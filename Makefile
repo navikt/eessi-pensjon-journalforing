@@ -33,4 +33,4 @@ tag:
 	git tag -a $(VERSION) -m "auto-tag from Makefile"
 
 manifest:
-	$(NAIS) upload --app eessi-fagmodul -v $(VERSION)
+	$(NAIS) upload --app eessi-pensjon-journalforing -v $(VERSION)
