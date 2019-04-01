@@ -26,3 +26,9 @@ resources:
   requests:
     cpu: 400m
     memory: 1024Mi
+
+
+fasitResources:
+  used:
+    - alias: srveessi-pensjon-journalforing
+      resourceType: Credential
