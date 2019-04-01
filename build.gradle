@@ -1,21 +1,125 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.3.20'
+        springBootVersion = '2.1.2.RELEASE'
+        springfoxVersion = '2.9.2'
+        jacksonModuleKotlinVersion = '2.9.8'
+        mockitoVersion = '2.23.4'
+        logstashLogbackVersion = '5.3'
+        pac4jVersion = '3.2.0'
+    }
+    repositories {
+        maven {
+            url "https://repo.adeo.no/repository/maven-central"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.21'
+    id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'se.patrikerdes.use-latest-versions' version '0.2.7'
 }
 
-group 'no.nav.eessi'
-version '1.0-SNAPSHOT'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-}
+group = 'no.nav.eessi'
+version = '0.0.1'
+sourceCompatibility = 1.8
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
+}
+jar {
+    baseName = 'eessi-pensjon-journalforing'
+}
+
+
+dependencies {
+    
+    // Spring
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-aop")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+    compile("org.springframework:spring-jms")
+
+    // Kafka
+    compile("org.springframework.kafka:spring-kafka")
+    compile("io.confluent:kafka-avro-serializer:5.1.0") {
+        exclude group: "org.apache.zookeeper",  module: "zookeeper"
+    }
+
+    // Kotlin
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+
+    // Swagger
+    compile("io.springfox:springfox-swagger2:${springfoxVersion}")
+    compile("io.springfox:springfox-swagger-ui:${springfoxVersion}")
+
+    // Logging
+    compile("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
+    
+
+    // Micrometer
+    compile("io.micrometer:micrometer-registry-prometheus")
+    
+
+    //mock
+    testCompile("org.mockito:mockito-core:${mockitoVersion}")
+    testCompile("org.jetbrains.kotlin:kotlin-test")
+    testCompile("org.jetbrains.kotlin:kotlin-test-junit")
+    testCompile("com.nhaarman:mockito-kotlin-kt1.1:1.6.0")
+
+
+    // Allows for variable expiration-date of each cache-entry
+    compile("net.jodah:expiringmap:0.5.9")
+}
+
+repositories {
+    maven {
+        name 'Confluent maven repo'
+        url 'http://packages.confluent.io/maven/'
+    }
+    maven {
+        url "https://repo.adeo.no/repository/maven-central"
+    }
+    maven {
+        url "https://repo.adeo.no/repository/maven-releases/"
+    }
+}
+
+/* https://github.com/ben-manes/gradle-versions-plugin */
+dependencyUpdates {
+    resolutionStrategy {
+        componentSelection { rules ->
+            rules.all { ComponentSelection selection ->
+                boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'preview'].any { qualifier ->
+                    selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+                }
+                if (rejected) {
+                    selection.reject('Not a real release')
+                }
+            }
+        }
+    }
+    revision = 'release'
 }
