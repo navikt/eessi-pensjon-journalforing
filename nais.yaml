@@ -1,0 +1,28 @@
+name: eessi-pensjon-journalforing
+image: repo.adeo.no:5443/eessi-pensjon-journalforing
+team: eessipensjon
+
+replicas:
+  min: 1
+  max: 1
+  cpuThresholdPercentage: 50
+
+prometheus:
+  enabled: true
+  path: /actuator/prometheus
+
+port: 8080
+healthcheck:
+  liveness:
+    initialDelay: 60
+    path: /internal/isalive
+  readiness:
+    initialDelay: 60
+    path: /internal/isready
+resources:
+  limits:
+    cpu: 4
+    memory: 4096Mi
+  requests:
+    cpu: 400m
+    memory: 1024Mi
