@@ -1,0 +1,17 @@
+kafka:
+  sedSendt:
+    topic: eessi-basis-sedSendt-v1
+    groupid: KC-privat-eessi-basis-sedSendt-v1
+
+
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
+    properties:
+      security.protocol: SASL_SSL
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      sasl:
+        mechanism: PLAIN
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${USERNAME}" password="${PASSWORD}";
