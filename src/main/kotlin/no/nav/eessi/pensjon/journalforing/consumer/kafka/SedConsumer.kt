@@ -1,12 +1,12 @@
-package no.nav.eessi.pensjon.journalforing.consumer.kafka;
+package no.nav.eessi.pensjon.journalforing.consumer.kafka
 
 import no.nav.eessi.pensjon.journalforing.integration.model.SedHendelse
 import org.codehaus.jackson.map.ObjectMapper
 import org.slf4j.LoggerFactory
 
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service
 
 @Service
 class SedConsumer : KafkaConsumer {
@@ -19,7 +19,7 @@ class SedConsumer : KafkaConsumer {
         logger.info("Innkommet hendelse")
         val sedHendelse = mapper.readValue(hendelse, SedHendelse::class.java)
 
-        if(sedHendelse.sektorKode == "P"){
+        if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: $sedHendelse")
             acknowledgment.acknowledge()
         }
