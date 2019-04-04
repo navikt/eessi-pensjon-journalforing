@@ -13,7 +13,7 @@ class SedConsumer : KafkaConsumer {
     private val logger = LoggerFactory.getLogger(SedConsumer::class.java)
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
-    override fun consume(hendelse: String, headers: MessageHeaders, acknowledgment: Acknowledgment) {
+    override fun consume(hendelse: String, acknowledgment: Acknowledgment) {
         if(hendelse.contains("P_BUC")){
             logger.info(hendelse)
         }
