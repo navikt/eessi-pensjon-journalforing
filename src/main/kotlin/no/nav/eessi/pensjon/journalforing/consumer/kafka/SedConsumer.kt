@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.consumer.kafka
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.eessi.pensjon.journalforing.integration.model.SedHendelse
-import org.codehaus.jackson.map.ObjectMapper
 import org.slf4j.LoggerFactory
 
 import org.springframework.kafka.annotation.KafkaListener
