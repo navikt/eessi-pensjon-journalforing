@@ -1,4 +1,4 @@
-package kafka
+package no.nav.eessi.pensjon.journalforing
 
 import no.nav.common.JAASCredential
 import no.nav.common.KafkaEnvironment

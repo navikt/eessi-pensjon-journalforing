@@ -30,3 +30,5 @@ securityTokenService:
 
 oppgave.oppgaver:
   url: 'http://localhost:6787/lala_behandlejournal'
+
+KAFKA_BOOTSTRAP_SERVERS_URL: localhost

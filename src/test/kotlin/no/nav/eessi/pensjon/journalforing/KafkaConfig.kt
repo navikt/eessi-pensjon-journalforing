@@ -1,4 +1,4 @@
-package kafka
+package no.nav.eessi.pensjon.journalforing
 
 data class KafkaConfig(
     val brokers: String,

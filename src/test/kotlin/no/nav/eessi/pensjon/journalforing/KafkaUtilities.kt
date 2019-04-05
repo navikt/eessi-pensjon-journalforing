@@ -1,4 +1,4 @@
-package kafka
+package no.nav.eessi.pensjon.journalforing
 
 import org.apache.kafka.common.acl.AccessControlEntry
 import org.apache.kafka.common.acl.AclBinding
