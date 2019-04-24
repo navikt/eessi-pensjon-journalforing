@@ -9,10 +9,12 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.kafka.test.rule.EmbeddedKafkaRule
 import org.junit.ClassRule
+import org.springframework.test.context.ActiveProfiles
 
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
+@ActiveProfiles("integrationtest")
 class EessiPensjonJournalforingApplicationTests {
 
 	@Test
