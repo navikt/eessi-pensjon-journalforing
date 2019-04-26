@@ -1,8 +1,7 @@
 kafka:
   sedSendt:
     topic: eessi-basis-sedSendt-v1
-    groupid: KC-privat-eessi-basis-sedSendt-v1
-
+    groupid: eessi-pensjon-group
 
 spring:
   kafka:
