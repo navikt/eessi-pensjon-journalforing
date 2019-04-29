@@ -1,45 +1,89 @@
+buildscript {
 
-	plugins {
-		id 'org.springframework.boot' version '2.1.4.RELEASE'
-		id 'org.jetbrains.kotlin.jvm' version '1.2.71'
-		id 'org.jetbrains.kotlin.plugin.spring' version '1.2.71'
+	ext {
+		kotlinVersion = '1.3.21'
+		springBootVersion = '2.1.2.RELEASE'
+		springSecurityVersion = '5.0.5.RELEASE'
+		prometheusVersion = '0.5.0'
+		springfoxVersion = '2.9.2'
+		jacksonModuleKotlinVersion = '2.9.6'
+		cxfVersion = '3.2.6'
+		mockitoVersion = '2.8.+'
+		oidcTokenSupportVersion = '0.2.9'
+		logstashLogbackVersion = '4.10'
 	}
-
-	apply plugin: 'io.spring.dependency-management'
-
-	group = 'no.nav.eessi.pensjon'
-	version = '0.0.1-SNAPSHOT'
-	sourceCompatibility = '1.8'
-
 	repositories {
-		mavenCentral()
+		maven {
+			url "https://repo.adeo.no/repository/maven-central"
+		}
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
 	}
 
 	dependencies {
-		implementation 'org.springframework.boot:spring-boot-starter-actuator'
-		implementation 'org.springframework.boot:spring-boot-starter-web'
-		implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-		implementation 'org.jetbrains.kotlin:kotlin-reflect'
-		implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-		implementation 'org.springframework.kafka:spring-kafka'
-		testImplementation 'org.springframework.boot:spring-boot-starter-test'
-		testImplementation 'org.springframework.kafka:spring-kafka-test'
-
-		// OIDC
-		implementation("no.nav.security:oidc-spring-support:0.2.9")
-		implementation("no.nav.security:oidc-test-support:0.2.9")
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+		classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+		classpath("gradle.plugin.org.openrepose:gradle-jaxb-plugin:2.5.0")
 	}
+}
 
-	compileKotlin {
-		kotlinOptions {
-			freeCompilerArgs = ['-Xjsr305=strict']
-			jvmTarget = '1.8'
-		}
-	}
+group = 'no.nav.eessi.pensjon'
+version = '0.0.1-SNAPSHOT'
 
-	compileTestKotlin {
-		kotlinOptions {
-			freeCompilerArgs = ['-Xjsr305=strict']
-			jvmTarget = '1.8'
-		}
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.openrepose.gradle.plugins.jaxb'
+
+dependencies {
+
+	// Spring-boot
+	implementation("org.springframework.boot:spring-boot-starter-aop")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-actuator")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+	implementation 'org.jetbrains.kotlin:kotlin-reflect'
+	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+	implementation 'org.springframework.kafka:spring-kafka'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+	// OIDC
+	implementation("no.nav.security:oidc-spring-support:0.2.9")
+	implementation("no.nav.security:oidc-test-support:0.2.9")
+
+	// Apache CXF
+	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
+	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
+}
+
+compileKotlin {
+	kotlinOptions {
+		freeCompilerArgs = ['-Xjsr305=strict']
+		jvmTarget = '1.8'
 	}
+}
+
+compileTestKotlin {
+	kotlinOptions {
+		freeCompilerArgs = ['-Xjsr305=strict']
+		jvmTarget = '1.8'
+	}
+}
+
+repositories {
+	maven {
+		url "https://repo.adeo.no/repository/maven-central"
+	}
+	maven {
+		url "https://repo.adeo.no/repository/maven-releases"
+	}
+}
+
+

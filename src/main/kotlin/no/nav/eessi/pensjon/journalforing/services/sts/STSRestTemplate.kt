@@ -1,6 +1,6 @@
-package no.nav.eessi.eessifagmodul.services.sts
+package no.nav.eessi.pensjon.journalforing.services.sts
 
-import no.nav.eessi.eessifagmodul.config.RequestResponseLoggerInterceptor
+import no.nav.eessi.pensjon.journalforing.config.RequestResponseLoggerInterceptor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -23,10 +23,10 @@ class STSRestTemplate {
     @Value("\${security-token-service-token.url}")
     lateinit var baseUrl: String
 
-    @Value("\${srveessipensjon.username}")
+    @Value("\${srvusername}")
     lateinit var username: String
 
-    @Value("\${srveessipensjon.password}")
+    @Value("\${srvpassword}")
     lateinit var password: String
 
     @Bean

@@ -17,4 +17,4 @@ spring:
       value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       sasl:
         mechanism: PLAIN
-        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${USERNAME}" password="${PASSWORD}";
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${srvusername}" password="${srvpassword}";

@@ -1,4 +1,4 @@
-package no.nav.eessi.eessifagmodul.services.sts
+package no.nav.eessi.pensjon.journalforing.services.sts
 
 /**
  * Documentation at https://confluence.adeo.no/display/KES/STS+-+Brukerdokumentasjon
@@ -38,12 +38,12 @@ class STSClientConfig {
         STS_URL = url
     }
 
-    @Value("\${srveessipensjon.username}")
+    @Value("\${srvusername}")
     fun setUsername(username: String) {
         SERVICEUSER_USERNAME = username
     }
 
-    @Value("\${srveessipensjon.password}")
+    @Value("\${srvpassword}")
     fun setPassword(password: String) {
         SERVICEUSER_PASSWORD = password
     }

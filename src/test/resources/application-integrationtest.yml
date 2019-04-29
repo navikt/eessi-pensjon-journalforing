@@ -12,3 +12,9 @@ spring:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
+
+eux-rina-api_v1: http://someurl
+securitytokenservice.url: http://someurl
+security-token-service-token.url: http://someurl
+srvusername: someuser
+srvpassword: somepass
