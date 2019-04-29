@@ -40,4 +40,4 @@ fasitResources:
         password: PASSWORD
 
     - alias: eux-rina-api_v1
-    resourceType: RestService
+      resourceType: RestService
