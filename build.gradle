@@ -1,40 +1,45 @@
-plugins {
-	id 'org.springframework.boot' version '2.1.4.RELEASE'
-	id 'org.jetbrains.kotlin.jvm' version '1.2.71'
-	id 'org.jetbrains.kotlin.plugin.spring' version '1.2.71'
-}
 
-apply plugin: 'io.spring.dependency-management'
-
-group = 'no.nav.eessi.pensjon'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
-
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-	implementation 'org.jetbrains.kotlin:kotlin-reflect'
-	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-	implementation 'org.springframework.kafka:spring-kafka'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
-}
-
-compileKotlin {
-	kotlinOptions {
-		freeCompilerArgs = ['-Xjsr305=strict']
-		jvmTarget = '1.8'
+	plugins {
+		id 'org.springframework.boot' version '2.1.4.RELEASE'
+		id 'org.jetbrains.kotlin.jvm' version '1.2.71'
+		id 'org.jetbrains.kotlin.plugin.spring' version '1.2.71'
 	}
-}
 
-compileTestKotlin {
-	kotlinOptions {
-		freeCompilerArgs = ['-Xjsr305=strict']
-		jvmTarget = '1.8'
+	apply plugin: 'io.spring.dependency-management'
+
+	group = 'no.nav.eessi.pensjon'
+	version = '0.0.1-SNAPSHOT'
+	sourceCompatibility = '1.8'
+
+	repositories {
+		mavenCentral()
 	}
-}
+
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-actuator'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+		implementation 'org.jetbrains.kotlin:kotlin-reflect'
+		implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+		implementation 'org.springframework.kafka:spring-kafka'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+		// OIDC
+		implementation("no.nav.security:oidc-spring-support:0.2.9")
+		implementation("no.nav.security:oidc-test-support:0.2.9")
+	}
+
+	compileKotlin {
+		kotlinOptions {
+			freeCompilerArgs = ['-Xjsr305=strict']
+			jvmTarget = '1.8'
+		}
+	}
+
+	compileTestKotlin {
+		kotlinOptions {
+			freeCompilerArgs = ['-Xjsr305=strict']
+			jvmTarget = '1.8'
+		}
+	}
