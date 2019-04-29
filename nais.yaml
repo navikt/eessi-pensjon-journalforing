@@ -32,8 +32,12 @@ fasitResources:
   used:
     - alias: kafka_bootstrap_servers
       resourceType: baseurl
+
     - alias: srveessi-pensjon-journalforing
       resourceType: credential
       propertyMap:
         username: USERNAME
         password: PASSWORD
+
+    - alias: eux-rina-api_v1
+    resourceType: RestService
