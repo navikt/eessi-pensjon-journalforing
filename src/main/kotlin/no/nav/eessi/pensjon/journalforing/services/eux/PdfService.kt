@@ -34,6 +34,7 @@ class PdfService(private val euxOidcRestTemplate: RestTemplate) {
                     String::class.java)
             if (!response.statusCode.isError) {
             //    hentPdfVellykkede.increment()
+                logger.debug(response.body)
                 return response.body
             } else {
            //     hentPdfFeilede.increment()
