@@ -15,6 +15,8 @@ import java.time.ZoneId
 import java.util.*
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
+import org.apache.commons.codec.binary.Base64
+
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 inline fun <reified T : Any> typeRefs(): TypeReference<T> = object : TypeReference<T>() {}
@@ -110,6 +112,11 @@ fun getCounter(key: String): Counter {
 
     )
     return countermap.getValue(key)
+}
+
+fun binaryToBase64(binaryString: String): String {
+    val encoded = Base64.encodeBase64(binaryString.toByteArray())
+    return Arrays.toString(encoded)
 }
 
 fun counter(name: String, type: String): Counter {

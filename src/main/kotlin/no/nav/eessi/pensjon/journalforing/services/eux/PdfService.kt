@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.eux
 
 import io.micrometer.core.instrument.Metrics.counter
+import no.nav.eessi.eessifagmodul.utils.binaryToBase64
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -34,7 +35,7 @@ class PdfService(private val euxOidcRestTemplate: RestTemplate) {
                     String::class.java)
             if (!response.statusCode.isError) {
             //    hentPdfVellykkede.increment()
-                logger.debug(response.body)
+                logger.debug(binaryToBase64(response.body!!))
                 return response.body
             } else {
            //     hentPdfFeilede.increment()
