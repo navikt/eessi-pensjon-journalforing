@@ -27,7 +27,7 @@ class PdfService(private val euxOidcRestTemplate: RestTemplate) {
         val httpEntity = HttpEntity("")
 
         try {
-            logger.info("Kaller RINA for å hente PDF")
+            logger.info("Kaller RINA for å hente PDF for rinaNr: $rinaNr , dokumentId: $dokumentId")
             val response = euxOidcRestTemplate.exchange(builder.toUriString(),
                     HttpMethod.GET,
                     httpEntity,
