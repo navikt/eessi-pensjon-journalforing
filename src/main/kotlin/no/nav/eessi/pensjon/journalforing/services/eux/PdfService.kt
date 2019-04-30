@@ -21,7 +21,7 @@ class PdfService(private val euxOidcRestTemplate: RestTemplate) {
 //    private val hentPdfFeilede = counter(hentPdfTellerNavn, "feilede")
 
     fun hentPdf(rinaNr: String, dokumentId: String): String? {
-        val path = "/buc/{$rinaNr}/sed/{$dokumentId}/pdf"
+        val path = "/buc/$rinaNr/sed/$dokumentId/pdf"
 
         val builder = UriComponentsBuilder.fromUriString(path).build()
         val httpEntity = HttpEntity("")
