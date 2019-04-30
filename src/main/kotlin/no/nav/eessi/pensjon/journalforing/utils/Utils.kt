@@ -116,7 +116,7 @@ fun getCounter(key: String): Counter {
 
 fun binaryToBase64(binaryString: String): String {
     val encoded = Base64.encodeBase64(binaryString.toByteArray())
-    return Arrays.toString(encoded)
+    return String(encoded)
 }
 
 fun counter(name: String, type: String): Counter {
