@@ -61,6 +61,9 @@ dependencies {
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
+	
+	// Allows for variable expiration-date of each cache-entry
+	implementation("net.jodah:expiringmap:0.5.9")
 }
 
 compileKotlin {
