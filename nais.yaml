@@ -30,22 +30,20 @@ resources:
 
 fasitResources:
   used:
+    - alias: eessi-pensjon-active-profiles
+      resourceType: ApplicationProperties
     - alias: kafka_bootstrap_servers
       resourceType: baseurl
-
     - alias: srveessi-pensjon-journalforing
       resourceType: credential
       propertyMap:
         username: srvusername
         password: srvpassword
-
     - alias: eux-rina-api_v1
       resourceType: RestService
-
     #Brukes av nye rest tjenester
     - alias: security-token-service-token
       resourceType: RestService
-
     #Brukes av gamle tjenester
     - alias: securityTokenService
       resourceType: BaseUrl
