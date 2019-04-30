@@ -36,8 +36,8 @@ fasitResources:
     - alias: srveessi-pensjon-journalforing
       resourceType: credential
       propertyMap:
-        username: USERNAME
-        password: PASSWORD
+        username: srvusername
+        password: srvpassword
 
     - alias: eux-rina-api_v1
       resourceType: RestService
