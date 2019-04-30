@@ -13,7 +13,7 @@ spring:
     properties:
       security.protocol: PLAINTEXT
 
-eux-rina-api_v1: http://someurl
+EUX_RINA_API_V1_URL: http://someurl
 securitytokenservice.url: http://someurl
 security-token-service-token.url: http://someurl
 srvusername: someuser
