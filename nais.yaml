@@ -41,6 +41,8 @@ fasitResources:
         password: srvpassword
     - alias: eux-rina-api_v1
       resourceType: RestService
+    - alias: Journalpost_v1
+      resourceType: RestService
     #Brukes av nye rest tjenester
     - alias: security-token-service-token
       resourceType: RestService
