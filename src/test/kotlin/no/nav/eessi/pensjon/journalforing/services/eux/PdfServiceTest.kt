@@ -29,7 +29,7 @@ class PdfServiceTest {
     }
 
     @Test
-    fun `Gitt gyldig request når etterspør pdf for SED så motta pdf`() {
+    fun `Gitt gyldig request når etterspør pdf for SED så motta base64 encodet pdf`() {
         val rinaNr = "123"
         val dokumentId = "456"
         doReturn(
@@ -42,7 +42,7 @@ class PdfServiceTest {
 
 
         val pdf = pdfService.hentPdf(rinaNr, dokumentId)
-        assertEquals("en fake pdf", pdf)
+        assertEquals("ZW4gZmFrZSBwZGY=", pdf)
     }
 
     @Test( expected = RuntimeException::class)
