@@ -2,24 +2,24 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 data class JournalpostModel(
     val avsenderMottaker: AvsenderMottaker,
-    val behandlingstema: String?, //optional
+    val behandlingstema: String? = null, //optional
     val bruker: Bruker,
     val dokumenter: List<Dokumenter>,
-    val eksternReferanseId: String?, //optional
-    val journalfoerendeEnhet: Int?, //optional
+    val eksternReferanseId: String? = null, //optional
+    val journalfoerendeEnhet: Int? = null, //optional
     val journalpostType: String,
     val kanal: String = "EESSI",
     val sak: Sak,
     val tema: String,
-    val tilleggsopplysninger: List<Tilleggsopplysninger>?, //optional
+    val tilleggsopplysninger: List<Tilleggsopplysninger>? = null, //optional
     val tittel: String
 )
 
 data class Dokumenter(
-    val brevkode: String?, //optional
-    val dokumentKategori: String?, //optional
+    val brevkode: String? = null, //optional
+    val dokumentKategori: String? = null, //optional
     val dokumentvarianter: List<Dokumentvarianter>,
-    val tittel: String?
+    val tittel: String? = null
 )
 
 data class Dokumentvarianter(
@@ -34,8 +34,8 @@ data class Sak(
 )
 
 data class AvsenderMottaker(
-    val id: String?, //optional
-    val land: String?, //optional
+    val id: String? = null, //optional
+    val land: String? = null, //optional
     val navn: String
 )
 

@@ -37,7 +37,5 @@ class JournalpostModelTest {
         assertEquals(journalpostModel.tilleggsopplysninger?.first()?.nokkel, "string")
         assertEquals(journalpostModel.tilleggsopplysninger?.first()?.verdi, "string")
         assertEquals(journalpostModel.tittel, "Ettersendelse til søknad om foreldrepenger")
-
-        assertNull(null)
     }
 }
