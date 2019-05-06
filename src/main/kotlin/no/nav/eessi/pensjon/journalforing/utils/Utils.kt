@@ -1,4 +1,4 @@
-package no.nav.eessi.eessifagmodul.utils
+package no.nav.eessi.pensjon.journalforing.utils
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
@@ -90,29 +90,6 @@ inline fun <T : Any, R> whenNotNull(input: T?, callback: (T) -> R): R? {
     return input?.let(callback)
 }
 
-fun getCounter(key: String): Counter {
-    val countermap = mapOf("AKSJONOK" to counter("eessipensjon_fagmodul.euxmuligeaksjoner", "vellykkede"),
-            "AKSJONFEIL" to counter("eessipensjon_fagmodul.euxmuligeaksjoner", "feilede"),
-            "SENDSEDOK" to counter("eessipensjon_fagmodul.sendsed", "vellykkede"),
-            "SENDSEDFEIL" to counter("eessipensjon_fagmodul.sendsed", "feilede"),
-            "HENTSEDOK" to counter("eessipensjon_fagmodul.hentsed", "vellykkede"),
-            "HENTSEDFEIL" to counter("eessipensjon_fagmodul.hentsed", "feilede"),
-            "SLETTSEDOK" to counter("eessipensjon_fagmodul.slettsed", "vellykkede"),
-            "SLETTSEDFEIL" to counter("eessipensjon_fagmodul.slettsed", "feilede"),
-            "OPPRETTEDOK" to counter("eessipensjon_fagmodul.opprettsed", "vellykkede"),
-            "OPPRETTSEDFEIL" to counter("eessipensjon_fagmodul.opprettsed", "feilede"),
-            "OPPRETTBUCOGSEDOK" to counter("eessipensjon_fagmodul.opprettbucogsed", "vellykkede"),
-            "OPPRETTBUCOGSEDFEIL" to counter("eessipensjon_fagmodul.opprettbucogsed", "feilede"),
-            "HENTBUCOK" to counter("eessipensjon_fagmodul.hentbuc", "vellykkede"),
-            "HENTBUCFEIL" to counter("eessipensjon_fagmodul.hentbuc", "feilede"),
-            "PERSONINFORMASJONOK" to counter("eessipensjon_fagmodul.hentperson", "vellykkede"),
-            "PERSONINFORMASJONFEIL" to counter("eessipensjon_fagmodul.hentperson", "feilede"),
-            "HENTKRAVUTLANDOK" to counter("eessipensjon_fagmodul.hentKravUtland", "vellykkede"),
-            "HENTKRAVUTLANDFEIL" to counter("eessipensjon_fagmodul.hentKravUtland", "feilede")
-
-    )
-    return countermap.getValue(key)
-}
 
 fun binaryToBase64(binaryString: String): String {
     val encoded = Base64.encodeBase64(binaryString.toByteArray())
@@ -122,7 +99,6 @@ fun binaryToBase64(binaryString: String): String {
 fun counter(name: String, type: String): Counter {
     return Metrics.counter(name, "type", type)
 }
-
 fun getFileAsResource(bytearr: ByteArray, filename: String): ByteArrayResource {
     class FileAsResource : ByteArrayResource(bytearr) {
         override fun getFilename(): String? {

@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.services.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.eessi.eessifagmodul.utils.mapAnyToJson
-import no.nav.eessi.eessifagmodul.utils.typeRef
+import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
+import no.nav.eessi.pensjon.journalforing.utils.typeRef
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod

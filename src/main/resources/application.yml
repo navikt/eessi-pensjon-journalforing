@@ -3,6 +3,7 @@ kafka:
     topic: eessi-basis-sedSendt-v1
     groupid: eessi-pensjon-group
 
+#Spring
 spring:
   kafka:
     listener:
@@ -18,3 +19,12 @@ spring:
       sasl:
         mechanism: PLAIN
         jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${srvusername}" password="${srvpassword}";
+
+#Metrics
+management:
+  endpoints:
+    metrics.enabled: true
+    web.exposure.include: '*'
+    export.prometheus.enabled: true
+    prometheus.enabled: true
+  metrics.web.server.auto-time-requests: false
