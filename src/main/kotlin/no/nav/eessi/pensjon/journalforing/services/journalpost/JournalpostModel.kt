@@ -1,50 +1,50 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 data class JournalpostModel(
-    val avsenderMottaker: AvsenderMottaker,
-    val behandlingstema: String? = null, //optional
-    val bruker: Bruker,
-    val dokumenter: List<Dokumenter>,
-    val eksternReferanseId: String? = null, //optional
-    val journalfoerendeEnhet: Int? = null, //optional
-    val journalpostType: String,
-    val kanal: String = "EESSI",
-    val sak: Sak,
-    val tema: String,
-    val tilleggsopplysninger: List<Tilleggsopplysninger>? = null, //optional
-    val tittel: String
+    val avsenderMottaker: AvsenderMottaker? = null,
+    val behandlingstema: String? = null,
+    val bruker: Bruker? = null,
+    val dokumenter: List<Dokument>, //REQUIRED
+    val eksternReferanseId: String? = null,
+    val journalfoerendeEnhet: String? = null,
+    val journalpostType: String = "UTGAAENDE", //REQUIRED
+    val kanal: String? = null,
+    val sak: Sak? = null,
+    val tema: String = "PEN", //REQUIRED
+    val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
+    val tittel: String //REQUIRED
 )
 
-data class Dokumenter(
-    val brevkode: String? = null, //optional
-    val dokumentKategori: String? = null, //optional
-    val dokumentvarianter: List<Dokumentvarianter>,
+data class Dokument(
+    val brevkode: String? = null,
+    val dokumentKategori: String? = "SED",
+    val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
     val tittel: String? = null
 )
 
 data class Dokumentvarianter(
-    val filtype: String = "PDF/A",
-    val fysiskDokument: String,
-    val variantformat: String = "ARKIV"
+    val filtype: String = "PDF/A", //REQUIRED
+    val fysiskDokument: String, //REQUIRED
+    val variantformat: String = "ARKIV" //REQUIRED
 )
 
 data class Sak(
-    val arkivsaksnummer: String,
-    val arkivsaksystem: String
+    val arkivsaksnummer: String, //REQUIRED
+    val arkivsaksystem: String //REQUIRED
 )
 
 data class AvsenderMottaker(
-    val id: String? = null, //optional
-    val land: String? = null, //optional
-    val navn: String
+    val id: String? = null,
+    val land: String? = null,
+    val navn: String //REQUIRED
 )
 
 data class Tilleggsopplysninger(
-    val nokkel: String,
-    val verdi: String
+    val nokkel: String, //REQUIRED
+    val verdi: String //REQUIRED
 )
 
 data class Bruker(
-    val id: String,
-    val idType: String
+    val id: String, //REQUIRED
+    val idType: String = "FNR" //REQUIRED
 )
