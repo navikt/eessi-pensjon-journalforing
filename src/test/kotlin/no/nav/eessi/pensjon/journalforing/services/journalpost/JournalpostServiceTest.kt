@@ -9,16 +9,13 @@ import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.Mockito.doReturn
 import org.mockito.junit.MockitoJUnitRunner
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.test.assertEquals
 import no.nav.eessi.pensjon.journalforing.utils.BUCTYPE
+import org.springframework.http.*
 
 
 @RunWith(MockitoJUnitRunner::class)
@@ -55,13 +52,15 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter`() {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
 
         doReturn(
                 ResponseEntity(responseBody, HttpStatus.OK))
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         eq(HttpMethod.POST),
-                        eq(HttpEntity(journalpostService.byggJournalPostModel(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString())),
+                        eq(HttpEntity(journalpostService.byggJournalPostModel(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
                         eq(String::class.java))
 
         journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody = "MockPdfBody", forsokFerdigstill = false)
