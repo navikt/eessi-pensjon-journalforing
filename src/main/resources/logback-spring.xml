@@ -23,7 +23,7 @@
         </root>
     </springProfile>
 
-    <springProfile name="local,test">
+    <springProfile name="local,test, integrationtest">
 
         <logger name="io" level="ERROR"/>
         <logger name="org" level="ERROR"/>
