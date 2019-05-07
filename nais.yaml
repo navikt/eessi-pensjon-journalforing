@@ -47,3 +47,5 @@ fasitResources:
     #Brukes av gamle tjenester
     - alias: securityTokenService
       resourceType: BaseUrl
+    - alias: oppgave.oppgaver
+      resourceType: RestService
