@@ -17,6 +17,8 @@ import org.springframework.kafka.test.rule.EmbeddedKafkaRule
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 import javax.ws.rs.HttpMethod
 
@@ -46,26 +48,30 @@ class EessiPensjonJournalforingApplicationTests {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            //.withPath("/")
-                            .withQueryStringParameter("grant_type", "client_credentials")
-            )
-                    .respond(
-                            response()
-                                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                                    .withStatusCode(HttpStatusCode.OK_200.code())
-                                    .withBody("{\"access_token\": \"sometoken\" , \"token_type\": \"sometype\", \"expires_in\": \"123456789\"}")
+                            .withQueryStringParameter("grant_type", "client_credentials"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/STSToken.json"))))
                     )
             // Mocker Eux PDF generator
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/123/sed/123/pdf")
-            )
-                    .respond(
-                            response()
-                                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                                    .withStatusCode(HttpStatusCode.OK_200.code())
-                                    .withBody("thePdf")
+                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("pdf for P_BUC_01")
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/pdf"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("pdf for P_BUC_03")
                     )
 
         }
@@ -85,10 +91,12 @@ class EessiPensjonJournalforingApplicationTests {
         val template = KafkaTemplate(pf)
         template.defaultTopic = SED_SENDT_TOPIC
 
-        // Send to kafka
-        template.sendDefault("{ \"id\" : 1, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_01\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
-        template.sendDefault(0, 2, "{ \"id\" : 2, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_01\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
-        template.send(SED_SENDT_TOPIC, 0, 2, "{ \"id\" : 3, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_03\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
+        // Sender 1 Foreldre SED til Kafka
+        template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/FB_BUC_01.json"))))
+
+        // Sender 2 Pensjon SED til Kafka
+        template.sendDefault(0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json"))))
+        template.send(SED_SENDT_TOPIC, 0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
         Thread.sleep(5000)
@@ -97,9 +105,17 @@ class EessiPensjonJournalforingApplicationTests {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/123/sed/123/pdf")
-                        .withBody(exact("thePdf")),
-                VerificationTimes.exactly(3)
+                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf")
+                        .withBody(exact("pdf for P_BUC_01")),
+                VerificationTimes.exactly(1)
+        )
+
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf")
+                        .withBody(exact("pdf for P_BUC_03")),
+                VerificationTimes.exactly(1)
         )
     }
 }

@@ -15,14 +15,13 @@ class SedSendtConsumer(val pdfService: PdfService) {
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
-        logger.info("Innkommet hendelse.")
+        logger.info("Innkommet hendelse")
         val sedHendelse = mapper.readValue(hendelse, SedHendelse::class.java)
-
-        pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
         if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
-           // acknowledgment.acknowledge()
+            pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            // acknowledgment.acknowledge()
         }
     }
 }
