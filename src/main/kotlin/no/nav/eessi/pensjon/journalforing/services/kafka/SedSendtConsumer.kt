@@ -21,11 +21,6 @@ class SedConsumer(val pdfService: PdfService, val journalpostService: Journalpos
 
 
         if(sedHendelse.sektorKode.equals("P")){
-
-            val pdfBody: String = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-                    ?: throw RuntimeException("Noe gikk galt under henting av pdf")
-
-            journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody, forsokFerdigstill = false)
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
             val pdfBody = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)

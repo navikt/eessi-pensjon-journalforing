@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.SedHendelse
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +34,7 @@ class JournalpostServiceTest {
 
     @Before
     fun setup() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/sedSendt.json")))
+        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json")))
         sedHendelse = mapper.readValue(sedSendtJson, SedHendelse::class.java)
         journalpostService = JournalpostService(mockrestTemplate)
     }
