@@ -115,3 +115,9 @@ fun errorBody(error: String, uuid: String = "no-uuid"): String {
 fun successBody(): String {
     return "{\"success\": true}"
 }
+
+enum class BUCTYPE (val BEHANDLINGSTEMA: String, val TEMA: String){
+    P_BUC_01("ab0254", "PEN"),
+    P_BUC_02("ab0011", "PEN"),
+    P_BUC_03("ab0194", "UFO")
+}

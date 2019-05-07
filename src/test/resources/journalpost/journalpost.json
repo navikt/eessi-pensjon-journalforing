@@ -1,0 +1,42 @@
+{
+"avsenderMottaker": {
+"id": "string",
+"land": "string",
+"navn": "string"
+},
+"behandlingstema": "ab0001",
+"bruker": {
+"id": "string",
+"idType": "FNR"
+},
+"dokumenter": [
+{
+"brevkode": "NAV 14-05.09",
+"dokumentKategori": "SOK",
+"dokumentvarianter": [
+{
+"filtype": "PDF/A",
+"fysiskDokument": "string",
+"variantformat": "ARKIV"
+}
+],
+"tittel": "Søknad om foreldrepenger ved fødsel"
+}
+],
+"eksternReferanseId": "string",
+"journalfoerendeEnhet": 9999,
+"journalpostType": "INNGAAENDE",
+"kanal": "NAV_NO",
+"sak": {
+"arkivsaksnummer": "string",
+"arkivsaksystem": "GSAK"
+},
+"tema": "FOR",
+"tilleggsopplysninger": [
+{
+"nokkel": "string",
+"verdi": "string"
+}
+],
+"tittel": "Ettersendelse til søknad om foreldrepenger"
+}

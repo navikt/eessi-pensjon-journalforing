@@ -19,3 +19,4 @@ security-token-service-token.url: http://localhost:${mockServerport}
 srvusername: someuser
 srvpassword: somepass
 oppgave.oppgaver.url: http://localhost:${mockServerport}
+JOURNALPOST_V1_URL: http://localhost:${mockServerport}
