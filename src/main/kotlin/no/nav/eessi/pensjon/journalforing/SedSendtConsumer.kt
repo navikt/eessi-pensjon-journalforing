@@ -8,9 +8,9 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 
 @Service
-class SedConsumer(val pdfService: PdfService) {
+class SedSendtConsumer(val pdfService: PdfService) {
 
-    private val logger = LoggerFactory.getLogger(SedConsumer::class.java)
+    private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val mapper = jacksonObjectMapper()
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")

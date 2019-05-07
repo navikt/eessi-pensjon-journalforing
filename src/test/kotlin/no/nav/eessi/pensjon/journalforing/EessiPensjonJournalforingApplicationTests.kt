@@ -1,7 +1,5 @@
 package no.nav.eessi.pensjon.journalforing
 
-import no.nav.eessi.pensjon.journalforing.EessiPensjonJournalforingApplicationTests.Companion.SED_SENDT_TOPIC
-import no.nav.eessi.pensjon.journalforing.EessiPensjonJournalforingApplicationTests.Companion.embeddedKafka
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -10,6 +8,8 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.StringBody.exact
+import org.mockserver.verify.VerificationTimes
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -20,11 +20,12 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 import javax.ws.rs.HttpMethod
 
+lateinit var mockServer : ClientAndServer
+
 @RunWith(SpringRunner::class)
 @SpringBootTest
 @ActiveProfiles("integrationtest")
 class EessiPensjonJournalforingApplicationTests {
-
 
     companion object {
         const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
@@ -38,7 +39,7 @@ class EessiPensjonJournalforingApplicationTests {
         init {
             // Start Mockserver in memory
             val port = randomFrom()
-            val mockServer = ClientAndServer.startClientAndServer(port)
+            mockServer = ClientAndServer.startClientAndServer(port)
             System.setProperty("mockServerport", port.toString())
 
             // Mocker STS
@@ -75,11 +76,6 @@ class EessiPensjonJournalforingApplicationTests {
         }
     }
 
-
-    @Test
-    fun contextLoads() {
-    }
-
     @Test
     @Throws(Exception::class)
     fun `Send en melding pa topic`() {
@@ -93,9 +89,17 @@ class EessiPensjonJournalforingApplicationTests {
         template.sendDefault("{ \"id\" : 1, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_01\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
         template.sendDefault(0, 2, "{ \"id\" : 2, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_01\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
         template.send(SED_SENDT_TOPIC, 0, 2, "{ \"id\" : 3, \"sedId\" : \"someSedId\", \"sektorKode\" : \"P\", \"bucType\" : \"FB_BUC_03\", \"rinaSakId\" : \"123\", \"avsenderId\" : \"avsenderid\", \"avsenderNavn\" : \"avsendernavn\", \"mottakerId\" : \"mottakerid\", \"mottakerNavn\" : \"mottakernavn\", \"rinaDokumentId\" : \"123\", \"rinaDokumentVersjon\" : \"1\", \"sedType\" : \"F001\", \"navBruker\" : \"12345678910\" }")
-    }
 
+        // Venter på at sedSendtConsumer skal consume meldingene
+        Thread.sleep(5000)
 
-    fun initMockserver() {
+        // Verifiserer at det har blitt forsøkt å hente PDF fra eux
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/123/sed/123/pdf")
+                        .withBody(exact("thePdf")),
+                VerificationTimes.exactly(3)
+        )
     }
 }
