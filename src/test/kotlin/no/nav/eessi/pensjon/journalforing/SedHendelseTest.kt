@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
