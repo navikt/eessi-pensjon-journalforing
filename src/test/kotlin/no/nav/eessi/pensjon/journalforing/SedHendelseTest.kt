@@ -14,7 +14,7 @@ class SedHendelseTest {
     fun `Gitt en gyldig SEDSendt json når mapping så skal alle felter mappes`() {
 
         val mapper = jacksonObjectMapper()
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/sedSendt.json")))
+        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json")))
         val sedHendelse = mapper.readValue(sedSendtJson, SedHendelse::class.java)
         assertEquals(sedHendelse.id, 1869)
         assertEquals(sedHendelse.sedId, "P2000_b12e06dda2c7474b9998c7139c841646_2")

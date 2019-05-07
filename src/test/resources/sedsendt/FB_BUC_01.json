@@ -1,0 +1,15 @@
+{
+  "id": 1,
+  "sedId": "someSedId",
+  "sektorKode": "FB",
+  "bucType": "FB_BUC_01",
+  "rinaSakId": "123",
+  "avsenderId": "avsenderid",
+  "avsenderNavn": "avsendernavn",
+  "mottakerId": "mottakerid",
+  "mottakerNavn": "mottakernavn",
+  "rinaDokumentId": "123",
+  "rinaDokumentVersjon": "1",
+  "sedType": "F001",
+  "navBruker": "12345678910"
+}
