@@ -73,7 +73,16 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("pdf for P_BUC_03")
                     )
-
+            // Mocker journalføringstjeneste
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/journalpost"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("{\"journalpostId\": \"string\", \"journalstatus\": \"MIDLERTIDIG\", \"melding\": \"string\" }")
+                    )
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
@@ -116,6 +125,13 @@ class EessiPensjonJournalforingApplicationTests {
                         .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/pdf")
                         .withBody(exact("pdf for P_BUC_03")),
                 VerificationTimes.exactly(1)
+        )
+        // Verifiserer at det har blitt forsøkt å opprette en journalpostoppgave
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/journalpost"),
+                VerificationTimes.exactly(2)
         )
     }
 }

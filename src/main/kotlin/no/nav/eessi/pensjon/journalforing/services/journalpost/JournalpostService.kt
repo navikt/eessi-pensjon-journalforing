@@ -54,7 +54,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
 
             val tittel = when {
                 sedHendelse.sedType != null -> "Utgående ${sedHendelse.sedType}"
-                else -> throw RuntimeException("pdf er null")
+                else -> throw RuntimeException("sedType er null")
             }
 
             return JournalpostModel(
