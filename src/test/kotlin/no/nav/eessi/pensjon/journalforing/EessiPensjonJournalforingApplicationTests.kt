@@ -58,7 +58,7 @@ class EessiPensjonJournalforingApplicationTests {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/123/sed/123/pdf"))
+                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -105,7 +105,7 @@ class EessiPensjonJournalforingApplicationTests {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/123/sed/123/pdf")
+                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf")
                         .withBody(exact("pdf for P_BUC_01")),
                 VerificationTimes.exactly(1)
         )
