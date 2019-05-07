@@ -113,7 +113,7 @@ class EessiPensjonJournalforingApplicationTests {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf")
+                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/pdf")
                         .withBody(exact("pdf for P_BUC_03")),
                 VerificationTimes.exactly(1)
         )
