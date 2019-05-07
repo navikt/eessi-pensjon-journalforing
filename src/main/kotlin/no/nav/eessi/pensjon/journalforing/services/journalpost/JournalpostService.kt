@@ -10,6 +10,8 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import kotlin.RuntimeException
 import no.nav.eessi.pensjon.journalforing.utils.BUCTYPE
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 
 @Service
 class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) {
@@ -78,9 +80,12 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
 
             val requestBody = byggJournalPostModel(sedHendelse= sedHendelse, pdfBody = pdfBody).toString()
 
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+
             val response = journalpostOidcRestTemplate.exchange(builder.toUriString(),
                 HttpMethod.POST,
-                    HttpEntity(requestBody),
+                    HttpEntity(requestBody, headers),
                     String::class.java)
             if(!response.statusCode.isError) {
                 logger.debug(response.body.toString())
