@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+
 data class JournalpostModel(
     val avsenderMottaker: AvsenderMottaker? = null,
     val behandlingstema: String? = null,
@@ -13,7 +15,12 @@ data class JournalpostModel(
     val tema: String = "PEN", //REQUIRED
     val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
     val tittel: String //REQUIRED
-)
+){
+    override fun toString(): String {
+        val mapper = jacksonObjectMapper()
+        return mapper.writeValueAsString(this)
+    }
+}
 
 data class Dokument(
     val brevkode: String? = null,
