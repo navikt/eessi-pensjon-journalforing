@@ -2,7 +2,18 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-data class JournalpostModel(
+data class JournalPostResponse(
+    val journalpostId: String,
+    val journalstatus: String,
+    val melding: String? = null
+){
+    override fun toString(): String {
+        val mapper = jacksonObjectMapper()
+        return mapper.writeValueAsString(this)
+    }
+}
+
+data class JournalpostRequest(
     val avsenderMottaker: AvsenderMottaker? = null,
     val behandlingstema: String? = null,
     val bruker: Bruker? = null,
@@ -55,3 +66,10 @@ data class Bruker(
     val id: String, //REQUIRED
     val idType: String = "FNR" //REQUIRED
 )
+
+// TODO find et passende sted/format for disse enumene
+enum class BUCTYPE (val BEHANDLINGSTEMA: String, val TEMA: String){
+    P_BUC_01("ab0254", "PEN"),
+    P_BUC_02("ab0011", "PEN"),
+    P_BUC_03("ab0194", "UFO")
+}

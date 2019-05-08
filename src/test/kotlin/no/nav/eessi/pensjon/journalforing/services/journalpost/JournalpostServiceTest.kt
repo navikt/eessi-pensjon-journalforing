@@ -14,7 +14,6 @@ import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.test.assertEquals
-import no.nav.eessi.pensjon.journalforing.utils.BUCTYPE
 import org.springframework.http.*
 
 
@@ -38,7 +37,7 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt gyldig SedHendelse så bygg Gyldig JournalpostModel`() {
-        val objectToTest = journalpostService.byggJournalPostModel(sedHendelse= sedHendelse, pdfBody = "MockPdfBody")
+        val objectToTest = journalpostService.byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = "MockPdfBody")
 
         assertEquals(objectToTest.avsenderMottaker?.id, sedHendelse.mottakerId, "Ugyldig mottagerid")
         assertEquals(objectToTest.avsenderMottaker?.navn, sedHendelse.mottakerNavn, "Ugyldig mottagernavn")
@@ -60,7 +59,7 @@ class JournalpostServiceTest {
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         eq(HttpMethod.POST),
-                        eq(HttpEntity(journalpostService.byggJournalPostModel(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
+                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
                         eq(String::class.java))
 
         journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody = "MockPdfBody", forsokFerdigstill = false)
