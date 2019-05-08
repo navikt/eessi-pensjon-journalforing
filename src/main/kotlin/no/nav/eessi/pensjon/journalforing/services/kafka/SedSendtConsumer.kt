@@ -56,6 +56,7 @@ class SedConsumer(val pdfService: PdfService,
         }
         oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.name
         oppgave.journalpostId = "1234"
+        oppgave.opprettetAvEnhetsnr = "9999"
 
 
         return oppgave
