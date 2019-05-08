@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.Logger
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType
 class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
+    private val mapper = jacksonObjectMapper()
 
     private final val opprettJournalpostNavn = "eessipensjon_journalforing.opprettjournalpost"
     private val opprettJournalpostVellykkede = counter(opprettJournalpostNavn, "vellykkede")
@@ -80,7 +82,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         }
     }
 
-    fun opprettJournalpost(sedHendelse: SedHendelse, pdfBody: String, forsokFerdigstill: Boolean):String? {
+    fun opprettJournalpost(sedHendelse: SedHendelse, pdfBody: String, forsokFerdigstill: Boolean):JournalPostResponse {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
@@ -104,7 +106,8 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
             if(!response.statusCode.isError) {
                 opprettJournalpostVellykkede.increment()
                 logger.debug(response.body.toString())
-                return response.body
+                return mapper.readValue(response.body, JournalPostResponse::class.java)
+
             } else {
                 throw RuntimeException("Noe gikk galt under opprettelse av journalpostoppgave")
             }
