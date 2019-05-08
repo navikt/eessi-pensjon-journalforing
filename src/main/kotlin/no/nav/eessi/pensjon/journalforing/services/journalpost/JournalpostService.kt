@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
+import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import kotlin.RuntimeException
-import no.nav.eessi.pensjon.journalforing.utils.BUCTYPE
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
@@ -18,7 +18,15 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
 
-    fun byggJournalPostModel(sedHendelse: SedHendelse, pdfBody: String): JournalpostModel{
+    private final val opprettJournalpostNavn = "eessipensjon_journalforing.opprettjournalpost"
+    private val opprettJournalpostVellykkede = counter(opprettJournalpostNavn, "vellykkede")
+    private val opprettJournalpostFeilede = counter(opprettJournalpostNavn, "feilede")
+
+    private final val genererJournalpostModelNavn = "eessipensjon_journalforing.genererjournalpostmodel"
+    private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
+    private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
+
+    fun byggJournalPostRequest(sedHendelse: SedHendelse, pdfBody: String): JournalpostRequest{
 
         try {
             val avsenderMottaker = when {
@@ -57,7 +65,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 else -> throw RuntimeException("sedType er null")
             }
 
-            return JournalpostModel(
+            return JournalpostRequest(
                 avsenderMottaker = avsenderMottaker,
                 behandlingstema = behandlingstema,
                 bruker = bruker,
@@ -66,6 +74,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 tittel = tittel
             )
         } catch (ex: Exception){
+            genererJournalpostModelFeilede.increment()
             logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
             throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
         }
@@ -78,22 +87,29 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         try {
             logger.info("Kaller Journalpost for å generere en journalpost")
 
-            val requestBody = byggJournalPostModel(sedHendelse= sedHendelse, pdfBody = pdfBody).toString()
+            val requestBody = byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody).toString()
+            genererJournalpostModelVellykkede.increment()
+
 
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
 
-            val response = journalpostOidcRestTemplate.exchange(builder.toUriString(),
-                HttpMethod.POST,
+            val response = journalpostOidcRestTemplate.exchange(
+                    builder.toUriString(),
+                    HttpMethod.POST,
                     HttpEntity(requestBody, headers),
-                    String::class.java)
+                    String::class.java
+            )
+
             if(!response.statusCode.isError) {
+                opprettJournalpostVellykkede.increment()
                 logger.debug(response.body.toString())
                 return response.body
             } else {
                 throw RuntimeException("Noe gikk galt under opprettelse av journalpostoppgave")
             }
         } catch(ex: Exception) {
+            opprettJournalpostFeilede.increment()
             logger.error("noe gikk galt under opprettelse av journalpostoppgave, $ex")
             throw RuntimeException("Feil ved opprettelse av journalpostoppgave, $ex")
         }
