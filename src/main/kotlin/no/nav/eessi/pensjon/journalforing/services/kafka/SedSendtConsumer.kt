@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Service
 class SedConsumer(val pdfService: PdfService,
@@ -48,6 +50,10 @@ class SedConsumer(val pdfService: PdfService,
            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.name
 
         }
+        oppgave.prioritet = Oppgave.Prioritet.NORM.name
+        //oppgave.aktoerId = sedHendelse.
+        oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+
         oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.name
         // oppgave.journalpostId = hent fra midlertidig journalføring når den er klar
         oppgave.opprettetAvEnhetsnr = "9999"
