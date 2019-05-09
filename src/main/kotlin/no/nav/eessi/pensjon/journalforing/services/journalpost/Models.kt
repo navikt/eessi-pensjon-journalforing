@@ -41,7 +41,7 @@ data class Dokument(
 )
 
 data class Dokumentvarianter(
-    val filtype: String = "PDFA", //REQUIRED
+    val filtype: String = "PDF", //REQUIRED
     val fysiskDokument: String, //REQUIRED
     val variantformat: String = "ARKIV" //REQUIRED
 )
