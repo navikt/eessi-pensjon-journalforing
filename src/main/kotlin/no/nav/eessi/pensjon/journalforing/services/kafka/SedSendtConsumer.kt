@@ -30,7 +30,7 @@ class SedConsumer(val pdfService: PdfService,
             val pdfBody = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             var aktoerId: String? = null
             if(sedHendelse.navBruker != null) {
-                aktoerId = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(sedHendelse.navBruker)
+                aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
             }
             val journalPostResponse = journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)
             oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId)
