@@ -1,4 +1,4 @@
-//package no.nav.eessi.pensjon.journalforing.services.oppgave
+//package no.nav.eessi.pensjon.journalforing.services.aktoerregister
 //
 //import no.nav.eessi.pensjon.journalforing.config.RequestResponseLoggerInterceptor
 //import org.springframework.beans.factory.annotation.Value
@@ -12,11 +12,12 @@
 //import org.springframework.web.client.RestTemplate
 //import java.util.*
 //
+//
 //@Component
-//class OppgaveRestTemplate {
+//class AktoerregisterRestTemplate {
 //
 //
-//    @Value("\${oppgave.oppgaver.url}")
+//    @Value("\${aktoerregister.api.v1.url}")
 //    lateinit var url: String
 //
 //    @Value("\${srvusername}")
@@ -27,10 +28,10 @@
 //
 //
 //    @Bean
-//    fun oppgaveOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+//    fun aktoerregisterRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
 //        return templateBuilder
 //                .rootUri(url)
-//                .additionalInterceptors(OppgaveHeadersRequestInterceptor(),
+//                .additionalInterceptors(AktoerHeadersRequestInterceptor(),
 //                        RequestResponseLoggerInterceptor(),
 //                        BasicAuthenticationInterceptor(username, password)
 //                )
@@ -39,7 +40,7 @@
 //                }
 //    }
 //
-//    class OppgaveHeadersRequestInterceptor : ClientHttpRequestInterceptor {
+//    class AktoerHeadersRequestInterceptor : ClientHttpRequestInterceptor {
 //        override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
 //            request.headers["X-Correlation-ID"] = UUID.randomUUID().toString()
 //            request.headers["Content-Type"] = MediaType.APPLICATION_JSON.toString()
