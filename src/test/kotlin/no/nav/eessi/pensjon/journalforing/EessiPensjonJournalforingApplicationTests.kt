@@ -124,7 +124,7 @@ class EessiPensjonJournalforingApplicationTests {
         template.send(SED_SENDT_TOPIC, 0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
-        Thread.sleep(5000)
+        Thread.sleep(10000)
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
