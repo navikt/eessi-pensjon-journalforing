@@ -83,6 +83,17 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("{\"journalpostId\": \"string\", \"journalstatus\": \"MIDLERTIDIG\", \"melding\": \"string\" }")
                     )
+            // Mocker aktørregisteret
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withQueryStringParameter("/identer?identgruppe=AktoerId&gjeldende=true"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("4567891235874")
+                    )
+
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
