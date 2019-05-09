@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.config
 
+import no.nav.eessi.pensjon.journalforing.services.sts.STSService
+import no.nav.eessi.pensjon.journalforing.services.sts.UsernameToOidcInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -8,11 +10,12 @@ import org.springframework.http.MediaType
 import org.springframework.http.client.*
 import org.springframework.http.client.support.BasicAuthenticationInterceptor
 import org.springframework.stereotype.Component
+import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Component
-class RestTemplateConfig {
+class RestTemplateConfig(val securityTokenExchangeService: STSService) {
 
     @Value("\${aktoerregister.api.v1.url}")
     lateinit var aktoerregisterUrl: String
@@ -20,11 +23,27 @@ class RestTemplateConfig {
     @Value("\${oppgave.oppgaver.url}")
     lateinit var oppgaveUrl: String
 
+    @Value("\${JOURNALPOST_V1_URL}")
+    lateinit var joarkUrl: String
+
     @Value("\${srvusername}")
     lateinit var username: String
 
     @Value("\${srvpassword}")
     lateinit var password: String
+
+
+    @Bean
+    fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+        return templateBuilder
+                .rootUri(joarkUrl)
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                }
+    }
 
 
     @Bean
