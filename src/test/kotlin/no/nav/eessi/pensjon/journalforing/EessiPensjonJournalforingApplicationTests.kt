@@ -8,6 +8,7 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.Parameter
 import org.mockserver.model.StringBody.exact
 import org.mockserver.verify.VerificationTimes
 import org.springframework.boot.test.context.SpringBootTest
@@ -17,6 +18,7 @@ import org.springframework.kafka.test.rule.EmbeddedKafkaRule
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
+import scala.reflect.api.Quasiquotes
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -83,6 +85,20 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("{\"journalpostId\": \"string\", \"journalstatus\": \"MIDLERTIDIG\", \"melding\": \"string\" }")
                     )
+            // Mocker aktørregisteret
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/identer")
+                            .withQueryStringParameters(
+                                    listOf(
+                                            Parameter("identgruppe", "AktoerId"),
+                                            Parameter("gjeldende", "true"))))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
+                    )
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
@@ -132,6 +148,17 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
                 VerificationTimes.exactly(2)
+        )
+        // Verifiserer at det har blitt forsøkt å hente AktoerID
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/identer")
+                        .withQueryStringParameters(
+                            listOf(
+                                Parameter("identgruppe", "AktoerId"),
+                                Parameter("gjeldende", "true"))),
+                VerificationTimes.exactly(1)
         )
     }
 }

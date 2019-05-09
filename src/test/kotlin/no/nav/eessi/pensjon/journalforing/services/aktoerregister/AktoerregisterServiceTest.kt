@@ -50,7 +50,7 @@ class AktoerregisterServiceTest {
         val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json")
         whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
 
-        val testAktoerId = "18128126178"
+        val testAktoerId = "12378945601"
         val expectedNorskIdent = "1000101917358"
 
         val response = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
