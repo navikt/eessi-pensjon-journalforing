@@ -17,6 +17,7 @@ import org.springframework.kafka.test.rule.EmbeddedKafkaRule
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
+import scala.reflect.api.Quasiquotes
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -87,13 +88,13 @@ class EessiPensjonJournalforingApplicationTests {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withQueryStringParameter("/identer?identgruppe=AktoerId&gjeldende=true"))
+                            .withPath("/identer"))
+                            //.withQueryStringParameter("/identer?identgruppe=AktoerId&gjeldende=true"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody("4567891235874")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
                     )
-
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
