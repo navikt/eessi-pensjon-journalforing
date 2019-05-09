@@ -97,8 +97,7 @@ class EessiPensjonJournalforingApplicationTests {
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(
-                                    "{\"12378945601\": { \"identer\": [ { \"ident\":\"12378945601\", \"identgruppe\":\"AktoerId\", \"gjeldende\": true }] }}")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
                     )
         }
 
