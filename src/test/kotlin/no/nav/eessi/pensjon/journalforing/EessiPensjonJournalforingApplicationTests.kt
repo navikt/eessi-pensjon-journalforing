@@ -8,6 +8,7 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.Parameter
 import org.mockserver.model.StringBody.exact
 import org.mockserver.verify.VerificationTimes
 import org.springframework.boot.test.context.SpringBootTest
@@ -88,12 +89,16 @@ class EessiPensjonJournalforingApplicationTests {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/identer"))
-                            //.withQueryStringParameter("/identer?identgruppe=AktoerId&gjeldende=true"))
+                            .withPath("/identer")
+                            .withQueryStringParameters(
+                                    listOf(
+                                            Parameter("identgruppe", "AktoerId"),
+                                            Parameter("gjeldende", "true"))))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
+                            .withBody(
+                                    "{\"12378945601\": { \"identer\": [ { \"ident\":\"12378945601\", \"identgruppe\":\"AktoerId\", \"gjeldende\": true }] }}")
                     )
         }
 
@@ -144,6 +149,17 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
                 VerificationTimes.exactly(2)
+        )
+        // Verifiserer at det har blitt forsøkt å hente AktoerID
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/identer")
+                        .withQueryStringParameters(
+                            listOf(
+                                Parameter("identgruppe", "AktoerId"),
+                                Parameter("gjeldende", "true"))),
+                VerificationTimes.exactly(1)
         )
     }
 }
