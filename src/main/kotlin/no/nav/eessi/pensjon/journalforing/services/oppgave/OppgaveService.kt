@@ -65,7 +65,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
         oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
 
         oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.name
-        oppgave.journalpostId = "1234"
+        oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
 
         return oppgave
