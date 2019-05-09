@@ -33,40 +33,40 @@ class AktoerregisterServiceTest {
 
 
     @Test
-    fun `hentGjeldendeNorskIdentForAktorId() should return 1 NorskIdent`() {
+    fun `hentGjeldendeNorskIdentForAktoerId() should return 1 NorskIdent`() {
         val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-AktoerId.json")
         whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
 
         val testAktoerId = "1000101917358"
         val expectedNorskIdent = "18128126178"
 
-        val response = aktoerregisterService.hentGjeldendeNorskIdentForAktorId(testAktoerId)
+        val response = aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         assertEquals(expectedNorskIdent, response, "AktørId 1000101917358 har norskidenten 18128126178")
     }
 
 
     @Test
-    fun `hentGjeldendeNorskIdentForAktorId() should return 1 AktoerId`() {
+    fun `hentGjeldendeNorskIdentForAktoerId() should return 1 AktoerId`() {
         val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json")
         whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
 
         val testAktoerId = "18128126178"
         val expectedNorskIdent = "1000101917358"
 
-        val response = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(testAktoerId)
+        val response = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         assertEquals(expectedNorskIdent, response, "NorskIdent 18128126178 skal ha AktoerId 100010191735818128126178")
     }
 
 
     @Test(expected = AktoerregisterIkkeFunnetException::class)
-    fun `hentGjeldendeNorskIdentForAktorId() should fail if ident is not found in response`() {
+    fun `hentGjeldendeNorskIdentForAktoerId() should fail if ident is not found in response`() {
         val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-AktoerId.json")
         whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
 
         val testAktoerId = "1234"
         try {
             // the mock returns NorskIdent 18128126178, not 1234 as we asked for
-            aktoerregisterService.hentGjeldendeNorskIdentForAktorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (rte: RuntimeException) {
             assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
             throw rte
@@ -81,7 +81,7 @@ class AktoerregisterServiceTest {
         val testAktoerId = "18128126178"
         try {
             // the mock returns a valid response, but has no idents
-            aktoerregisterService.hentGjeldendeNorskIdentForAktorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (rte: RuntimeException) {
             assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
             throw rte
@@ -97,7 +97,7 @@ class AktoerregisterServiceTest {
         val testAktoerId = "10000609641830456"
         try {
             // the mock returns a valid response, but with a message in 'feilmelding'
-            aktoerregisterService.hentGjeldendeNorskIdentForAktorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (are: AktoerregisterException) {
             assertEquals("Den angitte personidenten finnes ikke", are.message!!, "Feilmeldingen fra aktørregisteret skal være exception-message")
             throw are
@@ -112,7 +112,7 @@ class AktoerregisterServiceTest {
         val testAktoerId = "1000101917358"
         try {
             // the mock returns a valid response, but has 2 gjeldende AktoerId
-            aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(testAktoerId)
+            aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         } catch (rte: RuntimeException) {
             assertEquals("Forventet 1 ident, fant 2", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
             throw rte
@@ -127,7 +127,7 @@ class AktoerregisterServiceTest {
         val testAktoerId = "does-not-matter"
         try {
             // the mock returns 403-forbidden
-            aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(testAktoerId)
+            aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         } catch (rte: RuntimeException) {
             assertEquals("Received 403 Forbidden from aktørregisteret", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
             throw rte

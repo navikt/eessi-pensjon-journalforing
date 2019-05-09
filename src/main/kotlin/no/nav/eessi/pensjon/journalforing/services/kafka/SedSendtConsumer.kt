@@ -28,7 +28,7 @@ class SedConsumer(val pdfService: PdfService,
             val pdfBody = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             var aktoerId: String
             if(sedHendelse.navBruker != null) {
-             //   aktoerId = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(sedHendelse.navBruker)
+             //   aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
             }
             journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)
             // acknowledgment.acknowledge()

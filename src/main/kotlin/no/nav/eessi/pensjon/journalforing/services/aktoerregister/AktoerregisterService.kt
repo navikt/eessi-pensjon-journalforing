@@ -41,29 +41,29 @@ class AktoerregisterService(val aktoerregisterRestTemplate: RestTemplate) {
     @Value("\${app.name}")
     lateinit var appName: String
 
-    fun hentGjeldendeNorskIdentForAktorId(aktorid: String): String {
-        val response = doRequest(aktorid, "NorskIdent")
-        validateResponse(aktorid, response)
-        return response.getValue(aktorid).identer!![0].ident
+    fun hentGjeldendeNorskIdentForAkteorId(aktoerid: String): String {
+        val response = doRequest(aktoerid, "NorskIdent")
+        validateResponse(aktoerid, response)
+        return response.getValue(aktoerid).identer!![0].ident
     }
 
-    fun hentGjeldendeAktorIdForNorskIdent(norskIdent: String): String {
+    fun hentGjeldendeAktoerIdForNorskIdent(norskIdent: String): String {
         val response = doRequest(norskIdent, "AktoerId")
         validateResponse(norskIdent, response)
         return response.getValue(norskIdent).identer!![0].ident
     }
 
-    private fun validateResponse(aktorid: String, response: Map<String, IdentinfoForAktoer>) {
-        if (response[aktorid] == null)
-            throw AktoerregisterIkkeFunnetException("Ingen identinfo for $aktorid ble funnet")
+    private fun validateResponse(aktoerid: String, response: Map<String, IdentinfoForAktoer>) {
+        if (response[aktoerid] == null)
+            throw AktoerregisterIkkeFunnetException("Ingen identinfo for $aktoerid ble funnet")
 
-        val identInfoForAktoer = response[aktorid]!!
+        val identInfoForAktoer = response[aktoerid]!!
 
         if (identInfoForAktoer.feilmelding != null)
             throw AktoerregisterException(identInfoForAktoer.feilmelding)
 
         if (identInfoForAktoer.identer == null || identInfoForAktoer.identer.isEmpty())
-            throw AktoerregisterIkkeFunnetException("Ingen identer returnert for $aktorid")
+            throw AktoerregisterIkkeFunnetException("Ingen identer returnert for $aktoerid")
 
         if (identInfoForAktoer.identer.size > 1) {
             logger.info("Identer returnert fra aktoerregisteret:")
