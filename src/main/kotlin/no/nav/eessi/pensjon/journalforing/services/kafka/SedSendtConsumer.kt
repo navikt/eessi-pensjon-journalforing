@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import org.slf4j.LoggerFactory
@@ -9,7 +10,9 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 
 @Service
-class SedConsumer(val pdfService: PdfService, val journalpostService: JournalpostService) {
+class SedConsumer(val pdfService: PdfService,
+                  val journalpostService: JournalpostService,
+                  val aktoerregisterService: AktoerregisterService) {
 
     private val logger = LoggerFactory.getLogger(SedConsumer::class.java)
     private val mapper = jacksonObjectMapper()
@@ -23,6 +26,10 @@ class SedConsumer(val pdfService: PdfService, val journalpostService: Journalpos
         if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
             val pdfBody = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            var aktoerId: String
+            if(sedHendelse.navBruker != null) {
+             //   aktoerId = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(sedHendelse.navBruker)
+            }
             journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)
             // acknowledgment.acknowledge()
         }

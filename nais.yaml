@@ -51,3 +51,5 @@ fasitResources:
       resourceType: BaseUrl
     - alias: oppgave.oppgaver
       resourceType: RestService
+    - alias: aktoerregister.api.v1
+      resourceType: RestService
