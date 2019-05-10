@@ -1,10 +1,10 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import no.nav.eessi.pensjon.journalforing.utils.counter
+import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -26,9 +26,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(sedHendelse: SedHendelse, journalPostResponse: JournalPostResponse, aktoerId: String?) {
 
-        val requestBody = jacksonObjectMapper()
-                .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-                .writeValueAsString(populerOppgaveFelter(sedHendelse, journalPostResponse, aktoerId))
+        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse, journalPostResponse, aktoerId), true)
         val httpEntity = HttpEntity(requestBody)
 
         try {
