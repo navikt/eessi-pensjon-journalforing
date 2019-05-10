@@ -9,21 +9,26 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.util.concurrent.CountDownLatch
 
 @Service
-class SedConsumer(val pdfService: PdfService,
+class SedSendtConsumer(val pdfService: PdfService,
                   val journalpostService: JournalpostService,
                   val oppgaveService: OppgaveService,
                   val aktoerregisterService: AktoerregisterService) {
 
-    private val logger = LoggerFactory.getLogger(SedConsumer::class.java)
+    private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val mapper = jacksonObjectMapper()
+    private val latch = CountDownLatch(3)
+
+    fun getLatch(): CountDownLatch {
+        return latch
+    }
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
         logger.info("Innkommet hendelse")
         val sedHendelse = mapper.readValue(hendelse, SedHendelse::class.java)
-
 
         if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
@@ -36,5 +41,6 @@ class SedConsumer(val pdfService: PdfService,
             oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId)
             // acknowledgment.acknowledge()
         }
+        latch.countDown()
     }
 }
