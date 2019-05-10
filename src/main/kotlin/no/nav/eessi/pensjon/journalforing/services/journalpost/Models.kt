@@ -24,7 +24,7 @@ data class JournalpostRequest(
     val kanal: String? = null,
     val sak: Sak? = null,
     val tema: String = "PEN", //REQUIRED
-    val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
+  //  val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
     val tittel: String //REQUIRED
 ){
     override fun toString(): String {
