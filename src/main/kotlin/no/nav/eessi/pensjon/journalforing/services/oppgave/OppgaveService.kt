@@ -60,13 +60,13 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
 
         if(sedHendelse.bucType.equals("P_BUC_03")) {
             oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
-            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
+//            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
+//            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
 
         } else {
             oppgave.tema = Oppgave.Tema.PENSJON.toString()
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
-            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
+//            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
+//            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
 
         }
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
