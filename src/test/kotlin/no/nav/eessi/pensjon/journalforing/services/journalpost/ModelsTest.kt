@@ -33,8 +33,6 @@ class ModelsTest {
         assertEquals(journalpostRequestModel.sak?.arkivsaksnummer, "string")
         assertEquals(journalpostRequestModel.sak?.arkivsaksystem, "GSAK")
         assertEquals(journalpostRequestModel.tema, "FOR")
-        assertEquals(journalpostRequestModel.tilleggsopplysninger?.first()?.nokkel, "string")
-        assertEquals(journalpostRequestModel.tilleggsopplysninger?.first()?.verdi, "string")
         assertEquals(journalpostRequestModel.tittel, "Ettersendelse til søknad om foreldrepenger")
     }
 

@@ -32,11 +32,5 @@
 "arkivsaksystem": "GSAK"
 },
 "tema": "FOR",
-"tilleggsopplysninger": [
-{
-"nokkel": "string",
-"verdi": "string"
-}
-],
 "tittel": "Ettersendelse til søknad om foreldrepenger"
 }

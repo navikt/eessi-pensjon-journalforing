@@ -57,10 +57,10 @@ data class AvsenderMottaker(
     val navn: String //REQUIRED
 )
 
-data class Tilleggsopplysninger(
-    val nokkel: String, //REQUIRED
-    val verdi: String //REQUIRED
-)
+//data class Tilleggsopplysninger(
+//    val nokkel: String, //REQUIRED
+//    val verdi: String //REQUIRED
+//)
 
 data class Bruker(
     val id: String, //REQUIRED
