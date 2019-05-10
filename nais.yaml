@@ -30,8 +30,8 @@ resources:
 
 fasitResources:
   used:
-    - alias: eessi-pensjon-active-profiles
-      resourceType: ApplicationProperties
+#    - alias: eessi-pensjon-active-profiles
+#      resourceType: ApplicationProperties
     - alias: kafka_bootstrap_servers
       resourceType: baseurl
     - alias: srveessi-pensjon-journalforing
