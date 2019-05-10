@@ -56,24 +56,24 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
                              journalPostResponse: JournalPostResponse,
                              aktoerId: String?) : Oppgave {
         val oppgave = Oppgave()
-        oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.name
+        oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.toString()
 
         if(sedHendelse.bucType.equals("P_BUC_03")) {
-            oppgave.tema = Oppgave.Tema.UFORETRYGD.name
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.name
-            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.name
+            oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
+            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
+            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
 
         } else {
-            oppgave.tema = Oppgave.Tema.PENSJON.name
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.name
-            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.name
+            oppgave.tema = Oppgave.Tema.PENSJON.toString()
+            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
+            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
 
         }
-        oppgave.prioritet = Oppgave.Prioritet.NORM.name
+        oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
         oppgave.aktoerId = aktoerId
         oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
 
-        oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.name
+        oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
         oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
 
