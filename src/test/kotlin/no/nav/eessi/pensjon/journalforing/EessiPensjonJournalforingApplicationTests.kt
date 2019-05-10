@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedSendtConsumer
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,6 +12,7 @@ import org.mockserver.model.HttpStatusCode
 import org.mockserver.model.Parameter
 import org.mockserver.model.StringBody.exact
 import org.mockserver.verify.VerificationTimes
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -22,6 +24,7 @@ import scala.reflect.api.Quasiquotes
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
 
 lateinit var mockServer : ClientAndServer
@@ -30,6 +33,9 @@ lateinit var mockServer : ClientAndServer
 @SpringBootTest
 @ActiveProfiles("integrationtest")
 class EessiPensjonJournalforingApplicationTests {
+
+    @Autowired
+    lateinit var sedSendtConsumer: SedSendtConsumer
 
     companion object {
         const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
@@ -124,7 +130,7 @@ class EessiPensjonJournalforingApplicationTests {
         template.send(SED_SENDT_TOPIC, 0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
-        Thread.sleep(10000)
+        sedSendtConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS)
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
