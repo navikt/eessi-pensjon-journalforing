@@ -130,7 +130,7 @@ class EessiPensjonJournalforingApplicationTests {
         template.send(SED_SENDT_TOPIC, 0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
-        sedSendtConsumer.getLatch().await(10000, TimeUnit.MILLISECONDS)
+        sedSendtConsumer.getLatch().await(15000, TimeUnit.MILLISECONDS)
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
