@@ -38,7 +38,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
             jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
-            logger.error("En feil oppstod under opprettelse av oppgave; ${ex.message}")
+            logger.error("En feil oppstod under opprettelse av oppgave; ${ex.stackTrace}")
             opprettOppgaveFeilede.increment()
         }
     }
