@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
+import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,7 +60,11 @@ class JournalpostServiceTest {
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         eq(HttpMethod.POST),
-                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
+                        eq(HttpEntity(
+                                mapAnyToJson(
+                                        journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody"),
+                                        true),
+                                headers)),
                         eq(String::class.java))
 
         journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody = "MockPdfBody", forsokFerdigstill = false)
