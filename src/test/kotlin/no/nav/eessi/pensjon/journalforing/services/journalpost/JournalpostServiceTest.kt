@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
+import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
