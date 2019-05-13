@@ -34,6 +34,8 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
             validateResponseEntity(responseEntity)
             opprettOppgaveVellykkede.increment()
+            val tildeltEnhetsnr = jacksonObjectMapper().readTree(responseEntity.body!!)["tildeltEnhetsnr"].asInt()
+            logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
             jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under opprettelse av oppgave; ${ex.message}")
