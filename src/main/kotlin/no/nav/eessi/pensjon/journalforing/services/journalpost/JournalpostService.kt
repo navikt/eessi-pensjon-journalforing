@@ -89,7 +89,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         try {
             logger.info("Kaller Journalpost for å generere en journalpost")
 
-            val requestBody = byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody)
+            val requestBody = byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody).toString()
             genererJournalpostModelVellykkede.increment()
 
 

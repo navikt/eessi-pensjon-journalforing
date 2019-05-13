@@ -60,7 +60,7 @@ class JournalpostServiceTest {
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         eq(HttpMethod.POST),
-                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody"), headers)),
+                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
                         eq(String::class.java))
 
         journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody = "MockPdfBody", forsokFerdigstill = false)
