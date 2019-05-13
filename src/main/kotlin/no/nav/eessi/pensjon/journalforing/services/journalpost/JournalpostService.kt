@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import no.nav.eessi.pensjon.journalforing.utils.counter
-import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -90,7 +89,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         try {
             logger.info("Kaller Journalpost for å generere en journalpost")
 
-            val requestBody = mapAnyToJson(byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody), true)
+            val requestBody = byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody)
             genererJournalpostModelVellykkede.increment()
 
 
