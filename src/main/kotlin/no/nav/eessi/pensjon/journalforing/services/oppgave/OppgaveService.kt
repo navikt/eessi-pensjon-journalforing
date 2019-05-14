@@ -35,7 +35,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             validateResponseEntity(responseEntity)
             opprettOppgaveVellykkede.increment()
             val tildeltEnhetsnr = jacksonObjectMapper().readTree(responseEntity.body!!)["tildeltEnhetsnr"].asInt()
-            logger.info("d:  $tildeltEnhetsnr")
+            logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
             jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under opprettelse av oppgave; ${ex.stackTrace}")
