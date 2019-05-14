@@ -35,7 +35,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             validateResponseEntity(responseEntity)
             opprettOppgaveVellykkede.increment()
             val tildeltEnhetsnr = jacksonObjectMapper().readTree(responseEntity.body!!)["tildeltEnhetsnr"].asInt()
-            logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
+            logger.info("d:  $tildeltEnhetsnr")
             jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under opprettelse av oppgave; ${ex.stackTrace}")
@@ -62,12 +62,12 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
 
         if(sedHendelse.bucType.equals("P_BUC_03")) {
             oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
-//            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
+            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
 
         } else {
             oppgave.tema = Oppgave.Tema.PENSJON.toString()
-//            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
+            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
 
         }
