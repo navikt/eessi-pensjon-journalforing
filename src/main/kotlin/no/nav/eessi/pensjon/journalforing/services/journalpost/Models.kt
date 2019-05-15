@@ -67,9 +67,44 @@ data class Bruker(
     val idType: String = "FNR" //REQUIRED
 )
 
-// TODO find et passende sted/format for disse enumene
+// https://confluence.adeo.no/display/BOA/Behandlingstema
+enum class Behandlingstema : Code {
+    GJENLEVENDEPENSJON {
+        override fun toString() = "ab0011"
+        override fun decode() = "Gjenlevendepensjon"
+    },
+    ALDERSPENSJON {
+        override fun toString() = "ab0254"
+        override fun decode() = "Alderspensjon"
+    },
+    UFOREPENSJON {
+        override fun toString() = "ab0194"
+        override fun decode() = "Uførepensjon"
+    }
+}
+
+// https://confluence.adeo.no/display/BOA/Tema
+enum class Tema : Code {
+    PENSJON {
+        override fun toString() = "PEN"
+        override fun decode() = "Pensjon"
+    },
+    UFORETRYGD {
+        override fun toString() = "UFO"
+        override fun decode() = "Uføretrygd"
+    }
+}
+
 enum class BUCTYPE (val BEHANDLINGSTEMA: String, val TEMA: String){
-    P_BUC_01("ab0254", "PEN"),
-    P_BUC_02("ab0011", "PEN"),
-    P_BUC_03("ab0194", "UFO")
+    P_BUC_01(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
+    P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON.toString(), Tema.PENSJON.toString()),
+    P_BUC_03(Behandlingstema.UFOREPENSJON.toString(), Tema.UFORETRYGD.toString()),
+    P_BUC_04(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
+    P_BUC_05(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
+    P_BUC_06(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
+    P_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString())
+}
+
+interface Code {
+    fun decode(): String
 }
