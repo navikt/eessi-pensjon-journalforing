@@ -11,6 +11,8 @@ buildscript {
 		mockitoVersion = '2.8.+'
 		oidcTokenSupportVersion = '0.2.9'
 		logstashLogbackVersion = '4.10'
+		pensjonInformasjonVersion = '9.4.10'
+		personV3Version = '3.4.1'
 	}
 	repositories {
 		maven {
@@ -38,6 +40,10 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.openrepose.gradle.plugins.jaxb'
 
+configurations {
+	xsd
+}
+
 dependencies {
 
 	// Spring-boot
@@ -61,6 +67,7 @@ dependencies {
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
+	compile("commons-io:commons-io:2.6")
 	
 	// Allows for variable expiration-date of each cache-entry
 	implementation("net.jodah:expiringmap:0.5.9")
@@ -77,6 +84,11 @@ dependencies {
 	compile("io.micrometer:micrometer-registry-prometheus")
 
 	testImplementation("com.fasterxml.jackson.core:jackson-databind:2.9.3")
+
+	// Tjenestespesifikasjoner
+	implementation('no.nav.helse:cxf-prometheus-metrics:dd7d125')
+	implementation("no.nav.tjenester:nav-person-v3-tjenestespesifikasjon:${personV3Version}")
+	xsd("no.nav.pensjon:pensjonsinformasjon-xsd:${pensjonInformasjonVersion}")
 }
 
 compileKotlin {
