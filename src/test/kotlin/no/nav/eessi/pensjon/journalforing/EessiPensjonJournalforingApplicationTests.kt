@@ -20,7 +20,6 @@ import org.springframework.kafka.test.rule.EmbeddedKafkaRule
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
-import scala.reflect.api.Quasiquotes
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -62,6 +61,7 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/STStoken.json"))))
                     )
+
             // Mocker Eux PDF generator
             mockServer.`when`(
                     request()
@@ -81,6 +81,16 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("pdf for P_BUC_03")
                     )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/pdf"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("pdf for P_BUC_05")
+                    )
+
             // Mocker journalføringstjeneste
             mockServer.`when`(
                     request()
@@ -90,6 +100,38 @@ class EessiPensjonJournalforingApplicationTests {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("{\"journalpostId\": \"string\", \"journalstatus\": \"MIDLERTIDIG\", \"melding\": \"string\" }")
+                    )
+
+            // Mocker oppgavetjeneste
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestMedAktoerIdPEN.json")))))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdPEN.json")))))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdUFO.json")))))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
                     )
             // Mocker aktørregisteret
             mockServer.`when`(
@@ -125,9 +167,10 @@ class EessiPensjonJournalforingApplicationTests {
         // Sender 1 Foreldre SED til Kafka
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/FB_BUC_01.json"))))
 
-        // Sender 2 Pensjon SED til Kafka
-        template.sendDefault(0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json"))))
-        template.send(SED_SENDT_TOPIC, 0, 2, String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
+        // Sender 3 Pensjon SED til Kafka
+        template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json"))))
+        template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
+        template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_05.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
         sedSendtConsumer.getLatch().await(15000, TimeUnit.MILLISECONDS)
@@ -148,13 +191,49 @@ class EessiPensjonJournalforingApplicationTests {
                         .withBody(exact("pdf for P_BUC_03")),
                 VerificationTimes.exactly(1)
         )
-        // Verifiserer at det har blitt forsøkt å opprette en journalpostoppgave
+
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/pdf")
+                        .withBody(exact("pdf for P_BUC_05")),
+                VerificationTimes.exactly(1)
+        )
+        // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(2)
+                VerificationTimes.exactly(3)
         )
+
+        // Verifiserer at det har blitt forsøkt å opprette PEN oppgave med aktørid
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestMedAktoerIdPEN.json")))),
+        VerificationTimes.exactly(1)
+        )
+
+        // Verifiserer at det har blitt forsøkt å opprette PEN oppgave uten aktørid
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdPEN.json")))),
+                VerificationTimes.exactly(1)
+        )
+
+        // Verifiserer at det har blitt forsøkt å opprette UFO oppgave uten aktørid
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdUFO.json")))),
+                VerificationTimes.exactly(1)
+        )
+
         // Verifiserer at det har blitt forsøkt å hente AktoerID
         mockServer.verify(
                 request()

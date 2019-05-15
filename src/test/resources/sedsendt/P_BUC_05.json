@@ -1,0 +1,15 @@
+{
+  "id": 2318,
+  "sedId": "X008_40b5723cd9284af6ac0581f3981f3044_2",
+  "sektorKode": "P",
+  "bucType": "P_BUC_05",
+  "rinaSakId": "161558",
+  "avsenderId": "NO:NAVT003",
+  "avsenderNavn": "NAVT003",
+  "mottakerId": "NO:NAVT002",
+  "mottakerNavn": "NAVT002",
+  "rinaDokumentId": "40b5723cd9284af6ac0581f3981f3044",
+  "rinaDokumentVersjon": "2",
+  "sedType": "X008",
+  "navBruker": null
+}

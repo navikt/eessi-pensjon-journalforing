@@ -39,12 +39,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 )
             }
 
-            val behandlingstema = when {
-                sedHendelse.bucType.equals(BUCTYPE.P_BUC_01.name, true) -> BUCTYPE.P_BUC_01.BEHANDLINGSTEMA
-                sedHendelse.bucType.equals(BUCTYPE.P_BUC_02.name, true) -> BUCTYPE.P_BUC_02.BEHANDLINGSTEMA
-                sedHendelse.bucType.equals(BUCTYPE.P_BUC_03.name, true) -> BUCTYPE.P_BUC_03.BEHANDLINGSTEMA
-                else -> throw RuntimeException("Feil med bucType, ${sedHendelse.bucType}")
-            }
+            val behandlingstema = BUCTYPE.valueOf(sedHendelse.bucType!!).BEHANDLINGSTEMA
 
             val bruker = when {
                 sedHendelse.navBruker != null -> Bruker(id = sedHendelse.navBruker)

@@ -38,7 +38,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
             jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
-            logger.error("En feil oppstod under opprettelse av oppgave; ${ex.stackTrace}")
+            logger.error("En feil oppstod under opprettelse av oppgave; $ex")
             opprettOppgaveFeilede.increment()
         }
     }
@@ -62,17 +62,19 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
 
         if(sedHendelse.bucType.equals("P_BUC_03")) {
             oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
+          //  oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
 
         } else {
             oppgave.tema = Oppgave.Tema.PENSJON.toString()
-            oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
+        //    oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
 
         }
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
-        oppgave.aktoerId = aktoerId
+        if(aktoerId != null) {
+            oppgave.aktoerId = aktoerId
+        }
         oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
 
         //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()

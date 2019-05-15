@@ -1,0 +1,10 @@
+{
+  "opprettetAvEnhetsnr" : "9999",
+  "journalpostId" : "string",
+  "aktoerId" : "1000101917358",
+  "tema" : "PEN",
+  "behandlingstema" : "ab0313",
+  "oppgavetype" : "JFR",
+  "prioritet" : "NORM",
+  "aktivDato" : "2019-05-15"
+}

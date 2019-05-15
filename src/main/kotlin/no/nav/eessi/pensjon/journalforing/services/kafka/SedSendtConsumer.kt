@@ -33,12 +33,14 @@ class SedSendtConsumer(val pdfService: PdfService,
         if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
             val pdfBody = pdfService.hentPdf(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            val journalPostResponse = journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)
+
             var aktoerId: String? = null
             if(sedHendelse.navBruker != null) {
                 aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
             }
-            val journalPostResponse = journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody= pdfBody!!, forsokFerdigstill = false)
             oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId)
+
             // acknowledgment.acknowledge()
         }
         latch.countDown()
