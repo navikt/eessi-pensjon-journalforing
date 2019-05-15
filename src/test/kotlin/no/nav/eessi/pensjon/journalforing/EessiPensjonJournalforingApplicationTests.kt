@@ -165,11 +165,15 @@ class EessiPensjonJournalforingApplicationTests {
         template.defaultTopic = SED_SENDT_TOPIC
 
         // Sender 1 Foreldre SED til Kafka
+        System.out.println("Produserer FB_BUC_01 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/FB_BUC_01.json"))))
 
         // Sender 3 Pensjon SED til Kafka
+        System.out.println("Produserer P_BUC_01 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json"))))
+        System.out.println("Produserer P_BUC_03 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_03.json"))))
+        System.out.println("Produserer P_BUC_05 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_05.json"))))
 
         // Venter på at sedSendtConsumer skal consume meldingene
