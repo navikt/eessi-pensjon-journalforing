@@ -149,7 +149,7 @@ class EessiPensjonJournalforingApplicationTests {
                     )
 
             // Waiting for kafka to be ready
-            Thread.sleep(5000)
+            Thread.sleep(10000)
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
