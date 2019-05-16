@@ -147,6 +147,9 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
                     )
+
+            // Waiting for kafka to be ready
+            Thread.sleep(5000)
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
