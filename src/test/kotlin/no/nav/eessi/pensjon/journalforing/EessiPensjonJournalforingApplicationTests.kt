@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedSendtConsumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,10 +15,16 @@ import org.mockserver.model.StringBody.exact
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.listener.KafkaMessageListenerContainer
+import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.rule.EmbeddedKafkaRule
+import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import java.nio.file.Files
@@ -29,6 +36,7 @@ import javax.ws.rs.HttpMethod
 
 lateinit var mockServer : ClientAndServer
 
+
 @RunWith(SpringRunner::class)
 @SpringBootTest
 @ActiveProfiles("integrationtest")
@@ -37,6 +45,7 @@ class EessiPensjonJournalforingApplicationTests {
 
     @Autowired
     lateinit var sedSendtConsumer: SedSendtConsumer
+
 
     companion object {
         const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
@@ -48,6 +57,7 @@ class EessiPensjonJournalforingApplicationTests {
 
 
         init {
+
             // Start Mockserver in memory
             val port = randomFrom()
             mockServer = ClientAndServer.startClientAndServer(port)
@@ -325,5 +335,6 @@ class EessiPensjonJournalforingApplicationTests {
                                 Parameter("gjeldende", "true"))),
                 VerificationTimes.exactly(1)
         )
+        container.stop()
     }
 }
