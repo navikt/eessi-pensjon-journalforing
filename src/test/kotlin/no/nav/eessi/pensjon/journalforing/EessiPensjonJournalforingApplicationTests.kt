@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
@@ -31,6 +32,7 @@ lateinit var mockServer : ClientAndServer
 @RunWith(SpringRunner::class)
 @SpringBootTest
 @ActiveProfiles("integrationtest")
+@DirtiesContext
 class EessiPensjonJournalforingApplicationTests {
 
     @Autowired
@@ -107,7 +109,15 @@ class EessiPensjonJournalforingApplicationTests {
                     request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestMedAktoerIdPEN.json")))))
+                            .withBody("{\n" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"aktoerId\" : \"1000101917358\",\n" +
+                                    "  \"tema\" : \"PEN\",\n" +
+                                    "  \"oppgavetype\" : \"JFR\",\n" +
+                                    "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                    "}"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -117,7 +127,14 @@ class EessiPensjonJournalforingApplicationTests {
                     request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdPEN.json")))))
+                            .withBody("{\n" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"tema\" : \"PEN\",\n" +
+                                    "  \"oppgavetype\" : \"JFR\",\n" +
+                                    "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                    "}"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -127,7 +144,14 @@ class EessiPensjonJournalforingApplicationTests {
                     request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdUFO.json")))))
+                            .withBody("{\n" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"tema\" : \"UFO\",\n" +
+                                    "  \"oppgavetype\" : \"JFR\",\n" +
+                                    "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                    "}"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -161,12 +185,39 @@ class EessiPensjonJournalforingApplicationTests {
     @Test
     @Throws(Exception::class)
     fun `Send en melding pa topic`() {
+        val consumerProperties = KafkaTestUtils.consumerProps("eessi-pensjon-group2",
+                "false",
+                embeddedKafka.embeddedKafka)
+        // set up the Kafka consumer properties
+
+
+        // create a Kafka consumer factory
+        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(
+                consumerProperties)
+
+        // set the topic that needs to be consumed
+        val containerProperties = ContainerProperties(SED_SENDT_TOPIC)
+
+        var container = KafkaMessageListenerContainer<String, String>(consumerFactory, containerProperties)
+
+        // setup a Kafka message listener
+        val messageListener = object : MessageListener<String, String> {
+            override fun onMessage(record : ConsumerRecord<String, String>) {
+                System.out.println("test-listener received message:  $record")
+            }
+        }
+
+        container.setupMessageListener(messageListener)
+
+        // start the container and underlying message listener
+        container.start()
+        // wait until the container has the required number of assigned partitions
+        ContainerTestUtils.waitForAssignment(container, embeddedKafka.embeddedKafka.partitionsPerTopic)
         // Set up kafka
         val senderProps = KafkaTestUtils.senderProps(embeddedKafka.embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
         template.defaultTopic = SED_SENDT_TOPIC
-
         // Sender 1 Foreldre SED til Kafka
         System.out.println("Produserer FB_BUC_01 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/FB_BUC_01.json"))))
@@ -219,7 +270,15 @@ class EessiPensjonJournalforingApplicationTests {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestMedAktoerIdPEN.json")))),
+                        .withBody("{\n" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"aktoerId\" : \"1000101917358\",\n" +
+                                "  \"tema\" : \"PEN\",\n" +
+                                "  \"oppgavetype\" : \"JFR\",\n" +
+                                "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                "}"),
         VerificationTimes.exactly(1)
         )
 
@@ -228,7 +287,14 @@ class EessiPensjonJournalforingApplicationTests {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdPEN.json")))),
+                        .withBody("{\n" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"tema\" : \"PEN\",\n" +
+                                "  \"oppgavetype\" : \"JFR\",\n" +
+                                "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                "}"),
                 VerificationTimes.exactly(1)
         )
 
@@ -237,7 +303,14 @@ class EessiPensjonJournalforingApplicationTests {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveRequestUtenAktoerIdUFO.json")))),
+                        .withBody("{\n" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"tema\" : \"UFO\",\n" +
+                                "  \"oppgavetype\" : \"JFR\",\n" +
+                                "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                "}"),
                 VerificationTimes.exactly(1)
         )
 
