@@ -123,9 +123,11 @@ class EessiPensjonJournalforingApplicationTests {
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"string\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                     "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                     "}"))
                     .respond(response()
@@ -140,9 +142,11 @@ class EessiPensjonJournalforingApplicationTests {
                             .withBody("{\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                     "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                     "}"))
                     .respond(response()
@@ -157,9 +161,11 @@ class EessiPensjonJournalforingApplicationTests {
                             .withBody("{\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
                                     "  \"tema\" : \"UFO\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                     "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                     "}"))
                     .respond(response()
@@ -181,9 +187,6 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
                     )
-
-            // Waiting for kafka to be ready
-            Thread.sleep(10000)
         }
 
         fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
@@ -284,9 +287,11 @@ class EessiPensjonJournalforingApplicationTests {
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"aktoerId\" : \"1000101917358\",\n" +
+                                "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                 "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                 "}"),
         VerificationTimes.exactly(1)
@@ -300,9 +305,11 @@ class EessiPensjonJournalforingApplicationTests {
                         .withBody("{\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
+                                "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                 "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                 "}"),
                 VerificationTimes.exactly(1)
@@ -316,9 +323,11 @@ class EessiPensjonJournalforingApplicationTests {
                         .withBody("{\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
+                                "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
                                 "  \"tema\" : \"UFO\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
                                 "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
                                 "}"),
                 VerificationTimes.exactly(1)
