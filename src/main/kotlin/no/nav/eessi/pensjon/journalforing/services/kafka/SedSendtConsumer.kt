@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.kafka
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
@@ -18,7 +17,6 @@ class SedSendtConsumer(val pdfService: PdfService,
                   val aktoerregisterService: AktoerregisterService) {
 
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
-    private val mapper = jacksonObjectMapper()
     private val latch = CountDownLatch(4)
 
     fun getLatch(): CountDownLatch {
@@ -28,7 +26,7 @@ class SedSendtConsumer(val pdfService: PdfService,
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
         logger.info("Innkommet hendelse")
-        val sedHendelse = mapper.readValue(hendelse, SedHendelse::class.java)
+        val sedHendelse = sedMapper.readValue(hendelse, SedHendelse::class.java)
 
         if(sedHendelse.sektorKode.equals("P")){
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")

@@ -80,6 +80,8 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
         //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
         oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
+        oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
+        oppgave.beskrivelse = sedHendelse.sedType.toString()
 
         return oppgave
     }
