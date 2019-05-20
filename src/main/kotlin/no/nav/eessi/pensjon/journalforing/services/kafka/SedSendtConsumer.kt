@@ -19,7 +19,7 @@ class SedSendtConsumer(val pdfService: PdfService,
 
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val mapper = jacksonObjectMapper()
-    private val latch = CountDownLatch(3)
+    private val latch = CountDownLatch(4)
 
     fun getLatch(): CountDownLatch {
         return latch
