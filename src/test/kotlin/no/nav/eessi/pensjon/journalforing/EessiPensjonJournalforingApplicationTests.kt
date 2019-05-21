@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedSendtConsumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,7 +188,7 @@ class EessiPensjonJournalforingApplicationTests {
                     )
         }
 
-        fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
+        private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
             val random = Random()
             return random.nextInt(to - from) + from
         }
@@ -197,40 +196,28 @@ class EessiPensjonJournalforingApplicationTests {
 
     @Test
     @Throws(Exception::class)
-    fun `Send en melding pa topic`() {
+    fun `Når en SEDSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         val consumerProperties = KafkaTestUtils.consumerProps("eessi-pensjon-group2",
                 "false",
                 embeddedKafka.embeddedKafka)
-        // set up the Kafka consumer properties
 
-
-        // create a Kafka consumer factory
-        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(
-                consumerProperties)
-
-        // set the topic that needs to be consumed
+        val consumerFactory = DefaultKafkaConsumerFactory<String, String>(consumerProperties)
         val containerProperties = ContainerProperties(SED_SENDT_TOPIC)
-
-        var container = KafkaMessageListenerContainer<String, String>(consumerFactory, containerProperties)
-
-        // setup a Kafka message listener
-        val messageListener = object : MessageListener<String, String> {
-            override fun onMessage(record : ConsumerRecord<String, String>) {
-                System.out.println("test-listener received message:  $record")
-            }
-        }
+        val container = KafkaMessageListenerContainer<String, String>(consumerFactory, containerProperties)
+        val messageListener = MessageListener<String, String> { record -> System.out.println("Konsumerer melding:  $record") }
 
         container.setupMessageListener(messageListener)
-
-        // start the container and underlying message listener
         container.start()
-        // wait until the container has the required number of assigned partitions
+
+        // Vent til kafka er klar
         ContainerTestUtils.waitForAssignment(container, embeddedKafka.embeddedKafka.partitionsPerTopic)
-        // Set up kafka
+
+        // Sett opp produser
         val senderProps = KafkaTestUtils.senderProps(embeddedKafka.embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
         template.defaultTopic = SED_SENDT_TOPIC
+
         // Sender 1 Foreldre SED til Kafka
         System.out.println("Produserer FB_BUC_01 melding")
         template.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/FB_BUC_01.json"))))
