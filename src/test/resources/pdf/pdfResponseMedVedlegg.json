@@ -1,0 +1,19 @@
+{
+  "sed": {
+    "filnavn": "Sak_163373_dok_3f7bd9d1dfa04af6ac553a734ddc332e.pdf",
+    "mimeType": "application/pdf",
+    "innhold": "JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G"
+  },
+  "vedlegg": [
+    {
+      "filnavn": "fintbilde.jpg",
+      "mimeType": "image/jpg",
+      "innhold": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0"
+    },
+    {
+      "filnavn": "fintbilde2.jpg",
+      "mimeType": "image/jpg",
+      "innhold": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0"
+    }
+  ]
+}

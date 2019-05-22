@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.Logger
@@ -28,7 +29,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
     private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
     private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
 
-    fun byggJournalPostRequest(sedHendelse: SedHendelse, pdfBody: String): JournalpostRequest{
+    fun byggJournalPostRequest(sedHendelse: SedHendelse, sedDokumenter: SedDokumenterResponse): JournalpostRequest{
 
         try {
             val avsenderMottaker = when {
@@ -46,16 +47,11 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 else -> null
             }
 
-            val dokumenter = when {
-                pdfBody == null -> throw RuntimeException("pdf er null")
-                pdfBody == "" -> throw RuntimeException("pdf er tom")
-                else -> listOf(Dokument(
+            val dokumenter = listOf(Dokument(
                         brevkode = sedHendelse.sedId,
-                        dokumentvarianter = listOf(Dokumentvarianter(
-                                fysiskDokument = pdfBody))))
-            }
+                        dokumentvarianter = populerDokumentVarianter(sedDokumenter)))
 
-            val tema = BUCTYPE.valueOf(sedHendelse.bucType!!).TEMA
+            val tema = BUCTYPE.valueOf(sedHendelse.bucType).TEMA
 
             val tittel = when {
                 sedHendelse.sedType != null -> "Utgående ${sedHendelse.sedType}"
@@ -77,14 +73,26 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         }
     }
 
-    fun opprettJournalpost(sedHendelse: SedHendelse, pdfBody: String, forsokFerdigstill: Boolean):JournalPostResponse {
+    fun populerDokumentVarianter(sedDokumenter: SedDokumenterResponse) : List<Dokumentvarianter> {
+        val dokumenter = mutableListOf<Dokumentvarianter>()
+        dokumenter.add(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold, filtype = sedDokumenter.sed.mimeType.decode()))
+        sedDokumenter.vedlegg?.forEach{ vedlegg ->
+            dokumenter.add(Dokumentvarianter(fysiskDokument = vedlegg.innhold, filtype = vedlegg.mimeType.decode()))
+        }
+        return dokumenter
+    }
+
+    fun opprettJournalpost(sedHendelse: SedHendelse,
+                           sedDokumenter: SedDokumenterResponse,
+                           forsokFerdigstill: Boolean) :JournalPostResponse {
+
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         try {
             logger.info("Kaller Journalpost for å generere en journalpost")
 
-            val requestBody = byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = pdfBody).toString()
+            val requestBody = byggJournalPostRequest(sedHendelse = sedHendelse, sedDokumenter = sedDokumenter).toString()
             genererJournalpostModelVellykkede.increment()
 
 
