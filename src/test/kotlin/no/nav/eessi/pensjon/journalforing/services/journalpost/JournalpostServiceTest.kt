@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
-import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,14 +38,15 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt gyldig SedHendelse så bygg Gyldig JournalpostModel`() {
-        val objectToTest = journalpostService.byggJournalPostRequest(sedHendelse= sedHendelse, pdfBody = "MockPdfBody")
+        val objectToTest = journalpostService.byggJournalPostRequest(sedHendelse= sedHendelse,
+                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java))
 
         assertEquals(objectToTest.avsenderMottaker?.id, sedHendelse.mottakerId, "Ugyldig mottagerid")
         assertEquals(objectToTest.avsenderMottaker?.navn, sedHendelse.mottakerNavn, "Ugyldig mottagernavn")
         assertEquals(objectToTest.behandlingstema, BUCTYPE.valueOf(sedHendelse.bucType!!).BEHANDLINGSTEMA, "Ugyldig behandlingstema")
         assertEquals(objectToTest.bruker?.id, sedHendelse.navBruker, "Ugyldig bruker id")
         assertEquals(objectToTest.dokumenter.first().brevkode, sedHendelse.sedId, "Ugyldig brevkode")
-        assertEquals(objectToTest.dokumenter.first().dokumentvarianter.first().fysiskDokument, "MockPdfBody", "Ugyldig fysisk dokument")
+        assertEquals(objectToTest.dokumenter.first().dokumentvarianter.first().fysiskDokument, "JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", "Ugyldig fysisk dokument")
         assertEquals(objectToTest.tema, BUCTYPE.valueOf(sedHendelse.bucType!!).TEMA, "Ugyldig tema")
         assertEquals(objectToTest.tittel,"Utgående ${sedHendelse.sedType}", "Ugyldig tittel")
     }
@@ -60,22 +61,25 @@ class JournalpostServiceTest {
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         eq(HttpMethod.POST),
-                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse, pdfBody = "MockPdfBody").toString(), headers)),
+                        eq(HttpEntity(journalpostService.byggJournalPostRequest(sedHendelse = sedHendelse,
+                                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java)).toString(), headers)),
                         eq(String::class.java))
 
-        journalpostService.opprettJournalpost(sedHendelse = sedHendelse, pdfBody = "MockPdfBody", forsokFerdigstill = false)
+        journalpostService.opprettJournalpost(sedHendelse = sedHendelse,
+                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java), forsokFerdigstill = false)
     }
 
     @Test( expected = RuntimeException::class)
     fun `Gitt ugyldig request når forsøker oprette journalpost så kast exception`() {
         doReturn(
-                ResponseEntity("", HttpStatus.INTERNAL_SERVER_ERROR))
+                ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))), HttpStatus.INTERNAL_SERVER_ERROR))
                 .`when`(mockrestTemplate).exchange(
                         eq("/journalpost?forsoekFerdigstill=false"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-        journalpostService.opprettJournalpost(sedHendelse= sedHendelse, pdfBody = "String", forsokFerdigstill = false)
+        journalpostService.opprettJournalpost(sedHendelse= sedHendelse,
+                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java), forsokFerdigstill = false)
     }
 }

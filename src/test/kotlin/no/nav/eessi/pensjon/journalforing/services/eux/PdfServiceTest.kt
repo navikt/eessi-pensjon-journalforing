@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.test.assertEquals
 
 @RunWith(MockitoJUnitRunner::class)
@@ -33,16 +35,16 @@ class PdfServiceTest {
         val rinaNr = "123"
         val dokumentId = "456"
         doReturn(
-                ResponseEntity("en fake pdf", HttpStatus.OK))
+                ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), HttpStatus.OK))
                 .`when`(mockrestTemplate).exchange(
-                    eq("/buc/$rinaNr/sed/$dokumentId/pdf"),
+                    eq("/buc/$rinaNr/sed/$dokumentId/filer"),
                     any(HttpMethod::class.java),
                     any(HttpEntity::class.java),
                     eq(String::class.java))
 
 
-        val pdf = pdfService.hentPdf(rinaNr, dokumentId)
-        assertEquals("ZW4gZmFrZSBwZGY=", pdf)
+        val resp = pdfService.hentSedDokumenter(rinaNr, dokumentId)
+        assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", resp.sed.innhold)
     }
 
     @Test( expected = RuntimeException::class)
@@ -52,11 +54,11 @@ class PdfServiceTest {
         doReturn(
                 ResponseEntity("", HttpStatus.INTERNAL_SERVER_ERROR))
                 .`when`(mockrestTemplate).exchange(
-                        eq("/buc/$rinaNr/sed/$dokumentId/pdf"),
+                        eq("/buc/$rinaNr/sed/$dokumentId/filer"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-            pdfService.hentPdf(rinaNr, dokumentId)
+            pdfService.hentSedDokumenter(rinaNr, dokumentId)
     }
 }

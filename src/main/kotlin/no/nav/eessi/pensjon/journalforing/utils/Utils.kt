@@ -91,8 +91,8 @@ inline fun <T : Any, R> whenNotNull(input: T?, callback: (T) -> R): R? {
 }
 
 
-fun binaryToBase64(binaryString: String): String {
-    val encoded = Base64.encodeBase64(binaryString.toByteArray())
+fun stringToBase64(string: String): String {
+    val encoded = Base64.encodeBase64(string.toByteArray())
     return String(encoded)
 }
 

@@ -10,7 +10,6 @@ import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.HttpStatusCode
 import org.mockserver.model.Parameter
-import org.mockserver.model.StringBody.exact
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -77,29 +76,29 @@ class EessiPensjonJournalforingApplicationTests {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf"))
+                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody("pdf for P_BUC_01")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/pdf"))
+                            .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody("pdf for P_BUC_03")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/pdf"))
+                            .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"))
                     .respond(response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody("pdf for P_BUC_05")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
 
             // Mocker journalføringstjeneste
@@ -237,24 +236,24 @@ class EessiPensjonJournalforingApplicationTests {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/pdf")
-                        .withBody(exact("pdf for P_BUC_01")),
+                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 VerificationTimes.exactly(1)
         )
 
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/pdf")
-                        .withBody(exact("pdf for P_BUC_03")),
+                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 VerificationTimes.exactly(1)
         )
 
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/pdf")
-                        .withBody(exact("pdf for P_BUC_05")),
+                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer")
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 VerificationTimes.exactly(1)
         )
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
