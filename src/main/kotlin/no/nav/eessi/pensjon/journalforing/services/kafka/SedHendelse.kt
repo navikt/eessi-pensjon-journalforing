@@ -31,9 +31,133 @@ data class SedHendelse (
             override fun decode() = "P2200"
             override fun toString() = "P2200 - Krav om uførepensjon"
         },
-        P3000  {
-            override fun decode() = "P3000"
-            override fun toString() = "P3000 - Landspesifik info"
+        P3000_AT  {
+            override fun decode() = "P3000_AT"
+            override fun toString() = "P3000_AT - Landsspesifikk informasjon - Østerrike"
+        },
+        P3000_BE  {
+            override fun decode() = "P3000_BE"
+            override fun toString() = "P3000_BE - Landsspesifikk informasjon - Belgia"
+        },
+        P3000_BG  {
+            override fun decode() = "P3000_BG"
+            override fun toString() = "P3000_BG - Landsspesifikk informasjon - Bulgaria"
+        },
+        P3000_CH  {
+            override fun decode() = "P3000_CH"
+            override fun toString() = "P3000_CH - Landsspesifikk informasjon - Sveits"
+        },
+        P3000_CY  {
+            override fun decode() = "P3000_CY"
+            override fun toString() = "P3000_CY - Landsspesifikk informasjon - Kypros"
+        },
+        P3000_CZ  {
+            override fun decode() = "P3000_CZ"
+            override fun toString() = "P3000_CZ - Landsspesifikk informasjon - Republikken Tsjekkia"
+        },
+        P3000_DE  {
+            override fun decode() = "P3000_DE"
+            override fun toString() = "P3000_DE - Landsspesifikk informasjon - Tyskland"
+        },
+        P3000_DK  {
+            override fun decode() = "P3000_DK"
+            override fun toString() = "P3000_DK - Landsspesifikk informasjon - Danmark"
+        },
+        P3000_EE  {
+            override fun decode() = "P3000_EE"
+            override fun toString() = "P3000_EE - Landsspesifikk informasjon - Estland"
+        },
+        P3000_EL  {
+            override fun decode() = "P3000_EL"
+            override fun toString() = "P3000_EL - Landsspesifikk informasjon - Hellas"
+        },
+        P3000_ES  {
+            override fun decode() = "P3000_ES"
+            override fun toString() = "P3000_ES - Landsspesifikk informasjon - Spania"
+        },
+        P3000_FI  {
+            override fun decode() = "P3000_FI"
+            override fun toString() = "P3000_FI - Landsspesifikk informasjon - Finland"
+        },
+        P3000_FR  {
+            override fun decode() = "P3000_FR"
+            override fun toString() = "P3000_FR - Landsspesifikk informasjon - Frankrike"
+        },
+        P3000_HR  {
+            override fun decode() = "P3000_HR"
+            override fun toString() = "P3000_HR - Landsspesifikk informasjon - Kroatia"
+        },
+        P3000_HU  {
+            override fun decode() = "P3000_HU"
+            override fun toString() = "P3000_HU - Landsspesifikk informasjon - Ungarn"
+        },
+        P3000_IE  {
+            override fun decode() = "P3000_IE"
+            override fun toString() = "P3000_IE - Landsspesifikk informasjon - Irland"
+        },
+        P3000_IS  {
+            override fun decode() = "P3000_IS"
+            override fun toString() = "P3000_IS - Landsspesifikk informasjon - Island "
+        },
+        P3000_IT  {
+            override fun decode() = "P3000_IT"
+            override fun toString() = "P3000_IT - Landsspesifikk informasjon - Italia"
+        },
+        P3000_LI  {
+            override fun decode() = "P3000_LI"
+            override fun toString() = "P3000_LI - Landsspesifikk informasjon - Liechtenstein"
+        },
+        P3000_LT  {
+            override fun decode() = "P3000_LT"
+            override fun toString() = "P3000_LT - Landsspesifikk informasjon - Litauen"
+        },
+        P3000_LU  {
+            override fun decode() = "P3000_LU"
+            override fun toString() = "P3000_LU - Landsspesifikk informasjon - Luxembourg"
+        },
+        P3000_LV  {
+            override fun decode() = "P3000_LV"
+            override fun toString() = "P3000_LV - Landsspesifikk informasjon - Latvia"
+        },
+        P3000_MT  {
+            override fun decode() = "P3000_MT"
+            override fun toString() = "P3000_MT - Landsspesifikk informasjon - Malta"
+        },
+        P3000_NL  {
+            override fun decode() = "P3000_NL"
+            override fun toString() = "P3000_NL - Landsspesifikk informasjon - Nederland"
+        },
+        P3000_NO  {
+            override fun decode() = "P3000_NO"
+            override fun toString() = "P3000_NO - Landsspesifikk informasjon - Norge"
+        },
+        P3000_PL  {
+            override fun decode() = "P3000_PL"
+            override fun toString() = "P3000_PL - Landsspesifikk informasjon - Polen"
+        },
+        P3000_PT  {
+            override fun decode() = "P3000_PT"
+            override fun toString() = "P3000_PT - Landsspesifikk informasjon - Portugal"
+        },
+        P3000_RO  {
+            override fun decode() = "P3000_RO"
+            override fun toString() = "P3000_RO - Landsspesifikk informasjon - Romania"
+        },
+        P3000_SE  {
+            override fun decode() = "P3000_SE"
+            override fun toString() = "P3000_SE - Landsspesifikk informasjon - Sverige"
+        },
+        P3000_SI  {
+            override fun decode() = "P3000_SI"
+            override fun toString() = "P3000_SI - Landsspesifikk informasjon - Slovenia"
+        },
+        P3000_SK  {
+            override fun decode() = "P3000_SK"
+            override fun toString() = "P3000_SK - Landsspesifikk informasjon - Slovakia"
+        },
+        P3000_UK  {
+            override fun decode() = "P3000_UK"
+            override fun toString() = "P3000_UK - Landsspesifikk informasjon - Storbritannia"
         },
         P4000 {
             override fun decode() = "P4000"
