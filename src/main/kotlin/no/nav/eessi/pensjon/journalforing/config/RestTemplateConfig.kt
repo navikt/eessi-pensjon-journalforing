@@ -26,6 +26,9 @@ class RestTemplateConfig(val securityTokenExchangeService: STSService) {
     @Value("\${JOURNALPOST_V1_URL}")
     lateinit var joarkUrl: String
 
+    @Value("\${EUX_RINA_API_V1_URL}")
+    lateinit var euxUrl: String
+
     @Value("\${srvusername}")
     lateinit var username: String
 
@@ -72,6 +75,18 @@ class RestTemplateConfig(val securityTokenExchangeService: STSService) {
                 }
     }
 
+    @Bean
+    fun euxOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+        return templateBuilder
+                .rootUri(euxUrl)
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                }
+    }
+
     class RequestInterceptor : ClientHttpRequestInterceptor {
         override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
             request.headers["X-Correlation-ID"] = UUID.randomUUID().toString()
@@ -79,5 +94,4 @@ class RestTemplateConfig(val securityTokenExchangeService: STSService) {
             return execution.execute(request, body)
         }
     }
-
 }
