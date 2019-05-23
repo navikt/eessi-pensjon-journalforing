@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.personv3
 
-import no.nav.cxf.metrics.MetricFeature
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.slf4j.Logger
@@ -25,7 +24,6 @@ class PersonV3Config {
         val factory = JaxWsProxyFactoryBean()
         factory.serviceClass = PersonV3::class.java
         factory.address = endpointUrl
-        factory.features.add(MetricFeature())
         // Debug/logging av meldinger som sendes mellom app og tilbyder
         //factory.features.add(LoggingFeature()) // TODO: Add denne featureren bare dersom DEBUG er enabled
         return factory.create() as PersonV3

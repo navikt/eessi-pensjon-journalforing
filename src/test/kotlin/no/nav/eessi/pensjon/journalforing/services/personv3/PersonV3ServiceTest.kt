@@ -1,28 +1,15 @@
 package no.nav.eessi.pensjon.journalforing.services.personv3
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
-import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMother
+import com.nhaarman.mockito_kotlin.whenever
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers
 import kotlin.test.assertEquals
-
-
-import org.junit.runner.RunWith
-//import org.junit.jupiter.api.Assertions.assertEquals
-//import org.junit.jupiter.api.BeforeEach
-//import org.junit.jupiter.api.Test
-import org.springframework.core.io.DefaultResourceLoader
+import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
 
 class PersonV3ServiceTest {
 
@@ -34,15 +21,20 @@ class PersonV3ServiceTest {
 
     @Before
     fun setup() {
-        personV3 = mockk()
-        personV3Service = PersonV3Service(personV3)
+        val factory = JaxWsProxyFactoryBean()
+        factory.serviceClass = PersonV3::class.java
+        factory.address = "someurl"
+        personV3 = factory.create() as PersonV3
 
-        every {
-            personV3.hentPerson(HentPersonRequest().apply {
-                withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(subject)))
-                withInformasjonsbehov(listOf(Informasjonsbehov.ADRESSE))
-            })
-        } returns HentPersonResponse().withPerson(PersonMother.createWith(subject))
+        personV3Service = Mockito.spy(PersonV3Service(personV3))
+        doReturn(HentPersonResponse()).whenever(personV3Service).kallPersonV3(ArgumentMatchers.any())
+
+//        every {
+//            personV3.hentPerson(HentPersonRequest().apply {
+//                withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(subject)))
+//                withInformasjonsbehov(listOf(Informasjonsbehov.ADRESSE))
+//            })
+//        } returns HentPersonResponse().withPerson(PersonMother.createWith(subject))
 
         //submissionSampleJson = DefaultResourceLoader().getResource("classpath:json/submission/PinfoSubmission.json").file.readText()
         //imgAttachmentJson = DefaultResourceLoader().getResource("classpath:json/submission/imgAttachment.json").file.readText()

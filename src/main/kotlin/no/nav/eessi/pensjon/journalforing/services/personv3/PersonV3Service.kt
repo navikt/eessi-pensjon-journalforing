@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.journalforing.services.personv3
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.eessi.pensjon.journalforing.config.TimingService
 import no.nav.eessi.pensjon.journalforing.models.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.journalforing.models.PersonV3SikkerhetsbegrensningException
 import no.nav.eessi.pensjon.journalforing.services.sts.configureRequestSamlToken
@@ -11,13 +10,13 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensn
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class PersonV3Service(val service: PersonV3,
-                      val timingService: TimingService) {
+class PersonV3Service(val service: PersonV3) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
@@ -29,9 +28,27 @@ class PersonV3Service(val service: PersonV3,
         return Metrics.counter(name, "type", type)
     }
 
-    fun hentPerson(fnr: String): no.nav.tjeneste.virksomhet.person.v3.informasjon.Person {
+    fun hentPerson(fnr: String): Person {
         logger.info("Henter person fra PersonV3Service")
-        configureRequestSamlToken(service)
+
+        try {
+            logger.info("Kaller PersonV3.hentPerson service")
+
+            val resp = kallPersonV3(fnr)
+            hentperson_teller_type_vellykkede.increment()
+            return resp.person as Person
+        } catch (personIkkefunnet : HentPersonPersonIkkeFunnet) {
+            logger.error("Kaller PersonV3.hentPerson service Feilet")
+            hentperson_teller_type_feilede.increment()
+            throw PersonV3IkkeFunnetException(personIkkefunnet.message)
+        } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
+            logger.error("Kaller PersonV3.hentPerson service Feilet")
+            hentperson_teller_type_feilede.increment()
+            throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
+        }
+    }
+
+    fun kallPersonV3(fnr: String?) : HentPersonResponse{
 
         val request = HentPersonRequest().apply {
             withAktoer(PersonIdent().withIdent(
@@ -40,28 +57,12 @@ class PersonV3Service(val service: PersonV3,
             withInformasjonsbehov(listOf(
                     Informasjonsbehov.ADRESSE))
         }
-        val persontimed = timingService.timedStart("personV3")
-        try {
-            logger.info("Kaller PersonV3.hentPerson service")
-            val resp = service.hentPerson(request)
-            hentperson_teller_type_vellykkede.increment()
-            timingService.timesStop(persontimed)
-            return resp.person as no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
-        } catch (personIkkefunnet : HentPersonPersonIkkeFunnet) {
-            logger.error("Kaller PersonV3.hentPerson service Feilet")
-            timingService.timesStop(persontimed)
-            hentperson_teller_type_feilede.increment()
-            throw PersonV3IkkeFunnetException(personIkkefunnet.message)
-        } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
-            logger.error("Kaller PersonV3.hentPerson service Feilet")
-            timingService.timesStop(persontimed)
-            hentperson_teller_type_feilede.increment()
-            throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
-        }
+        configureRequestSamlToken(service)
+        return  service.hentPerson(request)
     }
 
 
-    fun hentLandKode(person: no.nav.tjeneste.virksomhet.person.v3.informasjon.Person): String? {
+    fun hentLandKode(person: Person): String? {
 
         //ikke adresse for død
         if (person.personstatus.equals("DØD")) {
