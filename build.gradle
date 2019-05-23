@@ -79,6 +79,7 @@ dependencies {
 	testImplementation("com.nhaarman:mockito-kotlin-kt1.1:1.5.0")
 	testImplementation("org.mock-server:mockserver-netty:5.4.1")
 	testImplementation("org.mock-server:mockserver-client-java:5.4.1")
+	testImplementation "io.mockk:mockk:1.9.2"
 
 	// Micrometer
 	compile("io.micrometer:micrometer-registry-prometheus")
