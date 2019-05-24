@@ -47,9 +47,19 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 else -> null
             }
 
-            val dokumenter = listOf(Dokument(
-                        brevkode = sedHendelse.sedId,
-                        dokumentvarianter = populerDokumentVarianter(sedDokumenter)))
+            val dokumenter =  mutableListOf<Dokument>()
+
+            dokumenter.add(Dokument(sedHendelse.sedId,
+                    "SED",
+                    listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
+                            filtype = sedDokumenter.sed.mimeType.decode())), sedDokumenter.sed.filnavn))
+
+            sedDokumenter.vedlegg?.forEach{ vedlegg ->
+                dokumenter.add(Dokument(sedHendelse.sedId,
+                        "SED",
+                        listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
+                                filtype = vedlegg.mimeType.decode())), vedlegg.filnavn))
+            }
 
             val tema = BUCTYPE.valueOf(sedHendelse.bucType).TEMA
 
@@ -71,15 +81,6 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
             logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
             throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
         }
-    }
-
-    fun populerDokumentVarianter(sedDokumenter: SedDokumenterResponse) : List<Dokumentvarianter> {
-        val dokumenter = mutableListOf<Dokumentvarianter>()
-        dokumenter.add(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold, filtype = sedDokumenter.sed.mimeType.decode()))
-        sedDokumenter.vedlegg?.forEach{ vedlegg ->
-            dokumenter.add(Dokumentvarianter(fysiskDokument = vedlegg.innhold, filtype = vedlegg.mimeType.decode()))
-        }
-        return dokumenter
     }
 
     fun opprettJournalpost(sedHendelse: SedHendelse,
