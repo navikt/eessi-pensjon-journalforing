@@ -14,8 +14,9 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
-@Component
+@Service
 class PersonV3Service(val service: PersonV3) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
@@ -33,7 +34,6 @@ class PersonV3Service(val service: PersonV3) {
 
         try {
             logger.info("Kaller PersonV3.hentPerson service")
-
             val resp = kallPersonV3(fnr)
             hentperson_teller_type_vellykkede.increment()
             return resp.person as Person
@@ -48,7 +48,7 @@ class PersonV3Service(val service: PersonV3) {
         }
     }
 
-    fun kallPersonV3(fnr: String?) : HentPersonResponse{
+    private fun kallPersonV3(fnr: String?) : HentPersonResponse{
 
         val request = HentPersonRequest().apply {
             withAktoer(PersonIdent().withIdent(
@@ -57,21 +57,17 @@ class PersonV3Service(val service: PersonV3) {
             withInformasjonsbehov(listOf(
                     Informasjonsbehov.ADRESSE))
         }
-        configureRequestSamlToken(service)
+        konfigurerSamlToken()
         return  service.hentPerson(request)
+    }
+    
+    fun konfigurerSamlToken(){
+        configureRequestSamlToken(service)
     }
 
 
     fun hentLandKode(person: Person): String? {
-
-        //ikke adresse for død
-        if (person.personstatus.equals("DØD")) {
-            logger.debug("           Person er avdod (ingen adresse å hente).")
-            return null
-        }
-
-        val bostedsadresse: Bostedsadresse = person.bostedsadresse ?: return null
-
-        return bostedsadresse.strukturertAdresse.landkode.value
+        if( person.bostedsadresse?.strukturertAdresse?.landkode == null){return null}
+        return person.bostedsadresse.strukturertAdresse.landkode.value
     }
 }

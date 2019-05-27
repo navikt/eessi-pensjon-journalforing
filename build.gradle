@@ -87,6 +87,7 @@ dependencies {
 	testImplementation("com.fasterxml.jackson.core:jackson-databind:2.9.3")
 
 	// Tjenestespesifikasjoner
+	implementation('no.nav.helse:cxf-prometheus-metrics:dd7d125')
 	implementation("no.nav.tjenester:nav-person-v3-tjenestespesifikasjon:${personV3Version}")
 	xsd("no.nav.pensjon:pensjonsinformasjon-xsd:${pensjonInformasjonVersion}")
 }

@@ -23,3 +23,5 @@ srvpassword: somepass
 oppgave.oppgaver.url: http://localhost:${mockServerport}
 JOURNALPOST_V1_URL: http://localhost:${mockServerport}
 aktoerregister.api.v1.url: http://localhost:${mockServerport}
+virksomhet.person.v3:
+  endpointurl: http://localhost:${mockServerport}
