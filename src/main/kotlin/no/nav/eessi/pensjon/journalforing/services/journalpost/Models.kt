@@ -21,7 +21,7 @@ data class JournalpostRequest(
     val dokumenter: List<Dokument>, //REQUIRED
     val eksternReferanseId: String? = null,
     val journalfoerendeEnhet: String? = null,
-    val journalpostType: String = "INNGAAENDE", //REQUIRED
+    val journalpostType: String = "UTGAAENDE", //REQUIRED
     val kanal: String? = null,
     val sak: Sak? = null,
     val tema: String = "PEN", //REQUIRED
