@@ -43,6 +43,9 @@ fasitResources:
       resourceType: RestService
     - alias: Journalpost_v1
       resourceType: RestService
+    #TPS
+    - alias: virksomhet:Person_v3
+      resourceType: WebserviceEndpoint
     #Brukes av nye rest tjenester
     - alias: security-token-service-token
       resourceType: RestService
