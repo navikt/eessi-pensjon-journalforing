@@ -4,6 +4,8 @@ import no.nav.eessi.pensjon.journalforing.services.aktoerregister.Aktoerregister
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
+import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -14,7 +16,8 @@ import java.util.concurrent.CountDownLatch
 class SedSendtConsumer(val pdfService: PdfService,
                   val journalpostService: JournalpostService,
                   val oppgaveService: OppgaveService,
-                  val aktoerregisterService: AktoerregisterService) {
+                  val aktoerregisterService: AktoerregisterService,
+                  val personV3Service: PersonV3Service) {
 
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val latch = CountDownLatch(4)
@@ -37,8 +40,13 @@ class SedSendtConsumer(val pdfService: PdfService,
                     forsokFerdigstill = false)
 
             var aktoerId: String? = null
+            var person: Person?
+            var landkode: String? = null
+
             if(sedHendelse.navBruker != null) {
                 aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
+                person = personV3Service.hentPerson(sedHendelse.navBruker)
+                landkode = personV3Service.hentLandKode(person)
             }
             oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId)
 

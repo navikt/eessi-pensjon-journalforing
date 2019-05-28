@@ -12,6 +12,8 @@ spring:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
+  main:
+    allow-bean-definition-overriding: true
 
 app.name: eessi-pensjon-journalforing
 

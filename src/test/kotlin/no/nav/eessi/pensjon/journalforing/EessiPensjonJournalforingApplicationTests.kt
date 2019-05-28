@@ -1,6 +1,13 @@
 package no.nav.eessi.pensjon.journalforing
 
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.spyk
+import io.mockk.*
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedSendtConsumer
+import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMock
+import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
+import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -13,6 +20,9 @@ import org.mockserver.model.Parameter
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -36,14 +46,30 @@ lateinit var mockServer : ClientAndServer
 
 
 @RunWith(SpringRunner::class)
-@SpringBootTest
+@SpringBootTest(classes = [ EessiPensjonJournalforingApplicationTests.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 class EessiPensjonJournalforingApplicationTests {
 
     @Autowired
+    lateinit var  personV3Service: PersonV3Service
+
+    @Autowired
     lateinit var sedSendtConsumer: SedSendtConsumer
 
+
+    // Mocks the PersonV3 Service so we don't have to deal with SOAP
+    @TestConfiguration
+    class TestConfig{
+        @Bean
+        @Primary
+        fun personV3(): PersonV3 = mockk()
+
+        @Bean
+        fun personV3Service(personV3: PersonV3): PersonV3Service {
+            return spyk(PersonV3Service(personV3))
+        }
+    }
 
     companion object {
         const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
@@ -55,7 +81,6 @@ class EessiPensjonJournalforingApplicationTests {
 
 
         init {
-
             // Start Mockserver in memory
             val port = randomFrom()
             mockServer = ClientAndServer.startClientAndServer(port)
@@ -196,6 +221,10 @@ class EessiPensjonJournalforingApplicationTests {
     @Test
     @Throws(Exception::class)
     fun `Når en SEDSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
+
+        val slot = slot<String>()
+        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { PersonMock.createWith(slot.captured)!! }
+
         val consumerProperties = KafkaTestUtils.consumerProps("eessi-pensjon-group2",
                 "false",
                 embeddedKafka.embeddedKafka)
@@ -330,6 +359,11 @@ class EessiPensjonJournalforingApplicationTests {
                                 Parameter("gjeldende", "true"))),
                 VerificationTimes.exactly(1)
         )
+
+        // Verifiser at det har blitt forsøkt å hente person fra tps
+        verify(exactly = 1) { personV3Service.hentPerson(any()) }
+
+
         container.stop()
     }
 }
