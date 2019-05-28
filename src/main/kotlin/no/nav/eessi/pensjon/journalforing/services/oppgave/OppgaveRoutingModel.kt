@@ -7,7 +7,7 @@ data class OppgaveRoutingModel(
         var fnr: String?,
         var bosatt: Bosatt
 ) {
-    enum class BucType(val bosattNorgeEnhet: Enhet, val enhetManglerFnr: Enhet, val bosattUtlandEnhet: Enhet) {
+    enum class BucType(val bosattNorgeEnhet: Enhet, val manglerFnrEnhet: Enhet, val bosattUtlandEnhet: Enhet) {
         P_BUC_01(NFP_UTLAND_AALESUND, NFP_UTLAND_AALESUND, PENSJON_UTLAND),
         P_BUC_02(NFP_UTLAND_AALESUND, NFP_UTLAND_AALESUND, PENSJON_UTLAND),
         P_BUC_03(UFORE_UTLANDSTILSNITT, UFORE_UTLANDSTILSNITT, UFORE_UTLAND),

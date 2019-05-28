@@ -11,8 +11,8 @@ class OppgaveRoutingService {
 
     fun route(oppgaverouting: OppgaveRoutingModel): OppgaveRoutingModel.Enhet {
         return if (oppgaverouting.fnr == null) {
-            logger.info("Fnr mangler, oppgave routes til: ${oppgaverouting.bucType.enhetManglerFnr}")
-            oppgaverouting.bucType.enhetManglerFnr
+            logger.info("Fnr mangler, oppgave routes til: ${oppgaverouting.bucType.manglerFnrEnhet}")
+            oppgaverouting.bucType.manglerFnrEnhet
         } else {
             if (hentBosatt(oppgaverouting.fnr) == Bosatt.NORGE) {
                 logger.info("Person bosatt i Norge, oppgave routes til: ${oppgaverouting.bucType.bosattNorgeEnhet}")
