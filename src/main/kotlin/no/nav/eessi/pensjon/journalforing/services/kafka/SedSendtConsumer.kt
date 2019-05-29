@@ -35,21 +35,24 @@ class SedSendtConsumer(val pdfService: PdfService,
             logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId}")
             logger.info("rinasakID: ${sedHendelse.rinaSakId}")
-            val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-
-            val journalPostResponse = journalpostService.opprettJournalpost(sedHendelse = sedHendelse,
-                    sedDokumenter = sedDokumenter,
-                    forsokFerdigstill = false)
-
             var aktoerId: String? = null
             var person: Person?
             var landkode: String? = null
 
             if(sedHendelse.navBruker != null) {
                 aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
+                logger.info("Aktørid: $aktoerId")
                 person = personV3Service.hentPerson(sedHendelse.navBruker)
                 landkode = personV3Service.hentLandKode(person)
             }
+
+            val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
+            val journalPostResponse = journalpostService.opprettJournalpost(sedHendelse = sedHendelse,
+                    sedDokumenter = sedDokumenter,
+                    forsokFerdigstill = false)
+
+
             oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId)
 
             // acknowledgment.acknowledge()
