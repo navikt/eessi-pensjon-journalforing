@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.journalforing.services.personv3
 
-import com.nhaarman.mockito_kotlin.doNothing
-import com.nhaarman.mockito_kotlin.whenever
-import com.nhaarman.mockito_kotlin.mock
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.spyk
 import no.nav.eessi.pensjon.journalforing.models.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.journalforing.models.PersonV3SikkerhetsbegrensningException
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
@@ -17,12 +18,11 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import kotlin.test.assertEquals
 
 class PersonV3ServiceTest {
 
-    lateinit var personV3 : PersonV3
+    private lateinit var personV3 : PersonV3
 
     lateinit var personV3Service : PersonV3Service
 
@@ -32,31 +32,19 @@ class PersonV3ServiceTest {
 
     @Before
     fun setup() {
-        personV3 = mock()
-        personV3Service = Mockito.spy(PersonV3Service(personV3))
+        personV3 = spyk()
+        personV3Service = spyk(PersonV3Service(personV3))
 
-        doNothing().whenever(personV3Service).konfigurerSamlToken()
-        whenever(
-                personV3.hentPerson(requestBuilder(subject, listOf(Informasjonsbehov.ADRESSE)))
-        ).thenReturn(HentPersonResponse().withPerson(PersonMock.createWith(subject)))
+        every { personV3Service.konfigurerSamlToken() } just Runs
 
-        whenever(
-                personV3.hentPerson(requestBuilder(ikkeFunnetSubject, listOf(Informasjonsbehov.ADRESSE)))
-        ).thenThrow(
-                HentPersonPersonIkkeFunnet(
-                        "$ikkeFunnetSubject ikke funnet",
-                        PersonIkkeFunnet()
-                )
-        )
+        every { personV3.hentPerson(requestBuilder(subject, listOf(Informasjonsbehov.ADRESSE))) } returns
+                HentPersonResponse().withPerson(PersonMock.createWith(subject))
 
-        whenever(
-                personV3.hentPerson(requestBuilder(sikkerhetsbegrensingSubject, listOf(Informasjonsbehov.ADRESSE)))
-        ).thenThrow(
-                HentPersonSikkerhetsbegrensning(
-                        "$sikkerhetsbegrensingSubject har sikkerhetsbegrensning",
-                        Sikkerhetsbegrensning()
-                )
-        )
+        every { personV3.hentPerson(requestBuilder(ikkeFunnetSubject, listOf(Informasjonsbehov.ADRESSE))) } throws
+                HentPersonPersonIkkeFunnet("$ikkeFunnetSubject ikke funnet", PersonIkkeFunnet())
+
+        every { personV3.hentPerson(requestBuilder(sikkerhetsbegrensingSubject, listOf(Informasjonsbehov.ADRESSE))) } throws
+                HentPersonSikkerhetsbegrensning("$sikkerhetsbegrensingSubject har sikkerhetsbegrensning", Sikkerhetsbegrensning())
     }
 
     @Test
