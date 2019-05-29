@@ -20,7 +20,7 @@ class STSRestTemplate {
 
     private val logger = LoggerFactory.getLogger(STSRestTemplate::class.java)
 
-    @Value("\${eessipen-security-token-service-token.url}")
+    @Value("\${security-token-service-token.url}")
     lateinit var baseUrl: String
 
     @Value("\${srvusername}")
