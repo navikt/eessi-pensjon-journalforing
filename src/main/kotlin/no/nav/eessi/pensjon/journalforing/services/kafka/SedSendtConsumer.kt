@@ -57,7 +57,7 @@ class SedSendtConsumer(val pdfService: PdfService,
                     journalPostResponse,
                     aktoerId,
                     landkode,
-                    "fyll inn dette når fødselsdato er klar",
+                    "010184",
                     OppgaveRoutingModel.YtelseType.AP)
 
             // acknowledgment.acknowledge()

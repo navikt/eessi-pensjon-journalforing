@@ -93,7 +93,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
         //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
         oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
-        //oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
+        oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
         oppgave.beskrivelse = sedHendelse.sedType.toString()
 
