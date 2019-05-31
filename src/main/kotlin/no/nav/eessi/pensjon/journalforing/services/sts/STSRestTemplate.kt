@@ -21,7 +21,7 @@ class STSRestTemplate {
     private val logger = LoggerFactory.getLogger(STSRestTemplate::class.java)
 
   //  @Value("\${security-token-service-token.url}")
-    var baseUrl: String = "https://security-token-service-t10.nais.preprod.local/rest/v1/sts/token"
+    var baseUrl: String = "https://security-token-service.nais.preprod.local/rest/v1/sts/token"
 
     @Value("\${srvusername}")
     lateinit var username: String
