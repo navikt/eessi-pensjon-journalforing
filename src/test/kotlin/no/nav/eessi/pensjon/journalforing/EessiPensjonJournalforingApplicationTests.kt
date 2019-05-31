@@ -143,6 +143,28 @@ class EessiPensjonJournalforingApplicationTests {
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
                             .withBody("{\n" +
+                                    "  \"tildeltEnhetsnr\" : \"4862\",\n" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"aktoerId\" : \"1000101917358\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
+                                    "  \"tema\" : \"PEN\",\n" +
+                                    "  \"oppgavetype\" : \"JFR\",\n" +
+                                    "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                    "}"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody("{\n" +
+                                    "  \"tildeltEnhetsnr\" : \"4476\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"string\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
@@ -299,6 +321,7 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{\n" +
+                                "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"aktoerId\" : \"1000101917358\",\n" +
@@ -318,6 +341,7 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{\n" +
+                                "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
@@ -336,6 +360,7 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{\n" +
+                                "  \"tildeltEnhetsnr\" : \"4476\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +

@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.oppgave
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.LoggerFactory
@@ -17,16 +17,26 @@ import java.time.format.DateTimeFormatter
 private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
 
 @Service
-class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
+class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRoutingService: OppgaveRoutingService) {
 
     private final val opprettOppgaveNavn = "eessipensjon_journalforing.opprettoppgave"
     private val opprettOppgaveVellykkede = counter(opprettOppgaveNavn, "vellykkede")
     private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
-    fun opprettOppgave(sedHendelse: SedHendelse, journalPostResponse: JournalPostResponse, aktoerId: String?) {
+    fun opprettOppgave(sedHendelse: SedHendelseModel,
+                       journalPostResponse: JournalPostResponse,
+                       aktoerId: String?,
+                       landkode: String?,
+                       fodselsDato: String,
+                       ytelseType: OppgaveRoutingModel.YtelseType?) {
 
-        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse, journalPostResponse, aktoerId), true)
+        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse,
+                journalPostResponse,
+                aktoerId,
+                landkode,
+                fodselsDato,
+                ytelseType), true)
         val httpEntity = HttpEntity(requestBody)
 
         try {
@@ -54,13 +64,16 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
             throw RuntimeException("Response from Oppgave is empty")
     }
 
-    fun populerOppgaveFelter(sedHendelse: SedHendelse,
+    fun populerOppgaveFelter(sedHendelse: SedHendelseModel,
                              journalPostResponse: JournalPostResponse,
-                             aktoerId: String?) : Oppgave {
+                             aktoerId: String?,
+                             landkode: String?,
+                             fodselsDato: String,
+                             ytelseType: OppgaveRoutingModel.YtelseType?) : Oppgave {
         val oppgave = Oppgave()
         oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.toString()
 
-        if(sedHendelse.bucType.equals("P_BUC_03")) {
+        if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_03) {
             oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
           //  oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
@@ -80,6 +93,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate) {
         //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
         oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
+        //oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
         oppgave.beskrivelse = sedHendelse.sedType.toString()
 

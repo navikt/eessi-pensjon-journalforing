@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelse
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,42 +29,42 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
     private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
     private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
 
-    fun byggJournalPostRequest(sedHendelse: SedHendelse, sedDokumenter: SedDokumenterResponse): JournalpostRequest{
+    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel, sedDokumenter: SedDokumenterResponse): JournalpostRequest{
 
         try {
             val avsenderMottaker = when {
-                sedHendelse.mottakerNavn == null -> null
+                sedHendelseModel.mottakerNavn == null -> null
                 else -> AvsenderMottaker(
-                        id = sedHendelse.mottakerId,
-                        navn = sedHendelse.mottakerNavn
+                        id = sedHendelseModel.mottakerId,
+                        navn = sedHendelseModel.mottakerNavn
                 )
             }
 
-            val behandlingstema = BUCTYPE.valueOf(sedHendelse.bucType!!).BEHANDLINGSTEMA
+            val behandlingstema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).BEHANDLINGSTEMA
 
             val bruker = when {
-                sedHendelse.navBruker != null -> Bruker(id = sedHendelse.navBruker)
+                sedHendelseModel.navBruker != null -> Bruker(id = sedHendelseModel.navBruker)
                 else -> null
             }
 
             val dokumenter =  mutableListOf<Dokument>()
 
-            dokumenter.add(Dokument(sedHendelse.sedId,
+            dokumenter.add(Dokument(sedHendelseModel.sedId,
                     "SED",
                     listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
                             filtype = sedDokumenter.sed.mimeType.decode())), sedDokumenter.sed.filnavn))
 
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
-                dokumenter.add(Dokument(sedHendelse.sedId,
+                dokumenter.add(Dokument(sedHendelseModel.sedId,
                         "SED",
                         listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
                                 filtype = vedlegg.mimeType.decode())), vedlegg.filnavn))
             }
 
-            val tema = BUCTYPE.valueOf(sedHendelse.bucType).TEMA
+            val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
 
             val tittel = when {
-                sedHendelse.sedType != null -> "Utgående ${sedHendelse.sedType}"
+                sedHendelseModel.sedType != null -> "Utgående ${sedHendelseModel.sedType}"
                 else -> throw RuntimeException("sedType er null")
             }
 
@@ -83,7 +83,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         }
     }
 
-    fun opprettJournalpost(sedHendelse: SedHendelse,
+    fun opprettJournalpost(sedHendelseModel: SedHendelseModel,
                            sedDokumenter: SedDokumenterResponse,
                            forsokFerdigstill: Boolean) :JournalPostResponse {
 
@@ -93,7 +93,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
         try {
             logger.info("Kaller Journalpost for å generere en journalpost")
 
-            val requestBody = byggJournalPostRequest(sedHendelse = sedHendelse, sedDokumenter = sedDokumenter).toString()
+            val requestBody = byggJournalPostRequest(sedHendelseModel = sedHendelseModel, sedDokumenter = sedDokumenter).toString()
             genererJournalpostModelVellykkede.increment()
 
 
