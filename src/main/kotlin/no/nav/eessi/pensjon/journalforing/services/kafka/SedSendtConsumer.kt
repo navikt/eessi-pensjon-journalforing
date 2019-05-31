@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
 
 @Service
