@@ -24,15 +24,19 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
     private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
-    fun opprettOppgave(sedHendelseModel: SedHendelseModel,
+    fun opprettOppgave(sedHendelse: SedHendelseModel,
                        journalPostResponse: JournalPostResponse,
                        aktoerId: String?,
-                       landkode: String?) {
+                       landkode: String?,
+                       fodselsDato: String,
+                       ytelseType: OppgaveRoutingModel.YtelseType?) {
 
-        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelseModel,
+        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse,
                 journalPostResponse,
                 aktoerId,
-                landkode), true)
+                landkode,
+                fodselsDato,
+                ytelseType), true)
         val httpEntity = HttpEntity(requestBody)
 
         try {
@@ -60,14 +64,16 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
             throw RuntimeException("Response from Oppgave is empty")
     }
 
-    fun populerOppgaveFelter(sedHendelseModel: SedHendelseModel,
+    fun populerOppgaveFelter(sedHendelse: SedHendelseModel,
                              journalPostResponse: JournalPostResponse,
                              aktoerId: String?,
-                             landkode: String?) : Oppgave {
+                             landkode: String?,
+                             fodselsDato: String,
+                             ytelseType: OppgaveRoutingModel.YtelseType?) : Oppgave {
         val oppgave = Oppgave()
         oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.toString()
 
-        if(sedHendelseModel.bucType == SedHendelseModel.BucType.P_BUC_03) {
+        if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_03) {
             oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
           //  oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
@@ -87,15 +93,10 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
         //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
         oppgave.journalpostId = journalPostResponse.journalpostId
         oppgave.opprettetAvEnhetsnr = "9999"
-   //     oppgave.tildeltEnhetsnr =
+        //oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
-        oppgave.beskrivelse = sedHendelseModel.sedType.toString()
+        oppgave.beskrivelse = sedHendelse.sedType.toString()
 
         return oppgave
     }
-
-//    fun bestemTildeltEnhetsNummer(landkode: String?, sedHendelseModel: SedHendelseModel): OppgaveRoutingModel.Enhet {
-//        val routingRequest = OppgaveRoutingModel()
-//        return oppgaveRoutingService.route(landkode, sedHendelseModel)
-//    }
 }

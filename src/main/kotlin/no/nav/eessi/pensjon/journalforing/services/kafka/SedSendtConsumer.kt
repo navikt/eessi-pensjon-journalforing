@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.journalforing.services.kafka
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.concurrent.CountDownLatch
 
 @Service
@@ -52,8 +54,12 @@ class SedSendtConsumer(val pdfService: PdfService,
                     sedDokumenter = sedDokumenter,
                     forsokFerdigstill = false)
 
-
-            oppgaveService.opprettOppgave(sedHendelse, journalPostResponse, aktoerId, landkode)
+            oppgaveService.opprettOppgave(sedHendelse,
+                    journalPostResponse,
+                    aktoerId,
+                    landkode,
+                    "fyll inn dette når fødselsdato er klar",
+                    OppgaveRoutingModel.YtelseType.AP)
 
             // acknowledgment.acknowledge()
         }
