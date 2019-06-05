@@ -232,6 +232,26 @@ class EessiPensjonJournalforingApplicationTests {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
                     )
+            // Mocker STS service discovery
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/.well-known/openid-configuration"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(
+                                    "{\n" +
+                                            "  \"issuer\": \"http://localhost:${port}\",\n" +
+                                            "  \"token_endpoint\": \"http://localhost:${port}/rest/v1/sts/token\",\n" +
+                                            "  \"exchange_token_endpoint\": \"http://localhost:${port}/rest/v1/sts/token/exchange\",\n" +
+                                            "  \"jwks_uri\": \"http://localhost:${port}/rest/v1/sts/jwks\",\n" +
+                                            "  \"subject_types_supported\": [\"public\"]\n" +
+                                            "}"
+                            )
+                    )
+
+
         }
 
         private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
