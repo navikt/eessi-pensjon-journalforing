@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostServic
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.journalforing.utils.counter
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -23,6 +24,10 @@ class SedSendtConsumer(val pdfService: PdfService,
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val latch = CountDownLatch(4)
 
+    private final val consumeSedMessageNavn = "eessipensjon_journalforing.consumeOutgoingSed"
+    private val consumeSedMessageVellykkede = counter(consumeSedMessageNavn, "vellykkede")
+    private val consumeSedMessageFeilede = counter(consumeSedMessageNavn, "feilede")
+
     fun getLatch(): CountDownLatch {
         return latch
     }
@@ -30,37 +35,49 @@ class SedSendtConsumer(val pdfService: PdfService,
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
         logger.info("Innkommet hendelse")
-        val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
+        try {
+            val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
-        if(sedHendelse.sektorKode.equals("P")){
-            logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
-            logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId}")
-            logger.info("rinasakID: ${sedHendelse.rinaSakId}")
-            var aktoerId: String? = null
-            var person: Person?
-            var landkode: String? = null
+            if (sedHendelse.sektorKode.equals("P")) {
+                logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
+                logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId}")
+                logger.info("rinasakID: ${sedHendelse.rinaSakId}")
+                var aktoerId: String? = null
+                val person: Person?
+                var landkode: String? = null
 
-            if(sedHendelse.navBruker != null) {
-                aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
-                logger.info("Aktørid: $aktoerId")
-                person = personV3Service.hentPerson(sedHendelse.navBruker)
-                landkode = personV3Service.hentLandKode(person)
+                if (sedHendelse.navBruker != null) {
+                    aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
+                    logger.info("Aktørid: $aktoerId")
+                    person = personV3Service.hentPerson(sedHendelse.navBruker)
+                    landkode = personV3Service.hentLandKode(person)
+                }
+
+                val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
+                val journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
+                        sedDokumenter = sedDokumenter,
+                        forsokFerdigstill = false)
+
+                oppgaveService.opprettOppgave(sedHendelse,
+                        journalPostResponse,
+                        aktoerId,
+                        landkode,
+                        "010184",
+                        OppgaveRoutingModel.YtelseType.AP)
             }
 
-            val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-
-            val journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
-                    sedDokumenter = sedDokumenter,
-                    forsokFerdigstill = false)
-
-            oppgaveService.opprettOppgave(sedHendelse,
-                    journalPostResponse,
-                    aktoerId,
-                    landkode,
-                    "010184",
-                    OppgaveRoutingModel.YtelseType.AP)
-
+            consumeSedMessageVellykkede.increment()
             acknowledgment.acknowledge()
+
+        } catch(ex: Exception){
+            consumeSedMessageFeilede.increment()
+            logger.error(
+                    "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
+                    "${ex.message}",
+                    ex
+            )
+            throw RuntimeException(ex.message)
         }
         latch.countDown()
     }
