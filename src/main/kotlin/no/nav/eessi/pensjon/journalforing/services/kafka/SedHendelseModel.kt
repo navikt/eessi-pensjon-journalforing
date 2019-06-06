@@ -201,7 +201,14 @@ data class SedHendelseModel (
             override fun decode() = "P10000"
             override fun toString() = "P10000 - Oversendelse av informasjon"
         },
-
+        P14000 {
+            override fun decode() = "P14000"
+            override fun toString() = "P14000 - Endring i personlige forhold"
+        },
+        P15000 {
+            override fun decode() = "P15000"
+            override fun toString() = "P15000 - Overføring av pensjonssaker til EESSI"
+        },
         // Administrative
         X001 {
             override fun decode() = "X001"
