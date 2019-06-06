@@ -47,7 +47,7 @@ fasitResources:
     - alias: virksomhet:Person_v3
       resourceType: WebserviceEndpoint
     #Brukes av nye rest tjenester
-    - alias: eessi-security-token-service
+    - alias: security-token-service-openid-configuration
       resourceType: RestService
     #Brukes av gamle tjenester
     - alias: securityTokenService

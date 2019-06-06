@@ -15,11 +15,13 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+securityTokenService:
+  discoveryUrl: http://localhost:${mockServerport}/.well-known/openid-configuration
+
 app.name: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
 securitytokenservice.url: http://someurl
-eessi-security-token-service.url: http://localhost:${mockServerport}
 srvusername: someuser
 srvpassword: somepass
 oppgave.oppgaver.url: http://localhost:${mockServerport}

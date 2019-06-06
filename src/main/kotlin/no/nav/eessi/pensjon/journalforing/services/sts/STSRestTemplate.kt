@@ -20,9 +20,6 @@ class STSRestTemplate {
 
     private val logger = LoggerFactory.getLogger(STSRestTemplate::class.java)
 
-    @Value("\${eessi-security-token-service.url}")
-    lateinit var baseUrl: String
-
     @Value("\${srvusername}")
     lateinit var username: String
 
@@ -31,9 +28,8 @@ class STSRestTemplate {
 
     @Bean
     fun securityTokenExchangeBasicAuthRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        logger.info("Oppretter RestTemplate for: $baseUrl")
+        logger.info("Oppretter RestTemplate for securityTokenExchangeBasicAuthRestTemplate")
         return templateBuilder
-                .rootUri(baseUrl)
                 .additionalInterceptors(RequestResponseLoggerInterceptor())
                 .additionalInterceptors(BasicAuthenticationInterceptor(username, password))
                 .build().apply {
