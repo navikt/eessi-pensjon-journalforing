@@ -60,7 +60,7 @@ class SedSendtConsumer(val pdfService: PdfService,
                     "010184",
                     OppgaveRoutingModel.YtelseType.AP)
 
-            // acknowledgment.acknowledge()
+            acknowledgment.acknowledge()
         }
         latch.countDown()
     }
