@@ -42,15 +42,25 @@ class AktoerregisterService(val aktoerregisterRestTemplate: RestTemplate) {
     lateinit var appName: String
 
     fun hentGjeldendeNorskIdentForAkteorId(aktoerid: String): String {
-        val response = doRequest(aktoerid, "NorskIdent")
-        validateResponse(aktoerid, response)
-        return response.getValue(aktoerid).identer!![0].ident
+        try {
+            val response = doRequest(aktoerid, "NorskIdent")
+            validateResponse(aktoerid, response)
+            return response.getValue(aktoerid).identer!![0].ident
+        } catch (ex: Exception) {
+            logger.error("Feil ved henting av gjeldene norsk ident")
+            throw ex
+        }
     }
 
     fun hentGjeldendeAktoerIdForNorskIdent(norskIdent: String): String {
-        val response = doRequest(norskIdent, "AktoerId")
-        validateResponse(norskIdent, response)
-        return response.getValue(norskIdent).identer!![0].ident
+        try {
+            val response = doRequest(norskIdent, "AktoerId")
+            validateResponse(norskIdent, response)
+            return response.getValue(norskIdent).identer!![0].ident
+        } catch (ex: Exception) {
+            logger.error("Feil ved henting av gjeldene aktoerId")
+            throw ex
+        }
     }
 
     private fun validateResponse(aktoerid: String, response: Map<String, IdentinfoForAktoer>) {

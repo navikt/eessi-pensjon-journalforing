@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import no.nav.eessi.pensjon.journalforing.utils.typeRef
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
+import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
@@ -43,6 +44,14 @@ data class WellKnownSTS(
 @Service
 class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
 
+    private final val discoverSTSEndpointsNavn = "eessipensjon_journalforing.discoverSTS"
+    private val discoverSTSEndpointsVellykkede = counter(discoverSTSEndpointsNavn, "vellykkede")
+    private val discoverSTSEndpointsFeilede = counter(discoverSTSEndpointsNavn, "feilede")
+
+    private final val getSystemOidcTokenNavn = "eessipensjon_journalforing.getSystemOidcToken"
+    private val getSystemOidcTokenVellykkede = counter(getSystemOidcTokenNavn, "vellykkede")
+    private val getSystemOidcTokenFeilede = counter(getSystemOidcTokenNavn, "feilede")
+
     @Value("\${securityTokenService.discoveryUrl}")
     lateinit var discoveryUrl: String
 
@@ -56,8 +65,10 @@ class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
                     HttpMethod.GET,
                     null,
                     typeRef<WellKnownSTS>()).body!!
+            discoverSTSEndpointsVellykkede.increment()
         } catch (ex: Exception) {
             logger.error("Feil ved henting av STS endepunkter fra well.known: ${ex.message}", ex)
+            discoverSTSEndpointsFeilede.increment()
             throw RestClientException(ex.message!!)
         }
     }
@@ -77,9 +88,11 @@ class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
 
             logger.debug("SecurityTokenResponse ${mapAnyToJson(responseEntity)} ")
             validateResponse(responseEntity)
+            getSystemOidcTokenVellykkede.increment()
             return responseEntity.body!!.accessToken
         } catch (ex: Exception) {
             logger.error("Feil ved bytting av username/password til OIDC token: ${ex.message}", ex)
+            getSystemOidcTokenFeilede.increment()
             throw SystembrukerTokenException(ex.message!!)
         }
     }
