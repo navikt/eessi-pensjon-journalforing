@@ -30,7 +30,7 @@ class DocumentConverterService {
         try {
             val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(convertFrom.documentContent)))
             val pdImageXObject = LosslessFactory.createFromImage(doc, awtImage)
-            addImage(doc,page,pdImageXObject)//contentStream.drawImage(pdImageXObject, 0f, 0f, awtImage.width.toFloat(), awtImage.height.toFloat())
+            addImage(doc,page,pdImageXObject)
             doc.save(outStream)
         } catch (ex: Exception) {
             logger.error("Klarte ikke å konvertere dokument: ${ex.printStackTrace()}")
