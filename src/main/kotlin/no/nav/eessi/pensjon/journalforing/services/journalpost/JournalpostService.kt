@@ -72,7 +72,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                         "SED",
                         listOf(Dokumentvarianter(MimeType.PDF.decode(),
                                 dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DocumentConverterModel(vedlegg.innhold, MimeType.PDF)),
-                                Variantformat.ARKIV)), vedlegg.filnavn))
+                                Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
             }
 
             val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
@@ -134,6 +134,10 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             logger.error("noe gikk galt under opprettelse av journalpostoppgave, $ex")
             throw RuntimeException("Feil ved opprettelse av journalpostoppgave, $ex")
         }
+    }
+
+    fun konverterFilendingTilPdf(filnavn: String): String {
+        return filnavn.replaceAfter(".", "pdf")
     }
 
 }
