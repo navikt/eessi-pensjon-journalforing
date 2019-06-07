@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterModel
+import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterService
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.utils.counter
@@ -16,7 +18,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
 @Service
-class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) {
+class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
+                         val dokumentConverterService: DocumentConverterService) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
@@ -52,13 +55,23 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
             dokumenter.add(Dokument(sedHendelseModel.sedId,
                     "SED",
                     listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
-                            filtype = sedDokumenter.sed.mimeType.decode())), sedDokumenter.sed.filnavn))
+                            filtype = sedDokumenter.sed.mimeType.decode(),
+                            variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
 
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
                 dokumenter.add(Dokument(sedHendelseModel.sedId,
                         "SED",
                         listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
-                                filtype = vedlegg.mimeType.decode())), vedlegg.filnavn))
+                                filtype = vedlegg.mimeType.decode(),
+                                variantformat = Variantformat.ORIGINAL)), vedlegg.filnavn))
+            }
+
+            sedDokumenter.vedlegg?.forEach{ vedlegg ->
+                dokumenter.add(Dokument(sedHendelseModel.sedId,
+                        "SED",
+                        listOf(Dokumentvarianter(vedlegg.mimeType.decode(),
+                                dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DocumentConverterModel(vedlegg.innhold, vedlegg.mimeType)),
+                                Variantformat.ARKIV)), vedlegg.filnavn))
             }
 
             val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
