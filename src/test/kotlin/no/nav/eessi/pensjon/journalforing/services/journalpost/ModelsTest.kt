@@ -24,7 +24,7 @@ class ModelsTest {
         assertEquals(journalpostRequestModel.dokumenter.first().dokumentKategori, "SOK")
         assertEquals(journalpostRequestModel.dokumenter.first().dokumentvarianter.first().filtype, "PDF/A")
         assertEquals(journalpostRequestModel.dokumenter.first().dokumentvarianter.first().fysiskDokument, "string")
-        assertEquals(journalpostRequestModel.dokumenter.first().dokumentvarianter.first().variantformat, "ARKIV")
+        assertEquals(journalpostRequestModel.dokumenter.first().dokumentvarianter.first().variantformat, Variantformat.ARKIV)
         assertEquals(journalpostRequestModel.dokumenter.first().tittel, "Søknad om foreldrepenger ved fødsel")
         assertEquals(journalpostRequestModel.eksternReferanseId, "string")
         assertEquals(journalpostRequestModel.journalfoerendeEnhet, "9999")

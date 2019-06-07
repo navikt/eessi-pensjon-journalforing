@@ -43,8 +43,14 @@ data class Dokument(
 data class Dokumentvarianter(
     val filtype: String, //REQUIRED
     val fysiskDokument: String, //REQUIRED
-    val variantformat: String = "ARKIV" //REQUIRED
+    val variantformat: Variantformat //REQUIRED
 )
+
+enum class Variantformat {
+    ARKIV,
+    ORIGINAL,
+    PRODUKSJON
+}
 
 data class Sak(
     val arkivsaksnummer: String, //REQUIRED

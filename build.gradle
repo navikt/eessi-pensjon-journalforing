@@ -89,6 +89,9 @@ dependencies {
 	// Tjenestespesifikasjoner
 	implementation("no.nav.tjenester:nav-person-v3-tjenestespesifikasjon:${personV3Version}")
 	xsd("no.nav.pensjon:pensjonsinformasjon-xsd:${pensjonInformasjonVersion}")
+
+	// PDF box
+	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
 }
 
 compileKotlin {
