@@ -42,7 +42,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
         val httpEntity = HttpEntity(requestBody)
 
         try {
-            logger.info("Oppretter oppgave")
+            logger.info("Oppretter $oppgaveType oppgave")
             val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
             validateResponseEntity(responseEntity)
             opprettOppgaveVellykkede.increment()
