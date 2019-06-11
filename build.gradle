@@ -8,7 +8,7 @@ buildscript {
 		springfoxVersion = '2.9.2'
 		jacksonModuleKotlinVersion = '2.9.7'
 		cxfVersion = '3.2.6'
-		mockitoVersion = '2.8.+'
+		mockitoVersion = '2.8.9'
 		oidcTokenSupportVersion = '0.2.9'
 		logstashLogbackVersion = '4.10'
 		pensjonInformasjonVersion = '9.4.10'
@@ -73,7 +73,7 @@ dependencies {
 	implementation("net.jodah:expiringmap:0.5.9")
 
 	//mock - test
-	testImplementation("org.mockito:mockito-core:${mockitoVersion}")
+//	testImplementation("org.mockito:mockito-core:${mockitoVersion}")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 	testImplementation("com.nhaarman:mockito-kotlin-kt1.1:1.5.0")
