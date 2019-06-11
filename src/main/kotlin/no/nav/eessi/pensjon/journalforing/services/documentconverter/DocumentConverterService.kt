@@ -20,15 +20,19 @@ class DocumentConverterService {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PdfService::class.java) }
 
-    fun konverterFraBildeTilBase64EncodedPDF(convertFrom: DocumentConverterModel): String  {
-        logger.info("Konverterer dokument fra ${convertFrom.mimeType} til ${MimeType.PDF}")
+    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentKonvertererModel): String  {
+        if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){
+            logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
+            return konverterFra.dokumentInnhold
+        }
+        logger.info("Konverterer dokument fra ${konverterFra.mimeType} til ${MimeType.PDF}")
         val doc: PDDocument?
         doc = PDDocument()
         val page = PDPage()
         val outStream = ByteArrayOutputStream()
 
         try {
-            val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(convertFrom.documentContent)))
+            val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(konverterFra.dokumentInnhold)))
             val pdImageXObject = LosslessFactory.createFromImage(doc, awtImage)
             addImage(doc,page,pdImageXObject)
             doc.save(outStream)
