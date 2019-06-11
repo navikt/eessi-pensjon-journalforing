@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.eux
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import org.slf4j.Logger
@@ -14,10 +16,11 @@ import java.lang.RuntimeException
 class PdfService(private val euxOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PdfService::class.java) }
-
     private final val hentPdfTellerNavn = "eessipensjon_journalforing.hentpdf"
     private val hentPdfVellykkede = counter(hentPdfTellerNavn, "vellykkede")
     private val hentPdfFeilede = counter(hentPdfTellerNavn, "feilede")
+    private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
 
     fun hentSedDokumenter(rinaNr: String, dokumentId: String): SedDokumenterResponse {
         val path = "/buc/$rinaNr/sed/$dokumentId/filer"
@@ -29,7 +32,6 @@ class PdfService(private val euxOidcRestTemplate: RestTemplate) {
                     String::class.java)
             if (!response.statusCode.isError) {
                 logger.info("Hentet PDF fra eux")
-                val mapper = jacksonObjectMapper()
                 val resp  = mapper.readValue(response.body, SedDokumenterResponse::class.java)
                 logger.info("Mappet response til SedDokumenterResponse")
                 hentPdfVellykkede.increment()

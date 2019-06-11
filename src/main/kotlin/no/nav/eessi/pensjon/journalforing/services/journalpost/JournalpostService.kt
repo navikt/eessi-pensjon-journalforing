@@ -56,10 +56,15 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             dokumenter.add(Dokument(sedHendelseModel.sedId,
                     "SED",
                     listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
-                            filtype = sedDokumenter.sed.mimeType.decode(),
+                            filtype = sedDokumenter.sed.mimeType!!.decode(),
                             variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
 
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
+
+                if(vedlegg.mimeType == null) {
+                    throw UnsupportedFiletypeException("Mottat en filtype som ikke er supportert klarer ikke å journalføre: ${vedlegg.filnavn}")
+                }
+
                 dokumenter.add(Dokument(sedHendelseModel.sedId,
                         "SED",
                         listOf(Dokumentvarianter(MimeType.PDF.decode(),
@@ -132,4 +137,5 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
         return filnavn.replaceAfter(".", "pdf")
     }
 
+    class UnsupportedFiletypeException(message: String) : Exception(message)
 }

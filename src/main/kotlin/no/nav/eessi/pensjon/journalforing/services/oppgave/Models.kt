@@ -42,6 +42,10 @@ data class Oppgave(
         JOURNALFORING {
             override fun toString() = "JFR"
             override fun decode() = "Journalføringsoppgave"
+        },
+        BEHANDLE_SED {
+            override fun toString() = "BEH_SED"
+            override fun decode() = "Behandle SED"
         }
     }
 

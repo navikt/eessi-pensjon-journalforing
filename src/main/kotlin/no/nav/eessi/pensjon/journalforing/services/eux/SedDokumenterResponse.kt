@@ -15,7 +15,7 @@ data class SedDokumenterResponse(
 }
 
 data class Dokument(val filnavn: String,
-                    val mimeType: MimeType,
+                    val mimeType: MimeType?,
                     val innhold: String)
 
 

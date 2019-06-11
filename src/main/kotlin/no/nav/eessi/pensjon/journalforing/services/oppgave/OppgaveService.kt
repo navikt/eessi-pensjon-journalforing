@@ -25,18 +25,20 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(sedHendelse: SedHendelseModel,
-                       journalPostResponse: JournalPostResponse,
+                       journalPostResponse: JournalPostResponse?,
                        aktoerId: String?,
                        landkode: String?,
                        fodselsDato: String,
-                       ytelseType: OppgaveRoutingModel.YtelseType?) {
+                       ytelseType: OppgaveRoutingModel.YtelseType?,
+                       oppgaveType: Oppgave.OppgaveType) {
 
         val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse,
                 journalPostResponse,
                 aktoerId,
                 landkode,
                 fodselsDato,
-                ytelseType), true)
+                ytelseType,
+                oppgaveType), true)
         val httpEntity = HttpEntity(requestBody)
 
         try {
@@ -66,37 +68,33 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
     }
 
     fun populerOppgaveFelter(sedHendelse: SedHendelseModel,
-                             journalPostResponse: JournalPostResponse,
+                             journalPostResponse: JournalPostResponse?,
                              aktoerId: String?,
                              landkode: String?,
                              fodselsDato: String,
-                             ytelseType: OppgaveRoutingModel.YtelseType?) : Oppgave {
+                             ytelseType: OppgaveRoutingModel.YtelseType?,
+                             oppgaveType: Oppgave.OppgaveType) : Oppgave {
         val oppgave = Oppgave()
-        oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.toString()
-
-       // if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_03) {
-       //     oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
-          //  oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
-//            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
-
-       // } else {
-            oppgave.tema = Oppgave.Tema.PENSJON.toString()
-        //    oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
-//            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
-
-        //}
+        oppgave.oppgavetype = oppgaveType.toString()
+        oppgave.tema = Oppgave.Tema.PENSJON.toString()
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
         if(aktoerId != null) {
             oppgave.aktoerId = aktoerId
         }
         oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-
-        //oppgave.behandlingstype = Oppgave.Behandlingstype.UTLAND.toString()
-        oppgave.journalpostId = journalPostResponse.journalpostId
+        if(journalPostResponse != null) {
+            oppgave.journalpostId = journalPostResponse.journalpostId
+        }
         oppgave.opprettetAvEnhetsnr = "9999"
         oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
-        oppgave.beskrivelse = sedHendelse.sedType.toString()
+        if(oppgaveType == Oppgave.OppgaveType.JOURNALFORING) {
+            oppgave.beskrivelse = sedHendelse.sedType.toString()
+        } else if (oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED) {
+            oppgave.beskrivelse = "Bytt denne teksten med noe annet............."
+        } else {
+            throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
+        }
 
         return oppgave
     }

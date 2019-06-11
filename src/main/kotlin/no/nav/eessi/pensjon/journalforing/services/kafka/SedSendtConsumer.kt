@@ -2,7 +2,9 @@ package no.nav.eessi.pensjon.journalforing.services.kafka
 
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
+import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
@@ -54,17 +56,30 @@ class SedSendtConsumer(val pdfService: PdfService,
                 }
 
                 val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                val journalPostResponse: JournalPostResponse
 
-                val journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
-                        sedDokumenter = sedDokumenter,
-                        forsokFerdigstill = false)
+                try  {
+                    journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
+                            sedDokumenter = sedDokumenter,
+                            forsokFerdigstill = false)
 
-                oppgaveService.opprettOppgave(sedHendelse,
-                        journalPostResponse,
-                        aktoerId,
-                        landkode,
-                        "010184",
-                        OppgaveRoutingModel.YtelseType.AP)
+                    oppgaveService.opprettOppgave(sedHendelse,
+                            journalPostResponse,
+                            aktoerId,
+                            landkode,
+                            "010184",
+                            OppgaveRoutingModel.YtelseType.AP,
+                            Oppgave.OppgaveType.JOURNALFORING)
+
+                } catch (ex: JournalpostService.UnsupportedFiletypeException) {
+                    oppgaveService.opprettOppgave(sedHendelse,
+                            null,
+                            aktoerId,
+                            landkode,
+                            "010184",
+                            OppgaveRoutingModel.YtelseType.AP,
+                            Oppgave.OppgaveType.BEHANDLE_SED)
+                }
             }
 
             consumeSedMessageVellykkede.increment()
