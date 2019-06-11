@@ -90,6 +90,9 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
         } catch (ex: Exception){
             genererJournalpostModelFeilede.increment()
             logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
+            if(ex is UnsupportedFiletypeException) {
+                throw ex
+            }
             throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
         }
     }
