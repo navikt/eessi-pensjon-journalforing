@@ -119,12 +119,12 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 return mapper.readValue(response.body, JournalPostResponse::class.java)
 
             } else {
-                throw RuntimeException("Noe gikk galt under opprettelse av journalpostoppgave")
+                throw RuntimeException("Noe gikk galt under opprettelse av journalpost")
             }
         } catch(ex: Exception) {
             opprettJournalpostFeilede.increment()
-            logger.error("noe gikk galt under opprettelse av journalpostoppgave, $ex")
-            throw RuntimeException("Feil ved opprettelse av journalpostoppgave, $ex")
+            logger.error("noe gikk galt under opprettelse av journalpost, $ex")
+            throw RuntimeException("Feil ved opprettelse av journalpost, $ex")
         }
     }
 
