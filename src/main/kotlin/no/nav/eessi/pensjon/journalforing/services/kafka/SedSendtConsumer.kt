@@ -82,7 +82,7 @@ class SedSendtConsumer(val pdfService: PdfService,
                             "010184",
                             OppgaveRoutingModel.YtelseType.AP,
                             Oppgave.OppgaveType.BEHANDLE_SED,
-                            ex.rinaDokumentId,
+                            ex.rinaSakId,
                             ex.filNavn)
                     )
                 }

@@ -63,7 +63,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
 
                 if(vedlegg.mimeType == null) {
                     throw UnsupportedFiletypeException("Mottat en filtype som ikke er supportert klarer ikke å journalføre: ${vedlegg.filnavn}",
-                            sedHendelseModel.rinaDokumentId,
+                            sedHendelseModel.rinaSakId,
                             vedlegg.filnavn)
                 }
 
@@ -146,5 +146,5 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     }
 
 
-    class UnsupportedFiletypeException(message: String, val rinaDokumentId: String, val filNavn: String) : Exception(message)
+    class UnsupportedFiletypeException(message: String, val rinaSakId: String, val filNavn: String) : Exception(message)
 }

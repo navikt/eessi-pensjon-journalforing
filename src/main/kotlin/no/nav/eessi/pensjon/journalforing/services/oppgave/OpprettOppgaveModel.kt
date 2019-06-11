@@ -11,6 +11,6 @@ data class OpprettOppgaveModel(
         var fodselsDato: String,
         var ytelseType: OppgaveRoutingModel.YtelseType?,
         var oppgaveType: Oppgave.OppgaveType,
-        var rinaDokumentId: String?,
+        var rinaSakId: String?,
         var filnavn: String?)
 
