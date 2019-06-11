@@ -73,17 +73,17 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
         val oppgave = Oppgave()
         oppgave.oppgavetype = Oppgave.OppgaveType.JOURNALFORING.toString()
 
-        if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_03) {
-            oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
+       // if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_03) {
+       //     oppgave.tema = Oppgave.Tema.UFORETRYGD.toString()
           //  oppgave.behandlingstema = Oppgave.Behandlingstema.UFORE_UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.UFORETRYDG.toString()
 
-        } else {
+       // } else {
             oppgave.tema = Oppgave.Tema.PENSJON.toString()
         //    oppgave.behandlingstema = Oppgave.Behandlingstema.UTLAND.toString()
 //            oppgave.temagruppe = Oppgave.Temagruppe.PENSJON.toString()
 
-        }
+        //}
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
         if(aktoerId != null) {
             oppgave.aktoerId = aktoerId
