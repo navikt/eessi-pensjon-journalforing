@@ -62,16 +62,8 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
                 dokumenter.add(Dokument(sedHendelseModel.sedId,
                         "SED",
-                        listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
-                                filtype = vedlegg.mimeType.decode(),
-                                variantformat = Variantformat.ORIGINAL)), vedlegg.filnavn))
-            }
-
-            sedDokumenter.vedlegg?.forEach{ vedlegg ->
-                dokumenter.add(Dokument(sedHendelseModel.sedId,
-                        "SED",
                         listOf(Dokumentvarianter(MimeType.PDF.decode(),
-                                dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentKonvertererModel(vedlegg.innhold, MimeType.PDF)),
+                                dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentKonvertererModel(vedlegg.innhold, vedlegg.mimeType)),
                                 Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
             }
 
