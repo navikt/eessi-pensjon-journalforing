@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.journalforing.services.documentconverter
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import org.springframework.stereotype.Service
-import javax.imageio.ImageIO
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.*
+import javax.imageio.ImageIO
 
 @Service
 class DocumentConverterService {
