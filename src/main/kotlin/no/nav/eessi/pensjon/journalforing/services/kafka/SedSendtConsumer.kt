@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostServic
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
@@ -63,22 +64,27 @@ class SedSendtConsumer(val pdfService: PdfService,
                             sedDokumenter = sedDokumenter,
                             forsokFerdigstill = false)
 
-                    oppgaveService.opprettOppgave(sedHendelse,
+                    oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                             journalPostResponse,
                             aktoerId,
                             landkode,
                             "010184",
                             OppgaveRoutingModel.YtelseType.AP,
-                            Oppgave.OppgaveType.JOURNALFORING)
+                            Oppgave.OppgaveType.JOURNALFORING,
+                            null,
+                            null))
 
                 } catch (ex: JournalpostService.UnsupportedFiletypeException) {
-                    oppgaveService.opprettOppgave(sedHendelse,
+                    oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                             null,
                             aktoerId,
                             landkode,
                             "010184",
                             OppgaveRoutingModel.YtelseType.AP,
-                            Oppgave.OppgaveType.BEHANDLE_SED)
+                            Oppgave.OppgaveType.BEHANDLE_SED,
+                            ex.rinaDokumentId,
+                            ex.filNavn)
+                    )
                 }
             }
 

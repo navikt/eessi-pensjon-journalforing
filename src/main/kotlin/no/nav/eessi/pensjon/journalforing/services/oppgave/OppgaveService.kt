@@ -1,8 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.utils.counter
 import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.LoggerFactory
@@ -24,25 +22,13 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
     private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
-    fun opprettOppgave(sedHendelse: SedHendelseModel,
-                       journalPostResponse: JournalPostResponse?,
-                       aktoerId: String?,
-                       landkode: String?,
-                       fodselsDato: String,
-                       ytelseType: OppgaveRoutingModel.YtelseType?,
-                       oppgaveType: Oppgave.OppgaveType) {
+    fun opprettOppgave(opprettOppgaveModel: OpprettOppgaveModel) {
 
-        val requestBody = mapAnyToJson(populerOppgaveFelter(sedHendelse,
-                journalPostResponse,
-                aktoerId,
-                landkode,
-                fodselsDato,
-                ytelseType,
-                oppgaveType), true)
+        val requestBody = mapAnyToJson(populerOppgaveFelter(opprettOppgaveModel), true)
         val httpEntity = HttpEntity(requestBody)
 
         try {
-            logger.info("Oppretter $oppgaveType oppgave")
+            logger.info("Oppretter ${opprettOppgaveModel.oppgaveType} oppgave")
             val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
             validateResponseEntity(responseEntity)
             opprettOppgaveVellykkede.increment()
@@ -67,31 +53,28 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
             throw RuntimeException("Response from Oppgave is empty")
     }
 
-    fun populerOppgaveFelter(sedHendelse: SedHendelseModel,
-                             journalPostResponse: JournalPostResponse?,
-                             aktoerId: String?,
-                             landkode: String?,
-                             fodselsDato: String,
-                             ytelseType: OppgaveRoutingModel.YtelseType?,
-                             oppgaveType: Oppgave.OppgaveType) : Oppgave {
+    fun populerOppgaveFelter(opprettOppgaveModel: OpprettOppgaveModel) : Oppgave {
         val oppgave = Oppgave()
-        oppgave.oppgavetype = oppgaveType.toString()
+        oppgave.oppgavetype = opprettOppgaveModel.oppgaveType.toString()
         oppgave.tema = Oppgave.Tema.PENSJON.toString()
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
-        if(aktoerId != null) {
-            oppgave.aktoerId = aktoerId
+        if(opprettOppgaveModel.aktoerId != null) {
+            oppgave.aktoerId = opprettOppgaveModel.aktoerId
         }
         oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-        if(journalPostResponse != null) {
-            oppgave.journalpostId = journalPostResponse.journalpostId
+        if(opprettOppgaveModel.journalPostResponse != null) {
+            oppgave.journalpostId = opprettOppgaveModel.journalPostResponse!!.journalpostId
         }
         oppgave.opprettetAvEnhetsnr = "9999"
-        oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType).enhetsNr
+        oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(opprettOppgaveModel.sedHendelse,
+                opprettOppgaveModel.landkode,
+                opprettOppgaveModel.fodselsDato,
+                opprettOppgaveModel.ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
-        if(oppgaveType == Oppgave.OppgaveType.JOURNALFORING) {
-            oppgave.beskrivelse = sedHendelse.sedType.toString()
-        } else if (oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED) {
-            oppgave.beskrivelse = "Bytt denne teksten med noe annet............."
+        if(opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.JOURNALFORING) {
+            oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
+        } else if (opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED) {
+            oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn} tilhørende RINA dokumentId: ${opprettOppgaveModel.rinaDokumentId} er i et format som ikke kan journalføres, avsender bes sende på nytt med støttet filformat "
         } else {
             throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
         }
