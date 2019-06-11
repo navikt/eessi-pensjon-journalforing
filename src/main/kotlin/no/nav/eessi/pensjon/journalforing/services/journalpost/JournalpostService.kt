@@ -128,6 +128,9 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             }
         } catch(ex: Exception) {
             opprettJournalpostFeilede.increment()
+            if(ex is UnsupportedFiletypeException) {
+                throw ex
+            }
             logger.error("noe gikk galt under opprettelse av journalpost, $ex")
             throw RuntimeException("Feil ved opprettelse av journalpost, $ex")
         }
