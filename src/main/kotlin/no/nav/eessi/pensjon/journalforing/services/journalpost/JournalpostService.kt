@@ -59,16 +59,13 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                             filtype = sedDokumenter.sed.mimeType.decode(),
                             variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
 
-            /*
-            Dette er skrudd av fordi PESYS ikke klarer å håndtere vedlegg av andre typer enn PDF
-
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
                 dokumenter.add(Dokument(sedHendelseModel.sedId,
                         "SED",
                         listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
                                 filtype = vedlegg.mimeType.decode(),
                                 variantformat = Variantformat.ORIGINAL)), vedlegg.filnavn))
-            }*/
+            }
 
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
                 dokumenter.add(Dokument(sedHendelseModel.sedId,
