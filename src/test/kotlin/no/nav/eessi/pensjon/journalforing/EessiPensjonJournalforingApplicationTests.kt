@@ -207,7 +207,7 @@ class EessiPensjonJournalforingApplicationTests {
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"string\",\n" +
                                     "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
-                                    "  \"tema\" : \"UFO\",\n" +
+                                    "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
                                     "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
@@ -384,7 +384,7 @@ class EessiPensjonJournalforingApplicationTests {
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
-                                "  \"tema\" : \"UFO\",\n" +
+                                "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
                                 "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
