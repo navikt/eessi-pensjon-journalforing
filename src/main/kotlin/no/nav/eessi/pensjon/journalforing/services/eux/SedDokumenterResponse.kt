@@ -44,6 +44,11 @@ enum class MimeType  : Code {
         override fun toString() = "image/tiff"
         override fun decode() = "TIFF"
     },
+    @JsonProperty("image/tif")
+    TIF {
+        override fun toString() = "image/tif"
+        override fun decode() = "TIF"
+    },
     @JsonProperty("image/png")
     PNG {
         override fun toString() = "image/png"
