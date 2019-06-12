@@ -56,8 +56,7 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
     fun populerOppgaveFelter(opprettOppgaveModel: OpprettOppgaveModel) : Oppgave {
         val oppgave = Oppgave()
         oppgave.oppgavetype = opprettOppgaveModel.oppgaveType.toString()
-       // oppgave.tema = Oppgave.Tema.PENSJON.toString()
-        oppgave.tema = "MED"
+        oppgave.tema = Oppgave.Tema.PENSJON.toString()
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
         if(opprettOppgaveModel.aktoerId != null) {
             oppgave.aktoerId = opprettOppgaveModel.aktoerId

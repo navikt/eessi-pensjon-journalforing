@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMock
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.ClassRule
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockserver.integration.ClientAndServer
@@ -261,7 +260,6 @@ class EessiPensjonJournalforingApplicationTests {
         }
     }
 
-    @Ignore
     @Test
     @Throws(Exception::class)
     fun `Når en SEDSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {

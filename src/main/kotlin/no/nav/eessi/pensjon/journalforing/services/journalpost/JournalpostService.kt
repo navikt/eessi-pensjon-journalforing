@@ -73,16 +73,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                                 dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentKonvertererModel(vedlegg.innhold, vedlegg.mimeType)),
                                 Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
             }
-
-            sedDokumenter.vedlegg?.forEach { vedlegg ->
-                dokumenter.add(Dokument(sedHendelseModel.sedId,
-                        "SED",
-                        listOf(Dokumentvarianter(fysiskDokument = vedlegg.innhold,
-                                filtype = vedlegg.mimeType!!.decode(),
-                                variantformat = Variantformat.ORIGINAL)), vedlegg.filnavn))
-            }
-
-                val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
+            val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
 
             val tittel = when {
                 sedHendelseModel.sedType != null -> "Utgående ${sedHendelseModel.sedType}"
