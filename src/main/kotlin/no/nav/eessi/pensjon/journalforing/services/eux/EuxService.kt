@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.eux
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.utils.counter
@@ -44,6 +45,39 @@ class EuxService(private val euxOidcRestTemplate: RestTemplate) {
             hentPdfFeilede.increment()
             logger.error("Noe gikk galt under henting av PDF fra eux: ${ex.message}")
             throw RuntimeException("Feil ved henting av PDF")
+        }
+    }
+
+    fun hentFodselsDato(rinaNr: String, dokumentId: String): String {
+        val sed = hentSed(rinaNr, dokumentId)
+        val rootNode = mapper.readValue(sed, JsonNode::class.java)
+        val foedselsdatoNode = rootNode.path("nav")
+                .path("bruker")
+                .path("person")
+                .path("foedselsdato")
+        return foedselsdatoNode.textValue()
+    }
+
+    fun hentSed(rinaNr: String, dokumentId: String) : String? {
+        val path = "/buc/$rinaNr/sed/$dokumentId"
+        try {
+            logger.info("Henter SED for rinaNr: $rinaNr , dokumentId: $dokumentId")
+            val response = euxOidcRestTemplate.exchange(path,
+                    HttpMethod.GET,
+                    HttpEntity(""),
+                    String::class.java)
+            if (!response.statusCode.isError) {
+                logger.info("Hentet SED fra eux")
+                hentPdfVellykkede.increment()
+                return response.body
+            } else {
+                hentPdfFeilede.increment()
+                throw RuntimeException("Noe gikk galt under henting av SED fra eux: ${response.statusCode}")
+            }
+        } catch (ex: Exception) {
+            hentPdfFeilede.increment()
+            logger.error("Noe gikk galt under henting av SED fra eux: ${ex.message}")
+            throw RuntimeException("Feil ved henting av SED")
         }
     }
 }

@@ -1,0 +1,372 @@
+{
+  "nav" : {
+    "bruker" : {
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "hklhklhl",
+          "fornavn" : "klhklhl"
+        }
+      },
+      "person" : {
+        "kontakt" : {
+          "telefon" : [ {
+            "nummer" : "70897789",
+            "type" : "hjem"
+          }, {
+            "type" : "mobil",
+            "nummer" : "123123123"
+          }, {
+            "type" : "arbeid",
+            "nummer" : "09708970879"
+          } ],
+          "email" : [ {
+            "adresse" : "bbnm@kjl.no"
+          }, {
+            "adresse" : "jlhjkh@fsdfsdf.dk"
+          } ]
+        },
+        "kjoenn" : "f",
+        "sivilstand" : [ {
+          "fradato" : "2018-02-01",
+          "status" : "gift"
+        }, {
+          "status" : "skilt_fra_registrert_partnerskap",
+          "fradato" : "2016-02-01"
+        } ],
+        "pin" : [ {
+          "sektor" : "pensjoner",
+          "identifikator" : "09809809809",
+          "land" : "BE"
+        }, {
+          "land" : "NO",
+          "identifikator" : "970970970",
+          "sektor" : "sykdom"
+        } ],
+        "foedselsdato" : "1980-01-01",
+        "statsborgerskap" : [ {
+          "land" : "AT"
+        }, {
+          "land" : "GR"
+        }, {
+          "land" : "CY"
+        } ],
+        "foedested" : {
+          "by" : "kljhklhl",
+          "region" : "kljlkljlk",
+          "land" : "DK"
+        },
+        "fornavn" : "øjøløjøjø",
+        "etternavn" : "jkljkjl",
+        "tidligereetternavn" : "hjkkhk",
+        "fornavnvedfoedsel" : "poupoup",
+        "tidligerefornavn" : "jkhkhk",
+        "etternavnvedfoedsel" : "poupoupu"
+      },
+      "bank" : {
+        "konto" : {
+          "innehaver" : {
+            "navn" : "kjflsdkfjldf",
+            "rolle" : "forsikret_person"
+          },
+          "sepa" : {
+            "swift" : "CTBAAU2S",
+            "iban" : "DE89370400440532013000"
+          }
+        }
+      },
+      "adresse" : {
+        "gate" : "jkkljkl",
+        "by" : "kljhljhkl",
+        "region" : "øljøklj",
+        "land" : "CY",
+        "bygning" : "kljl",
+        "postnummer" : "8098"
+      },
+      "far" : {
+        "person" : {
+          "fornavn" : "lkhlkhlkh",
+          "etternavnvedfoedsel" : "ihlhljhlhk"
+        }
+      }
+    },
+    "verge" : {
+      "person" : {
+        "kontakt" : {
+          "telefon" : [ {
+            "nummer" : "345345435",
+            "type" : "hjem"
+          }, {
+            "nummer" : "78997898",
+            "type" : "mobil"
+          } ],
+          "email" : [ {
+            "adresse" : "asdas@sdfsdfds.de"
+          } ]
+        },
+        "fornavn" : "kljlkj",
+        "etternavn" : "kljklj"
+      },
+      "vergemaal" : {
+        "mandat" : "kllkjlkjlncjkan  jc knsa oas nc ascn n"
+      },
+      "adresse" : {
+        "by" : "jkkljl",
+        "postnummer" : "7898",
+        "land" : "CZ",
+        "gate" : "kjklj",
+        "region" : "kljklj",
+        "bygning" : "jkllkj"
+      }
+    },
+    "krav" : {
+      "dato" : "2018-04-01"
+    },
+    "barn" : [ {
+      "far" : {
+        "person" : {
+          "etternavnvedfoedsel" : "jkljlk",
+          "fornavn" : "jkljlj"
+        }
+      },
+      "person" : {
+        "pin" : [ {
+          "identifikator" : "70708709",
+          "sektor" : "familieytelser",
+          "land" : "DK"
+        }, {
+          "identifikator" : "89798798",
+          "sektor" : "tIlbakekreving",
+          "land" : "BE"
+        } ],
+        "foedested" : {
+          "land" : "DK",
+          "region" : "jiojooi",
+          "by" : "ijilj"
+        },
+        "kjoenn" : "f",
+        "fornavn" : "kljlkjlkjj",
+        "statsborgerskap" : [ {
+          "land" : "AT"
+        }, {
+          "land" : "CY"
+        } ],
+        "etternavn" : "kljkljlk",
+        "doedsdato" : "2018-04-01",
+        "fornavnvedfoedsel" : "jkljlkj",
+        "foedselsdato" : "2010-04-01",
+        "etternavnvedfoedsel" : "jkkllk"
+      },
+      "opplysningeromannetbarn" : "jkllkjkl",
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "jljlkjl",
+          "fornavn" : "løkøkøl"
+        }
+      },
+      "relasjontilbruker" : "adoptivbarn"
+    }, {
+      "person" : {
+        "kjoenn" : "m",
+        "pin" : [ {
+          "land" : "BE",
+          "identifikator" : "8909089",
+          "sektor" : "alle"
+        } ],
+        "etternavn" : "kljklh",
+        "statsborgerskap" : [ {
+          "land" : "AT"
+        } ],
+        "fornavnvedfoedsel" : "jkllkjkl",
+        "fornavn" : "jhjhkjhk",
+        "foedselsdato" : "2013-04-01",
+        "foedested" : {
+          "land" : "CZ",
+          "by" : "jkljljk",
+          "region" : "kljlkj"
+        },
+        "etternavnvedfoedsel" : "kljklkl"
+      },
+      "far" : {
+        "person" : {
+          "etternavnvedfoedsel" : "kljjkl",
+          "fornavn" : "jlkjklkj"
+        }
+      },
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "jkllkjl",
+          "fornavn" : "jkljlkjl"
+        }
+      },
+      "relasjontilbruker" : "fosterbarn",
+      "opplysningeromannetbarn" : "øjkkljkl"
+    } ],
+    "ektefelle" : {
+      "person" : {
+        "pin" : [ {
+          "land" : "BE",
+          "identifikator" : "7979789789",
+          "sektor" : "dagpenger"
+        }, {
+          "land" : "HR",
+          "identifikator" : "789978",
+          "sektor" : "sykdom"
+        } ],
+        "etternavnvedfoedsel" : "jkkljkl",
+        "fornavn" : "jkhkjhjk",
+        "tidligereetternavn" : "ølkølk",
+        "foedested" : {
+          "land" : "BE",
+          "by" : "jlkjlj",
+          "region" : "kljkljljk"
+        },
+        "statsborgerskap" : [ {
+          "land" : "BE"
+        }, {
+          "land" : "HR"
+        } ],
+        "etternavn" : "jhhjkh",
+        "foedselsdato" : "1999-04-01",
+        "tidligerefornavn" : "ølkøl",
+        "kjoenn" : "f",
+        "fornavnvedfoedsel" : "jkljkljl"
+      },
+      "type" : "ektefelle",
+      "far" : {
+        "person" : {
+          "etternavnvedfoedsel" : "ølkøk",
+          "fornavn" : "øklø"
+        }
+      },
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "køølkøl",
+          "fornavn" : "jøjøkj"
+        }
+      }
+    },
+    "eessisak" : [ {
+      "land" : "BE",
+      "saksnummer" : "2345234234"
+    } ]
+  },
+  "sedVer" : "0",
+  "pensjon" : {
+    "ytelser" : [ {
+      "status" : "02",
+      "startdatoutbetaling" : "2018-04-01",
+      "annenytelse" : "jljklkj",
+      "institusjon" : {
+        "saksnummer" : "7686867",
+        "land" : "BE",
+        "sektor" : "familieytelser"
+      },
+      "beloep" : [ {
+        "gjeldendesiden" : "2018-04-01",
+        "betalingshyppighetytelse" : "06",
+        "annenbetalingshyppighetytelse" : "wererew",
+        "beloep" : "677",
+        "valuta" : "EUR"
+      } ],
+      "mottasbasertpaa" : "botid",
+      "pin" : {
+        "identifikator" : "kj90980"
+      },
+      "totalbruttobeloeparbeidsbasert" : "234",
+      "sluttdatoutbetaling" : "2018-04-01",
+      "totalbruttobeloepbostedsbasert" : "234",
+      "startdatoretttilytelse" : "2018-04-01",
+      "ytelse" : "02",
+      "sluttdatoretttilytelse" : "2018-04-01"
+    }, {
+      "annenytelse" : "sfsd",
+      "startdatoutbetaling" : "2018-04-01",
+      "totalbruttobeloepbostedsbasert" : "24234",
+      "mottasbasertpaa" : "i_arbeid",
+      "pin" : {
+        "identifikator" : "242343434"
+      },
+      "institusjon" : {
+        "land" : "BE",
+        "sektor" : "sykdom",
+        "saksnummer" : "34534534"
+      },
+      "startdatoretttilytelse" : "2018-04-01",
+      "beloep" : [ {
+        "beloep" : "34543",
+        "annenbetalingshyppighetytelse" : "345534",
+        "gjeldendesiden" : "2018-04-01",
+        "valuta" : "CZK",
+        "betalingshyppighetytelse" : "99"
+      } ],
+      "ytelse" : "01",
+      "sluttdatoretttilytelse" : "2018-04-01",
+      "totalbruttobeloeparbeidsbasert" : "233",
+      "sluttdatoutbetaling" : "2018-04-01",
+      "status" : "01"
+    } ],
+    "etterspurtedokumenter" : "klnlsnfnsdfds",
+    "bruker" : {
+      "arbeidsforhold" : [ {
+        "planlagtpensjoneringsdato" : "2020-03-01",
+        "inntekt" : [ {
+          "beloeputbetaltsiden" : "2016-02-01",
+          "annenbetalingshyppighetinntekt" : "hljhjkh",
+          "beloep" : "7000",
+          "betalingshyppighetinntekt" : "03",
+          "valuta" : "HUF"
+        }, {
+          "beloep" : "7678",
+          "annenbetalingshyppighetinntekt" : "kjklj",
+          "betalingshyppighetinntekt" : "06",
+          "valuta" : "NGN",
+          "beloeputbetaltsiden" : "2005-01-01"
+        } ],
+        "type" : "forsikrede_har_fortsatt_inntektsgivende_arbeid",
+        "arbeidstimerperuke" : "40",
+        "yrke" : "ljlhjkl",
+        "sluttdato" : "2018-02-01",
+        "planlagtstartdato" : "2017-04-01"
+      }, {
+        "inntekt" : [ {
+          "beloeputbetaltsiden" : "2014-04-01",
+          "beloep" : "3000",
+          "betalingshyppighetinntekt" : "03",
+          "annenbetalingshyppighetinntekt" : "klljk",
+          "valuta" : "ISK"
+        } ],
+        "arbeidstimerperuke" : "30",
+        "sluttdato" : "2018-03-03",
+        "yrke" : "qwqwewe",
+        "type" : "forsikrede_driver_ikke_lenger_selvstendig_naerigsvirksomhet",
+        "planlagtstartdato" : "2017-01-01",
+        "planlagtpensjoneringsdato" : "2021-04-01"
+      } ]
+    },
+    "vedtak" : [ {
+      "trekkgrunnlag" : [ "987_2009_Art_72_1" ],
+      "mottaker" : [ "forsikret_person" ]
+    }, {
+      "mottaker" : [ "representant_eller_verge" ],
+      "trekkgrunnlag" : [ "987_2009_Art_72_3" ]
+    }, {
+      "trekkgrunnlag" : [ "987_2009_Art_72_2" ]
+    } ],
+    "institusjonennaaikkesoektompensjon" : [ "kjkljlkjlk" ],
+    "vedleggandre" : "klknlnlvnsdjknvkvjsn",
+    "forespurtstartdato" : "2018-04-01",
+    "vedlegg" : [ "arbeidsattester", "medisinsk_dokumentasjon", "bekreftelse_på_utdanning", "annet" ],
+    "ytterligeinformasjon" : "kllfenwelfnl",
+    "utsettelse" : [ {
+      "institusjon" : {
+        "institusjonsid" : "89797",
+        "land" : "CZ",
+        "institusjonsnavn" : "kjlkjkl"
+      },
+      "tildato" : "2025-04-01"
+    } ],
+    "angitidligstdato" : "nei"
+  },
+  "sedGVer" : "4",
+  "sed" : "P2000"
+}

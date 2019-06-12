@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.CountDownLatch
 
 @Service
@@ -57,6 +59,11 @@ class SedSendtConsumer(val euxService: EuxService,
                 }
 
                 val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
+                val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                var isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+                var fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("yyMMdd"))
+
                 val journalPostResponse: JournalPostResponse
 
                 try  {
@@ -68,7 +75,7 @@ class SedSendtConsumer(val euxService: EuxService,
                             journalPostResponse,
                             aktoerId,
                             landkode,
-                            "010184",
+                            fodselsDato,
                             OppgaveRoutingModel.YtelseType.AP,
                             Oppgave.OppgaveType.JOURNALFORING,
                             null,
@@ -79,7 +86,7 @@ class SedSendtConsumer(val euxService: EuxService,
                             null,
                             aktoerId,
                             landkode,
-                            "010184",
+                            fodselsDato,
                             OppgaveRoutingModel.YtelseType.AP,
                             Oppgave.OppgaveType.BEHANDLE_SED,
                             ex.rinaSakId,
