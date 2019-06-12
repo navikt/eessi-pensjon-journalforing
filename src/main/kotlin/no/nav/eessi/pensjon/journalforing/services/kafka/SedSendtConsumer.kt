@@ -62,7 +62,7 @@ class SedSendtConsumer(val euxService: EuxService,
 
                 val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                 var isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-                var fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("yyMMdd"))
+                var fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
                 val journalPostResponse: JournalPostResponse
 
