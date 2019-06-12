@@ -14,10 +14,10 @@ prometheus:
 port: 8080
 healthcheck:
   liveness:
-    initialDelay: 60
+    initialDelay: 20
     path: /internal/isalive
   readiness:
-    initialDelay: 60
+    initialDelay: 20
     path: /internal/isready
 resources:
   limits:
