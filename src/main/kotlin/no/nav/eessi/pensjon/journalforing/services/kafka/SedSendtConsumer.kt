@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.kafka
 
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
+import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
@@ -18,11 +18,11 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 
 @Service
-class SedSendtConsumer(val pdfService: PdfService,
-                  val journalpostService: JournalpostService,
-                  val oppgaveService: OppgaveService,
-                  val aktoerregisterService: AktoerregisterService,
-                  val personV3Service: PersonV3Service) {
+class SedSendtConsumer(val euxService: EuxService,
+                       val journalpostService: JournalpostService,
+                       val oppgaveService: OppgaveService,
+                       val aktoerregisterService: AktoerregisterService,
+                       val personV3Service: PersonV3Service) {
 
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val latch = CountDownLatch(4)
@@ -56,7 +56,7 @@ class SedSendtConsumer(val pdfService: PdfService,
                     landkode = personV3Service.hentLandKode(person)
                 }
 
-                val sedDokumenter = pdfService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                 val journalPostResponse: JournalPostResponse
 
                 try  {

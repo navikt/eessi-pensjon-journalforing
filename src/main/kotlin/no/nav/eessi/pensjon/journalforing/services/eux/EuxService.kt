@@ -13,9 +13,9 @@ import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 
 @Service
-class PdfService(private val euxOidcRestTemplate: RestTemplate) {
+class EuxService(private val euxOidcRestTemplate: RestTemplate) {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PdfService::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(EuxService::class.java) }
     private final val hentPdfTellerNavn = "eessipensjon_journalforing.hentpdf"
     private val hentPdfVellykkede = counter(hentPdfTellerNavn, "vellykkede")
     private val hentPdfFeilede = counter(hentPdfTellerNavn, "feilede")

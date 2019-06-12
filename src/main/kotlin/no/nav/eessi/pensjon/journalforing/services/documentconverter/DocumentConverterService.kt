@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.documentconverter
 
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
-import no.nav.eessi.pensjon.journalforing.services.eux.PdfService
 import org.springframework.stereotype.Service
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -18,7 +17,7 @@ import javax.imageio.ImageIO
 @Service
 class DocumentConverterService {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PdfService::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(DocumentConverterService::class.java) }
 
     fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentKonvertererModel): String  {
         if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){

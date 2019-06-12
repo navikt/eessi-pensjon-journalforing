@@ -18,16 +18,16 @@ import java.nio.file.Paths
 import kotlin.test.assertEquals
 
 @RunWith(MockitoJUnitRunner::class)
-class PdfServiceTest {
+class EuxServiceTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    lateinit var pdfService: PdfService
+    lateinit var euxService: EuxService
 
     @Before
     fun setup() {
-        pdfService = PdfService(mockrestTemplate)
+        euxService = EuxService(mockrestTemplate)
     }
 
     @Test
@@ -43,7 +43,7 @@ class PdfServiceTest {
                     eq(String::class.java))
 
 
-        val resp = pdfService.hentSedDokumenter(rinaNr, dokumentId)
+        val resp = euxService.hentSedDokumenter(rinaNr, dokumentId)
         assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", resp.sed.innhold)
     }
 
@@ -59,6 +59,6 @@ class PdfServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-            pdfService.hentSedDokumenter(rinaNr, dokumentId)
+            euxService.hentSedDokumenter(rinaNr, dokumentId)
     }
 }

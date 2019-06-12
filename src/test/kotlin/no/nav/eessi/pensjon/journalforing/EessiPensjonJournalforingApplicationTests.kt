@@ -361,7 +361,7 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{\n" +
-                                "  \"tildeltEnhetsnr\" : \"4862\",\n" +
+                                "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
@@ -380,7 +380,7 @@ class EessiPensjonJournalforingApplicationTests {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{\n" +
-                                "  \"tildeltEnhetsnr\" : \"4476\",\n" +
+                                "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"string\",\n" +
                                 "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
