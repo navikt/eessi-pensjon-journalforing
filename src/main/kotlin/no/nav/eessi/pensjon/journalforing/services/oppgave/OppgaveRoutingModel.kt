@@ -28,7 +28,8 @@ data class OppgaveRoutingModel(
         UFORE_UTLANDSTILSNITT("4476"),
         UFORE_UTLAND("4475"),
         NFP_UTLAND_AALESUND("4862"),
-        UKJENT("0001")
+        UKJENT("0001"),
+        ID_OG_FORDELING("4303")
     }
 
     enum class Krets {

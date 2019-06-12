@@ -18,13 +18,27 @@ class OppgaveRoutingModelTest {
     // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
     val nayFodselsDato = LocalDate.now().minusYears(10).format(dateFormat)
 
+
+    @Test
+    fun `Gitt manglende fnr når opppgav routes så send oppgave til ID_OG_FORDELING`() {
+        val sedHendelse = SedHendelseModel(sektorKode = "",
+                bucType = SedHendelseModel.BucType.P_BUC_01,
+                rinaSakId = "",
+                rinaDokumentId = "",
+                sedType = SedHendelseModel.SedType.P2000)
+
+        val enhet = routingService.route(sedHendelse, null, "010580", null)
+        assertEquals(enhet, OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
+    }
+
     @Test
     fun `Gitt manglende landkode når opppgaverouting gjelder for buc01, så send oppgave til NFP_UTLAND_AALESUND`() {
         val sedHendelse = SedHendelseModel(sektorKode = "",
                 bucType = SedHendelseModel.BucType.P_BUC_01,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -36,7 +50,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_01,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -48,7 +63,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_01,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -60,7 +76,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_02,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -72,7 +89,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_02,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -84,7 +102,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_02,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -96,7 +115,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_03,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -108,7 +128,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_03,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -120,7 +141,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_03,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -132,7 +154,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_04,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -144,7 +167,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_04,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -156,7 +180,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_04,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", "010580", null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -168,7 +193,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -180,7 +206,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -192,7 +219,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -204,7 +232,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -216,7 +245,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -228,7 +258,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_05,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -240,7 +271,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -252,7 +284,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -264,7 +297,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -276,7 +310,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -288,7 +323,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -300,7 +336,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_06,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -312,7 +349,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -324,7 +362,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -336,7 +375,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -348,7 +388,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -360,7 +401,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -373,7 +415,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_07,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -386,7 +429,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -398,7 +442,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -410,7 +455,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -422,7 +468,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -434,7 +481,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -447,7 +495,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_08,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -459,7 +508,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -471,7 +521,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -483,7 +534,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
@@ -495,7 +547,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -507,7 +560,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -519,7 +573,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_09,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -532,7 +587,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.AP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -544,7 +600,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.AP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -556,7 +613,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.AP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -568,7 +626,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.GP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -580,7 +639,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.GP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -592,7 +652,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.GP)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -604,7 +665,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.UT)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
@@ -616,7 +678,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.UT)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
@@ -628,7 +691,8 @@ class OppgaveRoutingModelTest {
                 bucType = SedHendelseModel.BucType.P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                navBruker = "01010101010")
 
         val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.UT)
         assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)

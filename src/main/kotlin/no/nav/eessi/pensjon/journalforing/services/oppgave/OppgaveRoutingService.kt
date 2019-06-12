@@ -32,6 +32,10 @@ class OppgaveRoutingService {
         val bosatt: Bosatt
         var tildeltEnhet: Enhet = Enhet.UKJENT
 
+        if(sedHendelse.navBruker == null) {
+            return ID_OG_FORDELING
+        }
+
         when (sedHendelse.bucType) {
             P_BUC_01 -> {
                 tildeltEnhet = if(landkode.isNullOrEmpty()) {
