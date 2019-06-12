@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.journalforing.services.kafka
 
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
-import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
@@ -10,7 +9,6 @@ import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.journalforing.utils.counter
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -47,27 +45,17 @@ class SedSendtConsumer(val euxService: EuxService,
                 logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId}")
                 logger.info("rinasakID: ${sedHendelse.rinaSakId}")
-                var aktoerId: String? = null
-                val person: Person?
-                var landkode: String? = null
 
-                if (sedHendelse.navBruker != null) {
-                    aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
-                    logger.info("Aktørid: $aktoerId")
-                    person = personV3Service.hentPerson(sedHendelse.navBruker)
-                    landkode = personV3Service.hentLandKode(person)
-                }
-
+                val landkode = hentLandkode(sedHendelse)
+                val aktoerId = hentAktoerId(sedHendelse)
                 val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
                 val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-                var isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-                var fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
-
-                val journalPostResponse: JournalPostResponse
+                val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+                val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
                 try  {
-                    journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
+                    val journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
                             sedDokumenter = sedDokumenter,
                             forsokFerdigstill = false)
 
@@ -108,5 +96,34 @@ class SedSendtConsumer(val euxService: EuxService,
             throw RuntimeException(ex.message)
         }
         latch.countDown()
+    }
+
+    private fun hentAktoerId(sedHendelse: SedHendelseModel): String? {
+        return if(sedHendelse.navBruker == null) {
+            null
+        } else {
+            try {
+                val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker!!)
+                logger.info("Aktørid: $aktoerId")
+                aktoerId
+            } catch (ex: Exception) {
+                logger.error("Det oppstod en feil ved henting av aktørid: $ex")
+                null
+            }
+        }
+    }
+
+    fun hentLandkode(sedHendelse: SedHendelseModel): String?{
+        return if (sedHendelse.navBruker == null) {
+            null
+        } else {
+            return try {
+                val person = personV3Service.hentPerson(sedHendelse.navBruker)
+                personV3Service.hentLandKode(person)
+            } catch (ex: Exception) {
+                logger.error("Det oppstod en feil ved henting av landkode: $ex")
+                null
+            }
+        }
     }
 }
