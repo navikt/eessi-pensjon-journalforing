@@ -82,7 +82,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 sedHendelseModel.sedType != null -> "Utgående ${sedHendelseModel.sedType}"
                 else -> throw RuntimeException("sedType er null")
             }
-
+            genererJournalpostModelVellykkede.increment()
             return JournalpostModel(JournalpostRequest(
                 avsenderMottaker = avsenderMottaker,
                 behandlingstema = behandlingstema,
