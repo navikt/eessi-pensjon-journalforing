@@ -12,5 +12,5 @@ data class OpprettOppgaveModel(
         var ytelseType: OppgaveRoutingModel.YtelseType?,
         var oppgaveType: Oppgave.OppgaveType,
         var rinaSakId: String?,
-        var filnavn: String?)
+        var filnavn: List<String>?)
 

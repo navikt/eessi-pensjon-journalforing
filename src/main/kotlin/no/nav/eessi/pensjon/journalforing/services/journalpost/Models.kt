@@ -14,6 +14,11 @@ data class JournalPostResponse(
     }
 }
 
+data class JournalpostModel (
+        val journalpostRequest: JournalpostRequest,
+        val uSupporterteVedlegg: List<String>
+)
+
 data class JournalpostRequest(
     val avsenderMottaker: AvsenderMottaker? = null,
     val behandlingstema: String? = null,

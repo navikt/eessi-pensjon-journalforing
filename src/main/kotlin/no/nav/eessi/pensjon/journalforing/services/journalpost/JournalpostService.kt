@@ -33,7 +33,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
     private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
 
-    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel, sedDokumenter: SedDokumenterResponse): JournalpostRequest{
+    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel, sedDokumenter: SedDokumenterResponse): JournalpostModel{
 
         try {
             val avsenderMottaker = when {
@@ -52,26 +52,29 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             }
 
             val dokumenter =  mutableListOf<Dokument>()
-
             dokumenter.add(Dokument(sedHendelseModel.sedId,
                     "SED",
                     listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
                             filtype = sedDokumenter.sed.mimeType!!.decode(),
                             variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
 
+            val uSupporterteVedlegg = ArrayList<String>()
+
             sedDokumenter.vedlegg?.forEach{ vedlegg ->
 
                 if(vedlegg.mimeType == null) {
-                    throw UnsupportedFiletypeException("Mottat en filtype som ikke er supportert klarer ikke å journalføre: ${vedlegg.filnavn}",
-                            sedHendelseModel.rinaSakId,
-                            vedlegg.filnavn)
+                    uSupporterteVedlegg.add(vedlegg.filnavn)
+                } else {
+                    try {
+                        dokumenter.add(Dokument(sedHendelseModel.sedId,
+                                "SED",
+                                listOf(Dokumentvarianter(MimeType.PDF.decode(),
+                                        dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentKonvertererModel(vedlegg.innhold, vedlegg.mimeType)),
+                                        Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
+                    } catch(ex: Exception) {
+                        uSupporterteVedlegg.add(vedlegg.filnavn)
+                    }
                 }
-
-                dokumenter.add(Dokument(sedHendelseModel.sedId,
-                        "SED",
-                        listOf(Dokumentvarianter(MimeType.PDF.decode(),
-                                dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentKonvertererModel(vedlegg.innhold, vedlegg.mimeType)),
-                                Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
             }
             val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
 
@@ -80,45 +83,36 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 else -> throw RuntimeException("sedType er null")
             }
 
-            return JournalpostRequest(
+            return JournalpostModel(JournalpostRequest(
                 avsenderMottaker = avsenderMottaker,
                 behandlingstema = behandlingstema,
                 bruker = bruker,
                 dokumenter = dokumenter,
                 tema = tema,
                 tittel = tittel
-            )
+            ), uSupporterteVedlegg)
         } catch (ex: Exception){
             genererJournalpostModelFeilede.increment()
             logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
-            if(ex is UnsupportedFiletypeException) {
-                throw ex
-            }
             throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
         }
     }
 
-    fun opprettJournalpost(sedHendelseModel: SedHendelseModel,
-                           sedDokumenter: SedDokumenterResponse,
+    fun opprettJournalpost(journalpostRequest: JournalpostRequest,
                            forsokFerdigstill: Boolean) :JournalPostResponse {
 
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         try {
-            logger.info("Kaller Journalpost for å generere en journalpost")
-
-            val requestBody = byggJournalPostRequest(sedHendelseModel = sedHendelseModel, sedDokumenter = sedDokumenter).toString()
-            genererJournalpostModelVellykkede.increment()
-
-
+            logger.info("Kaller Joark for å generere en journalpost")
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
 
             val response = journalpostOidcRestTemplate.exchange(
                     builder.toUriString(),
                     HttpMethod.POST,
-                    HttpEntity(requestBody, headers),
+                    HttpEntity(journalpostRequest.toString(), headers),
                     String::class.java
             )
 
@@ -132,9 +126,6 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             }
         } catch(ex: Exception) {
             opprettJournalpostFeilede.increment()
-            if(ex is UnsupportedFiletypeException) {
-                throw ex
-            }
             logger.error("noe gikk galt under opprettelse av journalpost, $ex")
             throw RuntimeException("Feil ved opprettelse av journalpost, $ex")
         }
@@ -143,7 +134,4 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     fun konverterFilendingTilPdf(filnavn: String): String {
         return filnavn.replaceAfter(".", "pdf")
     }
-
-
-    class UnsupportedFiletypeException(message: String, val rinaSakId: String, val filNavn: String) : Exception(message)
 }

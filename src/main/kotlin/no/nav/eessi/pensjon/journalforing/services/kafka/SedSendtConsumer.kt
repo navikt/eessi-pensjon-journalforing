@@ -54,22 +54,20 @@ class SedSendtConsumer(val euxService: EuxService,
                 val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
                 val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-                try  {
-                    val journalPostResponse = journalpostService.opprettJournalpost(sedHendelseModel = sedHendelse,
-                            sedDokumenter = sedDokumenter,
-                            forsokFerdigstill = false)
+                val requestBody = journalpostService.byggJournalPostRequest(sedHendelseModel = sedHendelse, sedDokumenter = sedDokumenter)
+                val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest,false)
 
-                    oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
-                            journalPostResponse,
-                            aktoerId,
-                            landkode,
-                            fodselsDato,
-                            OppgaveRoutingModel.YtelseType.AP,
-                            Oppgave.OppgaveType.JOURNALFORING,
-                            null,
-                            null))
+                oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
+                        journalPostResponse,
+                        aktoerId,
+                        landkode,
+                        fodselsDato,
+                        OppgaveRoutingModel.YtelseType.AP,
+                        Oppgave.OppgaveType.JOURNALFORING,
+                        null,
+                        null))
 
-                } catch (ex: JournalpostService.UnsupportedFiletypeException) {
+                if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
                     oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                             null,
                             aktoerId,
@@ -77,9 +75,8 @@ class SedSendtConsumer(val euxService: EuxService,
                             fodselsDato,
                             OppgaveRoutingModel.YtelseType.AP,
                             Oppgave.OppgaveType.BEHANDLE_SED,
-                            ex.rinaSakId,
-                            ex.filNavn)
-                    )
+                            sedHendelse.rinaSakId,
+                            requestBody.uSupporterteVedlegg))
                 }
             }
 

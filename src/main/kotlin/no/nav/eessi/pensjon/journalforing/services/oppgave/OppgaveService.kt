@@ -71,12 +71,10 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
                 opprettOppgaveModel.fodselsDato,
                 opprettOppgaveModel.ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
-        if(opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.JOURNALFORING) {
-            oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
-        } else if (opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED) {
-            oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn} tilhørende RINA sakId: ${opprettOppgaveModel.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
-        } else {
-            throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
+        when {
+            opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.JOURNALFORING -> oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
+            opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED -> oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn.toString()} tilhørende RINA sakId: ${opprettOppgaveModel.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+            else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
         }
 
         return oppgave
