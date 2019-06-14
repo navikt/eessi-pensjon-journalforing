@@ -279,6 +279,41 @@ class EessiPensjonJournalforingApplicationTests {
                             )
                     )
 
+            // Mocker fagmodul hent ytelsetype
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/ytelseKravtype/161558/40b5723cd9284af6ac0581f3981f3044"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(
+                                    "{}"
+                            )
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/ytelseKravtype/148161/f899bf659ff04d20bc8b978b186f1ecc"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(
+                                    "{}"
+                            )
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/ytelseKravtype/147729/b12e06dda2c7474b9998c7139c841646"))
+                    .respond(response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(
+                                    "{}"
+                            )
+                    )
+
 
         }
 

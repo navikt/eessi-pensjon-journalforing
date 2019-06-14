@@ -26,7 +26,7 @@ class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
             val response = fagmodulOidcRestTemplate.exchange(path,
                     HttpMethod.GET,
                     HttpEntity(""),
-                    OppgaveRoutingModel.YtelseType::class.java)
+                    String::class.java)
             if (!response.statusCode.isError) {
                 logger.info("Hentet ytelsetype for P_BUC_10 fra fagmodulen: ${response.body}")
                 hentYtelsetypeVellykkede.increment()
