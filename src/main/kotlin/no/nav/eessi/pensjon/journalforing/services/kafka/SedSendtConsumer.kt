@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.kafka
 
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
@@ -22,7 +23,8 @@ class SedSendtConsumer(val euxService: EuxService,
                        val journalpostService: JournalpostService,
                        val oppgaveService: OppgaveService,
                        val aktoerregisterService: AktoerregisterService,
-                       val personV3Service: PersonV3Service) {
+                       val personV3Service: PersonV3Service,
+                       val fagmodulService: FagmodulService) {
 
     private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
     private val latch = CountDownLatch(4)
@@ -41,7 +43,7 @@ class SedSendtConsumer(val euxService: EuxService,
         try {
             val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
-            if (sedHendelse.sektorKode.equals("P")) {
+            if (sedHendelse.sektorKode == "P") {
                 logger.info("Gjelder pensjon: ${sedHendelse.sektorKode}")
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId}")
                 logger.info("rinasakID: ${sedHendelse.rinaSakId}")
@@ -57,12 +59,15 @@ class SedSendtConsumer(val euxService: EuxService,
                 val requestBody = journalpostService.byggJournalPostRequest(sedHendelseModel = sedHendelse, sedDokumenter = sedDokumenter)
                 val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest,false)
 
+                var ytelseType: OppgaveRoutingModel.YtelseType? = null
+                fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
                 oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                         journalPostResponse,
                         aktoerId,
                         landkode,
                         fodselsDato,
-                        OppgaveRoutingModel.YtelseType.AP,
+                        ytelseType,
                         Oppgave.OppgaveType.JOURNALFORING,
                         null,
                         null))
@@ -73,7 +78,7 @@ class SedSendtConsumer(val euxService: EuxService,
                             aktoerId,
                             landkode,
                             fodselsDato,
-                            OppgaveRoutingModel.YtelseType.AP,
+                            ytelseType,
                             Oppgave.OppgaveType.BEHANDLE_SED,
                             sedHendelse.rinaSakId,
                             requestBody.uSupporterteVedlegg))

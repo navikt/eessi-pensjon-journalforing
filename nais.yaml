@@ -56,3 +56,7 @@ fasitResources:
       resourceType: RestService
     - alias: aktoerregister.api.v1
       resourceType: RestService
+    - alias: eessifagmodulservice
+      resourceType: RestService
+
+

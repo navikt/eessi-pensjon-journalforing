@@ -29,6 +29,9 @@ class RestTemplateConfig(val securityTokenExchangeService: STSService) {
     @Value("\${EUX_RINA_API_V1_URL}")
     lateinit var euxUrl: String
 
+    @Value("\${eessifagmodulservice_URL}")
+    lateinit var fagmodulUrl: String
+
     @Value("\${srvusername}")
     lateinit var username: String
 
@@ -79,6 +82,18 @@ class RestTemplateConfig(val securityTokenExchangeService: STSService) {
     fun euxOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         return templateBuilder
                 .rootUri(euxUrl)
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                }
+    }
+
+    @Bean
+    fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+        return templateBuilder
+                .rootUri(fagmodulUrl)
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(RequestResponseLoggerInterceptor(),
                         UsernameToOidcInterceptor(securityTokenExchangeService))

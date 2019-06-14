@@ -36,8 +36,6 @@ class OppgaveRoutingService {
             return ID_OG_FORDELING
         }
 
-        return PENSJON_UTLAND
-
         when (sedHendelse.bucType) {
             P_BUC_01 -> {
                 tildeltEnhet = if(landkode.isNullOrEmpty()) {
