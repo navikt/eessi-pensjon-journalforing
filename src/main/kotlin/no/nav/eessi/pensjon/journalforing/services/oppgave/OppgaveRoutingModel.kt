@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.BucType
 
 data class OppgaveRoutingModel(
@@ -15,11 +14,8 @@ data class OppgaveRoutingModel(
     }
 
     enum class YtelseType {
-        @JsonProperty("01")
         AP,
-        @JsonProperty("02")
         GP,
-        @JsonProperty("03")
         UT
     }
 

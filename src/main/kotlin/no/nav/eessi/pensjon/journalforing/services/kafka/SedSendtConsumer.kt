@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.journalforing.services.kafka
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
@@ -32,6 +33,7 @@ class SedSendtConsumer(val euxService: EuxService,
     private final val consumeSedMessageNavn = "eessipensjon_journalforing.consumeOutgoingSed"
     private val consumeSedMessageVellykkede = counter(consumeSedMessageNavn, "vellykkede")
     private val consumeSedMessageFeilede = counter(consumeSedMessageNavn, "feilede")
+    private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
     fun getLatch(): CountDownLatch {
         return latch
@@ -60,7 +62,10 @@ class SedSendtConsumer(val euxService: EuxService,
                 val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest,false)
 
                 var ytelseType: OppgaveRoutingModel.YtelseType? = null
-                fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
+                if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_10) {
+                    ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
+                }
 
                 oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                         journalPostResponse,
