@@ -4,7 +4,7 @@ package no.nav.eessi.pensjon.journalforing.services.fagmodul
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class HentYtelseTypeResponse(
-        var kravDato: String?,
+        var dato: String?,
         var type: YtelseType
 ) {
 
