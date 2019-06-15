@@ -61,4 +61,21 @@ class EuxServiceTest {
 
             euxService.hentSedDokumenter(rinaNr, dokumentId)
     }
+
+    @Test
+    fun `Gitt gyldig request når etterspør fødselsdato for SED så motta fødselsdato`() {
+        val rinaNr = "123"
+        val dokumentId = "456"
+        doReturn(
+                ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))), HttpStatus.OK))
+                .`when`(mockrestTemplate).exchange(
+                        eq("/buc/$rinaNr/sed/$dokumentId"),
+                        any(HttpMethod::class.java),
+                        any(HttpEntity::class.java),
+                        eq(String::class.java))
+
+
+        val resp = euxService.hentFodselsDato(rinaNr, dokumentId)
+        assertEquals("1980-01-01", resp)
+    }
 }

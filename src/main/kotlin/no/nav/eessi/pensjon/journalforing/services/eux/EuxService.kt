@@ -48,16 +48,6 @@ class EuxService(private val euxOidcRestTemplate: RestTemplate) {
         }
     }
 
-    fun hentFodselsDato(rinaNr: String, dokumentId: String): String {
-        val sed = hentSed(rinaNr, dokumentId)
-        val rootNode = mapper.readValue(sed, JsonNode::class.java)
-        val foedselsdatoNode = rootNode.path("nav")
-                .path("bruker")
-                .path("person")
-                .path("foedselsdato")
-        return foedselsdatoNode.textValue()
-    }
-
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
         val path = "/buc/$rinaNr/sed/$dokumentId"
         try {
@@ -79,5 +69,15 @@ class EuxService(private val euxOidcRestTemplate: RestTemplate) {
             logger.error("Noe gikk galt under henting av SED fra eux: ${ex.message}")
             throw RuntimeException("Feil ved henting av SED")
         }
+    }
+
+    fun hentFodselsDato(rinaNr: String, dokumentId: String): String {
+        val sed = hentSed(rinaNr, dokumentId)
+        val rootNode = mapper.readValue(sed, JsonNode::class.java)
+        val foedselsdatoNode = rootNode.path("nav")
+                .path("bruker")
+                .path("person")
+                .path("foedselsdato")
+        return foedselsdatoNode.textValue()
     }
 }
