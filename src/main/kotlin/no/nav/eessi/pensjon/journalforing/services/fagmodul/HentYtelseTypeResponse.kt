@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class HentYtelseTypeResponse(
         var kravDato: String?,
-        var ytelseType: YtelseType
+        var type: YtelseType
 ) {
 
     enum class YtelseType {
