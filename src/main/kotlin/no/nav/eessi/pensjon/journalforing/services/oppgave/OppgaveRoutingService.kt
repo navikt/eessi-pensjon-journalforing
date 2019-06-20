@@ -266,7 +266,7 @@ class OppgaveRoutingService {
                 }
             }
         }
-        logger.info("Oppgave blir tildelt enhet: $tildeltEnhet")
+        logger.info("Oppgave blir tildelt enhet: : $tildeltEnhet ${tildeltEnhet.name}")
         return tildeltEnhet
     }
 

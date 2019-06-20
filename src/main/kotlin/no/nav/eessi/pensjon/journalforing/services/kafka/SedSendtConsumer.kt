@@ -42,6 +42,7 @@ class SedSendtConsumer(val euxService: EuxService,
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
         logger.info("Innkommet hendelse")
+        logger.debug(hendelse)
         try {
             val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
