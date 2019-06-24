@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentCon
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.utils.counter
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity

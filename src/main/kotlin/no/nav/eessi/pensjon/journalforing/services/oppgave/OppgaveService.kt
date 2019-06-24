@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.utils.counter
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity

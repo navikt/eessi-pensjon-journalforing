@@ -2,8 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.aktoerregister
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -34,9 +33,6 @@ class AktoerregisterService(val aktoerregisterRestTemplate: RestTemplate) {
     private val aktoerregister_teller_type_vellykkede = counter(aktoerregister_teller_navn, "vellykkede")
     private val aktoerregister_teller_type_feilede = counter(aktoerregister_teller_navn, "feilede")
 
-    final fun counter(name: String, type: String): Counter {
-        return Metrics.counter(name, "type", type)
-    }
 
     @Value("\${app.name}")
     lateinit var appName: String

@@ -2,8 +2,6 @@ package no.nav.eessi.pensjon.journalforing.utils
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
 import org.springframework.core.ParameterizedTypeReference
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
@@ -23,8 +21,4 @@ fun mapAnyToJson(data: Any, nonempty: Boolean = false): String {
     } else {
         mapAnyToJson(data)
     }
-}
-
-fun counter(name: String, type: String): Counter {
-    return Metrics.counter(name, "type", type)
 }

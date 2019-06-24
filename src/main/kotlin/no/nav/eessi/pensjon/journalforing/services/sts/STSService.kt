@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import no.nav.eessi.pensjon.journalforing.utils.typeRef
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
-import no.nav.eessi.pensjon.journalforing.utils.counter
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
