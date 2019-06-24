@@ -337,7 +337,7 @@ class EessiPensjonJournalforingApplicationTests {
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(consumerProperties)
         val containerProperties = ContainerProperties(SED_SENDT_TOPIC)
         val container = KafkaMessageListenerContainer<String, String>(consumerFactory, containerProperties)
-        val messageListener = MessageListener<String, String> { record -> System.out.println("Konsumerer melding:  $record") }
+        val messageListener = MessageListener<String, String> { record -> println("Konsumerer melding:  $record") }
 
         container.setupMessageListener(messageListener)
         container.start()
