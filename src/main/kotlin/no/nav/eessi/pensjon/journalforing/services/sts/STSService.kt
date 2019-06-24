@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.journalforing.services.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
-import no.nav.eessi.pensjon.journalforing.utils.typeRef
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
 import no.nav.eessi.pensjon.journalforing.metrics.counter
+import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -16,6 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
 
 private val logger = LoggerFactory.getLogger(STSService::class.java)
+
+inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
 data class SecurityTokenResponse(
         @JsonProperty("access_token")
