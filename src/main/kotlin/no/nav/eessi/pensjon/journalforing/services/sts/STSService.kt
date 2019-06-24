@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing.services.sts
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
 import no.nav.eessi.pensjon.journalforing.metrics.counter
-import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
+import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference

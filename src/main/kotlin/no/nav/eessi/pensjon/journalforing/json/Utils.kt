@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.utils
+package no.nav.eessi.pensjon.journalforing.json
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

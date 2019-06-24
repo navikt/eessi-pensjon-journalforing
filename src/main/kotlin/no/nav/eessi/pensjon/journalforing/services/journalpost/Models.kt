@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.utils.mapAnyToJson
+import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
 
 data class JournalPostResponse(
     val journalpostId: String,
