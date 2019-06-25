@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 
-class OppgaveRoutingModelTest {
+class OppgaveRoutingServiceTest {
 
     val routingService = OppgaveRoutingService()
 

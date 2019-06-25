@@ -37,19 +37,7 @@ class OppgaveRoutingService {
         }
 
         when (sedHendelse.bucType) {
-            P_BUC_01 -> {
-                tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                    NFP_UTLAND_AALESUND
-                } else {
-                    bosatt = mapBosatt(landkode)
-                    if(bosatt == NORGE) {
-                        NFP_UTLAND_AALESUND
-                    } else {
-                        PENSJON_UTLAND
-                    }
-                }
-            }
-            P_BUC_02 -> {
+            P_BUC_01,P_BUC_02,P_BUC_04 -> {
                 tildeltEnhet = if(landkode.isNullOrEmpty()) {
                     NFP_UTLAND_AALESUND
                 } else {
@@ -73,131 +61,7 @@ class OppgaveRoutingService {
                     }
                 }
             }
-            P_BUC_04 -> {
-                tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                    NFP_UTLAND_AALESUND
-                } else {
-                    bosatt = mapBosatt(landkode)
-                    if(bosatt == NORGE) {
-                        NFP_UTLAND_AALESUND
-                    } else {
-                        PENSJON_UTLAND
-                    }
-                }
-            }
-            P_BUC_05 -> {
-                when(bestemKrets(fodselsDato)) {
-                    NFP -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                UFORE_UTLANDSTILSNITT
-                            } else {
-                                UFORE_UTLAND
-                            }
-                        }
-                    }
-                    NAY -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                NFP_UTLAND_AALESUND
-                            } else {
-                                PENSJON_UTLAND
-                            }
-                        }
-                    }
-                }
-            }
-            P_BUC_06 -> {
-                when(bestemKrets(fodselsDato)) {
-                    NFP -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                UFORE_UTLANDSTILSNITT
-                            } else {
-                                UFORE_UTLAND
-                            }
-                        }
-                    }
-                    NAY -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                NFP_UTLAND_AALESUND
-                            } else {
-                                PENSJON_UTLAND
-                            }
-                        }
-                    }
-                }
-            }
-            P_BUC_07 -> {
-                when(bestemKrets(fodselsDato)) {
-                    NFP -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                UFORE_UTLANDSTILSNITT
-                            } else {
-                                UFORE_UTLAND
-                            }
-                        }
-                    }
-                    NAY -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                NFP_UTLAND_AALESUND
-                            } else {
-                                PENSJON_UTLAND
-                            }
-                        }
-                    }
-                }
-            }
-            P_BUC_08 -> {
-                when(bestemKrets(fodselsDato)) {
-                    NFP -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                UFORE_UTLANDSTILSNITT
-                            } else {
-                                UFORE_UTLAND
-                            }
-                        }
-                    }
-                    NAY -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                NFP_UTLAND_AALESUND
-                            } else {
-                                PENSJON_UTLAND
-                            }
-                        }
-                    }
-                }
-            }
-            P_BUC_09 -> {
+            P_BUC_05,P_BUC_06,P_BUC_07,P_BUC_08,P_BUC_09 -> {
                 when(bestemKrets(fodselsDato)) {
                     NFP -> {
                         tildeltEnhet = if(landkode.isNullOrEmpty()) {
@@ -227,19 +91,7 @@ class OppgaveRoutingService {
             }
             P_BUC_10 -> {
                 when(ytelseType) {
-                    AP -> {
-                        tildeltEnhet = if(landkode.isNullOrEmpty()) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            bosatt = mapBosatt(landkode)
-                            if(bosatt == NORGE) {
-                                NFP_UTLAND_AALESUND
-                            } else {
-                                PENSJON_UTLAND
-                            }
-                        }
-                    }
-                    GP -> {
+                    AP,GP -> {
                         tildeltEnhet = if(landkode.isNullOrEmpty()) {
                             NFP_UTLAND_AALESUND
                         } else {
