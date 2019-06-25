@@ -1,700 +1,174 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.BucType.*
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.*
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.random.Random
 import kotlin.test.assertEquals
 
 class OppgaveRoutingServiceTest {
 
     val routingService = OppgaveRoutingService()
 
-    val dateFormat = DateTimeFormatter.ofPattern("ddMMyy")
+    companion object {
+        val MANGLER_LAND = null as String?
+        const val NORGE: String = "NOR"
+        const val UTLAND: String = "SE"
 
-    // NFP krets er en person mellom 18 og 60 år
-    val nfpFodselsDato = LocalDate.now().minusYears(19).format(dateFormat)
+        val dateFormat = DateTimeFormatter.ofPattern("ddMMyy")
+        // NFP krets er en person mellom 18 og 60 år
+        val alder19aar = LocalDate.now().minusYears(19).minusDays(1).format(Companion.dateFormat)
+        val alder18aar = LocalDate.now().minusYears(18).minusDays(1).format(Companion.dateFormat)
+        val alder59aar = LocalDate.now().minusYears(60).plusDays(1).format(Companion.dateFormat)
 
-    // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
-    val nayFodselsDato = LocalDate.now().minusYears(10).format(dateFormat)
+        // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
+        val alder17aar = LocalDate.now().minusYears(18).plusDays(1).format(Companion.dateFormat)
+        val alder60aar = LocalDate.now().minusYears(60).minusDays(1).format(Companion.dateFormat)
+    }
 
+    private fun alleAldre() = "0101" + Random.nextInt(0,100).toString()
 
     @Test
-    fun `Gitt manglende fnr når opppgav routes så send oppgave til ID_OG_FORDELING`() {
+    fun `Gitt manglende fnr når oppgave routes så send oppgave til ID_OG_FORDELING`() {
         val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_01,
+                bucType = P_BUC_01,
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000)
 
-        val enhet = routingService.route(sedHendelse, null, "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
+        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc01, så send oppgave til NFP_UTLAND_AALESUND`() {
+    fun `Gitt manglende buc-type så send oppgave til PENSJON_UTLAND`() {
         val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_01,
+                bucType = null,
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
+                navBruker = "010101010101")
 
-        val enhet = routingService.route(sedHendelse, null, "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
+        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc01, så send oppgave til NFP_UTLAND_AALESUND`() {
+    fun `Gitt manglende ytelsestype for P_BUC_10 så send oppgave til PENSJON_UTLAND`() {
         val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_01,
+                bucType = P_BUC_10,
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
+                navBruker = "010101010101")
 
-        val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
+        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc01, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_01,
+    fun `Routing for vanlige BUC'er`() {
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_01, MANGLER_LAND, alleAldre()))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_01, NORGE, alleAldre()))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, UTLAND, alleAldre()))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_02, MANGLER_LAND, alleAldre()))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_02, NORGE, alleAldre()))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_02, UTLAND, alleAldre()))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, MANGLER_LAND, alleAldre()))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alleAldre()))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_03, UTLAND, alleAldre()))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_04, MANGLER_LAND, alleAldre()))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_04, NORGE, alleAldre()))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_04, UTLAND, alleAldre()))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_05, MANGLER_LAND, alder19aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_05, NORGE, alder19aar))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_05, UTLAND, alder19aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_05, MANGLER_LAND, alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_05, NORGE, alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_05, UTLAND, alder17aar))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_06, MANGLER_LAND, alder19aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_06, NORGE, alder19aar))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_06, UTLAND, alder19aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_06, MANGLER_LAND, alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_06, NORGE, alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_06, UTLAND, alder17aar))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_07, MANGLER_LAND, alder19aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_07, NORGE, alder19aar))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_07, UTLAND, alder19aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_07, MANGLER_LAND, alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_07, NORGE, alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_07, UTLAND, alder17aar))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_08, MANGLER_LAND, alder19aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_08, NORGE, alder19aar))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_08, UTLAND, alder19aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_08, MANGLER_LAND, alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_08, NORGE, alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_08, UTLAND, alder17aar))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_09, MANGLER_LAND, alder19aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_09, NORGE, alder19aar))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_09, UTLAND, alder19aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_09, MANGLER_LAND, alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_09, NORGE, alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_09, UTLAND, alder17aar))
+
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder19aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder19aar, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder19aar, AP))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, AP))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder19aar, GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder19aar, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder19aar, GP))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, GP))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder19aar, UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder19aar, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder19aar, UT))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder17aar, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, UT))
+
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder59aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder59aar, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder59aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, MANGLER_LAND, alder60aar, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder60aar, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, AP))
+    }
+
+    private fun enhetFor(bucType: SedHendelseModel.BucType,
+                         land: String?,
+                         fodselsDato: String,
+                         ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet =
+
+            routingService.route(SedHendelseModel(sektorKode = "",
+                bucType = bucType,
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
+                navBruker = "01010101010"), land, fodselsDato, ytelse)
 
-        val enhet = routingService.route(sedHendelse, "SE", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc02, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_02,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc02, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_02,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc02, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_02,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc03, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_03,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc03, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_03,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc03, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_03,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc04, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_04,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc04, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_04,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc04, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_04,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", "010580", null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc05, NFP_KRETS så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc05, NFP_KRETS, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc05, NFP_KRETS, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc05, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc05, NAY_KRETS, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc05, NAY_KRETS, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_05,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc06, NFP_KRETS så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc06, NFP_KRETS, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc06, NFP_KRETS, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc06, NAY_KRETS, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc06, NAY_KRETS, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc06, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_06,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc07, NFP_KRETS så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc07, NFP_KRETS, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc07, NFP_KRETS, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc07, NAY_KRETS, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc07, NAY_KRETS, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc07, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_07,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc08, NFP_KRETS så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc08, NFP_KRETS, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc08, NFP_KRETS, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc08, NAY_KRETS, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc08, NAY_KRETS, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc08, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_08,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc09, NFP_KRETS så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc09, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc09, NFP_KRETS, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc09, NFP_KRETS, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc09, NAY_KRETS, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc09, NAY_KRETS, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_09,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nayFodselsDato, null)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc10 AP, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.AP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc10 AP, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.AP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc10 AP, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.AP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc10 GP, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.GP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc10 GP, så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.GP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc10 GP, så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.GP)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt manglende landkode når opppgaverouting gjelder for buc10 UT, NAY_KRETS så send oppgave til NFP_UTLAND_AALESUND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, null, nayFodselsDato, OppgaveRoutingModel.YtelseType.UT)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-    }
-
-    @Test
-    fun `Gitt utenlandsk landkode når opppgaverouting gjelder for buc10 UT, så send oppgave til UFORE_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "SE", nfpFodselsDato, OppgaveRoutingModel.YtelseType.UT)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-    }
-
-    @Test
-    fun `Gitt norsk landkode når opppgaverouting gjelder for buc10 UT, så send oppgave til UFORE_UTLANDSTILSNITT`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = SedHendelseModel.BucType.P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010")
-
-        val enhet = routingService.route(sedHendelse, "NOR", nfpFodselsDato, OppgaveRoutingModel.YtelseType.UT)
-        assertEquals(enhet, OppgaveRoutingModel.Enhet.UFORE_UTLANDSTILSNITT)
-    }
 }
