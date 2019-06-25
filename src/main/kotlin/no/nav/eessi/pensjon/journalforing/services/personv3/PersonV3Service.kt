@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.personv3
 
-import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.Metrics
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.models.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.journalforing.models.PersonV3SikkerhetsbegrensningException
 import no.nav.eessi.pensjon.journalforing.services.sts.configureRequestSamlToken
@@ -13,7 +12,6 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,9 +23,6 @@ class PersonV3Service(val service: PersonV3) {
     private val hentperson_teller_type_vellykkede = counter(hentperson_teller_navn, "vellykkede")
     private val hentperson_teller_type_feilede = counter(hentperson_teller_navn, "feilede")
 
-    final fun counter(name: String, type: String): Counter {
-        return Metrics.counter(name, "type", type)
-    }
 
     fun hentPerson(fnr: String): Person {
         logger.info("Henter person fra PersonV3Service")

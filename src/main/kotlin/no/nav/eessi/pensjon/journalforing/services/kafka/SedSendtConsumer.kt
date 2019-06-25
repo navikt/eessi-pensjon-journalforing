@@ -10,7 +10,7 @@ import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
-import no.nav.eessi.pensjon.journalforing.utils.counter
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
