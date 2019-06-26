@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.E
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Krets.NAY
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Krets.NFP
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.UT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -25,70 +25,40 @@ class OppgaveRoutingService {
               fodselsDato: String,
               ytelseType: OppgaveRoutingModel.YtelseType?): Enhet {
 
-        logger.info("Router oppgave for hendelsetype: ${sedHendelse.sedType}, " +
+        val tildeltEnhet =
+                when {
+                    sedHendelse.navBruker == null -> ID_OG_FORDELING
+
+                    NORGE == bosatt(landkode) ->
+                        when (sedHendelse.bucType) {
+                            P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
+                            P_BUC_03 -> UFORE_UTLANDSTILSNITT
+                            P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
+                                if (krets(fodselsDato) == NAY) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                            P_BUC_10 ->
+                                if (ytelseType == UT) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                            else -> NFP_UTLAND_AALESUND // Ukjent buc-type
+                        }
+
+                    else ->
+                        when (sedHendelse.bucType) {
+                            P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
+                            P_BUC_03 -> UFORE_UTLAND
+                            P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
+                                if (krets(fodselsDato) == NAY) UFORE_UTLAND else PENSJON_UTLAND
+                            P_BUC_10 ->
+                                if (ytelseType == UT) UFORE_UTLAND else PENSJON_UTLAND
+                            else -> PENSJON_UTLAND // Ukjent buc-type
+                        }
+                }
+
+        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
+                "for Buc: ${sedHendelse.bucType}, " +
+                "Hendelsetype: ${sedHendelse.sedType?.decode()}, " +
                 "Landkode: $landkode, " +
-                "fødselsdato: $fodselsDato, " +
+                "Fødselsdato: $fodselsDato, " +
                 "Ytelsetype: $ytelseType")
 
-        if(sedHendelse.navBruker == null) {
-            return ID_OG_FORDELING
-        }
-
-        val tildeltEnhet = when (sedHendelse.bucType) {
-            P_BUC_01,P_BUC_02,P_BUC_04 -> {
-                if(bosatt(landkode) == NORGE) {
-                    NFP_UTLAND_AALESUND
-                } else {
-                    PENSJON_UTLAND
-                }
-            }
-            P_BUC_03 -> {
-                if(bosatt(landkode) == NORGE) {
-                    UFORE_UTLANDSTILSNITT
-                } else {
-                    UFORE_UTLAND
-                }
-            }
-            P_BUC_05,P_BUC_06,P_BUC_07,P_BUC_08,P_BUC_09 -> {
-                when(krets(fodselsDato)) {
-                    NFP -> {
-                        if(bosatt(landkode) == NORGE) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            UFORE_UTLAND
-                        }
-                    }
-                    NAY -> {
-                        if(bosatt(landkode) == NORGE) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            PENSJON_UTLAND
-                        }
-                    }
-                }
-            }
-            P_BUC_10 -> {
-                when(ytelseType) {
-                    AP,GP -> {
-                        if(bosatt(landkode) == NORGE) {
-                            NFP_UTLAND_AALESUND
-                        } else {
-                            PENSJON_UTLAND
-                        }
-                    }
-                    UT -> {
-                        if (bosatt(landkode) == NORGE) {
-                            UFORE_UTLANDSTILSNITT
-                        } else {
-                            UFORE_UTLAND
-                        }
-                    }
-                    else -> PENSJON_UTLAND // Ukjent ytelsestype
-                }
-            }
-            else -> PENSJON_UTLAND // Ukjent buc-type
-        }
-        logger.info("Oppgave blir tildelt enhet: : $tildeltEnhet ${tildeltEnhet.name}")
         return tildeltEnhet
     }
 
@@ -106,8 +76,6 @@ class OppgaveRoutingService {
         val dagensDate = LocalDate.now()
         val period = Period.between(fodselsdatoDate, dagensDate)
 
-        return if(  (period.years >= 18) && (period.years < 60)) {
-            NFP
-        } else NAY
+        return if((period.years >= 18) && (period.years < 60)) NAY else NFP
     }
 }
