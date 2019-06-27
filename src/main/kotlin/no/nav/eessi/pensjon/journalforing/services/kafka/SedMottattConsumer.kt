@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 
 @Service
-class SedSendtConsumer(val journalforingService: JournalforingService) {
+class SedMottattConsumer(val journalforingService: JournalforingService) {
 
-    private val logger = LoggerFactory.getLogger(SedSendtConsumer::class.java)
+    private val logger = LoggerFactory.getLogger(SedMottattConsumer::class.java)
     private val latch = CountDownLatch(4)
 
-    private final val consumeSedMessageNavn = "eessipensjon_journalforing.consumeOutgoingSed"
+    private final val consumeSedMessageNavn = "eessipensjon_journalforing.consumeIncomingSed"
     private val consumeSedMessageVellykkede = counter(consumeSedMessageNavn, "vellykkede")
     private val consumeSedMessageFeilede = counter(consumeSedMessageNavn, "feilede")
 
@@ -22,9 +22,9 @@ class SedSendtConsumer(val journalforingService: JournalforingService) {
         return latch
     }
 
-    @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
+    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consume(hendelse: String, acknowledgment: Acknowledgment) {
-        logger.info("Innkommet sedSendt hendelse")
+        logger.info("Innkommet sedMottatt hendelse")
         logger.debug(hendelse)
         try {
             journalforingService.journalfor(hendelse)

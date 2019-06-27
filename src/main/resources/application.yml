@@ -2,6 +2,9 @@ kafka:
   sedSendt:
     topic: eessi-basis-sedSendt-v1
     groupid: eessi-pensjon-group
+  sedMottatt:
+    topic: eessi-basis-sedMottatt-v1
+    groupid: eessi-pensjon-group
 
 #Spring
 spring:

@@ -36,7 +36,7 @@
 //
 //    @Before
 //    fun setup() {
-//        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json")))
+//        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
 //        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
 //        journalpostService = JournalpostService(mockrestTemplate, documentConverterService)
 //    }
