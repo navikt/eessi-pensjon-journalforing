@@ -80,7 +80,6 @@ dependencies {
 	implementation("net.jodah:expiringmap:0.5.9")
 
 	//mock - test
-//	testImplementation("org.mockito:mockito-core:${mockitoVersion}")
 	testImplementation("org.jetbrains.kotlin:kotlin-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 	testImplementation("com.nhaarman:mockito-kotlin-kt1.1:1.5.0")
@@ -101,6 +100,9 @@ dependencies {
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.1.1")
 	implementation("com.twelvemonkeys.imageio:imageio-tiff:3.1.1")
+
+	// Logging
+	implementation("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
 }
 
 compileKotlin {

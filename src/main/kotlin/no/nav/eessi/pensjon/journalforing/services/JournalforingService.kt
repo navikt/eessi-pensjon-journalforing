@@ -81,7 +81,7 @@ class JournalforingService(val euxService: EuxService,
             null
         } else {
             try {
-                val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker!!)
+                val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
                 logger.info("Aktørid: $aktoerId")
                 aktoerId
             } catch (ex: Exception) {

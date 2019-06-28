@@ -38,7 +38,7 @@ class PersonV3ServiceTest {
         every { personV3Service.konfigurerSamlToken() } just Runs
 
         every { personV3.hentPerson(requestBuilder(subject, listOf(Informasjonsbehov.ADRESSE))) } returns
-                HentPersonResponse().withPerson(PersonMock.createWith(subject))
+                HentPersonResponse().withPerson(PersonMock.createWith())
 
         every { personV3.hentPerson(requestBuilder(ikkeFunnetSubject, listOf(Informasjonsbehov.ADRESSE))) } throws
                 HentPersonPersonIkkeFunnet("$ikkeFunnetSubject ikke funnet", PersonIkkeFunnet())
@@ -50,7 +50,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentPerson med gyldig subject`(){
         try {
-            assertEquals(personV3Service.hentPerson(subject), PersonMock.createWith(subject))
+            assertEquals(personV3Service.hentPerson(subject), PersonMock.createWith())
         }catch(ex: Exception){
             assert(false)
         }
@@ -81,7 +81,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentLandKode med gyldig subject`(){
         try {
-            assertEquals("NOR", personV3Service.hentLandKode(PersonMock.createWith(subject)!!))
+            assertEquals("NOR", personV3Service.hentLandKode(PersonMock.createWith()!!))
         }catch(ex: Exception){
             assert(false)
         }
@@ -90,7 +90,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentLandKode med subject uten landkode`(){
         try {
-            assertEquals(null,  personV3Service.hentLandKode(PersonMock.createWith(subject, false)!!))
+            assertEquals(null,  personV3Service.hentLandKode(PersonMock.createWith(false)!!))
         }catch(ex: Exception){
             assert(false)
         }

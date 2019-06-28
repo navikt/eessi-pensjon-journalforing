@@ -124,7 +124,7 @@ class JournalforingIntegrationTest {
 
     private fun capturePersonMock() {
         val slot = slot<String>()
-        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { PersonMock.createWith(slot.captured)!! }
+        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { PersonMock.createWith()!! }
     }
 
     companion object {
