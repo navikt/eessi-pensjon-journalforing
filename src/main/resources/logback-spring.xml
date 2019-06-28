@@ -40,8 +40,6 @@
         <logger name="no.nav.security" level="DEBUG"/>
         <logger name="no.nav.eessi" level="DEBUG"/>
 
-        <include resource="org/springframework/boot/logging/logback/base.xml"/>
-
         <root level="info">
             <appender-ref ref="stdout_json"/>
         </root>
