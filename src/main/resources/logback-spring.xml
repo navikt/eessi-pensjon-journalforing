@@ -24,6 +24,14 @@
     </springProfile>
 
     <springProfile name="local,test, integrationtest">
+        <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%level %logger %msg %n</pattern>
+            </encoder>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeCallerData>true</includeCallerData>
+            </encoder>
+        </appender>
 
         <logger name="io" level="ERROR"/>
         <logger name="org" level="ERROR"/>
@@ -32,8 +40,9 @@
         <logger name="no.nav.security" level="DEBUG"/>
         <logger name="no.nav.eessi" level="DEBUG"/>
 
-        <include resource="org/springframework/boot/logging/logback/base.xml"/>
-
+        <root level="info">
+            <appender-ref ref="stdout_json"/>
+        </root>
     </springProfile>
 
 </configuration>
