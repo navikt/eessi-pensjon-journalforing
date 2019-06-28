@@ -16,7 +16,7 @@ class SedHendelseTest {
 
         val mapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sedsendt/P_BUC_01.json")))
+        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
         val sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
         assertEquals(sedHendelse.id, 1869)
         assertEquals(sedHendelse.sedId, "P2000_b12e06dda2c7474b9998c7139c841646_2")
