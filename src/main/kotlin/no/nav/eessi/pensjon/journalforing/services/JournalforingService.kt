@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
 
 private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -29,7 +30,7 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String, sedHendelseType: SedHendelseModel.SedHendelseType ){
+    fun journalfor(hendelse: String, sedHendelseType: SedHendelseType ){
         val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
         if (sedHendelse.sektorKode == "P") {
