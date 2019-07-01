@@ -19,7 +19,7 @@ class DocumentConverterService {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(DocumentConverterService::class.java) }
 
-    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentKonvertererModel): String  {
+    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentConvertererModel): String  {
         if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){
             logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
             return konverterFra.dokumentInnhold
@@ -56,7 +56,6 @@ class DocumentConverterService {
         val pageWidth = if (rotate) pageSize.height else pageSize.width
         val pageHeight = if (rotate) pageSize.width else pageSize.height
         val contentWidth = pageWidth - 2 * margin
-        //val contentHeight = pageHeight - 2 * margin
         val imageWidth = image.width
         val imageHeight = image.height
         var scale = 1.0f
