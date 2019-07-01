@@ -17,10 +17,14 @@ import org.springframework.web.util.UriComponentsBuilder
 import kotlin.RuntimeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType.*
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 
 @Service
 class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
-                         val dokumentConverterService: DocumentConverterService) {
+                         val dokumentConverterService: DocumentConverterService,
+                         val personV3Service: PersonV3Service) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
@@ -33,17 +37,11 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
     private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
 
-    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel, sedDokumenter: SedDokumenterResponse): JournalpostModel{
-
+    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel,
+                               sedHendelseType: SedHendelseType,
+                               sedDokumenter: SedDokumenterResponse): JournalpostModel {
         try {
-            val avsenderMottaker = when {
-                sedHendelseModel.mottakerNavn == null -> null
-                else -> AvsenderMottaker(
-                        id = sedHendelseModel.mottakerId,
-                        navn = sedHendelseModel.mottakerNavn
-                )
-            }
-
+            val avsenderMottaker = populerAvsenderMottaker(sedHendelseModel, sedHendelseType)
             val behandlingstema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).BEHANDLINGSTEMA
 
             val bruker = when {
@@ -91,7 +89,9 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 tema = tema,
                 tittel = tittel
             ), uSupporterteVedlegg)
-        } catch (ex: Exception){
+        }
+
+    catch (ex: Exception){
             genererJournalpostModelFeilede.increment()
             logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
             throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
@@ -99,6 +99,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     }
 
     fun opprettJournalpost(journalpostRequest: JournalpostRequest,
+                           sedHendelseType: SedHendelseType,
                            forsokFerdigstill: Boolean) :JournalPostResponse {
 
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
@@ -133,5 +134,24 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
 
     fun konverterFilendingTilPdf(filnavn: String): String {
         return filnavn.replaceAfter(".", "pdf")
+    }
+
+    private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
+                                        sedHendelseType: SedHendelseType): AvsenderMottaker {
+        return if(sedHendelse.navBruker.isNullOrEmpty()) {
+            if(sedHendelseType == SENDT) {
+                AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
+            } else {
+                AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn)
+            }
+        } else {
+            try {
+                val person = personV3Service.hentPerson(sedHendelse.navBruker)
+                AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, person.personnavn.sammensattNavn)
+            } catch (ex: Exception) {
+                logger.warn("Klarte ikke å hente navn for fnr: ${sedHendelse.navBruker}, fyller ut UTL_ORG istedenfor")
+                AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
+            }
+        }
     }
 }

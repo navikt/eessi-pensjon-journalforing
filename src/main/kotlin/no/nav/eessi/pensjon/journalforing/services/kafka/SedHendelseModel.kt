@@ -6,11 +6,11 @@ data class SedHendelseModel (
         val sektorKode: String,
         val bucType: BucType?,
         val rinaSakId: String,
-        val avsenderId: String? = null,
-        val avsenderNavn: String? = null,
+        val avsenderId: String,
+        val avsenderNavn: String,
         val avsenderLand: String? = null,
-        val mottakerId: String? = null,
-        val mottakerNavn: String? = null,
+        val mottakerId: String,
+        val mottakerNavn: String,
         val mottakerLand: String? = null,
         val rinaDokumentId: String,
         val rinaDokumentVersjon: String? = null,
@@ -302,6 +302,11 @@ data class SedHendelseModel (
 
     interface Code {
         fun decode(): String
+    }
+
+    enum class SedHendelseType {
+        SENDT,
+        MOTTATT
     }
 }
 

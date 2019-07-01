@@ -29,7 +29,7 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String){
+    fun journalfor(hendelse: String, sedHendelseType: SedHendelseModel.SedHendelseType ){
         val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
         if (sedHendelse.sektorKode == "P") {
@@ -43,8 +43,8 @@ class JournalforingService(val euxService: EuxService,
             val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
             val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-            val requestBody = journalpostService.byggJournalPostRequest(sedHendelseModel = sedHendelse, sedDokumenter = sedDokumenter)
-            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest,false)
+            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, sedHendelseType, sedDokumenter)
+            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, sedHendelseType,false)
 
             var ytelseType: OppgaveRoutingModel.YtelseType? = null
 

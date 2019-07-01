@@ -7,6 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType.MOTTATT
 
 @Service
 class SedMottattConsumer(val journalforingService: JournalforingService) {
@@ -27,7 +28,7 @@ class SedMottattConsumer(val journalforingService: JournalforingService) {
         logger.info("Innkommet sedMottatt hendelse")
         logger.debug(hendelse)
         try {
-            journalforingService.journalfor(hendelse)
+            journalforingService.journalfor(hendelse, MOTTATT)
             consumeSedMessageVellykkede.increment()
             acknowledgment.acknowledge()
         } catch(ex: Exception){

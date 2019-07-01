@@ -20,7 +20,7 @@ data class JournalpostModel (
 )
 
 data class JournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker? = null,
+    val avsenderMottaker: AvsenderMottaker,
     val behandlingstema: String? = null,
     val bruker: Bruker? = null,
     val dokumenter: List<Dokument>, //REQUIRED
@@ -63,15 +63,17 @@ data class Sak(
 )
 
 data class AvsenderMottaker(
-    val id: String? = null,
-    val land: String? = null,
+    val id: String, //REQUIRED
+    val idType: IdType, //REQUIRED
     val navn: String //REQUIRED
 )
 
-//data class Tilleggsopplysninger(
-//    val nokkel: String, //REQUIRED
-//    val verdi: String //REQUIRED
-//)
+enum class IdType {
+    FNR,
+    ORGNR,
+    HPRNR,
+    UTL_ORG
+}
 
 data class Bruker(
     val id: String, //REQUIRED
