@@ -20,7 +20,7 @@ class DocumentConverterService {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(DocumentConverterService::class.java) }
 
-    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentConvertererModel): String  {
+    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentConverterModel): String  {
         if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){
             logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
             return konverterFra.dokumentInnhold

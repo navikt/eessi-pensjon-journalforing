@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.services.documentconverter.DokumentConvertererModel
+import no.nav.eessi.pensjon.journalforing.services.documentconverter.DokumentConverterModel
 import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterService
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
@@ -69,7 +69,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                         dokumenter.add(Dokument(sedHendelseModel.sedId,
                                 "SED",
                                 listOf(Dokumentvarianter(MimeType.PDF.decode(),
-                                        dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentConvertererModel(vedlegg.innhold, vedlegg.mimeType)),
+                                        dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentConverterModel(vedlegg.innhold, vedlegg.mimeType)),
                                         Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
                     } catch(ex: Exception) {
                         uSupporterteVedlegg.add(vedlegg.filnavn)

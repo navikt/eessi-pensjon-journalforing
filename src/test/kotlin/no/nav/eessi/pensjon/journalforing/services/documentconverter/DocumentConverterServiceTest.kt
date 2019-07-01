@@ -17,7 +17,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en gyldig png fil når konverterer til pdf så konverter til pdf med jpeg bilde innhold`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConvertererModel(encodedString, MimeType.PNG)
+        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
 
         assertNotNull(pdf)
@@ -28,7 +28,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en gyldig pdf fil når konverterer til pdf så returner innsendt pdf uten å konvertere`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.pdf"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConvertererModel(encodedString, MimeType.PDF)
+        val convertModel = DokumentConverterModel(encodedString, MimeType.PDF)
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
         assertNotNull(encodedString)
         assertEquals(encodedString, pdf)
@@ -38,7 +38,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en korrupt png fil når konverterer til pdf så kast exception`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/korruptnavlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConvertererModel(encodedString, MimeType.PNG)
+        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
     }
 }
