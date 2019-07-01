@@ -11,7 +11,7 @@ import kotlin.test.assertNotNull
 
 
 class DocumentConverterServiceTest {
-    val converterService = DocumentConverterService()
+    private val converterService = DocumentConverterService()
 
     @Test
     fun `Gitt en gyldig png fil når konverterer til pdf så konverter til pdf med jpeg bilde innhold`() {
@@ -32,5 +32,13 @@ class DocumentConverterServiceTest {
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
         assertNotNull(encodedString)
         assertEquals(encodedString, pdf)
+    }
+
+    @Test(expected = Exception::class)
+    fun `Gitt en korrupt png fil når konverterer til pdf så kast exception`() {
+        val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/korruptnavlogo.png"))
+        val encodedString = Base64.getEncoder().encodeToString(fileContent)
+        val convertModel = DokumentConvertererModel(encodedString, MimeType.PNG)
+        val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
     }
 }

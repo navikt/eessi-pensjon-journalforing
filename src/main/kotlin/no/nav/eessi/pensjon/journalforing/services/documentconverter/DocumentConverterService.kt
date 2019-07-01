@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.lang.RuntimeException
 import java.util.*
 import javax.imageio.ImageIO
 
@@ -32,11 +33,12 @@ class DocumentConverterService {
 
         try {
             val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(konverterFra.dokumentInnhold)))
+                    ?: throw RuntimeException("Klarte ikke å konvertere dokumentet")
             val pdImageXObject = LosslessFactory.createFromImage(doc, awtImage)
             addImage(doc,page,pdImageXObject)
             doc.save(outStream)
         } catch (ex: Exception) {
-            logger.error("Klarte ikke å konvertere dokument: ${ex.printStackTrace()}")
+            logger.error("Klarte ikke å konvertere dokument: $ex")
             throw ex
         } finally {
             doc.close()
