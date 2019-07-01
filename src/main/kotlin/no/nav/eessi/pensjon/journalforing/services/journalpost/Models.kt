@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 
 data class JournalPostResponse(
     val journalpostId: String,
@@ -20,18 +21,18 @@ data class JournalpostModel (
 )
 
 data class JournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker,
-    val behandlingstema: String? = null,
-    val bruker: Bruker? = null,
-    val dokumenter: List<Dokument>, //REQUIRED
-    val eksternReferanseId: String? = null,
-    val journalfoerendeEnhet: String? = null,
-    val journalpostType: String = "UTGAAENDE", //REQUIRED
-    val kanal: String? = null,
-    val sak: Sak? = null,
-    val tema: String = "PEN", //REQUIRED
+        val avsenderMottaker: AvsenderMottaker,
+        val behandlingstema: String? = null,
+        val bruker: Bruker? = null,
+        val dokumenter: List<Dokument>, //REQUIRED
+        val eksternReferanseId: String? = null,
+        val journalfoerendeEnhet: String? = null,
+        val journalpostType: String = "UTGAAENDE", //REQUIRED
+        val kanal: String? = null,
+        val sak: Sak? = null,
+        val tema: String = "PEN", //REQUIRED
   //  val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
-    val tittel: String //REQUIRED
+        val tittel: String //REQUIRED
 ){
     override fun toString(): String {
         return mapAnyToJson(this,true)
@@ -62,6 +63,9 @@ data class Sak(
     val arkivsaksystem: String //REQUIRED
 )
 
+/**
+ * Avsender eller mottaker informasjon for personen eller organisasjonen som enten sender eller mottar dokumentet
+ */
 data class AvsenderMottaker(
     val id: String, //REQUIRED
     val idType: IdType, //REQUIRED
