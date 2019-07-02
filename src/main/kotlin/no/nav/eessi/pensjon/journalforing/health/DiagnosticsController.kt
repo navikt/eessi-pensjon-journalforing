@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.nais
+package no.nav.eessi.pensjon.journalforing.health
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
