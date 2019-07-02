@@ -12,10 +12,10 @@ import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-
 @Service
 class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRoutingService: OppgaveRoutingService) {
+
+    private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
 
     private final val opprettOppgaveNavn = "eessipensjon_journalforing.opprettoppgave"
     private val opprettOppgaveVellykkede = counter(opprettOppgaveNavn, "vellykkede")

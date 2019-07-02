@@ -15,8 +15,6 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
 
-private val logger = LoggerFactory.getLogger(STSService::class.java)
-
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
 data class SecurityTokenResponse(
@@ -45,6 +43,8 @@ data class WellKnownSTS(
  */
 @Service
 class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
+
+    private val logger = LoggerFactory.getLogger(STSService::class.java)
 
     private final val discoverSTSEndpointsNavn = "eessipensjon_journalforing.discoverSTS"
     private val discoverSTSEndpointsVellykkede = counter(discoverSTSEndpointsNavn, "vellykkede")

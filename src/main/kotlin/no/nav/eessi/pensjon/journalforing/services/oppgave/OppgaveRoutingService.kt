@@ -15,10 +15,10 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
-
 @Service
 class OppgaveRoutingService {
+
+    private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(sedHendelse: SedHendelseModel,
               landkode: String?,

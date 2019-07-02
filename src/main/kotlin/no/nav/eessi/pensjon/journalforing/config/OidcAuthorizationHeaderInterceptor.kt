@@ -9,10 +9,9 @@ import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 
-
-private val logger = LoggerFactory.getLogger(OidcAuthorizationHeaderInterceptor::class.java)
-
 class OidcAuthorizationHeaderInterceptor(private val oidcRequestContextHolder: OIDCRequestContextHolder) : ClientHttpRequestInterceptor {
+
+    private val logger = LoggerFactory.getLogger(OidcAuthorizationHeaderInterceptor::class.java)
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         logger.info("sjekker reqiest header for AUTH")
@@ -41,6 +40,8 @@ class OidcAuthorizationHeaderInterceptor(private val oidcRequestContextHolder: O
 }
 
 class OidcAuthorizationHeaderInterceptorSelectIssuer(private val oidcRequestContextHolder: OIDCRequestContextHolder, private val issuer: String) : ClientHttpRequestInterceptor {
+
+    private val logger = LoggerFactory.getLogger(OidcAuthorizationHeaderInterceptorSelectIssuer::class.java)
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         logger.info("sjekker reqiest header for AUTH")

@@ -19,8 +19,6 @@ import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
-private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
-
 @Service
 class JournalforingService(val euxService: EuxService,
                            val journalpostService: JournalpostService,
@@ -28,6 +26,8 @@ class JournalforingService(val euxService: EuxService,
                            val aktoerregisterService: AktoerregisterService,
                            val personV3Service: PersonV3Service,
                            val fagmodulService: FagmodulService)  {
+
+    private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
