@@ -3,8 +3,6 @@ package no.nav.eessi.pensjon.journalforing.services.oppgave
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -57,8 +55,8 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
 }
 
 class OpprettOppgaveModel(
-        val sedHendelse: SedHendelseModel,
-        val journalPostResponse: JournalPostResponse?,
+        val sedType: String,
+        val journalpostId: String?,
         val tildeltEnhetsnr: String,
         val aktoerId: String?,
         val oppgaveType: OppgaveType,
@@ -81,12 +79,12 @@ class OpprettOppgaveModel(
             prioritet = Oppgave.Prioritet.NORM.toString(),
             aktoerId = this.aktoerId,
             aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-            journalpostId = this.journalPostResponse?.journalpostId,
+            journalpostId = journalpostId,
             opprettetAvEnhetsnr = "9999",
             tildeltEnhetsnr = tildeltEnhetsnr,
             fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
             beskrivelse = when {
-                this.oppgaveType == OppgaveType.JOURNALFORING -> this.sedHendelse.sedType.toString()
+                this.oppgaveType == OppgaveType.JOURNALFORING -> sedType
                 this.oppgaveType == OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: ${this.filnavn.toString()} tilhørende RINA sakId: ${this.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
                 else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
             }

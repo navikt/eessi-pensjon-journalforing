@@ -57,8 +57,9 @@ class JournalforingService(val euxService: EuxService,
 
             val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
 
-            oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
-                    journalPostResponse,
+            oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                    sedHendelse.sedType.toString(),
+                    journalPostResponse.journalpostId,
                     tildeltEnhet.enhetsNr,
                     aktoerId,
                     OpprettOppgaveModel.OppgaveType.JOURNALFORING,
@@ -66,7 +67,8 @@ class JournalforingService(val euxService: EuxService,
                     null))
 
             if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
-                oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
+                oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                        sedHendelse.sedType.toString(),
                         null,
                         tildeltEnhet.enhetsNr,
                         aktoerId,
