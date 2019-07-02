@@ -35,83 +35,78 @@ class JournalforingService(val euxService: EuxService,
     fun journalfor(hendelseJson: String, hendelseType: HendelseType){
         val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
-        if (sedHendelse.sektorKode == "P") {
-            logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
+        if (sedHendelse.sektorKode != "P") {
+            // Vi ignorerer alle hendelser som ikke har vår sektorkode
+            return
+        }
 
-            val landkode = hentLandkode(sedHendelse)
-            val aktoerId = hentAktoerId(sedHendelse)
-            val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-            val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-            val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-            val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
+        val person = hentPerson(sedHendelse.navBruker)
+        val landkode = landKode(person)
+        val aktoerId = hentAktoerId(sedHendelse.navBruker)
 
-            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter)
-            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
+        val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+        val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-            var ytelseType: OppgaveRoutingModel.YtelseType? = null
+        val personNavn = person?.personnavn?.sammensattNavn
 
-            if(sedHendelse.bucType == BucType.P_BUC_10) {
-                ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
-            }
+        val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter, personNavn)
+        val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
-            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
+        var ytelseType: OppgaveRoutingModel.YtelseType? = null
 
+        if(sedHendelse.bucType == BucType.P_BUC_10) {
+            ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
+        }
+
+        val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
+
+        oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                sedType = sedHendelse.sedType.toString(),
+                journalpostId = journalPostResponse.journalpostId,
+                tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                aktoerId = aktoerId,
+                oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
+                rinaSakId = null,
+                filnavn = null))
+
+        if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
             oppgaveService.opprettOppgave(OpprettOppgaveModel(
                     sedType = sedHendelse.sedType.toString(),
-                    journalpostId = journalPostResponse.journalpostId,
+                    journalpostId = null,
                     tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                     aktoerId = aktoerId,
-                    oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
-                    rinaSakId = null,
-                    filnavn = null))
-
-            if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
-                oppgaveService.opprettOppgave(OpprettOppgaveModel(
-                        sedType = sedHendelse.sedType.toString(),
-                        journalpostId = null,
-                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                        aktoerId = aktoerId,
-                        oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
-                        rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = requestBody.uSupporterteVedlegg))
-            }
+                    oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
+                    rinaSakId = sedHendelse.rinaSakId,
+                    filnavn = requestBody.uSupporterteVedlegg))
         }
     }
 
-    private fun hentAktoerId(sedHendelse: SedHendelseModel): String? {
-        return if(sedHendelse.navBruker == null) {
+    private fun hentAktoerId(navBruker: String?): String? {
+        if(navBruker == null) return null
+        return try {
+            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker)
+            aktoerId
+        } catch (ex: Exception) {
+            logger.error("Det oppstod en feil ved henting av aktørid: $ex")
             null
-        } else {
-            try {
-                val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(sedHendelse.navBruker)
-                logger.info("Aktørid: $aktoerId")
-                aktoerId
-            } catch (ex: Exception) {
-                logger.error("Det oppstod en feil ved henting av aktørid: $ex")
-                null
-            }
         }
     }
 
-    fun hentLandkode(sedHendelse: SedHendelseModel): String?{
-        return if (sedHendelse.navBruker == null) {
+    private fun hentPerson(navBruker: String?): Person? {
+        if (navBruker == null) return null
+        return try {
+            personV3Service.hentPerson(navBruker)
+        } catch (ex: Exception) {
+            logger.error("Det oppstod en feil ved henting av person: $ex")
             null
-        } else {
-            return try {
-                val person = personV3Service.hentPerson(sedHendelse.navBruker)
-                hentLandKode(person)
-            } catch (ex: Exception) {
-                logger.error("Det oppstod en feil ved henting av landkode: $ex")
-                null
-            }
         }
     }
 
-    fun hentLandKode(person: Person): String? {
-        if( person.bostedsadresse?.strukturertAdresse?.landkode == null){return null}
-        return person.bostedsadresse.strukturertAdresse.landkode.value
-    }
+    private fun landKode(person: Person?) = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
 }
 
 private class HentYtelseTypeMapper {
