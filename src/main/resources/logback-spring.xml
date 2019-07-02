@@ -16,7 +16,7 @@
         <logger name="no.nav" level="INFO"/>
         <logger name="no.nav.security" level="ERROR"/>
         <logger name="no.nav.eessi" level="INFO"/>
-        <logger name="no.nav.eessi.pensjon.journalforing.config.RequestResponseLoggerInterceptor" level="OFF"/>
+        <logger name="no.nav.eessi.pensjon.journalforing.logging.RequestResponseLoggerInterceptor" level="OFF"/>
 
         <root level="info">
             <appender-ref ref="stdout_json"/>
