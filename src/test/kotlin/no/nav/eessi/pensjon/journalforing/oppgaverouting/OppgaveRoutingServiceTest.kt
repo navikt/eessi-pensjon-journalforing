@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
+import no.nav.eessi.pensjon.journalforing.models.BucType
+import no.nav.eessi.pensjon.journalforing.models.BucType.*
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import org.junit.Test
@@ -136,7 +136,7 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, AP))
     }
 
-    private fun enhetFor(bucType: SedHendelseModel.BucType,
+    private fun enhetFor(bucType: BucType,
                          land: String?,
                          fodselsDato: String,
                          ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {

@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.models.sed
 
+import no.nav.eessi.pensjon.journalforing.models.BucType
+
 data class SedHendelseModel (
         val id: Long? = 0,
         val sedId: String? = null,
@@ -17,19 +19,6 @@ data class SedHendelseModel (
         val sedType: SedType?,
         val navBruker: String? = null
 ) {
-
-    enum class BucType {
-        P_BUC_01,
-        P_BUC_02,
-        P_BUC_03,
-        P_BUC_04,
-        P_BUC_05,
-        P_BUC_06,
-        P_BUC_07,
-        P_BUC_08,
-        P_BUC_09,
-        P_BUC_10,
-    }
 
 
     enum class SedType: Code  {

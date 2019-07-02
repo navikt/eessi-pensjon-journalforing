@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services
 
+import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
@@ -51,7 +52,7 @@ class JournalforingService(val euxService: EuxService,
 
             var ytelseType: OppgaveRoutingModel.YtelseType? = null
 
-            if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_10) {
+            if(sedHendelse.bucType == BucType.P_BUC_10) {
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
