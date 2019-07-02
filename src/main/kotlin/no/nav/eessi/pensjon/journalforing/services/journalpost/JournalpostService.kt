@@ -20,6 +20,7 @@ import org.springframework.http.MediaType
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType.*
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostType.*
 
 @Service
 class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
@@ -41,6 +42,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                                sedHendelseType: SedHendelseType,
                                sedDokumenter: SedDokumenterResponse): JournalpostModel {
         try {
+            val journalpostType = populerJournalpostType(sedHendelseType)
             val avsenderMottaker = populerAvsenderMottaker(sedHendelseModel, sedHendelseType)
             val behandlingstema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).BEHANDLINGSTEMA
 
@@ -77,17 +79,18 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
             val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
 
             val tittel = when {
-                sedHendelseModel.sedType != null -> "Utgående ${sedHendelseModel.sedType}"
+                sedHendelseModel.sedType != null -> "${journalpostType.decode()} ${sedHendelseModel.sedType}"
                 else -> throw RuntimeException("sedType er null")
             }
             genererJournalpostModelVellykkede.increment()
             return JournalpostModel(JournalpostRequest(
-                avsenderMottaker = avsenderMottaker,
-                behandlingstema = behandlingstema,
-                bruker = bruker,
-                dokumenter = dokumenter,
-                tema = tema,
-                tittel = tittel
+                    avsenderMottaker = avsenderMottaker,
+                    behandlingstema = behandlingstema,
+                    bruker = bruker,
+                    dokumenter = dokumenter,
+                    tema = tema,
+                    tittel = tittel,
+                    journalpostType = journalpostType
             ), uSupporterteVedlegg)
         }
 
@@ -152,6 +155,14 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 logger.warn("Klarte ikke å hente navn for fnr: ${sedHendelse.navBruker}, fyller ut UTL_ORG istedenfor")
                 AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
             }
+        }
+    }
+
+    private fun populerJournalpostType(sedHendelseType: SedHendelseType): JournalpostType {
+        return if(sedHendelseType == SENDT) {
+            UTGAAENDE
+        } else {
+            INNGAAENDE
         }
     }
 }

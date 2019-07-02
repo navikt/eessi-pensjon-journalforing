@@ -29,7 +29,7 @@ class ModelsTest {
         assertEquals(journalpostRequestModel.dokumenter.first().tittel, "Søknad om foreldrepenger ved fødsel")
         assertEquals(journalpostRequestModel.eksternReferanseId, "string")
         assertEquals(journalpostRequestModel.journalfoerendeEnhet, "9999")
-        assertEquals(journalpostRequestModel.journalpostType, "INNGAAENDE")
+        assertEquals(journalpostRequestModel.journalpostType, JournalpostType.INNGAAENDE)
         assertEquals(journalpostRequestModel.kanal, "NAV_NO")
         assertEquals(journalpostRequestModel.sak?.arkivsaksnummer, "string")
         assertEquals(journalpostRequestModel.sak?.arkivsaksystem, "GSAK")
