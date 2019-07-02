@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing.services.personv3
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.models.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.journalforing.models.PersonV3SikkerhetsbegrensningException
-import no.nav.eessi.pensjon.journalforing.services.sts.configureRequestSamlToken
+import no.nav.eessi.pensjon.journalforing.security.sts.configureRequestSamlToken
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3

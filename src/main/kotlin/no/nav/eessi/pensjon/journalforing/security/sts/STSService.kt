@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.sts
+package no.nav.eessi.pensjon.journalforing.security.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException

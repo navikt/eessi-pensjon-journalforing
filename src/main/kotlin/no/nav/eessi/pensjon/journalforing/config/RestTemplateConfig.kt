@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.config
 
 import no.nav.eessi.pensjon.journalforing.logging.RequestResponseLoggerInterceptor
-import no.nav.eessi.pensjon.journalforing.services.sts.STSService
-import no.nav.eessi.pensjon.journalforing.services.sts.UsernameToOidcInterceptor
+import no.nav.eessi.pensjon.journalforing.security.sts.STSService
+import no.nav.eessi.pensjon.journalforing.security.sts.UsernameToOidcInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
