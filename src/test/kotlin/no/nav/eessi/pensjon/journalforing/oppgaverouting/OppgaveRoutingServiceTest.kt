@@ -1,9 +1,9 @@
-package no.nav.eessi.pensjon.journalforing.services.oppgave
+package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

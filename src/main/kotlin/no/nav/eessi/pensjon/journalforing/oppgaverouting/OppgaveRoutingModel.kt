@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.oppgave
+package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType
 

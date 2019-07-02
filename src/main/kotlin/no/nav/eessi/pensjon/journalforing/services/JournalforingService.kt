@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service

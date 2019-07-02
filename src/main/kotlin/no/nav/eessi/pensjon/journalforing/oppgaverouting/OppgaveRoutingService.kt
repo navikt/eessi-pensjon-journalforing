@@ -1,14 +1,14 @@
-package no.nav.eessi.pensjon.journalforing.services.oppgave
+package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Bosatt
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Bosatt.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Krets.NAY
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Krets.NFP
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.UT
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Bosatt
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Bosatt.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Krets.NAY
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Krets.NFP
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate

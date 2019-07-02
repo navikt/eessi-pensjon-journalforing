@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.fagmodul
 
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 
 
 class HentYtelseTypeMapper {
