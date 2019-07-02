@@ -55,7 +55,7 @@ class JournalforingService(val euxService: EuxService,
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
-            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
+            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
 
             oppgaveService.opprettOppgave(OpprettOppgaveModel(
                     sedType = sedHendelse.sedType.toString(),

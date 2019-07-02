@@ -20,17 +20,18 @@ class OppgaveRoutingService {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
-    fun route(sedHendelse: SedHendelseModel,
+    fun route(navBruker: String?,
+              bucType: SedHendelseModel.BucType?,
               landkode: String?,
               fodselsDato: String,
               ytelseType: OppgaveRoutingModel.YtelseType?): Enhet {
 
         val tildeltEnhet =
                 when {
-                    sedHendelse.navBruker == null -> ID_OG_FORDELING
+                    navBruker == null -> ID_OG_FORDELING
 
                     NORGE == bosatt(landkode) ->
-                        when (sedHendelse.bucType) {
+                        when (bucType) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
                             P_BUC_03 -> UFORE_UTLANDSTILSNITT
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
@@ -41,7 +42,7 @@ class OppgaveRoutingService {
                         }
 
                     else ->
-                        when (sedHendelse.bucType) {
+                        when (bucType) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
                             P_BUC_03 -> UFORE_UTLAND
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
@@ -53,8 +54,7 @@ class OppgaveRoutingService {
                 }
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
-                "for Buc: ${sedHendelse.bucType}, " +
-                "Hendelsetype: ${sedHendelse.sedType?.decode()}, " +
+                "for Buc: $bucType, " +
                 "Landkode: $landkode, " +
                 "Fødselsdato: $fodselsDato, " +
                 "Ytelsetype: $ytelseType")
