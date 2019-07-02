@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.journalforing.services.oppgave
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -13,7 +15,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRoutingService: OppgaveRoutingService) {
+class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate, private val oppgaveRoutingService: OppgaveRoutingService) {
 
     private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
 
@@ -53,9 +55,9 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
             throw RuntimeException("Response from Oppgave is empty")
     }
 
-    fun populerOppgaveFelter(opprettOppgaveModel: OpprettOppgaveModel) : Oppgave {
+    private fun populerOppgaveFelter(opprettOppgaveModel: OpprettOppgaveModel) : Oppgave {
         val oppgave = Oppgave()
-        oppgave.oppgavetype = opprettOppgaveModel.oppgaveType.toString()
+        oppgave.oppgavetype = opprettOppgaveModel.oppgaveType.oppgaveType.toString()
         oppgave.tema = Oppgave.Tema.PENSJON.toString()
         oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
         if(opprettOppgaveModel.aktoerId != null) {
@@ -72,11 +74,134 @@ class OppgaveService(val oppgaveOidcRestTemplate: RestTemplate, val oppgaveRouti
                 opprettOppgaveModel.ytelseType).enhetsNr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
         when {
-            opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.JOURNALFORING -> oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
-            opprettOppgaveModel.oppgaveType == Oppgave.OppgaveType.BEHANDLE_SED -> oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn.toString()} tilhørende RINA sakId: ${opprettOppgaveModel.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+            opprettOppgaveModel.oppgaveType == OpprettOppgaveModel.OppgaveType.JOURNALFORING -> oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
+            opprettOppgaveModel.oppgaveType == OpprettOppgaveModel.OppgaveType.BEHANDLE_SED -> oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn.toString()} tilhørende RINA sakId: ${opprettOppgaveModel.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
             else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
         }
 
         return oppgave
+    }
+}
+
+data class OpprettOppgaveModel(
+        var sedHendelse: SedHendelseModel,
+        var journalPostResponse: JournalPostResponse?,
+        var aktoerId: String?,
+        var landkode: String?,
+        var fodselsDato: String,
+        var ytelseType: OppgaveRoutingModel.YtelseType?,
+        var oppgaveType: OppgaveType,
+        var rinaSakId: String?,
+        var filnavn: List<String>?) {
+
+    enum class OppgaveType(internal val oppgaveType: Oppgave.OppgaveType) {
+        GENERELL(Oppgave.OppgaveType.GENERELL),
+        JOURNALFORING(Oppgave.OppgaveType.JOURNALFORING),
+        BEHANDLE_SED(Oppgave.OppgaveType.JOURNALFORING)
+    }
+
+}
+
+private data class Oppgave(
+        var id: Long? = null,
+        var tildeltEnhetsnr: String? = null,
+        var endretAvEnhetsnr: String? = null,
+        var opprettetAvEnhetsnr: String? = null,
+        var journalpostId: String? = null,
+        var journalpostkilde: String? = null,
+        var behandlesAvApplikasjon: String? = null,
+        var saksreferanse: String? = null,
+        var bnr: String? = null,
+        var samhandlernr: String? = null,
+        var aktoerId: String? = null,
+        var orgnr: String? = null,
+        var tilordnetRessurs: String? = null,
+        var beskrivelse: String? = null,
+        var temagruppe: String? = null,
+        var tema: String? = null,
+        var behandlingstema: String? = null,
+        var oppgavetype: String? = null,
+        var behandlingstype: String? = null,
+        var prioritet: String? = null,
+        var versjon: String? = null,
+        var mappeId: String? = null,
+        var fristFerdigstillelse: String? = null,
+        var aktivDato: String? = null,
+        var opprettetTidspunkt: String? = null,
+        var opprettetAv: String? = null,
+        var endretAv: String? = null,
+        var ferdigstiltTidspunkt: String? = null,
+        var endretTidspunkt: String? = null,
+        var status: String? = null,
+        var metadata: Map<String, String>? = null
+) {
+
+    enum class OppgaveType : Code {
+        GENERELL {
+            override fun toString() = "GEN"
+            override fun decode() = "Generell oppgave"
+        },
+        JOURNALFORING {
+            override fun toString() = "JFR"
+            override fun decode() = "Journalføringsoppgave"
+        },
+        BEHANDLE_SED {
+            override fun toString() = "BEH_SED"
+            override fun decode() = "Behandle SED"
+        }
+    }
+
+    enum class Tema : Code {
+        PENSJON {
+            override fun toString() = "PEN"
+            override fun decode() = "Pensjon"
+        },
+        UFORETRYGD {
+            override fun toString() = "UFO"
+            override fun decode() = "Uføretrygd"
+        }
+    }
+
+    enum class Behandlingstema : Code {
+        UTLAND {
+            override fun toString() = "ab0313"
+            override fun decode() = "Utland"
+        },
+        UFORE_UTLAND {
+            override fun toString() = "ab0039"
+            override fun decode() = "Uføreytelser fra utlandet"
+        }
+    }
+
+    enum class Temagruppe : Code {
+        PENSJON {
+            override fun toString() = "PENS"
+            override fun decode() = "Pensjon"
+        },
+        UFORETRYDG {
+            override fun toString() = "UFRT"
+            override fun decode() = "Uføretrydg"
+        }
+    }
+
+    enum class Behandlingstype : Code {
+        MOTTA_SOKNAD_UTLAND {
+            override fun toString() = "ae0110"
+            override fun decode() = "Motta søknad utland"
+        },
+        UTLAND {
+            override fun toString() = "ae0106"
+            override fun decode() = "Utland"
+        }
+    }
+
+    enum class Prioritet {
+        HOY,
+        NORM,
+        LAV
+    }
+
+    interface Code {
+        fun decode(): String
     }
 }

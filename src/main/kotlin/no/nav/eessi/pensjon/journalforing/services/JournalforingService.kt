@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
-import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -60,7 +59,7 @@ class JournalforingService(val euxService: EuxService,
                     landkode,
                     fodselsDato,
                     ytelseType,
-                    Oppgave.OppgaveType.JOURNALFORING,
+                    OpprettOppgaveModel.OppgaveType.JOURNALFORING,
                     null,
                     null))
 
@@ -71,7 +70,7 @@ class JournalforingService(val euxService: EuxService,
                         landkode,
                         fodselsDato,
                         ytelseType,
-                        Oppgave.OppgaveType.BEHANDLE_SED,
+                        OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
                         sedHendelse.rinaSakId,
                         requestBody.uSupporterteVedlegg))
             }
