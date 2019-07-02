@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.BucType.*
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.*
 import org.junit.Test

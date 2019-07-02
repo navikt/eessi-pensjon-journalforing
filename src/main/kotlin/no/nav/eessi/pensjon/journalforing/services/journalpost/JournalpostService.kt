@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.journalforing.services.documentconverter.DokumentCon
 import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterService
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,8 +17,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import kotlin.RuntimeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType.*
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType.*
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostType.*
 

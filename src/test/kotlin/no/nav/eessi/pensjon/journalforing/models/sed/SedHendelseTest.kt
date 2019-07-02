@@ -1,8 +1,7 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.journalforing.models.sed
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths

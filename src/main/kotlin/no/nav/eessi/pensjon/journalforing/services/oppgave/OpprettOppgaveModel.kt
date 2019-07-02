@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalPostResponse
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 
 data class OpprettOppgaveModel(
         var sedHendelse: SedHendelseModel,

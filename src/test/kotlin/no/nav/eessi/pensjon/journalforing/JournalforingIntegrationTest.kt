@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.slot
 import io.mockk.*
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedSendtConsumer
+import no.nav.eessi.pensjon.journalforing.listeners.SedSendtConsumer
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMock
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
