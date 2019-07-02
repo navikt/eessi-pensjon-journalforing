@@ -26,7 +26,7 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(opprettOppgaveModel: OpprettOppgaveModel) {
 
-        val requestBody = mapAnyToJson(populerOppgaveFelter(opprettOppgaveModel), true)
+        val requestBody = opprettOppgaveModel.asJson()
         val httpEntity = HttpEntity(requestBody)
 
         try {
@@ -54,33 +54,9 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
         if (!responseEntity.hasBody())
             throw RuntimeException("Response from Oppgave is empty")
     }
-
-    private fun populerOppgaveFelter(opprettOppgaveModel: OpprettOppgaveModel) : Oppgave {
-        val oppgave = Oppgave()
-        oppgave.oppgavetype = opprettOppgaveModel.oppgaveType.oppgaveType.toString()
-        oppgave.tema = Oppgave.Tema.PENSJON.toString()
-        oppgave.prioritet = Oppgave.Prioritet.NORM.toString()
-        if(opprettOppgaveModel.aktoerId != null) {
-            oppgave.aktoerId = opprettOppgaveModel.aktoerId
-        }
-        oppgave.aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-        if(opprettOppgaveModel.journalPostResponse != null) {
-            oppgave.journalpostId = opprettOppgaveModel.journalPostResponse!!.journalpostId
-        }
-        oppgave.opprettetAvEnhetsnr = "9999"
-        oppgave.tildeltEnhetsnr = opprettOppgaveModel.tildeltEnhetsnr
-        oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
-        when {
-            opprettOppgaveModel.oppgaveType == OpprettOppgaveModel.OppgaveType.JOURNALFORING -> oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
-            opprettOppgaveModel.oppgaveType == OpprettOppgaveModel.OppgaveType.BEHANDLE_SED -> oppgave.beskrivelse = "Mottatt vedlegg: ${opprettOppgaveModel.filnavn.toString()} tilhørende RINA sakId: ${opprettOppgaveModel.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
-            else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
-        }
-
-        return oppgave
-    }
 }
 
-data class OpprettOppgaveModel(
+class OpprettOppgaveModel(
         val sedHendelse: SedHendelseModel,
         val journalPostResponse: JournalPostResponse?,
         val tildeltEnhetsnr: String,
@@ -89,46 +65,66 @@ data class OpprettOppgaveModel(
         val rinaSakId: String?,
         val filnavn: List<String>?) {
 
-    enum class OppgaveType(val oppgaveType: Oppgave.OppgaveType) {
-        GENERELL(Oppgave.OppgaveType.GENERELL),
-        JOURNALFORING(Oppgave.OppgaveType.JOURNALFORING),
-        BEHANDLE_SED(Oppgave.OppgaveType.JOURNALFORING)
-    }
+    enum class OppgaveType { GENERELL, JOURNALFORING, BEHANDLE_SED }
 
+    fun asJson() = mapAnyToJson(this.toOppgave(), true)
+
+    private val oppgaveTypeMap = mapOf(
+            OppgaveType.GENERELL to Oppgave.OppgaveType.GENERELL,
+            OppgaveType.JOURNALFORING to Oppgave.OppgaveType.JOURNALFORING,
+            OppgaveType.BEHANDLE_SED to Oppgave.OppgaveType.BEHANDLE_SED
+    )
+
+    private fun toOppgave() = Oppgave(
+            oppgavetype = oppgaveTypeMap[this.oppgaveType].toString(),
+            tema = Oppgave.Tema.PENSJON.toString(),
+            prioritet = Oppgave.Prioritet.NORM.toString(),
+            aktoerId = this.aktoerId,
+            aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
+            journalpostId = this.journalPostResponse?.journalpostId,
+            opprettetAvEnhetsnr = "9999",
+            tildeltEnhetsnr = tildeltEnhetsnr,
+            fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
+            beskrivelse = when {
+                this.oppgaveType == OppgaveType.JOURNALFORING -> this.sedHendelse.sedType.toString()
+                this.oppgaveType == OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: ${this.filnavn.toString()} tilhørende RINA sakId: ${this.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+                else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
+            }
+    )
 }
 
 private data class Oppgave(
-        var id: Long? = null,
-        var tildeltEnhetsnr: String? = null,
-        var endretAvEnhetsnr: String? = null,
-        var opprettetAvEnhetsnr: String? = null,
-        var journalpostId: String? = null,
-        var journalpostkilde: String? = null,
-        var behandlesAvApplikasjon: String? = null,
-        var saksreferanse: String? = null,
-        var bnr: String? = null,
-        var samhandlernr: String? = null,
-        var aktoerId: String? = null,
-        var orgnr: String? = null,
-        var tilordnetRessurs: String? = null,
-        var beskrivelse: String? = null,
-        var temagruppe: String? = null,
-        var tema: String? = null,
-        var behandlingstema: String? = null,
-        var oppgavetype: String? = null,
-        var behandlingstype: String? = null,
-        var prioritet: String? = null,
-        var versjon: String? = null,
-        var mappeId: String? = null,
-        var fristFerdigstillelse: String? = null,
-        var aktivDato: String? = null,
-        var opprettetTidspunkt: String? = null,
-        var opprettetAv: String? = null,
-        var endretAv: String? = null,
-        var ferdigstiltTidspunkt: String? = null,
-        var endretTidspunkt: String? = null,
-        var status: String? = null,
-        var metadata: Map<String, String>? = null
+        val id: Long? = null,
+        val tildeltEnhetsnr: String? = null,
+        val endretAvEnhetsnr: String? = null,
+        val opprettetAvEnhetsnr: String? = null,
+        val journalpostId: String? = null,
+        val journalpostkilde: String? = null,
+        val behandlesAvApplikasjon: String? = null,
+        val saksreferanse: String? = null,
+        val bnr: String? = null,
+        val samhandlernr: String? = null,
+        val aktoerId: String? = null,
+        val orgnr: String? = null,
+        val tilordnetRessurs: String? = null,
+        val beskrivelse: String? = null,
+        val temagruppe: String? = null,
+        val tema: String? = null,
+        val behandlingstema: String? = null,
+        val oppgavetype: String? = null,
+        val behandlingstype: String? = null,
+        val prioritet: String? = null,
+        val versjon: String? = null,
+        val mappeId: String? = null,
+        val fristFerdigstillelse: String? = null,
+        val aktivDato: String? = null,
+        val opprettetTidspunkt: String? = null,
+        val opprettetAv: String? = null,
+        val endretAv: String? = null,
+        val ferdigstiltTidspunkt: String? = null,
+        val endretTidspunkt: String? = null,
+        val status: String? = null,
+        val metadata: Map<String, String>? = null
 ) {
 
     enum class OppgaveType : Code {
