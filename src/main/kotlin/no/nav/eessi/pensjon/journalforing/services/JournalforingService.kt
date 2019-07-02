@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -29,7 +31,7 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String){
+    fun journalfor(hendelse: String, sedHendelseType: SedHendelseType ){
         val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
         if (sedHendelse.sektorKode == "P") {
@@ -43,8 +45,8 @@ class JournalforingService(val euxService: EuxService,
             val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
             val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-            val requestBody = journalpostService.byggJournalPostRequest(sedHendelseModel = sedHendelse, sedDokumenter = sedDokumenter)
-            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest,false)
+            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, sedHendelseType, sedDokumenter)
+            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, sedHendelseType,false)
 
             var ytelseType: OppgaveRoutingModel.YtelseType? = null
 
@@ -97,11 +99,16 @@ class JournalforingService(val euxService: EuxService,
         } else {
             return try {
                 val person = personV3Service.hentPerson(sedHendelse.navBruker)
-                personV3Service.hentLandKode(person)
+                hentLandKode(person)
             } catch (ex: Exception) {
                 logger.error("Det oppstod en feil ved henting av landkode: $ex")
                 null
             }
         }
+    }
+
+    fun hentLandKode(person: Person): String? {
+        if( person.bostedsadresse?.strukturertAdresse?.landkode == null){return null}
+        return person.bostedsadresse.strukturertAdresse.landkode.value
     }
 }

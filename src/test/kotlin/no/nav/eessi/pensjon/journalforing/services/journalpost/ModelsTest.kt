@@ -5,6 +5,7 @@ import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.test.assertEquals
+import no.nav.eessi.pensjon.journalforing.services.journalpost.IdType.FNR
 
 class ModelsTest {
 
@@ -14,9 +15,9 @@ class ModelsTest {
         val mapper = jacksonObjectMapper()
         val journalpostRequestJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json")))
         val journalpostRequestModel = mapper.readValue(journalpostRequestJson, JournalpostRequest::class.java)
-        assertEquals(journalpostRequestModel.avsenderMottaker?.id , "string")
-        assertEquals(journalpostRequestModel.avsenderMottaker?.land, "string")
-        assertEquals(journalpostRequestModel.avsenderMottaker?.navn, "string")
+        assertEquals(journalpostRequestModel.avsenderMottaker.id , "12345678912")
+        assertEquals(journalpostRequestModel.avsenderMottaker.idType, FNR)
+        assertEquals(journalpostRequestModel.avsenderMottaker.navn, "navn navnesen")
         assertEquals(journalpostRequestModel.behandlingstema, "ab0001")
         assertEquals(journalpostRequestModel.bruker?.id, "string")
         assertEquals(journalpostRequestModel.bruker?.idType, "FNR")

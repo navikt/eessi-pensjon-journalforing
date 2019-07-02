@@ -20,18 +20,18 @@ data class JournalpostModel (
 )
 
 data class JournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker? = null,
-    val behandlingstema: String? = null,
-    val bruker: Bruker? = null,
-    val dokumenter: List<Dokument>, //REQUIRED
-    val eksternReferanseId: String? = null,
-    val journalfoerendeEnhet: String? = null,
-    val journalpostType: String = "UTGAAENDE", //REQUIRED
-    val kanal: String? = null,
-    val sak: Sak? = null,
-    val tema: String = "PEN", //REQUIRED
+        val avsenderMottaker: AvsenderMottaker,
+        val behandlingstema: String? = null,
+        val bruker: Bruker? = null,
+        val dokumenter: List<Dokument>, //REQUIRED
+        val eksternReferanseId: String? = null,
+        val journalfoerendeEnhet: String? = null,
+        val journalpostType: String = "UTGAAENDE", //REQUIRED
+        val kanal: String? = null,
+        val sak: Sak? = null,
+        val tema: String = "PEN", //REQUIRED
   //  val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
-    val tittel: String //REQUIRED
+        val tittel: String //REQUIRED
 ){
     override fun toString(): String {
         return mapAnyToJson(this,true)
@@ -62,16 +62,21 @@ data class Sak(
     val arkivsaksystem: String //REQUIRED
 )
 
+/**
+ * Avsender eller mottaker informasjon for personen eller organisasjonen som enten sender eller mottar dokumentet
+ */
 data class AvsenderMottaker(
-    val id: String? = null,
-    val land: String? = null,
+    val id: String, //REQUIRED
+    val idType: IdType, //REQUIRED
     val navn: String //REQUIRED
 )
 
-//data class Tilleggsopplysninger(
-//    val nokkel: String, //REQUIRED
-//    val verdi: String //REQUIRED
-//)
+enum class IdType {
+    FNR,
+    ORGNR,
+    HPRNR,
+    UTL_ORG
+}
 
 data class Bruker(
     val id: String, //REQUIRED

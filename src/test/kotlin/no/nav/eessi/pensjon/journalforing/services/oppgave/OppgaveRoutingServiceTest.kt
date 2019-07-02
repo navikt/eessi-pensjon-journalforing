@@ -19,14 +19,14 @@ class OppgaveRoutingServiceTest {
         const val NORGE: String = "NOR"
         const val UTLAND: String = "SE"
 
-        val dateFormat = DateTimeFormatter.ofPattern("ddMMyy")
+        private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMyy")
         // NFP krets er en person mellom 18 og 60 år
-        val alder18aar = LocalDate.now().minusYears(18).minusDays(1).format(Companion.dateFormat)
-        val alder59aar = LocalDate.now().minusYears(60).plusDays(1).format(Companion.dateFormat)
+        val alder18aar: String = LocalDate.now().minusYears(18).minusDays(1).format(dateFormat)
+        val alder59aar: String = LocalDate.now().minusYears(60).plusDays(1).format(dateFormat)
 
         // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
-        val alder17aar = LocalDate.now().minusYears(18).plusDays(1).format(Companion.dateFormat)
-        val alder60aar = LocalDate.now().minusYears(60).minusDays(1).format(Companion.dateFormat)
+        val alder17aar: String = LocalDate.now().minusYears(18).plusDays(1).format(dateFormat)
+        val alder60aar: String = LocalDate.now().minusYears(60).minusDays(1).format(dateFormat)
     }
 
     private fun alleAldre() = "0101" + Random.nextInt(0,100).toString()
@@ -37,7 +37,11 @@ class OppgaveRoutingServiceTest {
                 bucType = P_BUC_01,
                 rinaSakId = "",
                 rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000)
+                sedType = SedHendelseModel.SedType.P2000,
+                avsenderId = "",
+                avsenderNavn = "",
+                mottakerId = "",
+                mottakerNavn = "")
 
         val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, ID_OG_FORDELING)
@@ -50,7 +54,11 @@ class OppgaveRoutingServiceTest {
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "010101010101")
+                navBruker = "010101010101",
+                avsenderId = "",
+                avsenderNavn = "",
+                mottakerId = "",
+                mottakerNavn = "")
 
         val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, PENSJON_UTLAND)
@@ -63,7 +71,11 @@ class OppgaveRoutingServiceTest {
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "010101010101")
+                navBruker = "010101010101",
+                avsenderId = "",
+                avsenderNavn = "",
+                mottakerId = "",
+                mottakerNavn = "")
 
         val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, PENSJON_UTLAND)
@@ -166,6 +178,10 @@ class OppgaveRoutingServiceTest {
                 rinaSakId = "",
                 rinaDokumentId = "",
                 sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010"), land, fodselsDato, ytelse)
+                navBruker = "01010101010",
+                avsenderId = "",
+                avsenderNavn = "",
+                mottakerId = "",
+                mottakerNavn = ""), land, fodselsDato, ytelse)
 
 }
