@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.kafka
+package no.nav.eessi.pensjon.journalforing.models.sed
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

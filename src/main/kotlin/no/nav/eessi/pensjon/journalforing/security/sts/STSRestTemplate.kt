@@ -1,6 +1,6 @@
-package no.nav.eessi.pensjon.journalforing.services.sts
+package no.nav.eessi.pensjon.journalforing.security.sts
 
-import no.nav.eessi.pensjon.journalforing.config.RequestResponseLoggerInterceptor
+import no.nav.eessi.pensjon.journalforing.logging.RequestResponseLoggerInterceptor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder

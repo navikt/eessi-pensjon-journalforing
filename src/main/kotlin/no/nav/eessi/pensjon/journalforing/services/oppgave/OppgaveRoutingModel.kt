@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.BucType
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType
 
 data class OppgaveRoutingModel(
         var bucType: BucType,

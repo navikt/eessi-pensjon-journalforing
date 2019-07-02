@@ -4,8 +4,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.spyk
-import no.nav.eessi.pensjon.journalforing.models.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.journalforing.models.PersonV3SikkerhetsbegrensningException
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3

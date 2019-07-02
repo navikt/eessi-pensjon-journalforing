@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.sts
+package no.nav.eessi.pensjon.journalforing.security.sts
 
 /**
  * Documentation at https://confluence.adeo.no/display/KES/STS+-+Brukerdokumentasjon

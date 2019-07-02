@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.kafka
+package no.nav.eessi.pensjon.journalforing.models.sed
 
 data class SedHendelseModel (
         val id: Long? = 0,

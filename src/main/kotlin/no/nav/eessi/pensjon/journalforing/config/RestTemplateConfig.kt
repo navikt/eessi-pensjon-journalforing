@@ -1,10 +1,12 @@
 package no.nav.eessi.pensjon.journalforing.config
 
-import no.nav.eessi.pensjon.journalforing.services.sts.STSService
-import no.nav.eessi.pensjon.journalforing.services.sts.UsernameToOidcInterceptor
+import no.nav.eessi.pensjon.journalforing.logging.RequestResponseLoggerInterceptor
+import no.nav.eessi.pensjon.journalforing.security.sts.STSService
+import no.nav.eessi.pensjon.journalforing.security.sts.UsernameToOidcInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpRequest
 import org.springframework.http.MediaType
 import org.springframework.http.client.*
@@ -14,7 +16,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-@Component
+@Configuration
 class RestTemplateConfig(val securityTokenExchangeService: STSService) {
 
     @Value("\${aktoerregister.api.v1.url}")

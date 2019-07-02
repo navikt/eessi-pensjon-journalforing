@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.services.kafka
+package no.nav.eessi.pensjon.journalforing.listeners
 
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.services.JournalforingService
@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType.MOTTATT
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType.MOTTATT
 
 @Service
 class SedMottattConsumer(val journalforingService: JournalforingService) {

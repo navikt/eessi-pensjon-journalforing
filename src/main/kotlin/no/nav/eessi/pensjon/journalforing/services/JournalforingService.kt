@@ -5,8 +5,8 @@ import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.services.kafka.sedMapper
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
 import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
@@ -16,10 +16,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
-
-private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
 @Service
 class JournalforingService(val euxService: EuxService,
@@ -28,6 +26,8 @@ class JournalforingService(val euxService: EuxService,
                            val aktoerregisterService: AktoerregisterService,
                            val personV3Service: PersonV3Service,
                            val fagmodulService: FagmodulService)  {
+
+    private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 

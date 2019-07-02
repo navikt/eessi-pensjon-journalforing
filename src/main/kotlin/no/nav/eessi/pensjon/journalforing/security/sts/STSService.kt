@@ -1,21 +1,20 @@
-package no.nav.eessi.pensjon.journalforing.services.sts
+package no.nav.eessi.pensjon.journalforing.security.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.eessi.pensjon.journalforing.SystembrukerTokenException
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
-
-private val logger = LoggerFactory.getLogger(STSService::class.java)
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -45,6 +44,8 @@ data class WellKnownSTS(
  */
 @Service
 class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
+
+    private val logger = LoggerFactory.getLogger(STSService::class.java)
 
     private final val discoverSTSEndpointsNavn = "eessipensjon_journalforing.discoverSTS"
     private val discoverSTSEndpointsVellykkede = counter(discoverSTSEndpointsNavn, "vellykkede")
@@ -104,3 +105,6 @@ class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
             throw RuntimeException("SecurityTokenExchange received http-error ${responseEntity.statusCode}:${responseEntity.statusCodeValue}")
     }
 }
+
+@ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE)
+class SystembrukerTokenException(message: String) : Exception(message)

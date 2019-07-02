@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.BucType.*
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
+import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet
@@ -15,10 +15,10 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
-
 @Service
 class OppgaveRoutingService {
+
+    private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(sedHendelse: SedHendelseModel,
               landkode: String?,
