@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.models.sed
 
 import no.nav.eessi.pensjon.journalforing.models.BucType
+import no.nav.eessi.pensjon.journalforing.models.SedType
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -22,7 +23,7 @@ class SedMapperTest {
         assertEquals(sedHendelse.mottakerNavn, "NAV Test 07")
         assertEquals(sedHendelse.rinaDokumentId, "b12e06dda2c7474b9998c7139c841646")
         assertEquals(sedHendelse.rinaDokumentVersjon, "2")
-        assertEquals(sedHendelse.sedType, SedHendelseModel.SedType.P2000)
+        assertEquals(sedHendelse.sedType, SedType.P2000)
         assertEquals(sedHendelse.navBruker, "12378945601")
     }
 }
