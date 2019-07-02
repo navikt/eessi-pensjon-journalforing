@@ -55,13 +55,13 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
 }
 
 class OpprettOppgaveModel(
-        val sedType: String,
-        val journalpostId: String?,
-        val tildeltEnhetsnr: String,
-        val aktoerId: String?,
+        private val sedType: String,
+        private val journalpostId: String?,
+        private val tildeltEnhetsnr: String,
+        private val aktoerId: String?,
         val oppgaveType: OppgaveType,
-        val rinaSakId: String?,
-        val filnavn: List<String>?) {
+        private val rinaSakId: String?,
+        private val filnavn: List<String>?) {
 
     enum class OppgaveType { GENERELL, JOURNALFORING, BEHANDLE_SED }
 
