@@ -1,5 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.models.sed
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.models.SedType
 
@@ -20,7 +23,11 @@ data class SedHendelseModel (
         val sedType: SedType?,
         val navBruker: String? = null
 ) {
+    companion object {
+        private val sedMapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
-
+        fun fromJson(json: String): SedHendelseModel = sedMapper.readValue(json, SedHendelseModel::class.java)
+    }
 }
+
 

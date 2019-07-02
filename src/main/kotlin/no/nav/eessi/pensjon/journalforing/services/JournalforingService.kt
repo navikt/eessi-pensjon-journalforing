@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -33,8 +32,8 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String, sedHendelseType: HendelseType){
-        val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
+    fun journalfor(hendelseJson: String, hendelseType: HendelseType){
+        val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
         if (sedHendelse.sektorKode == "P") {
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
@@ -47,8 +46,8 @@ class JournalforingService(val euxService: EuxService,
             val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
             val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, sedHendelseType, sedDokumenter)
-            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, sedHendelseType,false)
+            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter)
+            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
             var ytelseType: OppgaveRoutingModel.YtelseType? = null
 
