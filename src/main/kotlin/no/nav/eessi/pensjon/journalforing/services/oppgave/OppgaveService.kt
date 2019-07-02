@@ -84,17 +84,17 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate, private 
 }
 
 data class OpprettOppgaveModel(
-        var sedHendelse: SedHendelseModel,
-        var journalPostResponse: JournalPostResponse?,
-        var aktoerId: String?,
-        var landkode: String?,
-        var fodselsDato: String,
-        var ytelseType: OppgaveRoutingModel.YtelseType?,
-        var oppgaveType: OppgaveType,
-        var rinaSakId: String?,
-        var filnavn: List<String>?) {
+        val sedHendelse: SedHendelseModel,
+        val journalPostResponse: JournalPostResponse?,
+        val aktoerId: String?,
+        val landkode: String?,
+        val fodselsDato: String,
+        val ytelseType: OppgaveRoutingModel.YtelseType?,
+        val oppgaveType: OppgaveType,
+        val rinaSakId: String?,
+        val filnavn: List<String>?) {
 
-    enum class OppgaveType(internal val oppgaveType: Oppgave.OppgaveType) {
+    enum class OppgaveType(val oppgaveType: Oppgave.OppgaveType) {
         GENERELL(Oppgave.OppgaveType.GENERELL),
         JOURNALFORING(Oppgave.OppgaveType.JOURNALFORING),
         BEHANDLE_SED(Oppgave.OppgaveType.JOURNALFORING)
