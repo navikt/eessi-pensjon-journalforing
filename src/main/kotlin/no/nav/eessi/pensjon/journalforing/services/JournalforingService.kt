@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
@@ -33,7 +33,7 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String, sedHendelseType: SedHendelseType ){
+    fun journalfor(hendelse: String, sedHendelseType: HendelseType){
         val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
 
         if (sedHendelse.sektorKode == "P") {

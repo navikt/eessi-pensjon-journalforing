@@ -17,8 +17,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import kotlin.RuntimeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType.*
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.models.HendelseType.*
+import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostType.*
 
@@ -39,7 +39,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
 
     fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel,
-                               sedHendelseType: SedHendelseType,
+                               sedHendelseType: HendelseType,
                                sedDokumenter: SedDokumenterResponse): JournalpostModel {
         try {
             val journalpostType = populerJournalpostType(sedHendelseType)
@@ -102,7 +102,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     }
 
     fun opprettJournalpost(journalpostRequest: JournalpostRequest,
-                           sedHendelseType: SedHendelseType,
+                           sedHendelseType: HendelseType,
                            forsokFerdigstill: Boolean) :JournalPostResponse {
 
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
@@ -140,7 +140,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     }
 
     private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
-                                        sedHendelseType: SedHendelseType): AvsenderMottaker {
+                                        sedHendelseType: HendelseType): AvsenderMottaker {
         return if(sedHendelse.navBruker.isNullOrEmpty()) {
             if(sedHendelseType == SENDT) {
                 AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
@@ -158,7 +158,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
         }
     }
 
-    private fun populerJournalpostType(sedHendelseType: SedHendelseType): JournalpostType {
+    private fun populerJournalpostType(sedHendelseType: HendelseType): JournalpostType {
         return if(sedHendelseType == SENDT) {
             UTGAAENDE
         } else {

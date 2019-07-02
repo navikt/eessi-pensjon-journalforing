@@ -22,9 +22,5 @@ data class SedHendelseModel (
 ) {
 
 
-    enum class SedHendelseType {
-        SENDT,
-        MOTTATT
-    }
 }
 

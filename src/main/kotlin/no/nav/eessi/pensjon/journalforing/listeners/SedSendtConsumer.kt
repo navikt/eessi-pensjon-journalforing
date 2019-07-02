@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType.SENDT
+import no.nav.eessi.pensjon.journalforing.models.HendelseType.SENDT
 
 @Service
 class SedSendtConsumer(val journalforingService: JournalforingService) {
