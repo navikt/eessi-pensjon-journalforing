@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Service
-class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate, private val oppgaveRoutingService: OppgaveRoutingService) {
+class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
 
     private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
 
@@ -68,10 +68,7 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate, private 
             oppgave.journalpostId = opprettOppgaveModel.journalPostResponse!!.journalpostId
         }
         oppgave.opprettetAvEnhetsnr = "9999"
-        oppgave.tildeltEnhetsnr = oppgaveRoutingService.route(opprettOppgaveModel.sedHendelse,
-                opprettOppgaveModel.landkode,
-                opprettOppgaveModel.fodselsDato,
-                opprettOppgaveModel.ytelseType).enhetsNr
+        oppgave.tildeltEnhetsnr = opprettOppgaveModel.tildeltEnhetsnr
         oppgave.fristFerdigstillelse = LocalDate.now().plusDays(1).toString()
         when {
             opprettOppgaveModel.oppgaveType == OpprettOppgaveModel.OppgaveType.JOURNALFORING -> oppgave.beskrivelse = opprettOppgaveModel.sedHendelse.sedType.toString()
@@ -86,10 +83,8 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate, private 
 data class OpprettOppgaveModel(
         val sedHendelse: SedHendelseModel,
         val journalPostResponse: JournalPostResponse?,
+        val tildeltEnhetsnr: String,
         val aktoerId: String?,
-        val landkode: String?,
-        val fodselsDato: String,
-        val ytelseType: OppgaveRoutingModel.YtelseType?,
         val oppgaveType: OppgaveType,
         val rinaSakId: String?,
         val filnavn: List<String>?) {

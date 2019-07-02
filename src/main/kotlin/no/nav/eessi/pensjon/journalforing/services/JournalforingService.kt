@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
@@ -24,7 +25,8 @@ class JournalforingService(val euxService: EuxService,
                            val oppgaveService: OppgaveService,
                            val aktoerregisterService: AktoerregisterService,
                            val personV3Service: PersonV3Service,
-                           val fagmodulService: FagmodulService)  {
+                           val fagmodulService: FagmodulService,
+                           val oppgaveRoutingService: OppgaveRoutingService)  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -53,12 +55,12 @@ class JournalforingService(val euxService: EuxService,
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
+            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
+
             oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                     journalPostResponse,
+                    tildeltEnhet.enhetsNr,
                     aktoerId,
-                    landkode,
-                    fodselsDato,
-                    ytelseType,
                     OpprettOppgaveModel.OppgaveType.JOURNALFORING,
                     null,
                     null))
@@ -66,10 +68,8 @@ class JournalforingService(val euxService: EuxService,
             if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
                 oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
                         null,
+                        tildeltEnhet.enhetsNr,
                         aktoerId,
-                        landkode,
-                        fodselsDato,
-                        ytelseType,
                         OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
                         sedHendelse.rinaSakId,
                         requestBody.uSupporterteVedlegg))
