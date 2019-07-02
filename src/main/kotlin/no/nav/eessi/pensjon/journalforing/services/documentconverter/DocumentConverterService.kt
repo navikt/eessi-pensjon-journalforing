@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.lang.RuntimeException
 import java.util.*
 import javax.imageio.ImageIO
 
@@ -19,7 +20,7 @@ class DocumentConverterService {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(DocumentConverterService::class.java) }
 
-    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentKonvertererModel): String  {
+    fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentConverterModel): String  {
         if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){
             logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
             return konverterFra.dokumentInnhold
@@ -32,11 +33,12 @@ class DocumentConverterService {
 
         try {
             val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(konverterFra.dokumentInnhold)))
+                    ?: throw RuntimeException("Klarte ikke å konvertere dokumentet")
             val pdImageXObject = LosslessFactory.createFromImage(doc, awtImage)
             addImage(doc,page,pdImageXObject)
             doc.save(outStream)
         } catch (ex: Exception) {
-            logger.error("Klarte ikke å konvertere dokument: ${ex.printStackTrace()}")
+            logger.error("Klarte ikke å konvertere dokument: $ex")
             throw ex
         } finally {
             doc.close()
@@ -56,7 +58,6 @@ class DocumentConverterService {
         val pageWidth = if (rotate) pageSize.height else pageSize.width
         val pageHeight = if (rotate) pageSize.width else pageSize.height
         val contentWidth = pageWidth - 2 * margin
-        //val contentHeight = pageHeight - 2 * margin
         val imageWidth = image.width
         val imageHeight = image.height
         var scale = 1.0f
