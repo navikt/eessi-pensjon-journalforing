@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.services.kafka.SedHendelseModel.SedHendelseType
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -98,11 +99,16 @@ class JournalforingService(val euxService: EuxService,
         } else {
             return try {
                 val person = personV3Service.hentPerson(sedHendelse.navBruker)
-                personV3Service.hentLandKode(person)
+                hentLandKode(person)
             } catch (ex: Exception) {
                 logger.error("Det oppstod en feil ved henting av landkode: $ex")
                 null
             }
         }
+    }
+
+    fun hentLandKode(person: Person): String? {
+        if( person.bostedsadresse?.strukturertAdresse?.landkode == null){return null}
+        return person.bostedsadresse.strukturertAdresse.landkode.value
     }
 }

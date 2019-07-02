@@ -59,10 +59,4 @@ class PersonV3Service(val service: PersonV3) {
     fun konfigurerSamlToken(){
         configureRequestSamlToken(service)
     }
-
-
-    fun hentLandKode(person: Person): String? {
-        if( person.bostedsadresse?.strukturertAdresse?.landkode == null){return null}
-        return person.bostedsadresse.strukturertAdresse.landkode.value
-    }
 }

@@ -78,24 +78,6 @@ class PersonV3ServiceTest {
         }
     }
 
-    @Test
-    fun `Kaller hentLandKode med gyldig subject`(){
-        try {
-            assertEquals("NOR", personV3Service.hentLandKode(PersonMock.createWith()!!))
-        }catch(ex: Exception){
-            assert(false)
-        }
-    }
-
-    @Test
-    fun `Kaller hentLandKode med subject uten landkode`(){
-        try {
-            assertEquals(null,  personV3Service.hentLandKode(PersonMock.createWith(false)!!))
-        }catch(ex: Exception){
-            assert(false)
-        }
-    }
-
     fun requestBuilder(norskIdent: String, informasjonsbehov: List<Informasjonsbehov>): HentPersonRequest{
         return HentPersonRequest().apply {
             withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(norskIdent)))
