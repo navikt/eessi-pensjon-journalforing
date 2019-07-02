@@ -58,23 +58,23 @@ class JournalforingService(val euxService: EuxService,
             val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
 
             oppgaveService.opprettOppgave(OpprettOppgaveModel(
-                    sedHendelse.sedType.toString(),
-                    journalPostResponse.journalpostId,
-                    tildeltEnhet.enhetsNr,
-                    aktoerId,
-                    OpprettOppgaveModel.OppgaveType.JOURNALFORING,
-                    null,
-                    null))
+                    sedType = sedHendelse.sedType.toString(),
+                    journalpostId = journalPostResponse.journalpostId,
+                    tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                    aktoerId = aktoerId,
+                    oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
+                    rinaSakId = null,
+                    filnavn = null))
 
             if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
                 oppgaveService.opprettOppgave(OpprettOppgaveModel(
-                        sedHendelse.sedType.toString(),
-                        null,
-                        tildeltEnhet.enhetsNr,
-                        aktoerId,
-                        OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
-                        sedHendelse.rinaSakId,
-                        requestBody.uSupporterteVedlegg))
+                        sedType = sedHendelse.sedType.toString(),
+                        journalpostId = null,
+                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                        aktoerId = aktoerId,
+                        oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
+                        rinaSakId = sedHendelse.rinaSakId,
+                        filnavn = requestBody.uSupporterteVedlegg))
             }
         }
     }
