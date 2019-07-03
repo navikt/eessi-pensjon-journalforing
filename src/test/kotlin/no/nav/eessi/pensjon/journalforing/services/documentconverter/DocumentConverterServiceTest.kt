@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.documentconverter
 
-import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import org.apache.commons.io.FileUtils
 import org.junit.Test
 import java.util.*
@@ -17,7 +16,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en gyldig png fil når konverterer til pdf så konverter til pdf med jpeg bilde innhold`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
+        val convertModel = DokumentConverterModel(encodedString, "image/png")
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
 
         assertNotNull(pdf)
@@ -28,7 +27,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en gyldig pdf fil når konverterer til pdf så returner innsendt pdf uten å konvertere`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.pdf"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PDF)
+        val convertModel = DokumentConverterModel(encodedString, "application/pdf")
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
         assertNotNull(encodedString)
         assertEquals(encodedString, pdf)
@@ -38,7 +37,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en korrupt png fil når konverterer til pdf så kast exception`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/korruptnavlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
+        val convertModel = DokumentConverterModel(encodedString, "image/png")
         val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.documentconverter
 
-import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import org.springframework.stereotype.Service
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -21,11 +20,11 @@ class DocumentConverterService {
     private val logger: Logger by lazy { LoggerFactory.getLogger(DocumentConverterService::class.java) }
 
     fun konverterFraBildeTilBase64EncodedPDF(konverterFra: DokumentConverterModel): String  {
-        if(konverterFra.mimeType == MimeType.PDF || konverterFra.mimeType == MimeType.PDFA){
+        if(konverterFra.mimeType == "application/pdf" || konverterFra.mimeType == "application/pdfa"){
             logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
             return konverterFra.dokumentInnhold
         }
-        logger.info("Konverterer dokument fra ${konverterFra.mimeType} til ${MimeType.PDF}")
+        logger.info("Konverterer dokument fra ${konverterFra.mimeType} til application/pdf")
         val doc: PDDocument?
         doc = PDDocument()
         val page = PDPage()
