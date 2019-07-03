@@ -141,19 +141,14 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
                                         sedHendelseType: HendelseType,
                                         personNavn: String?): AvsenderMottaker {
-        return if(sedHendelse.navBruker.isNullOrEmpty()) {
+        return if(sedHendelse.navBruker.isNullOrEmpty() || personNavn.isNullOrEmpty()) {
             if(sedHendelseType == SENDT) {
-                AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
+                AvsenderMottaker(sedHendelse.avsenderId, IdType.ORGNR, sedHendelse.avsenderNavn)
             } else {
                 AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn)
             }
         } else {
-            if (personNavn != null) {
-                AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, personNavn)
-            } else {
-                logger.warn("Klarte ikke å hente navn for fnr: ${sedHendelse.navBruker}, fyller ut UTL_ORG istedenfor")
-                AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
-            }
+            AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, personNavn)
         }
     }
 
