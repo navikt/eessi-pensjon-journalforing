@@ -19,13 +19,11 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import no.nav.eessi.pensjon.journalforing.models.HendelseType.*
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
-import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostType.*
 
 @Service
 class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
-                         val dokumentConverterService: DocumentConverterService,
-                         val personV3Service: PersonV3Service) {
+                         val dokumentConverterService: DocumentConverterService) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
@@ -40,10 +38,11 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
 
     fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel,
                                sedHendelseType: HendelseType,
-                               sedDokumenter: SedDokumenterResponse): JournalpostModel {
+                               sedDokumenter: SedDokumenterResponse,
+                               personNavn: String?): JournalpostModel {
         try {
             val journalpostType = populerJournalpostType(sedHendelseType)
-            val avsenderMottaker = populerAvsenderMottaker(sedHendelseModel, sedHendelseType)
+            val avsenderMottaker = populerAvsenderMottaker(sedHendelseModel, sedHendelseType, personNavn)
             val behandlingstema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).BEHANDLINGSTEMA
 
             val bruker = when {
@@ -140,7 +139,8 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
     }
 
     private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
-                                        sedHendelseType: HendelseType): AvsenderMottaker {
+                                        sedHendelseType: HendelseType,
+                                        personNavn: String?): AvsenderMottaker {
         return if(sedHendelse.navBruker.isNullOrEmpty()) {
             if(sedHendelseType == SENDT) {
                 AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
@@ -148,10 +148,9 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                 AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn)
             }
         } else {
-            try {
-                val person = personV3Service.hentPerson(sedHendelse.navBruker)
-                AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, person.personnavn.sammensattNavn)
-            } catch (ex: Exception) {
+            if (personNavn != null) {
+                AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, personNavn)
+            } else {
                 logger.warn("Klarte ikke å hente navn for fnr: ${sedHendelse.navBruker}, fyller ut UTL_ORG istedenfor")
                 AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn)
             }
