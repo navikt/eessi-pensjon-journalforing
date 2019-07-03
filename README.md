@@ -25,3 +25,9 @@ Dersom du er supertrygg på testene kan du forsøke en oppdatering av alle avhen
 ```
 ./gradlew useLatestVersions && ./gradlew useLatestVersionsCheck
 ```
+
+## OWASP avhengighetssjekk
+
+```
+./gradlew dependencyCheckAnalyze || open build/reports/dependency-check-report.html
+```
