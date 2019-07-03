@@ -1,9 +1,9 @@
-package no.nav.eessi.pensjon.journalforing.services.oppgave
+package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -33,51 +33,19 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende fnr når oppgave routes så send oppgave til ID_OG_FORDELING`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = P_BUC_01,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                avsenderId = "",
-                avsenderNavn = "",
-                mottakerId = "",
-                mottakerNavn = "")
-
-        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        val enhet = routingService.route(null, P_BUC_01, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
     fun `Gitt manglende buc-type så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = null,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "010101010101",
-                avsenderId = "",
-                avsenderNavn = "",
-                mottakerId = "",
-                mottakerNavn = "")
-
-        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        val enhet = routingService.route("010101010101", null, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 så send oppgave til PENSJON_UTLAND`() {
-        val sedHendelse = SedHendelseModel(sektorKode = "",
-                bucType = P_BUC_10,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "010101010101",
-                avsenderId = "",
-                avsenderNavn = "",
-                mottakerId = "",
-                mottakerNavn = "")
-
-        val enhet = routingService.route(sedHendelse, MANGLER_LAND, alleAldre(), null)
+        val enhet = routingService.route("010101010101", P_BUC_10, MANGLER_LAND, alleAldre(), null)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
@@ -171,17 +139,8 @@ class OppgaveRoutingServiceTest {
     private fun enhetFor(bucType: SedHendelseModel.BucType,
                          land: String?,
                          fodselsDato: String,
-                         ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet =
-
-            routingService.route(SedHendelseModel(sektorKode = "",
-                bucType = bucType,
-                rinaSakId = "",
-                rinaDokumentId = "",
-                sedType = SedHendelseModel.SedType.P2000,
-                navBruker = "01010101010",
-                avsenderId = "",
-                avsenderNavn = "",
-                mottakerId = "",
-                mottakerNavn = ""), land, fodselsDato, ytelse)
+                         ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {
+        return routingService.route("01010101010", bucType, land, fodselsDato, ytelse)
+                         }
 
 }

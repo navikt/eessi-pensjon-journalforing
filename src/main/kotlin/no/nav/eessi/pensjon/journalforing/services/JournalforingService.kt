@@ -3,11 +3,11 @@ package no.nav.eessi.pensjon.journalforing.services
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
@@ -55,7 +55,7 @@ class JournalforingService(val euxService: EuxService,
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
-            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
+            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
 
             oppgaveService.opprettOppgave(OpprettOppgaveModel(
                     sedType = sedHendelse.sedType.toString(),
@@ -113,3 +113,13 @@ class JournalforingService(val euxService: EuxService,
         return person.bostedsadresse.strukturertAdresse.landkode.value
     }
 }
+
+private class HentYtelseTypeMapper {
+    fun map(hentYtelseTypeResponse: HentYtelseTypeResponse) : OppgaveRoutingModel.YtelseType {
+        return when(hentYtelseTypeResponse.type) {
+            HentYtelseTypeResponse.YtelseType.AP -> OppgaveRoutingModel.YtelseType.AP
+            HentYtelseTypeResponse.YtelseType.GP -> OppgaveRoutingModel.YtelseType.GP
+            HentYtelseTypeResponse.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
+        }
+    }
+ }
