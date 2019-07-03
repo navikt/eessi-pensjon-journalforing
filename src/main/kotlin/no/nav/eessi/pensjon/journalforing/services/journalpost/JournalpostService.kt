@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.services.documentconverter.DokumentConverterModel
-import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterService
+import no.nav.eessi.pensjon.journalforing.documentconverter.DocumentConverter
+import no.nav.eessi.pensjon.journalforing.documentconverter.MimeDocument
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
@@ -22,8 +22,7 @@ import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostType.*
 
 @Service
-class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
-                         val dokumentConverterService: DocumentConverterService) {
+class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
@@ -68,7 +67,7 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate,
                         dokumenter.add(Dokument(sedHendelseModel.sedId,
                                 "SED",
                                 listOf(Dokumentvarianter(MimeType.PDF.decode(),
-                                        dokumentConverterService.konverterFraBildeTilBase64EncodedPDF(DokumentConverterModel(vedlegg.innhold, vedlegg.mimeType.toString())),
+                                        DocumentConverter.convertToBase64PDF(MimeDocument(vedlegg.innhold, vedlegg.mimeType.toString())),
                                         Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
                     } catch(ex: Exception) {
                         uSupporterteVedlegg.add(vedlegg.filnavn)
