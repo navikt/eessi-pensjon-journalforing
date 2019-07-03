@@ -64,11 +64,11 @@ fun <T> configureRequestSamlTokenOnBehalfOfOidc(service: T, token: String) {
     val client = ClientProxy.getClient(service)
 
     // Add interceptor to extract token from request context and add to STS request as the OnbehalfOf element.
-    client.outInterceptors.add(OnBehalfOfOutInteceptor())
+    client.outInterceptors.add(OnBehalfOfOutInterceptor())
     configureSTSRequestSamlToken(client, false)
 
     client.requestContext[REQUEST_CONTEXT_ONBEHALFOF_TOKEN] = token
-    client.requestContext[REQUEST_CONTEXT_ONBEHALFOF_TOKEN_TYPE] = OnBehalfOfOutInteceptor.TokenType.OIDC
+    client.requestContext[REQUEST_CONTEXT_ONBEHALFOF_TOKEN_TYPE] = OnBehalfOfOutInterceptor.TokenType.OIDC
 }
 
 private fun configureSTSRequestSamlToken(client: Client, cacheTokenInEndpoint: Boolean) {
