@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import org.mockito.Mockito.doReturn
@@ -30,7 +29,6 @@ class JournalpostServiceTest {
 
     private lateinit var journalpostService: JournalpostService
     private lateinit var sedHendelse: SedHendelseModel
-    private val mapper = jacksonObjectMapper()
 
     @Before
     fun setup() {
@@ -39,11 +37,10 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt gyldig SedHendelse så bygg Gyldig JournalpostModel`() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
-        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
+        sedHendelse = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))))
 
         val journalpostRequest = journalpostService.byggJournalPostRequest(sedHendelseModel= sedHendelse,
-                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java),
+                sedDokumenter = SedDokumenterResponse.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 sedHendelseType = HendelseType.SENDT,
                 personNavn = "navn navnesen")
 
@@ -59,11 +56,10 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt utgående SED med fnr når populerer request så blir avsenderMottaker FNR`() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
-        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
+        sedHendelse = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))))
 
         val journalpostRequest = journalpostService.byggJournalPostRequest(sedHendelseModel= sedHendelse,
-                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java),
+                sedDokumenter = SedDokumenterResponse.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 sedHendelseType = HendelseType.SENDT,
                 personNavn = "navn navnesen")
 
@@ -74,11 +70,11 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt utgående SED uten fnr når populerer request så blir avsenderMottaker NAV`() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json")))
-        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
+        sedHendelse = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))))
+
 
         val journalpostRequest = journalpostService.byggJournalPostRequest(sedHendelseModel= sedHendelse,
-                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java),
+                sedDokumenter = SedDokumenterResponse.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 sedHendelseType = HendelseType.SENDT,
                 personNavn = "navn navnesen")
 
@@ -89,11 +85,10 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt inngående SED med fnr når populerer request så blir avsenderMottaker FNR`() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
-        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
+        sedHendelse = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))))
 
         val journalpostRequest = journalpostService.byggJournalPostRequest(sedHendelseModel= sedHendelse,
-                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java),
+                sedDokumenter = SedDokumenterResponse.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 sedHendelseType = HendelseType.MOTTATT,
                 personNavn = "navn navnesen")
 
@@ -104,11 +99,10 @@ class JournalpostServiceTest {
 
     @Test
     fun `Gitt inngående SED uten fnr når populerer request så blir avsenderMottaker utenlandsk ORG`() {
-        val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json")))
-        sedHendelse = mapper.readValue(sedSendtJson, SedHendelseModel::class.java)
+        sedHendelse = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))))
 
         val journalpostRequest = journalpostService.byggJournalPostRequest(sedHendelseModel= sedHendelse,
-                sedDokumenter = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), SedDokumenterResponse::class.java),
+                sedDokumenter = SedDokumenterResponse.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
                 sedHendelseType = HendelseType.MOTTATT,
                 personNavn = "navn navnesen")
 
@@ -132,7 +126,7 @@ class JournalpostServiceTest {
                         eq(String::class.java))
 
         val journalpotReponse = journalpostService.opprettJournalpost(
-                journalpostRequest = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json"))), JournalpostRequest::class.java),
+                journalpostRequest = JournalpostRequest.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json")))),
                 sedHendelseType = HendelseType.SENDT,
                 forsokFerdigstill = false)
         assertEquals(journalpotReponse.journalpostId, "429434378")
@@ -151,7 +145,7 @@ class JournalpostServiceTest {
                         eq(String::class.java))
 
         journalpostService.opprettJournalpost(
-                journalpostRequest = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json"))), JournalpostRequest::class.java),
+                journalpostRequest = JournalpostRequest.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json")))),
                 sedHendelseType = HendelseType.SENDT,
                 forsokFerdigstill = false)
     }
