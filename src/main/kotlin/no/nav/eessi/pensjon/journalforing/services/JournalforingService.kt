@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeMapper
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
-import no.nav.eessi.pensjon.journalforing.services.oppgave.Oppgave
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
@@ -25,7 +25,8 @@ class JournalforingService(val euxService: EuxService,
                            val oppgaveService: OppgaveService,
                            val aktoerregisterService: AktoerregisterService,
                            val personV3Service: PersonV3Service,
-                           val fagmodulService: FagmodulService)  {
+                           val fagmodulService: FagmodulService,
+                           val oppgaveRoutingService: OppgaveRoutingService)  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -54,26 +55,26 @@ class JournalforingService(val euxService: EuxService,
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
-            oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
-                    journalPostResponse,
-                    aktoerId,
-                    landkode,
-                    fodselsDato,
-                    ytelseType,
-                    Oppgave.OppgaveType.JOURNALFORING,
-                    null,
-                    null))
+            val tildeltEnhet = oppgaveRoutingService.route(sedHendelse, landkode, fodselsDato, ytelseType)
+
+            oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                    sedType = sedHendelse.sedType.toString(),
+                    journalpostId = journalPostResponse.journalpostId,
+                    tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                    aktoerId = aktoerId,
+                    oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
+                    rinaSakId = null,
+                    filnavn = null))
 
             if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
-                oppgaveService.opprettOppgave(OpprettOppgaveModel(sedHendelse,
-                        null,
-                        aktoerId,
-                        landkode,
-                        fodselsDato,
-                        ytelseType,
-                        Oppgave.OppgaveType.BEHANDLE_SED,
-                        sedHendelse.rinaSakId,
-                        requestBody.uSupporterteVedlegg))
+                oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                        sedType = sedHendelse.sedType.toString(),
+                        journalpostId = null,
+                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                        aktoerId = aktoerId,
+                        oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
+                        rinaSakId = sedHendelse.rinaSakId,
+                        filnavn = requestBody.uSupporterteVedlegg))
             }
         }
     }
