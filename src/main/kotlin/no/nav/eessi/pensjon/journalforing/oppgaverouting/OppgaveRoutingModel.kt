@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType
+import no.nav.eessi.pensjon.journalforing.models.BucType
 
 data class OppgaveRoutingModel(
         var bucType: BucType,

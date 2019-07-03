@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.BucType.*
+import no.nav.eessi.pensjon.journalforing.models.BucType
+import no.nav.eessi.pensjon.journalforing.models.BucType.*
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel.Enhet
@@ -21,7 +21,7 @@ class OppgaveRoutingService {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(navBruker: String?,
-              bucType: SedHendelseModel.BucType?,
+              bucType: BucType?,
               landkode: String?,
               fodselsDato: String,
               ytelseType: OppgaveRoutingModel.YtelseType?): Enhet {

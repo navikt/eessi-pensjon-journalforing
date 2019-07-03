@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.journalforing.services
 
+import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
-import no.nav.eessi.pensjon.journalforing.models.sed.sedMapper
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel.SedHendelseType
+import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
@@ -32,8 +32,8 @@ class JournalforingService(val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelse: String, sedHendelseType: SedHendelseType ){
-        val sedHendelse = sedMapper.readValue(hendelse, SedHendelseModel::class.java)
+    fun journalfor(hendelseJson: String, hendelseType: HendelseType){
+        val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
         if (sedHendelse.sektorKode == "P") {
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
@@ -46,12 +46,12 @@ class JournalforingService(val euxService: EuxService,
             val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
             val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, sedHendelseType, sedDokumenter)
-            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, sedHendelseType,false)
+            val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter)
+            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
             var ytelseType: OppgaveRoutingModel.YtelseType? = null
 
-            if(sedHendelse.bucType == SedHendelseModel.BucType.P_BUC_10) {
+            if(sedHendelse.bucType == BucType.P_BUC_10) {
                 ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
             }
 
