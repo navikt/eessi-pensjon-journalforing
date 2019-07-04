@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.journalforing.services.aktoerregister.Aktoerregister
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.journalforing.services.journalpost.BUCTYPE
 import no.nav.eessi.pensjon.journalforing.services.journalpost.IdType.*
 import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
