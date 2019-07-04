@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.journalforing
 
-import no.nav.eessi.pensjon.journalforing.documentconverter.DocumentConverter
-import no.nav.eessi.pensjon.journalforing.documentconverter.MimeDocument
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
+import no.nav.eessi.pensjon.journalforing.pdf.ImageConverter
 import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
@@ -50,11 +49,14 @@ data class JournalpostModel (
                         uSupporterteVedlegg.add(vedlegg.filnavn)
                     } else {
                         try {
-                            dokumenter.add(Dokument(sedHendelseModel.sedId,
-                                    "SED",
-                                    listOf(Dokumentvarianter(MimeType.PDF.decode(),
-                                            DocumentConverter.convertToBase64PDF(MimeDocument(vedlegg.innhold, vedlegg.mimeType.toString())),
-                                            Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
+                            dokumenter.add(
+                                    Dokument(sedHendelseModel.sedId,
+                                            "SED",
+                                            listOf(Dokumentvarianter(
+                                                    MimeType.PDF.decode(),
+                                                    konverterBildeTilPDF(vedlegg.innhold, vedlegg.mimeType.toString()),
+                                                    Variantformat.ARKIV)),
+                                            konverterFilendingTilPdf(vedlegg.filnavn)))
                         } catch(ex: Exception) {
                             uSupporterteVedlegg.add(vedlegg.filnavn)
                         }
@@ -84,6 +86,16 @@ data class JournalpostModel (
                 throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
             }
         }
+
+        private fun konverterBildeTilPDF(base64Document: String, mimeType: String): String {
+            if (mimeType == "application/pdf" || mimeType == "application/pdfa"){
+                logger.info("Dokumentet er allerede i PDF format, konverteres ikke")
+                return base64Document
+            }
+            logger.info("Konverterer dokument fra $mimeType til application/pdf")
+            return ImageConverter.toBase64PDF(base64Document)
+        }
+
         private fun konverterFilendingTilPdf(filnavn: String): String {
             return filnavn.replaceAfter(".", "pdf")
         }
