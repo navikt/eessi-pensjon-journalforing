@@ -68,7 +68,7 @@ class SedListenerTest {
     }
 
     @Test
-    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så opprett journalføringsoppgave med tilhørende journalpost`() {
+    fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så opprett journalføringsoppgave med tilhørende journalpost`() {
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), acknowledgment)
         verify(oppgaveService, times(1)).opprettOppgave(any())
         verify(journalpostService, times(1)).opprettJournalpost(any(), any(), eq(false))
@@ -76,7 +76,7 @@ class SedListenerTest {
     }
 
     @Test
-    fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så opprett journalføringsoppgave med tilhørende journalpost`() {
+    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så opprett journalføringsoppgave med tilhørende journalpost`() {
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), acknowledgment)
         verify(oppgaveService, times(1)).opprettOppgave(any())
         verify(journalpostService, times(1)).opprettJournalpost(any(), any(), eq(false))
