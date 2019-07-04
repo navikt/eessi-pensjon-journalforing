@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.slot
 import io.mockk.*
-import no.nav.eessi.pensjon.journalforing.listeners.SedSendtConsumer
+import no.nav.eessi.pensjon.journalforing.listeners.SedListener
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMock
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
@@ -48,7 +48,7 @@ private lateinit var mockServer : ClientAndServer
 class JournalforingIntegrationTest {
 
     @Autowired
-    lateinit var sedSendtConsumer: SedSendtConsumer
+    lateinit var sedListener: SedListener
 
     @Autowired
     lateinit var  personV3Service: PersonV3Service
@@ -70,8 +70,8 @@ class JournalforingIntegrationTest {
         // produserer sedSendt meldinger på kafka
         produserSedHendelser(sedSendtProducerTemplate)
 
-        // Venter på at sedSendtConsumer skal consume meldingene
-        sedSendtConsumer.getLatch().await(15000, TimeUnit.MILLISECONDS)
+        // Venter på at sedListener skal consumeSedSendt meldingene
+        sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()
