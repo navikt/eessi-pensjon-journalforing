@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Configuration
-class RestTemplateConfig(val securityTokenExchangeService: STSService) {
+class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
 
     @Value("\${aktoerregister.api.v1.url}")
     lateinit var aktoerregisterUrl: String

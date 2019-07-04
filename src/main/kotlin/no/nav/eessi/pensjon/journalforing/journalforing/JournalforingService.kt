@@ -19,13 +19,13 @@ import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
-class JournalforingService(val euxService: EuxService,
-                           val journalpostService: JournalpostService,
-                           val oppgaveService: OppgaveService,
-                           val aktoerregisterService: AktoerregisterService,
-                           val personV3Service: PersonV3Service,
-                           val fagmodulService: FagmodulService,
-                           val oppgaveRoutingService: OppgaveRoutingService)  {
+class JournalforingService(private val euxService: EuxService,
+                           private val journalpostService: JournalpostService,
+                           private val oppgaveService: OppgaveService,
+                           private val aktoerregisterService: AktoerregisterService,
+                           private val personV3Service: PersonV3Service,
+                           private val fagmodulService: FagmodulService,
+                           private val oppgaveRoutingService: OppgaveRoutingService)  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 

@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.journalforing.models.HendelseType.MOTTATT
 
 @Service
-class SedMottattConsumer(val journalforingService: JournalforingService) {
+class SedMottattConsumer(private val journalforingService: JournalforingService) {
 
     private val logger = LoggerFactory.getLogger(SedMottattConsumer::class.java)
     private val latch = CountDownLatch(4)
