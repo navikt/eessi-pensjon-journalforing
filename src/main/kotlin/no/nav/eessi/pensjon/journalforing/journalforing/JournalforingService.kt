@@ -1,12 +1,13 @@
 package no.nav.eessi.pensjon.journalforing.journalforing
 
+import no.nav.eessi.pensjon.journalforing.documentconverter.DocumentConverter
+import no.nav.eessi.pensjon.journalforing.documentconverter.MimeDocument
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
-import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -17,6 +18,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
+import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
+import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
@@ -31,6 +35,11 @@ class JournalforingService(val euxService: EuxService,
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
+
+    private final val genererJournalpostModelNavn = "eessipensjon_journalforing.genererjournalpostmodel"
+    private val genererJournalpostModelVellykkede = counter(genererJournalpostModelNavn, "vellykkede")
+    private val genererJournalpostModelFeilede = counter(genererJournalpostModelNavn, "feilede")
+
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType){
         val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
@@ -53,7 +62,7 @@ class JournalforingService(val euxService: EuxService,
 
         val personNavn = person?.personnavn?.sammensattNavn
 
-        val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter, personNavn)
+        val requestBody = byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter, personNavn)
         val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
         var ytelseType: OppgaveRoutingModel.YtelseType? = null
@@ -107,6 +116,95 @@ class JournalforingService(val euxService: EuxService,
     }
 
     private fun landKode(person: Person?) = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+
+    fun byggJournalPostRequest(sedHendelseModel: SedHendelseModel,
+                               sedHendelseType: HendelseType,
+                               sedDokumenter: SedDokumenterResponse,
+                               personNavn: String?): JournalpostModel {
+        try {
+            val journalpostType = populerJournalpostType(sedHendelseType)
+            val avsenderMottaker = populerAvsenderMottaker(sedHendelseModel, sedHendelseType, personNavn)
+            val behandlingstema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).BEHANDLINGSTEMA
+
+            val bruker = when {
+                sedHendelseModel.navBruker != null -> Bruker(id = sedHendelseModel.navBruker)
+                else -> null
+            }
+
+            val dokumenter =  mutableListOf<Dokument>()
+            dokumenter.add(Dokument(sedHendelseModel.sedId,
+                    "SED",
+                    listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
+                            filtype = sedDokumenter.sed.mimeType!!.decode(),
+                            variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
+
+            val uSupporterteVedlegg = ArrayList<String>()
+
+            sedDokumenter.vedlegg?.forEach{ vedlegg ->
+
+                if(vedlegg.mimeType == null) {
+                    uSupporterteVedlegg.add(vedlegg.filnavn)
+                } else {
+                    try {
+                        dokumenter.add(Dokument(sedHendelseModel.sedId,
+                                "SED",
+                                listOf(Dokumentvarianter(MimeType.PDF.decode(),
+                                        DocumentConverter.convertToBase64PDF(MimeDocument(vedlegg.innhold, vedlegg.mimeType.toString())),
+                                        Variantformat.ARKIV)), konverterFilendingTilPdf(vedlegg.filnavn)))
+                    } catch(ex: Exception) {
+                        uSupporterteVedlegg.add(vedlegg.filnavn)
+                    }
+                }
+            }
+            val tema = BUCTYPE.valueOf(sedHendelseModel.bucType.toString()).TEMA
+
+            val tittel = when {
+                sedHendelseModel.sedType != null -> "${journalpostType.decode()} ${sedHendelseModel.sedType}"
+                else -> throw RuntimeException("sedType er null")
+            }
+            genererJournalpostModelVellykkede.increment()
+            return JournalpostModel(JournalpostRequest(
+                    avsenderMottaker = avsenderMottaker,
+                    behandlingstema = behandlingstema,
+                    bruker = bruker,
+                    dokumenter = dokumenter,
+                    tema = tema,
+                    tittel = tittel,
+                    journalpostType = journalpostType
+            ), uSupporterteVedlegg)
+        }
+
+        catch (ex: Exception){
+            genererJournalpostModelFeilede.increment()
+            logger.error("noe gikk galt under konstruksjon av JournalpostModel, $ex")
+            throw RuntimeException("Feil ved konstruksjon av JournalpostModel, $ex")
+        }
+    }
+    fun konverterFilendingTilPdf(filnavn: String): String {
+        return filnavn.replaceAfter(".", "pdf")
+    }
+
+    private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
+                                        sedHendelseType: HendelseType,
+                                        personNavn: String?): AvsenderMottaker {
+        return if(sedHendelse.navBruker.isNullOrEmpty() || personNavn.isNullOrEmpty()) {
+            if(sedHendelseType == HendelseType.SENDT) {
+                AvsenderMottaker(sedHendelse.avsenderId, IdType.ORGNR, sedHendelse.avsenderNavn)
+            } else {
+                AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn)
+            }
+        } else {
+            AvsenderMottaker(sedHendelse.navBruker, IdType.FNR, personNavn)
+        }
+    }
+
+    private fun populerJournalpostType(sedHendelseType: HendelseType): JournalpostType {
+        return if(sedHendelseType == HendelseType.SENDT) {
+            JournalpostType.UTGAAENDE
+        } else {
+            JournalpostType.INNGAAENDE
+        }
+    }
 }
 
 private class HentYtelseTypeMapper {
