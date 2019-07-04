@@ -1,12 +1,10 @@
-package no.nav.eessi.pensjon.journalforing.services
+package no.nav.eessi.pensjon.journalforing.journalforing
 
 import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
-import no.nav.eessi.pensjon.journalforing.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
@@ -17,6 +15,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
 @Service
@@ -53,7 +52,7 @@ class JournalforingService(val euxService: EuxService,
 
         val personNavn = person?.personnavn?.sammensattNavn
 
-        val requestBody = journalpostService.byggJournalPostRequest(sedHendelse, hendelseType, sedDokumenter, personNavn)
+        val requestBody = JournalpostModel.from(sedHendelse, hendelseType, sedDokumenter, personNavn)
         val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
         var ytelseType: OppgaveRoutingModel.YtelseType? = null
@@ -107,6 +106,7 @@ class JournalforingService(val euxService: EuxService,
     }
 
     private fun landKode(person: Person?) = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+
 }
 
 private class HentYtelseTypeMapper {
@@ -117,4 +117,5 @@ private class HentYtelseTypeMapper {
             HentYtelseTypeResponse.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
         }
     }
- }
+}
+

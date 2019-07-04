@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.listeners
 
 import no.nav.eessi.pensjon.journalforing.metrics.counter
-import no.nav.eessi.pensjon.journalforing.services.JournalforingService
+import no.nav.eessi.pensjon.journalforing.journalforing.JournalforingService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

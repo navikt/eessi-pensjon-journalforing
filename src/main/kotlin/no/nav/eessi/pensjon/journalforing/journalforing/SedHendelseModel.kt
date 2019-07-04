@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.models.sed
+package no.nav.eessi.pensjon.journalforing.journalforing
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -29,5 +29,7 @@ data class SedHendelseModel (
         fun fromJson(json: String): SedHendelseModel = sedMapper.readValue(json, SedHendelseModel::class.java)
     }
 }
+
+
 
 
