@@ -17,8 +17,12 @@ class SedListener(private val journalforingService: JournalforingService) {
     private val latch = CountDownLatch(4)
 
     private final val consumeSedSendtMessageNavn = "eessipensjon_journalforing.consumeOutgoingSed"
-    private val consumeSedMessageVellykkede = counter(consumeSedSendtMessageNavn, "vellykkede")
-    private val consumeSedMessageFeilede = counter(consumeSedSendtMessageNavn, "feilede")
+    private val consumeSedSendtMessageVellykkede = counter(consumeSedSendtMessageNavn, "vellykkede")
+    private val consumeSedSendtMessageFeilede = counter(consumeSedSendtMessageNavn, "feilede")
+
+    private final val consumeSedMottattMessageNavn = "eessipensjon_journalforing.consumeIncomingSed"
+    private val consumeSedMottattMessageVellykkede = counter(consumeSedMottattMessageNavn, "vellykkede")
+    private val consumeSedMottattMessageFeilede = counter(consumeSedMottattMessageNavn, "feilede")
 
     fun getLatch(): CountDownLatch {
         return latch
@@ -30,10 +34,10 @@ class SedListener(private val journalforingService: JournalforingService) {
         logger.debug(hendelse)
         try {
             journalforingService.journalfor(hendelse, SENDT)
-            consumeSedMessageVellykkede.increment()
+            consumeSedSendtMessageVellykkede.increment()
             acknowledgment.acknowledge()
         } catch(ex: Exception){
-            consumeSedMessageFeilede.increment()
+            consumeSedSendtMessageFeilede.increment()
             logger.error(
                     "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
                     "${ex.message}",
@@ -50,10 +54,10 @@ class SedListener(private val journalforingService: JournalforingService) {
         logger.debug(hendelse)
         try {
             journalforingService.journalfor(hendelse, HendelseType.MOTTATT)
-            consumeSedMessageVellykkede.increment()
+            consumeSedMottattMessageVellykkede.increment()
             acknowledgment.acknowledge()
         } catch(ex: Exception){
-            consumeSedMessageFeilede.increment()
+            consumeSedMottattMessageFeilede.increment()
             logger.error(
                     "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
                             "${ex.message}",
