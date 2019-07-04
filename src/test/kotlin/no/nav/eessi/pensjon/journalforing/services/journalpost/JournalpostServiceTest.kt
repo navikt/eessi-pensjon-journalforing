@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.journalforing.services.journalpost
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.models.sed.SedHendelseModel
 import org.mockito.Mockito.doReturn
-import no.nav.eessi.pensjon.journalforing.services.documentconverter.DocumentConverterService
 import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.journalpost.IdType.*
 import org.junit.Before
@@ -24,15 +23,12 @@ class JournalpostServiceTest {
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    @Mock
-    private lateinit var documentConverterService: DocumentConverterService
-
     private lateinit var journalpostService: JournalpostService
     private lateinit var sedHendelse: SedHendelseModel
 
     @Before
     fun setup() {
-        journalpostService = JournalpostService(mockrestTemplate, documentConverterService)
+        journalpostService = JournalpostService(mockrestTemplate)
     }
 
     @Test
