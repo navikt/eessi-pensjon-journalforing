@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
 
@@ -13,11 +15,6 @@ data class JournalPostResponse(
         return mapper.writeValueAsString(this)
     }
 }
-
-data class JournalpostModel (
-        val journalpostRequest: JournalpostRequest,
-        val uSupporterteVedlegg: List<String>
-)
 
 data class JournalpostRequest(
         val avsenderMottaker: AvsenderMottaker,
@@ -33,6 +30,12 @@ data class JournalpostRequest(
   //  val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
         val tittel: String //REQUIRED
 ){
+    companion object {
+        private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
+        fun fromJson(json: String): JournalpostRequest = mapper.readValue(json, JournalpostRequest::class.java)
+    }
+
     override fun toString(): String {
         return mapAnyToJson(this,true)
     }
@@ -91,47 +94,6 @@ data class Bruker(
     val id: String, //REQUIRED
     val idType: String = "FNR" //REQUIRED
 )
-
-// https://confluence.adeo.no/display/BOA/Behandlingstema
-enum class Behandlingstema : Code {
-    GJENLEVENDEPENSJON {
-        override fun toString() = "ab0011"
-        override fun decode() = "Gjenlevendepensjon"
-    },
-    ALDERSPENSJON {
-        override fun toString() = "ab0254"
-        override fun decode() = "Alderspensjon"
-    },
-    UFOREPENSJON {
-        override fun toString() = "ab0194"
-        override fun decode() = "Uførepensjon"
-    }
-}
-
-// https://confluence.adeo.no/display/BOA/Tema
-enum class Tema : Code {
-    PENSJON {
-        override fun toString() = "PEN"
-        override fun decode() = "Pensjon"
-    },
-    UFORETRYGD {
-        override fun toString() = "UFO"
-        override fun decode() = "Uføretrygd"
-    }
-}
-
-enum class BUCTYPE (val BEHANDLINGSTEMA: String, val TEMA: String){
-    P_BUC_01(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_03(Behandlingstema.UFOREPENSJON.toString(), Tema.UFORETRYGD.toString()),
-    P_BUC_04(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_05(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_06(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_08(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString())
-}
 
 interface Code {
     fun decode(): String

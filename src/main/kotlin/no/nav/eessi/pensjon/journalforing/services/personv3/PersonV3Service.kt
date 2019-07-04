@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ResponseStatus
 
 @Service
-class PersonV3Service(val service: PersonV3) {
+class PersonV3Service(private val service: PersonV3) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 

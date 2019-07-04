@@ -42,8 +42,8 @@ class ModelsTest {
         val mapper = jacksonObjectMapper()
         val journalpostResponseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json")))
         val journalpostResponseModel = mapper.readValue(journalpostResponseJson, JournalPostResponse::class.java)
-        assertEquals(journalpostResponseModel.journalpostId, "string")
-        assertEquals(journalpostResponseModel.journalstatus, "MIDLERTIDIG")
-        assertEquals(journalpostResponseModel.melding, "string")
+        assertEquals(journalpostResponseModel.journalpostId, "429434378")
+        assertEquals(journalpostResponseModel.journalstatus, "M")
+        assertEquals(journalpostResponseModel.melding, "null")
     }
 }

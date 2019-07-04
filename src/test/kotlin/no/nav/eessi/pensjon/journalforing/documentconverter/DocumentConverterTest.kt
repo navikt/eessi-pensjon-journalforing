@@ -1,6 +1,5 @@
-package no.nav.eessi.pensjon.journalforing.services.documentconverter
+package no.nav.eessi.pensjon.journalforing.documentconverter
 
-import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
 import org.apache.commons.io.FileUtils
 import org.junit.Test
 import java.util.*
@@ -10,15 +9,14 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 
-class DocumentConverterServiceTest {
-    private val converterService = DocumentConverterService()
+class DocumentConverterTest {
 
     @Test
     fun `Gitt en gyldig png fil når konverterer til pdf så konverter til pdf med jpeg bilde innhold`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
-        val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
+        val convertModel = MimeDocument(encodedString, "image/png")
+        val pdf = DocumentConverter.convertToBase64PDF(convertModel)
 
         assertNotNull(pdf)
         assertNotEquals(encodedString, pdf)
@@ -28,8 +26,8 @@ class DocumentConverterServiceTest {
     fun `Gitt en gyldig pdf fil når konverterer til pdf så returner innsendt pdf uten å konvertere`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/navlogo.pdf"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PDF)
-        val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
+        val convertModel = MimeDocument(encodedString, "application/pdf")
+        val pdf = DocumentConverter.convertToBase64PDF(convertModel)
         assertNotNull(encodedString)
         assertEquals(encodedString, pdf)
     }
@@ -38,7 +36,7 @@ class DocumentConverterServiceTest {
     fun `Gitt en korrupt png fil når konverterer til pdf så kast exception`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/korruptnavlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        val convertModel = DokumentConverterModel(encodedString, MimeType.PNG)
-        val pdf = converterService.konverterFraBildeTilBase64EncodedPDF(convertModel)
+        val convertModel = MimeDocument(encodedString, "image/png")
+        DocumentConverter.convertToBase64PDF(convertModel)
     }
 }

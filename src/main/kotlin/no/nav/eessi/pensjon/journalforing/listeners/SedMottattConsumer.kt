@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.listeners
 
 import no.nav.eessi.pensjon.journalforing.metrics.counter
-import no.nav.eessi.pensjon.journalforing.services.JournalforingService
+import no.nav.eessi.pensjon.journalforing.journalforing.JournalforingService
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.journalforing.models.HendelseType.MOTTATT
 
 @Service
-class SedMottattConsumer(val journalforingService: JournalforingService) {
+class SedMottattConsumer(private val journalforingService: JournalforingService) {
 
     private val logger = LoggerFactory.getLogger(SedMottattConsumer::class.java)
     private val latch = CountDownLatch(4)

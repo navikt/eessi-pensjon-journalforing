@@ -2,12 +2,20 @@ package no.nav.eessi.pensjon.journalforing.services.eux
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 data class SedDokumenterResponse(
         val sed: Dokument,
         val vedlegg: List<Dokument>?
 ){
+    companion object {
+        private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
+        fun fromJson(json: String): SedDokumenterResponse = mapper.readValue(json, SedDokumenterResponse::class.java)
+    }
+
     override fun toString(): String {
         val mapper = jacksonObjectMapper()
         return mapper.writeValueAsString(this)

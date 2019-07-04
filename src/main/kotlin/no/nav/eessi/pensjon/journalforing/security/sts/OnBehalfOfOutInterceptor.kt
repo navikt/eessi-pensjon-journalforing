@@ -19,7 +19,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 const val REQUEST_CONTEXT_ONBEHALFOF_TOKEN = "request.onbehalfof.token"
 const val REQUEST_CONTEXT_ONBEHALFOF_TOKEN_TYPE = "request.onbehalfof.tokentype"
 
-class OnBehalfOfOutInteceptor : AbstractPhaseInterceptor<Message>(Phase.SETUP) {
+class OnBehalfOfOutInterceptor : AbstractPhaseInterceptor<Message>(Phase.SETUP) {
 
     enum class TokenType constructor(val valueType: String) {
         OIDC("urn:ietf:params:oauth:token-type:jwt")
