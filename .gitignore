@@ -2,6 +2,7 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 /out/
+/codemr
 
 ### IntelliJ IDEA ###
 .idea
