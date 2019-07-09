@@ -19,7 +19,7 @@ class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
 
     fun hentYtelseTypeForPBuc10(rinaNr: String, dokumentId: String): HentYtelseTypeResponse {
 
-        val path = "/buc/ytelseKravtype/$rinaNr/$dokumentId"
+        val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
         try {
             logger.info("Henter ytelsetype for P_BUC_10 for rinaNr: $rinaNr , dokumentId: $dokumentId")
             val response = fagmodulOidcRestTemplate.exchange(path,

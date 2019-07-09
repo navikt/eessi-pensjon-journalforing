@@ -354,12 +354,11 @@ class JournalforingIntegrationTest {
                                             "}"
                             )
                     )
-
             // Mocker fagmodul hent ytelsetype
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/ytelseKravtype/161558/40b5723cd9284af6ac0581f3981f3044"))
+                            .withPath("/sed/ytelseKravtype/161558/sedid/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -370,7 +369,7 @@ class JournalforingIntegrationTest {
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/ytelseKravtype/148161/f899bf659ff04d20bc8b978b186f1ecc"))
+                            .withPath("/sed/ytelseKravtype/148161/sedid/f899bf659ff04d20bc8b978b186f1ecc"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -381,7 +380,7 @@ class JournalforingIntegrationTest {
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/ytelseKravtype/147729/b12e06dda2c7474b9998c7139c841646"))
+                            .withPath("/sed/ytelseKravtype/147729/sedid/b12e06dda2c7474b9998c7139c841646"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())

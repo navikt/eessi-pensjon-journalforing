@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 
@@ -110,11 +111,12 @@ class JournalforingService(private val euxService: EuxService,
 }
 
 private class HentYtelseTypeMapper {
-    fun map(hentYtelseTypeResponse: HentYtelseTypeResponse) : OppgaveRoutingModel.YtelseType {
-        return when(hentYtelseTypeResponse.type) {
-            HentYtelseTypeResponse.YtelseType.AP -> OppgaveRoutingModel.YtelseType.AP
-            HentYtelseTypeResponse.YtelseType.GP -> OppgaveRoutingModel.YtelseType.GP
-            HentYtelseTypeResponse.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
+    fun map(hentYtelseTypeResponse: HentYtelseTypeResponse) : OppgaveRoutingModel.YtelseType? {
+        return when(hentYtelseTypeResponse.krav?.type) {
+            Krav.YtelseType.AP -> OppgaveRoutingModel.YtelseType.AP
+            Krav.YtelseType.GP -> OppgaveRoutingModel.YtelseType.GP
+            Krav.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
+            null -> null
         }
     }
 }
