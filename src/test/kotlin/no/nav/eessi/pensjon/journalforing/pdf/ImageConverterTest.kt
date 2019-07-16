@@ -1,6 +1,5 @@
-package no.nav.eessi.pensjon.journalforing.documentconverter
+package no.nav.eessi.pensjon.journalforing.pdf
 
-import no.nav.eessi.pensjon.journalforing.pdf.ImageConverter
 import org.apache.commons.io.FileUtils
 import org.junit.Test
 import java.util.*
