@@ -33,7 +33,7 @@ class JournalforingService(private val euxService: EuxService,
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType){
-        val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
+        val sedHendelse = deserialiserHendelse(hendelseJson)
 
         if (sedHendelse.sektorKode != "P") {
             // Vi ignorerer alle hendelser som ikke har vår sektorkode
@@ -43,24 +43,22 @@ class JournalforingService(private val euxService: EuxService,
         logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
         val person = hentPerson(sedHendelse.navBruker)
-        val landkode = landKode(person)
         val aktoerId = hentAktoerId(sedHendelse.navBruker)
+        val personNavn = person?.personnavn?.sammensattNavn
+        val landkode = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
 
         val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
         val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
         val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
         val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-        val personNavn = person?.personnavn?.sammensattNavn
-
         val requestBody = JournalpostModel.from(sedHendelse, hendelseType, sedDokumenter, personNavn)
         val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
 
-        var ytelseType: OppgaveRoutingModel.YtelseType? = null
-
-        if(sedHendelse.bucType == BucType.P_BUC_10) {
-            ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
-        }
+        val ytelseType: OppgaveRoutingModel.YtelseType? =
+                if(sedHendelse.bucType == BucType.P_BUC_10){
+                    hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
+                } else null
 
         val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
 
@@ -106,8 +104,14 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    private fun landKode(person: Person?) = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
-
+    private fun deserialiserHendelse(hendelse: String): SedHendelseModel {
+        try {
+            return SedHendelseModel.fromJson(hendelse)
+        } catch (ex: Exception){
+            logger.error("Det oppstod en feil ved deserialisering av hendelse: $ex")
+            throw ex
+        }
+    }
 }
 
 private class HentYtelseTypeMapper {

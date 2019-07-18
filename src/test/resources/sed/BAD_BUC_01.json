@@ -1,0 +1,19 @@
+{
+  "id": [],
+  "sedId": null,
+  "sektorKode": {},
+  "bucType": 42,
+  "rinaSakId": false,
+  "avsenderId": true,
+  "avsenderNavn": {
+    "foo": []
+  },
+  "avsenderLand": "1234444",
+  "mottakerId": "fffffffffff",
+  "mottakerNavn": [[[]]],
+  "mottakerLand": -22,
+  "rinaDokumentId": {"bar":{"baz":{}}},
+  "rinaDokumentVersjon": "???",
+  "sedType": "rrrrrrr",
+  "navBruker": []
+}
