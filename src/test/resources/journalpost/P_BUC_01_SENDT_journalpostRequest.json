@@ -1,0 +1,70 @@
+{
+  "avsenderMottaker" : {
+    "id" : "12378945601",
+    "idType" : "FNR",
+    "navn" : "Test Testesen"
+  },
+  "behandlingstema" : "ab0254",
+  "bruker" : {
+    "id" : "12378945601",
+    "idType" : "FNR"
+  },
+  "dokumenter" : [ {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "MockSedDocument_P2000"
+  }, {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "Vedlegg1"
+  }, {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "Vedlegg2"
+  }, {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "Vedlegg3"
+  }, {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "Vedlegg4"
+  }, {
+    "brevkode" : "P2000_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "Vedlegg5"
+  } ],
+  "journalpostType" : "UTGAAENDE",
+  "tema" : "PEN",
+  "tittel" : "Utgående P2000 - Krav om alderspensjon"
+}

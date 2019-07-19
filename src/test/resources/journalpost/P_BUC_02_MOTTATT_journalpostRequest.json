@@ -1,0 +1,25 @@
+{
+  "avsenderMottaker" : {
+    "id" : "12378945602",
+    "idType" : "FNR",
+    "navn" : "Test Testesen"
+  },
+  "behandlingstema" : "ab0011",
+  "bruker" : {
+    "id" : "12378945602",
+    "idType" : "FNR"
+  },
+  "dokumenter" : [ {
+    "brevkode" : "P2100_b12e06dda2c7474b9998c7139c841646_2",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "MockSedDocument_P2100"
+  } ],
+  "journalpostType" : "INNGAAENDE",
+  "tema" : "PEN",
+  "tittel" : "Inngående P2100 - Krav om gjenlevendepensjon"
+}

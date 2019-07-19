@@ -1,0 +1,21 @@
+{
+  "avsenderMottaker" : {
+    "id" : "NO:NAVT003",
+    "idType" : "ORGNR",
+    "navn" : "NAVT003"
+  },
+  "behandlingstema" : "ab0194",
+  "dokumenter" : [ {
+    "brevkode" : "P2200_f899bf659ff04d20bc8b978b186f1ecc_1",
+    "dokumentKategori" : "SED",
+    "dokumentvarianter" : [ {
+      "filtype" : "PDF",
+      "fysiskDokument" : "ipsum lorem",
+      "variantformat" : "ARKIV"
+    } ],
+    "tittel" : "MockSedDocument_P2200"
+  } ],
+  "journalpostType" : "UTGAAENDE",
+  "tema" : "UFO",
+  "tittel" : "Utgående P2200 - Krav om uførepensjon"
+}
