@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.journalforing
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
@@ -32,54 +34,67 @@ class JournalforingService(private val euxService: EuxService,
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
-    fun journalfor(hendelseJson: String, hendelseType: HendelseType){
-        val sedHendelse = deserialiserHendelse(hendelseJson)
+    fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
+        try {
+            val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
-        if (sedHendelse.sektorKode != "P") {
-            // Vi ignorerer alle hendelser som ikke har vår sektorkode
-            return
-        }
+            if (sedHendelse.sektorKode != "P") {
+                // Vi ignorerer alle hendelser som ikke har vår sektorkode
+                return
+            }
 
-        logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
+            logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-        val person = hentPerson(sedHendelse.navBruker)
-        val aktoerId = hentAktoerId(sedHendelse.navBruker)
-        val personNavn = person?.personnavn?.sammensattNavn
-        val landkode = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+            val person = hentPerson(sedHendelse.navBruker)
+            val aktoerId = hentAktoerId(sedHendelse.navBruker)
+            val personNavn = person?.personnavn?.sammensattNavn
+            val landkode = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
 
-        val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-        val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-        val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
+            val sedDokumenter = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+            val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
-        val requestBody = JournalpostModel.from(sedHendelse, hendelseType, sedDokumenter, personNavn)
-        val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType,false)
+            val requestBody = JournalpostModel.from(sedHendelse, hendelseType, sedDokumenter, personNavn)
+            val journalPostResponse = journalpostService.opprettJournalpost(requestBody.journalpostRequest, hendelseType, false)
 
-        val ytelseType: OppgaveRoutingModel.YtelseType? =
-                if(sedHendelse.bucType == BucType.P_BUC_10){
-                    hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId))
-                } else null
+            val tildeltEnhet = hentTildeltEnhet(
+                    sedHendelse.bucType,
+                    sedHendelse.rinaSakId,
+                    sedHendelse.rinaDokumentId,
+                    sedHendelse.navBruker,
+                    landkode,
+                    fodselsDato
+            )
 
-        val tildeltEnhet = oppgaveRoutingService.route(sedHendelse.navBruker, sedHendelse.bucType, landkode, fodselsDato, ytelseType)
-
-        oppgaveService.opprettOppgave(OpprettOppgaveModel(
-                sedType = sedHendelse.sedType.toString(),
-                journalpostId = journalPostResponse.journalpostId,
-                tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                aktoerId = aktoerId,
-                oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
-                rinaSakId = null,
-                filnavn = null))
-
-        if(requestBody.uSupporterteVedlegg.isNotEmpty()) {
             oppgaveService.opprettOppgave(OpprettOppgaveModel(
                     sedType = sedHendelse.sedType.toString(),
-                    journalpostId = null,
+                    journalpostId = journalPostResponse.journalpostId,
                     tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                     aktoerId = aktoerId,
-                    oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
-                    rinaSakId = sedHendelse.rinaSakId,
-                    filnavn = requestBody.uSupporterteVedlegg))
+                    oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
+                    rinaSakId = null,
+                    filnavn = null))
+
+            if (requestBody.uSupporterteVedlegg.isNotEmpty()) {
+                oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                        sedType = sedHendelse.sedType.toString(),
+                        journalpostId = null,
+                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                        aktoerId = aktoerId,
+                        oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
+                        rinaSakId = sedHendelse.rinaSakId,
+                        filnavn = requestBody.uSupporterteVedlegg))
+            }
+        } catch (ex: MismatchedInputException) {
+            logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
+            throw ex
+        } catch (ex: MissingKotlinParameterException) {
+            logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
+            throw ex
+        } catch (ex: Exception) {
+            logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
+            throw ex
         }
     }
 
@@ -104,12 +119,19 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    private fun deserialiserHendelse(hendelse: String): SedHendelseModel {
-        try {
-            return SedHendelseModel.fromJson(hendelse)
-        } catch (ex: Exception){
-            logger.error("Det oppstod en feil ved deserialisering av hendelse: $ex")
-            throw ex
+    private fun hentTildeltEnhet(
+            bucType: BucType?,
+            rinaSakId: String,
+            rinaDokumentId: String,
+            navBruker: String?,
+            landkode: String?,
+            fodselsDato: String
+    ): OppgaveRoutingModel.Enhet {
+        return if(bucType == BucType.P_BUC_10){
+            val ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(rinaSakId, rinaDokumentId))
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, ytelseType)
+        } else {
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato)
         }
     }
 }
