@@ -83,7 +83,6 @@ class ArchitectureTest {
 
         /*
         TODO do something about the dependencies surrounding STS, but there is a bit too much black magic there for me ...
-        TODO refactor SedListenerTest, it has way too many dependencies
         TODO look at/refactor the relationship between journalforing.JournalpostModel and services.journalpost.JournalpostService ...
          */
         layeredArchitecture()
@@ -112,15 +111,15 @@ class ArchitectureTest {
                 .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT)
                 .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS)
-                .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
+                .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonV3Service)
-                .whereLayer(AktoerregisterService).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
-                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
-                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
-                .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
-                .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing, Listeners)
-                .whereLayer(PersonV3Service).mayOnlyBeAccessedByLayers(ROOT, Journalforing, Listeners)
+                .whereLayer(AktoerregisterService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(PersonV3Service).mayOnlyBeAccessedByLayers(ROOT, Journalforing)
                 //Verify rules
                 .check(classesToAnalyze)
     }
