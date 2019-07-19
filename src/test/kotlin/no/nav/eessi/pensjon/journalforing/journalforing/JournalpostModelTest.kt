@@ -21,11 +21,11 @@ class JournalpostModelTest {
 
         assertEquals(journalpostModel.journalpostRequest.avsenderMottaker.id, sedHendelse.navBruker, "Ugyldig mottagerid")
         assertEquals(journalpostModel.journalpostRequest.avsenderMottaker.navn, "navn navnesen", "Ugyldig mottagernavn")
-        assertEquals(journalpostModel.journalpostRequest.behandlingstema, BUCTYPE.valueOf(sedHendelse.bucType.toString()).BEHANDLINGSTEMA, "Ugyldig behandlingstema")
+        assertEquals(journalpostModel.journalpostRequest.behandlingstema, sedHendelse.bucType?.BEHANDLINGSTEMA, "Ugyldig behandlingstema")
         assertEquals(journalpostModel.journalpostRequest.bruker?.id, sedHendelse.navBruker, "Ugyldig bruker id")
         assertEquals(journalpostModel.journalpostRequest.dokumenter.first().brevkode, sedHendelse.sedId, "Ugyldig brevkode")
         assertEquals(journalpostModel.journalpostRequest.dokumenter.first().dokumentvarianter.first().fysiskDokument, "JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", "Ugyldig fysisk dokument")
-        assertEquals(journalpostModel.journalpostRequest.tema, BUCTYPE.valueOf(sedHendelse.bucType.toString()).TEMA, "Ugyldig tema")
+        assertEquals(journalpostModel.journalpostRequest.tema, sedHendelse.bucType?.TEMA, "Ugyldig tema")
         assertEquals(journalpostModel.journalpostRequest.tittel,"Utgående ${sedHendelse.sedType}", "Ugyldig tittel")
     }
 
