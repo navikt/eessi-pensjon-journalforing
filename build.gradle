@@ -107,6 +107,9 @@ dependencies {
 
 	// Logging
 	implementation("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
+	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
+	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
+
 }
 
 compileKotlin {
