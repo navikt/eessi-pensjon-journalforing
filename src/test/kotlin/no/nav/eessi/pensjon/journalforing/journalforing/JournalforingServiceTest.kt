@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeRespon
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonMock
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import org.junit.Before
@@ -28,8 +27,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -140,7 +137,7 @@ class JournalforingServiceTest {
     @Test
     fun `gitt en sendt sed som ikke tilhører pensjon så blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
-        verify(oppgaveService, times(0)).opprettOppgave(any())
+        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
         verify(journalpostService, times(0)).opprettJournalpost(any(), any(), eq(false))
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -151,16 +148,8 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2000JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_01_SENDT_journalpostRequest.json")))
-        val p2000OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_01_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12378945601"))
@@ -169,25 +158,21 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT) , eq(false))
         assertEquals(p2000JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2000OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2000 - Krav om alderspensjon"),
+                eq("123"),
+                eq("0001"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
     }
 
     @Test
     fun `Sendt gyldig Sed P2100`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2100JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_02_SENDT_journalpostRequest.json")))
-        val p2100OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_02_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
-        val p2100BehandleSed = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_02_BehandleSed.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.SENDT )
 
@@ -197,24 +182,32 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT) , eq(false))
         assertEquals(p2100JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService, times(2)).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2100OppgaveModel, oppgaveCaptor.firstValue.asJson())
-        assertEquals(p2100BehandleSed, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq("123"),
+                eq("4862"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
+        verify(oppgaveService).opprettOppgave(
+                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(null),
+                eq("4862"),
+                eq("mockAktoerID"),
+                eq("BEHANDLE_SED"),
+                eq("147730"),
+                eq(listOf("Vedlegg1", "Vedlegg2"))
+        )
     }
+
+
 
     @Test
     fun `Sendt gyldig Sed P2200`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2200JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_03_SENDT_journalpostRequest.json")))
-        val p2200OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_03_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
-
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.SENDT )
         verify(personV3Service, times(0)).hentPerson(any())
@@ -223,33 +216,41 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT), eq(false))
         assertEquals(p2200JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2200OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2200 - Krav om uførepensjon"),
+                eq("123"),
+                eq("4303"),
+                eq(null),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
+
+
     }
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val P_BUC_10_JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_10_SENDT_journalpostRequest.json")))
-        val P_BUC_10_OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_10_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
+
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
-
 
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT), eq(false))
         assertEquals(P_BUC_10_JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(P_BUC_10_OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2000 - Krav om alderspensjon"),
+                eq("123"),
+                eq("4475"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
     }
 
     @Test
@@ -269,7 +270,7 @@ class JournalforingServiceTest {
     @Test
     fun `gitt en mottatt sed som ikke tilhører pensjon så blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
-        verify(oppgaveService, times(0)).opprettOppgave(any())
+        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
         verify(journalpostService, times(0)).opprettJournalpost(any(), any(), eq(false))
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -280,16 +281,8 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2000JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_01_MOTTATT_journalpostRequest.json")))
-        val p2000OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_01_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
@@ -298,25 +291,23 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT) , eq(false))
         assertEquals(p2000JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2000OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2000 - Krav om alderspensjon"),
+                eq("123"),
+                eq("0001"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
+
+
     }
 
     @Test
     fun `Mottat gyldig Sed P2100`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2100JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_02_MOTTATT_journalpostRequest.json")))
-        val p2100OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_02_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
-        val p2100BehandleSed = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_02_BehandleSed.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.MOTTATT )
 
@@ -326,24 +317,31 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT) , eq(false))
         assertEquals(p2100JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService, times(2)).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2100OppgaveModel, oppgaveCaptor.firstValue.asJson())
-        assertEquals(p2100BehandleSed, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq("123"),
+                eq("4862"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
+        verify(oppgaveService).opprettOppgave(
+                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(null),
+                eq("4862"),
+                eq("mockAktoerID"),
+                eq("BEHANDLE_SED"),
+                eq("147730"),
+                eq(listOf("Vedlegg1", "Vedlegg2"))
+        )
+
     }
 
     @Test
     fun `Mottat gyldig Sed P2200`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val p2200JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_03_MOTTATT_journalpostRequest.json")))
-        val p2200OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_03_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
-
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.MOTTATT )
         verify(personV3Service, times(0)).hentPerson(any())
@@ -352,22 +350,22 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT), eq(false))
         assertEquals(p2200JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(p2200OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2200 - Krav om uførepensjon"),
+                eq("123"),
+                eq("4303"),
+                eq(null),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
+
     }
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
-
-        val currentDate = LocalDate.now()
-
         val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val oppgaveCaptor = argumentCaptor<OpprettOppgaveModel>()
-
         val P_BUC_10_JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_10_MOTTATT_journalpostRequest.json")))
-        val P_BUC_10_OppgaveModel = String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/P_BUC_10_opprettOppgaveModel.json")))
-                .replace("{FRISTFERDIGSTILLELSE}", currentDate.plusDays(1).toString())
-                .replace("{AKTIVDATO}", currentDate.format(DateTimeFormatter.ISO_DATE))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
@@ -377,8 +375,15 @@ class JournalforingServiceTest {
         verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT), eq(false))
         assertEquals(P_BUC_10_JournalpostRequest, journalpostCaptor.lastValue.toString())
 
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture())
-        assertEquals(P_BUC_10_OppgaveModel, oppgaveCaptor.lastValue.asJson())
+        verify(oppgaveService).opprettOppgave(
+                eq("P2000 - Krav om alderspensjon"),
+                eq("123"),
+                eq("4475"),
+                eq("mockAktoerID"),
+                eq("JOURNALFORING"),
+                eq(null),
+                eq(null)
+        )
     }
 
     @Test
@@ -394,5 +399,7 @@ class JournalforingServiceTest {
                 journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.MOTTATT )
         }
     }
+
+
 
 }

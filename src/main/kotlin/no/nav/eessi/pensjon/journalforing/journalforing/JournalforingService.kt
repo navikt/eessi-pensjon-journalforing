@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
-import no.nav.eessi.pensjon.journalforing.services.oppgave.OpprettOppgaveModel
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -67,24 +66,24 @@ class JournalforingService(private val euxService: EuxService,
                     fodselsDato
             )
 
-            oppgaveService.opprettOppgave(OpprettOppgaveModel(
+            oppgaveService.opprettOppgave(
                     sedType = sedHendelse.sedType.toString(),
                     journalpostId = journalPostResponse.journalpostId,
                     tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                     aktoerId = aktoerId,
-                    oppgaveType = OpprettOppgaveModel.OppgaveType.JOURNALFORING,
+                    oppgaveType = "JOURNALFORING",
                     rinaSakId = null,
-                    filnavn = null))
+                    filnavn = null)
 
             if (requestBody.uSupporterteVedlegg.isNotEmpty()) {
-                oppgaveService.opprettOppgave(OpprettOppgaveModel(
+                oppgaveService.opprettOppgave(
                         sedType = sedHendelse.sedType.toString(),
                         journalpostId = null,
                         tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                         aktoerId = aktoerId,
-                        oppgaveType = OpprettOppgaveModel.OppgaveType.BEHANDLE_SED,
+                        oppgaveType = "BEHANDLE_SED",
                         rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = requestBody.uSupporterteVedlegg))
+                        filnavn = requestBody.uSupporterteVedlegg)
             }
         } catch (ex: MismatchedInputException) {
             logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
