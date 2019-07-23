@@ -6,6 +6,6 @@
   "tema" : "PEN",
   "oppgavetype" : "JFR",
   "prioritet" : "NORM",
-  "fristFerdigstillelse" : "2019-07-20",
-  "aktivDato" : "2019-07-19"
+  "fristFerdigstillelse" : "{FRISTFERDIGSTILLELSE}",
+  "aktivDato" : "{AKTIVDATO}"
 }
