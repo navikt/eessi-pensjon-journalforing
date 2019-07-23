@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.services.oppgave
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.metrics.counter
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
 import org.slf4j.LoggerFactory
@@ -22,19 +21,50 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
     private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
-    fun opprettOppgave(opprettOppgaveModel: OpprettOppgaveModel) {
-
-        val requestBody = opprettOppgaveModel.asJson()
-        val httpEntity = HttpEntity(requestBody)
-
+    fun opprettOppgave(
+            sedType: String,
+            journalpostId: String?,
+            tildeltEnhetsnr: String,
+            aktoerId: String?,
+            oppgaveType: String,
+            rinaSakId: String?,
+            filnavn: List<String>?)
+    {
         try {
-            logger.info("Oppretter ${opprettOppgaveModel.oppgaveType} oppgave")
+
+            val oppgaveTypeMap = mapOf(
+                    "GENERELL" to Oppgave.OppgaveType.GENERELL,
+                    "JOURNALFORING" to Oppgave.OppgaveType.JOURNALFORING,
+                    "BEHANDLE_SED" to Oppgave.OppgaveType.BEHANDLE_SED
+            )
+
+            val requestBody = mapAnyToJson(
+                    Oppgave(
+                        oppgavetype = oppgaveTypeMap[oppgaveType].toString(),
+                        tema = Oppgave.Tema.PENSJON.toString(),
+                        prioritet = Oppgave.Prioritet.NORM.toString(),
+                        aktoerId = aktoerId,
+                        aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
+                        journalpostId = journalpostId,
+                        opprettetAvEnhetsnr = "9999",
+                        tildeltEnhetsnr = tildeltEnhetsnr,
+                        fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
+                        beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
+                            Oppgave.OppgaveType.JOURNALFORING -> sedType
+                            Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: ${filnavn.toString()} tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+                            else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
+                    }), true)
+
+            val httpEntity = HttpEntity(requestBody)
+
+
+            logger.info("Oppretter ${oppgaveType} oppgave")
+
             val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
             validateResponseEntity(responseEntity)
+
             opprettOppgaveVellykkede.increment()
-            val tildeltEnhetsnr = jacksonObjectMapper().readTree(responseEntity.body!!)["tildeltEnhetsnr"].asInt()
             logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
-            jacksonObjectMapper().readTree(responseEntity.body!!)["id"].asInt()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under opprettelse av oppgave: $ex")
             opprettOppgaveFeilede.increment()
@@ -52,43 +82,6 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
         if (!responseEntity.hasBody())
             throw RuntimeException("Response from Oppgave is empty")
     }
-}
-
-class OpprettOppgaveModel(
-        private val sedType: String,
-        private val journalpostId: String?,
-        private val tildeltEnhetsnr: String,
-        private val aktoerId: String?,
-        val oppgaveType: OppgaveType,
-        private val rinaSakId: String?,
-        private val filnavn: List<String>?) {
-
-    enum class OppgaveType { GENERELL, JOURNALFORING, BEHANDLE_SED }
-
-    fun asJson() = mapAnyToJson(this.toOppgave(), true)
-
-    private val oppgaveTypeMap = mapOf(
-            OppgaveType.GENERELL to Oppgave.OppgaveType.GENERELL,
-            OppgaveType.JOURNALFORING to Oppgave.OppgaveType.JOURNALFORING,
-            OppgaveType.BEHANDLE_SED to Oppgave.OppgaveType.BEHANDLE_SED
-    )
-
-    private fun toOppgave() = Oppgave(
-            oppgavetype = oppgaveTypeMap[this.oppgaveType].toString(),
-            tema = Oppgave.Tema.PENSJON.toString(),
-            prioritet = Oppgave.Prioritet.NORM.toString(),
-            aktoerId = this.aktoerId,
-            aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-            journalpostId = journalpostId,
-            opprettetAvEnhetsnr = "9999",
-            tildeltEnhetsnr = tildeltEnhetsnr,
-            fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
-            beskrivelse = when {
-                this.oppgaveType == OppgaveType.JOURNALFORING -> sedType
-                this.oppgaveType == OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: ${this.filnavn.toString()} tilhørende RINA sakId: ${this.rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
-                else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
-            }
-    )
 }
 
 private data class Oppgave(
