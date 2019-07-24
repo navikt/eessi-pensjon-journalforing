@@ -34,33 +34,50 @@ data class JournalpostModel (
                     else -> null
                 }
 
-                val dokumenter =  mutableListOf<Dokument>()
-                dokumenter.add(Dokument(sedHendelseModel.sedId,
-                        "SED",
-                        listOf(Dokumentvarianter(fysiskDokument = sedDokumenter.sed.innhold,
-                                filtype = sedDokumenter.sed.mimeType!!.decode(),
-                                variantformat = Variantformat.ARKIV)), sedDokumenter.sed.filnavn))
-
-                val uSupporterteVedlegg = ArrayList<String>()
-
-                sedDokumenter.vedlegg?.forEach{ vedlegg ->
-
-                    if(vedlegg.mimeType == null) {
-                        uSupporterteVedlegg.add(vedlegg.filnavn)
-                    } else {
+                val konvert = sedDokumenter.vedlegg?.map { it ->
+                    if(it.mimeType == null) {
+                        Dokument(null,
+                                "UNSUPPORTED",
+                                listOf(),
+                                it.filnavn
+                        )
+                    }else {
                         try {
-                            dokumenter.add(
-                                    Dokument(sedHendelseModel.sedId,
-                                            "SED",
-                                            listOf(Dokumentvarianter(
-                                                    MimeType.PDF.decode(),
-                                                    konverterBildeTilPDF(vedlegg.innhold, vedlegg.mimeType.toString()),
-                                                    Variantformat.ARKIV)),
-                                            konverterFilendingTilPdf(vedlegg.filnavn)))
-                        } catch(ex: Exception) {
-                            uSupporterteVedlegg.add(vedlegg.filnavn)
+                            Dokument(sedHendelseModel.sedId,
+                                    "SED",
+                                    listOf(Dokumentvarianter(
+                                            MimeType.PDF.decode(),
+                                            konverterBildeTilPDF(it.innhold, it.mimeType.toString()),
+                                            Variantformat.ARKIV)),
+                                    konverterFilendingTilPdf(it.filnavn))
+                        } catch (ex: Exception) {
+                            Dokument(null,
+                                    "UNSUPPORTED",
+                                    listOf(),
+                                    it.filnavn
+                            )
                         }
                     }
+                }
+
+                val partition = konvert?.partition { it.dokumentKategori != "UNSUPPORTED" }
+
+                val dokumenter = listOf(Dokument(
+                        sedHendelseModel.sedId,
+                        "SED",
+                        listOf(Dokumentvarianter(
+                                fysiskDokument = sedDokumenter.sed.innhold,
+                                filtype = sedDokumenter.sed.mimeType!!.decode(),
+                                variantformat = Variantformat.ARKIV)),
+                        sedDokumenter.sed.filnavn
+                )).plus(when(partition?.first){
+                    null -> listOf()
+                    else -> partition?.first?.mapNotNull { it }
+                })
+
+                val uSupporterteVedlegg = when(partition?.second){
+                    null -> listOf()
+                    else -> partition.second.mapNotNull { it.tittel }
                 }
 
                 val tema = when {
@@ -100,7 +117,7 @@ data class JournalpostModel (
         }
 
         private fun konverterFilendingTilPdf(filnavn: String): String {
-            return filnavn.replaceAfter(".", "pdf")
+            return filnavn.replaceAfterLast(".", "pdf")
         }
 
         private fun populerAvsenderMottaker(sedHendelse: SedHendelseModel,
