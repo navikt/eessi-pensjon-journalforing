@@ -1,36 +1,36 @@
 {
-"avsenderMottaker": {
-"id": "12345678912",
-"idType": "FNR",
-"navn": "navn navnesen"
-},
-"behandlingstema": "ab0001",
-"bruker": {
-"id": "string",
-"idType": "FNR"
-},
-"dokumenter": [
-{
-"brevkode": "NAV 14-05.09",
-"dokumentKategori": "SOK",
-"dokumentvarianter": [
-{
-"filtype": "PDF/A",
-"fysiskDokument": "string",
-"variantformat": "ARKIV"
-}
-],
-"tittel": "Søknad om foreldrepenger ved fødsel"
-}
-],
-"eksternReferanseId": "string",
-"journalfoerendeEnhet": 9999,
-"journalpostType": "INNGAAENDE",
-"kanal": "NAV_NO",
-"sak": {
-"arkivsaksnummer": "string",
-"arkivsaksystem": "GSAK"
-},
-"tema": "FOR",
-"tittel": "Ettersendelse til søknad om foreldrepenger"
+  "avsenderMottaker": {
+    "id": "12345678912",
+    "idType": "FNR",
+    "navn": "navn navnesen"
+  },
+  "behandlingstema": "ab0254",
+  "bruker": {
+    "id": "12345678912",
+    "idType": "FNR"
+  },
+  "dokumenter": [
+    {
+      "brevkode": "NAV 14-05.09",
+      "dokumentKategori": "SOK",
+      "dokumentvarianter": [
+        {
+          "filtype": "PDF/A",
+          "fysiskDokument": "string",
+          "variantformat": "ARKIV"
+        }
+      ],
+      "tittel": "Søknad om foreldrepenger ved fødsel"
+    }
+  ],
+  "eksternReferanseId": "string",
+  "journalfoerendeEnhet": "9999",
+  "journalpostType": "INNGAAENDE",
+  "kanal": "NAV_NO",
+  "sak": {
+    "arkivsaksnummer": "string",
+    "arkivsaksystem": "GSAK"
+  },
+  "tema": "PEN",
+  "tittel": "Inngående P2000 - Krav om alderspensjon"
 }

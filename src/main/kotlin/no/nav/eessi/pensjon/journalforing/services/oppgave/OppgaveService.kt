@@ -28,7 +28,7 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
             aktoerId: String?,
             oppgaveType: String,
             rinaSakId: String?,
-            filnavn: List<String>?)
+            filnavn: String?)
     {
         try {
 
@@ -51,7 +51,7 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
                         fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
                         beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
                             Oppgave.OppgaveType.JOURNALFORING -> sedType
-                            Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: ${filnavn.toString()} tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+                            Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
                             else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
                     }), true)
 

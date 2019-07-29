@@ -1,5 +1,9 @@
 package no.nav.eessi.pensjon.journalforing.services.eux
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +29,9 @@ class EuxServiceTest {
 
     lateinit var euxService: EuxService
 
+    private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
+
     @Before
     fun setup() {
         euxService = EuxService(mockrestTemplate)
@@ -42,9 +49,9 @@ class EuxServiceTest {
                     any(HttpEntity::class.java),
                     eq(String::class.java))
 
-
         val resp = euxService.hentSedDokumenter(rinaNr, dokumentId)
-        assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", resp.sed.innhold)
+        val innhold = mapper.readValue(resp, JsonNode::class.java).path("sed").path("innhold").textValue()
+        assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", innhold)
     }
 
     @Test( expected = RuntimeException::class)
