@@ -1,19 +1,18 @@
-package no.nav.eessi.pensjon.journalforing.services.eux
-
+package no.nav.eessi.pensjon.journalforing.pdf
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-data class SedDokumenterResponse(
-        val sed: Dokument,
-        val vedlegg: List<Dokument>?
+data class SedDokumenter(
+        val sed: EuxDokument,
+        val vedlegg: List<EuxDokument>?
 ){
     companion object {
         private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
-        fun fromJson(json: String): SedDokumenterResponse = mapper.readValue(json, SedDokumenterResponse::class.java)
+        fun fromJson(json: String): SedDokumenter = mapper.readValue(json, SedDokumenter::class.java)
     }
 
     override fun toString(): String {
@@ -22,10 +21,9 @@ data class SedDokumenterResponse(
     }
 }
 
-data class Dokument(val filnavn: String,
-                    val mimeType: MimeType?,
-                    val innhold: String)
-
+data class EuxDokument(val filnavn: String,
+                       val mimeType: MimeType?,
+                       val innhold: String)
 
 enum class MimeType  : Code {
     @JsonProperty("application/pdf")
@@ -64,7 +62,25 @@ enum class MimeType  : Code {
     }
 }
 
+data class JournalPostDokument(
+        val brevkode: String? = null,
+        val dokumentKategori: String? = "SED",
+        val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
+        val tittel: String? = null
+)
+
+data class Dokumentvarianter(
+    val filtype: String, //REQUIRED
+    val fysiskDokument: String, //REQUIRED
+    val variantformat: Variantformat //REQUIRED
+)
+
+enum class Variantformat {
+    ARKIV,
+    ORIGINAL,
+    PRODUKSJON
+}
+
 interface Code {
     fun decode(): String
 }
-

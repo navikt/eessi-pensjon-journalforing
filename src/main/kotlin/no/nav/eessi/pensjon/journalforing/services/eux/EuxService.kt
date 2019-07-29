@@ -23,7 +23,7 @@ class EuxService(private val euxOidcRestTemplate: RestTemplate) {
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
 
-    fun hentSedDokumenter(rinaNr: String, dokumentId: String): SedDokumenterResponse {
+    fun hentSedDokumenter(rinaNr: String, dokumentId: String): String? {
         val path = "/buc/$rinaNr/sed/$dokumentId/filer"
         try {
             logger.info("Henter PDF for SED og tilhørende vedlegg for rinaNr: $rinaNr , dokumentId: $dokumentId")
@@ -33,10 +33,7 @@ class EuxService(private val euxOidcRestTemplate: RestTemplate) {
                     String::class.java)
             if (!response.statusCode.isError) {
                 logger.info("Hentet PDF fra eux")
-                val resp  = mapper.readValue(response.body, SedDokumenterResponse::class.java)
-                logger.info("Mappet response til SedDokumenterResponse")
-                hentPdfVellykkede.increment()
-                return resp
+                return response.body
             } else {
                 hentPdfFeilede.increment()
                 throw RuntimeException("Noe gikk galt under henting av PDF fra eux: ${response.statusCode}")

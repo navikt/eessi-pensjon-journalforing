@@ -12,6 +12,8 @@ import java.lang.RuntimeException
 import java.util.*
 import javax.imageio.ImageIO
 
+
+// TODO using exceptions as control flow is pretty iffy ...
 object ImageConverter {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(ImageConverter::class.java) }

@@ -7,11 +7,9 @@ import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.pdf.*
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.journalforing.services.eux.Dokument
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
-import no.nav.eessi.pensjon.journalforing.services.eux.MimeType
-import no.nav.eessi.pensjon.journalforing.services.eux.SedDokumenterResponse
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
@@ -27,7 +25,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 
@@ -55,12 +52,15 @@ class JournalforingServiceTest {
     @Mock
     lateinit var oppgaveRoutingService: OppgaveRoutingService
 
+    @Mock
+    lateinit var pdfService: PDFService
+
     lateinit var journalforingService: JournalforingService
 
     @Before
     fun setup() {
 
-        journalforingService = JournalforingService(euxService, journalpostService, oppgaveService, aktoerregisterService, personV3Service, fagmodulService, oppgaveRoutingService)
+        journalforingService = JournalforingService(euxService, journalpostService, oppgaveService, aktoerregisterService, personV3Service, fagmodulService, oppgaveRoutingService, pdfService)
 
         //MOCK RESPONSES
 
@@ -74,37 +74,46 @@ class JournalforingServiceTest {
                 .`when`(euxService)
                 .hentFodselsDato(anyString(), anyString())
 
+
         //EUX - HENT SED DOKUMENT
-        doReturn(SedDokumenterResponse(
-                sed = Dokument("MockSedDocument_P2000", MimeType.PDF, "ipsum lorem"),
-                vedlegg = listOf(
-                        Dokument("Vedlegg1", MimeType.PDF, "ipsum lorem"),
-                        Dokument("Vedlegg2", MimeType.PDF, "ipsum lorem"),
-                        Dokument("Vedlegg3", MimeType.PDF, "ipsum lorem"),
-                        Dokument("Vedlegg4", MimeType.PDF, "ipsum lorem"),
-                        Dokument("Vedlegg5", MimeType.PDF, "ipsum lorem"))))
+        doReturn("MOCK DOCUMENTS")
                 .`when`(euxService)
-                .hentSedDokumenter(eq("147729"), anyString())
+                .hentSedDokumenter(anyString(), anyString())
 
-        doReturn(SedDokumenterResponse(
-                sed = Dokument("MockSedDocument_P2100", MimeType.PDF, "ipsum lorem"),
-                vedlegg = listOf(
-                        Dokument("Vedlegg1", null, "ipsum lorem"),
-                        Dokument("Vedlegg2", null, "ipsum lorem"))))
-                .`when`(euxService)
-                .hentSedDokumenter(eq("147730"), anyString())
+        //PDF -
+        doReturn(Pair<String, String?>("P2000 Supported Documents", null))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq("P2000_b12e06dda2c7474b9998c7139c841646_2"))
 
-        doReturn(SedDokumenterResponse(
-                sed = Dokument("MockSedDocument_P2200", MimeType.PDF, "ipsum lorem"),
-                vedlegg = null))
-                .`when`(euxService)
-                .hentSedDokumenter(eq("148161"), anyString())
+        doReturn(Pair<String, String?>("P2100 Supported Documents", "P2100 UnSupported Documents"))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq("P2100_b12e06dda2c7474b9998c7139c841646_2"))
 
+        doReturn(Pair<String, String?>("P2200 Supported Documents", null))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq("P2200_f899bf659ff04d20bc8b978b186f1ecc_1"))
 
         //JOURNALPOST OPPRETT JOURNALPOST
-        doReturn(JournalPostResponse("123", "M", "null"))
+        doReturn("123")
                 .`when`(journalpostService)
-                .opprettJournalpost(any(), any(), eq(false))
+                .opprettJournalpost(
+                        navBruker= anyOrNull(),
+                        personNavn= anyOrNull(),
+                        avsenderId= anyOrNull(),
+                        avsenderNavn= anyOrNull(),
+                        mottakerId= anyOrNull(),
+                        mottakerNavn= anyOrNull(),
+                        bucType= anyOrNull(),
+                        sedType= anyOrNull(),
+                        sedHendelseType= anyOrNull(),
+                        eksternReferanseId= anyOrNull(),
+                        kanal= anyOrNull(),
+                        journalfoerendeEnhet= anyOrNull(),
+                        arkivsaksnummer= anyOrNull(),
+                        arkivsaksystem= anyOrNull(),
+                        dokumenter= anyOrNull(),
+                        forsokFerdigstill= anyOrNull()
+                )
 
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -138,13 +147,31 @@ class JournalforingServiceTest {
     fun `gitt en sendt sed som ikke tilhører pensjon så blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
-        verify(journalpostService, times(0)).opprettJournalpost(any(), any(), eq(false))
+        verify(journalpostService, times(0)).opprettJournalpost(
+                navBruker= anyOrNull(),
+                personNavn= anyOrNull(),
+                avsenderId= anyOrNull(),
+                avsenderNavn= anyOrNull(),
+                mottakerId= anyOrNull(),
+                mottakerNavn= anyOrNull(),
+                bucType= anyOrNull(),
+                sedType= anyOrNull(),
+                sedHendelseType= anyOrNull(),
+                eksternReferanseId= anyOrNull(),
+                kanal= anyOrNull(),
+                journalfoerendeEnhet= anyOrNull(),
+                arkivsaksnummer= anyOrNull(),
+                arkivsaksystem= anyOrNull(),
+                dokumenter= anyOrNull(),
+                forsokFerdigstill= anyOrNull()
+        )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
         verify(fagmodulService, times(0)).hentYtelseTypeForPBuc10(any(), any())
         verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any() ,eq(null))
     }
+
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
@@ -155,9 +182,24 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT) , eq(false))
-        assertEquals(p2000JournalpostRequest, journalpostCaptor.lastValue.toString())
-
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945601"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_01"),
+                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2000 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
         verify(oppgaveService).opprettOppgave(
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
@@ -179,8 +221,24 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12378945602"))
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT) , eq(false))
-        assertEquals(p2100JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945602"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_02"),
+                sedType= eq("P2100 - Krav om gjenlevendepensjon"),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2100 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2100 - Krav om gjenlevendepensjon"),
@@ -198,7 +256,7 @@ class JournalforingServiceTest {
                 eq("mockAktoerID"),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq(listOf("Vedlegg1", "Vedlegg2"))
+                eq("P2100 UnSupported Documents")
         )
     }
 
@@ -206,15 +264,29 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2200`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2200JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_03_SENDT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.SENDT )
         verify(personV3Service, times(0)).hentPerson(any())
         verify(euxService).hentFodselsDato(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT), eq(false))
-        assertEquals(p2200JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq(null),
+                personNavn= eq(null),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT002"),
+                mottakerNavn= eq("NAVT002"),
+                bucType= eq("P_BUC_03"),
+                sedType= eq("P2200 - Krav om uførepensjon"),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2200 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2200 - Krav om uførepensjon"),
@@ -231,17 +303,31 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val P_BUC_10_JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_10_SENDT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.SENDT), eq(false))
-        assertEquals(P_BUC_10_JournalpostRequest, journalpostCaptor.lastValue.toString())
-
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945601"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_10"),
+                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2000 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
+        
         verify(oppgaveService).opprettOppgave(
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
@@ -271,7 +357,24 @@ class JournalforingServiceTest {
     fun `gitt en mottatt sed som ikke tilhører pensjon så blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
-        verify(journalpostService, times(0)).opprettJournalpost(any(), any(), eq(false))
+        verify(journalpostService, times(0)).opprettJournalpost(
+                navBruker= anyOrNull(),
+                personNavn= anyOrNull(),
+                avsenderId= anyOrNull(),
+                avsenderNavn= anyOrNull(),
+                mottakerId= anyOrNull(),
+                mottakerNavn= anyOrNull(),
+                bucType= anyOrNull(),
+                sedType= anyOrNull(),
+                sedHendelseType= anyOrNull(),
+                eksternReferanseId= anyOrNull(),
+                kanal= anyOrNull(),
+                journalfoerendeEnhet= anyOrNull(),
+                arkivsaksnummer= anyOrNull(),
+                arkivsaksystem= anyOrNull(),
+                dokumenter= anyOrNull(),
+                forsokFerdigstill= anyOrNull()
+        )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
@@ -281,15 +384,29 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2000JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_01_MOTTATT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT) , eq(false))
-        assertEquals(p2000JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945601"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_01"),
+                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedHendelseType= eq("MOTTATT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2000 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2000 - Krav om alderspensjon"),
@@ -306,16 +423,30 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2100`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2100JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_02_MOTTATT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.MOTTATT )
 
         verify(personV3Service).hentPerson(eq("12378945602"))
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT) , eq(false))
-        assertEquals(p2100JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945602"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_02"),
+                sedType= eq("P2100 - Krav om gjenlevendepensjon"),
+                sedHendelseType= eq("MOTTATT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2100 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2100 - Krav om gjenlevendepensjon"),
@@ -333,22 +464,36 @@ class JournalforingServiceTest {
                 eq("mockAktoerID"),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq(listOf("Vedlegg1", "Vedlegg2"))
+                eq("P2100 UnSupported Documents")
         )
 
     }
 
     @Test
     fun `Mottat gyldig Sed P2200`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2200JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_03_MOTTATT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.MOTTATT )
         verify(personV3Service, times(0)).hentPerson(any())
         verify(euxService).hentFodselsDato(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT), eq(false))
-        assertEquals(p2200JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq(null),
+                personNavn= eq(null),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT002"),
+                mottakerNavn= eq("NAVT002"),
+                bucType= eq("P_BUC_03"),
+                sedType= eq("P2200 - Krav om uførepensjon"),
+                sedHendelseType= eq("MOTTATT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2200 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2200 - Krav om uførepensjon"),
@@ -364,16 +509,30 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val P_BUC_10_JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_10_MOTTATT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
 
-        verify(journalpostService).opprettJournalpost(journalpostCaptor.capture(), eq(HendelseType.MOTTATT), eq(false))
-        assertEquals(P_BUC_10_JournalpostRequest, journalpostCaptor.lastValue.toString())
+        verify(journalpostService).opprettJournalpost(
+                navBruker= eq("12378945601"),
+                personNavn= eq("Test Testesen"),
+                avsenderId= eq("NO:NAVT003"),
+                avsenderNavn= eq("NAVT003"),
+                mottakerId= eq("NO:NAVT007"),
+                mottakerNavn= eq("NAV Test 07"),
+                bucType= eq("P_BUC_10"),
+                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedHendelseType= eq("MOTTATT"),
+                eksternReferanseId= eq(null),
+                kanal= eq(null),
+                journalfoerendeEnhet= eq(null),
+                arkivsaksnummer= eq(null),
+                arkivsaksystem= eq(null),
+                dokumenter= eq("P2000 Supported Documents"),
+                forsokFerdigstill= eq(false)
+        )
 
         verify(oppgaveService).opprettOppgave(
                 eq("P2000 - Krav om alderspensjon"),

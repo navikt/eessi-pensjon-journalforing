@@ -1,9 +1,19 @@
 package no.nav.eessi.pensjon.journalforing.services.journalpost
 
+import com.fasterxml.jackson.annotation.JsonRawValue
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.json.mapAnyToJson
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.TreeNode
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import java.io.IOException
+
+
 
 data class JournalPostResponse(
     val journalpostId: String,
@@ -20,7 +30,9 @@ data class JournalpostRequest(
         val avsenderMottaker: AvsenderMottaker,
         val behandlingstema: String? = null,
         val bruker: Bruker? = null,
-        val dokumenter: List<Dokument>, //REQUIRED
+        @JsonDeserialize(using = JsonAsStringDeserializer::class)
+        @JsonRawValue
+        val dokumenter: String, //REQUIRED
         val eksternReferanseId: String? = null,
         val journalfoerendeEnhet: String? = null,
         val journalpostType: JournalpostType, //REQUIRED
@@ -39,25 +51,6 @@ data class JournalpostRequest(
     override fun toString(): String {
         return mapAnyToJson(this,true)
     }
-}
-
-data class Dokument(
-    val brevkode: String? = null,
-    val dokumentKategori: String? = "SED",
-    val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
-    val tittel: String? = null
-)
-
-data class Dokumentvarianter(
-    val filtype: String, //REQUIRED
-    val fysiskDokument: String, //REQUIRED
-    val variantformat: Variantformat //REQUIRED
-)
-
-enum class Variantformat {
-    ARKIV,
-    ORIGINAL,
-    PRODUKSJON
 }
 
 enum class JournalpostType: Code {
@@ -97,4 +90,12 @@ data class Bruker(
 
 interface Code {
     fun decode(): String
+}
+
+private class JsonAsStringDeserializer : JsonDeserializer<String>() {
+    @Throws(IOException::class, JsonProcessingException::class)
+    override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): String {
+        val tree = jsonParser.codec.readTree<TreeNode>(jsonParser)
+        return tree.toString()
+    }
 }
