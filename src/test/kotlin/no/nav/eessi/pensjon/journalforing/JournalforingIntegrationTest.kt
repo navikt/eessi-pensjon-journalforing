@@ -34,6 +34,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
 
@@ -53,6 +54,9 @@ class JournalforingIntegrationTest {
     @Autowired
     lateinit var  personV3Service: PersonV3Service
 
+    private val latch = CountDownLatch(4)
+
+
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
@@ -70,7 +74,8 @@ class JournalforingIntegrationTest {
         // produserer sedSendt meldinger på kafka
         produserSedHendelser(sedSendtProducerTemplate)
 
-        // Venter på at sedListener skal consumeSedSendt meldingene
+        // Venter på at begge konsumentgruppene (sedListener og testUtilityConsumer) skal consumeSedSendt meldingene
+        latch.await(15000, TimeUnit.MILLISECONDS)
         sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
@@ -116,7 +121,9 @@ class JournalforingIntegrationTest {
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(consumerProperties)
         val containerProperties = ContainerProperties(topicNavn)
         val container = KafkaMessageListenerContainer<String, String>(consumerFactory, containerProperties)
-        val messageListener = MessageListener<String, String> { record -> println("Konsumerer melding:  $record") }
+        val messageListener = MessageListener<String, String> { record -> println("Konsumerer melding:  $record")
+            latch.countDown()
+        }
         container.setupMessageListener(messageListener)
 
         return container
@@ -497,6 +504,14 @@ class JournalforingIntegrationTest {
                                 listOf(
                                         Parameter("identgruppe", "AktoerId"),
                                         Parameter("gjeldende", "true"))),
+                VerificationTimes.exactly(1)
+        )
+
+        // Verifiserer at det har blitt forsøkt å hente well known STS configurasjon
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/.well-known/openid-configuration"),
                 VerificationTimes.exactly(1)
         )
 
