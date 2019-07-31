@@ -36,6 +36,7 @@ import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
+import kotlin.test.assertEquals
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 
@@ -112,6 +113,7 @@ class JournalforingIntegrationTest {
         val consumerProperties = KafkaTestUtils.consumerProps("eessi-pensjon-group2",
                 "false",
                 embeddedKafka.embeddedKafka)
+        consumerProperties["auto.offset.reset"] = "earliest"
 
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(consumerProperties)
         val containerProperties = ContainerProperties(topicNavn)
@@ -397,6 +399,7 @@ class JournalforingIntegrationTest {
     }
 
     private fun verifiser() {
+        assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(

@@ -9,6 +9,7 @@ spring:
       ack-mode: manual
     consumer:
       enable-auto-commit: false
+      auto-offset-reset: earliest
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
