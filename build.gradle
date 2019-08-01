@@ -89,7 +89,7 @@ dependencies {
 	testImplementation "io.mockk:mockk:1.9.2"
 
 	// Architecture tests
-	testImplementation 'com.tngtech.archunit:archunit:0.10.2'
+	testImplementation 'com.tngtech.archunit:archunit:0.11.0'
 
 	// Micrometer
 	compile("io.micrometer:micrometer-registry-prometheus")
