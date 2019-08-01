@@ -2,17 +2,17 @@ buildscript {
 
 	ext {
 		kotlinVersion = '1.3.41'
-		springBootVersion = '2.1.2.RELEASE'
+		springBootVersion = '2.1.6.RELEASE'
 		springSecurityVersion = '5.0.5.RELEASE'
 		prometheusVersion = '0.5.0'
 		springfoxVersion = '2.9.2'
 		jacksonModuleKotlinVersion = '2.9.7'
-		cxfVersion = '3.2.6'
+		cxfVersion = '3.3.2'
 		mockitoVersion = '2.8.9'
 		oidcTokenSupportVersion = '0.2.9'
-		logstashLogbackVersion = '4.10'
+		logstashLogbackVersion = '6.1'
 		pensjonInformasjonVersion = '9.4.10'
-		personV3Version = '3.4.1'
+		personV3Version = '3.6.1'
 	}
 	repositories {
 		maven {
@@ -69,8 +69,8 @@ dependencies {
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 
 	// OIDC
-	implementation("no.nav.security:oidc-spring-support:0.2.9")
-	implementation("no.nav.security:oidc-test-support:0.2.9")
+	implementation("no.nav.security:oidc-spring-support:0.2.18")
+	implementation("no.nav.security:oidc-test-support:0.2.18")
 
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
