@@ -74,7 +74,7 @@ dependencies {
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
-	compile("commons-io:commons-io:2.6")
+	implementation("commons-io:commons-io:2.6")
 	
 	// Allows for variable expiration-date of each cache-entry
 	implementation("net.jodah:expiringmap:0.5.9")
@@ -91,7 +91,7 @@ dependencies {
 	testImplementation 'com.tngtech.archunit:archunit:0.11.0'
 
 	// Micrometer
-	compile("io.micrometer:micrometer-registry-prometheus")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 
 	// Tjenestespesifikasjoner
 	implementation("no.nav.tjenester:nav-person-v3-tjenestespesifikasjon:${personV3Version}")
