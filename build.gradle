@@ -32,10 +32,10 @@ buildscript {
 }
 
 plugins {
-	id 'se.patrikerdes.use-latest-versions' version '0.2.9'
+	id 'se.patrikerdes.use-latest-versions' version '0.2.12'
 	id 'com.github.ben-manes.versions' version '0.21.0'
-	id "org.owasp.dependencycheck" version "5.0.0-M2"
-	id "org.sonarqube" version "2.7"
+	id "org.owasp.dependencycheck" version "5.2.0"
+	id "org.sonarqube" version "2.7.1"
 	id 'jacoco'
 }
 
