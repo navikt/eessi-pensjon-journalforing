@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.listeners
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.journalforing.journalforing.JournalforingService
 import org.junit.Before
 import org.junit.Test

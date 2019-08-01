@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
