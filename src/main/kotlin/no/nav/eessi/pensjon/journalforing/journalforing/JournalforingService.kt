@@ -48,16 +48,14 @@ class JournalforingService(private val euxService: EuxService,
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
             val person = hentPerson(sedHendelse.navBruker)
+            val personNavn = hentPersonNavn(person)
             val aktoerId = hentAktoerId(sedHendelse.navBruker)
-            val personNavn = person?.personnavn?.sammensattNavn
-            val landkode = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+            val fodselsDato = hentFodselsDato(sedHendelse)
+            val landkode = hentLandkode(person)
 
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedId)
 
-            val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-            val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-            val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
             val journalpostId = journalpostService.opprettJournalpost(
                     navBruker= sedHendelse.navBruker,
@@ -117,6 +115,18 @@ class JournalforingService(private val euxService: EuxService,
             logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
             throw ex
         }
+    }
+
+    private fun hentLandkode(person: Person?) =
+            person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+
+    private fun hentPersonNavn(person: Person?) =
+            person?.personnavn?.sammensattNavn
+
+    private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
+        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+        return isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
