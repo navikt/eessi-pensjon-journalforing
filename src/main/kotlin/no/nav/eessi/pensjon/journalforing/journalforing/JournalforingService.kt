@@ -19,6 +19,8 @@ import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.pdf.*
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
+import no.nav.eessi.pensjon.journalforing.services.personv3.hentLandkode
+import no.nav.eessi.pensjon.journalforing.services.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import java.lang.RuntimeException
 
@@ -116,12 +118,6 @@ class JournalforingService(private val euxService: EuxService,
             throw ex
         }
     }
-
-    private fun hentLandkode(person: Person?) =
-            person?.bostedsadresse?.strukturertAdresse?.landkode?.value
-
-    private fun hentPersonNavn(person: Person?) =
-            person?.personnavn?.sammensattNavn
 
     private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
         val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
