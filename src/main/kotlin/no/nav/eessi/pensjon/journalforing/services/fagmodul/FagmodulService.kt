@@ -17,7 +17,7 @@ class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
     private val hentYtelsetypeVellykkede = counter(hentYtelsetypeTellerNavn, "vellykkede")
     private val hentYtelsetypeFeilede = counter(hentYtelsetypeTellerNavn, "feilede")
 
-    fun hentYtelseTypeForPBuc10(rinaNr: String, dokumentId: String): HentYtelseTypeResponse {
+    fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse {
 
         val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
         try {
@@ -25,7 +25,7 @@ class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
             val response = fagmodulOidcRestTemplate.exchange(path,
                     HttpMethod.GET,
                     HttpEntity(""),
-                    HentYtelseTypeResponse::class.java)
+                    HentPinOgYtelseTypeResponse::class.java)
             if (!response.statusCode.isError) {
                 logger.info("Hentet ytelsetype for P_BUC_10 fra fagmodulen: ${response.body}")
                 hentYtelsetypeVellykkede.increment()

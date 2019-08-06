@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.journalforing.models.BucType
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.journalforing.services.personv3.PersonV3Service
@@ -15,10 +15,13 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.journalforing.models.HendelseType
+import no.nav.eessi.pensjon.journalforing.models.SedType
 import no.nav.eessi.pensjon.journalforing.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.pdf.*
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
+import no.nav.eessi.pensjon.journalforing.services.personv3.hentLandkode
+import no.nav.eessi.pensjon.journalforing.services.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import java.lang.RuntimeException
 
@@ -46,18 +49,17 @@ class JournalforingService(private val euxService: EuxService,
             }
 
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-
+            val pinOgYtelse = hentPinOgYtelse(sedHendelse)
+            val fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
             val person = hentPerson(sedHendelse.navBruker)
-            val aktoerId = hentAktoerId(sedHendelse.navBruker)
-            val personNavn = person?.personnavn?.sammensattNavn
-            val landkode = person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+            val personNavn = hentPersonNavn(person)
+            val aktoerId = hentAktoerId(fnr)
+            val fodselsDato = hentFodselsDato(sedHendelse)
+            val landkode = hentLandkode(person)
 
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedId)
 
-            val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-            val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-            val fodselsDato = isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
 
             val journalpostId = journalpostService.opprettJournalpost(
                     navBruker= sedHendelse.navBruker,
@@ -80,8 +82,7 @@ class JournalforingService(private val euxService: EuxService,
 
             val tildeltEnhet = hentTildeltEnhet(
                     sedHendelse.bucType,
-                    sedHendelse.rinaSakId,
-                    sedHendelse.rinaDokumentId,
+                    pinOgYtelse,
                     sedHendelse.navBruker,
                     landkode,
                     fodselsDato
@@ -119,6 +120,26 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
+    private fun settFnr(fnrFraSed: String?, fnrFraFagmodulen: String?): String? {
+        if(fnrFraSed.isNullOrEmpty()) {
+            return fnrFraFagmodulen
+        }
+        return fnrFraSed
+    }
+
+    private fun hentPinOgYtelse(sedHendelse: SedHendelseModel): HentPinOgYtelseTypeResponse? {
+        if(sedHendelse.sedType == SedType.P15000 || sedHendelse.bucType == BucType.P_BUC_10) {
+            return fagmodulService.hentPinOgYtelseType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        }
+        return null
+    }
+
+    private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
+        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+        return isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
+    }
+
     private fun hentAktoerId(navBruker: String?): String? {
         if(navBruker == null) return null
         return try {
@@ -131,7 +152,9 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentPerson(navBruker: String?): Person? {
-        if (navBruker == null) return null
+        if (navBruker == null) {
+            return null
+        }
         return try {
             personV3Service.hentPerson(navBruker)
         } catch (ex: Exception) {
@@ -142,14 +165,13 @@ class JournalforingService(private val euxService: EuxService,
 
     private fun hentTildeltEnhet(
             bucType: BucType?,
-            rinaSakId: String,
-            rinaDokumentId: String,
+            pinOgYtelseType: HentPinOgYtelseTypeResponse?,
             navBruker: String?,
             landkode: String?,
             fodselsDato: String
     ): OppgaveRoutingModel.Enhet {
         return if(bucType == BucType.P_BUC_10){
-            val ytelseType = hentYtelseTypeMapper.map(fagmodulService.hentYtelseTypeForPBuc10(rinaSakId, rinaDokumentId))
+            val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, ytelseType)
         } else {
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato)
@@ -158,8 +180,8 @@ class JournalforingService(private val euxService: EuxService,
 }
 
 private class HentYtelseTypeMapper {
-    fun map(hentYtelseTypeResponse: HentYtelseTypeResponse) : OppgaveRoutingModel.YtelseType? {
-        return when(hentYtelseTypeResponse.krav?.type) {
+    fun map(hentPinOgYtelseTypeResponse: HentPinOgYtelseTypeResponse?) : OppgaveRoutingModel.YtelseType? {
+        return when(hentPinOgYtelseTypeResponse?.krav?.type) {
             Krav.YtelseType.AP -> OppgaveRoutingModel.YtelseType.AP
             Krav.YtelseType.GP -> OppgaveRoutingModel.YtelseType.GP
             Krav.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
@@ -167,4 +189,3 @@ private class HentYtelseTypeMapper {
         }
     }
 }
-

@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.journalforing.pdf.*
 import no.nav.eessi.pensjon.journalforing.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.journalforing.services.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentYtelseTypeResponse
+import no.nav.eessi.pensjon.journalforing.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.journalforing.services.fagmodul.Krav
 import no.nav.eessi.pensjon.journalforing.services.journalpost.*
 import no.nav.eessi.pensjon.journalforing.services.oppgave.OppgaveService
@@ -138,9 +138,9 @@ class JournalforingServiceTest {
                 .hentGjeldendeAktoerIdForNorskIdent(anyString())
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
-        doReturn(HentYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
+        doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
                 .`when`(fagmodulService)
-                .hentYtelseTypeForPBuc10(anyString(), anyString())
+                .hentPinOgYtelseType(anyString(), anyString())
     }
 
     @Test
@@ -168,7 +168,7 @@ class JournalforingServiceTest {
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(fagmodulService, times(0)).hentYtelseTypeForPBuc10(any(), any())
+        verify(fagmodulService, times(0)).hentPinOgYtelseType(any(), any())
         verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any() ,eq(null))
     }
 
@@ -378,7 +378,7 @@ class JournalforingServiceTest {
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(fagmodulService, times(0)).hentYtelseTypeForPBuc10(any(), any())
+        verify(fagmodulService, times(0)).hentPinOgYtelseType(any(), any())
         verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any() ,eq(null))
     }
 

@@ -14,6 +14,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ResponseStatus
 
+fun hentLandkode(person: Person?) =
+        person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+
+fun hentPersonNavn(person: Person?) =
+        person?.personnavn?.sammensattNavn
+
+
 @Service
 class PersonV3Service(private val service: PersonV3) {
 
@@ -55,7 +62,7 @@ class PersonV3Service(private val service: PersonV3) {
         konfigurerSamlToken()
         return  service.hentPerson(request)
     }
-    
+
     fun konfigurerSamlToken(){
         configureRequestSamlToken(service)
     }
