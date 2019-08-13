@@ -50,7 +50,6 @@ class PDFService {
                             tittel = it.filnavn)
                 })
             } else {
-                pdfConverterNavnFeilede.increment()
                 throw RuntimeException("No supported documents, $json")
             }
             pdfConverterNavnVellykkede.increment()
