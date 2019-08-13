@@ -19,7 +19,8 @@ import java.io.IOException
 data class JournalPostResponse(
     val journalpostId: String,
     val journalstatus: String,
-    val melding: String? = null
+    val melding: String? = null,
+    val journalpostferdigstilt: String
 ){
     override fun toString(): String {
         val mapper = jacksonObjectMapper()
