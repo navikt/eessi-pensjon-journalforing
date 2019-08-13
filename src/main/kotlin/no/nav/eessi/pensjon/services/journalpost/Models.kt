@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.services.journalpost
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonRawValue
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -14,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import java.io.IOException
 
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class JournalPostResponse(
     val journalpostId: String,
     val journalstatus: String,
