@@ -1,5 +1,6 @@
 {
   "journalpostId": "429434378",
   "journalstatus": "M",
-  "melding": "null"
+  "melding": "null",
+  "etNyttFeltSomPlutseligKanKomme": "Denne er her for å forsikre at mapperen ikke kræsjer ved nye ukjente felter"
 }
