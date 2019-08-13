@@ -111,3 +111,7 @@ class AktoerregisterService(private val aktoerregisterRestTemplate: RestTemplate
         return jacksonObjectMapper().readValue(responseEntity.body!!)
     }
 }
+
+class AktoerregisterIkkeFunnetException(message: String?) : Exception(message)
+
+class AktoerregisterException(message: String) : Exception(message)
