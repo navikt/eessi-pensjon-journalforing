@@ -219,7 +219,7 @@ class JournalforingIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody("{\"journalpostId\": \"string\", \"journalstatus\": \"MIDLERTIDIG\", \"melding\": \"string\" }")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))))
                     )
 
             // Mocker oppgavetjeneste
@@ -230,7 +230,7 @@ class JournalforingIntegrationTest {
                             .withBody("{\n" +
                                     "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
                                     "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
@@ -251,7 +251,7 @@ class JournalforingIntegrationTest {
                             .withBody("{\n" +
                                     "  \"tildeltEnhetsnr\" : \"4476\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
                                     "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
@@ -271,7 +271,7 @@ class JournalforingIntegrationTest {
                             .withPath("/")
                             .withBody("{\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
@@ -291,7 +291,7 @@ class JournalforingIntegrationTest {
                             .withBody("{\n" +
                                     "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
@@ -311,7 +311,7 @@ class JournalforingIntegrationTest {
                             .withBody("{\n" +
                                     "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"string\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
@@ -441,7 +441,7 @@ class JournalforingIntegrationTest {
                         .withBody("{\n" +
                                 "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"journalpostId\" : \"429434378\",\n" +
                                 "  \"aktoerId\" : \"1000101917358\",\n" +
                                 "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
@@ -461,7 +461,7 @@ class JournalforingIntegrationTest {
                         .withBody("{\n" +
                                 "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"journalpostId\" : \"429434378\",\n" +
                                 "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
@@ -480,7 +480,7 @@ class JournalforingIntegrationTest {
                         .withBody("{\n" +
                                 "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"string\",\n" +
+                                "  \"journalpostId\" : \"429434378\",\n" +
                                 "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
