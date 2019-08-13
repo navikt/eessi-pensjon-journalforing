@@ -2,22 +2,27 @@ package no.nav.eessi.pensjon.journalforing.pdf
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.metrics.counter
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 
+/**
+ *  Konverterer vedlegg fra bildeformat til pdf
+ */
 @Service
-class PDFService (){
+class PDFService {
 
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
-
     private val mapper: ObjectMapper = jacksonObjectMapper()
+
+    private final val pdfConverterNavn = "eessipensjon_journalforing.pdfConverter"
+    private val pdfConverterNavnVellykkede = counter(pdfConverterNavn, "vellykkede")
+    private val pdfConverterNavnFeilede = counter(pdfConverterNavn, "feilede")
 
     fun parseJsonDocuments(json: String, sedId: String?): Pair<String, String?>{
         try {
-
             val documents = mapper.readValue(json, SedDokumenter::class.java)
-
             val convertedDocuments = listOf(documents.sed).plus(documents.vedlegg ?: listOf())
                     .map { convert(it) }
 
@@ -47,17 +52,17 @@ class PDFService (){
             } else {
                 throw RuntimeException("No supported documents, $json")
             }
-
-
+            pdfConverterNavnVellykkede.increment()
             return Pair(supportedDocumentsJson, unnsupportedDocumentsJson)
         } catch (ex: RuntimeException) {
+            pdfConverterNavnFeilede.increment()
             logger.error("RuntimeException: Noe gikk galt under parsing av json, $json", ex)
             throw ex
         } catch (ex: Exception) {
+            pdfConverterNavnFeilede.increment()
             logger.error("Noe gikk galt under parsing av json, $json", ex)
             throw ex
         }
-
     }
 
     private fun convert(document: EuxDokument): EuxDokument{
@@ -75,7 +80,6 @@ class PDFService (){
                 document
             }
         }
-
     }
 
     private fun konverterFilendingTilPdf(filnavn: String): String {
