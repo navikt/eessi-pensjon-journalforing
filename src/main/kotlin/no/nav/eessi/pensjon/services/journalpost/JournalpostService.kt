@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.counter
 import no.nav.eessi.pensjon.models.BucType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -20,9 +20,8 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
 
-    private final val opprettJournalpostNavn = "eessipensjon_journalforing.opprettjournalpost"
-    private val opprettJournalpostVellykkede = counter(opprettJournalpostNavn, "vellykkede")
-    private val opprettJournalpostFeilede = counter(opprettJournalpostNavn, "feilede")
+    private val opprettJournalpostVellykkede = counter("eessipensjon_journalforing", "http_request", "opprettjournalpost", "type","vellykkede")
+    private val opprettJournalpostFeilede = counter("eessipensjon_journalforing", "http_request", "opprettjournalpost", "type", "feilede")
 
     fun opprettJournalpost(
             navBruker: String?,

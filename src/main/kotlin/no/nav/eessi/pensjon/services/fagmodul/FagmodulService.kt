@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.services.fagmodul
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -13,9 +13,9 @@ import java.lang.RuntimeException
 class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
-    private final val hentYtelsetypeTellerNavn = "eessipensjon_journalforing.hentpdf"
-    private val hentYtelsetypeVellykkede = counter(hentYtelsetypeTellerNavn, "vellykkede")
-    private val hentYtelsetypeFeilede = counter(hentYtelsetypeTellerNavn, "feilede")
+
+    private val hentYtelsetypeVellykkede = counter("eessipensjon_journalforing", "http_request", "hentYtelseKravtype", "type", "vellykkede")
+    private val hentYtelsetypeFeilede = counter("eessipensjon_journalforing", "http_request", "hentYtelseKravtype", "type", "feilede")
 
     fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse {
 

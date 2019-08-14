@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.services.oppgave
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import no.nav.eessi.pensjon.json.mapAnyToJson
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -16,9 +16,8 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
 
     private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
 
-    private final val opprettOppgaveNavn = "eessipensjon_journalforing.opprettoppgave"
-    private val opprettOppgaveVellykkede = counter(opprettOppgaveNavn, "vellykkede")
-    private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
+    private val opprettOppgaveVellykkede = counter("eessipensjon_journalforing", "http_request", "opprettoppgave", "type", "vellykkede")
+    private val opprettOppgaveFeilede = counter("eessipensjon_journalforing", "http_request", "opprettoppgave", "type", "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(

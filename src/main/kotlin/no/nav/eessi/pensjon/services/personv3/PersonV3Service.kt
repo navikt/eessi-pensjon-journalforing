@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.services.personv3
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.counter
 import no.nav.eessi.pensjon.security.sts.configureRequestSamlToken
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
@@ -26,9 +26,8 @@ class PersonV3Service(private val service: PersonV3) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
-    private val hentperson_teller_navn = "eessipensjon_journalforing.hentperson"
-    private val hentperson_teller_type_vellykkede = counter(hentperson_teller_navn, "vellykkede")
-    private val hentperson_teller_type_feilede = counter(hentperson_teller_navn, "feilede")
+    private val hentpersonVellykkede = counter("eessipensjon_journalforing", "http_request", "hentperson", "type", "vellykkede")
+    private val hentpersonFeilede = counter("eessipensjon_journalforing", "http_request", "hentperson", "type", "feilede")
 
 
     fun hentPerson(fnr: String): Person {
@@ -37,15 +36,15 @@ class PersonV3Service(private val service: PersonV3) {
         try {
             logger.info("Kaller PersonV3.hentPerson service")
             val resp = kallPersonV3(fnr)
-            hentperson_teller_type_vellykkede.increment()
+            hentpersonVellykkede.increment()
             return resp.person as Person
         } catch (personIkkefunnet : HentPersonPersonIkkeFunnet) {
             logger.error("Kaller PersonV3.hentPerson service Feilet")
-            hentperson_teller_type_feilede.increment()
+            hentpersonFeilede.increment()
             throw PersonV3IkkeFunnetException(personIkkefunnet.message)
         } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
             logger.error("Kaller PersonV3.hentPerson service Feilet")
-            hentperson_teller_type_feilede.increment()
+            hentpersonFeilede.increment()
             throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
         }
     }

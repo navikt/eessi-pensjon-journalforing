@@ -1,14 +1,13 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.models.HendelseType
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
-import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.HendelseType.*
 
 @Service
 class SedListener(private val journalforingService: JournalforingService) {
@@ -16,13 +15,11 @@ class SedListener(private val journalforingService: JournalforingService) {
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
     private val latch = CountDownLatch(4)
 
-    private final val consumeSedSendtMessageNavn = "eessipensjon_journalforing.consumeOutgoingSed"
-    private val consumeSedSendtMessageVellykkede = counter(consumeSedSendtMessageNavn, "vellykkede")
-    private val consumeSedSendtMessageFeilede = counter(consumeSedSendtMessageNavn, "feilede")
+    private val consumeSedSendtMessageVellykkede = counter("eessipensjon_journalforing", "http_request", "consumeOutgoingSed", "type", "vellykkede")
+    private val consumeSedSendtMessageFeilede = counter("eessipensjon_journalforing", "http_request", "consumeOutgoingSed", "type", "feilede")
 
-    private final val consumeSedMottattMessageNavn = "eessipensjon_journalforing.consumeIncomingSed"
-    private val consumeSedMottattMessageVellykkede = counter(consumeSedMottattMessageNavn, "vellykkede")
-    private val consumeSedMottattMessageFeilede = counter(consumeSedMottattMessageNavn, "feilede")
+    private val consumeSedMottattMessageVellykkede = counter("eessipensjon_journalforing", "http_request","consumeIncomingSed", "type", "vellykkede")
+    private val consumeSedMottattMessageFeilede = counter("eessipensjon_journalforing", "http_request","consumeIncomingSed", "type", "feilede")
 
     fun getLatch(): CountDownLatch {
         return latch
@@ -53,7 +50,7 @@ class SedListener(private val journalforingService: JournalforingService) {
         logger.info("Innkommet sedMottatt hendelse")
         logger.debug(hendelse)
         try {
-            journalforingService.journalfor(hendelse, HendelseType.MOTTATT)
+            journalforingService.journalfor(hendelse, MOTTATT)
             consumeSedMottattMessageVellykkede.increment()
             acknowledgment.acknowledge()
         } catch(ex: Exception){

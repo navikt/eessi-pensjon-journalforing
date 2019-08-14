@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -17,9 +17,10 @@ import java.lang.RuntimeException
 class EuxService(private val euxOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(EuxService::class.java) }
-    private final val hentPdfTellerNavn = "eessipensjon_journalforing.hentpdf"
-    private val hentPdfVellykkede = counter(hentPdfTellerNavn, "vellykkede")
-    private val hentPdfFeilede = counter(hentPdfTellerNavn, "feilede")
+
+    private val hentPdfVellykkede = counter("eessipensjon_journalforing", "http_request", "hentpdf", "type", "vellykkede")
+    private val hentPdfFeilede = counter("eessipensjon_journalforing", "http_request", "hentpdf", "type", "feilede")
+
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
 

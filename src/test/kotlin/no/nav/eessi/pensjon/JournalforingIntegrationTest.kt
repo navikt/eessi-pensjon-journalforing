@@ -2,9 +2,9 @@ package no.nav.eessi.pensjon
 
 import io.mockk.slot
 import io.mockk.*
+import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.services.personv3.PersonMock
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.ClassRule
 import org.junit.Test

@@ -1,8 +1,7 @@
 package no.nav.eessi.pensjon.security.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.eessi.pensjon.metrics.counter
-import no.nav.eessi.pensjon.json.mapAnyToJson
+import io.micrometer.core.instrument.Metrics.counter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -15,6 +14,8 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
+import no.nav.eessi.pensjon.json.mapAnyToJson
+
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -47,13 +48,11 @@ class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
 
     private val logger = LoggerFactory.getLogger(STSService::class.java)
 
-    private final val discoverSTSEndpointsNavn = "eessipensjon_journalforing.discoverSTS"
-    private val discoverSTSEndpointsVellykkede = counter(discoverSTSEndpointsNavn, "vellykkede")
-    private val discoverSTSEndpointsFeilede = counter(discoverSTSEndpointsNavn, "feilede")
+    private val discoverSTSEndpointsVellykkede = counter("eessipensjon_journalforing", "http_request", "discoverSTS", "type", "vellykkede")
+    private val discoverSTSEndpointsFeilede = counter("eessipensjon_journalforing", "http_request", "discoverSTS", "type", "feilede")
 
-    private final val getSystemOidcTokenNavn = "eessipensjon_journalforing.getSystemOidcToken"
-    private val getSystemOidcTokenVellykkede = counter(getSystemOidcTokenNavn, "vellykkede")
-    private val getSystemOidcTokenFeilede = counter(getSystemOidcTokenNavn, "feilede")
+    private val getSystemOidcTokenVellykkede = counter("eessipensjon_journalforing", "http_request", "getSystemOidcToken", "type", "vellykkede")
+    private val getSystemOidcTokenFeilede = counter("eessipensjon_journalforing","http_request", "getSystemOidcToken", "type", "feilede")
 
     @Value("\${securityTokenService.discoveryUrl}")
     lateinit var discoveryUrl: String

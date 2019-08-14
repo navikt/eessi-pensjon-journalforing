@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.pdf
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
@@ -12,13 +12,10 @@ import java.lang.RuntimeException
  */
 @Service
 class PDFService {
-
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
     private val mapper: ObjectMapper = jacksonObjectMapper()
-
-    private final val pdfConverterNavn = "eessipensjon_journalforing.pdfConverter"
-    private val pdfConverterNavnVellykkede = counter(pdfConverterNavn, "vellykkede")
-    private val pdfConverterNavnFeilede = counter(pdfConverterNavn, "feilede")
+    private val pdfConverterVellykkede = counter("eessipensjon_journalforing", "http_request", "pdfConverter", "type", "vellykkede")
+    private val pdfConverterFeilede = counter("eessipensjon_journalforing", "http_request", "pdfConverter", "type", "feilede")
 
     fun parseJsonDocuments(json: String, sedId: String?): Pair<String, String?>{
         try {
@@ -52,14 +49,14 @@ class PDFService {
             } else {
                 throw RuntimeException("No supported documents, $json")
             }
-            pdfConverterNavnVellykkede.increment()
+            pdfConverterVellykkede.increment()
             return Pair(supportedDocumentsJson, unnsupportedDocumentsJson)
         } catch (ex: RuntimeException) {
-            pdfConverterNavnFeilede.increment()
+            pdfConverterFeilede.increment()
             logger.error("RuntimeException: Noe gikk galt under parsing av json, $json", ex)
             throw ex
         } catch (ex: Exception) {
-            pdfConverterNavnFeilede.increment()
+            pdfConverterFeilede.increment()
             logger.error("Noe gikk galt under parsing av json, $json", ex)
             throw ex
         }

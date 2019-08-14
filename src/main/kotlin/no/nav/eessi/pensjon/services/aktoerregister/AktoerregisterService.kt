@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.services.aktoerregister
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.Metrics.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -29,10 +29,8 @@ class AktoerregisterService(private val aktoerregisterRestTemplate: RestTemplate
 
     private val logger = LoggerFactory.getLogger(AktoerregisterService::class.java)
 
-    private val aktoerregister_teller_navn = "eessipensjon_journalforing.aktoerregister"
-    private val aktoerregister_teller_type_vellykkede = counter(aktoerregister_teller_navn, "vellykkede")
-    private val aktoerregister_teller_type_feilede = counter(aktoerregister_teller_navn, "feilede")
-
+    private val aktoerregisterVellykkede = counter("eessipensjon_journalforing", "http_request", "aktoerregister", "type", "vellykkede")
+    private val aktoerregisterFeilede = counter("eessipensjon_journalforing", "http_request", "aktoerregister", "type", "feilede")
 
     @Value("\${app.name}")
     lateinit var appName: String
@@ -100,13 +98,13 @@ class AktoerregisterService(private val aktoerregisterRestTemplate: RestTemplate
 
         if (responseEntity.statusCode.isError) {
             logger.error("Fikk ${responseEntity.statusCode} feil fra aktørregisteret")
-            aktoerregister_teller_type_feilede.increment()
+            aktoerregisterFeilede.increment()
             if (responseEntity.hasBody()) {
                 logger.error(responseEntity.body.toString())
             }
             throw AktoerregisterException("Received ${responseEntity.statusCode} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
         }
-        aktoerregister_teller_type_vellykkede.increment()
+        aktoerregisterVellykkede.increment()
 
         return jacksonObjectMapper().readValue(responseEntity.body!!)
     }
