@@ -3,9 +3,11 @@ package no.nav.eessi.pensjon.pdf
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths

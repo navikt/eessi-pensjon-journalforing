@@ -3,6 +3,9 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertTrue
+import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
@@ -16,9 +19,6 @@ import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.services.personv3.PersonMock
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

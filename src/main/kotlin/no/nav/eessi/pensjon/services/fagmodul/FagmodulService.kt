@@ -1,43 +1,46 @@
 package no.nav.eessi.pensjon.services.fagmodul
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 
+/**
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
+ */
 @Service
-class FagmodulService(private val fagmodulOidcRestTemplate: RestTemplate) {
+class FagmodulService(
+        private val fagmodulOidcRestTemplate: RestTemplate,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
-    private final val hentYtelsetypeTellerNavn = "eessipensjon_journalforing.hentpdf"
-    private val hentYtelsetypeVellykkede = counter(hentYtelsetypeTellerNavn, "vellykkede")
-    private val hentYtelsetypeFeilede = counter(hentYtelsetypeTellerNavn, "feilede")
 
     fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse {
-
-        val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
-        try {
-            logger.info("Henter ytelsetype for P_BUC_10 for rinaNr: $rinaNr , dokumentId: $dokumentId")
-            val response = fagmodulOidcRestTemplate.exchange(path,
-                    HttpMethod.GET,
-                    HttpEntity(""),
-                    HentPinOgYtelseTypeResponse::class.java)
-            if (!response.statusCode.isError) {
-                logger.info("Hentet ytelsetype for P_BUC_10 fra fagmodulen: ${response.body}")
-                hentYtelsetypeVellykkede.increment()
-                return response.body!!
-            } else {
-                hentYtelsetypeFeilede.increment()
-                throw RuntimeException("Noe gikk galt under henting av Ytelsetype fra fagmodulen: ${response.statusCode}")
+        return metricsHelper.measure("hentYtelseKravtype") {
+            val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
+            try {
+                logger.info("Henter ytelsetype for P_BUC_10 for rinaNr: $rinaNr , dokumentId: $dokumentId")
+                val response = fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        HttpEntity(""),
+                        HentPinOgYtelseTypeResponse::class.java)
+                if (!response.statusCode.isError) {
+                    logger.info("Hentet ytelsetype for P_BUC_10 fra fagmodulen: ${response.body}")
+                    response.body!!
+                } else {
+                    throw RuntimeException("Noe gikk galt under henting av Ytelsetype fra fagmodulen: ${response.statusCode}")
+                }
+            } catch (ex: Exception) {
+                logger.error("Noe gikk galt under henting av ytelsetype fra fagmodulen: ${ex.message}")
+                throw RuntimeException("Feil ved henting av ytelsetype fra fagmodulen")
             }
-        } catch (ex: Exception) {
-            hentYtelsetypeFeilede.increment()
-            logger.error("Noe gikk galt under henting av ytelsetype fra fagmodulen: ${ex.message}")
-            throw RuntimeException("Feil ved henting av ytelsetype fra fagmodulen")
         }
     }
 }

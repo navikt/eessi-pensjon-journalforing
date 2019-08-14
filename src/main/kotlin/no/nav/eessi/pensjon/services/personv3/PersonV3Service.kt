@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.services.personv3
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.security.sts.configureRequestSamlToken
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
@@ -10,6 +11,7 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -21,32 +23,32 @@ fun hentPersonNavn(person: Person?) =
         person?.personnavn?.sammensattNavn
 
 
+/**
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
+ */
 @Service
-class PersonV3Service(private val service: PersonV3) {
+class PersonV3Service(
+        private val service: PersonV3,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
-    private val hentperson_teller_navn = "eessipensjon_journalforing.hentperson"
-    private val hentperson_teller_type_vellykkede = counter(hentperson_teller_navn, "vellykkede")
-    private val hentperson_teller_type_feilede = counter(hentperson_teller_navn, "feilede")
-
-
     fun hentPerson(fnr: String): Person {
-        logger.info("Henter person fra PersonV3Service")
+        return metricsHelper.measure("hentperson") {
+            logger.info("Henter person fra PersonV3Service")
 
-        try {
-            logger.info("Kaller PersonV3.hentPerson service")
-            val resp = kallPersonV3(fnr)
-            hentperson_teller_type_vellykkede.increment()
-            return resp.person as Person
-        } catch (personIkkefunnet : HentPersonPersonIkkeFunnet) {
-            logger.error("Kaller PersonV3.hentPerson service Feilet")
-            hentperson_teller_type_feilede.increment()
-            throw PersonV3IkkeFunnetException(personIkkefunnet.message)
-        } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
-            logger.error("Kaller PersonV3.hentPerson service Feilet")
-            hentperson_teller_type_feilede.increment()
-            throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
+            try {
+                logger.info("Kaller PersonV3.hentPerson service")
+                val resp = kallPersonV3(fnr)
+                resp.person as Person
+            } catch (personIkkefunnet: HentPersonPersonIkkeFunnet) {
+                logger.error("Kaller PersonV3.hentPerson service Feilet")
+                throw PersonV3IkkeFunnetException(personIkkefunnet.message)
+            } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
+                logger.error("Kaller PersonV3.hentPerson service Feilet")
+                throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
+            }
         }
     }
 
