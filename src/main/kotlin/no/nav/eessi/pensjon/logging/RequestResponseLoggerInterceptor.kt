@@ -34,12 +34,12 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
 
     private fun logResponse(response: ClientHttpResponse) {
         if (log.isDebugEnabled) {
-            log.debug("\n============================response begin=========================================="
+            log.debug("\n===========================response begin================================================\n"
                     + "Status code  : " + response.statusCode + "\n"
                     + "Status text  : " + response.statusText + "\n"
                     + "Headers      : " + response.headers + "\n"
                     + "Response body: " + StreamUtils.copyToString(response.body, Charset.defaultCharset()) + "\n"
-                    + "=======================response end=================================================")
+                    + "==========================response end================================================")
         }
     }
 }
