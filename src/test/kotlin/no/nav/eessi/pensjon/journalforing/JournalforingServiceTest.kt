@@ -17,6 +17,8 @@ import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.services.personv3.PersonMock
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -204,7 +206,7 @@ class JournalforingServiceTest {
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
                 eq("0001"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -244,7 +246,7 @@ class JournalforingServiceTest {
                 eq("P2100 - Krav om gjenlevendepensjon"),
                 eq("123"),
                 eq("4862"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -253,7 +255,7 @@ class JournalforingServiceTest {
                 eq("P2100 - Krav om gjenlevendepensjon"),
                 eq(null),
                 eq("4862"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
                 eq("P2100 UnSupported Documents")
@@ -332,7 +334,7 @@ class JournalforingServiceTest {
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
                 eq("4475"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -412,7 +414,7 @@ class JournalforingServiceTest {
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
                 eq("0001"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -452,7 +454,7 @@ class JournalforingServiceTest {
                 eq("P2100 - Krav om gjenlevendepensjon"),
                 eq("123"),
                 eq("4862"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -461,7 +463,7 @@ class JournalforingServiceTest {
                 eq("P2100 - Krav om gjenlevendepensjon"),
                 eq(null),
                 eq("4862"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
                 eq("P2100 UnSupported Documents")
@@ -538,7 +540,7 @@ class JournalforingServiceTest {
                 eq("P2000 - Krav om alderspensjon"),
                 eq("123"),
                 eq("4475"),
-                eq("mockAktoerID"),
+                eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
                 eq(null)
@@ -559,6 +561,18 @@ class JournalforingServiceTest {
         }
     }
 
+    @Test
+    fun `Gitt en tom fnr når fnr valideres så svar invalid`(){
+        assertFalse(isFnrValid(null))
+    }
 
+    @Test
+    fun `Gitt en ugyldig lengde fnr når fnr valideres så svar invalid`(){
+        assertFalse(isFnrValid("1234"))
+    }
 
+    @Test
+    fun `Gitt en gyldig lengde fnr når fnr valideres så svar valid`(){
+        assertTrue(isFnrValid("12345678910"))
+    }
 }
