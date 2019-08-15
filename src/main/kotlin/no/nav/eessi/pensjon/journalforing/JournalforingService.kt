@@ -53,7 +53,7 @@ class JournalforingService(private val euxService: EuxService,
             var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
             val person = hentPerson(fnr)
             // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
-            fnr = null
+            if(person == null) fnr = null
 
             val personNavn = hentPersonNavn(person)
             val aktoerId = null
