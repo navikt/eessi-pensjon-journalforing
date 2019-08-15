@@ -71,6 +71,8 @@ data class Sak(
 
 /**
  * Avsender eller mottaker informasjon for personen eller organisasjonen som enten sender eller mottar dokumentet
+ *
+ * https://confluence.adeo.no/display/BOA/Type%3A+AvsenderMottaker
  */
 data class AvsenderMottaker(
     val id: String, //REQUIRED
@@ -79,10 +81,10 @@ data class AvsenderMottaker(
 )
 
 enum class IdType {
+    NULL,
     FNR,
     ORGNR,
-    HPRNR,
-    UTL_ORG
+    UKJENT,
 }
 
 data class Bruker(

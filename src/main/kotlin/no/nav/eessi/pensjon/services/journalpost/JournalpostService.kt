@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.metrics.counter
 import no.nav.eessi.pensjon.models.BucType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
@@ -23,6 +24,9 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
     private final val opprettJournalpostNavn = "eessipensjon_journalforing.opprettjournalpost"
     private val opprettJournalpostVellykkede = counter(opprettJournalpostNavn, "vellykkede")
     private val opprettJournalpostFeilede = counter(opprettJournalpostNavn, "feilede")
+
+    @Value("\${no.nav.orgnummer}")
+    private lateinit var navOrgnummer: String
 
     fun opprettJournalpost(
             navBruker: String?,
@@ -45,8 +49,6 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
 
         val avsenderMottaker = populerAvsenderMottaker(
                 navBruker,
-                avsenderId,
-                avsenderNavn,
                 mottakerId,
                 mottakerNavn,
                 sedHendelseType,
@@ -108,17 +110,15 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
 
     private fun populerAvsenderMottaker(
             navBruker: String?,
-            avsenderId: String,
-            avsenderNavn: String,
             mottakerId: String,
             mottakerNavn: String,
             sedHendelseType: String,
             personNavn: String?): AvsenderMottaker {
         return if(navBruker.isNullOrEmpty() || personNavn.isNullOrEmpty()) {
             if(sedHendelseType == "SENDT") {
-                AvsenderMottaker(avsenderId, IdType.ORGNR, avsenderNavn)
+                AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV")
             } else {
-                AvsenderMottaker(mottakerId, IdType.UTL_ORG, mottakerNavn)
+                AvsenderMottaker(mottakerId, IdType.UKJENT, mottakerNavn)
             }
         } else {
             AvsenderMottaker(navBruker, IdType.FNR, personNavn)

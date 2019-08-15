@@ -34,3 +34,5 @@ management:
     export.prometheus.enabled: true
     prometheus.enabled: true
   metrics.web.server.auto-time-requests: false
+
+no.nav.orgnummer: 889640782
