@@ -50,8 +50,11 @@ class JournalforingService(private val euxService: EuxService,
 
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
             val pinOgYtelse = hentPinOgYtelse(sedHendelse)
-            val fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
-            val person = hentPerson(sedHendelse.navBruker)
+            var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
+            val person = hentPerson(fnr)
+            // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
+            fnr = null
+
             val personNavn = hentPersonNavn(person)
             val aktoerId = hentAktoerId(fnr)
             val fodselsDato = hentFodselsDato(sedHendelse)
@@ -62,7 +65,7 @@ class JournalforingService(private val euxService: EuxService,
 
 
             val journalpostId = journalpostService.opprettJournalpost(
-                    navBruker= sedHendelse.navBruker,
+                    navBruker= fnr,
                     personNavn= personNavn,
                     avsenderId= sedHendelse.avsenderId,
                     avsenderNavn= sedHendelse.avsenderNavn,

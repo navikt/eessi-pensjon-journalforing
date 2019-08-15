@@ -132,11 +132,6 @@ class JournalforingServiceTest {
                 .`when`(oppgaveRoutingService)
                 .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(), any())
 
-        //AKTOERREGISTER HENT AKTORID FOR NORSK IDENT
-        doReturn("mockAktoerID")
-                .`when`(aktoerregisterService)
-                .hentGjeldendeAktoerIdForNorskIdent(anyString())
-
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
                 .`when`(fagmodulService)
@@ -175,15 +170,12 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2000JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_01_SENDT_journalpostRequest.json")))
-
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945601"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -213,8 +205,6 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2100`(){
-        val journalpostCaptor = argumentCaptor<JournalpostRequest>()
-        val p2100JournalpostRequest = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/P_BUC_02_SENDT_journalpostRequest.json")))
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.SENDT )
 
@@ -222,7 +212,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945602"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -303,14 +293,13 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945601"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -384,13 +373,12 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945601"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -430,7 +418,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945602"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -516,7 +504,7 @@ class JournalforingServiceTest {
 
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq("12378945601"),
+                navBruker= eq(null),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
