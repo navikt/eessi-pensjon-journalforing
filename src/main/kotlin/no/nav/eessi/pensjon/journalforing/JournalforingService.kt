@@ -51,9 +51,11 @@ class JournalforingService(private val euxService: EuxService,
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
             val pinOgYtelse = hentPinOgYtelse(sedHendelse)
             val fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
-            val person = hentPerson(sedHendelse.navBruker)
+            val person = hentPerson(fnr)
             val personNavn = hentPersonNavn(person)
-            val aktoerId = hentAktoerId(fnr)
+            val aktoerId = null
+            if(person != null) hentAktoerId(fnr)
+
             val fodselsDato = hentFodselsDato(sedHendelse)
             val landkode = hentLandkode(person)
 
@@ -141,9 +143,9 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
-        if(navBruker == null) return null
+        if (!isFnrValid(navBruker)) return null
         return try {
-            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker)
+            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
             aktoerId
         } catch (ex: Exception) {
             logger.error("Det oppstod en feil ved henting av aktørid: $ex")
@@ -152,13 +154,10 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentPerson(navBruker: String?): Person? {
-        if (navBruker == null) {
-            return null
-        }
+        if (!isFnrValid(navBruker)) return null
         return try {
-            personV3Service.hentPerson(navBruker)
+            personV3Service.hentPerson(navBruker!!)
         } catch (ex: Exception) {
-            logger.error("Det oppstod en feil ved henting av person: $ex")
             null
         }
     }
@@ -177,6 +176,13 @@ class JournalforingService(private val euxService: EuxService,
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato)
         }
     }
+}
+
+fun isFnrValid(navBruker: String?): Boolean {
+    if(navBruker == null) return false
+    if(navBruker.length != 11) return false
+
+    return true
 }
 
 private class HentYtelseTypeMapper {
