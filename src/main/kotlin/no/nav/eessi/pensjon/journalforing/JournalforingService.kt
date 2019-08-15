@@ -128,7 +128,7 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentPinOgYtelse(sedHendelse: SedHendelseModel): HentPinOgYtelseTypeResponse? {
-        if(sedHendelse.sedType == SedType.P15000 || sedHendelse.bucType == BucType.P_BUC_10) {
+        if(sedHendelse.bucType == BucType.P_BUC_10) {
             return fagmodulService.hentPinOgYtelseType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
         }
         return null
