@@ -489,18 +489,6 @@ class JournalforingIntegrationTest {
                 VerificationTimes.exactly(1)
         )
 
-        // Verifiserer at det har blitt forsøkt å hente AktoerID
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/identer")
-                        .withQueryStringParameters(
-                                listOf(
-                                        Parameter("identgruppe", "AktoerId"),
-                                        Parameter("gjeldende", "true"))),
-                VerificationTimes.exactly(1)
-        )
-
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 1) { personV3Service.hentPerson(any()) }
     }
