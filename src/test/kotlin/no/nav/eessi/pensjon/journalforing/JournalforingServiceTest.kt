@@ -177,7 +177,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -214,7 +214,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945602"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -301,7 +301,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -380,7 +380,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -420,7 +420,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945602"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
@@ -506,7 +506,7 @@ class JournalforingServiceTest {
 
 
         verify(journalpostService).opprettJournalpost(
-                navBruker= eq(null),
+                navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
