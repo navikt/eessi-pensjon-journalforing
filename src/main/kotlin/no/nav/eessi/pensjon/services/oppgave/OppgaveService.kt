@@ -84,7 +84,7 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
     }
 }
 
-private data class Oppgave(
+private class Oppgave(
         val id: Long? = null,
         val tildeltEnhetsnr: String? = null,
         val endretAvEnhetsnr: String? = null,

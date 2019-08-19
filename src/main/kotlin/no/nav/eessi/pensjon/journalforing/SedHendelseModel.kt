@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 
-data class SedHendelseModel (
+class SedHendelseModel (
         val id: Long? = 0,
         val sedId: String? = null,
         val sektorKode: String,
