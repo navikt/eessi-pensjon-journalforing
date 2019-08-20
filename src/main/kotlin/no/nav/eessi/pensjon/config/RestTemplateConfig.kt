@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.config
 
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
+import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import no.nav.eessi.pensjon.security.sts.STSService
 import no.nav.eessi.pensjon.security.sts.UsernameToOidcInterceptor
 import org.springframework.beans.factory.annotation.Value
@@ -16,7 +18,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Configuration
-class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
+class RestTemplateConfig(private val securityTokenExchangeService: STSService, private val meterRegistry: MeterRegistry) {
 
     @Value("\${aktoerregister.api.v1.url}")
     lateinit var aktoerregisterUrl: String
@@ -46,6 +48,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
                 .rootUri(joarkUrl)
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
@@ -58,6 +61,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
         return templateBuilder
                 .rootUri(aktoerregisterUrl)
                 .additionalInterceptors(RequestInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
                         RequestResponseLoggerInterceptor(),
                         BasicAuthenticationInterceptor(username, password)
                 )
@@ -72,6 +76,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
                 .rootUri(oppgaveUrl)
                 .additionalInterceptors(RequestInterceptor(),
                         RequestResponseLoggerInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
                         BasicAuthenticationInterceptor(username, password)
                 )
                 .build().apply {
@@ -97,6 +102,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService) {
                 .rootUri(fagmodulUrl)
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
