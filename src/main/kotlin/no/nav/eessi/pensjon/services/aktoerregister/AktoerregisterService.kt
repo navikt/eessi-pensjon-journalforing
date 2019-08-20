@@ -2,8 +2,10 @@ package no.nav.eessi.pensjon.services.aktoerregister
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -24,15 +26,16 @@ data class IdentinfoForAktoer(
         val feilmelding: String?
 )
 
+/**
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
+ */
 @Service
-class AktoerregisterService(private val aktoerregisterRestTemplate: RestTemplate) {
+class AktoerregisterService(
+        private val aktoerregisterRestTemplate: RestTemplate,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger = LoggerFactory.getLogger(AktoerregisterService::class.java)
-
-    private val aktoerregister_teller_navn = "eessipensjon_journalforing.aktoerregister"
-    private val aktoerregister_teller_type_vellykkede = counter(aktoerregister_teller_navn, "vellykkede")
-    private val aktoerregister_teller_type_feilede = counter(aktoerregister_teller_navn, "feilede")
-
 
     @Value("\${app.name}")
     lateinit var appName: String
@@ -83,32 +86,32 @@ class AktoerregisterService(private val aktoerregisterRestTemplate: RestTemplate
     private fun doRequest(ident: String,
                           identGruppe: String,
                           gjeldende: Boolean = true): Map<String, IdentinfoForAktoer> {
-        val headers = HttpHeaders()
-        headers["Nav-Personidenter"] = ident
-        headers["Nav-Consumer-Id"] = appName
-        headers["Nav-Call-Id"] = UUID.randomUUID().toString()
-        val requestEntity = HttpEntity<String>(headers)
+        return metricsHelper.measure("aktoerregister") {
+            val headers = HttpHeaders()
+            headers["Nav-Personidenter"] = ident
+            headers["Nav-Consumer-Id"] = appName
+            headers["Nav-Call-Id"] = UUID.randomUUID().toString()
+            val requestEntity = HttpEntity<String>(headers)
 
-        val uriBuilder = UriComponentsBuilder.fromPath("/identer")
-                .queryParam("identgruppe", identGruppe)
-                .queryParam("gjeldende", gjeldende)
-        logger.info("Kaller aktørregisteret: /identer")
-        val responseEntity = aktoerregisterRestTemplate.exchange(uriBuilder.toUriString(),
-                HttpMethod.GET,
-                requestEntity,
-                String::class.java)
+            val uriBuilder = UriComponentsBuilder.fromPath("/identer")
+                    .queryParam("identgruppe", identGruppe)
+                    .queryParam("gjeldende", gjeldende)
+            logger.info("Kaller aktørregisteret: /identer")
+            val responseEntity = aktoerregisterRestTemplate.exchange(uriBuilder.toUriString(),
+                    HttpMethod.GET,
+                    requestEntity,
+                    String::class.java)
 
-        if (responseEntity.statusCode.isError) {
-            logger.error("Fikk ${responseEntity.statusCode} feil fra aktørregisteret")
-            aktoerregister_teller_type_feilede.increment()
-            if (responseEntity.hasBody()) {
-                logger.error(responseEntity.body.toString())
+            if (responseEntity.statusCode.isError) {
+                logger.error("Fikk ${responseEntity.statusCode} feil fra aktørregisteret")
+                if (responseEntity.hasBody()) {
+                    logger.error(responseEntity.body.toString())
+                }
+                throw AktoerregisterException("Received ${responseEntity.statusCode} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
             }
-            throw AktoerregisterException("Received ${responseEntity.statusCode} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
-        }
-        aktoerregister_teller_type_vellykkede.increment()
 
-        return jacksonObjectMapper().readValue(responseEntity.body!!)
+            jacksonObjectMapper().readValue(responseEntity.body!!)
+        }
     }
 }
 

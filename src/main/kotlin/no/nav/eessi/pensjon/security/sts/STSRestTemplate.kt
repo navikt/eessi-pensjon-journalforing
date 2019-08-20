@@ -1,7 +1,10 @@
 package no.nav.eessi.pensjon.security.sts
 
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
+import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -26,13 +29,18 @@ class STSRestTemplate {
     @Value("\${srvpassword}")
     lateinit var password: String
 
+    @Autowired
+    lateinit var meterRegistry: MeterRegistry
+
     @Bean
     fun securityTokenExchangeBasicAuthRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         logger.info("Oppretter RestTemplate for securityTokenExchangeBasicAuthRestTemplate")
         return templateBuilder
                 .additionalInterceptors(RequestResponseLoggerInterceptor())
-                .additionalInterceptors(BasicAuthenticationInterceptor(username, password))
-                .build().apply {
+                .additionalInterceptors(
+                        RequestCountInterceptor(meterRegistry),
+                        BasicAuthenticationInterceptor(username, password)
+                ).build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }
     }

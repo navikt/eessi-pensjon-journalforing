@@ -2,6 +2,9 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.services.personv3.hentLandkode
+import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
@@ -9,7 +12,6 @@ import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -20,8 +22,6 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
-import no.nav.eessi.pensjon.services.personv3.hentLandkode
-import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import java.lang.RuntimeException
 

@@ -1,8 +1,7 @@
 package no.nav.eessi.pensjon.security.sts
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.eessi.pensjon.metrics.counter
-import no.nav.eessi.pensjon.json.mapAnyToJson
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -15,6 +14,10 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
+import no.nav.eessi.pensjon.json.mapAnyToJson
+import no.nav.eessi.pensjon.metrics.MetricsHelper
+import org.springframework.beans.factory.annotation.Autowired
+
 
 inline fun <reified T : Any> typeRef(): ParameterizedTypeReference<T> = object : ParameterizedTypeReference<T>() {}
 
@@ -41,19 +44,16 @@ data class WellKnownSTS(
 )
 /**
  * Denne STS tjenesten benyttes ved kall mot nye REST tjenester sånn som Aktørregisteret
+ *
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Service
-class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
+class STSService(
+        private val securityTokenExchangeBasicAuthRestTemplate: RestTemplate,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger = LoggerFactory.getLogger(STSService::class.java)
-
-    private final val discoverSTSEndpointsNavn = "eessipensjon_journalforing.discoverSTS"
-    private val discoverSTSEndpointsVellykkede = counter(discoverSTSEndpointsNavn, "vellykkede")
-    private val discoverSTSEndpointsFeilede = counter(discoverSTSEndpointsNavn, "feilede")
-
-    private final val getSystemOidcTokenNavn = "eessipensjon_journalforing.getSystemOidcToken"
-    private val getSystemOidcTokenVellykkede = counter(getSystemOidcTokenNavn, "vellykkede")
-    private val getSystemOidcTokenFeilede = counter(getSystemOidcTokenNavn, "feilede")
 
     @Value("\${securityTokenService.discoveryUrl}")
     lateinit var discoveryUrl: String
@@ -61,42 +61,42 @@ class STSService(val securityTokenExchangeBasicAuthRestTemplate: RestTemplate) {
     lateinit var wellKnownSTS: WellKnownSTS
 
     @PostConstruct
-    fun discoverEndpoints(){
-        try {
-            logger.info("Henter STS endepunkter fra well.known " + discoveryUrl)
-            wellKnownSTS = RestTemplate().exchange(discoveryUrl,
-                    HttpMethod.GET,
-                    null,
-                    typeRef<WellKnownSTS>()).body!!
-            discoverSTSEndpointsVellykkede.increment()
-        } catch (ex: Exception) {
-            logger.error("Feil ved henting av STS endepunkter fra well.known: ${ex.message}", ex)
-            discoverSTSEndpointsFeilede.increment()
-            throw RestClientException(ex.message!!)
+    fun discoverEndpoints() {
+        metricsHelper.measure("disoverSTS") {
+            try {
+                logger.info("Henter STS endepunkter fra well.known " + discoveryUrl)
+                    wellKnownSTS = RestTemplate().exchange(discoveryUrl,
+                            HttpMethod.GET,
+                            null,
+                            typeRef<WellKnownSTS>()).body!!
+            } catch (ex: Exception) {
+                logger.error("Feil ved henting av STS endepunkter fra well.known: ${ex.message}", ex)
+                throw RestClientException(ex.message!!)
+            }
         }
     }
 
     fun getSystemOidcToken(): String {
-        try {
-            val uri = UriComponentsBuilder.fromUriString(wellKnownSTS.tokenEndpoint)
-                    .queryParam("grant_type", "client_credentials")
-                    .queryParam("scope", "openid")
-                    .build().toUriString()
+        return metricsHelper.measure("getSystemOidcToken") {
+            try {
+                val uri = UriComponentsBuilder.fromUriString(wellKnownSTS.tokenEndpoint)
+                        .queryParam("grant_type", "client_credentials")
+                        .queryParam("scope", "openid")
+                        .build().toUriString()
 
-            logger.info("Kaller STS for å bytte username/password til OIDC token")
-            val responseEntity = securityTokenExchangeBasicAuthRestTemplate.exchange(uri,
-                    HttpMethod.GET,
-                    null,
-                    typeRef<SecurityTokenResponse>())
+                logger.info("Kaller STS for å bytte username/password til OIDC token")
+                val responseEntity = securityTokenExchangeBasicAuthRestTemplate.exchange(uri,
+                        HttpMethod.GET,
+                        null,
+                        typeRef<SecurityTokenResponse>())
 
-            logger.debug("SecurityTokenResponse ${mapAnyToJson(responseEntity)} ")
-            validateResponse(responseEntity)
-            getSystemOidcTokenVellykkede.increment()
-            return responseEntity.body!!.accessToken
-        } catch (ex: Exception) {
-            logger.error("Feil ved bytting av username/password til OIDC token: ${ex.message}", ex)
-            getSystemOidcTokenFeilede.increment()
-            throw SystembrukerTokenException(ex.message!!)
+                logger.debug("SecurityTokenResponse ${mapAnyToJson(responseEntity)} ")
+                validateResponse(responseEntity)
+                responseEntity.body!!.accessToken
+            } catch (ex: Exception) {
+                logger.error("Feil ved bytting av username/password til OIDC token: ${ex.message}", ex)
+                throw SystembrukerTokenException(ex.message!!)
+            }
         }
     }
 

@@ -1,8 +1,10 @@
 package no.nav.eessi.pensjon.services.oppgave
 
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapAnyToJson
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -11,14 +13,16 @@ import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
+ */
 @Service
-class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
+class OppgaveService(
+        private val oppgaveOidcRestTemplate: RestTemplate,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-
-    private final val opprettOppgaveNavn = "eessipensjon_journalforing.opprettoppgave"
-    private val opprettOppgaveVellykkede = counter(opprettOppgaveNavn, "vellykkede")
-    private val opprettOppgaveFeilede = counter(opprettOppgaveNavn, "feilede")
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(
@@ -28,47 +32,44 @@ class OppgaveService(private val oppgaveOidcRestTemplate: RestTemplate) {
             aktoerId: String?,
             oppgaveType: String,
             rinaSakId: String?,
-            filnavn: String?)
-    {
-        try {
+            filnavn: String?) {
+        metricsHelper.measure("opprettoppgave") {
+            try {
+                val oppgaveTypeMap = mapOf(
+                        "GENERELL" to Oppgave.OppgaveType.GENERELL,
+                        "JOURNALFORING" to Oppgave.OppgaveType.JOURNALFORING,
+                        "BEHANDLE_SED" to Oppgave.OppgaveType.BEHANDLE_SED
+                )
 
-            val oppgaveTypeMap = mapOf(
-                    "GENERELL" to Oppgave.OppgaveType.GENERELL,
-                    "JOURNALFORING" to Oppgave.OppgaveType.JOURNALFORING,
-                    "BEHANDLE_SED" to Oppgave.OppgaveType.BEHANDLE_SED
-            )
+                val requestBody = mapAnyToJson(
+                        Oppgave(
+                                oppgavetype = oppgaveTypeMap[oppgaveType].toString(),
+                                tema = Oppgave.Tema.PENSJON.toString(),
+                                prioritet = Oppgave.Prioritet.NORM.toString(),
+                                aktoerId = aktoerId,
+                                aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
+                                journalpostId = journalpostId,
+                                opprettetAvEnhetsnr = "9999",
+                                tildeltEnhetsnr = tildeltEnhetsnr,
+                                fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
+                                beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
+                                    Oppgave.OppgaveType.JOURNALFORING -> sedType
+                                    Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+                                    else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
+                                }), true)
 
-            val requestBody = mapAnyToJson(
-                    Oppgave(
-                        oppgavetype = oppgaveTypeMap[oppgaveType].toString(),
-                        tema = Oppgave.Tema.PENSJON.toString(),
-                        prioritet = Oppgave.Prioritet.NORM.toString(),
-                        aktoerId = aktoerId,
-                        aktivDato = LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                        journalpostId = journalpostId,
-                        opprettetAvEnhetsnr = "9999",
-                        tildeltEnhetsnr = tildeltEnhetsnr,
-                        fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
-                        beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
-                            Oppgave.OppgaveType.JOURNALFORING -> sedType
-                            Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
-                            else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
-                    }), true)
+                val httpEntity = HttpEntity(requestBody)
 
-            val httpEntity = HttpEntity(requestBody)
+                logger.info("Oppretter ${oppgaveType} oppgave")
 
+                val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
+                validateResponseEntity(responseEntity)
 
-            logger.info("Oppretter ${oppgaveType} oppgave")
-
-            val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
-            validateResponseEntity(responseEntity)
-
-            opprettOppgaveVellykkede.increment()
-            logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
-        } catch (ex: Exception) {
-            logger.error("En feil oppstod under opprettelse av oppgave: $ex")
-            opprettOppgaveFeilede.increment()
-            throw RuntimeException("En feil oppstod under opprettelse av oppgave: $ex")
+                logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under opprettelse av oppgave: $ex")
+                throw RuntimeException("En feil oppstod under opprettelse av oppgave: $ex")
+            }
         }
     }
 

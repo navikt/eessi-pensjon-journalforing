@@ -1,11 +1,13 @@
 package no.nav.eessi.pensjon.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.metrics.counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
@@ -15,15 +17,17 @@ import kotlin.RuntimeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
+/**
+ * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
+ */
 @Service
-class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) {
+class JournalpostService(
+        private val journalpostOidcRestTemplate: RestTemplate,
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
-
-    private final val opprettJournalpostNavn = "eessipensjon_journalforing.opprettjournalpost"
-    private val opprettJournalpostVellykkede = counter(opprettJournalpostNavn, "vellykkede")
-    private val opprettJournalpostFeilede = counter(opprettJournalpostNavn, "feilede")
 
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
@@ -77,34 +81,34 @@ class JournalpostService(private val journalpostOidcRestTemplate: RestTemplate) 
                 tema,
                 tittel)
 
-        //Send Request
 
+        //Send Request
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
-        try {
-            logger.info("Kaller Joark for å generere en journalpost")
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_JSON
+        return metricsHelper.measure("opprettjournalpost") {
+            try {
+                logger.info("Kaller Joark for å generere en journalpost")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
 
-            val response = journalpostOidcRestTemplate.exchange(
-                    builder.toUriString(),
-                    HttpMethod.POST,
-                    HttpEntity(requestBody.toString(), headers),
-                    String::class.java
-            )
+                val response = journalpostOidcRestTemplate.exchange(
+                        builder.toUriString(),
+                        HttpMethod.POST,
+                        HttpEntity(requestBody.toString(), headers),
+                        String::class.java
+                )
 
-            if(!response.statusCode.isError) {
-                opprettJournalpostVellykkede.increment()
-                logger.debug(response.body.toString())
-                return mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
-            } else {
-                throw RuntimeException("Noe gikk galt under opprettelse av journalpost")
+                if (!response.statusCode.isError) {
+                    logger.debug(response.body.toString())
+                    mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
+                } else {
+                    throw RuntimeException("Noe gikk galt under opprettelse av journalpost")
+                }
+            } catch (ex: Exception) {
+                logger.error("noe gikk galt under opprettelse av journalpost, $ex")
+                throw RuntimeException("Feil ved opprettelse av journalpost, $ex", ex)
             }
-        } catch(ex: Exception) {
-            opprettJournalpostFeilede.increment()
-            logger.error("noe gikk galt under opprettelse av journalpost, $ex")
-            throw RuntimeException("Feil ved opprettelse av journalpost, $ex")
         }
     }
 
