@@ -2,10 +2,10 @@ package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class SedHendelseModelTest {
 

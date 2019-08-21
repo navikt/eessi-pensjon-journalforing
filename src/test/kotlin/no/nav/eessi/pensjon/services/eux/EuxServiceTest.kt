@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.Mockito.doReturn
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -19,9 +19,10 @@ import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.assertThrows
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class EuxServiceTest {
 
     @Mock
@@ -32,7 +33,7 @@ class EuxServiceTest {
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
 
-    @Before
+    @BeforeEach
     fun setup() {
         euxService = EuxService(mockrestTemplate)
     }
@@ -54,7 +55,7 @@ class EuxServiceTest {
         assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", innhold)
     }
 
-    @Test( expected = RuntimeException::class)
+    @Test
     fun `Gitt ugyldig request når etterspør pdf for SED så kast exception`() {
         val rinaNr = "-1"
         val dokumentId = "-1"
@@ -66,7 +67,9 @@ class EuxServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
+        assertThrows<RuntimeException> {
             euxService.hentSedDokumenter(rinaNr, dokumentId)
+        }
     }
 
     @Test

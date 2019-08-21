@@ -1,11 +1,10 @@
 package no.nav.eessi.pensjon.services.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.pdf.Variantformat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.Assert.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 import no.nav.eessi.pensjon.services.journalpost.IdType.FNR
 
 class ModelsTest {

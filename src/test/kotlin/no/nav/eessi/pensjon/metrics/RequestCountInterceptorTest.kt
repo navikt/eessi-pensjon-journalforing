@@ -9,11 +9,12 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.config.NamingConvention
 import io.micrometer.core.instrument.search.Search
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.client.ClientHttpRequestExecution
@@ -37,11 +38,11 @@ class RequestCountInterceptorTest {
     private val aBody = "BODY".toByteArray()
     private val responseBody = "RESPONSE BODY".toByteArray()
 
-    @Before
+    @BeforeEach
     fun setup() {
     }
 
-    @After
+    @AfterEach
     fun `should always call downstream`() {
         verify(mockExecution).execute(any(), any())
     }
@@ -84,11 +85,8 @@ class RequestCountInterceptorTest {
 
         whenever(mockExecution.execute(any(), any())).thenThrow(IOException())
 
-        try {
+        assertThrows<IOException> {
             requestCountInterceptor.intercept(mockRequest, aBody, mockExecution)
-            fail("should propagate exception")
-        } catch (ex: IOException) {
-            // expected
         }
 
         assertCount(1, httpPost.name, someUri.toString(), RequestCountInterceptor.FAILURE_VALUE, RequestCountInterceptor.UNKNOWN_STATUS_TAG_VALUE, "IOException")
@@ -103,10 +101,11 @@ class RequestCountInterceptorTest {
                 RequestCountInterceptor.STATUS_TAG, status.toString(),
                 RequestCountInterceptor.EXCEPTION_TAG, exception)
 
-        assertEquals("\nexpected: ${meterName(counterToCheck.id) }: $expectedCount, but found:\n${counterList(meterRegistry)}",
+        assertEquals(
                 expectedCount.toDouble(),
                 counterToCheck.count(),
-                0.1)
+                0.1,
+                "\nexpected: ${meterName(counterToCheck.id) }: $expectedCount, but found:\n${counterList(meterRegistry)}")
     }
 
     private fun counterList(meterRegistry: MeterRegistry) =

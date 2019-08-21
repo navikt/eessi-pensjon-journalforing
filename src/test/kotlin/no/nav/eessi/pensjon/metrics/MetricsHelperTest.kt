@@ -4,9 +4,9 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.MockClock
 import io.micrometer.core.instrument.simple.SimpleConfig
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.IOError
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +16,7 @@ internal class MetricsHelperTest {
     lateinit var metricsHelper: MetricsHelper
     lateinit var config: MetricsHelper.Configuration
 
-    @Before
+    @BeforeEach
     fun setup() {
         registry = SimpleMeterRegistry()
         config = MetricsHelper.Configuration()

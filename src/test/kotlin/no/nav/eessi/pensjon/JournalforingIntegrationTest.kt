@@ -6,14 +6,17 @@ import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.services.personv3.PersonMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
-import org.junit.ClassRule
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.*
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -24,29 +27,31 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule
+import org.springframework.kafka.test.EmbeddedKafkaBroker
+import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit4.SpringRunner
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
-import org.junit.Assert.assertEquals
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 
 private lateinit var mockServer : ClientAndServer
 
-@RunWith(SpringRunner::class)
 @SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
+@EmbeddedKafka(count = 1, controlledShutdown = true, topics = [SED_SENDT_TOPIC])
 class JournalforingIntegrationTest {
+
+    @Autowired
+    lateinit var embeddedKafka: EmbeddedKafkaBroker
 
     @Autowired
     lateinit var sedListener: SedListener
@@ -63,7 +68,7 @@ class JournalforingIntegrationTest {
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
         container.start()
-        ContainerTestUtils.waitForAssignment(container, embeddedKafka.embeddedKafka.partitionsPerTopic)
+        ContainerTestUtils.waitForAssignment(container, embeddedKafka.partitionsPerTopic)
 
         // Sett opp producer
         val sedSendtProducerTemplate = settOppProducerTemplate(SED_SENDT_TOPIC)
@@ -98,11 +103,11 @@ class JournalforingIntegrationTest {
     private fun shutdown(container: KafkaMessageListenerContainer<String, String>) {
         mockServer.stop()
         container.stop()
-        embeddedKafka.embeddedKafka.kafkaServers.forEach { it.shutdown() }
+        embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
     private fun settOppProducerTemplate(topicNavn: String): KafkaTemplate<Int, String> {
-        val senderProps = KafkaTestUtils.senderProps(embeddedKafka.embeddedKafka.brokersAsString)
+        val senderProps = KafkaTestUtils.senderProps(embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
         template.defaultTopic = topicNavn
@@ -112,7 +117,7 @@ class JournalforingIntegrationTest {
     private fun settOppUtitlityConsumer(topicNavn: String): KafkaMessageListenerContainer<String, String> {
         val consumerProperties = KafkaTestUtils.consumerProps("eessi-pensjon-group2",
                 "false",
-                embeddedKafka.embeddedKafka)
+                embeddedKafka)
         consumerProperties["auto.offset.reset"] = "earliest"
 
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(consumerProperties)
@@ -130,12 +135,6 @@ class JournalforingIntegrationTest {
     }
 
     companion object {
-
-        @ClassRule
-        @JvmField
-        // Start kafka in memory
-        var embeddedKafka = EmbeddedKafkaRule(1, true, SED_SENDT_TOPIC)
-
 
         init {
             // Start Mockserver in memory
@@ -398,7 +397,7 @@ class JournalforingIntegrationTest {
     }
 
     private fun verifiser() {
-        assertEquals("Alle meldinger har ikke blitt konsumert", 0, sedListener.getLatch().count)
+        assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(

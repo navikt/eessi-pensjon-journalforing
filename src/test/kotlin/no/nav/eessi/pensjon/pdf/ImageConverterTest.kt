@@ -1,11 +1,12 @@
 package no.nav.eessi.pensjon.pdf
 
 import org.apache.commons.io.FileUtils
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.*
 import java.io.File
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.assertThrows
 
 
 class ImageConverterTest {
@@ -20,10 +21,12 @@ class ImageConverterTest {
         assertNotEquals(encodedString, pdf)
     }
 
-    @Test(expected = Exception::class)
+    @Test
     fun `Gitt en korrupt png fil når konverterer til pdf så kast exception`() {
         val fileContent = FileUtils.readFileToByteArray(File("src/test/resources/documentconverter/korruptnavlogo.png"))
         val encodedString = Base64.getEncoder().encodeToString(fileContent)
-        ImageConverter.toBase64PDF(encodedString)
+        assertThrows<Exception> {
+            ImageConverter.toBase64PDF(encodedString)
+        }
     }
 }
