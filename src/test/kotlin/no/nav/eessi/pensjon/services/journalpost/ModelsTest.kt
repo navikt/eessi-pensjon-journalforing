@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.pdf.Variantformat
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 import no.nav.eessi.pensjon.services.journalpost.IdType.FNR
 
 class ModelsTest {

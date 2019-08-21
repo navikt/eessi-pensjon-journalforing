@@ -7,12 +7,11 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import org.junit.Assert.assertEquals
+import kotlin.math.exp
 
 
 class PDFServiceTest {
@@ -43,16 +42,16 @@ class PDFServiceTest {
         unmockkAll()
     }
 
-    @Test
+    @Test(expected = MissingKotlinParameterException::class)
     fun `Gitt en json dokument med manglende filnavn så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeFilnavn.json")))
-        assertFailsWith<MissingKotlinParameterException> { pdfService.parseJsonDocuments(fileContent, "123") }
+        pdfService.parseJsonDocuments(fileContent, "123")
     }
 
-    @Test
+    @Test(expected = MissingKotlinParameterException::class)
     fun `Gitt en json dokument med manglende innhold så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeInnhold.json")))
-        assertFailsWith<MissingKotlinParameterException> { pdfService.parseJsonDocuments(fileContent, "123") }
+        pdfService.parseJsonDocuments(fileContent, "123")
     }
 
     @Test
@@ -62,10 +61,10 @@ class PDFServiceTest {
         assertEquals("[\"ManglendeMimeType.png\"]", uSpporterteVedlegg)
     }
 
-    @Test
+    @Test(expected = MismatchedInputException::class)
     fun `Gitt en json dokument med ugyldig filnavn så kastes MismatchedInputException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigFilnavn.json")))
-        assertFailsWith<MismatchedInputException> { pdfService.parseJsonDocuments(fileContent, "123") }
+        pdfService.parseJsonDocuments(fileContent, "123")
     }
 
     @Test
@@ -75,15 +74,15 @@ class PDFServiceTest {
         assertEquals("[\"UgyldigInnhold.jpg\"]", uSpporterteVedlegg)
     }
 
-    @Test
+    @Test(expected = InvalidFormatException::class)
     fun `Gitt en json dokument med ugyldig MimeType så kastes InvalidFormatException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json")))
-        assertFailsWith<InvalidFormatException> { pdfService.parseJsonDocuments(fileContent, "123") }
+        pdfService.parseJsonDocuments(fileContent, "123")
     }
 
-    @Test
+    @Test(expected = MissingKotlinParameterException::class)
     fun `Gitt en json dokument med ugyldige nøkkler så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigNokkler.json")))
-        assertFailsWith<MissingKotlinParameterException> { pdfService.parseJsonDocuments(fileContent, "123") }
+        pdfService.parseJsonDocuments(fileContent, "123")
     }
 }

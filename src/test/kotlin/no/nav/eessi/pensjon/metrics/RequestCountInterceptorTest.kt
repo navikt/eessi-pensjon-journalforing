@@ -9,8 +9,8 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.config.NamingConvention
 import io.micrometer.core.instrument.search.Search
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.fail
+import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

@@ -14,8 +14,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 
 @RunWith(MockitoJUnitRunner::class)
 class AktoerregisterServiceTest {
@@ -41,7 +41,7 @@ class AktoerregisterServiceTest {
         val expectedNorskIdent = "18128126178"
 
         val response = aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
-        assertEquals(expectedNorskIdent, response, "AktørId 1000101917358 har norskidenten 18128126178")
+        assertEquals("AktørId 1000101917358 har norskidenten 18128126178", expectedNorskIdent, response)
     }
 
 
@@ -54,7 +54,7 @@ class AktoerregisterServiceTest {
         val expectedNorskIdent = "1000101917358"
 
         val response = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
-        assertEquals(expectedNorskIdent, response, "NorskIdent 18128126178 skal ha AktoerId 100010191735818128126178")
+        assertEquals("NorskIdent 18128126178 skal ha AktoerId 100010191735818128126178", expectedNorskIdent, response)
     }
 
 
@@ -68,7 +68,7 @@ class AktoerregisterServiceTest {
             // the mock returns NorskIdent 18128126178, not 1234 as we asked for
             aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (rte: RuntimeException) {
-            assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
+            assertTrue("Exception skal si noe om hvilken identen som ikke ble funnet", rte.message!!.contains(testAktoerId))
             throw rte
         }
     }
@@ -83,7 +83,7 @@ class AktoerregisterServiceTest {
             // the mock returns a valid response, but has no idents
             aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (rte: RuntimeException) {
-            assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
+            assertTrue("Exception skal si noe om hvilken identen som ikke ble funnet", rte.message!!.contains(testAktoerId))
             throw rte
         }
     }
@@ -99,7 +99,7 @@ class AktoerregisterServiceTest {
             // the mock returns a valid response, but with a message in 'feilmelding'
             aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         } catch (are: AktoerregisterException) {
-            assertEquals("Den angitte personidenten finnes ikke", are.message!!, "Feilmeldingen fra aktørregisteret skal være exception-message")
+            assertEquals("Feilmeldingen fra aktørregisteret skal være exception-message", "Den angitte personidenten finnes ikke", are.message!!)
             throw are
         }
     }
@@ -114,7 +114,7 @@ class AktoerregisterServiceTest {
             // the mock returns a valid response, but has 2 gjeldende AktoerId
             aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         } catch (rte: RuntimeException) {
-            assertEquals("Forventet 1 ident, fant 2", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
+            assertEquals("RuntimeException skal kastes dersom mer enn 1 ident returneres", "Forventet 1 ident, fant 2", rte.message!!)
             throw rte
         }
     }
@@ -129,7 +129,7 @@ class AktoerregisterServiceTest {
             // the mock returns 403-forbidden
             aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         } catch (rte: RuntimeException) {
-            assertEquals("Received 403 Forbidden from aktørregisteret", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
+            assertEquals("RuntimeException skal kastes dersom mer enn 1 ident returneres", "Received 403 Forbidden from aktørregisteret", rte.message!!)
             throw rte
         }
     }

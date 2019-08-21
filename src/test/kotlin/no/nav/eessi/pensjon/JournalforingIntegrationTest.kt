@@ -36,7 +36,7 @@ import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 
@@ -398,7 +398,7 @@ class JournalforingIntegrationTest {
     }
 
     private fun verifiser() {
-        assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
+        assertEquals("Alle meldinger har ikke blitt konsumert", 0, sedListener.getLatch().count)
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(

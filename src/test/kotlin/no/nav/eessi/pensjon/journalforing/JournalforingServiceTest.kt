@@ -3,8 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -27,7 +27,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertFailsWith
 
 
 @RunWith(MockitoJUnitRunner::class)
@@ -330,18 +329,14 @@ class JournalforingServiceTest {
         )
     }
 
-    @Test
+    @Test(expected = MismatchedInputException::class)
     fun `Sendt Sed med ugyldige verdier`(){
-        assertFailsWith<MismatchedInputException> {
-            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.SENDT )
-        }
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.SENDT )
     }
 
-    @Test
+    @Test(expected = MissingKotlinParameterException::class)
     fun `Sendt Sed med ugyldige felter`(){
-        assertFailsWith<MissingKotlinParameterException> {
-            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.SENDT )
-        }
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.SENDT )
     }
 
     @Test
@@ -535,18 +530,14 @@ class JournalforingServiceTest {
         )
     }
 
-    @Test
+    @Test(expected = MismatchedInputException::class)
     fun `Mottat Sed med ugyldige verdier`(){
-        assertFailsWith<MismatchedInputException> {
-                journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.MOTTATT )
-        }
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.MOTTATT )
     }
 
-    @Test
+    @Test(expected = MissingKotlinParameterException::class)
     fun `Mottat Sed med ugyldige felter`(){
-        assertFailsWith<MissingKotlinParameterException> {
-                journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.MOTTATT )
-        }
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.MOTTATT )
     }
 
     @Test

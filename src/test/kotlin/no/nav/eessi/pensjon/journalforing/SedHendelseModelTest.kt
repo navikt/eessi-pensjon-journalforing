@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.models.SedType
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 
 class SedHendelseModelTest {
 
@@ -13,7 +13,7 @@ class SedHendelseModelTest {
     fun `Gitt en gyldig SEDSendt json når mapping så skal alle felter mappes`() {
         val sedSendtJson = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json")))
         val sedHendelse = SedHendelseModel.fromJson(sedSendtJson)
-        assertEquals(sedHendelse.id, 1869)
+        assertEquals(sedHendelse.id, 1869L)
         assertEquals(sedHendelse.sedId, "P2000_b12e06dda2c7474b9998c7139c841646_2")
         assertEquals(sedHendelse.sektorKode, "P")
         assertEquals(sedHendelse.bucType, BucType.P_BUC_01)

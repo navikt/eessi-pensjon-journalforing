@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.listeners
 
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,7 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertFailsWith
 
 @RunWith(MockitoJUnitRunner::class)
 class SedListenerTest {
@@ -44,17 +44,21 @@ class SedListenerTest {
 
     @Test
     fun `gitt en exception ved sedSendt så kastes RunTimeException og meldig blir IKKE ack'et`() {
-        assertFailsWith<RuntimeException> {
+        try {
             sedListener.consumeSedSendt("Explode!", acknowledgment)
+            fail("Expected exception")
+        } catch(ex: java.lang.RuntimeException) {
+            verify(acknowledgment, times(0)).acknowledge()
         }
-        verify(acknowledgment, times(0)).acknowledge()
     }
 
     @Test
     fun `gitt en exception ved sedMottatt så kastes RunTimeException og meldig blir IKKE ack'et`() {
-        assertFailsWith<RuntimeException> {
+        try {
             sedListener.consumeSedMottatt("Explode!", acknowledgment)
+            fail("Expected exception")
+        } catch(ex: java.lang.RuntimeException) {
+            verify(acknowledgment, times(0)).acknowledge()
         }
-        verify(acknowledgment, times(0)).acknowledge()
     }
 }

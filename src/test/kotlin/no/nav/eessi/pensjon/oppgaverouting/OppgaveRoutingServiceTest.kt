@@ -8,7 +8,7 @@ import org.junit.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 
 class OppgaveRoutingServiceTest {
 

@@ -4,8 +4,8 @@ import org.apache.commons.io.FileUtils
 import org.junit.Test
 import java.util.*
 import java.io.File
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 
 
 class ImageConverterTest {
