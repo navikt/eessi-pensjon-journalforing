@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
@@ -140,7 +139,7 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
-        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+        val fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
         val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
         return isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
     }

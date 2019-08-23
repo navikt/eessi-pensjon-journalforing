@@ -82,7 +82,7 @@ class EuxServiceTest {
                         eq(String::class.java))
 
 
-        val resp = euxService.hentFodselsDato(rinaNr, dokumentId)
+        val resp = euxService.hentFodselsDatoFraSed(rinaNr, dokumentId)
         assertEquals("1980-01-01", resp)
     }
 }
