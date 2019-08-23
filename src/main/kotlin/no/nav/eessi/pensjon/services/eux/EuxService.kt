@@ -89,7 +89,7 @@ class EuxService(
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */
-    fun hentFodselsDatoFraSed(rinaNr: String, dokumentId: String): String {
+    fun hentFodselsDatoFraSed(rinaNr: String, dokumentId: String): String? {
         val sed = hentSed(rinaNr, dokumentId)
         val rootNode = mapper.readValue(sed, JsonNode::class.java)
         val foedselsdatoNode = rootNode.path("nav")
