@@ -4,25 +4,27 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.doThrow
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.Mockito.doReturn
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
-import java.io.IOException
 import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.RestClientException
 
-@RunWith(MockitoJUnitRunner::class)
+
+@ExtendWith(MockitoExtension::class)
 class FagmodulServiceTest {
 
     @Mock
@@ -32,7 +34,7 @@ class FagmodulServiceTest {
 
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
-    @Before
+    @BeforeEach
     fun setup() {
         fagmodulService = FagmodulService(mockrestTemplate)
     }
@@ -58,7 +60,7 @@ class FagmodulServiceTest {
         assertEquals(resp.krav!!.type.name, "AP")
     }
 
-    @Test(expected = RuntimeException::class)
+    @Test
     fun `Gitt NOT_FOUND når etterspør pin og ytelsetype så kast exception`() {
         val rinaNr = "123"
         val dokumentId = "456"
@@ -73,22 +75,25 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(HentPinOgYtelseTypeResponse::class.java))
 
-        fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+        assertThrows<RuntimeException> {
+            fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+        }
     }
 
-    @Test(expected = RuntimeException::class)
-    fun `Gitt IOException når etterspør pin og ytelsetype så kast exception`() {
+    @Test
+    fun `Gitt RestClientException når etterspør pin og ytelsetype så kast exception`() {
         val rinaNr = "123"
         val dokumentId = "456"
 
-        doThrow(IOException())
+        doThrow(RestClientException("oops"))
                 .`when`(mockrestTemplate).exchange(
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(HentPinOgYtelseTypeResponse::class.java))
-
-        fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+        assertThrows<RuntimeException> {
+            fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+        }
     }
 
     @Test
@@ -109,7 +114,7 @@ class FagmodulServiceTest {
         assertEquals(resp, "2011-05-28")
     }
 
-    @Test(expected = RuntimeException::class)
+    @Test
     fun `Gitt NOT_FOUND når etterspør fodselsdato så kast exception`() {
         val rinaNr = "123"
         val buctype = "P_BUC_01"
@@ -123,22 +128,24 @@ class FagmodulServiceTest {
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(String::class.java))
-
-        fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        assertThrows<RuntimeException> {
+            fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        }
     }
 
-    @Test(expected = RuntimeException::class)
-    fun `Gitt IOException når etterspør fodselsdato så kast exception`() {
+    @Test
+    fun `Gitt RestClientException når etterspør fodselsdato så kast exception`() {
         val rinaNr = "123"
         val buctype = "P_BUC_01"
 
-        doThrow(IOException())
+        doThrow(RestClientException("oops"))
                 .`when`(mockrestTemplate).exchange(
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$buctype"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(HentPinOgYtelseTypeResponse::class.java))
-
-        fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        assertThrows<RuntimeException> {
+            fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        }
     }
 }
