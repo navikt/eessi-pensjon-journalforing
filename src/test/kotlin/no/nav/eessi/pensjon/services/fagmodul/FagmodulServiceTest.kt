@@ -105,7 +105,7 @@ class FagmodulServiceTest {
 
         doReturn(responseEntity)
                 .`when`(mockrestTemplate).exchange(
-                        eq("/fodselsdato/$rinaNr/buctype/$buctype"),
+                        eq("/sed/fodselsdato/$rinaNr/buctype/$buctype"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
                         eq(String::class.java))

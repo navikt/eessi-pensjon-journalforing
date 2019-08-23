@@ -52,7 +52,7 @@ class FagmodulService(
      */
     fun hentFodselsdatoFraBuc(rinaNr: String, buctype: String) : String? {
         return metricsHelper.measure("hentSed") {
-            val path = "/fodselsdato/$rinaNr/buctype/$buctype"
+            val path = "/sed/fodselsdato/$rinaNr/buctype/$buctype"
             try {
                 logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
                 val response = fagmodulOidcRestTemplate.exchange(path,
