@@ -14,9 +14,9 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
-import org.junit.Before
-import org.junit.Test
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class PersonV3ServiceTest {
 
@@ -28,7 +28,7 @@ class PersonV3ServiceTest {
     private val ikkeFunnetSubject = "33037329381"
     private val sikkerhetsbegrensingSubject = "43037329381"
 
-    @Before
+    @BeforeEach
     fun setup() {
         personV3 = spyk()
         personV3Service = spyk(PersonV3Service(personV3))

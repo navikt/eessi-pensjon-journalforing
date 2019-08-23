@@ -107,7 +107,7 @@ class AktoerregisterService(
                 if (responseEntity.hasBody()) {
                     logger.error(responseEntity.body.toString())
                 }
-                throw AktoerregisterException("Received ${responseEntity.statusCode} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
+                throw AktoerregisterException("Received ${responseEntity.statusCodeValue} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
             }
 
             jacksonObjectMapper().readValue(responseEntity.body!!)

@@ -3,19 +3,20 @@ package no.nav.eessi.pensjon.services.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import org.mockito.Mockito.doReturn
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.assertThrows
 import org.springframework.http.*
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class JournalpostServiceTest {
 
     @Mock
@@ -23,7 +24,7 @@ class JournalpostServiceTest {
 
     private lateinit var journalpostService: JournalpostService
 
-    @Before
+    @BeforeEach
     fun setup() {
         journalpostService = JournalpostService(mockrestTemplate)
     }
@@ -85,7 +86,7 @@ class JournalpostServiceTest {
         assertEquals(journalpostResponse, "429434378")
     }
 
-    @Test( expected = RuntimeException::class)
+    @Test
     fun `Gitt ugyldig request når forsøker oprette journalpost så kast exception`() {
         doReturn(
                 ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))), HttpStatus.INTERNAL_SERVER_ERROR))
@@ -95,22 +96,23 @@ class JournalpostServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-        journalpostService.opprettJournalpost(
-                navBruker= "12345678912",
-                personNavn= "navn navnesen",
-                avsenderId= "NO:NAVT003",
-                avsenderNavn= "NAVT003",
-                mottakerId= "NO:NAVT007",
-                mottakerNavn= "NAV Test 07",
-                bucType= "P_BUC_01",
-                sedType= "P2000 - Krav om alderspensjon",
-                sedHendelseType= "MOTTATT",
-                eksternReferanseId= "string",
-                kanal= "NAV_NO",
-                journalfoerendeEnhet= "9999",
-                arkivsaksnummer= "string",
-                arkivsaksystem= "GSAK",
-                dokumenter= """
+        assertThrows<RuntimeException> {
+            journalpostService.opprettJournalpost(
+                    navBruker = "12345678912",
+                    personNavn = "navn navnesen",
+                    avsenderId = "NO:NAVT003",
+                    avsenderNavn = "NAVT003",
+                    mottakerId = "NO:NAVT007",
+                    mottakerNavn = "NAV Test 07",
+                    bucType = "P_BUC_01",
+                    sedType = "P2000 - Krav om alderspensjon",
+                    sedHendelseType = "MOTTATT",
+                    eksternReferanseId = "string",
+                    kanal = "NAV_NO",
+                    journalfoerendeEnhet = "9999",
+                    arkivsaksnummer = "string",
+                    arkivsaksystem = "GSAK",
+                    dokumenter = """
                     [{
                         "brevkode": "NAV 14-05.09",
                         "dokumentKategori": "SOK",
@@ -124,7 +126,8 @@ class JournalpostServiceTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                forsokFerdigstill= false
-        )
+                    forsokFerdigstill = false
+            )
+        }
     }
 }

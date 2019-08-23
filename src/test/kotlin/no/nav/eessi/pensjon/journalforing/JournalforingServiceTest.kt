@@ -3,8 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -19,18 +19,20 @@ import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.services.personv3.PersonMock
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertFailsWith
 
-
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class JournalforingServiceTest {
 
     @Mock
@@ -59,7 +61,7 @@ class JournalforingServiceTest {
 
     lateinit var journalforingService: JournalforingService
 
-    @Before
+    @BeforeEach
     fun setup() {
 
         journalforingService = JournalforingService(euxService, journalpostService, oppgaveService, aktoerregisterService, personV3Service, fagmodulService, oppgaveRoutingService, pdfService)
@@ -332,15 +334,15 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed med ugyldige verdier`(){
-        assertFailsWith<MismatchedInputException> {
-            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.SENDT )
+        assertThrows<MismatchedInputException> {
+            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.SENDT)
         }
     }
 
     @Test
     fun `Sendt Sed med ugyldige felter`(){
-        assertFailsWith<MissingKotlinParameterException> {
-            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.SENDT )
+        assertThrows<MissingKotlinParameterException> {
+            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.SENDT)
         }
     }
 
@@ -537,15 +539,15 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat Sed med ugyldige verdier`(){
-        assertFailsWith<MismatchedInputException> {
-                journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.MOTTATT )
+        assertThrows<MismatchedInputException> {
+            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json"))), HendelseType.MOTTATT)
         }
     }
 
     @Test
     fun `Mottat Sed med ugyldige felter`(){
-        assertFailsWith<MissingKotlinParameterException> {
-                journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.MOTTATT )
+        assertThrows<MissingKotlinParameterException> {
+            journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json"))), HendelseType.MOTTATT)
         }
     }
 

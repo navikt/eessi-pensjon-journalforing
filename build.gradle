@@ -54,14 +54,19 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-actuator")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	
+
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation 'org.springframework.kafka:spring-kafka'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude module: 'junit'
+		exclude module: "mockito-core"
+	}
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testCompileOnly('junit:junit:4.12') {
+		because "spring-kafka-test needs it - but we should not use it in our code"
+	}
 
 	// OIDC
 	implementation("no.nav.security:oidc-spring-support:0.2.18")
@@ -76,10 +81,13 @@ dependencies {
 	implementation("net.jodah:expiringmap:0.5.9")
 
 	//mock - test
-	testImplementation("org.jetbrains.kotlin:kotlin-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.5.1")
+	testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.1")
+	testImplementation('org.mockito:mockito-junit-jupiter:2.23.0')
 	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
-	testImplementation("org.mock-server:mockserver-netty:5.4.1")
+	testImplementation("org.mock-server:mockserver-netty:5.4.1") {
+		exclude module: 'junit'
+	}
 	testImplementation("org.mock-server:mockserver-client-java:5.4.1")
 	testImplementation "io.mockk:mockk:1.9.2"
 
@@ -103,6 +111,10 @@ dependencies {
 	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
 	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
 
+}
+
+test {
+	useJUnitPlatform()
 }
 
 compileKotlin {

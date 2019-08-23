@@ -2,18 +2,19 @@ package no.nav.eessi.pensjon.listeners
 
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mock
 import org.mockito.exceptions.base.MockitoException
-import org.mockito.junit.MockitoJUnitRunner
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertFailsWith
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class SedListenerTest {
 
     @Mock
@@ -24,10 +25,9 @@ class SedListenerTest {
 
     lateinit var sedListener: SedListener
 
-    @Before
+    @BeforeEach
     fun setup() {
         sedListener = SedListener(jouralforingService)
-        doThrow(MockitoException("Boom!")).`when`(jouralforingService).journalfor(eq("Explode!"), any())
     }
 
     @Test
@@ -44,7 +44,9 @@ class SedListenerTest {
 
     @Test
     fun `gitt en exception ved sedSendt så kastes RunTimeException og meldig blir IKKE ack'et`() {
-        assertFailsWith<RuntimeException> {
+        doThrow(MockitoException("Boom!")).`when`(jouralforingService).journalfor(eq("Explode!"), any())
+
+        assertThrows<RuntimeException> {
             sedListener.consumeSedSendt("Explode!", acknowledgment)
         }
         verify(acknowledgment, times(0)).acknowledge()
@@ -52,7 +54,9 @@ class SedListenerTest {
 
     @Test
     fun `gitt en exception ved sedMottatt så kastes RunTimeException og meldig blir IKKE ack'et`() {
-        assertFailsWith<RuntimeException> {
+        doThrow(MockitoException("Boom!")).`when`(jouralforingService).journalfor(eq("Explode!"), any())
+
+        assertThrows<RuntimeException> {
             sedListener.consumeSedMottatt("Explode!", acknowledgment)
         }
         verify(acknowledgment, times(0)).acknowledge()
