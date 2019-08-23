@@ -43,4 +43,32 @@ class FagmodulService(
             }
         }
     }
+
+    /**
+     * Henter den forsikredes fødselsdato fra SEDer i den oppgitte BUCen
+     *
+     *  @param rinaNr BUC-id
+     *  @param buctype BUC-type
+     */
+    fun hentFodselsdatoFraBuc(rinaNr: String, buctype: String) : String? {
+        return metricsHelper.measure("hentSed") {
+            val path = "/fodselsdato/$rinaNr/buctype/$buctype"
+            try {
+                logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
+                val response = fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        HttpEntity(""),
+                        String::class.java)
+                if (!response.statusCode.isError) {
+                    logger.info("Hentet fødselsdato fra fagmodulen")
+                    response.body
+                } else {
+                    throw RuntimeException("Noe gikk galt under henting av fødselsdato fra fagmodulen: ${response.statusCode}")
+                }
+            } catch (ex: Exception) {
+                logger.error("Noe gikk galt under henting av fødselsdato fra fagmodulen: ${ex.message}")
+                throw RuntimeException("Feil ved henting av fødselsdato")
+            }
+        }
+    }
 }

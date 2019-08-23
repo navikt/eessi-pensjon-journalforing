@@ -76,7 +76,7 @@ class JournalforingServiceTest {
         //EUX - HENT FODSELSDATO
         doReturn("1964-04-19")
                 .`when`(euxService)
-                .hentFodselsDato(anyString(), anyString())
+                .hentFodselsDatoFraSed(anyString(), anyString())
 
 
         //EUX - HENT SED DOKUMENT
@@ -176,7 +176,7 @@ class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2000`(){
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12378945601"))
-        verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq("12378945601"),
@@ -213,7 +213,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945602"))
-        verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq("12378945602"),
@@ -261,7 +261,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.SENDT )
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(euxService).hentFodselsDato(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
+        verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq(null),
@@ -300,7 +300,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945601"))
-        verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq("12378945601"),
@@ -379,7 +379,7 @@ class JournalforingServiceTest {
     fun `Mottat gyldig Sed P2000`(){
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
-        verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq("12378945601"),
@@ -419,7 +419,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.MOTTATT )
 
         verify(personV3Service).hentPerson(eq("12378945602"))
-        verify(euxService).hentFodselsDato(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq("12378945602"),
@@ -466,7 +466,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.MOTTATT )
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(euxService).hentFodselsDato(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
+        verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
                 navBruker= eq(null),
@@ -504,7 +504,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
-        verify(euxService).hentFodselsDato(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
+        verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
 
         verify(journalpostService).opprettJournalpost(

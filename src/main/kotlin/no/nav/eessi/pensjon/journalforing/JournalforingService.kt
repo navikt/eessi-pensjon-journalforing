@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
@@ -139,10 +138,19 @@ class JournalforingService(private val euxService: EuxService,
         return null
     }
 
+    /**
+     * Henter fødselsdatoen fra den gjeldende SEDen som skal journalføres, dersom dette feltet er tomt
+     * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
+     */
     private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
-        val fodselsDatoISO = euxService.hentFodselsDato(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-        val isoDato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-        return isoDato.format(DateTimeFormatter.ofPattern("ddMMyy"))
+        var fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+
+        if(fodselsDatoISO.isNullOrEmpty()) {
+            fodselsDatoISO = fagmodulService.hentFodselsdatoFraBuc(sedHendelse.rinaSakId, sedHendelse.bucType!!.name)
+        }
+
+        val fodselsdato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+        return fodselsdato.format(DateTimeFormatter.ofPattern("ddMMyy"))
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
