@@ -27,6 +27,12 @@ class EuxService(
     private val logger: Logger by lazy { LoggerFactory.getLogger(EuxService::class.java) }
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
+    /**
+     * Henter SED og tilhørende vedlegg i json format
+     *
+     * @param rinaNr BUC-id
+     * @param dokumentId SED-id
+     */
     fun hentSedDokumenter(rinaNr: String, dokumentId: String): String? {
         return metricsHelper.measure("hentpdf") {
             val path = "/buc/$rinaNr/sed/$dokumentId/filer"
@@ -49,6 +55,12 @@ class EuxService(
         }
     }
 
+    /**
+     * Henter SED i json format
+     *
+     * @param rinaNr BUC-id
+     * @param dokumentId SED-id
+     */
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
         return metricsHelper.measure("hentSed") {
             val path = "/buc/$rinaNr/sed/$dokumentId"
@@ -71,7 +83,13 @@ class EuxService(
         }
     }
 
-    fun hentFodselsDato(rinaNr: String, dokumentId: String): String {
+    /**
+     * Henter den forsikredes fødselsdato i en konkret SED
+     *
+     * @param rinaNr BUC-id
+     * @param dokumentId SED-id
+     */
+    fun hentFodselsDatoFraSed(rinaNr: String, dokumentId: String): String {
         val sed = hentSed(rinaNr, dokumentId)
         val rootNode = mapper.readValue(sed, JsonNode::class.java)
         val foedselsdatoNode = rootNode.path("nav")
