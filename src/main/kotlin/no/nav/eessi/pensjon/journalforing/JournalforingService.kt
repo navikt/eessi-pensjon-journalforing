@@ -55,8 +55,8 @@ class JournalforingService(private val euxService: EuxService,
             if(person == null) fnr = null
 
             val personNavn = hentPersonNavn(person)
-            val aktoerId = null
-            if(person != null) hentAktoerId(fnr)
+            var aktoerId: String? = null
+            if(person != null) aktoerId = hentAktoerId(fnr)
 
             val fodselsDato = hentFodselsDato(sedHendelse)
             val landkode = hentLandkode(person)
