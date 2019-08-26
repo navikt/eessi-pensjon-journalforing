@@ -226,6 +226,7 @@ class JournalforingIntegrationTest {
                                     "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"429434378\",\n" +
+                                    "  \"aktoerId\" : \"1000101917358\",\n" +
                                     "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
@@ -436,6 +437,7 @@ class JournalforingIntegrationTest {
                                 "  \"tildeltEnhetsnr\" : \"4862\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"429434378\",\n" +
+                                "  \"aktoerId\" : \"1000101917358\",\n" +
                                 "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
