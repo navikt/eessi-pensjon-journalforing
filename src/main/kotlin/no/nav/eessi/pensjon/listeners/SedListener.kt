@@ -9,7 +9,9 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.models.HendelseType.*
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
 
 @Service
 class SedListener(
@@ -26,39 +28,43 @@ class SedListener(
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, acknowledgment: Acknowledgment) {
-        metricsHelper.measure("consumeOutgoingSed") {
-            logger.info("Innkommet sedSendt hendelse")
-            logger.debug(hendelse)
-            try {
-                journalforingService.journalfor(hendelse, SENDT)
-                acknowledgment.acknowledge()
-            } catch (ex: Exception) {
-                logger.error(
-                        "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
-                                "${ex.message}",
-                        ex
-                )
-                throw RuntimeException(ex.message)
-            }
+        MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
+            metricsHelper.measure("consumeOutgoingSed") {
+                logger.info("Innkommet sedSendt hendelse")
+                logger.debug(hendelse)
+                try {
+                    journalforingService.journalfor(hendelse, SENDT)
+                    acknowledgment.acknowledge()
+                } catch (ex: Exception) {
+                    logger.error(
+                            "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
+                                    "${ex.message}",
+                            ex
+                    )
+                    throw RuntimeException(ex.message)
+                }
             latch.countDown()
+            }
         }
     }
 
     @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consumeSedMottatt(hendelse: String, acknowledgment: Acknowledgment) {
-        metricsHelper.measure("consumeIncomingSed") {
-            logger.info("Innkommet sedMottatt hendelse")
-            logger.debug(hendelse)
-            try {
-                journalforingService.journalfor(hendelse, MOTTATT)
-                acknowledgment.acknowledge()
-            } catch (ex: Exception) {
-                logger.error(
-                        "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
-                                "${ex.message}",
-                        ex
-                )
-                throw RuntimeException(ex.message)
+        MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
+            metricsHelper.measure("consumeIncomingSed") {
+                logger.info("Innkommet sedMottatt hendelse")
+                logger.debug(hendelse)
+                try {
+                    journalforingService.journalfor(hendelse, MOTTATT)
+                    acknowledgment.acknowledge()
+                } catch (ex: Exception) {
+                    logger.error(
+                            "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
+                                    "${ex.message}",
+                            ex
+                    )
+                    throw RuntimeException(ex.message)
+                }
             }
         }
     }
