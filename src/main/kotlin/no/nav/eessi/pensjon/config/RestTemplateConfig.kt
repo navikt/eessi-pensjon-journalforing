@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.config
 
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import no.nav.eessi.pensjon.security.sts.STSService
@@ -47,7 +48,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
         return templateBuilder
                 .rootUri(joarkUrl)
                 .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                .additionalInterceptors(
+                        RequestResponseLoggerInterceptor(),
+                        RequestIdHeaderInterceptor(),
                         RequestCountInterceptor(meterRegistry),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
@@ -60,7 +63,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     fun aktoerregisterRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         return templateBuilder
                 .rootUri(aktoerregisterUrl)
-                .additionalInterceptors(RequestInterceptor(),
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestInterceptor(),
                         RequestCountInterceptor(meterRegistry),
                         RequestResponseLoggerInterceptor(),
                         BasicAuthenticationInterceptor(username, password)
@@ -74,7 +79,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     fun oppgaveOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         return templateBuilder
                 .rootUri(oppgaveUrl)
-                .additionalInterceptors(RequestInterceptor(),
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestInterceptor(),
                         RequestResponseLoggerInterceptor(),
                         RequestCountInterceptor(meterRegistry),
                         BasicAuthenticationInterceptor(username, password)
@@ -89,7 +96,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
         return templateBuilder
                 .rootUri(euxUrl)
                 .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestResponseLoggerInterceptor(),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
@@ -101,7 +110,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
         return templateBuilder
                 .rootUri(fagmodulUrl)
                 .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(RequestResponseLoggerInterceptor(),
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestResponseLoggerInterceptor(),
                         RequestCountInterceptor(meterRegistry),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {

@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.security.sts
 
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import org.slf4j.LoggerFactory
@@ -36,8 +37,8 @@ class STSRestTemplate {
     fun securityTokenExchangeBasicAuthRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         logger.info("Oppretter RestTemplate for securityTokenExchangeBasicAuthRestTemplate")
         return templateBuilder
-                .additionalInterceptors(RequestResponseLoggerInterceptor())
                 .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
                         RequestCountInterceptor(meterRegistry),
                         BasicAuthenticationInterceptor(username, password)
                 ).build().apply {
