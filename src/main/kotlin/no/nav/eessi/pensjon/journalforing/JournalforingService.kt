@@ -62,8 +62,7 @@ class JournalforingService(private val euxService: EuxService,
             val landkode = hentLandkode(person)
 
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
-            val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedId)
-
+            val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
             val journalpostId = journalpostService.opprettJournalpost(
                     navBruker= fnr,
@@ -73,7 +72,7 @@ class JournalforingService(private val euxService: EuxService,
                     mottakerId= sedHendelse.mottakerId,
                     mottakerNavn= sedHendelse.mottakerNavn,
                     bucType= sedHendelse.bucType?.name ?: throw RuntimeException("Buctype er null: $hendelseJson"),
-                    sedType= sedHendelse.sedType?.toString() ?: throw RuntimeException("sedType er null: $hendelseJson"),
+                    sedType= sedHendelse.sedType.name,
                     sedHendelseType= hendelseType.name,
                     eksternReferanseId= null,// TODO what value to put here?,
                     kanal= "EESSI",
@@ -93,7 +92,7 @@ class JournalforingService(private val euxService: EuxService,
             )
 
             oppgaveService.opprettOppgave(
-                    sedType = sedHendelse.sedType.toString(),
+                    sedType = sedHendelse.sedType,
                     journalpostId = journalpostId,
                     tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                     aktoerId = aktoerId,
@@ -103,7 +102,7 @@ class JournalforingService(private val euxService: EuxService,
 
             if (uSupporterteVedlegg != null) {
                 oppgaveService.opprettOppgave(
-                        sedType = sedHendelse.sedType.toString(),
+                        sedType = sedHendelse.sedType,
                         journalpostId = null,
                         tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                         aktoerId = aktoerId,

@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.services.oppgave
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapAnyToJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
@@ -26,7 +27,7 @@ class OppgaveService(
 
     // https://oppgave.nais.preprod.local/?url=https://oppgave.nais.preprod.local/api/swagger.json#/v1oppgaver/opprettOppgave
     fun opprettOppgave(
-            sedType: String,
+            sedType: SedType,
             journalpostId: String?,
             tildeltEnhetsnr: String,
             aktoerId: String?,
@@ -53,14 +54,14 @@ class OppgaveService(
                                 tildeltEnhetsnr = tildeltEnhetsnr,
                                 fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
                                 beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
-                                    Oppgave.OppgaveType.JOURNALFORING -> sedType
-                                    Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: ${rinaSakId} er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
+                                    Oppgave.OppgaveType.JOURNALFORING -> sedType.toString()
+                                    Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: $rinaSakId er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
                                     else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
                                 }), true)
 
                 val httpEntity = HttpEntity(requestBody)
 
-                logger.info("Oppretter ${oppgaveType} oppgave")
+                logger.info("Oppretter $oppgaveType oppgave")
 
                 val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
                 validateResponseEntity(responseEntity)

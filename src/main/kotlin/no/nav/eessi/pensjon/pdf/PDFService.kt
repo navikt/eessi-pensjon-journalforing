@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -19,11 +20,12 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
     private val mapper: ObjectMapper = jacksonObjectMapper()
 
-    fun parseJsonDocuments(json: String, sedId: String?): Pair<String, String?>{
+    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, String?>{
         return metricsHelper.measure("pdfConverter") {
             try {
                 val documents = mapper.readValue(json, SedDokumenter::class.java)
-                val convertedDocuments = listOf(documents.sed).plus(documents.vedlegg ?: listOf())
+                val sedDokument = konverterTilLesbartFilnavn(sedType, documents)
+                val convertedDocuments = listOf(sedDokument).plus(documents.vedlegg ?: listOf())
                         .map { convert(it) }
 
                 val (supportedDocuments, unsupportedDocuments) = convertedDocuments
@@ -38,7 +40,7 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
                     mapper.writeValueAsString(supportedDocuments.map {
                         JournalPostDokument(
-                                brevkode = sedId,
+                                brevkode = sedType.name,
                                 dokumentKategori = "SED",
                                 dokumentvarianter = listOf(
                                         Dokumentvarianter(
@@ -61,6 +63,16 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                 throw ex
             }
         }
+    }
+
+    /**
+     *  Konverterer SED filnavn til menneskelesbart filnavn
+     *
+     *  fra format: P2200_f899bf659ff04d20bc8b978b186f1ecc_1
+     *  til format: P2200.pdf
+     */
+    private fun konverterTilLesbartFilnavn(sedType: SedType, documents: SedDokumenter): EuxDokument {
+        return EuxDokument("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
     }
 
     private fun convert(document: EuxDokument): EuxDokument{
