@@ -115,18 +115,18 @@ class AktoerregisterServiceTest {
         assertEquals("Forventet 1 ident, fant 2", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
     }
 
-    @Test @Disabled("Det kommer feil exception") // TODO sjekk opp
+    @Test
     fun `should throw runtimeexception when 403-forbidden is returned`() {
         val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/403-Forbidden.json", HttpStatus.FORBIDDEN)
         whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
 
         val testAktoerId = "does-not-matter"
 
-        val rte = assertThrows<RuntimeException> {
+        val arre = assertThrows<AktoerregisterException> {
             // the mock returns 403-forbidden
             aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         }
-        assertEquals("Received 403 Forbidden from aktørregisteret", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
+        assertEquals("Received 403 Forbidden from aktørregisteret", arre.message!!)
     }
 
     private fun createResponseEntityFromJsonFile(filePath: String, httpStatus: HttpStatus = HttpStatus.OK): ResponseEntity<String> {
