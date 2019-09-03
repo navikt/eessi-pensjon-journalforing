@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import no.nav.eessi.pensjon.models.SedType
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -20,9 +21,9 @@ class PDFServiceTest {
     @Test
     fun `Gitt en json dokument uten vedlegg så konverter til json dokument med pdf innhold`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))
-        val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, "123")
+        val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
-        assertEquals("[{\"brevkode\":\"123\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"Sak_163373_dok_3f7bd9d1dfa04af6ac553a734ddc332e.pdf\"}]", supported)
+        assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"}]", supported)
         assertEquals(null, unsupported)
     }
 
@@ -33,9 +34,9 @@ class PDFServiceTest {
         every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
 
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedVedlegg.json")))
-        val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, "123")
+        val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
-        assertEquals("[{\"brevkode\":\"123\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"Sak_163373_dok_3f7bd9d1dfa04af6ac553a734ddc332e.pdf\"},{\"brevkode\":\"123\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"123\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
+        assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
         assertEquals(null, unsupported)
 
         unmockkAll()
@@ -45,7 +46,7 @@ class PDFServiceTest {
     fun `Gitt en json dokument med manglende filnavn så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeFilnavn.json")))
         assertThrows<MissingKotlinParameterException> {
-            pdfService.parseJsonDocuments(fileContent, "123")
+            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
     }
 
@@ -53,14 +54,14 @@ class PDFServiceTest {
     fun `Gitt en json dokument med manglende innhold så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeInnhold.json")))
         assertThrows<MissingKotlinParameterException> {
-            pdfService.parseJsonDocuments(fileContent, "123")
+            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
     }
 
     @Test
     fun `Gitt en json dokument med manglende mimeType så blir den satt på listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeMimeType.json")))
-        val (_, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, "123")
+        val (_, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         assertEquals("[\"ManglendeMimeType.png\"]", uSpporterteVedlegg)
     }
 
@@ -68,14 +69,14 @@ class PDFServiceTest {
     fun `Gitt en json dokument med ugyldig filnavn så kastes MismatchedInputException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigFilnavn.json")))
         assertThrows<MismatchedInputException> {
-            pdfService.parseJsonDocuments(fileContent, "123")
+            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
     }
 
     @Test
     fun `Gitt en json dokument med ugyldig innhold så blir den satt på listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigInnhold.json")))
-        val (test, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, "123")
+        val (test, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         assertEquals("[\"UgyldigInnhold.jpg\"]", uSpporterteVedlegg)
     }
 
@@ -83,7 +84,7 @@ class PDFServiceTest {
     fun `Gitt en json dokument med ugyldig MimeType så kastes InvalidFormatException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json")))
         assertThrows<InvalidFormatException> {
-            pdfService.parseJsonDocuments(fileContent, "123")
+            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
     }
 
@@ -91,7 +92,7 @@ class PDFServiceTest {
     fun `Gitt en json dokument med ugyldige nøkkler så kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigNokkler.json")))
         assertThrows<MissingKotlinParameterException> {
-            pdfService.parseJsonDocuments(fileContent, "123")
+            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
     }
 }

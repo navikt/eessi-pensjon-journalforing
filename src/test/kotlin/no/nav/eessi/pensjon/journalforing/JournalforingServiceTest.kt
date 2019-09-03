@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
@@ -36,30 +37,30 @@ import java.nio.file.Paths
 class JournalforingServiceTest {
 
     @Mock
-    lateinit var euxService: EuxService
+    private lateinit var euxService: EuxService
 
     @Mock
-    lateinit var journalpostService: JournalpostService
+    private lateinit var journalpostService: JournalpostService
 
     @Mock
-    lateinit var oppgaveService: OppgaveService
+    private lateinit var oppgaveService: OppgaveService
 
     @Mock
-    lateinit var aktoerregisterService: AktoerregisterService
+    private lateinit var aktoerregisterService: AktoerregisterService
 
     @Mock
-    lateinit var personV3Service: PersonV3Service
+    private lateinit var personV3Service: PersonV3Service
 
     @Mock
-    lateinit var fagmodulService: FagmodulService
+    private lateinit var fagmodulService: FagmodulService
 
     @Mock
-    lateinit var oppgaveRoutingService: OppgaveRoutingService
+    private lateinit var oppgaveRoutingService: OppgaveRoutingService
 
     @Mock
-    lateinit var pdfService: PDFService
+    private lateinit var pdfService: PDFService
 
-    lateinit var journalforingService: JournalforingService
+    private lateinit var journalforingService: JournalforingService
 
     @BeforeEach
     fun setup() {
@@ -87,15 +88,15 @@ class JournalforingServiceTest {
         //PDF -
         doReturn(Pair<String, String?>("P2000 Supported Documents", null))
                 .`when`(pdfService)
-                .parseJsonDocuments(any(), eq("P2000_b12e06dda2c7474b9998c7139c841646_2"))
+                .parseJsonDocuments(any(), eq(SedType.P2000))
 
         doReturn(Pair<String, String?>("P2100 Supported Documents", "P2100 UnSupported Documents"))
                 .`when`(pdfService)
-                .parseJsonDocuments(any(), eq("P2100_b12e06dda2c7474b9998c7139c841646_2"))
+                .parseJsonDocuments(any(), eq(SedType.P2100))
 
         doReturn(Pair<String, String?>("P2200 Supported Documents", null))
                 .`when`(pdfService)
-                .parseJsonDocuments(any(), eq("P2200_f899bf659ff04d20bc8b978b186f1ecc_1"))
+                .parseJsonDocuments(any(), eq(SedType.P2200))
 
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn("123")
@@ -186,7 +187,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_01"),
-                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("SENDT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -197,7 +198,7 @@ class JournalforingServiceTest {
                 forsokFerdigstill= eq(false)
         )
         verify(oppgaveService).opprettOppgave(
-                eq("P2000 - Krav om alderspensjon"),
+                eq(SedType.P2000),
                 eq("123"),
                 eq("0001"),
                 eq(null),
@@ -223,7 +224,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_02"),
-                sedType= eq("P2100 - Krav om gjenlevendepensjon"),
+                sedType= eq(SedType.P2100.name),
                 sedHendelseType= eq("SENDT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -235,7 +236,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(SedType.P2100),
                 eq("123"),
                 eq("4862"),
                 eq(null),
@@ -244,7 +245,7 @@ class JournalforingServiceTest {
                 eq(null)
         )
         verify(oppgaveService).opprettOppgave(
-                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(SedType.P2100),
                 eq(null),
                 eq("4862"),
                 eq(null),
@@ -271,7 +272,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT002"),
                 mottakerNavn= eq("NAVT002"),
                 bucType= eq("P_BUC_03"),
-                sedType= eq("P2200 - Krav om uførepensjon"),
+                sedType= eq(SedType.P2200.name),
                 sedHendelseType= eq("SENDT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -283,7 +284,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2200 - Krav om uførepensjon"),
+                eq(SedType.P2200),
                 eq("123"),
                 eq("4303"),
                 eq(null),
@@ -310,7 +311,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_10"),
-                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("SENDT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -322,7 +323,7 @@ class JournalforingServiceTest {
         )
         
         verify(oppgaveService).opprettOppgave(
-                eq("P2000 - Krav om alderspensjon"),
+                eq(SedType.P2000),
                 eq("123"),
                 eq("4475"),
                 eq(null),
@@ -389,7 +390,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_01"),
-                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -401,7 +402,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2000 - Krav om alderspensjon"),
+                eq(SedType.P2000),
                 eq("123"),
                 eq("0001"),
                 eq(null),
@@ -429,7 +430,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_02"),
-                sedType= eq("P2100 - Krav om gjenlevendepensjon"),
+                sedType= eq(SedType.P2100.name),
                 sedHendelseType= eq("MOTTATT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -441,7 +442,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(SedType.P2100),
                 eq("123"),
                 eq("4862"),
                 eq(null),
@@ -450,7 +451,7 @@ class JournalforingServiceTest {
                 eq(null)
         )
         verify(oppgaveService).opprettOppgave(
-                eq("P2100 - Krav om gjenlevendepensjon"),
+                eq(SedType.P2100),
                 eq(null),
                 eq("4862"),
                 eq(null),
@@ -476,7 +477,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT002"),
                 mottakerNavn= eq("NAVT002"),
                 bucType= eq("P_BUC_03"),
-                sedType= eq("P2200 - Krav om uførepensjon"),
+                sedType= eq(SedType.P2200.name),
                 sedHendelseType= eq("MOTTATT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -488,7 +489,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2200 - Krav om uførepensjon"),
+                eq(SedType.P2200),
                 eq("123"),
                 eq("4303"),
                 eq(null),
@@ -515,7 +516,7 @@ class JournalforingServiceTest {
                 mottakerId= eq("NO:NAVT007"),
                 mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_10"),
-                sedType= eq("P2000 - Krav om alderspensjon"),
+                sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),
                 eksternReferanseId= eq(null),
                 kanal= eq("EESSI"),
@@ -527,7 +528,7 @@ class JournalforingServiceTest {
         )
 
         verify(oppgaveService).opprettOppgave(
-                eq("P2000 - Krav om alderspensjon"),
+                eq(SedType.P2000),
                 eq("123"),
                 eq("4475"),
                 eq(null),
