@@ -18,7 +18,6 @@ class ModelsTest {
         val journalpostRequestModel = mapper.readValue(journalpostRequestJson, JournalpostRequest::class.java)
         assertEquals(journalpostRequestModel.avsenderMottaker.id , "12345678912")
         assertEquals(journalpostRequestModel.avsenderMottaker.idType, FNR)
-        assertEquals(journalpostRequestModel.avsenderMottaker.navn, "navn navnesen")
         assertEquals(journalpostRequestModel.behandlingstema, "ab0254")
         assertEquals(journalpostRequestModel.bruker?.id, "12345678912")
         assertEquals(journalpostRequestModel.bruker?.idType, "FNR")
