@@ -75,16 +75,13 @@ data class Sak(
  * https://confluence.adeo.no/display/BOA/Type%3A+AvsenderMottaker
  */
 data class AvsenderMottaker(
-    val id: String, //REQUIRED
-    val idType: IdType, //REQUIRED
-    val navn: String //REQUIRED
+    val id: String?,
+    val idType: IdType?
 )
 
 enum class IdType {
-    NULL,
     FNR,
-    ORGNR,
-    UKJENT,
+    ORGNR
 }
 
 data class Bruker(
