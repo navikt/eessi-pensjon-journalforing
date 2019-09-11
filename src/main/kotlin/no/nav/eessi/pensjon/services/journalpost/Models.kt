@@ -16,7 +16,7 @@ import java.io.IOException
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class JournalPostResponse(
+class JournalPostResponse(
     val journalpostId: String,
     val journalstatus: String,
     val melding: String? = null,
@@ -28,7 +28,7 @@ data class JournalPostResponse(
     }
 }
 
-data class JournalpostRequest(
+class JournalpostRequest(
         val avsenderMottaker: AvsenderMottaker,
         val behandlingstema: String? = null,
         val bruker: Bruker? = null,
@@ -41,7 +41,7 @@ data class JournalpostRequest(
         val kanal: String? = "EESSI",
         val sak: Sak? = null,
         val tema: String = "PEN", //REQUIRED
-  //  val tilleggsopplysninger: List<Tilleggsopplysninger>? = null,
+        val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
         val tittel: String //REQUIRED
 ){
     companion object {
@@ -64,7 +64,7 @@ enum class JournalpostType: Code {
     }
 }
 
-data class Sak(
+class Sak(
     val arkivsaksnummer: String, //REQUIRED
     val arkivsaksystem: String //REQUIRED
 )
@@ -74,7 +74,7 @@ data class Sak(
  *
  * https://confluence.adeo.no/display/BOA/Type%3A+AvsenderMottaker
  */
-data class AvsenderMottaker(
+class AvsenderMottaker(
     val id: String?,
     val idType: IdType?
 )
@@ -84,9 +84,14 @@ enum class IdType {
     ORGNR
 }
 
-data class Bruker(
+class Bruker(
     val id: String, //REQUIRED
     val idType: String = "FNR" //REQUIRED
+)
+
+class Tilleggsopplysning(
+        val nokkel: String, //REQUIRED
+        val verdi: String //REQUIRED
 )
 
 interface Code {
