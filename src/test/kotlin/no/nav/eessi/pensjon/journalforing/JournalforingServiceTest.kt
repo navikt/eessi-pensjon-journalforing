@@ -102,6 +102,7 @@ class JournalforingServiceTest {
         doReturn("123")
                 .`when`(journalpostService)
                 .opprettJournalpost(
+                        rinaSakId = anyOrNull(),
                         navBruker= anyOrNull(),
                         personNavn= anyOrNull(),
                         avsenderId= anyOrNull(),
@@ -148,6 +149,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
         verify(journalpostService, times(0)).opprettJournalpost(
+                rinaSakId= anyOrNull(),
                 navBruker= anyOrNull(),
                 personNavn= anyOrNull(),
                 avsenderId= anyOrNull(),
@@ -180,6 +182,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
@@ -217,6 +220,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945602"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
@@ -265,6 +269,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq(null),
                 personNavn= eq(null),
                 avsenderId= eq("NO:NAVT003"),
@@ -304,6 +309,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
@@ -352,6 +358,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
         verify(journalpostService, times(0)).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= anyOrNull(),
                 personNavn= anyOrNull(),
                 avsenderId= anyOrNull(),
@@ -383,6 +390,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
@@ -423,6 +431,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945602"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
@@ -470,6 +479,7 @@ class JournalforingServiceTest {
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq(null),
                 personNavn= eq(null),
                 avsenderId= eq("NO:NAVT003"),
@@ -509,6 +519,7 @@ class JournalforingServiceTest {
 
 
         verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
                 navBruker= eq("12378945601"),
                 personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),

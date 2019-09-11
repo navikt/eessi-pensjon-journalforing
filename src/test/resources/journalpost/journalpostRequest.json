@@ -31,5 +31,11 @@
     "arkivsaksystem": "GSAK"
   },
   "tema": "PEN",
+  "tilleggsopplysninger": [
+    {
+      "nokkel":"eessi_pensjon_rinasakid",
+      "verdi":"1111"
+    }
+  ],
   "tittel": "Inngående P2000 - Krav om alderspensjon"
 }

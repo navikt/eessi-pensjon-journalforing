@@ -65,6 +65,7 @@ class JournalforingService(private val euxService: EuxService,
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
             val journalpostId = journalpostService.opprettJournalpost(
+                    rinaSakId = sedHendelse.rinaSakId,
                     navBruker= fnr,
                     personNavn= personNavn,
                     avsenderId= sedHendelse.avsenderId,

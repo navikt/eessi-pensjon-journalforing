@@ -28,11 +28,13 @@ class JournalpostService(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
+    private final val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_rinasakid"
 
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
 
     fun opprettJournalpost(
+            rinaSakId: String,
             navBruker: String?,
             personNavn: String?,
             avsenderId: String,
@@ -63,6 +65,7 @@ class JournalpostService(
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer, arkivsaksystem)
         val tema = BucType.valueOf(bucType).TEMA
+        val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
         val tittel = "${journalpostType.decode()} $sedType"
 
         val requestBody = JournalpostRequest(
@@ -76,6 +79,7 @@ class JournalpostService(
                 kanal,
                 sak,
                 tema,
+                tilleggsopplysninger,
                 tittel)
 
 
@@ -107,6 +111,10 @@ class JournalpostService(
                 throw RuntimeException("Feil ved opprettelse av journalpost, $ex", ex)
             }
         }
+    }
+
+    private fun populerTilleggsopplysninger(rinaSakId: String): List<Tilleggsopplysning> {
+        return listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId))
     }
 
     private fun populerAvsenderMottaker(

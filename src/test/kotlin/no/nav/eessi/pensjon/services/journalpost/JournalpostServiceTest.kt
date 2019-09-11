@@ -51,6 +51,7 @@ class JournalpostServiceTest {
                         eq(String::class.java))
 
         val journalpostResponse = journalpostService.opprettJournalpost(
+                rinaSakId = "1111",
                 navBruker= "12345678912",
                 personNavn= "navn navnesen",
                 avsenderId= "NO:NAVT003",
@@ -98,6 +99,7 @@ class JournalpostServiceTest {
 
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
+                    rinaSakId = "1111",
                     navBruker = "12345678912",
                     personNavn = "navn navnesen",
                     avsenderId = "NO:NAVT003",
