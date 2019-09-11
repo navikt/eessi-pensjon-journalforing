@@ -28,7 +28,7 @@ class JournalpostService(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
     private val mapper = jacksonObjectMapper()
-    private final val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_rinasakid"
+    private final val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
 
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
