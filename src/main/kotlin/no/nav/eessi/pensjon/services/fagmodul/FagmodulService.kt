@@ -22,6 +22,10 @@ class FagmodulService(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
 
+    /**
+     * Henter pin og ytelsetype , støttede SED typer:
+     *  P2100 og P15000
+     */
     fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse {
         return metricsHelper.measure("hentYtelseKravtype") {
             val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"

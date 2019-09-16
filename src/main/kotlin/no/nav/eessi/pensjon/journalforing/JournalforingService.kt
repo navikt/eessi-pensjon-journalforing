@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
@@ -85,6 +86,7 @@ class JournalforingService(private val euxService: EuxService,
             )
 
             val tildeltEnhet = hentTildeltEnhet(
+                    sedHendelse.sedType,
                     sedHendelse.bucType,
                     pinOgYtelse,
                     sedHendelse.navBruker,
@@ -132,7 +134,7 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentPinOgYtelse(sedHendelse: SedHendelseModel): HentPinOgYtelseTypeResponse? {
-        if(sedHendelse.bucType == BucType.P_BUC_10) {
+        if(sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
             return fagmodulService.hentPinOgYtelseType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
         }
         return null
@@ -174,13 +176,14 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     private fun hentTildeltEnhet(
-            bucType: BucType?,
+            sedType: SedType,
+            bucType: BucType,
             pinOgYtelseType: HentPinOgYtelseTypeResponse?,
             navBruker: String?,
             landkode: String?,
             fodselsDato: String
     ): OppgaveRoutingModel.Enhet {
-        return if(bucType == BucType.P_BUC_10){
+        return if(sedType == SedType.P15000){
             val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, ytelseType)
         } else {
