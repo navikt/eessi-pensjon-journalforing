@@ -138,6 +138,10 @@ class JournalforingServiceTest {
                 .`when`(oppgaveRoutingService)
                 .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(), any())
 
+        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
+                .`when`(oppgaveRoutingService)
+                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(), eq(null))
+
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
                 .`when`(fagmodulService)
@@ -303,7 +307,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
+         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
@@ -331,7 +335,7 @@ class JournalforingServiceTest {
         verify(oppgaveService).opprettOppgave(
                 eq(SedType.P2000),
                 eq("123"),
-                eq("4475"),
+                eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
@@ -541,7 +545,7 @@ class JournalforingServiceTest {
         verify(oppgaveService).opprettOppgave(
                 eq(SedType.P2000),
                 eq("123"),
-                eq("4475"),
+                eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
                 eq(null),
