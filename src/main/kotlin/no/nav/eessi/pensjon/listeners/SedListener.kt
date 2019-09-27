@@ -9,6 +9,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.models.HendelseType.*
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
@@ -27,10 +28,10 @@ class SedListener(
     }
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
-    fun consumeSedSendt(hendelse: String, acknowledgment: Acknowledgment) {
+    fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeOutgoingSed") {
-                logger.info("Innkommet sedSendt hendelse")
+                logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
                     journalforingService.journalfor(hendelse, SENDT)
@@ -49,10 +50,10 @@ class SedListener(
     }
 
     @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
-    fun consumeSedMottatt(hendelse: String, acknowledgment: Acknowledgment) {
+    fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
-                logger.info("Innkommet sedMottatt hendelse")
+                logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}\")")
                 logger.debug(hendelse)
                 try {
                     journalforingService.journalfor(hendelse, MOTTATT)
