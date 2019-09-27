@@ -57,7 +57,7 @@ class FagmodulServiceTest {
 
         val resp = fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
         assertEquals(resp.fnr, "12345678910")
-        assertEquals(resp.krav!!.type.name, "AP")
+        assertEquals(resp.krav!!.type!!.name, "AP")
     }
 
     @Test
