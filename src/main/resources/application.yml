@@ -13,7 +13,6 @@ spring:
       ack-mode: manual
     consumer:
       enable-auto-commit: false
-      auto-offset-reset: earliest
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
     properties:
       security.protocol: SASL_SSL
