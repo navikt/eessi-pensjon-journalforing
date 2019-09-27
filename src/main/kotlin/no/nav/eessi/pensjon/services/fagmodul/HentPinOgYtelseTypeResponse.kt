@@ -9,7 +9,7 @@ data class HentPinOgYtelseTypeResponse(
         )
 data class Krav(
         var dato: String?,
-        var type: YtelseType
+        var type: YtelseType?
 ) {
 
     enum class YtelseType {
