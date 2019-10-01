@@ -65,6 +65,15 @@ class JournalforingService(private val euxService: EuxService,
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
+            val tildeltEnhet = hentTildeltEnhet(
+                    sedHendelse.sedType,
+                    sedHendelse.bucType!!,
+                    pinOgYtelse,
+                    sedHendelse.navBruker,
+                    landkode,
+                    fodselsDato
+            )
+
             val journalpostId = journalpostService.opprettJournalpost(
                     rinaSakId = sedHendelse.rinaSakId,
                     navBruker= fnr,
@@ -78,20 +87,11 @@ class JournalforingService(private val euxService: EuxService,
                     sedHendelseType= hendelseType.name,
                     eksternReferanseId= null,// TODO what value to put here?,
                     kanal= "EESSI",
-                    journalfoerendeEnhet= null, // TODO what value to put here?,
+                    journalfoerendeEnhet= tildeltEnhet.enhetsNr,
                     arkivsaksnummer= null, // TODO what value to put here?,
                     arkivsaksystem= null, // TODO what value to put here?,
                     dokumenter= documents,
                     forsokFerdigstill= false
-            )
-
-            val tildeltEnhet = hentTildeltEnhet(
-                    sedHendelse.sedType,
-                    sedHendelse.bucType,
-                    pinOgYtelse,
-                    sedHendelse.navBruker,
-                    landkode,
-                    fodselsDato
             )
 
             oppgaveService.opprettOppgave(
