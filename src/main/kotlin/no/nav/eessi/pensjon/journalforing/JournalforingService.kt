@@ -100,7 +100,7 @@ class JournalforingService(private val euxService: EuxService,
                     tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                     aktoerId = aktoerId,
                     oppgaveType = "JOURNALFORING",
-                    rinaSakId = null,
+                    rinaSakId = sedHendelse.rinaSakId,
                     filnavn = null)
 
             if (uSupporterteVedlegg != null) {

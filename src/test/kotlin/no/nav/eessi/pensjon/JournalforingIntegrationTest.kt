@@ -227,7 +227,7 @@ class JournalforingIntegrationTest {
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
-                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon   rinaSakId: 147729\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
@@ -248,7 +248,7 @@ class JournalforingIntegrationTest {
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"429434378\",\n" +
                                     "  \"aktoerId\" : \"1000101917358\",\n" +
-                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon   rinaSakId: 147729\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
@@ -267,27 +267,7 @@ class JournalforingIntegrationTest {
                             .withBody("{\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
-                                    "}"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
-                    )
-            mockServer.`when`(
-                    HttpRequest.request()
-                            .withMethod(HttpMethod.POST)
-                            .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"tildeltEnhetsnr\" : \"4303\",\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
+                                    "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon   rinaSakId: 147729\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
@@ -307,7 +287,27 @@ class JournalforingIntegrationTest {
                                     "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                     "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
+                                    "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon   rinaSakId: 148161\",\n" +
+                                    "  \"tema\" : \"PEN\",\n" +
+                                    "  \"oppgavetype\" : \"JFR\",\n" +
+                                    "  \"prioritet\" : \"NORM\",\n" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                                    "}"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody("{\n" +
+                                    "  \"tildeltEnhetsnr\" : \"4303\",\n" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
+                                    "  \"journalpostId\" : \"429434378\",\n" +
+                                    "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED   rinaSakId: 161558\",\n" +
                                     "  \"tema\" : \"PEN\",\n" +
                                     "  \"oppgavetype\" : \"JFR\",\n" +
                                     "  \"prioritet\" : \"NORM\",\n" +
@@ -438,7 +438,7 @@ class JournalforingIntegrationTest {
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"429434378\",\n" +
                                 "  \"aktoerId\" : \"1000101917358\",\n" +
-                                "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon\",\n" +
+                                "  \"beskrivelse\" : \"P2000 - Krav om alderspensjon   rinaSakId: 147729\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
@@ -457,7 +457,7 @@ class JournalforingIntegrationTest {
                                 "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"429434378\",\n" +
-                                "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED\",\n" +
+                                "  \"beskrivelse\" : \"X008 - Ugyldiggjøre SED   rinaSakId: 161558\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +
@@ -476,7 +476,7 @@ class JournalforingIntegrationTest {
                                 "  \"tildeltEnhetsnr\" : \"4303\",\n" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
                                 "  \"journalpostId\" : \"429434378\",\n" +
-                                "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon\",\n" +
+                                "  \"beskrivelse\" : \"P2200 - Krav om uførepensjon   rinaSakId: 148161\",\n" +
                                 "  \"tema\" : \"PEN\",\n" +
                                 "  \"oppgavetype\" : \"JFR\",\n" +
                                 "  \"prioritet\" : \"NORM\",\n" +

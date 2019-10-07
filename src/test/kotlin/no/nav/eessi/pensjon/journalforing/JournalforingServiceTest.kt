@@ -210,7 +210,7 @@ class JournalforingServiceTest {
                 eq("0001"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147729"),
                 eq(null)
         )
     }
@@ -249,7 +249,7 @@ class JournalforingServiceTest {
                 eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147730"),
                 eq(null)
         )
         verify(oppgaveService).opprettOppgave(
@@ -298,7 +298,7 @@ class JournalforingServiceTest {
                 eq("4303"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("148161"),
                 eq(null)
         )
 
@@ -338,7 +338,7 @@ class JournalforingServiceTest {
                 eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147729"),
                 eq(null)
         )
     }
@@ -419,7 +419,7 @@ class JournalforingServiceTest {
                 eq("0001"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147729"),
                 eq(null)
         )
 
@@ -460,7 +460,7 @@ class JournalforingServiceTest {
                 eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147730"),
                 eq(null)
         )
         verify(oppgaveService).opprettOppgave(
@@ -508,7 +508,7 @@ class JournalforingServiceTest {
                 eq("4303"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("148161"),
                 eq(null)
         )
 
@@ -548,7 +548,7 @@ class JournalforingServiceTest {
                 eq("4862"),
                 eq(null),
                 eq("JOURNALFORING"),
-                eq(null),
+                eq("147729"),
                 eq(null)
         )
     }
