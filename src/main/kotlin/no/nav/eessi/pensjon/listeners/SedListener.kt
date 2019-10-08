@@ -36,7 +36,7 @@ class SedListener(
                 try {
                     journalforingService.journalfor(hendelse, SENDT)
                     acknowledgment.acknowledge()
-                    logger.info("acket offset: ${cr.offset()}")
+                    logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
                     logger.error(
                             "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
@@ -59,7 +59,7 @@ class SedListener(
                 try {
                     journalforingService.journalfor(hendelse, MOTTATT)
                     acknowledgment.acknowledge()
-                    logger.info("acket offset: ${cr.offset()}")
+                    logger.info("Acket sedMottatt melding offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
                     logger.error(
                             "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
