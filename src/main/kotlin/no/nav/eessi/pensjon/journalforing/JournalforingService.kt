@@ -101,7 +101,8 @@ class JournalforingService(private val euxService: EuxService,
                     aktoerId = aktoerId,
                     oppgaveType = "JOURNALFORING",
                     rinaSakId = sedHendelse.rinaSakId,
-                    filnavn = null)
+                    filnavn = null,
+                    hendelseType = hendelseType)
 
             if (uSupporterteVedlegg != null) {
                 oppgaveService.opprettOppgave(
@@ -111,7 +112,8 @@ class JournalforingService(private val euxService: EuxService,
                         aktoerId = aktoerId,
                         oppgaveType = "BEHANDLE_SED",
                         rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = uSupporterteVedlegg)
+                        filnavn = uSupporterteVedlegg,
+                        hendelseType = hendelseType)
             }
 
         } catch (ex: MismatchedInputException) {
