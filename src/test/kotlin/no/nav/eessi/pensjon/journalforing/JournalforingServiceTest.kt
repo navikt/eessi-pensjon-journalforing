@@ -65,7 +65,14 @@ class JournalforingServiceTest {
     @BeforeEach
     fun setup() {
 
-        journalforingService = JournalforingService(euxService, journalpostService, oppgaveService, aktoerregisterService, personV3Service, fagmodulService, oppgaveRoutingService, pdfService)
+        journalforingService = JournalforingService(euxService,
+                journalpostService,
+                oppgaveService,
+                aktoerregisterService,
+                personV3Service,
+                fagmodulService,
+                oppgaveRoutingService,
+                pdfService)
 
         //MOCK RESPONSES
 
@@ -151,7 +158,7 @@ class JournalforingServiceTest {
     @Test
     fun `gitt en sendt sed som ikke tilhører pensjon så blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
-        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
+        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.SENDT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId= anyOrNull(),
                 navBruker= anyOrNull(),
@@ -211,7 +218,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147729"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.SENDT)
         )
     }
 
@@ -250,7 +258,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147730"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.SENDT)
         )
         verify(oppgaveService).opprettOppgave(
                 eq(SedType.P2100),
@@ -259,7 +268,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq("P2100 UnSupported Documents")
+                eq("P2100 UnSupported Documents"),
+                eq(HendelseType.SENDT)
         )
     }
 
@@ -299,7 +309,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("148161"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.SENDT)
         )
 
 
@@ -339,7 +350,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147729"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.SENDT)
         )
     }
 
@@ -359,8 +371,8 @@ class JournalforingServiceTest {
 
     @Test
     fun `gitt en mottatt sed som ikke tilhører pensjon så blir den ignorert`() {
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
-        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any())
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.MOTTATT )
+        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.MOTTATT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= anyOrNull(),
@@ -420,10 +432,9 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147729"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.MOTTATT)
         )
-
-
     }
 
     @Test
@@ -461,7 +472,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147730"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.MOTTATT)
         )
         verify(oppgaveService).opprettOppgave(
                 eq(SedType.P2100),
@@ -470,9 +482,9 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq("P2100 UnSupported Documents")
+                eq("P2100 UnSupported Documents"),
+                eq(HendelseType.MOTTATT)
         )
-
     }
 
     @Test
@@ -509,9 +521,9 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("148161"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.MOTTATT)
         )
-
     }
 
     @Test
@@ -549,7 +561,8 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("JOURNALFORING"),
                 eq("147729"),
-                eq(null)
+                eq(null),
+                eq(HendelseType.MOTTATT)
         )
     }
 

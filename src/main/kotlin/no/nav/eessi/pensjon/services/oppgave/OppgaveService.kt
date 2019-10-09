@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.services.oppgave
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapAnyToJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,8 +33,9 @@ class OppgaveService(
             tildeltEnhetsnr: String,
             aktoerId: String?,
             oppgaveType: String,
-            rinaSakId: String?,
-            filnavn: String?) {
+            rinaSakId: String,
+            filnavn: String?,
+            hendelseType: HendelseType) {
         metricsHelper.measure("opprettoppgave") {
             try {
                 val oppgaveTypeMap = mapOf(
@@ -41,6 +43,7 @@ class OppgaveService(
                         "JOURNALFORING" to Oppgave.OppgaveType.JOURNALFORING,
                         "BEHANDLE_SED" to Oppgave.OppgaveType.BEHANDLE_SED
                 )
+                val beskrivelse = genererBeskrivelseTekst(sedType, rinaSakId, hendelseType)
 
                 val requestBody = mapAnyToJson(
                         Oppgave(
@@ -54,7 +57,7 @@ class OppgaveService(
                                 tildeltEnhetsnr = tildeltEnhetsnr,
                                 fristFerdigstillelse = LocalDate.now().plusDays(1).toString(),
                                 beskrivelse = when (oppgaveTypeMap[oppgaveType]) {
-                                    Oppgave.OppgaveType.JOURNALFORING -> "$sedType   rinaSakId: $rinaSakId"
+                                    Oppgave.OppgaveType.JOURNALFORING -> beskrivelse
                                     Oppgave.OppgaveType.BEHANDLE_SED -> "Mottatt vedlegg: $filnavn tilhørende RINA sakId: $rinaSakId er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )"
                                     else -> throw RuntimeException("Ukjent eller manglende oppgavetype under opprettelse av oppgave")
                                 }), true)
@@ -74,7 +77,20 @@ class OppgaveService(
         }
     }
 
+    /**
+     * Genererer beskrivelse i format:
+     * Utgående PXXXX - [nav på SEDen] / Rina saksnr: xxxxxx
+     */
+    private fun genererBeskrivelseTekst(sedType: SedType, rinaSakId: String, hendelseType: HendelseType): String {
+        return if(hendelseType == HendelseType.MOTTATT) {
+            "Inngående $sedType / Rina saksnr: $rinaSakId"
+        } else {
+            "Utgående $sedType / Rina saksnr: $rinaSakId"
+        }
+    }
+
     private fun validateResponseEntity(responseEntity: ResponseEntity<String>) {
+        // TODO , spring kaster en HttpClientException når man får en 400 eller 500 kode, dermed havner vi aldri her men i en catch.
         if (responseEntity.statusCode.isError) {
             logger.error("Received ${responseEntity.statusCode} from Oppgave")
             logger.error(responseEntity.body.toString())
