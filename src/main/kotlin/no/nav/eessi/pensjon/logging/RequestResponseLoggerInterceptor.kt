@@ -23,12 +23,12 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
         if (log.isDebugEnabled) {
             val requestLog = StringBuffer()
 
-            requestLog.append("\n===========================request begin================================================\n")
-            requestLog.append("URI            :  ${request.uri}  \n")
-            requestLog.append("Method         :  ${request.method} \n")
-            requestLog.append("Headers        :  ${request.headers} \n")
+            requestLog.append("\n===========================request begin================================================")
+            requestLog.append("\nURI            :  ${request.uri}")
+            requestLog.append("\nMethod         :  ${request.method}")
+            requestLog.append("\nHeaders        :  ${request.headers}")
             requestLog.append(trunkerBodyHvisDenErStor(body))
-            requestLog.append("==========================request end================================================")
+            requestLog.append("\n==========================request end================================================")
             log.debug(requestLog.toString())
         }
     }
@@ -37,12 +37,12 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
         if (log.isDebugEnabled) {
             val responseLog = StringBuilder()
 
-            responseLog.append("\n===========================response begin================================================\n")
-            responseLog.append("Status code    : ${response.statusCode} \n")
-            responseLog.append("Status text    : ${response.statusText} \n")
-            responseLog.append("Headers        : ${response.headers} \n")
+            responseLog.append("\n===========================response begin================================================")
+            responseLog.append("\nStatus code    : ${response.statusCode}")
+            responseLog.append("\nStatus text    : ${response.statusText}")
+            responseLog.append("\nHeaders        : ${response.headers}")
             responseLog.append(trunkerBodyHvisDenErStor(body))
-            responseLog.append("==========================response end================================================")
+            responseLog.append("\n==========================response end================================================")
             log.debug(responseLog.toString())
         }
     }
@@ -50,9 +50,9 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
     private fun trunkerBodyHvisDenErStor(body: ByteArray) : String {
         // Korter ned body dersom den er veldig stor ( ofte ved binærinnhold )
         return if (body.size > 5000) {
-            "Truncated body :  ${String(body.copyOfRange(0, 5000))} \n"
+            "\nTruncated body :  ${String(body.copyOfRange(0, 5000))}"
         } else {
-            "Complete body  :  ${String(body)} \n"
+            "\nComplete body  :  ${String(body)}"
         }
     }
 }
