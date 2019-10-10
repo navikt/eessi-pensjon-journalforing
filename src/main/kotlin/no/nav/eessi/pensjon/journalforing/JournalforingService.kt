@@ -41,6 +41,7 @@ class JournalforingService(private val euxService: EuxService,
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
         try {
+            return
             val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
             if (sedHendelse.sektorKode != "P") {

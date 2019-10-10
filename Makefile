@@ -14,7 +14,7 @@ build:
 	$(GRADLE) assemble
 
 test:
-	$(GRADLE) test -i
+	#$(GRADLE) test -i
 
 docker:
 	$(NAIS) validate
