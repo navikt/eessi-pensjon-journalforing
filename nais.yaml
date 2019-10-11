@@ -22,10 +22,10 @@ healthcheck:
 resources:
   limits:
     cpu: 4
-    memory: 4096Mi
+    memory: 8096Mi
   requests:
     cpu: 400m
-    memory: 1024Mi
+    memory: 4024Mi
 
 
 fasitResources:
