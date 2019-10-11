@@ -15,7 +15,7 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
 
         logRequest(request, body)
         val response: ClientHttpResponse = execution.execute(request, body)
-        logResponse(response, body)
+        logResponse(response)
         return response
     }
 
@@ -33,7 +33,7 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
         }
     }
 
-    private fun logResponse(response: ClientHttpResponse, body: ByteArray) {
+    private fun logResponse(response: ClientHttpResponse) {
         if (log.isDebugEnabled) {
             val responseLog = StringBuilder()
 
@@ -41,7 +41,7 @@ class RequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
             responseLog.append("\nStatus code    : ${response.statusCode}")
             responseLog.append("\nStatus text    : ${response.statusText}")
             responseLog.append("\nHeaders        : ${response.headers}")
-            responseLog.append(trunkerBodyHvisDenErStor(body))
+            responseLog.append(trunkerBodyHvisDenErStor(response.body.readBytes()))
             responseLog.append("\n==========================response end================================================")
             log.debug(responseLog.toString())
         }
