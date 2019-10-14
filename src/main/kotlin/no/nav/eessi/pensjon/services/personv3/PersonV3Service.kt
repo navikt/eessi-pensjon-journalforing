@@ -34,14 +34,14 @@ class PersonV3Service(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
-    fun hentPerson(fnr: String): Person {
+    fun hentPerson(fnr: String): Bruker {
         return metricsHelper.measure("hentperson") {
             logger.info("Henter person fra PersonV3Service")
 
             try {
                 logger.info("Kaller PersonV3.hentPerson service")
                 val resp = kallPersonV3(fnr)
-                resp.person as Person
+                resp.person as Bruker
             } catch (personIkkefunnet: HentPersonPersonIkkeFunnet) {
                 logger.error("Kaller PersonV3.hentPerson service Feilet")
                 throw PersonV3IkkeFunnetException(personIkkefunnet.message)

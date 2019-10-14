@@ -4,6 +4,7 @@ import io.mockk.slot
 import io.mockk.*
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.personv3.PersonMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -127,7 +128,7 @@ class JournalforingIntegrationTest {
 
     private fun capturePersonMock() {
         val slot = slot<String>()
-        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { PersonMock.createWith()!! }
+        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
     }
 
     companion object {

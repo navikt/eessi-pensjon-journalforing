@@ -24,6 +24,7 @@ class OppgaveRoutingService {
               bucType: BucType?,
               landkode: String?,
               fodselsDato: String,
+              geografiskTilknytning: String,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
         val tildeltEnhet =

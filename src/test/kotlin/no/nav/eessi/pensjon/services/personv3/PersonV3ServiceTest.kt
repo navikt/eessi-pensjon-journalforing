@@ -36,7 +36,7 @@ class PersonV3ServiceTest {
         every { personV3Service.konfigurerSamlToken() } just Runs
 
         every { personV3.hentPerson(requestBuilder(subject, listOf(Informasjonsbehov.ADRESSE))) } returns
-                HentPersonResponse().withPerson(PersonMock.createWith())
+                HentPersonResponse().withPerson(BrukerMock.createWith())
 
         every { personV3.hentPerson(requestBuilder(ikkeFunnetSubject, listOf(Informasjonsbehov.ADRESSE))) } throws
                 HentPersonPersonIkkeFunnet("$ikkeFunnetSubject ikke funnet", PersonIkkeFunnet())
@@ -48,7 +48,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentPerson med gyldig subject`(){
         try {
-            assertEquals(personV3Service.hentPerson(subject), PersonMock.createWith())
+            assertEquals(personV3Service.hentPerson(subject), BrukerMock.createWith())
         }catch(ex: Exception){
             assert(false)
         }
