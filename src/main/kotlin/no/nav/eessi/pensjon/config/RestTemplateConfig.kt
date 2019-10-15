@@ -120,6 +120,21 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                 }
     }
 
+    @Bean
+    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+        return templateBuilder
+                .rootUri("https://app-q3.adeo.no/norg2/")
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestResponseLoggerInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
+                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                }
+    }
+
     class RequestInterceptor : ClientHttpRequestInterceptor {
         override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
             request.headers["X-Correlation-ID"] = UUID.randomUUID().toString()

@@ -24,10 +24,15 @@ class OppgaveRoutingService {
               bucType: BucType?,
               landkode: String?,
               fodselsDato: String,
-              geografiskTilknytning: String,
+              geografiskTilknytning: String? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
-        val tildeltEnhet =
+        //kun P_BUC_01
+        //val norg2tildeltEnhet = hentNorg2Eenhet(navBruker, geografiskTilknytning, bucType)
+
+        logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
+
+        val tildeltEnhetFalback =
                 when {
                     navBruker == null -> ID_OG_FORDELING
 
@@ -54,6 +59,17 @@ class OppgaveRoutingService {
                         }
                 }
 
+        logger.debug("tildeltEnhetFalback: $tildeltEnhetFalback")
+
+        //hvilke tildeltEnhet å benytte!?
+
+//        val tildeltEnhet = when {
+//            norg2tildeltEnhet != null -> norg2tildeltEnhet
+//            else -> tildeltEnhetFalback
+//        }
+
+        val tildeltEnhet = tildeltEnhetFalback
+
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
                 "for Buc: $bucType, " +
                 "Landkode: $landkode, " +
@@ -61,6 +77,22 @@ class OppgaveRoutingService {
                 "Ytelsetype: $ytelseType")
 
         return tildeltEnhet
+    }
+
+    //4803 behandler saker der bruker er bosatt i fylke 01-05
+    //4862 behandler saker der bruker er bosatt i fylke 06-20
+    //0001 behandler saker der bruker er bosatt i utlandet.
+    private fun hentNorg2Eenhet(navBruker: String?, geografiskTilknytning: String?, bucType: BucType?): Enhet? {
+        if (navBruker == null || geografiskTilknytning == null) return null
+
+        when(bucType) {
+            P_BUC_01 -> {
+                return PENSJON_UTLAND
+            }
+            else -> {}
+        }
+
+        return null
     }
 
     private fun bosatt(landkode: String?): Bosatt =
