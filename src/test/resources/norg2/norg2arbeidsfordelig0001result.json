@@ -1,0 +1,32 @@
+[
+  {
+    "id": 100027960,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ae0107",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "ANY",
+    "enhetId": 100000617,
+    "enhetNr": "0001",
+    "enhetNavn": "NAV Pensjon Utland",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2018-11-02"
+  },
+  {
+    "id": 100026861,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "ANY",
+    "enhetId": 100000617,
+    "enhetNr": "0001",
+    "enhetNavn": "NAV Pensjon Utland",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  }
+]

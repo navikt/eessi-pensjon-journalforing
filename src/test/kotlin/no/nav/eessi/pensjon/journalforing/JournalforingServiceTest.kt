@@ -140,7 +140,7 @@ class JournalforingServiceTest {
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
-                .route(eq(null), eq(BucType.P_BUC_03), eq(null), any(),  anyString() ,eq(null))
+                .route(eq(null), eq(BucType.P_BUC_03), eq(null), any(),  eq(null) ,eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
@@ -149,11 +149,6 @@ class JournalforingServiceTest {
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
                 .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(),  anyString(), eq(null))
-
-//        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_OSLO)
-//                .`when`(oppgaveRoutingService)
-//                .route(anyString(), eq(BucType.P_BUC_05), anyString(), anyString(),  anyString(), eq(null))
-//
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
@@ -360,45 +355,6 @@ class JournalforingServiceTest {
                 eq(HendelseType.SENDT)
         )
     }
-
-//    @Test
-//    fun `Sendt Sed i P_BUC_05`(){
-//        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_P6000.json"))), HendelseType.SENDT )
-//
-//        verify(personV3Service).hentPerson(eq("12378945601"))
-//        verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
-//
-//        verify(journalpostService).opprettJournalpost(
-//                rinaSakId = anyOrNull(),
-//                navBruker= eq("12378945601"),
-//                personNavn= eq("Test Testesen"),
-//                avsenderId= eq("NO:NAVT003"),
-//                avsenderNavn= eq("NAVT003"),
-//                mottakerId= eq("NO:NAVT007"),
-//                mottakerNavn= eq("NAV Test 07"),
-//                bucType= eq("P_BUC_05"),
-//                sedType= eq(SedType.P6000.name),
-//                sedHendelseType= eq("SENDT"),
-//                eksternReferanseId= eq(null),
-//                kanal= eq("EESSI"),
-//                journalfoerendeEnhet= eq("4803"),
-//                arkivsaksnummer= eq(null),
-//                arkivsaksystem= eq(null),
-//                dokumenter= eq("P6000 Supported Documents"),
-//                forsokFerdigstill= eq(false)
-//        )
-//
-//        verify(oppgaveService).opprettOppgave(
-//                eq(SedType.P2000),
-//                eq("123"),
-//                eq("4803"),
-//                eq(null),
-//                eq("JOURNALFORING"),
-//                eq("147729"),
-//                eq(null),
-//                eq(HendelseType.SENDT)
-//        )
-//    }
 
     @Test
     fun `Sendt Sed med ugyldige verdier`(){
