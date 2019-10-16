@@ -4,15 +4,20 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.mockito.Mock
 
 class OppgaveRoutingServiceTest {
 
-    val routingService = OppgaveRoutingService()
+    @Mock
+    private lateinit var norg2Service: Norg2Service
+
+    val routingService = OppgaveRoutingService(norg2Service)
 
     companion object {
         val MANGLER_LAND = null as String?

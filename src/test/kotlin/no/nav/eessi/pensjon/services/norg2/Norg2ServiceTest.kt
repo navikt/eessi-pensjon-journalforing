@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
@@ -41,8 +42,6 @@ class Norg2ServiceTest {
         val expected = "1100"
         assertEquals(expected, actual)
 
-        assertEquals("11", norg2Service.fylke2siffer(actual ?: ""))
-
     }
 
     @Test
@@ -57,8 +56,14 @@ class Norg2ServiceTest {
     fun `finn fordeligsenhet for utland`() {
         val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
+        val request = Norg2ArbeidsfordelingRequest(
+                geografiskOmraade = "ANY",
+                behandlingstype = "ae0107",
+                gyldigFra = "2018-11-02"
+        )
+
         val expected = "0001"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0107", gyldigFra = "2018-11-02", list = enheter)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -67,8 +72,14 @@ class Norg2ServiceTest {
     fun `finn fordeligsenhet for utland feiler`() {
         val enheter = listOf<Norg2ArbeidsfordelingItem>()
 
+        val request = Norg2ArbeidsfordelingRequest(
+                geografiskOmraade = "ANY",
+                behandlingstype = "ae0107",
+                gyldigFra = "2018-11-02"
+        )
+
         val expected = null
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0107", gyldigFra = "2018-11-02", list = enheter)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -77,8 +88,14 @@ class Norg2ServiceTest {
     fun `finn fordeligsenhet for Oslo`() {
         val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
+        val request = Norg2ArbeidsfordelingRequest(
+                geografiskOmraade = "ANY",
+                behandlingstype = "ae0104"
+                //gyldigFra = "2018-11-02"
+        )
+
         val expected = "4803"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "02", gyldigFra = "2017-09-30", list = enheter)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -87,16 +104,15 @@ class Norg2ServiceTest {
     fun `finn fordeligsenhet for Aalesund`() {
         val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
+        val request = Norg2ArbeidsfordelingRequest(
+                geografiskOmraade = "ANY",
+                behandlingstype = "ae0104"
+                //gyldigFra = "2018-11-02"
+        )
+
         val expected = "4862"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "11",  gyldigFra = "2017-09-30", list = enheter)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `henter opp 2 siffer fylkeskode`() {
-        val actual = norg2Service.fylke2siffer("1100")
-        val expected = "11"
         assertEquals(expected, actual)
     }
 
@@ -111,30 +127,34 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val result = norg2Service.hentArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "04")
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", "0422",null)
+
+        val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(4, result?.size)
 
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "04", list = result)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("4803", actual)
     }
 
-    @Test
-    fun `hent arbeidsfordeligEnheter fra Utland feiler ved søkkreiteria`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"))
-        doReturn(response)
-                .whenever(mockrestTemplate).exchange(
-                        contains("/api/v1/arbeidsfordeling"),
-                        any(HttpMethod::class.java),
-                        any(HttpEntity::class.java),
-                        eq(String::class.java)
-                )
-
-        val result = norg2Service.hentArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "04")
-        assertEquals(2, result?.size)
-
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0104", geografiskOmraade = "04", list = result)
-        assertEquals(null, actual)
-    }
+//    @Test
+//    fun `hent arbeidsfordeligEnheter fra Utland feiler ved feil bruk av søk`() {
+//        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"))
+//        doReturn(response)
+//                .whenever(mockrestTemplate).exchange(
+//                        contains("/api/v1/arbeidsfordeling"),
+//                        any(HttpMethod::class.java),
+//                        any(HttpEntity::class.java),
+//                        eq(String::class.java)
+//                )
+//
+//        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(null, null,null)
+//
+//        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+//        assertEquals(2, result?.size)
+//
+//        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+//        assertEquals(null, actual)
+//    }
 
     @Test
     fun `hent arbeidsfordeligEnheter fra Utland`() {
@@ -147,13 +167,56 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val result = norg2Service.hentArbeidsfordelingEnheter(behandsligType = "ae0107", gyldigFra = "2018-11-02")
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(null, null,null)
+
+        val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(2, result?.size)
 
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(behandsligType = "ae0107", gyldigFra = "2018-11-02", list = result)
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("0001", actual)
     }
 
+    @Test
+    fun `hent arbeidsfordeligEnheter ved diskresjon`() {
+        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"))
+        doReturn(response)
+                .whenever(mockrestTemplate).exchange(
+                        contains("/api/v1/arbeidsfordeling"),
+                        any(HttpMethod::class.java),
+                        any(HttpEntity::class.java),
+                        eq(String::class.java)
+                )
+
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", null, "SPSF")
+
+        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+        assertEquals(3, result?.size)
+
+        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        assertEquals("2103", actual)
+    }
+
+//    @Test
+//    fun `hent arbeidsfordeligEnheter ved feil diskresjonskode`() {
+//        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"))
+//        doReturn(response)
+//                .whenever(mockrestTemplate).exchange(
+//                        contains("/api/v1/arbeidsfordeling"),
+//                        any(HttpMethod::class.java),
+//                        any(HttpEntity::class.java),
+//                        eq(String::class.java)
+//                )
+//
+//        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(null, "3322", "SPSF")
+//        assertEquals("SPSF", request.diskresjonskode)
+//        assertEquals("ANY", request.tema)
+//
+//        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+//        assertEquals(3, result?.size)
+//
+//        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+//        assertEquals(null, actual)
+//    }
 
     @Test
     fun `hent organisering Enhet forventer liste fra norg2 og resultat er fylkesnr`() {
@@ -172,9 +235,6 @@ class Norg2ServiceTest {
 
         val actual = norg2Service.finnFylke(result)
         assertEquals("1100", actual)
-
-        assertEquals("11", norg2Service.fylke2siffer(actual ?: ""))
-
     }
 
 

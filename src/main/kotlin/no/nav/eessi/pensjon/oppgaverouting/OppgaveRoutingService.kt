@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Krets.NAY
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Krets.NFP
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
+import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -16,7 +17,7 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Service
-class OppgaveRoutingService {
+class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
@@ -27,8 +28,10 @@ class OppgaveRoutingService {
               geografiskTilknytning: String? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
+        var diskresjonKode: String? = null
+
         //kun P_BUC_01
-        //val norg2tildeltEnhet = hentNorg2Eenhet(navBruker, geografiskTilknytning, bucType)
+        val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonKode)
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
 
@@ -82,12 +85,12 @@ class OppgaveRoutingService {
     //4803 behandler saker der bruker er bosatt i fylke 01-05
     //4862 behandler saker der bruker er bosatt i fylke 06-20
     //0001 behandler saker der bruker er bosatt i utlandet.
-    private fun hentNorg2Eenhet(navBruker: String?, geografiskTilknytning: String?, bucType: BucType?): Enhet? {
+    private fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonKode: String?): Enhet? {
         if (navBruker == null || geografiskTilknytning == null) return null
 
         when(bucType) {
             P_BUC_01 -> {
-                return PENSJON_UTLAND
+                return Enhet.valueOf( norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonKode)!! )
             }
             else -> {}
         }

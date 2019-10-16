@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
+@Service
 class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
@@ -18,14 +20,43 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
 //        Bosatt_utland("ae0107"), 2018-11-02
 //        Bosatt_Norge("ae0104")  2017-09-30
-    fun hentArbeidsfordelingEnheter(behandsligType: String, geografiskOmraade: String = "ANY", tema: String = "PEN", gyldigFra: String ="2017-09-30",  diskresjonskoder: String? = "ANY") : List<Norg2ArbeidsfordelingItem>? {
+//    fun hentArbeidsfordelingEnheter(behandlingsType: String, geografiskOmraade: String = "ANY", tema: String = "PEN", gyldigFra: String ="2017-09-30",  diskresjonskoder: String? = "ANY") : List<Norg2ArbeidsfordelingItem>? {
 
-            val request = Norg2ArbeidsfordelingRequest(
-                    behandlingstype = behandsligType,
-                    geografiskOmraade =  geografiskOmraade,
-                    tema = tema,
-                    gyldigFra = gyldigFra
-            )
+    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
+
+        val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
+        val enheter = hentArbeidsfordelingEnheter(request)
+        val enhet = finnKorrektArbeidsfordelingEnheter(request, enheter)
+
+        return enhet
+    }
+
+    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
+        val request = when {
+            landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> {
+                Norg2ArbeidsfordelingRequest(
+                        geografiskOmraade = geografiskTilknytning,
+                        behandlingstype = "ae0104"
+                )
+            }
+            landkode == null && geografiskTilknytning == null && diskresjonKode == null -> {
+                Norg2ArbeidsfordelingRequest(
+                        geografiskOmraade = "ANY",
+                        behandlingstype = "ae0107",
+                        gyldigFra = "2018-11-02"
+                )
+            }
+            else -> {
+                Norg2ArbeidsfordelingRequest(
+                        tema = "ANY",
+                        diskresjonskode = diskresjonKode
+                )
+            }
+        }
+        return request
+    }
+
+    fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
 
             val httpEntity = HttpEntity(request.toJson())
             val responseEntity = norg2OidcRestTemplate.exchange(
@@ -39,18 +70,17 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         return fordelingEnheter
     }
 
-    fun finnKorrektArbeidsfordelingEnheter(behandsligType: String, geografiskOmraade: String = "ANY", tema: String = "PEN",  gyldigFra: String ="2017-09-30",  diskresjonskoder: String? = "ANY", list: List<Norg2ArbeidsfordelingItem>?): String? {
+    fun finnKorrektArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>?): String? {
         return list
                 ?.asSequence()
-                ?.filter { it.behandlingstype == behandsligType }
-                ?.filter { it.gyldigFra == gyldigFra }
-                ?.filter { it.geografiskOmraade == geografiskOmraade }
-                ?.filter { it.tema == "PEN" }
+                ?.filter { it.diskresjonskode == request.diskresjonskode }
+                ?.filter { it.behandlingstype == request.behandlingstype }
+                //?.filter { it.gyldigFra == request.gyldigFra }
+                //?.filter { it.geografiskOmraade == request.geografiskOmraade }
+                ?.filter { it.tema == request.tema }
                 ?.map { it.enhetNr }
                 ?.lastOrNull()
     }
-
-    //fun hentNavkontorGeografiskOmraade(geografiskOmraade: String) = null
 
     fun hentorganiseringEnhet(enhet: String) : List<Norg2OrganiseringItem>? {
         val responseEntity = norg2OidcRestTemplate.exchange(
@@ -71,13 +101,11 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                 ?.firstOrNull()
     }
 
-    fun fylke2siffer(fylkesnr: String) = fylkesnr.dropLast(2)
-
 }
 
 data class Norg2ArbeidsfordelingRequest(
     val tema: String = "PEN",
-    val diskresjonskode: String = "ANY",
+    val diskresjonskode: String? = "ANY",
     val behandlingstema: String = "ANY",
     val behandlingstype: String = "ANY",
     val geografiskOmraade: String = "ANY",
@@ -122,19 +150,6 @@ data class Norg2NavkontorResponse(
         val status: String? = null,
         val orgNivaa: String? = null
 )
-
-//{
-//    companion object {
-//        private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
-//
-//        fun fromJson(json: String): JournalpostRequest = mapper.readValue(json, JournalpostRequest::class.java)
-//    }
-//
-//    override fun toString(): String {
-//        return mapAnyToJson(this,true)
-//    }
-//}
-
 
 data class Norg2OrganiseringItem(
         val orgType: String? = null,
