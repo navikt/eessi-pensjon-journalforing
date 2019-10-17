@@ -18,10 +18,6 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
     private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
 
-//        Bosatt_utland("ae0107"), 2018-11-02
-//        Bosatt_Norge("ae0104")  2017-09-30
-//    fun hentArbeidsfordelingEnheter(behandlingsType: String, geografiskOmraade: String = "ANY", tema: String = "PEN", gyldigFra: String ="2017-09-30",  diskresjonskoder: String? = "ANY") : List<Norg2ArbeidsfordelingItem>? {
-
     fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
 
         val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
@@ -32,27 +28,24 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     }
 
     fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
-        val request = when {
-            landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> {
-                Norg2ArbeidsfordelingRequest(
-                        geografiskOmraade = geografiskTilknytning,
-                        behandlingstype = "ae0104"
-                )
-            }
-            landkode == null && geografiskTilknytning == null && diskresjonKode == null -> {
-                Norg2ArbeidsfordelingRequest(
-                        geografiskOmraade = "ANY",
-                        behandlingstype = "ae0107",
-                        gyldigFra = "2018-11-02"
-                )
-            }
-            else -> {
-                Norg2ArbeidsfordelingRequest(
-                        tema = "ANY",
-                        diskresjonskode = diskresjonKode
-                )
-            }
-        }
+        val request: Norg2ArbeidsfordelingRequest =
+
+                when {
+                    landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
+                            geografiskOmraade = geografiskTilknytning,
+                            behandlingstype = "ae0104"
+                    )
+                    landkode != "NOR" && geografiskTilknytning == null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
+                            geografiskOmraade = "ANY",
+                            behandlingstype = "ae0107",
+                            gyldigFra = "2018-11-02"
+                    )
+                    diskresjonKode != null -> Norg2ArbeidsfordelingRequest(
+                            tema = "ANY",
+                            diskresjonskode = "SPSF"
+                    )
+                    else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
+                }
         return request
     }
 
@@ -75,7 +68,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                 ?.asSequence()
                 ?.filter { it.diskresjonskode == request.diskresjonskode }
                 ?.filter { it.behandlingstype == request.behandlingstype }
-                //?.filter { it.gyldigFra == request.gyldigFra }
+                ?.filter { it.gyldigFra == request.gyldigFra }
                 //?.filter { it.geografiskOmraade == request.geografiskOmraade }
                 ?.filter { it.tema == request.tema }
                 ?.map { it.enhetNr }
@@ -102,6 +95,8 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     }
 
 }
+
+class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)
 
 data class Norg2ArbeidsfordelingRequest(
     val tema: String = "PEN",

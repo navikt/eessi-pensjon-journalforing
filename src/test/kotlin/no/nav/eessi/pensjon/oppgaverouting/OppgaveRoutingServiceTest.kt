@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
@@ -10,14 +12,23 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
 
+@ExtendWith(MockitoExtension::class)
 class OppgaveRoutingServiceTest {
 
     @Mock
     private lateinit var norg2Service: Norg2Service
 
-    val routingService = OppgaveRoutingService(norg2Service)
+    private lateinit var routingService: OppgaveRoutingService
+
+    @BeforeEach
+    fun setup() {
+        routingService = OppgaveRoutingService(norg2Service)
+    }
 
     companion object {
         val MANGLER_LAND = null as String?
@@ -143,6 +154,45 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, AP))
     }
 
+    @Test
+    fun `hentNorg2Enhet for bosatt utland`() {
+
+        doReturn("0001").whenever(norg2Service).hentArbeidsfordelingEnhet(null, "SVE", null)
+
+        val actual = routingService.hentNorg2Enhet("1208201515925",null,"SVE",P_BUC_01,null)
+        val expected = PENSJON_UTLAND
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for bosatt Norge`() {
+        doReturn("4803").whenever(norg2Service).hentArbeidsfordelingEnhet("0322", "NOR", null)
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
+        val expected = NFP_UTLAND_OSLO
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for bosatt Norge feil buc`() {
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_04,null)
+        val expected = null
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
+        doReturn("2103").whenever(norg2Service).hentArbeidsfordelingEnhet("0322", "NOR", "SPSF")
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,"SPSF")
+        val expected = DISKRESJONSKODE
+
+        assertEquals(expected,actual)
+    }
+
     private fun enhetFor(bucType: BucType,
                          land: String?,
                          fodselsDato: String,
@@ -150,5 +200,16 @@ class OppgaveRoutingServiceTest {
                          ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {
         return routingService.route("01010101010", bucType, land, fodselsDato,geografiskTilknytning, ytelse)
                          }
+
+    @Test
+    fun testEnumEnhets() {
+
+        assertEquals(PENSJON_UTLAND, OppgaveRoutingModel.Enhet.getEnhet("0001"))
+
+        assertEquals(NFP_UTLAND_OSLO, OppgaveRoutingModel.Enhet.getEnhet("4803"))
+
+        assertEquals(DISKRESJONSKODE, OppgaveRoutingModel.Enhet.getEnhet("2103"))
+
+    }
 
 }
