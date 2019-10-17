@@ -10,17 +10,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 
 @Service
 class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
+    constructor(): this(RestTemplate())
+
     private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
 
     fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
 
         val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
+        logger.debug("følgende request til Norg2 : $request")
         val enheter = hentArbeidsfordelingEnheter(request)
         val enhet = finnKorrektArbeidsfordelingEnheter(request, enheter)
 
@@ -46,21 +51,31 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                     )
                     else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
                 }
+        logger.debug("Request: ${request.toJson()}")
         return request
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
 
             val httpEntity = HttpEntity(request.toJson())
-            val responseEntity = norg2OidcRestTemplate.exchange(
-                    "/api/v1/arbeidsfordeling",
-                    HttpMethod.POST,
-                    httpEntity,
-                    String::class.java)
+            try {
+                val responseEntity = norg2OidcRestTemplate.exchange(
+                        "/api/v1/arbeidsfordeling",
+                        HttpMethod.POST,
+                        httpEntity,
+                        String::class.java)
 
-            val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
+                val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
+                logger.debug("fordelsingsEnheter: $fordelingEnheter")
+                return fordelingEnheter
 
-        return fordelingEnheter
+            } catch (hcee: HttpClientErrorException) {
+                throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hcee.message}")
+            } catch (hsee: HttpServerErrorException) {
+                throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hsee.message}")
+            } catch (ex: Exception) {
+                throw RuntimeException("Ukjent feil ved henting av arbeidsfordelingsenheter fra Norg2 ${ex.message}")
+            }
     }
 
     fun finnKorrektArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>?): String? {
@@ -74,26 +89,6 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                 ?.map { it.enhetNr }
                 ?.lastOrNull()
     }
-
-    fun hentorganiseringEnhet(enhet: String) : List<Norg2OrganiseringItem>? {
-        val responseEntity = norg2OidcRestTemplate.exchange(
-                "api/v1/enhet/$enhet/organisering",
-                HttpMethod.GET,
-                null,
-                String::class.java
-        )
-
-        return mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2OrganiseringItem>>())
-    }
-
-    fun finnFylke(enhetsList: List<Norg2OrganiseringItem>?): String? {
-        logger.debug("list: $enhetsList")
-        return enhetsList
-                ?.filter { it.orgType == "FYLKE" }
-                ?.map { it.organiserer?.nr }
-                ?.firstOrNull()
-    }
-
 }
 
 class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)

@@ -36,6 +36,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     @Value("\${eessifagmodulservice_URL}")
     lateinit var fagmodulUrl: String
 
+    @Value("\${eessipennorg2service_URL}")
+    lateinit var norg2Url: String
+
     @Value("\${srvusername}")
     lateinit var username: String
 
@@ -123,7 +126,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     @Bean
     fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         return templateBuilder
-                .rootUri("https://app-q3.adeo.no/norg2/")
+                .rootUri(norg2Url)
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(
                         RequestIdHeaderInterceptor(),

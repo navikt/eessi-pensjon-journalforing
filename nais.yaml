@@ -58,5 +58,8 @@ fasitResources:
       resourceType: RestService
     - alias: eessifagmodulservice
       resourceType: RestService
+    - alias: eessipennorg2service
+      resourceType: RestService
+
 
 

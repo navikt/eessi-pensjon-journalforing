@@ -219,6 +219,19 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))))
                     )
 
+            //Mock norg2tjeneste
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/api/v1/arbeidsfordeling")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
+                    )
+
+
             // Mocker oppgavetjeneste
             mockServer.`when`(
                     HttpRequest.request()
@@ -429,6 +442,25 @@ class JournalforingIntegrationTest {
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
                 VerificationTimes.exactly(3)
+        )
+
+        // Verifiserer at det har blitt forsøkt å hente enhet fra Norg2
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/api/v1/arbeidsfordeling")
+//                        .withBody("{$lineSeparator" +
+//                                " \"tema\" : \"PEN\", $lineSeparator" +
+//                                " \"diskresjonskode\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"behandlingstema\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"behandlingstype\" : \"ae0104\",$lineSeparator\" + " +
+//                                " \"geografiskOmraade\" : \"026123\",$lineSeparator\" +" +
+//                                " \"skalTilLokalkontor\" : false,$lineSeparator\" +" +
+//                                " \"oppgavetype\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"gyldigFra\" : \"2017-09-30\",$lineSeparator\" +" +
+//                                " \"temagruppe\" : \"ANY\"$lineSeparator\"}"),
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))),
+                VerificationTimes.exactly(1)
         )
 
         // Verifiserer at det har blitt forsøkt å opprette PEN oppgave med aktørid

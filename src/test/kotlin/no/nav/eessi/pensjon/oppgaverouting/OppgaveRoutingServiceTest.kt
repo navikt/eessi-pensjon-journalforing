@@ -1,26 +1,33 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Spy
+import org.mockito.junit.jupiter.MockitoExtension
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
 class OppgaveRoutingServiceTest {
 
-    @Mock
+    @Spy
     private lateinit var norg2Service: Norg2Service
 
     private lateinit var routingService: OppgaveRoutingService
@@ -156,8 +163,9 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt utland`() {
-
-        doReturn("0001").whenever(norg2Service).hentArbeidsfordelingEnhet(null, "SVE", null)
+        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        doReturn(enhetlist)
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet("1208201515925",null,"SVE",P_BUC_01,null)
         val expected = PENSJON_UTLAND
@@ -167,7 +175,9 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge`() {
-        doReturn("4803").whenever(norg2Service).hentArbeidsfordelingEnhet("0322", "NOR", null)
+        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        doReturn(enhetlist)
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
         val expected = NFP_UTLAND_OSLO
@@ -176,8 +186,42 @@ class OppgaveRoutingServiceTest {
     }
 
     @Test
+    fun `hentNorg2Enhet for bosatt nord-Norge`() {
+        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        doReturn(enhetlist)
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01,null)
+        val expected = NFP_UTLAND_AALESUND
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_04,null)
+       val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_03,null)
+       val expected = null
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2`() {
+        doReturn(listOf<Norg2ArbeidsfordelingItem>())
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
+        val expected = null
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2 error`() {
+        doThrow(RuntimeException("dummy"))
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
         val expected = null
 
         assertEquals(expected,actual)
@@ -185,7 +229,9 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
-        doReturn("2103").whenever(norg2Service).hentArbeidsfordelingEnhet("0322", "NOR", "SPSF")
+        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        doReturn(enhetlist)
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,"SPSF")
         val expected = DISKRESJONSKODE
@@ -210,6 +256,10 @@ class OppgaveRoutingServiceTest {
 
         assertEquals(DISKRESJONSKODE, OppgaveRoutingModel.Enhet.getEnhet("2103"))
 
+    }
+
+    fun getJsonFileFromResource(filename: String): String {
+        return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 
 }
