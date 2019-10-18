@@ -141,7 +141,8 @@ class ArchitectureTest {
                         "org.junit.matchers",
                         "org.junit.rules",
                         "org.junit.runner..",
-                        "org.junit.validator"
+                        "org.junit.validator",
+                        "junit.framework.."
                 ).because(junitReason)
                 .check(classesToAnalyze)
 
