@@ -36,6 +36,9 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     @Value("\${eessifagmodulservice_URL}")
     lateinit var fagmodulUrl: String
 
+    @Value("\${eessipennorg2service_URL}")
+    lateinit var norg2Url: String
+
     @Value("\${srvusername}")
     lateinit var username: String
 
@@ -109,6 +112,21 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
         return templateBuilder
                 .rootUri(fagmodulUrl)
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestResponseLoggerInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
+                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                }
+    }
+
+    @Bean
+    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+        return templateBuilder
+                .rootUri(norg2Url)
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(
                         RequestIdHeaderInterceptor(),

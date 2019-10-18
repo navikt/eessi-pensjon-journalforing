@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
+import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.personv3.PersonMock
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,7 +78,7 @@ class JournalforingServiceTest {
         //MOCK RESPONSES
 
         //PERSONV3 - HENT PERSON
-        doReturn(PersonMock.createWith(landkoder = true))
+        doReturn(BrukerMock.createWith(landkoder = true))
                 .`when`(personV3Service)
                 .hentPerson(anyString())
 
@@ -131,23 +132,23 @@ class JournalforingServiceTest {
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_01), any(), any() ,eq(null))
+                .route(any(), eq(BucType.P_BUC_01), any(), any(), anyString(), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_02), any(), any() ,eq(null))
+                .route(any(), eq(BucType.P_BUC_02), any(), any(), anyString(), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
-                .route(eq(null), eq(BucType.P_BUC_03), eq(null), any() ,eq(null))
+                .route(eq(null), eq(BucType.P_BUC_03), eq(null), any(),  eq(null) ,eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(), any())
+                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(),  anyString(),  any())
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(), eq(null))
+                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(),  anyString(), eq(null))
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
@@ -182,7 +183,7 @@ class JournalforingServiceTest {
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
         verify(fagmodulService, times(0)).hentPinOgYtelseType(any(), any())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any() ,eq(null))
+        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null))
     }
 
 
@@ -396,7 +397,7 @@ class JournalforingServiceTest {
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
         verify(fagmodulService, times(0)).hentPinOgYtelseType(any(), any())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any() ,eq(null))
+        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null))
     }
 
     @Test

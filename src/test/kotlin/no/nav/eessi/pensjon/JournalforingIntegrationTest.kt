@@ -4,6 +4,7 @@ import io.mockk.slot
 import io.mockk.*
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.personv3.PersonMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -127,13 +128,14 @@ class JournalforingIntegrationTest {
 
     private fun capturePersonMock() {
         val slot = slot<String>()
-        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { PersonMock.createWith()!! }
+        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
     }
 
     companion object {
 
         init {
             // Start Mockserver in memory
+            val lineSeparator = System.lineSeparator()
             val port = randomFrom()
             mockServer = ClientAndServer.startClientAndServer(port)
             System.setProperty("mockServerport", port.toString())
@@ -217,22 +219,35 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))))
                     )
 
+            //Mock norg2tjeneste
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/api/v1/arbeidsfordeling")
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
+                    )
+
+
             // Mocker oppgavetjeneste
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"tildeltEnhetsnr\" : \"4862\",\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"aktoerId\" : \"1000101917358\",\n" +
-                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                            .withBody("{$lineSeparator"+
+                                    "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator"  +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -243,17 +258,17 @@ class JournalforingIntegrationTest {
                     HttpRequest.request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"tildeltEnhetsnr\" : \"4476\",\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"aktoerId\" : \"1000101917358\",\n" +
-                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                            .withBody("{$lineSeparator" +
+                                    "  \"tildeltEnhetsnr\" : \"4476\",$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -264,15 +279,15 @@ class JournalforingIntegrationTest {
                     HttpRequest.request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                            .withBody("{$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -283,16 +298,16 @@ class JournalforingIntegrationTest {
                     HttpRequest.request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"tildeltEnhetsnr\" : \"4303\",\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"Utgående P2200 - Krav om uførepensjon / Rina saksnr: 148161\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                            .withBody("{$lineSeparator" +
+                                    "  \"tildeltEnhetsnr\" : \"4303\",$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående P2200 - Krav om uførepensjon / Rina saksnr: 148161\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -303,16 +318,16 @@ class JournalforingIntegrationTest {
                     HttpRequest.request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
-                            .withBody("{\n" +
-                                    "  \"tildeltEnhetsnr\" : \"4303\",\n" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                    "  \"journalpostId\" : \"429434378\",\n" +
-                                    "  \"beskrivelse\" : \"Utgående X008 - Ugyldiggjøre SED / Rina saksnr: 161558\",\n" +
-                                    "  \"tema\" : \"PEN\",\n" +
-                                    "  \"oppgavetype\" : \"JFR\",\n" +
-                                    "  \"prioritet\" : \"NORM\",\n" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"\n" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"\n" +
+                            .withBody("{$lineSeparator" +
+                                    "  \"tildeltEnhetsnr\" : \"4303\",$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående X008 - Ugyldiggjøre SED / Rina saksnr: 161558\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -394,6 +409,7 @@ class JournalforingIntegrationTest {
     }
 
     private fun verifiser() {
+        val lineSeparator = System.lineSeparator()
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
@@ -428,22 +444,41 @@ class JournalforingIntegrationTest {
                 VerificationTimes.exactly(3)
         )
 
+        // Verifiserer at det har blitt forsøkt å hente enhet fra Norg2
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.POST)
+                        .withPath("/api/v1/arbeidsfordeling")
+//                        .withBody("{$lineSeparator" +
+//                                " \"tema\" : \"PEN\", $lineSeparator" +
+//                                " \"diskresjonskode\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"behandlingstema\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"behandlingstype\" : \"ae0104\",$lineSeparator\" + " +
+//                                " \"geografiskOmraade\" : \"026123\",$lineSeparator\" +" +
+//                                " \"skalTilLokalkontor\" : false,$lineSeparator\" +" +
+//                                " \"oppgavetype\" : \"ANY\",$lineSeparator\" +" +
+//                                " \"gyldigFra\" : \"2017-09-30\",$lineSeparator\" +" +
+//                                " \"temagruppe\" : \"ANY\"$lineSeparator\"}"),
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))),
+                VerificationTimes.exactly(1)
+        )
+
         // Verifiserer at det har blitt forsøkt å opprette PEN oppgave med aktørid
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody("{\n" +
-                                "  \"tildeltEnhetsnr\" : \"4862\",\n" +
-                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"429434378\",\n" +
-                                "  \"aktoerId\" : \"1000101917358\",\n" +
-                                "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",\n" +
-                                "  \"tema\" : \"PEN\",\n" +
-                                "  \"oppgavetype\" : \"JFR\",\n" +
-                                "  \"prioritet\" : \"NORM\",\n" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "\n" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "\n" +
+                        .withBody("{$lineSeparator" +
+                                "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
+                                "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",$lineSeparator" +
+                                "  \"tema\" : \"PEN\",$lineSeparator" +
+                                "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
                                 "}"),
                 VerificationTimes.exactly(1)
         )
@@ -453,16 +488,16 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody("{\n" +
-                                "  \"tildeltEnhetsnr\" : \"4303\",\n" +
-                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"429434378\",\n" +
-                                "  \"beskrivelse\" : \"Utgående X008 - Ugyldiggjøre SED / Rina saksnr: 161558\",\n" +
-                                "  \"tema\" : \"PEN\",\n" +
-                                "  \"oppgavetype\" : \"JFR\",\n" +
-                                "  \"prioritet\" : \"NORM\",\n" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "\n" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "\n" +
+                        .withBody("{$lineSeparator" +
+                                "  \"tildeltEnhetsnr\" : \"4303\",$lineSeparator" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                "  \"beskrivelse\" : \"Utgående X008 - Ugyldiggjøre SED / Rina saksnr: 161558\",$lineSeparator" +
+                                "  \"tema\" : \"PEN\",$lineSeparator" +
+                                "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
                                 "}"),
                 VerificationTimes.exactly(1)
         )
@@ -472,16 +507,16 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
-                        .withBody("{\n" +
-                                "  \"tildeltEnhetsnr\" : \"4303\",\n" +
-                                "  \"opprettetAvEnhetsnr\" : \"9999\",\n" +
-                                "  \"journalpostId\" : \"429434378\",\n" +
-                                "  \"beskrivelse\" : \"Utgående P2200 - Krav om uførepensjon / Rina saksnr: 148161\",\n" +
-                                "  \"tema\" : \"PEN\",\n" +
-                                "  \"oppgavetype\" : \"JFR\",\n" +
-                                "  \"prioritet\" : \"NORM\",\n" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "\n" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "\n" +
+                        .withBody("{$lineSeparator" +
+                                "  \"tildeltEnhetsnr\" : \"4303\",$lineSeparator" +
+                                "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                "  \"beskrivelse\" : \"Utgående P2200 - Krav om uførepensjon / Rina saksnr: 148161\",$lineSeparator" +
+                                "  \"tema\" : \"PEN\",$lineSeparator" +
+                                "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
                                 "}"),
                 VerificationTimes.exactly(1)
         )

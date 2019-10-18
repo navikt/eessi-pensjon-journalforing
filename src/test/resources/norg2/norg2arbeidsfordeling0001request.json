@@ -1,0 +1,11 @@
+{
+  "tema" : "PEN",
+  "diskresjonskode" : "ANY",
+  "behandlingstema" : "ANY",
+  "behandlingstype" : "ae0107",
+  "geografiskOmraade" : "ANY",
+  "skalTilLokalkontor" : false,
+  "oppgavetype" : "ANY",
+  "gyldigFra" : "2018-11-02",
+  "temagruppe" : "ANY"
+}

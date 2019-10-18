@@ -24,7 +24,13 @@ data class OppgaveRoutingModel(
         UFORE_UTLANDSTILSNITT("4476"),
         UFORE_UTLAND("4475"),
         NFP_UTLAND_AALESUND("4862"),
-        ID_OG_FORDELING("4303")
+        NFP_UTLAND_OSLO("4803"),
+        ID_OG_FORDELING("4303"),
+        DISKRESJONSKODE("2103");
+
+        companion object {
+            fun getEnhet(enhetsNr: String): Enhet? = values().find { it.enhetsNr == enhetsNr }
+        }
     }
 
     enum class Krets {

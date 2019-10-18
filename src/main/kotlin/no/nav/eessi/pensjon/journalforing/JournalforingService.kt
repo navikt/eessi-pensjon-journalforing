@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import java.lang.RuntimeException
 
@@ -51,12 +52,15 @@ class JournalforingService(private val euxService: EuxService,
             logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
             val pinOgYtelse = hentPinOgYtelse(sedHendelse)
             var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
-            val person = hentPerson(fnr)
+
+            val person = hentBruker(fnr)
+
             // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
             if(person == null) fnr = null
 
             val personNavn = hentPersonNavn(person)
             var aktoerId: String? = null
+
             if(person != null) aktoerId = hentAktoerId(fnr)
 
             val fodselsDato = hentFodselsDato(sedHendelse)
@@ -65,14 +69,20 @@ class JournalforingService(private val euxService: EuxService,
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
+            val geografiskTilknytning = person?.geografiskTilknytning?.geografiskTilknytning
+            logger.debug("geografiskTilknytning: $geografiskTilknytning")
+
             val tildeltEnhet = hentTildeltEnhet(
                     sedHendelse.sedType,
                     sedHendelse.bucType!!,
                     pinOgYtelse,
                     sedHendelse.navBruker,
                     landkode,
-                    fodselsDato
+                    fodselsDato,
+                    geografiskTilknytning
             )
+
+            logger.debug("tildeltEnhet: $tildeltEnhet")
 
             val journalpostId = journalpostService.opprettJournalpost(
                     rinaSakId = sedHendelse.rinaSakId,
@@ -93,6 +103,8 @@ class JournalforingService(private val euxService: EuxService,
                     dokumenter= documents,
                     forsokFerdigstill= false
             )
+
+            logger.debug("JournalPostID: $journalpostId")
 
             oppgaveService.opprettOppgave(
                     sedType = sedHendelse.sedType,
@@ -177,19 +189,30 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
+    private fun hentBruker(navBruker: String?): Bruker? {
+        if (!isFnrValid(navBruker)) return null
+        return try {
+            personV3Service.hentPerson(navBruker!!)
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+
     private fun hentTildeltEnhet(
             sedType: SedType,
             bucType: BucType,
             pinOgYtelseType: HentPinOgYtelseTypeResponse?,
             navBruker: String?,
             landkode: String?,
-            fodselsDato: String
+            fodselsDato: String,
+            geografiskTilknytning: String?
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
             val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, ytelseType)
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, ytelseType)
         } else {
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato)
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning)
         }
     }
 }

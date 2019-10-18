@@ -1,0 +1,62 @@
+[
+  {
+    "id": 100026256,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ae0104",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "02",
+    "enhetId": 100000612,
+    "enhetNr": "4803",
+    "enhetNavn": "NAV Familie- og pensjonsytelser Oslo 2",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  },
+  {
+    "id": 100026256,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ae0104",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "04",
+    "enhetId": 100000612,
+    "enhetNr": "4803",
+    "enhetNavn": "NAV Familie- og pensjonsytelser Oslo 2",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  },
+  {
+    "id": 100026843,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "02",
+    "enhetId": 100000609,
+    "enhetNr": "4808",
+    "enhetNavn": "NAV Familie- og pensjonsytelser Porsgrunn",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  },
+  {
+    "id": 100026861,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "ANY",
+    "enhetId": 100000617,
+    "enhetNr": "0001",
+    "enhetNavn": "NAV Pensjon Utland",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  }
+]

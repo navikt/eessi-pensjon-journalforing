@@ -1,0 +1,62 @@
+[
+  {
+    "id": 100026265,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ae0104",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "11",
+    "enhetId": 100002195,
+    "enhetNr": "4862",
+    "enhetNavn": "NAV Familie- og pensjonsytelser utland Ålesund",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  },
+  {
+    "id": 100025561,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "11",
+    "enhetId": 100000589,
+    "enhetNr": "4817",
+    "enhetNavn": "NAV Familie- og pensjonsytelser Steinkjer",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-12-07"
+  },
+  {
+    "id": 100026852,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "11",
+    "enhetId": 100000610,
+    "enhetNr": "4815",
+    "enhetNavn": "NAV Familie- og pensjonsytelser Ålesund",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  },
+  {
+    "id": 100026861,
+    "diskresjonskode": "ANY",
+    "oppgavetype": "ANY",
+    "behandlingstype": "ANY",
+    "behandlingstema": "ANY",
+    "tema": "PEN",
+    "temagruppe": "ANY",
+    "geografiskOmraade": "ANY",
+    "enhetId": 100000617,
+    "enhetNr": "0001",
+    "enhetNavn": "NAV Pensjon Utland",
+    "skalTilLokalkontor": false,
+    "gyldigFra": "2017-09-30"
+  }
+]
