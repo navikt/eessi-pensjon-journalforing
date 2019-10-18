@@ -31,6 +31,7 @@ inline fun <reified T : Any> typeRefs(): TypeReference<T> = object : TypeReferen
 inline fun <reified T : Any> mapJsonToAny(json: String, objekt: TypeReference<T>, failonunknown: Boolean = false): T {
     return try {
         jacksonObjectMapper()
+                .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failonunknown)
                 .readValue(json, objekt)
     } catch (jpe: JsonParseException) {

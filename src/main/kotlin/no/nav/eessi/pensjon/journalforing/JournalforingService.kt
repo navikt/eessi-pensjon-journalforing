@@ -2,9 +2,6 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
-import no.nav.eessi.pensjon.services.personv3.hentLandkode
-import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
@@ -22,6 +19,8 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
+import no.nav.eessi.pensjon.services.personv3.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import java.lang.RuntimeException
@@ -34,7 +33,8 @@ class JournalforingService(private val euxService: EuxService,
                            private val personV3Service: PersonV3Service,
                            private val fagmodulService: FagmodulService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
-                           private val pdfService: PDFService)  {
+                           private val pdfService: PDFService,
+                           private val begrensInnsynService: BegrensInnsynService)  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -69,7 +69,10 @@ class JournalforingService(private val euxService: EuxService,
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-            val geografiskTilknytning = person?.geografiskTilknytning?.geografiskTilknytning
+            val geografiskTilknytning = hentGeografiskTilknytning(person)
+
+            val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
+
             logger.debug("geografiskTilknytning: $geografiskTilknytning")
 
             val tildeltEnhet = hentTildeltEnhet(
@@ -79,7 +82,8 @@ class JournalforingService(private val euxService: EuxService,
                     sedHendelse.navBruker,
                     landkode,
                     fodselsDato,
-                    geografiskTilknytning
+                    geografiskTilknytning,
+                    diskresjonskode
             )
 
             logger.debug("tildeltEnhet: $tildeltEnhet")
@@ -206,13 +210,14 @@ class JournalforingService(private val euxService: EuxService,
             navBruker: String?,
             landkode: String?,
             fodselsDato: String,
-            geografiskTilknytning: String?
+            geografiskTilknytning: String?,
+            diskresjonskode: Diskresjonskode?
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
             val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, ytelseType)
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode, ytelseType)
         } else {
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning)
+            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode)
         }
     }
 }

@@ -1,0 +1,89 @@
+{
+  "horisontal": {
+    "refusjonskrav": {
+      "kreditorinstitusjon": {
+        "betalingsreferanse": "fsdv sdfdsf",
+        "globalreferanse": "asdfsda huu",
+        "krav": {
+          "valuta": "EUR",
+          "avvist": {
+            "valuta": "DKK",
+            "totalbeloep": "3244"
+          },
+          "totalbeloep": "23424"
+        },
+        "navn": "afds fs ewffe",
+        "utbetaling": {
+          "totalbeloep": "332",
+          "valuta": "SEK"
+        },
+        "id": "dsaf fasfsa"
+      },
+      "refusjon": [
+        {
+          "avslag": {
+            "valuta": "NOK",
+            "beloep": "2333",
+            "grunn": {
+              "annet": "ojnwnjv jninij",
+              "type": "ingen_betaling_gjelder_for_denne_faktura"
+            },
+            "type": {
+              "id": "delvis_avslag"
+            }
+          },
+          "kreditorinstitusjon": {
+            "fakturanummer": "ffwfwe",
+            "beloep": "3442",
+            "valuta": "EUR"
+          },
+          "henvisningtil": "anmodning_om_administrativ_kontroll",
+          "utstedelsesdato": "2018-09-09"
+        },
+        {
+          "kreditorinstitusjon": {
+            "beloep": "34d42",
+            "fakturanummer": "ffwadsfwe",
+            "valuta": "SEK"
+          },
+          "avslag": {
+            "grunn": {
+              "type": "ikke_mottatt_svar_på_forespørsel",
+              "annet": "ojadsnwnjv jninij"
+            },
+            "beloep": "233",
+            "type": {
+              "id": "ikke_avslag"
+            },
+            "valuta": "DKK"
+          },
+          "henvisningtil": "anmodning_om_legeundersøkels",
+          "utstedelsesdato": "2018-10-09"
+        }
+      ],
+      "debitorinstitusjon": {
+        "globalreferanse": "jnji jninj"
+      },
+      "totaltantallfakturaer": "122"
+    }
+  },
+  "sedGVer": "4",
+  "nav": {
+    "bruker": {
+      "person": {
+        "fornavn": "csdca sacs",
+        "kjoenn": "M",
+        "pin": {
+          "kompetenteuland": "12345678910",
+          "oppholdsland": "12345678990"
+        },
+        "etternavn": "mcsdc omomom",
+        "etternavnvedfoedsel": "wqefwv wfeff",
+        "foedselsdato": "1955-09-12",
+        "fornavnvedfoedsel": "dfvkmomo iomoio"
+      }
+    }
+  },
+  "sedVer": "1",
+  "sed": "H021"
+}

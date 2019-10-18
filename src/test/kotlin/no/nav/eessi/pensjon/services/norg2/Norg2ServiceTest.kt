@@ -146,7 +146,7 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", null, "SPSF")
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", null, Diskresjonskode.SPSF)
 
         val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(3, result?.size)

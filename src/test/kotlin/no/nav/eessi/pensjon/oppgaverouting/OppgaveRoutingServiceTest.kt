@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,7 +78,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing for vanlige BUC'er`() {
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, MANGLER_LAND, alleAldre(), geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, MANGLER_LAND, alleAldre(),  geografiskTilknytning))
         assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_01, NORGE, alleAldre(), geografiskTilknytning))
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, UTLAND, alleAldre(), geografiskTilknytning))
 
@@ -128,37 +129,38 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_09, NORGE, alder17aar, geografiskTilknytning))
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_09, UTLAND, alder17aar, geografiskTilknytning))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, GP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, GP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, GP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, GP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, GP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, GP))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, UT))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, UT))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, UT))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, UT))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, UT))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, UT))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder59aar, geografiskTilknytning, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder59aar, geografiskTilknytning, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder59aar, geografiskTilknytning, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder59aar, geografiskTilknytning, null, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder59aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder59aar, geografiskTilknytning, null, AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder60aar, geografiskTilknytning, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder60aar, geografiskTilknytning, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder60aar, geografiskTilknytning, null, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder60aar, geografiskTilknytning, null,AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, null, AP))
+
     }
 
     @Test
@@ -193,6 +195,18 @@ class OppgaveRoutingServiceTest {
 
         val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01,null)
         val expected = NFP_UTLAND_AALESUND
+
+        assertEquals(expected,actual)
+    }
+
+    @Test
+    fun `hentNorg2Enhet for diskresjonkode`() {
+        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        doReturn(enhetlist)
+                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+
+        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01, Diskresjonskode.SPSF)
+        val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
     }
@@ -233,7 +247,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,"SPSF")
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01, Diskresjonskode.SPSF)
         val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
@@ -243,9 +257,18 @@ class OppgaveRoutingServiceTest {
                          land: String?,
                          fodselsDato: String,
                          geografiskTilknytning: String,
+                         diskresjonskode: Diskresjonskode? =null,
                          ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {
-        return routingService.route("01010101010", bucType, land, fodselsDato,geografiskTilknytning, ytelse)
-                         }
+        return routingService.route(
+                "01010101010",
+                bucType,
+                land,
+                fodselsDato,
+                geografiskTilknytning,
+                diskresjonskode,
+                ytelse
+            )
+        }
 
     @Test
     fun testEnumEnhets() {

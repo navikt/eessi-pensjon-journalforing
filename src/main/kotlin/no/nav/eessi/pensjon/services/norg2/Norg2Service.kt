@@ -8,7 +8,9 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -22,7 +24,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
     private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
 
-    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
+    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: Diskresjonskode?): String? {
 
         val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
         logger.debug("følgende request til Norg2 : $request")
@@ -32,7 +34,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         return enhet
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
+    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: Diskresjonskode?): Norg2ArbeidsfordelingRequest {
         val request: Norg2ArbeidsfordelingRequest =
 
                 when {
@@ -44,9 +46,9 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                             geografiskOmraade = "ANY",
                             behandlingstype = "ae0107"
                     )
-                    diskresjonKode != null -> Norg2ArbeidsfordelingRequest(
+                    diskresjonKode != null && diskresjonKode == Diskresjonskode.SPFO || diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
-                            diskresjonskode = "SPSF"
+                            diskresjonskode = diskresjonKode.name
                     )
                     else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
                 }
@@ -57,8 +59,11 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
                 return metricsHelper.measure("hentArbeidsfordeling") {
 
-                    val httpEntity = HttpEntity(request.toJson())
                     try {
+                        val headers = HttpHeaders()
+                        headers.contentType = MediaType.APPLICATION_JSON
+                        val httpEntity = HttpEntity(request.toJson(), headers)
+
                         val responseEntity = norg2OidcRestTemplate.exchange(
                                 "/api/v1/arbeidsfordeling",
                                 HttpMethod.POST,
