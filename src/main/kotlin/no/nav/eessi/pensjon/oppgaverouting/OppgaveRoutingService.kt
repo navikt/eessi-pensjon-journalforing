@@ -65,12 +65,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.debug("norg2tildeltEnhet: $norg2tildeltEnhet  tildeltEnhetFalback: $tildeltEnhetFalback")
 
-//        hvilke tildeltEnhet å benytte!?
-//        val tildeltEnhet = when {
-//            norg2tildeltEnhet != null -> norg2tildeltEnhet
-//            else -> tildeltEnhetFalback
-//        }
-
         val tildeltEnhet = norg2tildeltEnhet ?: tildeltEnhetFalback
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +

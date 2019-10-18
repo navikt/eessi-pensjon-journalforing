@@ -42,8 +42,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                     )
                     landkode != "NOR" && geografiskTilknytning == null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
                             geografiskOmraade = "ANY",
-                            behandlingstype = "ae0107",
-                            gyldigFra = "2018-11-02"
+                            behandlingstype = "ae0107"
                     )
                     diskresjonKode != null -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
@@ -56,26 +55,29 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
+                return metricsHelper.measure("hentArbeidsfordeling") {
 
-            val httpEntity = HttpEntity(request.toJson())
-            try {
-                val responseEntity = norg2OidcRestTemplate.exchange(
-                        "/api/v1/arbeidsfordeling",
-                        HttpMethod.POST,
-                        httpEntity,
-                        String::class.java)
+                    val httpEntity = HttpEntity(request.toJson())
+                    try {
+                        val responseEntity = norg2OidcRestTemplate.exchange(
+                                "/api/v1/arbeidsfordeling",
+                                HttpMethod.POST,
+                                httpEntity,
+                                String::class.java)
 
-                val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
-                logger.debug("fordelsingsEnheter: $fordelingEnheter")
-                return fordelingEnheter
+                        val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
+                        logger.debug("fordelsingsEnheter: $fordelingEnheter")
 
-            } catch (hcee: HttpClientErrorException) {
-                throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hcee.message}")
-            } catch (hsee: HttpServerErrorException) {
-                throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hsee.message}")
-            } catch (ex: Exception) {
-                throw RuntimeException("Ukjent feil ved henting av arbeidsfordelingsenheter fra Norg2 ${ex.message}")
-            }
+                        fordelingEnheter
+
+                    } catch (hcee: HttpClientErrorException) {
+                        throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hcee.message}")
+                    } catch (hsee: HttpServerErrorException) {
+                        throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hsee.message}")
+                    } catch (ex: Exception) {
+                        throw RuntimeException("Ukjent feil ved henting av arbeidsfordelingsenheter fra Norg2 ${ex.message}")
+                    }
+                }
     }
 
     fun finnKorrektArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>?): String? {
@@ -83,8 +85,6 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                 ?.asSequence()
                 ?.filter { it.diskresjonskode == request.diskresjonskode }
                 ?.filter { it.behandlingstype == request.behandlingstype }
-                ?.filter { it.gyldigFra == request.gyldigFra }
-                //?.filter { it.geografiskOmraade == request.geografiskOmraade }
                 ?.filter { it.tema == request.tema }
                 ?.map { it.enhetNr }
                 ?.lastOrNull()
