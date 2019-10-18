@@ -238,7 +238,7 @@ class JournalforingIntegrationTest {
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
                             .withBody("{$lineSeparator"+
-                                    "  \"tildeltEnhetsnr\" : \"4862\",$lineSeparator"  +
+                                    "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator"  +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
                                     "  \"journalpostId\" : \"429434378\",$lineSeparator" +
                                     "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
@@ -469,7 +469,7 @@ class JournalforingIntegrationTest {
                         .withMethod(HttpMethod.POST)
                         .withPath("/")
                         .withBody("{$lineSeparator" +
-                                "  \"tildeltEnhetsnr\" : \"4862\",$lineSeparator" +
+                                "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator" +
                                 "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
                                 "  \"journalpostId\" : \"429434378\",$lineSeparator" +
                                 "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
