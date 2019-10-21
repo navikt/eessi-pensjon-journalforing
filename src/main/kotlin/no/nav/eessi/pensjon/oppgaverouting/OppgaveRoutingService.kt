@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Krets.NFP
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingRequestException
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -27,17 +28,31 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
               landkode: String?,
               fodselsDato: String,
               geografiskTilknytning: String? = null,
+              diskresjonskode: Diskresjonskode? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
-        //TODO
-        var diskresjonKode: String? = null
 
-        //kun P_BUC_01
-        val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonKode)
+        //kun P_BUC_01 -- kall til norg2 arbeidsfordeling
+        val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode)
+        //fallback samt nav-enhet for alle buc en p_buc_01
+        val tildeltEnhetFalback = fallbackEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType)
 
-        val tildeltEnhetFalback =
-                when {
+        logger.debug("norg2tildeltEnhet: $norg2tildeltEnhet  tildeltEnhetFalback: $tildeltEnhetFalback")
+
+        val tildeltEnhet = norg2tildeltEnhet ?: tildeltEnhetFalback
+
+        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
+                "for Buc: $bucType, " +
+                "Landkode: $landkode, " +
+                "Fødselsdato: $fodselsDato, " +
+                "Ytelsetype: $ytelseType")
+
+        return tildeltEnhet
+    }
+
+    private fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?): Enhet {
+        return when {
                     navBruker == null -> ID_OG_FORDELING
 
                     NORGE == bosatt(landkode) ->
@@ -62,28 +77,16 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             else -> PENSJON_UTLAND // Ukjent buc-type
                         }
                 }
-
-        logger.debug("norg2tildeltEnhet: $norg2tildeltEnhet  tildeltEnhetFalback: $tildeltEnhetFalback")
-
-        val tildeltEnhet = norg2tildeltEnhet ?: tildeltEnhetFalback
-
-        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
-                "for Buc: $bucType, " +
-                "Landkode: $landkode, " +
-                "Fødselsdato: $fodselsDato, " +
-                "Ytelsetype: $ytelseType")
-
-        return tildeltEnhet
     }
 
-    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonKode: String?): Enhet? {
-        if (navBruker == null && geografiskTilknytning == null) return null
+    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonKode: Diskresjonskode?): Enhet? {
+        if (navBruker == null) return null
 
         return when(bucType) {
             P_BUC_01 -> {
                 try {
                     val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonKode)
-                    OppgaveRoutingModel.Enhet.getEnhet(enhetVerdi!!)
+                    enhetVerdi?.let { Enhet.getEnhet(it) }
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {
                     logger.error("Norg2 request feil ${rqe.message}")
                     null

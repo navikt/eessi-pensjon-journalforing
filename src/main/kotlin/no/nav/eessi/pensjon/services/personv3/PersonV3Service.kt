@@ -22,6 +22,7 @@ fun hentLandkode(person: Person?) =
 fun hentPersonNavn(person: Person?) =
         person?.personnavn?.sammensattNavn
 
+fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.

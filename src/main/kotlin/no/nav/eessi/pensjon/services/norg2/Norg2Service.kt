@@ -8,7 +8,9 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
@@ -22,7 +24,13 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
     private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
 
-    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
+    //https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
+    protected enum class BehandlingsTyper(val kode : String) {
+        BOSATT_NORGE("ae0104"),
+        BOSATT_UTLAND("ae0107")
+    }
+
+    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: Diskresjonskode?): String? {
 
         val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
         logger.debug("følgende request til Norg2 : $request")
@@ -32,21 +40,20 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         return enhet
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
+    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: Diskresjonskode?): Norg2ArbeidsfordelingRequest {
         val request: Norg2ArbeidsfordelingRequest =
-
                 when {
                     landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
                             geografiskOmraade = geografiskTilknytning,
-                            behandlingstype = "ae0104"
+                            behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
                     )
-                    landkode != "NOR" && geografiskTilknytning == null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
+                    landkode != "NOR" && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
                             geografiskOmraade = "ANY",
-                            behandlingstype = "ae0107"
+                            behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
                     )
-                    diskresjonKode != null -> Norg2ArbeidsfordelingRequest(
+                    diskresjonKode != null && diskresjonKode == Diskresjonskode.SPFO || diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
-                            diskresjonskode = "SPSF"
+                            diskresjonskode = diskresjonKode.name
                     )
                     else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
                 }
@@ -57,8 +64,11 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
                 return metricsHelper.measure("hentArbeidsfordeling") {
 
-                    val httpEntity = HttpEntity(request.toJson())
                     try {
+                        val headers = HttpHeaders()
+                        headers.contentType = MediaType.APPLICATION_JSON
+                        val httpEntity = HttpEntity(request.toJson(), headers)
+
                         val responseEntity = norg2OidcRestTemplate.exchange(
                                 "/api/v1/arbeidsfordeling",
                                 HttpMethod.POST,
@@ -91,6 +101,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     }
 }
 
+
 class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)
 
 data class Norg2ArbeidsfordelingRequest(
@@ -101,65 +112,21 @@ data class Norg2ArbeidsfordelingRequest(
     val geografiskOmraade: String = "ANY",
     val skalTilLokalkontor: Boolean = false,
     val oppgavetype: String = "ANY",
-    val gyldigFra: String = "2017-09-30",
     val temagruppe: String = "ANY"
 )
 
 data class Norg2ArbeidsfordelingItem(
-        val oppgavetype: String? = null,
-        val enhetNr: String? = null,
-        val behandlingstema: String? = null,
-        val temagruppe: String? = null,
-        val skalTilLokalkontor: Boolean? = null,
-        val behandlingstype: String? = null,
-        val geografiskOmraade: String? = null,
-        val tema: String? = null,
-        val enhetNavn: String? = null,
-        val diskresjonskode: String? = null,
-        val gyldigFra: String? = null,
-        val enhetId: Int? = null,
-        val id: Int? = null
-)
-
-data class Norg2NavkontorResponse(
-        val enhetNr: String? = null,
-        val sosialeTjenester: String? = null,
-        val oppgavebehandler: Boolean? = null,
-        val orgNrTilKommunaltNavKontor: String? = null,
-        val underAvviklingDato: Any? = null,
-        val type: String? = null,
-        val versjon: Int? = null,
-        val aktiveringsdato: String? = null,
-        val underEtableringDato: String? = null,
-        val navn: String? = null,
-        val enhetId: Int? = null,
-        val nedleggelsesdato: Any? = null,
-        val organisasjonsnummer: String? = null,
-        val kanalstrategi: String? = null,
-        val antallRessurser: Int? = null,
-        val status: String? = null,
-        val orgNivaa: String? = null
-)
-
-data class Norg2OrganiseringItem(
-        val orgType: String? = null,
-        val organiserer: Organiserer? = null,
-        val fra: String? = null,
-        val til: Any? = null,
-        val id: Int? = null,
-        val organisertUnder: OrganisertUnder? = null
-)
-
-data class Organiserer(
-        val nr: String? = null,
-        val navn: String? = null,
-        val gyldigFra: Any? = null,
-        val id: Int? = null
-)
-
-data class OrganisertUnder(
-        val nr: String? = null,
-        val navn: String? = null,
-        val gyldigFra: Any? = null,
-        val id: Int? = null
+    val oppgavetype: String? = null,
+    val enhetNr: String? = null,
+    val behandlingstema: String? = null,
+    val temagruppe: String? = null,
+    val skalTilLokalkontor: Boolean? = null,
+    val behandlingstype: String? = null,
+    val geografiskOmraade: String? = null,
+    val tema: String? = null,
+    val enhetNavn: String? = null,
+    val diskresjonskode: String? = null,
+    val gyldigFra: String? = null,
+    val enhetId: Int? = null,
+    val id: Int? = null
 )
