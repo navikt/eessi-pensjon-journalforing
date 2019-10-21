@@ -158,7 +158,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `gitt en sendt sed som ikke tilhører pensjon så blir den ignorert`() {
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.SENDT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.SENDT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId= anyOrNull(),
@@ -189,7 +189,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.SENDT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
@@ -227,7 +227,7 @@ class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed P2100`(){
 
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.SENDT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945602"))
         verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
@@ -279,7 +279,7 @@ class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed P2200`(){
 
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.SENDT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.SENDT )
         verify(personV3Service, times(0)).hentPerson(any())
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
@@ -319,7 +319,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.SENDT )
+         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
@@ -372,7 +372,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `gitt en mottatt sed som ikke tilhører pensjon så blir den ignorert`() {
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01.json"))), HendelseType.MOTTATT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.MOTTATT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.MOTTATT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -402,7 +402,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))), HendelseType.MOTTATT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
@@ -441,7 +441,7 @@ class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2100`(){
 
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02.json"))), HendelseType.MOTTATT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json"))), HendelseType.MOTTATT )
 
         verify(personV3Service).hentPerson(eq("12378945602"))
         verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
@@ -491,7 +491,7 @@ class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2200`(){
 
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03.json"))), HendelseType.MOTTATT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
         verify(personV3Service, times(0)).hentPerson(any())
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
@@ -530,7 +530,7 @@ class JournalforingServiceTest {
     @Test
     fun `Mottat Sed i P_BUC_10`(){
 
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10.json"))), HendelseType.MOTTATT )
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12378945601"))
         verify(euxService).hentFodselsDatoFraSed(eq("147729"), eq("b12e06dda2c7474b9998c7139c841646"))
 
