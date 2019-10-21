@@ -36,13 +36,13 @@ class SedListenerTest {
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))),cr,  acknowledgment)
+        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))),cr,  acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så så ack melding`() {
-        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01.json"))),cr, acknowledgment)
+        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))),cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
