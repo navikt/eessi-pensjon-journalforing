@@ -53,7 +53,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                     )
                     diskresjonKode != null && diskresjonKode == Diskresjonskode.SPFO || diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
-                            diskresjonskode = diskresjonKode.name
+                            diskresjonskode = Diskresjonskode.SPSF.name
                     )
                     else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
                 }
