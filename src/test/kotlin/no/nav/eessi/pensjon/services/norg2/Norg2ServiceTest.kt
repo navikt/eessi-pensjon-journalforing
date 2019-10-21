@@ -38,8 +38,7 @@ class Norg2ServiceTest {
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
-                behandlingstype = "ae0107",
-                gyldigFra = "2018-11-02"
+                behandlingstype = "ae0107"
         )
 
         val expected = "0001"
@@ -54,8 +53,7 @@ class Norg2ServiceTest {
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
-                behandlingstype = "ae0107",
-                gyldigFra = "2018-11-02"
+                behandlingstype = "ae0107"
         )
 
         val expected = null
@@ -71,7 +69,6 @@ class Norg2ServiceTest {
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
                 behandlingstype = "ae0104"
-                //gyldigFra = "2018-11-02"
         )
 
         val expected = "4803"

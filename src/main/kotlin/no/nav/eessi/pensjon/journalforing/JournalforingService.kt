@@ -69,8 +69,9 @@ class JournalforingService(private val euxService: EuxService,
             val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
             val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
+            //tps bruker gt
             val geografiskTilknytning = hentGeografiskTilknytning(person)
-
+            //tps bruker diskresjon
             val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
 
             logger.debug("geografiskTilknytning: $geografiskTilknytning")

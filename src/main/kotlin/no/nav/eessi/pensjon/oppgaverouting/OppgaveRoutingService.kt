@@ -32,8 +32,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
-        //TODO
-        var diskresjonKode: String? = null
 
         //kun P_BUC_01 -- kall til norg2 arbeidsfordeling
         val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode)
@@ -88,9 +86,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             P_BUC_01 -> {
                 try {
                     val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonKode)
-
                     enhetVerdi?.let { Enhet.getEnhet(it) }
-
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {
                     logger.error("Norg2 request feil ${rqe.message}")
                     null
