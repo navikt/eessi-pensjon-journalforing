@@ -5,7 +5,6 @@ import io.mockk.*
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
-import no.nav.eessi.pensjon.services.personv3.PersonMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -246,8 +245,8 @@ class JournalforingIntegrationTest {
                                     "  \"tema\" : \"PEN\",$lineSeparator" +
                                     "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                     "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -267,8 +266,8 @@ class JournalforingIntegrationTest {
                                     "  \"tema\" : \"PEN\",$lineSeparator" +
                                     "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                     "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -286,8 +285,8 @@ class JournalforingIntegrationTest {
                                     "  \"tema\" : \"PEN\",$lineSeparator" +
                                     "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                     "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -306,8 +305,8 @@ class JournalforingIntegrationTest {
                                     "  \"tema\" : \"PEN\",$lineSeparator" +
                                     "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                     "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -326,8 +325,8 @@ class JournalforingIntegrationTest {
                                     "  \"tema\" : \"PEN\",$lineSeparator" +
                                     "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                     "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," +"$lineSeparator" +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" +"$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                     "}"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -416,25 +415,22 @@ class JournalforingIntegrationTest {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
-                VerificationTimes.exactly(1)
+                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"),
+                VerificationTimes.once()
         )
 
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
-                VerificationTimes.exactly(1)
+                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"),
+                VerificationTimes.once()
         )
 
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))),
-                VerificationTimes.exactly(1)
+                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
+                VerificationTimes.once()
         )
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
@@ -449,18 +445,8 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/api/v1/arbeidsfordeling")
-//                        .withBody("{$lineSeparator" +
-//                                " \"tema\" : \"PEN\", $lineSeparator" +
-//                                " \"diskresjonskode\" : \"ANY\",$lineSeparator\" +" +
-//                                " \"behandlingstema\" : \"ANY\",$lineSeparator\" +" +
-//                                " \"behandlingstype\" : \"ae0104\",$lineSeparator\" + " +
-//                                " \"geografiskOmraade\" : \"026123\",$lineSeparator\" +" +
-//                                " \"skalTilLokalkontor\" : false,$lineSeparator\" +" +
-//                                " \"oppgavetype\" : \"ANY\",$lineSeparator\" +" +
-//                                " \"gyldigFra\" : \"2017-09-30\",$lineSeparator\" +" +
-//                                " \"temagruppe\" : \"ANY\"$lineSeparator\"}"),
                         .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))),
-                VerificationTimes.exactly(1)
+                VerificationTimes.once()
         )
 
         // Verifiserer at det har blitt forsøkt å opprette PEN oppgave med aktørid
@@ -477,8 +463,8 @@ class JournalforingIntegrationTest {
                                 "  \"tema\" : \"PEN\",$lineSeparator" +
                                 "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                 "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                 "}"),
                 VerificationTimes.exactly(1)
         )
@@ -496,8 +482,8 @@ class JournalforingIntegrationTest {
                                 "  \"tema\" : \"PEN\",$lineSeparator" +
                                 "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                 "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                 "}"),
                 VerificationTimes.exactly(1)
         )
@@ -515,8 +501,8 @@ class JournalforingIntegrationTest {
                                 "  \"tema\" : \"PEN\",$lineSeparator" +
                                 "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
                                 "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + "$lineSeparator" +
-                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + "$lineSeparator" +
+                                "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
                                 "}"),
                 VerificationTimes.exactly(1)
         )
