@@ -121,7 +121,7 @@ class JournalforingService(private val euxService: EuxService,
                     filnavn = null,
                     hendelseType = hendelseType)
 
-            if (uSupporterteVedlegg != null) {
+            if (uSupporterteVedlegg.isNotEmpty()) {
                 oppgaveService.opprettOppgave(
                         sedType = sedHendelse.sedType,
                         journalpostId = null,
@@ -129,7 +129,7 @@ class JournalforingService(private val euxService: EuxService,
                         aktoerId = aktoerId,
                         oppgaveType = "BEHANDLE_SED",
                         rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = uSupporterteVedlegg,
+                        filnavn = usupporterteFilnavn(uSupporterteVedlegg),
                         hendelseType = hendelseType)
             }
 
@@ -143,6 +143,12 @@ class JournalforingService(private val euxService: EuxService,
             logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
             throw ex
         }
+    }
+
+    private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {
+        var filnavn = ""
+        uSupporterteVedlegg.forEach { vedlegg -> filnavn += vedlegg.filnavn + " " }
+        return filnavn
     }
 
     private fun settFnr(fnrFraSed: String?, fnrFraFagmodulen: String?): String? {

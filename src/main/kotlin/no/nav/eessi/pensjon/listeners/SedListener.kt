@@ -21,7 +21,7 @@ class SedListener(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val latch = CountDownLatch(4)
+    private val latch = CountDownLatch(5)
 
     fun getLatch(): CountDownLatch {
         return latch

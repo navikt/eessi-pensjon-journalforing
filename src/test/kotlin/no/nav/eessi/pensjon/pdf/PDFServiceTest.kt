@@ -1,16 +1,16 @@
 package no.nav.eessi.pensjon.pdf
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import no.nav.eessi.pensjon.models.SedType
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 
 
@@ -24,7 +24,7 @@ class PDFServiceTest {
         val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"}]", supported)
-        assertEquals(null, unsupported)
+        assertEquals(0, unsupported.size)
     }
 
     @Test
@@ -37,7 +37,7 @@ class PDFServiceTest {
         val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
-        assertEquals(null, unsupported)
+        assertEquals(0, unsupported.size)
 
         unmockkAll()
     }
@@ -62,7 +62,7 @@ class PDFServiceTest {
     fun `Gitt en json dokument med manglende mimeType så blir den satt på listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeMimeType.json")))
         val (_, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
-        assertEquals("[\"ManglendeMimeType.png\"]", uSpporterteVedlegg)
+        assertEquals(1, uSpporterteVedlegg.size)
     }
 
     @Test
@@ -76,16 +76,17 @@ class PDFServiceTest {
     @Test
     fun `Gitt en json dokument med ugyldig innhold så blir den satt på listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigInnhold.json")))
-        val (test, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
-        assertEquals("[\"UgyldigInnhold.jpg\"]", uSpporterteVedlegg)
+        val (test, uSupporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+        assertEquals(1, uSupporterteVedlegg.size)
+        assertEquals("UgyldigInnhold.jpg", uSupporterteVedlegg[0].filnavn)
     }
 
     @Test
-    fun `Gitt en json dokument med ugyldig MimeType så kastes InvalidFormatException`() {
+    fun `Gitt en json dokument med ugyldig MimeType så returneres det ugyldige dokumentet i usupporterteVedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json")))
-        assertThrows<InvalidFormatException> {
-            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
-        }
+            val docs = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+            assertNotNull(docs.second)
+            assertNull(docs.second[0].mimeType)
     }
 
     @Test

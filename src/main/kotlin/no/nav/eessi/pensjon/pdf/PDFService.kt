@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.pdf
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 
+
+val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
 /**
  * Konverterer vedlegg fra bildeformat til pdf
  *
@@ -18,9 +22,8 @@ import java.lang.RuntimeException
 @Service
 class PDFService(@Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
-    private val mapper: ObjectMapper = jacksonObjectMapper()
 
-    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, String?>{
+    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, List<EuxDokument>>{
         return metricsHelper.measure("pdfConverter") {
             try {
                 val documents = mapper.readValue(json, SedDokumenter::class.java)
@@ -32,9 +35,9 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                         .partition { it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA }
 
                 val unnsupportedDocumentsJson = if (unsupportedDocuments.isNotEmpty()) {
-                    mapper.writeValueAsString(unsupportedDocuments.map { it.filnavn })
+                    unsupportedDocuments
                 } else {
-                    null
+                    emptyList()
                 }
 
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
