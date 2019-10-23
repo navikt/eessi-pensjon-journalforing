@@ -98,15 +98,15 @@ class JournalforingServiceTest {
                 .hentSedDokumenter(anyString(), anyString())
 
         //PDF -
-        doReturn(Pair<String, String?>("P2000 Supported Documents", null))
+        doReturn(Pair<String, List<EuxDokument>>("P2000 Supported Documents", emptyList()))
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2000))
 
-        doReturn(Pair<String, String?>("P2100 Supported Documents", "P2100 UnSupported Documents"))
+        doReturn(Pair("P2100 Supported Documents", listOf(EuxDokument("usupportertVedlegg.xml", null, "bleh"))))
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2100))
 
-        doReturn(Pair<String, String?>("P2200 Supported Documents", null))
+        doReturn(Pair<String, List<EuxDokument>>("P2200 Supported Documents", emptyList()))
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
@@ -280,7 +280,7 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq("P2100 UnSupported Documents"),
+                eq("usupportertVedlegg.xml "),
                 eq(HendelseType.SENDT)
         )
     }
@@ -494,7 +494,7 @@ class JournalforingServiceTest {
                 eq(null),
                 eq("BEHANDLE_SED"),
                 eq("147730"),
-                eq("P2100 UnSupported Documents"),
+                eq("usupportertVedlegg.xml "),
                 eq(HendelseType.MOTTATT)
         )
     }

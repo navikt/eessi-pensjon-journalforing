@@ -73,7 +73,7 @@ class JournalforingIntegrationTest {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
+        sedListener.getLatch().await(95000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()
@@ -84,16 +84,13 @@ class JournalforingIntegrationTest {
 
     private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
         // Sender 1 Foreldre SED til Kafka
-        println("Produserer FB_BUC_01 melding")
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
         // Sender 3 Pensjon SED til Kafka
-        println("Produserer P_BUC_01 melding")
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
-        println("Produserer P_BUC_03 melding")
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
-        println("Produserer P_BUC_05 melding")
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
     }
 
     private fun shutdown(container: KafkaMessageListenerContainer<String, String>) {
@@ -182,6 +179,16 @@ class JournalforingIntegrationTest {
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
+                            .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json"))))
+                    )
+
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
                             .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -201,6 +208,15 @@ class JournalforingIntegrationTest {
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
+                    )
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -279,25 +295,6 @@ class JournalforingIntegrationTest {
                             .withMethod(HttpMethod.POST)
                             .withPath("/")
                             .withBody("{$lineSeparator" +
-                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
-                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
-                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147729\",$lineSeparator" +
-                                    "  \"tema\" : \"PEN\",$lineSeparator" +
-                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
-                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
-                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
-                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
-                                    "}"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
-                    )
-            mockServer.`when`(
-                    HttpRequest.request()
-                            .withMethod(HttpMethod.POST)
-                            .withPath("/")
-                            .withBody("{$lineSeparator" +
                                     "  \"tildeltEnhetsnr\" : \"4303\",$lineSeparator" +
                                     "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
                                     "  \"journalpostId\" : \"429434378\",$lineSeparator" +
@@ -333,6 +330,49 @@ class JournalforingIntegrationTest {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
                     )
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody("{$lineSeparator" +
+                                    "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"journalpostId\" : \"429434378\",$lineSeparator" +
+                                    "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Utgående P2000 - Krav om alderspensjon / Rina saksnr: 147666\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"JFR\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
+                                    "}"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/")
+                            .withBody("{$lineSeparator" +
+                                    "  \"tildeltEnhetsnr\" : \"4803\",$lineSeparator" +
+                                    "  \"opprettetAvEnhetsnr\" : \"9999\",$lineSeparator" +
+                                    "  \"aktoerId\" : \"1000101917358\",$lineSeparator" +
+                                    "  \"beskrivelse\" : \"Mottatt vedlegg: etWordDokument.doxc  tilhørende RINA sakId: 147666 er i et format som ikke kan journalføres. Be avsenderland/institusjon sende SED med vedlegg på nytt, i støttet filformat ( pdf, jpeg, jpg, png eller tiff )\",$lineSeparator" +
+                                    "  \"tema\" : \"PEN\",$lineSeparator" +
+                                    "  \"oppgavetype\" : \"BEH_SED\",$lineSeparator" +
+                                    "  \"prioritet\" : \"NORM\",$lineSeparator" +
+                                    "  \"fristFerdigstillelse\" : " + "\"" + LocalDate.now().plusDays(1).toString() + "\"," + lineSeparator +
+                                    "  \"aktivDato\" : " + "\"" + LocalDate.now().toString() + "\"" + lineSeparator +
+                                    "}"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/oppgave/opprettOppgaveResponse.json"))))
+                    )
+
             // Mocker aktørregisteret
             mockServer.`when`(
                     HttpRequest.request()
@@ -437,7 +477,7 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(3)
+                VerificationTimes.exactly(4)
         )
 
         // Verifiserer at det har blitt forsøkt å hente enhet fra Norg2
@@ -446,7 +486,7 @@ class JournalforingIntegrationTest {
                         .withMethod(HttpMethod.POST)
                         .withPath("/api/v1/arbeidsfordeling")
                         .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))),
-                VerificationTimes.once()
+                VerificationTimes.exactly(2)
         )
 
         // Verifiserer at det har blitt forsøkt å opprette PEN oppgave med aktørid
@@ -508,7 +548,7 @@ class JournalforingIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 1) { personV3Service.hentPerson(any()) }
+        verify(exactly = 2) { personV3Service.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
