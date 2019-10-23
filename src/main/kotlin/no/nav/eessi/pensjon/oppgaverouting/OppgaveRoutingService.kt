@@ -51,7 +51,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
+    private fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
         return when {
                     navBruker == null -> ID_OG_FORDELING
 
