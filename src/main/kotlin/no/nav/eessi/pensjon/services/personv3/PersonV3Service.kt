@@ -43,12 +43,12 @@ class PersonV3Service(
                 logger.info("Kaller PersonV3.hentPerson service")
                 val resp = kallPersonV3(fnr)
                 resp.person as Bruker
-            } catch (personIkkefunnet: HentPersonPersonIkkeFunnet) {
-                logger.error("Kaller PersonV3.hentPerson service Feilet")
-                throw PersonV3IkkeFunnetException(personIkkefunnet.message)
-            } catch (personSikkerhetsbegrensning: HentPersonSikkerhetsbegrensning) {
-                logger.error("Kaller PersonV3.hentPerson service Feilet")
-                throw PersonV3SikkerhetsbegrensningException(personSikkerhetsbegrensning.message)
+            } catch (pif: HentPersonPersonIkkeFunnet) {
+                logger.error("Personen finnes ikke", pif)
+                throw PersonV3IkkeFunnetException(pif.message)
+            } catch (psb: HentPersonSikkerhetsbegrensning) {
+                logger.error("Sikkerhetsbegrensning hindret henting av person", psb)
+                throw PersonV3SikkerhetsbegrensningException(psb.message)
             }
         }
     }
