@@ -6,12 +6,10 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Krets.NAY
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Krets.NFP
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingRequestException
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -56,7 +54,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
                             P_BUC_03 -> UFORE_UTLANDSTILSNITT
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
-                                if (krets(fodselsDato) == NAY) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                                if (isBetween18and60(fodselsDato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             P_BUC_10 ->
                                 if (ytelseType == UT) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             else -> NFP_UTLAND_AALESUND // Ukjent buc-type
@@ -67,7 +65,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
                             P_BUC_03 -> UFORE_UTLAND
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
-                                if (krets(fodselsDato) == NAY) UFORE_UTLAND else PENSJON_UTLAND
+                                if (isBetween18and60(fodselsDato)) UFORE_UTLAND else PENSJON_UTLAND
                             P_BUC_10 ->
                                 if (ytelseType == UT) UFORE_UTLAND else PENSJON_UTLAND
                             else -> PENSJON_UTLAND // Ukjent buc-type
@@ -103,12 +101,8 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 else -> UTLAND
             }
 
-    private fun between18and60(fodselsDato: LocalDate): Boolean {
+    private fun isBetween18and60(fodselsDato: LocalDate): Boolean {
         val alder = Period.between(fodselsDato, LocalDate.now())
         return (alder.years >= 18) && (alder.years < 60)
-    }
-
-    private fun krets(fodselsDato: LocalDate): OppgaveRoutingModel.Krets {
-        return if(between18and60(fodselsDato)) NAY else NFP
     }
 }
