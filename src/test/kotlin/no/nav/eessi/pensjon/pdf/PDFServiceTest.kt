@@ -19,7 +19,7 @@ class PDFServiceTest {
     val pdfService = PDFService()
 
     @Test
-    fun `Gitt en json dokument uten vedlegg så konverter til json dokument med pdf innhold`() {
+    fun `Gitt en json dokument uten vedlegg saa konverter til json dokument med pdf innhold`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json")))
         val (supported, unsupported) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
@@ -28,7 +28,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med vedlegg så konverter til json dokument med pdf innhold`() {
+    fun `Gitt en json dokument med vedlegg saa konverter til json dokument med pdf innhold`() {
 
         mockkObject(ImageConverter)
         every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
@@ -43,7 +43,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med manglende filnavn så kastes MissingKotlinParameterException`() {
+    fun `Gitt en json dokument med manglende filnavn saa kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeFilnavn.json")))
         assertThrows<MissingKotlinParameterException> {
             pdfService.parseJsonDocuments(fileContent, SedType.P2000)
@@ -51,7 +51,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med manglende innhold så kastes MissingKotlinParameterException`() {
+    fun `Gitt en json dokument med manglende innhold saa kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeInnhold.json")))
         assertThrows<MissingKotlinParameterException> {
             pdfService.parseJsonDocuments(fileContent, SedType.P2000)
@@ -59,14 +59,14 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med manglende mimeType så blir den satt på listen over uSupporterte vedlegg`() {
+    fun `Gitt en json dokument med manglende mimeType saa blir den satt paa listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeMimeType.json")))
         val (_, uSpporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         assertEquals(1, uSpporterteVedlegg.size)
     }
 
     @Test
-    fun `Gitt en json dokument med ugyldig filnavn så kastes MismatchedInputException`() {
+    fun `Gitt en json dokument med ugyldig filnavn saa kastes MismatchedInputException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigFilnavn.json")))
         assertThrows<MismatchedInputException> {
             pdfService.parseJsonDocuments(fileContent, SedType.P2000)
@@ -74,15 +74,15 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med ugyldig innhold så blir den satt på listen over uSupporterte vedlegg`() {
+    fun `Gitt en json dokument med ugyldig innhold saa blir den satt paa listen over uSupporterte vedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigInnhold.json")))
-        val (test, uSupporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+        val (_, uSupporterteVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         assertEquals(1, uSupporterteVedlegg.size)
         assertEquals("UgyldigInnhold.jpg", uSupporterteVedlegg[0].filnavn)
     }
 
     @Test
-    fun `Gitt en json dokument med ugyldig MimeType så returneres det ugyldige dokumentet i usupporterteVedlegg`() {
+    fun `Gitt en json dokument med ugyldig MimeType saa returneres det ugyldige dokumentet i usupporterteVedlegg`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json")))
             val docs = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
             assertNotNull(docs.second)
@@ -90,7 +90,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med ugyldige nøkkler så kastes MissingKotlinParameterException`() {
+    fun `Gitt en json dokument med ugyldige noekkler saa kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigNokkler.json")))
         assertThrows<MissingKotlinParameterException> {
             pdfService.parseJsonDocuments(fileContent, SedType.P2000)

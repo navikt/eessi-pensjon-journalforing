@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.services.norg2
 
 
-enum class Diskresjonskode(term: String) {
+enum class Diskresjonskode(val term: String) {
     KLIE("Klientadresse"),
     MILI("Militær"),
     PEND("Pendler"),
