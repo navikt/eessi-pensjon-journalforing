@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -151,15 +152,15 @@ class JournalforingServiceTest {
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(),  anyString(), eq(null), any())
+                .route(anyString(), eq(BucType.P_BUC_10), anyString(), any(),  anyString(), eq(null), any())
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), anyString(),  anyString(), eq(null), eq(null))
+                .route(anyString(), eq(BucType.P_BUC_10), anyString(), any(),  anyString(), eq(null), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_05), anyString(), anyString(),  anyString(), eq(Diskresjonskode.SPSF),  eq(null))
+                .route(anyString(), eq(BucType.P_BUC_05), anyString(), any(),  anyString(), eq(Diskresjonskode.SPSF),  eq(null))
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
@@ -168,7 +169,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `gitt en sendt sed som ikke tilhører pensjon så blir den ignorert`() {
+    fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.SENDT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.SENDT))
         verify(journalpostService, times(0)).opprettJournalpost(
@@ -382,7 +383,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `gitt en mottatt sed som ikke tilhører pensjon så blir den ignorert`() {
+    fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.MOTTATT )
         verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.MOTTATT))
         verify(journalpostService, times(0)).opprettJournalpost(
@@ -593,17 +594,17 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt en tom fnr når fnr valideres så svar invalid`(){
+    fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
         assertFalse(isFnrValid(null))
     }
 
     @Test
-    fun `Gitt en ugyldig lengde fnr når fnr valideres så svar invalid`(){
+    fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
         assertFalse(isFnrValid("1234"))
     }
 
     @Test
-    fun `Gitt en gyldig lengde fnr når fnr valideres så svar valid`(){
+    fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
         assertTrue(isFnrValid("12345678910"))
     }
 }

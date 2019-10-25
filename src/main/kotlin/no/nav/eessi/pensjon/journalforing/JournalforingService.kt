@@ -3,27 +3,28 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
+import no.nav.eessi.pensjon.services.fagmodul.Krav
+import no.nav.eessi.pensjon.services.journalpost.JournalpostService
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.oppgave.OppgaveService
+import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.services.personv3.hentGeografiskTilknytning
+import no.nav.eessi.pensjon.services.personv3.hentLandkode
+import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.pdf.*
-import no.nav.eessi.pensjon.services.fagmodul.Krav
-import no.nav.eessi.pensjon.services.journalpost.*
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
-import no.nav.eessi.pensjon.services.personv3.*
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
-import java.lang.RuntimeException
 
 @Service
 class JournalforingService(private val euxService: EuxService,
@@ -97,7 +98,7 @@ class JournalforingService(private val euxService: EuxService,
                     avsenderNavn= sedHendelse.avsenderNavn,
                     mottakerId= sedHendelse.mottakerId,
                     mottakerNavn= sedHendelse.mottakerNavn,
-                    bucType= sedHendelse.bucType?.name ?: throw RuntimeException("Buctype er null: $hendelseJson"),
+                    bucType= sedHendelse.bucType.name,
                     sedType= sedHendelse.sedType.name,
                     sedHendelseType= hendelseType.name,
                     eksternReferanseId= null,// TODO what value to put here?,
@@ -169,15 +170,13 @@ class JournalforingService(private val euxService: EuxService,
      * Henter fødselsdatoen fra den gjeldende SEDen som skal journalføres, dersom dette feltet er tomt
      * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
      */
-    private fun hentFodselsDato(sedHendelse: SedHendelseModel): String {
+    private fun hentFodselsDato(sedHendelse: SedHendelseModel): LocalDate {
         var fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
         if(fodselsDatoISO.isNullOrEmpty()) {
             fodselsDatoISO = fagmodulService.hentFodselsdatoFraBuc(sedHendelse.rinaSakId, sedHendelse.bucType!!.name)
         }
-
-        val fodselsdato = LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-        return fodselsdato.format(DateTimeFormatter.ofPattern("ddMMyy"))
+        return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
@@ -191,15 +190,6 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    private fun hentPerson(navBruker: String?): Person? {
-        if (!isFnrValid(navBruker)) return null
-        return try {
-            personV3Service.hentPerson(navBruker!!)
-        } catch (ex: Exception) {
-            null
-        }
-    }
-
     private fun hentBruker(navBruker: String?): Bruker? {
         if (!isFnrValid(navBruker)) return null
         return try {
@@ -209,14 +199,13 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-
     private fun hentTildeltEnhet(
             sedType: SedType,
             bucType: BucType,
             pinOgYtelseType: HentPinOgYtelseTypeResponse?,
             navBruker: String?,
             landkode: String?,
-            fodselsDato: String,
+            fodselsDato: LocalDate,
             geografiskTilknytning: String?,
             diskresjonskode: Diskresjonskode?
     ): OppgaveRoutingModel.Enhet {
