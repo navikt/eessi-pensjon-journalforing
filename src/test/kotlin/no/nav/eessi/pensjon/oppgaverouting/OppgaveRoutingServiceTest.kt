@@ -10,9 +10,9 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,8 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import kotlin.random.Random
 
 @ExtendWith(MockitoExtension::class)
 class OppgaveRoutingServiceTest {
@@ -39,97 +37,97 @@ class OppgaveRoutingServiceTest {
     }
 
     companion object {
+        const val geografiskTilknytning = "032342"
         val MANGLER_LAND = null as String?
         const val NORGE: String = "NOR"
         const val UTLAND: String = "SE"
 
-        private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("ddMMyy")
         // NFP krets er en person mellom 18 og 60 år
-        val alder18aar: String = LocalDate.now().minusYears(18).minusDays(1).format(dateFormat)
-        val alder59aar: String = LocalDate.now().minusYears(60).plusDays(1).format(dateFormat)
+        val alder18aar: LocalDate = LocalDate.now().minusYears(18).minusDays(1)
+        val alder59aar: LocalDate = LocalDate.now().minusYears(60).plusDays(1)
 
 
         // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
-        val alder17aar: String = LocalDate.now().minusYears(18).plusDays(1).format(dateFormat)
-        val alder60aar: String = LocalDate.now().minusYears(60).minusDays(1).format(dateFormat)
+        val alder17aar: LocalDate = LocalDate.now().minusYears(18).plusDays(1)
+        val alder60aar: LocalDate = LocalDate.now().minusYears(60)
 
-        val geografiskTilknytning = "032342"
     }
 
-    private fun alleAldre() = "0101" + Random.nextInt(0,100).toString()
+    private fun irrelevantDato() = LocalDate.MIN
 
     @Test
-    fun `Gitt manglende fnr når oppgave routes så send oppgave til ID_OG_FORDELING`() {
-        val enhet = routingService.route(null, P_BUC_01, MANGLER_LAND, alleAldre(), geografiskTilknytning, null)
+    fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
+        val enhet = routingService.route(bucType = P_BUC_01, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
         assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
-    fun `Gitt manglende buc-type så send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route("010101010101", null, MANGLER_LAND, alleAldre(), geografiskTilknytning,null)
+    fun `Gitt manglende buc-type saa send oppgave til PENSJON_UTLAND`() {
+        val enhet = routingService.route(navBruker = "010101010101", landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
-    fun `Gitt manglende ytelsestype for P_BUC_10 så send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route("010101010101", P_BUC_10, MANGLER_LAND, alleAldre(), geografiskTilknytning,null)
+    fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
+        val enhet = routingService.route(navBruker = "010101010101", bucType = P_BUC_10, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Routing for vanlige BUC'er`() {
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, MANGLER_LAND, alleAldre(),  geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_01, NORGE, alleAldre(), geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_01, UTLAND, alleAldre(), geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_01, land = NORGE, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato()))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_02, MANGLER_LAND, alleAldre(), geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_02, NORGE, alleAldre(), geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_02, UTLAND, alleAldre(), geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_02, fodselsDato = irrelevantDato()))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_02, land = NORGE, fodselsDato = irrelevantDato()))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_02, land = UTLAND, fodselsDato = irrelevantDato()))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_03, MANGLER_LAND, alleAldre(), geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alleAldre(), geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_03, UTLAND, alleAldre(), geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_03, fodselsDato = irrelevantDato()))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_03, land = NORGE, fodselsDato = irrelevantDato()))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_03, land = UTLAND, fodselsDato = irrelevantDato()))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_04, MANGLER_LAND, alleAldre(), geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_04, NORGE, alleAldre(), geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_04, UTLAND, alleAldre(), geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_04, fodselsDato = irrelevantDato()))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_04, land = NORGE, fodselsDato = irrelevantDato()))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_04, land = UTLAND, fodselsDato = irrelevantDato()))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_05, MANGLER_LAND, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_05, NORGE, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_05, UTLAND, alder18aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_05, MANGLER_LAND, alder17aar, geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_05, NORGE, alder17aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_05, UTLAND, alder17aar, geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_05, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_05, land = NORGE, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_05, land = UTLAND, fodselsDato = alder18aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_05, fodselsDato = alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType =  P_BUC_05, land = NORGE, fodselsDato = alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_05, land = UTLAND, fodselsDato = alder17aar))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_06, MANGLER_LAND, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_06, NORGE, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_06, UTLAND, alder18aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_06, MANGLER_LAND, alder17aar, geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_06, NORGE, alder17aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_06, UTLAND, alder17aar, geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_06, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_06, land = NORGE, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_06, land = UTLAND, fodselsDato = alder18aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_06, fodselsDato = alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_06,land = NORGE, fodselsDato = alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_06, land = UTLAND, fodselsDato = alder17aar))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_07, MANGLER_LAND, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_07, NORGE, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_07, UTLAND, alder18aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_07, MANGLER_LAND, alder17aar, geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_07, NORGE, alder17aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_07, UTLAND, alder17aar, geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_07, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_07, land = NORGE, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_07, land = UTLAND, fodselsDato = alder18aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_07, fodselsDato = alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_07, land = NORGE, fodselsDato = alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_07, land = UTLAND, fodselsDato = alder17aar))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_08, MANGLER_LAND, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_08, NORGE, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_08, UTLAND, alder18aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_08, MANGLER_LAND, alder17aar, geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_08, NORGE, alder17aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_08, UTLAND, alder17aar, geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_08, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_08, land = NORGE, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_08, land = UTLAND, fodselsDato = alder18aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_08, fodselsDato = alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_08, land = NORGE, fodselsDato = alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_08, land = UTLAND, fodselsDato = alder17aar))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_09, MANGLER_LAND, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_09, NORGE, alder18aar, geografiskTilknytning))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_09, UTLAND, alder18aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_09, MANGLER_LAND, alder17aar, geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_09, NORGE, alder17aar, geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_09, UTLAND, alder17aar, geografiskTilknytning))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_09, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_09, land = NORGE, fodselsDato = alder18aar))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_09, land = UTLAND, fodselsDato = alder18aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_09, fodselsDato = alder17aar))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_09, land = NORGE, fodselsDato = alder17aar))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_09, land = UTLAND, fodselsDato = alder17aar))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = AP))
         assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, AP))
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, AP))
 
@@ -259,10 +257,10 @@ class OppgaveRoutingServiceTest {
     }
 
     private fun enhetFor(bucType: BucType,
-                         land: String?,
-                         fodselsDato: String,
-                         geografiskTilknytning: String,
-                         diskresjonskode: Diskresjonskode? =null,
+                         land: String? = null,
+                         fodselsDato: LocalDate,
+                         geografiskTilknytning: String? = null,
+                         diskresjonskode: Diskresjonskode? = null,
                          ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {
         return routingService.route(
                 "01010101010",
@@ -286,7 +284,7 @@ class OppgaveRoutingServiceTest {
 
     }
 
-    fun getJsonFileFromResource(filename: String): String {
+    private fun getJsonFileFromResource(filename: String): String {
         return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 

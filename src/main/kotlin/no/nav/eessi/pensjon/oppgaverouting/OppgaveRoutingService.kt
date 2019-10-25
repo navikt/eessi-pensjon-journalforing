@@ -16,42 +16,36 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.Period
-import java.time.format.DateTimeFormatter
 
 @Service
 class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
-    fun route(navBruker: String?,
-              bucType: BucType?,
-              landkode: String?,
-              fodselsDato: String,
+    fun route(navBruker: String? = null,
+              bucType: BucType? = null,
+              landkode: String? = null,
+              fodselsDato: LocalDate,
               geografiskTilknytning: String? = null,
               diskresjonskode: Diskresjonskode? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
 
-        //kun P_BUC_01 -- kall til norg2 arbeidsfordeling
-        val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode)
-        //fallback samt nav-enhet for alle buc en p_buc_01
-        val tildeltEnhetFalback = fallbackEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType, diskresjonskode)
+        val tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode) ?: bestemTildeltEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType, diskresjonskode)
 
-        logger.debug("norg2tildeltEnhet: $norg2tildeltEnhet  tildeltEnhetFalback: $tildeltEnhetFalback")
-
-        val tildeltEnhet = norg2tildeltEnhet ?: tildeltEnhetFalback
-
-        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) " +
-                "for Buc: $bucType, " +
+        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
+                "Buc: $bucType, " +
                 "Landkode: $landkode, " +
                 "Fødselsdato: $fodselsDato, " +
+                "Geografisk Tilknytning: $geografiskTilknytning, " +
                 "Ytelsetype: $ytelseType")
 
         return tildeltEnhet
     }
 
-    private fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
+    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
+        logger.info("Bestemmer tildelt enhet")
         return when {
                     navBruker == null -> ID_OG_FORDELING
 
@@ -88,6 +82,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             P_BUC_01 -> {
                 try {
                     val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonKode)
+                    logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {
                     logger.error("Norg2 request feil ${rqe.message}")
@@ -108,13 +103,12 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 else -> UTLAND
             }
 
-    private fun krets(fodselsDato: String): OppgaveRoutingModel.Krets {
-        val fodselsdatoString = fodselsDato.substring(0,6)
-        val format = DateTimeFormatter.ofPattern("ddMMyy")
-        val fodselsdatoDate = LocalDate.parse(fodselsdatoString, format)
-        val dagensDate = LocalDate.now()
-        val period = Period.between(fodselsdatoDate, dagensDate)
+    private fun between18and60(fodselsDato: LocalDate): Boolean {
+        val alder = Period.between(fodselsDato, LocalDate.now())
+        return (alder.years >= 18) && (alder.years < 60)
+    }
 
-        return if((period.years >= 18) && (period.years < 60)) NAY else NFP
+    private fun krets(fodselsDato: LocalDate): OppgaveRoutingModel.Krets {
+        return if(between18and60(fodselsDato)) NAY else NFP
     }
 }
