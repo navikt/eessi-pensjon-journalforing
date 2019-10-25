@@ -75,13 +75,13 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 }
     }
 
-    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonKode: Diskresjonskode?): Enhet? {
+    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonskode: Diskresjonskode?): Enhet? {
         if (navBruker == null) return null
 
         return when(bucType) {
             P_BUC_01 -> {
                 try {
-                    val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonKode)
+                    val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonskode)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {
