@@ -37,7 +37,7 @@ class OppgaveRoutingServiceTest {
     }
 
     companion object {
-        const val geografiskTilknytning = "032342"
+        const val dummyTilknytning = "032342"
         val MANGLER_LAND = null as String?
         const val NORGE: String = "NOR"
         const val UTLAND: String = "SE"
@@ -57,27 +57,27 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
-        val enhet = routingService.route(bucType = P_BUC_01, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
+        val enhet = routingService.route(bucType = P_BUC_01, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning)
         assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
     fun `Gitt manglende buc-type saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(navBruker = "010101010101", landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
+        val enhet = routingService.route(navBruker = "010101010101", landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(navBruker = "010101010101", bucType = P_BUC_10, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning)
+        val enhet = routingService.route(navBruker = "010101010101", bucType = P_BUC_10, landkode = MANGLER_LAND, fodselsDato = irrelevantDato())
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Routing for vanlige BUC'er`() {
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_01, land = NORGE, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato(), geografiskTilknytning = geografiskTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_01, land = NORGE, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato()))
 
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_02, fodselsDato = irrelevantDato()))
@@ -128,42 +128,40 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_09, land = UTLAND, fodselsDato = alder17aar))
 
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, GP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, GP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = GP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, GP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, GP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = GP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = GP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = GP))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder18aar, geografiskTilknytning, null, UT))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder18aar, geografiskTilknytning, null, UT))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder18aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = UT))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = UT))
 
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder17aar, geografiskTilknytning, null, UT))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_10, NORGE, alder17aar, geografiskTilknytning, null, UT))
-        assertEquals(UFORE_UTLAND, enhetFor(P_BUC_10, UTLAND, alder17aar, geografiskTilknytning, null, UT))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = UT))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = UT))
+        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = UT))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder59aar, geografiskTilknytning, null, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder59aar, geografiskTilknytning, null, AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder59aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder59aar, ytelse = AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder59aar, ytelse = AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder59aar, ytelse = AP))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, MANGLER_LAND, alder60aar, geografiskTilknytning, null, AP))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder60aar, geografiskTilknytning, null,AP))
-        assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, null, AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder60aar, ytelse = AP))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder60aar, ytelse = AP))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, ytelse = AP))
 
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, MANGLER_LAND, alder60aar, geografiskTilknytning, Diskresjonskode.SPSF, AP))
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_03, NORGE, alder60aar, geografiskTilknytning, Diskresjonskode.SPFO , UT))
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, Diskresjonskode.SPFO, GP))
-
-
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, fodselsDato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = Diskresjonskode.SPSF, ytelse = AP))
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = Diskresjonskode.SPFO , ytelse = UT))
+        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, ytelse = GP))
     }
 
     @Test
