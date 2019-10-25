@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
