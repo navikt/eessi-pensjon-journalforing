@@ -36,7 +36,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         //kun P_BUC_01 -- kall til norg2 arbeidsfordeling
         val norg2tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode)
         //fallback samt nav-enhet for alle buc en p_buc_01
-        val tildeltEnhetFalback = fallbackEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType)
+        val tildeltEnhetFalback = fallbackEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType, diskresjonskode)
 
         logger.debug("norg2tildeltEnhet: $norg2tildeltEnhet  tildeltEnhetFalback: $tildeltEnhetFalback")
 
@@ -51,9 +51,11 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?): Enhet {
+    private fun fallbackEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: String, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
         return when {
                     navBruker == null -> ID_OG_FORDELING
+
+                    diskresjonskode != null && diskresjonskode == Diskresjonskode.SPFO || diskresjonskode == Diskresjonskode.SPSF -> DISKRESJONSKODE
 
                     NORGE == bosatt(landkode) ->
                         when (bucType) {

@@ -161,6 +161,11 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, enhetFor(P_BUC_10, NORGE, alder60aar, geografiskTilknytning, null,AP))
         assertEquals(PENSJON_UTLAND, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, null, AP))
 
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, MANGLER_LAND, alder60aar, geografiskTilknytning, Diskresjonskode.SPSF, AP))
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_03, NORGE, alder60aar, geografiskTilknytning, Diskresjonskode.SPFO , UT))
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_10, UTLAND, alder60aar, geografiskTilknytning, Diskresjonskode.SPFO, GP))
+
+
     }
 
     @Test
