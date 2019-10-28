@@ -223,6 +223,30 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
+            //Mock fagmodul /buc/{rinanr}/allDocuments
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/.*/allDocuments"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
+                    )
+
+            //Mock eux hent av sed
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018" ))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json"))))
+                    )
+
+
+
             // Mocker journalføringstjeneste
             mockServer.`when`(
                     HttpRequest.request()
@@ -472,6 +496,25 @@ class JournalforingIntegrationTest {
                         .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
                 VerificationTimes.once()
         )
+
+
+        // Verfiy fagmodul allDocuments
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("buc/.*/allDocuments"),
+                VerificationTimes.exactly(4)
+        )
+
+        // Verfiy eux sed
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
+                VerificationTimes.exactly(4)
+        )
+
+
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()

@@ -75,4 +75,26 @@ class FagmodulService(
             }
         }
     }
+
+    fun hentAlleDokumenterFraRinaSak(rinaNr: String): String? {
+        return metricsHelper.measure("hentSeds") {
+            val path = "/buc/$rinaNr/allDocuments"
+            try {
+                logger.info("Henter jsondata for alle sed for rinaNr: $rinaNr")
+                val response = fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        null,
+                        String::class.java)
+                if (!response.statusCode.isError) {
+                    logger.info("Hentet seds fra fagmodulen")
+                    response.body
+                } else {
+                    throw RuntimeException("Noe gikk galt under henting av seds fra fagmodulen: ${response.statusCode}")
+                }
+            } catch (ex: Exception) {
+                logger.error("Noe gikk galt under henting av seds fra fagmodulen: ${ex.message}")
+                throw RuntimeException("Feil ved henting av seds")
+            }
+        }
+    }
 }
