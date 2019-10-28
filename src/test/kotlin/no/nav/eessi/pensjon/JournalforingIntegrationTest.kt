@@ -511,7 +511,7 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.exactly(4)
+                VerificationTimes.exactly(8)
         )
 
 
