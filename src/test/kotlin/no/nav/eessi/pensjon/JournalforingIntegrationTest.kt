@@ -227,37 +227,7 @@ class JournalforingIntegrationTest {
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
-                            .withPath("/buc/148161/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
-                    )
-
-            mockServer.`when`(
-                    HttpRequest.request()
-                            .withMethod(HttpMethod.GET)
-                            .withPath("/buc/147666/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
-                    )
-
-            mockServer.`when`(
-                    HttpRequest.request()
-                            .withMethod(HttpMethod.GET)
-                            .withPath("/buc/147729/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
-                    )
-
-            mockServer.`when`(
-                    HttpRequest.request()
-                            .withMethod(HttpMethod.GET)
-                            .withPath("/buc/161558/allDocuments"))
+                            .withPath("/buc/.*/allDocuments"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -532,52 +502,15 @@ class JournalforingIntegrationTest {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/161558/allDocuments"),
-                VerificationTimes.atLeast(1)
+                        .withPath("/buc/.*/allDocuments"),
+                VerificationTimes.atLeast(4)
         )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/allDocuments"),
-                VerificationTimes.atLeast(1)
-        )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147666/allDocuments"),
-                VerificationTimes.atLeast(1)
-        )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/148161/allDocuments"),
-                VerificationTimes.atLeast(1)
-        )
-
         // Verfiy eux sed
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(1)
-        )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(1)
-        )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(1)
-        )
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(1)
+                        .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
+                VerificationTimes.atLeast(4)
         )
 
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
