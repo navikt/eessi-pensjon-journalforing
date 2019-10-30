@@ -47,7 +47,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return when {
                     navBruker == null -> ID_OG_FORDELING
 
-                    diskresjonskode != null && diskresjonskode == Diskresjonskode.SPFO || diskresjonskode == Diskresjonskode.SPSF -> DISKRESJONSKODE
+                    diskresjonskode != null && diskresjonskode == Diskresjonskode.SPSF -> DISKRESJONSKODE
 
                     NORGE == bosatt(landkode) ->
                         when (bucType) {

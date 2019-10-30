@@ -160,8 +160,9 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, ytelse = AP))
 
         assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, fodselsDato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = Diskresjonskode.SPSF, ytelse = AP))
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = Diskresjonskode.SPFO , ytelse = UT))
-        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, ytelse = GP))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = Diskresjonskode.SPFO , ytelse = UT))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, ytelse = GP))
+        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, ytelse = GP))
     }
 
     @Test

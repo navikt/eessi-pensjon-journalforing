@@ -51,7 +51,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                             geografiskOmraade = "ANY",
                             behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
                     )
-                    diskresjonKode != null && diskresjonKode == Diskresjonskode.SPFO || diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
+                    diskresjonKode != null && diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
                             diskresjonskode = Diskresjonskode.SPSF.name
                     )
