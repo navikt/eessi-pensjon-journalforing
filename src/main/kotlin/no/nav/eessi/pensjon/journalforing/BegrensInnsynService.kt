@@ -42,14 +42,18 @@ class BegrensInnsynService(private val euxService: EuxService,
 
         val fnre = sedFnrSøk.finnAlleFnrDnrISed(sed!!)
         fnre.forEach { fnr ->
-            val person = personV3Service.hentPerson(fnr)
-            person.diskresjonskode?.value?.let { kode ->
-                logger.debug("Diskresjonskode: $kode")
-                val diskresjonskode = Diskresjonskode.valueOf(kode)
-                if (diskresjonskode == Diskresjonskode.SPFO || diskresjonskode == Diskresjonskode.SPSF) {
-                    logger.debug("Personen har diskret adresse")
-                    return diskresjonskode
+            try {
+                val person = personV3Service.hentPerson(fnr)
+                person.diskresjonskode?.value?.let { kode ->
+                    logger.debug("Diskresjonskode: $kode")
+                    val diskresjonskode = Diskresjonskode.valueOf(kode)
+                    if (diskresjonskode == Diskresjonskode.SPSF) {
+                        logger.debug("Personen har diskret adresse")
+                        return diskresjonskode
+                    }
                 }
+            } catch (ex: Exception) {
+                logger.error("forsetter videre: ${ex.message}")
             }
         }
         return null
