@@ -53,7 +53,7 @@ class BegrensInnsynService(private val euxService: EuxService,
                     }
                 }
             } catch (ex: Exception) {
-                logger.error("forsetter videre: ${ex.message}")
+                logger.info("forsetter videre: ${ex.message}")
             }
         }
         return null
