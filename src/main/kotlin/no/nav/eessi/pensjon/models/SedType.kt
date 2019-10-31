@@ -3,6 +3,14 @@ package no.nav.eessi.pensjon.models
 enum class SedType: Code {
 
     // Pensjon
+    P1000 {
+        override fun decode() = "P1000"
+        override fun toString() = "P1000 - Anmodning om perioder med omsorg for barn"
+    },
+    P1100 {
+        override fun decode() = "P1100"
+        override fun toString() = "P1100 - Svar på anmodning om perioder med omsorg for barn"
+    },
     P2000 {
         override fun decode() = "P2000"
         override fun toString() = "P2000 - Krav om alderspensjon"
@@ -170,6 +178,18 @@ enum class SedType: Code {
     P10000 {
         override fun decode() = "P10000"
         override fun toString() = "P10000 - Oversendelse av informasjon"
+    },
+    P11000 {
+        override fun decode() = "P11000"
+        override fun toString() = "P11000 - Anmodning om pensjonsbeløp"
+    },
+    P12000 {
+        override fun decode() = "P12000"
+        override fun toString() = "P12000 - Informasjon om pensjonsbeløp"
+    },
+    P13000 {
+        override fun decode() = "P13000"
+        override fun toString() = "P13000 - Informasjon om pensjonstillegg"
     },
     P14000 {
         override fun decode() = "P14000"
