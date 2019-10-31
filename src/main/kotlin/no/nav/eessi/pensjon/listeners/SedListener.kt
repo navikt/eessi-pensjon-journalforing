@@ -30,9 +30,7 @@ class SedListener(
     }
 
 
-    @KafkaListener(groupId = "\${kafka.sedSendt.groupid}",
-            topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "0")])])
+    @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeOutgoingSed") {
@@ -55,9 +53,7 @@ class SedListener(
         }
     }
 
-    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}",
-            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "0")])])
+    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
