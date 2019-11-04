@@ -2,6 +2,8 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
@@ -23,6 +25,7 @@ import no.nav.eessi.pensjon.services.personv3.hentLandkode
 import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -36,114 +39,118 @@ class JournalforingService(private val euxService: EuxService,
                            private val fagmodulService: FagmodulService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
-                           private val begrensInnsynService: BegrensInnsynService)  {
+                           private val begrensInnsynService: BegrensInnsynService,
+                           @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
-        try {
-            val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
+        metricsHelper.measure("consumeOutgoingPensionSed") {
+            try {
+                val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
-            if (sedHendelse.sektorKode != "P") {
-                // Vi ignorerer alle hendelser som ikke har vår sektorkode
-                return
-            }
+                if (sedHendelse.sektorKode != "P") {
+                    // Vi ignorerer alle hendelser som ikke har vår sektorkode
+                    return@measure
+                }
 
-            logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-            val pinOgYtelse = hentPinOgYtelse(sedHendelse)
-            var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
+                logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
+                val pinOgYtelse = hentPinOgYtelse(sedHendelse)
+                var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
 
-            val person = hentBruker(fnr)
+                val person = hentBruker(fnr)
 
-            // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
-            if(person == null) fnr = null
+                // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
+                if (person == null) fnr = null
 
-            val personNavn = hentPersonNavn(person)
-            var aktoerId: String? = null
+                val personNavn = hentPersonNavn(person)
+                var aktoerId: String? = null
 
-            if(person != null) aktoerId = hentAktoerId(fnr)
+                if (person != null) aktoerId = hentAktoerId(fnr)
 
-            val fodselsDato = hentFodselsDato(sedHendelse)
-            val landkode = hentLandkode(person)
+                val fodselsDato = hentFodselsDato(sedHendelse)
+                val landkode = hentLandkode(person)
 
-            val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId) ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
-            val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
+                val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                        ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
+                val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-            //tps bruker gt
-            val geografiskTilknytning = hentGeografiskTilknytning(person)
-            //tps bruker diskresjon
-            val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
+                //tps bruker gt
+                val geografiskTilknytning = hentGeografiskTilknytning(person)
+                //tps bruker diskresjon
+                val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
 
-            logger.debug("geografiskTilknytning: $geografiskTilknytning")
+                logger.debug("geografiskTilknytning: $geografiskTilknytning")
 
-            val tildeltEnhet = hentTildeltEnhet(
-                    sedHendelse.sedType,
-                    sedHendelse.bucType!!,
-                    pinOgYtelse,
-                    sedHendelse.navBruker,
-                    landkode,
-                    fodselsDato,
-                    geografiskTilknytning,
-                    diskresjonskode
-            )
+                val tildeltEnhet = hentTildeltEnhet(
+                        sedHendelse.sedType,
+                        sedHendelse.bucType!!,
+                        pinOgYtelse,
+                        sedHendelse.navBruker,
+                        landkode,
+                        fodselsDato,
+                        geografiskTilknytning,
+                        diskresjonskode
+                )
 
-            logger.debug("tildeltEnhet: $tildeltEnhet")
+                logger.debug("tildeltEnhet: $tildeltEnhet")
 
-            val journalpostId = journalpostService.opprettJournalpost(
-                    rinaSakId = sedHendelse.rinaSakId,
-                    navBruker= fnr,
-                    personNavn= personNavn,
-                    avsenderId= sedHendelse.avsenderId,
-                    avsenderNavn= sedHendelse.avsenderNavn,
-                    mottakerId= sedHendelse.mottakerId,
-                    mottakerNavn= sedHendelse.mottakerNavn,
-                    bucType= sedHendelse.bucType.name,
-                    sedType= sedHendelse.sedType.name,
-                    sedHendelseType= hendelseType.name,
-                    eksternReferanseId= null,// TODO what value to put here?,
-                    kanal= "EESSI",
-                    journalfoerendeEnhet= tildeltEnhet.enhetsNr,
-                    arkivsaksnummer= null, // TODO what value to put here?,
-                    arkivsaksystem= null, // TODO what value to put here?,
-                    dokumenter= documents,
-                    forsokFerdigstill= false
-            )
+                val journalpostId = journalpostService.opprettJournalpost(
+                        rinaSakId = sedHendelse.rinaSakId,
+                        navBruker = fnr,
+                        personNavn = personNavn,
+                        avsenderId = sedHendelse.avsenderId,
+                        avsenderNavn = sedHendelse.avsenderNavn,
+                        mottakerId = sedHendelse.mottakerId,
+                        mottakerNavn = sedHendelse.mottakerNavn,
+                        bucType = sedHendelse.bucType.name,
+                        sedType = sedHendelse.sedType.name,
+                        sedHendelseType = hendelseType.name,
+                        eksternReferanseId = null,// TODO what value to put here?,
+                        kanal = "EESSI",
+                        journalfoerendeEnhet = tildeltEnhet.enhetsNr,
+                        arkivsaksnummer = null, // TODO what value to put here?,
+                        arkivsaksystem = null, // TODO what value to put here?,
+                        dokumenter = documents,
+                        forsokFerdigstill = false
+                )
 
-            logger.debug("JournalPostID: $journalpostId")
+                logger.debug("JournalPostID: $journalpostId")
 
-            oppgaveService.opprettOppgave(
-                    sedType = sedHendelse.sedType,
-                    journalpostId = journalpostId,
-                    tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                    aktoerId = aktoerId,
-                    oppgaveType = "JOURNALFORING",
-                    rinaSakId = sedHendelse.rinaSakId,
-                    filnavn = null,
-                    hendelseType = hendelseType)
-
-            if (uSupporterteVedlegg.isNotEmpty()) {
                 oppgaveService.opprettOppgave(
                         sedType = sedHendelse.sedType,
-                        journalpostId = null,
+                        journalpostId = journalpostId,
                         tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                         aktoerId = aktoerId,
-                        oppgaveType = "BEHANDLE_SED",
+                        oppgaveType = "JOURNALFORING",
                         rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = usupporterteFilnavn(uSupporterteVedlegg),
+                        filnavn = null,
                         hendelseType = hendelseType)
-            }
 
-        } catch (ex: MismatchedInputException) {
-            logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
-            throw ex
-        } catch (ex: MissingKotlinParameterException) {
-            logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
-            throw ex
-        } catch (ex: Exception) {
-            logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
-            throw ex
+                if (uSupporterteVedlegg.isNotEmpty()) {
+                    oppgaveService.opprettOppgave(
+                            sedType = sedHendelse.sedType,
+                            journalpostId = null,
+                            tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                            aktoerId = aktoerId,
+                            oppgaveType = "BEHANDLE_SED",
+                            rinaSakId = sedHendelse.rinaSakId,
+                            filnavn = usupporterteFilnavn(uSupporterteVedlegg),
+                            hendelseType = hendelseType)
+                }
+
+            } catch (ex: MismatchedInputException) {
+                logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
+                throw ex
+            } catch (ex: MissingKotlinParameterException) {
+                logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
+                throw ex
+            } catch (ex: Exception) {
+                logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
+                throw ex
+            }
         }
     }
 
