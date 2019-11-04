@@ -47,7 +47,7 @@ class JournalforingService(private val euxService: EuxService,
     private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
-        metricsHelper.measure("consumeOutgoingPensionSed") {
+        metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
             try {
                 val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
 
