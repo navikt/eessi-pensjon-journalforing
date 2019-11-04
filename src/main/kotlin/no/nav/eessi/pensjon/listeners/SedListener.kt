@@ -57,7 +57,7 @@ class SedListener(
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
-                logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}\")")
+                logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
                     journalforingService.journalfor(hendelse, MOTTATT)
