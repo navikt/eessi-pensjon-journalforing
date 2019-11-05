@@ -50,22 +50,6 @@ node {
             }
         }
 
-        stage("deploy T8") {
-            def version = sh(script: 'git describe --abbrev=0', returnStdout: true).trim()
-            build([
-                    job       : 'nais-deploy-pipeline',
-                    wait      : true,
-                    parameters: [
-                            string(name: 'APP', value: "eessi-pensjon-journalforing"),
-                            string(name: 'REPO', value: "navikt/eessi-pensjon-journalforing"),
-                            string(name: 'VERSION', value: version),
-                            string(name: 'DEPLOY_REF', value: version),
-                            string(name: 'NAMESPACE', value: 't8'),
-                            string(name: 'DEPLOY_ENV', value: 't8')
-                    ]
-            ])
-        }
-
         stage("deploy Q2") {
             def version = sh(script: 'git describe --abbrev=0', returnStdout: true).trim()
             build([
