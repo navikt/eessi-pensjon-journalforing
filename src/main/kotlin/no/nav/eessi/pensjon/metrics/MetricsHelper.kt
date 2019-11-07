@@ -5,9 +5,41 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 
 @Component
 class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) val configuration: Configuration = Configuration()) {
+
+    @PostConstruct
+    fun initCounters() {
+        listOf("journalforOgOpprettOppgaveForSed",
+                "consumeOutgoingSed",
+                "consumeOutgoingSed",
+                "pdfConverter",
+                "disoverSTS",
+                "getSystemOidcToken",
+                "aktoerregister",
+                "hentSed",
+                "hentpdf",
+                "hentSeds",
+                "hentSed",
+                "hentYtelseKravtype",
+                "opprettjournalpost",
+                "hentArbeidsfordeling",
+                "opprettoppgave",
+                "hentperson"
+                ).forEach {counterName ->
+            Counter.builder(configuration.measureMeterName)
+                    .tag(configuration.typeTag, configuration.successTypeTagValue)
+                    .tag(configuration.methodTag, counterName)
+                    .register(registry)
+
+            Counter.builder(configuration.measureMeterName)
+                    .tag(configuration.typeTag, configuration.failureTypeTagValue)
+                    .tag(configuration.methodTag, counterName)
+                    .register(registry)
+        }
+    }
 
     fun <R> measure(
             method: String,
@@ -15,33 +47,24 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
             success: String = configuration.successTypeTagValue,
             meterName: String = configuration.measureMeterName,
             eventType: String = configuration.callEventTypeTagValue,
-            extraTags: Array<String> = arrayOf(),
-            description: String = "",
             block: () -> R): R {
 
-        var throwableClass = configuration.noExceptionTypeTagValue
         var typeTag = success
 
         try {
             return Timer.builder("$meterName.${configuration.measureTimerSuffix}")
-                    .description(if (description.isEmpty()) null else description)
                     .tag(configuration.methodTag, method)
-                    .tags(*extraTags)
                     .register(registry)
                     .recordCallable {
                         block.invoke()
                     }
         } catch (throwable: Throwable) {
-            throwableClass = throwable.javaClass.simpleName
             typeTag = failure
             throw throwable
         } finally {
             try {
                 Counter.builder(meterName)
-                        .description(if (description.isEmpty()) null else description)
-                        .tags(*extraTags)
                         .tag(configuration.methodTag, method)
-                        .tag(configuration.exceptionTag, throwableClass)
                         .tag(configuration.typeTag, typeTag)
                         .register(registry)
                         .increment()
@@ -54,17 +77,12 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
     fun increment(
             event: String,
             eventType: String = configuration.eventTypeTagValue,
-            extraTags: Array<String> = arrayOf(),
             throwable: Throwable? = null,
-            meterName: String = configuration.incrementMeterName,
-            description: String = "") {
+            meterName: String = configuration.incrementMeterName) {
         try {
             Counter.builder(meterName)
-                    .description(if (description.isEmpty()) null else description)
                     .tag(configuration.eventTag, event)
-                    .tags(*extraTags)
                     .tag(configuration.typeTag, eventType)
-                    .tag(configuration.exceptionTag, if (throwable == null) configuration.noExceptionTypeTagValue else throwable.javaClass.simpleName)
                     .register(registry)
                     .increment()
         } catch (t: Throwable) {
@@ -80,14 +98,12 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
             val eventTag: String = "event",
             val methodTag: String = "method",
             val typeTag: String = "type",
-            val exceptionTag: String = "exception",
 
             val successTypeTagValue: String = "successful",
             val failureTypeTagValue: String = "failed",
 
             val eventTypeTagValue: String = "occurred",
 
-            val callEventTypeTagValue: String = "called",
-            val noExceptionTypeTagValue: String = "none"
+            val callEventTypeTagValue: String = "called"
     )
 }

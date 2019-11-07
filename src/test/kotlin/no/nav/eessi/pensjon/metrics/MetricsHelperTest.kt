@@ -34,8 +34,7 @@ internal class MetricsHelperTest {
             registry.counter(
                     config.measureMeterName,
                     config.methodTag, "dummy",
-                    config.typeTag, config.successTypeTagValue,
-                    config.exceptionTag, config.noExceptionTypeTagValue)
+                    config.typeTag, config.successTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -55,8 +54,7 @@ internal class MetricsHelperTest {
             registry.counter(
                     config.measureMeterName,
                     config.methodTag, "dummy",
-                    config.typeTag, config.failureTypeTagValue,
-                    config.exceptionTag, "RuntimeException")
+                    config.typeTag, config.failureTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -76,8 +74,7 @@ internal class MetricsHelperTest {
             registry.counter(
                     config.measureMeterName,
                     config.methodTag, "dummy",
-                    config.typeTag, config.failureTypeTagValue,
-                    config.exceptionTag, "IOError")
+                    config.typeTag, config.failureTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -87,9 +84,7 @@ internal class MetricsHelperTest {
         metricsHelper.measure(
             method = "mymethod",
             failure = "feilede",
-            success = "vellykkede",
-            extraTags = arrayOf("my_tag", "my_value"),
-            description = "My metric is the best"
+            success = "vellykkede"
         ) {
             // no exception here
         }
@@ -99,41 +94,10 @@ internal class MetricsHelperTest {
             registry.counter(
                     config.measureMeterName,
                     config.methodTag, "mymethod",
-                    config.typeTag, "vellykkede",
-                    config.exceptionTag, config.noExceptionTypeTagValue,
-                    "my_tag", "my_value")
+                    config.typeTag, "vellykkede")
                     .count(),
                 0.0001)
     }
-
-    @Test
-    fun measure_supports_customization() {
-        val myCustomSuccessTypeTagValue = "vellykkede"
-        val customizedMetricsHelper =
-                MetricsHelper(
-                        registry,
-                        MetricsHelper.Configuration(successTypeTagValue = myCustomSuccessTypeTagValue))
-
-        customizedMetricsHelper.measure(
-            method = "mymethod",
-            extraTags = arrayOf("my_tag", "my_value"),
-            description = "My metric is the best"
-        ) {
-            // no exception here
-        }
-
-        assertEquals(
-            1.0,
-            registry.counter(
-                    config.measureMeterName,
-                    config.methodTag, "mymethod",
-                    config.typeTag, myCustomSuccessTypeTagValue,
-                    config.exceptionTag, config.noExceptionTypeTagValue,
-                    "my_tag", "my_value")
-                    .count(),
-                0.0001)
-    }
-
 
     @Test
     fun measure_registers_a_timer_too() {
@@ -160,18 +124,14 @@ internal class MetricsHelperTest {
     fun increment_increments_a_counter() {
         metricsHelper.increment(
                 event = "myevent",
-                eventType = "mottatt",
-                extraTags = arrayOf("my_tag", "my_value")
-        )
+                eventType = "mottatt")
 
         assertEquals(1.0,
                 registry.counter(
                         config.incrementMeterName,
                         config.eventTag, "myevent",
-                        config.typeTag, "mottatt",
-                        config.exceptionTag, config.noExceptionTypeTagValue,
-                        "my_tag", "my_value"
-                ).count(),
+                        config.typeTag, "mottatt")
+                        .count(),
                 0.0001)
 
     }
@@ -188,9 +148,8 @@ internal class MetricsHelperTest {
                 registry.counter(
                         config.incrementMeterName,
                         config.eventTag, "myevent",
-                        config.typeTag, "failed",
-                        config.exceptionTag, "RuntimeException"
-                ).count(),
+                        config.typeTag, "failed")
+                        .count(),
                 0.0001)
 
     }
