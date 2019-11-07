@@ -14,7 +14,7 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
     fun initCounters() {
         listOf("journalforOgOpprettOppgaveForSed",
                 "consumeOutgoingSed",
-                "consumeOutgoingSed",
+                "consumeIncomingSed",
                 "pdfConverter",
                 "disoverSTS",
                 "getSystemOidcToken",
