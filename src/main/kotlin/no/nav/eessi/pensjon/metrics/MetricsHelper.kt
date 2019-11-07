@@ -10,6 +10,10 @@ import javax.annotation.PostConstruct
 @Component
 class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) val configuration: Configuration = Configuration()) {
 
+    /**
+     * Alle counters må legges inn i init listen slik at counteren med konkrete tagger blir initiert med 0.
+     * Dette er nødvendig for at grafana alarmer skal fungere i alle tilfeller
+     */
     @PostConstruct
     fun initCounters() {
         listOf("journalforOgOpprettOppgaveForSed",
