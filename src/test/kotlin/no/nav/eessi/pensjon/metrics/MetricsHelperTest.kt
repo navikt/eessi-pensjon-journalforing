@@ -80,26 +80,6 @@ internal class MetricsHelperTest {
     }
 
     @Test
-    fun measure_supports_overriding_in_call() {
-        metricsHelper.measure(
-            method = "mymethod",
-            failure = "feilede",
-            success = "vellykkede"
-        ) {
-            // no exception here
-        }
-
-        assertEquals(
-            1.0,
-            registry.counter(
-                    config.measureMeterName,
-                    config.methodTag, "mymethod",
-                    config.typeTag, "vellykkede")
-                    .count(),
-                0.0001)
-    }
-
-    @Test
     fun measure_registers_a_timer_too() {
         val mockClock = MockClock()
         val registry = SimpleMeterRegistry(SimpleConfig.DEFAULT, mockClock)
