@@ -9,8 +9,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -63,16 +64,18 @@ class OppgaveService(
                                 }), true)
 
                 val httpEntity = HttpEntity(requestBody)
-
                 logger.info("Oppretter $oppgaveType oppgave")
-
-                val responseEntity = oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
-                validateResponseEntity(responseEntity)
-
+                oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
                 logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under opprettelse av oppgave ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En 4xx feil oppstod under opprettelse av oppgave ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under opprettelse av oppgave ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En 5xx feil oppstod under opprettelse av oppgave ex: ${sex.message} body: ${sex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under opprettelse av oppgave: $ex")
-                throw RuntimeException("En feil oppstod under opprettelse av oppgave: $ex")
+                logger.error("En ukjent feil oppstod under opprettelse av oppgave ex: ${ex.message}")
+                throw java.lang.RuntimeException("En ukjent feil oppstod under opprettelse av oppgave ex: ${ex.message}")
             }
         }
     }
@@ -87,18 +90,6 @@ class OppgaveService(
         } else {
             "Utgående $sedType / Rina saksnr: $rinaSakId"
         }
-    }
-
-    private fun validateResponseEntity(responseEntity: ResponseEntity<String>) {
-        // TODO , spring kaster en HttpClientException når man får en 400 eller 500 kode, dermed havner vi aldri her men i en catch.
-        if (responseEntity.statusCode.isError) {
-            logger.error("Received ${responseEntity.statusCode} from Oppgave")
-            logger.error(responseEntity.body.toString())
-            throw RuntimeException("Received ${responseEntity.statusCode} ${responseEntity.statusCode.reasonPhrase} from Oppgave")
-        }
-
-        if (!responseEntity.hasBody())
-            throw RuntimeException("Response from Oppgave is empty")
     }
 }
 

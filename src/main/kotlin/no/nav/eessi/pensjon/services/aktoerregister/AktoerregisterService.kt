@@ -10,9 +10,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.lang.RuntimeException
 import java.util.*
 
 data class Identinfo(
@@ -97,20 +101,24 @@ class AktoerregisterService(
                     .queryParam("identgruppe", identGruppe)
                     .queryParam("gjeldende", gjeldende)
             logger.info("Kaller aktørregisteret: /identer")
-            val responseEntity = aktoerregisterRestTemplate.exchange(uriBuilder.toUriString(),
-                    HttpMethod.GET,
-                    requestEntity,
-                    String::class.java)
 
-            if (responseEntity.statusCode.isError) {
-                logger.error("Fikk ${responseEntity.statusCode} feil fra aktørregisteret")
-                if (responseEntity.hasBody()) {
-                    logger.error(responseEntity.body.toString())
-                }
-                throw AktoerregisterException("Received ${responseEntity.statusCodeValue} ${responseEntity.statusCode.reasonPhrase} from aktørregisteret")
+            val responseEntity: ResponseEntity<String>
+            try {
+                responseEntity = aktoerregisterRestTemplate.exchange(uriBuilder.toUriString(),
+                        HttpMethod.GET,
+                        requestEntity,
+                        String::class.java)
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under kall til aktørregisteret ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw RuntimeException("En 4xx feil oppstod under kall til aktørregisteret ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under kall til aktørregisteret ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw RuntimeException("En 5xx feil oppstod under kall til aktørregisteret ex: ${sex.message} body: ${sex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En ukjent feil oppstod under kall til aktørregisteret ex: ${ex.message}")
+                throw RuntimeException("En ukjent feil oppstod under kall til aktørregisteret ex: ${ex.message}")
             }
-
-            jacksonObjectMapper().readValue(responseEntity.body!!)
+            return@measure jacksonObjectMapper().readValue(responseEntity.body!!)
         }
     }
 }

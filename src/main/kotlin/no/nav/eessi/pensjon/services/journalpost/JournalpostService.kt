@@ -13,9 +13,10 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import kotlin.RuntimeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -51,7 +52,7 @@ class JournalpostService(
             arkivsaksystem: String?,
             dokumenter: String,
             forsokFerdigstill: Boolean? = false
-    ): String {
+    ): String? {
 
         val avsenderMottaker = populerAvsenderMottaker(
                 navBruker,
@@ -88,27 +89,25 @@ class JournalpostService(
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         return metricsHelper.measure("opprettjournalpost") {
-            try {
+            return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost")
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
-
                 val response = journalpostOidcRestTemplate.exchange(
                         builder.toUriString(),
                         HttpMethod.POST,
                         HttpEntity(requestBody.toString(), headers),
-                        String::class.java
-                )
-
-                if (!response.statusCode.isError) {
-                    logger.debug(response.body.toString())
-                    mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
-                } else {
-                    throw RuntimeException("Noe gikk galt under opprettelse av journalpost")
-                }
+                        String::class.java)
+                mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under opprettelse av journalpost ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En 4xx feil oppstod under opprettelse av journalpost ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under opprettelse av journalpost ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En 5xx feil oppstod opprettelse av journalpost ex: ${sex.message} body: ${sex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("noe gikk galt under opprettelse av journalpost, $ex")
-                throw RuntimeException("Feil ved opprettelse av journalpost, $ex", ex)
+                logger.error("En ukjent feil oppstod under opprettelse av journalpost ex: ${ex.message}")
+                throw java.lang.RuntimeException("En ukjent feil oppstod opprettelse av journalpost ex: ${ex.message}")
             }
         }
     }

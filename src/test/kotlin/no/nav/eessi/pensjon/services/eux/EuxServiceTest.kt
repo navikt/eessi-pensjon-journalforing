@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nhaarman.mockitokotlin2.doThrow
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
@@ -21,6 +22,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
+import sun.net.www.http.HttpClient
 
 @ExtendWith(MockitoExtension::class)
 class EuxServiceTest {
@@ -59,8 +62,7 @@ class EuxServiceTest {
     fun `Gitt ugyldig request når etterspør pdf for SED så kast exception`() {
         val rinaNr = "-1"
         val dokumentId = "-1"
-        doReturn(
-                ResponseEntity("", HttpStatus.INTERNAL_SERVER_ERROR))
+        doThrow(HttpClientErrorException(HttpStatus.NOT_FOUND, "bla bla bla finnes ikke"))
                 .`when`(mockrestTemplate).exchange(
                         eq("/buc/$rinaNr/sed/$dokumentId/filer"),
                         any(HttpMethod::class.java),

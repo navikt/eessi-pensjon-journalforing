@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.services.aktoerregister
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,8 +17,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 
 @ExtendWith(MockitoExtension::class)
 class AktoerregisterServiceTest {
@@ -117,16 +118,15 @@ class AktoerregisterServiceTest {
 
     @Test
     fun `should throw runtimeexception when 403-forbidden is returned`() {
-        val mockResponseEntity = createResponseEntityFromJsonFile("src/test/resources/aktoerregister/403-Forbidden.json", HttpStatus.FORBIDDEN)
-        whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenReturn(mockResponseEntity)
+        whenever(mockrestTemplate.exchange(any<String>(), any(), any<HttpEntity<Unit>>(), ArgumentMatchers.eq(String::class.java))).thenThrow(HttpClientErrorException(HttpStatus.FORBIDDEN))
 
         val testAktoerId = "does-not-matter"
 
-        val arre = assertThrows<AktoerregisterException> {
+        val arre = assertThrows<RuntimeException> {
             // the mock returns 403-forbidden
             aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         }
-        assertEquals("Received 403 Forbidden from aktørregisteret", arre.message!!)
+        assertEquals("En 4xx feil oppstod under kall til aktørregisteret ex: 403 FORBIDDEN body: ", arre.message!!)
     }
 
     private fun createResponseEntityFromJsonFile(filePath: String, httpStatus: HttpStatus = HttpStatus.OK): ResponseEntity<String> {
