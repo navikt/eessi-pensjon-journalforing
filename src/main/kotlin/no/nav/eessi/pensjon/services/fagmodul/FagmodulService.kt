@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 
@@ -17,8 +19,7 @@ import java.lang.RuntimeException
 @Service
 class FagmodulService(
         private val fagmodulOidcRestTemplate: RestTemplate,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
-) {
+        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
 
@@ -26,24 +27,24 @@ class FagmodulService(
      * Henter pin og ytelsetype , støttede SED typer:
      *  P2100 og P15000
      */
-    fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse {
+    fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse? {
         return metricsHelper.measure("hentYtelseKravtype") {
             val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
-            try {
+            return@measure try {
                 logger.info("Henter ytelsetype for P_BUC_10 for rinaNr: $rinaNr , dokumentId: $dokumentId")
-                val response = fagmodulOidcRestTemplate.exchange(path,
+                fagmodulOidcRestTemplate.exchange(path,
                         HttpMethod.GET,
                         HttpEntity(""),
-                        HentPinOgYtelseTypeResponse::class.java)
-                if (!response.statusCode.isError) {
-                    logger.info("Hentet ytelsetype for P_BUC_10 fra fagmodulen: ${response.body}")
-                    response.body!!
-                } else {
-                    throw RuntimeException("Noe gikk galt under henting av Ytelsetype fra fagmodulen: ${response.statusCode}")
-                }
+                        HentPinOgYtelseTypeResponse::class.java).body
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under henting av ytelsetype ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw RuntimeException("En 4xx feil oppstod under henting av ytelsetype ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under henting av ytelsetype ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw RuntimeException("En 5xx feil oppstod under henting av ytelsetype ex: ${sex.message} body: ${sex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under henting av ytelsetype fra fagmodulen: ${ex.message}")
-                throw RuntimeException("Feil ved henting av ytelsetype fra fagmodulen")
+                logger.error("En ukjent feil oppstod under henting av ytelsetype ex: ${ex.message}")
+                throw RuntimeException("En ukjent feil oppstod under henting av ytelsetype ex: ${ex.message}")
             }
         }
     }
@@ -59,19 +60,19 @@ class FagmodulService(
             val path = "/sed/fodselsdato/$rinaNr/buctype/$buctype"
             try {
                 logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
-                val response = fagmodulOidcRestTemplate.exchange(path,
+                fagmodulOidcRestTemplate.exchange(path,
                         HttpMethod.GET,
                         HttpEntity(""),
-                        String::class.java)
-                if (!response.statusCode.isError) {
-                    logger.info("Hentet fødselsdato fra fagmodulen")
-                    response.body
-                } else {
-                    throw RuntimeException("Noe gikk galt under henting av fødselsdato fra fagmodulen: ${response.statusCode}")
-                }
+                        String::class.java).body
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under henting av fødselsdato ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw RuntimeException("En 4xx feil oppstod under henting av fødselsdato ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under henting av henting av fødselsdato ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw RuntimeException("En 5xx feil oppstod under henting av fødselsdato ex: ${sex.message} body: ${sex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under henting av fødselsdato fra fagmodulen: ${ex.message}")
-                throw RuntimeException("Feil ved henting av fødselsdato")
+                logger.error("En ukjent feil oppstod under henting av henting av fødselsdato ex: ${ex.message}")
+                throw RuntimeException("En ukjent feil oppstod under henting av fødselsdato ex: ${ex.message}")
             }
         }
     }
@@ -79,21 +80,21 @@ class FagmodulService(
     fun hentAlleDokumenterFraRinaSak(rinaNr: String): String? {
         return metricsHelper.measure("hentSeds") {
             val path = "/buc/$rinaNr/allDocuments"
-            try {
+            return@measure try {
                 logger.info("Henter jsondata for alle sed for rinaNr: $rinaNr")
-                val response = fagmodulOidcRestTemplate.exchange(path,
+                fagmodulOidcRestTemplate.exchange(path,
                         HttpMethod.GET,
                         null,
-                        String::class.java)
-                if (!response.statusCode.isError) {
-                    logger.info("Hentet seds fra fagmodulen")
-                    response.body
-                } else {
-                    throw RuntimeException("Noe gikk galt under henting av seds fra fagmodulen: ${response.statusCode}")
-                }
+                        String::class.java).body
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under henting av av SEDer ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw RuntimeException("En 4xx feil oppstod under henting av SEDer ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under henting av henting av SEDer ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw RuntimeException("En 5xx feil oppstod under henting av SEDer ex: ${sex.message} body: ${sex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under henting av seds fra fagmodulen: ${ex.message}")
-                throw RuntimeException("Feil ved henting av seds")
+                logger.error("En ukjent feil oppstod under henting av henting av SEDer ex: ${ex.message}")
+                throw RuntimeException("En ukjent feil oppstod under henting av SEDer ex: ${ex.message}")
             }
         }
     }
