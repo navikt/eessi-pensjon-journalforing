@@ -77,6 +77,34 @@ class FagmodulService(
         }
     }
 
+    /**
+     * Henter den forsikredes fødselsnummer fra SEDer i den oppgitte BUCen
+     *
+     *  @param rinaNr BUC-id
+     *  @param buctype BUC-type
+     */
+    fun hentFnrFraBuc(rinaNr: String, buctype: String) : String? {
+        return metricsHelper.measure("hentSed") {
+            val path = "/sed/fodselsnr/$rinaNr/buctype/$buctype"
+            try {
+                logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
+                fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        HttpEntity(""),
+                        String::class.java).body
+            } catch (cex: HttpClientErrorException) {
+                logger.error("En 4xx feil oppstod under henting av fnr ex: ${cex.message} body: ${cex.responseBodyAsString}")
+                throw RuntimeException("En 4xx feil oppstod under henting av fnr ex: ${cex.message} body: ${cex.responseBodyAsString}")
+            } catch (sex: HttpServerErrorException) {
+                logger.error("En 5xx feil oppstod under henting av fnr ex: ${sex.message} body: ${sex.responseBodyAsString}")
+                throw RuntimeException("En 5xx feil oppstod under henting av fnr ex: ${sex.message} body: ${sex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En ukjent feil oppstod under henting av fnr ex: ${ex.message}")
+                throw RuntimeException("En ukjent feil oppstod under henting av fnr ex: ${ex.message}")
+            }
+        }
+    }
+
     fun hentAlleDokumenterFraRinaSak(rinaNr: String): String? {
         return metricsHelper.measure("hentSeds") {
             val path = "/buc/$rinaNr/allDocuments"

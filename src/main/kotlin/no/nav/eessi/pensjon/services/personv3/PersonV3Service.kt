@@ -35,7 +35,7 @@ class PersonV3Service(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
-    fun hentPerson(fnr: String): Bruker {
+    fun hentPerson(fnr: String): Bruker? {
         return metricsHelper.measure("hentperson") {
             logger.info("Henter person fra PersonV3Service")
 
@@ -44,8 +44,8 @@ class PersonV3Service(
                 val resp = kallPersonV3(fnr)
                 resp.person as Bruker
             } catch (pif: HentPersonPersonIkkeFunnet) {
-                logger.error("Personen finnes ikke", pif)
-                throw PersonV3IkkeFunnetException(pif.message)
+                logger.warn("Personen finnes ikke", pif)
+                null
             } catch (psb: HentPersonSikkerhetsbegrensning) {
                 logger.error("Sikkerhetsbegrensning hindret henting av person", psb)
                 throw PersonV3SikkerhetsbegrensningException(psb.message)

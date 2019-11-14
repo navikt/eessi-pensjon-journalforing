@@ -32,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -148,7 +147,7 @@ class JournalforingServiceTest {
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
-                .route(eq(null), eq(BucType.P_BUC_03), eq(null), any(),  eq(null) ,eq(null), eq(null))
+                .route(eq("12345678901"), eq(BucType.P_BUC_03), eq("NOR"), any(), any(), eq(null), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
@@ -166,6 +165,11 @@ class JournalforingServiceTest {
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
                 .`when`(fagmodulService)
                 .hentPinOgYtelseType(anyString(), anyString())
+
+        //FAGMODUL HENT FNR FRA BUC
+        doReturn("12345678901")
+                .`when`(fagmodulService)
+                .hentFnrFraBuc(anyString(), anyString())
     }
 
     @Test
@@ -292,13 +296,13 @@ class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2200`(){
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.SENDT )
-        verify(personV3Service, times(0)).hentPerson(any())
+        verify(personV3Service, times(1)).hentPerson(any())
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq(null),
-                personNavn= eq(null),
+                navBruker= eq("12345678901"),
+                personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
                 mottakerId= eq("NO:NAVT002"),
@@ -504,13 +508,13 @@ class JournalforingServiceTest {
     fun `Mottat gyldig Sed P2200`(){
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
-        verify(personV3Service, times(0)).hentPerson(any())
+        verify(personV3Service, times(1)).hentPerson(any())
         verify(euxService).hentFodselsDatoFraSed(eq("148161"), eq("f899bf659ff04d20bc8b978b186f1ecc"))
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq(null),
-                personNavn= eq(null),
+                navBruker= eq("12345678901"),
+                personNavn= eq("Test Testesen"),
                 avsenderId= eq("NO:NAVT003"),
                 avsenderNavn= eq("NAVT003"),
                 mottakerId= eq("NO:NAVT002"),

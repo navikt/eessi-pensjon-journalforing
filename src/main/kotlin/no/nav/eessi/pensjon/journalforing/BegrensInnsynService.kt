@@ -44,7 +44,7 @@ class BegrensInnsynService(private val euxService: EuxService,
         fnre.forEach { fnr ->
             try {
                 val person = personV3Service.hentPerson(fnr)
-                person.diskresjonskode?.value?.let { kode ->
+                person?.diskresjonskode?.value?.let { kode ->
                     logger.debug("Diskresjonskode: $kode")
                     val diskresjonskode = Diskresjonskode.valueOf(kode)
                     if (diskresjonskode == Diskresjonskode.SPSF) {
