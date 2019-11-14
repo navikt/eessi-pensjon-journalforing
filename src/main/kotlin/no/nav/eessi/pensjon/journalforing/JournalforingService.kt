@@ -57,16 +57,23 @@ class JournalforingService(private val euxService: EuxService,
                 }
 
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-                val pinOgYtelse = hentPinOgYtelse(sedHendelse)
-                var fnr = settFnr(sedHendelse.navBruker, pinOgYtelse?.fnr)
 
-                val person = hentBruker(fnr)
+                var person = hentPerson(sedHendelse.navBruker)
+                val fnr : String
 
-                // Dersom hentPerson ikke fikk oppslag er fnr antageligvis feil utfylt i SED, vi fortsetter som om fnr mangler
-                if (person == null) fnr = null
+                if(person != null) {
+                    fnr = sedHendelse.navBruker!!
+                } else {
+                    // TODO buctype fjernes som argument snart fordi fagmodulen bruker den ikke
+                    fnr = fagmodulService.hentFnrFraBuc(sedHendelse.rinaSakId, "fjernes")!!
+                    person = hentPerson(fnr)
+                }
 
                 val personNavn = hentPersonNavn(person)
                 var aktoerId: String? = null
+
+                // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
+                val pinOgYtelse = hentPinOgYtelse(sedHendelse)
 
                 if (person != null) aktoerId = hentAktoerId(fnr)
 
@@ -88,7 +95,7 @@ class JournalforingService(private val euxService: EuxService,
                         sedHendelse.sedType,
                         sedHendelse.bucType!!,
                         pinOgYtelse,
-                        sedHendelse.navBruker,
+                        fnr,
                         landkode,
                         fodselsDato,
                         geografiskTilknytning,
@@ -160,13 +167,6 @@ class JournalforingService(private val euxService: EuxService,
         return filnavn
     }
 
-    private fun settFnr(fnrFraSed: String?, fnrFraFagmodulen: String?): String? {
-        if(fnrFraSed.isNullOrEmpty()) {
-            return fnrFraFagmodulen
-        }
-        return fnrFraSed
-    }
-
     private fun hentPinOgYtelse(sedHendelse: SedHendelseModel): HentPinOgYtelseTypeResponse? {
         if(sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
             return try{
@@ -202,7 +202,7 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    private fun hentBruker(navBruker: String?): Bruker? {
+    private fun hentPerson(navBruker: String?): Bruker? {
         if (!isFnrValid(navBruker)) return null
         return try {
             personV3Service.hentPerson(navBruker!!)
