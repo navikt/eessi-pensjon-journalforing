@@ -12,11 +12,9 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import java.lang.RuntimeException
 import java.util.*
 
 data class Identinfo(
@@ -108,15 +106,13 @@ class AktoerregisterService(
                         HttpMethod.GET,
                         requestEntity,
                         String::class.java)
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under kall til aktørregisteret ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under kall til aktørregisteret ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under kall til aktørregisteret ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under kall til aktørregisteret ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under kall til aktørregisteret ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under kall til aktørregisteret ex: ${ex.message}")
+
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under kall til aktørregisteret ex: $ex body: ${ex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under kall til aktørregisteret ex: $ex")
+                throw java.lang.RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message}")
             }
             return@measure jacksonObjectMapper().readValue(responseEntity.body!!)
         }

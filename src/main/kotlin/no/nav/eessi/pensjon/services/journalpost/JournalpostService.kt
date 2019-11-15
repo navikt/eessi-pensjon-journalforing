@@ -15,8 +15,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -99,15 +98,12 @@ class JournalpostService(
                         HttpEntity(requestBody.toString(), headers),
                         String::class.java)
                 mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under opprettelse av journalpost ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En 4xx feil oppstod under opprettelse av journalpost ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under opprettelse av journalpost ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En 5xx feil oppstod opprettelse av journalpost ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under opprettelse av journalpost ex: ${ex.message}")
-                throw java.lang.RuntimeException("En ukjent feil oppstod opprettelse av journalpost ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under opprettelse av journalpost ex: $ex body: ${ex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under opprettelse av journalpost ex: $ex")
+                throw java.lang.RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
         }
     }

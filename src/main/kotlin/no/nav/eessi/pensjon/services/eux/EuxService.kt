@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 
@@ -44,15 +43,12 @@ class EuxService(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av PDF ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av PDF ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av PDF ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av PDF ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av PDF ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av PDF ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av PDF ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod henting av PDF ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av PDF ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av PDF ex: ${ex.message}")
             }
         }
     }
@@ -72,15 +68,12 @@ class EuxService(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av SED ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av SED ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av SED ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av SED ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av SED ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av SED ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av SED ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av SED ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av SED ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av SED ex: ${ex.message}")
             }
         }
     }

@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.services.aktoerregister
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -126,7 +125,7 @@ class AktoerregisterServiceTest {
             // the mock returns 403-forbidden
             aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         }
-        assertEquals("En 4xx feil oppstod under kall til aktørregisteret ex: 403 FORBIDDEN body: ", arre.message!!)
+        assertEquals("En feil oppstod under kall til aktørregisteret ex: 403 FORBIDDEN body: ", arre.message!!)
     }
 
     private fun createResponseEntityFromJsonFile(filePath: String, httpStatus: HttpStatus = HttpStatus.OK): ResponseEntity<String> {
