@@ -60,17 +60,6 @@ fun <T> configureRequestSamlToken(service: T) {
     configureSTSRequestSamlToken(client, true)
 }
 
-fun <T> configureRequestSamlTokenOnBehalfOfOidc(service: T, token: String) {
-    val client = ClientProxy.getClient(service)
-
-    // Add interceptor to extract token from request context and add to STS request as the OnbehalfOf element.
-    client.outInterceptors.add(OnBehalfOfOutInterceptor())
-    configureSTSRequestSamlToken(client, false)
-
-    client.requestContext[REQUEST_CONTEXT_ONBEHALFOF_TOKEN] = token
-    client.requestContext[REQUEST_CONTEXT_ONBEHALFOF_TOKEN_TYPE] = OnBehalfOfOutInterceptor.TokenType.OIDC
-}
-
 private fun configureSTSRequestSamlToken(client: Client, cacheTokenInEndpoint: Boolean) {
     val stsClient = createCustomSTSClient(client.bus)
     configureSTSWithPolicyForClient(stsClient, client, STS_REQUEST_SAML_POLICY, cacheTokenInEndpoint)
@@ -131,8 +120,6 @@ private fun configureSTSClient(stsClient: STSClient) {
         isEnableAppliesTo = false
         isAllowRenewing = false
         location = STS_URL
-        // Debug/logging av meldinger som sendes mellom app og STS
-        // features = listOf(LoggingFeature()) // TODO: Add denne featureren bare dersom DEBUG er enabled
         properties = mapOf(
                 SecurityConstants.USERNAME to SERVICEUSER_USERNAME,
                 SecurityConstants.PASSWORD to SERVICEUSER_PASSWORD

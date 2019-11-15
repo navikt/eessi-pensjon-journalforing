@@ -3,8 +3,6 @@ package no.nav.eessi.pensjon.services.journalpost
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonRawValue
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.mapAnyToJson
@@ -44,12 +42,6 @@ class JournalpostRequest(
         val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
         val tittel: String //REQUIRED
 ){
-    companion object {
-        private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
-
-        fun fromJson(json: String): JournalpostRequest = mapper.readValue(json, JournalpostRequest::class.java)
-    }
-
     override fun toString(): String {
         return mapAnyToJson(this,true)
     }

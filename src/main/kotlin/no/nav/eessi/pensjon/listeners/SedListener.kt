@@ -12,8 +12,6 @@ import no.nav.eessi.pensjon.models.HendelseType.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.kafka.annotation.PartitionOffset
-import org.springframework.kafka.annotation.TopicPartition
 import java.util.*
 
 @Service

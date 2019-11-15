@@ -9,12 +9,6 @@ data class SedDokumenter(
         val sed: EuxDokument,
         val vedlegg: List<EuxDokument>?
 ){
-    companion object {
-        private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
-
-        fun fromJson(json: String): SedDokumenter = mapper.readValue(json, SedDokumenter::class.java)
-    }
-
     override fun toString(): String {
         val mapper = jacksonObjectMapper()
         return mapper.writeValueAsString(this)
