@@ -37,7 +37,7 @@ class FagmodulService(
                         HentPinOgYtelseTypeResponse::class.java).body
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under henting av ytelsetype ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av ytelsetype ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av ytelsetype ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under henting av ytelsetype ex: $ex")
                 throw RuntimeException("En feil oppstod under henting av ytelsetype ex: ${ex.message}")
@@ -62,7 +62,7 @@ class FagmodulService(
                         String::class.java).body
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under henting av fødselsdato ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av fødselsdato ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av fødselsdato ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under henting av fødselsdato ex: $ex")
                 throw RuntimeException("En feil oppstod under henting av fødselsdato ex: ${ex.message}")
