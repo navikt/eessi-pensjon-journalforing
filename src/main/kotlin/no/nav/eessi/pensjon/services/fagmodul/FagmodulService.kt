@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 
@@ -36,15 +35,12 @@ class FagmodulService(
                         HttpMethod.GET,
                         HttpEntity(""),
                         HentPinOgYtelseTypeResponse::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av ytelsetype ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av ytelsetype ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av ytelsetype ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av ytelsetype ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av ytelsetype ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av ytelsetype ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av ytelsetype ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av ytelsetype ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av ytelsetype ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av ytelsetype ex: ${ex.message}")
             }
         }
     }
@@ -64,15 +60,12 @@ class FagmodulService(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av fødselsdato ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av fødselsdato ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av henting av fødselsdato ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av fødselsdato ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av henting av fødselsdato ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av fødselsdato ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av fødselsdato ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av fødselsdato ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av fødselsdato ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av fødselsdato ex: ${ex.message}")
             }
         }
     }
@@ -90,17 +83,14 @@ class FagmodulService(
                 logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
                 fagmodulOidcRestTemplate.exchange(path,
                         HttpMethod.GET,
-                        HttpEntity(""),
+                        null,
                         String::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av fnr ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av fnr ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av fnr ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av fnr ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av fnr ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av fnr ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message}")
             }
         }
     }
@@ -114,15 +104,12 @@ class FagmodulService(
                         HttpMethod.GET,
                         null,
                         String::class.java).body
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under henting av av SEDer ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw RuntimeException("En 4xx feil oppstod under henting av SEDer ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under henting av henting av SEDer ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw RuntimeException("En 5xx feil oppstod under henting av SEDer ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av henting av SEDer ex: ${ex.message}")
-                throw RuntimeException("En ukjent feil oppstod under henting av SEDer ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message}")
             }
         }
     }
