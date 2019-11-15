@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -67,15 +66,12 @@ class OppgaveService(
                 logger.info("Oppretter $oppgaveType oppgave")
                 oppgaveOidcRestTemplate.exchange("/", HttpMethod.POST, httpEntity, String::class.java)
                 logger.info("Opprettet journalforingsoppgave med tildeltEnhetsnr:  $tildeltEnhetsnr")
-            } catch (cex: HttpClientErrorException) {
-                logger.error("En 4xx feil oppstod under opprettelse av oppgave ex: ${cex.message} body: ${cex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En 4xx feil oppstod under opprettelse av oppgave ex: ${cex.message} body: ${cex.responseBodyAsString}")
-            } catch (sex: HttpServerErrorException) {
-                logger.error("En 5xx feil oppstod under opprettelse av oppgave ex: ${sex.message} body: ${sex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En 5xx feil oppstod under opprettelse av oppgave ex: ${sex.message} body: ${sex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under opprettelse av oppgave ex: ${ex.message}")
-                throw java.lang.RuntimeException("En ukjent feil oppstod under opprettelse av oppgave ex: ${ex.message}")
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under opprettelse av oppgave ex: $ex body: ${ex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En feil oppstod under opprettelse av oppgave ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under opprettelse av oppgave ex: $ex")
+                throw java.lang.RuntimeException("En feil oppstod under opprettelse av oppgave ex: ${ex.message}")
             }
         }
     }
