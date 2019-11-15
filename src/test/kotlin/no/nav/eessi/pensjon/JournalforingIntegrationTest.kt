@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.*
@@ -38,13 +37,14 @@ import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
+private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 
 private lateinit var mockServer : ClientAndServer
 
 @SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(count = 1, controlledShutdown = true, topics = [SED_SENDT_TOPIC])
+@EmbeddedKafka(count = 1, controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC])
 class JournalforingIntegrationTest {
 
     @Autowired
@@ -56,7 +56,6 @@ class JournalforingIntegrationTest {
     @Autowired
     lateinit var  personV3Service: PersonV3Service
 
-    @Disabled
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
@@ -75,7 +74,7 @@ class JournalforingIntegrationTest {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(95000, TimeUnit.MILLISECONDS)
+        sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()
@@ -234,6 +233,27 @@ class JournalforingIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
+                    )
+
+            //Mock fagmodul hent fnr fra buc
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/sed/fodselsnr/161558/buctype/fjernes"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.FORBIDDEN_403.code())
+                            .withBody("oops")
+                    )
+
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/sed/fodselsnr/148161/buctype/fjernes"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.FORBIDDEN_403.code())
+                            .withBody("oops")
                     )
 
             //Mock eux hent av sed

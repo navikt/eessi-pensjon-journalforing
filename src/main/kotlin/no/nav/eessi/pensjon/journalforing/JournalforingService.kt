@@ -59,14 +59,18 @@ class JournalforingService(private val euxService: EuxService,
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
                 var person = hentPerson(sedHendelse.navBruker)
-                val fnr : String
+                var fnr : String? = null
 
                 if(person != null) {
                     fnr = sedHendelse.navBruker!!
                 } else {
-                    // TODO buctype fjernes som argument snart fordi fagmodulen bruker den ikke
-                    fnr = fagmodulService.hentFnrFraBuc(sedHendelse.rinaSakId, "fjernes")!!
-                    person = hentPerson(fnr)
+                    try {
+                        // TODO buctype fjernes som argument snart fordi fagmodulen bruker den ikke
+                        fnr = fagmodulService.hentFnrFraBuc(sedHendelse.rinaSakId, "fjernes")!!
+                        person = hentPerson(fnr)
+                    } catch (ex: Exception) {
+                        logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                    }
                 }
 
                 val personNavn = hentPersonNavn(person)
