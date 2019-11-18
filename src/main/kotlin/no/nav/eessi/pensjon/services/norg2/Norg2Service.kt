@@ -12,8 +12,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 @Service
@@ -62,32 +61,32 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
-                return metricsHelper.measure("hentArbeidsfordeling") {
+        return metricsHelper.measure("hentArbeidsfordeling") {
 
-                    try {
-                        val headers = HttpHeaders()
-                        headers.contentType = MediaType.APPLICATION_JSON
-                        val httpEntity = HttpEntity(request.toJson(), headers)
+            try {
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+                val httpEntity = HttpEntity(request.toJson(), headers)
 
-                        val responseEntity = norg2OidcRestTemplate.exchange(
-                                "/api/v1/arbeidsfordeling",
-                                HttpMethod.POST,
-                                httpEntity,
-                                String::class.java)
+                val responseEntity = norg2OidcRestTemplate.exchange(
+                        "/api/v1/arbeidsfordeling",
+                        HttpMethod.POST,
+                        httpEntity,
+                        String::class.java)
 
-                        val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
-                        logger.debug("fordelsingsEnheter: $fordelingEnheter")
+                val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
+                logger.debug("fordelsingsEnheter: $fordelingEnheter")
 
-                        fordelingEnheter
+                fordelingEnheter
 
-                    } catch (hcee: HttpClientErrorException) {
-                        throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hcee.message}")
-                    } catch (hsee: HttpServerErrorException) {
-                        throw RuntimeException("Noe gikk galt under henting av arbeidsfordelingsenheter fra Norg2 ${hsee.message}")
-                    } catch (ex: Exception) {
-                        throw RuntimeException("Ukjent feil ved henting av arbeidsfordelingsenheter fra Norg2 ${ex.message}")
-                    }
-                }
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av arbeidsfordeling ex: $ex body: ${ex.responseBodyAsString}")
+                throw java.lang.RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under henting av arbeidsfordeling ex: $ex")
+                throw java.lang.RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message}")
+            }
+        }
     }
 
     fun finnKorrektArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>?): String? {

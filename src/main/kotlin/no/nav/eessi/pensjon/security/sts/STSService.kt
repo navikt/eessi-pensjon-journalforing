@@ -66,9 +66,12 @@ class STSService(
                             HttpMethod.GET,
                             null,
                             typeRef<WellKnownSTS>()).body!!
-            } catch (ex: Exception) {
-                logger.error("Feil ved henting av STS endepunkter fra well.known: ${ex.message}", ex)
-                throw RestClientException(ex.message!!)
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under service discovery av STS ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under service discovery av STS ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under service discovery av STS ex: $ex")
+                throw RuntimeException("En feil oppstod under service discovery av STS ex: ${ex.message}")
             }
         }
     }
