@@ -109,10 +109,10 @@ class AktoerregisterService(
 
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under kall til aktørregisteret ex: $ex body: ${ex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under kall til aktørregisteret ex: $ex")
-                throw java.lang.RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message}")
+                throw RuntimeException("En feil oppstod under kall til aktørregisteret ex: ${ex.message}")
             }
             return@measure jacksonObjectMapper().readValue(responseEntity.body!!)
         }

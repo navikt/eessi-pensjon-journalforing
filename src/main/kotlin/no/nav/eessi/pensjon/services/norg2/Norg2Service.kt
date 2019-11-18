@@ -81,10 +81,10 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under henting av arbeidsfordeling ex: $ex body: ${ex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under henting av arbeidsfordeling ex: $ex")
-                throw java.lang.RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message}")
+                throw RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message}")
             }
         }
     }

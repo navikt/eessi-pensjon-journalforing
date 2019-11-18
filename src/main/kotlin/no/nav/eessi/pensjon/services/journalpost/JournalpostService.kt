@@ -100,10 +100,10 @@ class JournalpostService(
                 mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: $ex body: ${ex.responseBodyAsString}")
-                throw java.lang.RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: $ex")
-                throw java.lang.RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
+                throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
         }
     }
