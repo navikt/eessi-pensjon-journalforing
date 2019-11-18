@@ -49,6 +49,9 @@ class PersonV3Service(
             } catch (psb: HentPersonSikkerhetsbegrensning) {
                 logger.error("Sikkerhetsbegrensning hindret henting av person", psb)
                 throw PersonV3SikkerhetsbegrensningException(psb.message)
+            } catch (ex: Exception) {
+                logger.error("En ukjent feil oppstod under henting av person", ex)
+                throw ex
             }
         }
     }
