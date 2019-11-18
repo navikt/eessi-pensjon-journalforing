@@ -8,10 +8,7 @@ import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.personv3.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
-import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,7 +49,7 @@ class BegrensInnsynServiceTest {
     @Test
     fun sjekkeUtJacksonMapper() {
         val json = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val expected = listOf<String>("44cb68f89a2f4e748934fb4722721018")
+        val expected = listOf("44cb68f89a2f4e748934fb4722721018")
         val actual = begrensInnsynService.hentSedDocumentsIds(json)
 
         Assertions.assertEquals(expected, actual)
@@ -141,8 +138,6 @@ class BegrensInnsynServiceTest {
         Assertions.assertEquals(expected, actual)
     }
 
-
-
     @Test
     fun sjekkForDiskresjonskodeSPSFFunnet() {
 
@@ -171,10 +166,5 @@ class BegrensInnsynServiceTest {
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)
-
-
     }
-
-
-
 }

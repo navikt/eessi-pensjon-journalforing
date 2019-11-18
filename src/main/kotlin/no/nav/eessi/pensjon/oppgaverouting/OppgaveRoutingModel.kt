@@ -32,9 +32,4 @@ data class OppgaveRoutingModel(
             fun getEnhet(enhetsNr: String): Enhet? = values().find { it.enhetsNr == enhetsNr }
         }
     }
-
-    enum class Krets {
-        NFP,
-        NAY
-    }
 }
