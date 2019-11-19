@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.failureTypeTagValue
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.successTypeTagValue
+
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -52,7 +55,7 @@ class FagmodulService(
      *  @param buctype BUC-type
      */
     fun hentFodselsdatoFraBuc(rinaNr: String, buctype: String) : String? {
-        return metricsHelper.measure("hentSed") {
+        return metricsHelper.measure("hentFodselsdatoFraBuc") {
             val path = "/sed/fodselsdato/$rinaNr/buctype/$buctype"
             try {
                 logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
@@ -77,21 +80,32 @@ class FagmodulService(
      *  @param buctype BUC-type
      */
     fun hentFnrFraBuc(rinaNr: String, buctype: String) : String? {
-        return metricsHelper.measure("hentSed") {
-            val path = "/sed/fodselsnr/$rinaNr/buctype/$buctype"
-            try {
-                logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
-                fagmodulOidcRestTemplate.exchange(path,
-                        HttpMethod.GET,
-                        null,
-                        String::class.java).body
-            } catch(ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
-            } catch(ex: Exception) {
-                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex")
-                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message}")
+        val path = "/sed/fodselsnr/$rinaNr/buctype/$buctype"
+        try {
+            logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
+            val fnr = fagmodulOidcRestTemplate.exchange(path,
+                    HttpMethod.GET,
+                    HttpEntity(""),
+                    String::class.java).body
+            metricsHelper.increment("hentFnrFraBUC", successTypeTagValue)
+            return fnr
+        } catch(ex: HttpClientErrorException) {
+            // Ved ikke ikke treff på fnr fortsetter vi som om fnr ikke var utfylt
+            if (ex.statusCode == HttpStatus.NOT_FOUND) {
+                logger.info("Fant ikke fnr i noen SEDer i BUC : $rinaNr")
+                return null
             }
+            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
+            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
+            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
+        } catch(ex: HttpServerErrorException) {
+            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
+            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
+            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
+        } catch(ex: Exception) {
+            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
+            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex")
+            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message}")
         }
     }
 

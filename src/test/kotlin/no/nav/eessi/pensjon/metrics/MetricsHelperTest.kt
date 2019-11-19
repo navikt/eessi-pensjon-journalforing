@@ -4,6 +4,14 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.MockClock
 import io.micrometer.core.instrument.simple.SimpleConfig
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.eventTag
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.failureTypeTagValue
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.incrementMeterName
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.measureMeterName
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.measureTimerSuffix
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.methodTag
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.successTypeTagValue
+import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.typeTag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,14 +20,12 @@ import java.util.concurrent.TimeUnit
 
 internal class MetricsHelperTest {
 
-    lateinit var registry: MeterRegistry
-    lateinit var metricsHelper: MetricsHelper
-    lateinit var config: MetricsHelper.Configuration
+    private lateinit var registry: MeterRegistry
+    private lateinit var metricsHelper: MetricsHelper
 
     @BeforeEach
     fun setup() {
         registry = SimpleMeterRegistry()
-        config = MetricsHelper.Configuration()
         metricsHelper = MetricsHelper(registry)
     }
 
@@ -32,9 +38,9 @@ internal class MetricsHelperTest {
         assertEquals(
             1.0,
             registry.counter(
-                    config.measureMeterName,
-                    config.methodTag, "dummy",
-                    config.typeTag, config.successTypeTagValue)
+                    measureMeterName,
+                    methodTag, "dummy",
+                    typeTag, successTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -52,9 +58,9 @@ internal class MetricsHelperTest {
         assertEquals(
             1.0,
             registry.counter(
-                    config.measureMeterName,
-                    config.methodTag, "dummy",
-                    config.typeTag, config.failureTypeTagValue)
+                    measureMeterName,
+                    methodTag, "dummy",
+                    typeTag, failureTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -72,9 +78,9 @@ internal class MetricsHelperTest {
         assertEquals(
             1.0,
             registry.counter(
-                    config.measureMeterName,
-                    config.methodTag, "dummy",
-                    config.typeTag, config.failureTypeTagValue)
+                    measureMeterName,
+                    methodTag, "dummy",
+                    typeTag, failureTypeTagValue)
                 .count(),
             0.0001)
     }
@@ -91,8 +97,8 @@ internal class MetricsHelperTest {
         }
 
         val timer = registry.timer(
-                "${config.measureMeterName}.${config.measureTimerSuffix}",
-                config.methodTag, "dummy")
+                "$measureMeterName.$measureTimerSuffix",
+                methodTag, "dummy")
         assertEquals(1, timer.count())
         assertEquals(
                 100.0,
@@ -108,9 +114,9 @@ internal class MetricsHelperTest {
 
         assertEquals(1.0,
                 registry.counter(
-                        config.incrementMeterName,
-                        config.eventTag, "myevent",
-                        config.typeTag, "mottatt")
+                        incrementMeterName,
+                        eventTag, "myevent",
+                        typeTag, "mottatt")
                         .count(),
                 0.0001)
 
@@ -126,11 +132,10 @@ internal class MetricsHelperTest {
 
         assertEquals(1.0,
                 registry.counter(
-                        config.incrementMeterName,
-                        config.eventTag, "myevent",
-                        config.typeTag, "failed")
+                        incrementMeterName,
+                        eventTag, "myevent",
+                        typeTag, "failed")
                         .count(),
                 0.0001)
-
     }
 }
