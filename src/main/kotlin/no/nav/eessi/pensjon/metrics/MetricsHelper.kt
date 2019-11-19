@@ -3,12 +3,11 @@ package no.nav.eessi.pensjon.metrics
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
 @Component
-class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) val configuration: Configuration = Configuration()) {
+class MetricsHelper(val registry: MeterRegistry) {
 
     /**
      * Alle counters må legges inn i init listen slik at counteren med konkrete tagger blir initiert med 0.
@@ -23,7 +22,6 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
                 "disoverSTS",
                 "getSystemOidcToken",
                 "aktoerregister",
-                "hentSed",
                 "hentpdf",
                 "hentSeds",
                 "hentSed",
@@ -31,45 +29,46 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
                 "opprettjournalpost",
                 "hentArbeidsfordeling",
                 "opprettoppgave",
-                "hentperson"
+                "hentperson",
+                "hentFodselsdatoFraBuc",
+                "hentFnrFraBUC"
                 ).forEach {counterName ->
-            Counter.builder(configuration.measureMeterName)
-                    .tag(configuration.typeTag, configuration.successTypeTagValue)
-                    .tag(configuration.methodTag, counterName)
+            Counter.builder(measureMeterName)
+                    .tag(typeTag, successTypeTagValue)
+                    .tag(methodTag, counterName)
                     .register(registry)
 
-            Counter.builder(configuration.measureMeterName)
-                    .tag(configuration.typeTag, configuration.failureTypeTagValue)
-                    .tag(configuration.methodTag, counterName)
+            Counter.builder(measureMeterName)
+                    .tag(typeTag, failureTypeTagValue)
+                    .tag(methodTag, counterName)
                     .register(registry)
         }
     }
 
     fun <R> measure(
             method: String,
-            failure: String = configuration.failureTypeTagValue,
-            success: String = configuration.successTypeTagValue,
-            meterName: String = configuration.measureMeterName,
-            eventType: String = configuration.callEventTypeTagValue,
+            failure: String = failureTypeTagValue,
+            success: String = successTypeTagValue,
+            meterName: String = measureMeterName,
             block: () -> R): R {
 
-        var typeTag = success
+        var typeTagValue = success
 
         try {
-            return Timer.builder("$meterName.${configuration.measureTimerSuffix}")
-                    .tag(configuration.methodTag, method)
+            return Timer.builder("$meterName.$measureTimerSuffix")
+                    .tag(methodTag, method)
                     .register(registry)
                     .recordCallable {
                         block.invoke()
                     }
         } catch (throwable: Throwable) {
-            typeTag = failure
+            typeTagValue = failure
             throw throwable
         } finally {
             try {
                 Counter.builder(meterName)
-                        .tag(configuration.methodTag, method)
-                        .tag(configuration.typeTag, typeTag)
+                        .tag(methodTag, method)
+                        .tag(typeTag, typeTagValue)
                         .register(registry)
                         .increment()
             } catch (e: Exception) {
@@ -80,13 +79,13 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
 
     fun increment(
             event: String,
-            eventType: String = configuration.eventTypeTagValue,
+            eventType: String,
             throwable: Throwable? = null,
-            meterName: String = configuration.incrementMeterName) {
+            meterName: String = incrementMeterName) {
         try {
             Counter.builder(meterName)
-                    .tag(configuration.eventTag, event)
-                    .tag(configuration.typeTag, eventType)
+                    .tag(eventTag, event)
+                    .tag(typeTag, eventType)
                     .register(registry)
                     .increment()
         } catch (t: Throwable) {
@@ -94,20 +93,17 @@ class MetricsHelper(val registry: MeterRegistry, @Autowired(required = false) va
         }
     }
 
-    data class Configuration(
-            val incrementMeterName: String = "event",
-            val measureMeterName: String = "method",
-            val measureTimerSuffix: String = "timer",
+    companion object Configuration {
+        const val incrementMeterName: String = "event"
+        const val measureMeterName: String = "method"
+        const val measureTimerSuffix: String = "timer"
 
-            val eventTag: String = "event",
-            val methodTag: String = "method",
-            val typeTag: String = "type",
+        const val eventTag: String = "event"
+        const val methodTag: String = "method"
+        const val typeTag: String = "type"
 
-            val successTypeTagValue: String = "successful",
-            val failureTypeTagValue: String = "failed",
-
-            val eventTypeTagValue: String = "occurred",
-
-            val callEventTypeTagValue: String = "called"
-    )
+        const val successTypeTagValue: String = "successful"
+        const val failureTypeTagValue: String = "failed"
+    }
 }
+

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.doThrow
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
@@ -21,6 +22,7 @@ import java.nio.file.Paths
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClientException
 
 
@@ -30,7 +32,7 @@ class FagmodulServiceTest {
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    lateinit var fagmodulService: FagmodulService
+    private lateinit var fagmodulService: FagmodulService
 
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
@@ -146,6 +148,38 @@ class FagmodulServiceTest {
                         eq(HentPinOgYtelseTypeResponse::class.java))
         assertThrows<RuntimeException> {
             fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        }
+    }
+
+    @Test
+    fun `Gitt 404 når etterspør fodselsnummer så returner null`() {
+        val rinaNr = "123"
+        val buctype = "P_BUC_01"
+
+        doThrow(HttpClientErrorException(HttpStatus.NOT_FOUND))
+                .`when`(mockrestTemplate).exchange(
+                        eq("/sed/fodselsnr/$rinaNr/buctype/$buctype"),
+                        any(HttpMethod::class.java),
+                        any(HttpEntity::class.java),
+                        eq(String::class.java))
+
+        assertNull(fagmodulService.hentFnrFraBuc(rinaNr, buctype))
+    }
+
+    @Test
+    fun `Gitt 401 når etterspør fodselsnummer så kast exception`() {
+        val rinaNr = "123"
+        val buctype = "P_BUC_01"
+
+        doThrow(HttpClientErrorException(HttpStatus.UNAUTHORIZED))
+                .`when`(mockrestTemplate).exchange(
+                        eq("/sed/fodselsnr/$rinaNr/buctype/$buctype"),
+                        any(HttpMethod::class.java),
+                        any(HttpEntity::class.java),
+                        eq(String::class.java))
+
+        assertThrows<RuntimeException> {
+            fagmodulService.hentFnrFraBuc(rinaNr, buctype)
         }
     }
 }
