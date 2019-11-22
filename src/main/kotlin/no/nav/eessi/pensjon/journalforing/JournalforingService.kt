@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.handeler.OppgaveHandeler
+import no.nav.eessi.pensjon.handeler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -40,6 +42,7 @@ class JournalforingService(private val euxService: EuxService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val begrensInnsynService: BegrensInnsynService,
+                           private val oppgaveHandeler: OppgaveHandeler,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -130,6 +133,17 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.debug("JournalPostID: $journalpostId")
 
+                oppgaveHandeler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
+                        sedType = sedHendelse.sedType.name,
+                        journalpostId = journalpostId,
+                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                        aktoerId = aktoerId,
+                        oppgaveType = if(uSupporterteVedlegg.isEmpty()) "JOURNALFORING" else "BEHANDLE_SED",
+                        rinaSakId = sedHendelse.rinaSakId,
+                        hendelseType = hendelseType.name,
+                        filnavn = usupporterteFilnavn(uSupporterteVedlegg)
+                ))
+
                 oppgaveService.opprettOppgave(
                         sedType = sedHendelse.sedType,
                         journalpostId = journalpostId,
@@ -139,6 +153,7 @@ class JournalforingService(private val euxService: EuxService,
                         rinaSakId = sedHendelse.rinaSakId,
                         filnavn = null,
                         hendelseType = hendelseType)
+
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     oppgaveService.opprettOppgave(

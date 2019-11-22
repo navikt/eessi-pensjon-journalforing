@@ -5,6 +5,9 @@ kafka:
   sedMottatt:
     topic: eessi-basis-sedMottatt-v1
     groupid: eessi-pensjon-group
+  oppgave:
+      topic: eessi-pensjon-oppgave-v1
+      groupid: eessi-pensjon-group
 
 #Spring
 spring:
