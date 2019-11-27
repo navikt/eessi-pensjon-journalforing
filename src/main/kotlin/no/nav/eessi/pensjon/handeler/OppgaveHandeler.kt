@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.handeler
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -10,25 +12,26 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 
 @Service
-class OppgaveHandeler(val kafkaTemplate: KafkaTemplate<String, String>,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
+class OppgaveHandeler(private val kafkaTemplate: KafkaTemplate<String, String>,
+      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
-    val X_REQUEST_ID = "x_request_id"
+    private val logger = LoggerFactory.getLogger(OppgaveHandeler::class.java)
+    private val X_REQUEST_ID = "x_request_id"
 
-    @Value("\${oppgaveTopic}")
-    lateinit var oppgaveTopic: String
+    @Value("\${kafka.oppgave.topic}")
+    private lateinit var oppgaveTopic: String
 
     @Value("\${FASIT_ENVIRONMENT_NAME}")
-    lateinit var topicPostfix: String
+    private lateinit var topicPostfix: String
 
+    private fun putMeldingPaaKafka(melding: OppgaveMelding) {
+        kafkaTemplate.defaultTopic = "$oppgaveTopic-$topicPostfix"
 
-    fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
-        val topic = "$oppgaveTopic-$topicPostfix"
-        kafkaTemplate.defaultTopic = topic
+        logger.debug("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
 
-        val messageBuilder = MessageBuilder.withPayload(melding)
+        val messageBuilder = MessageBuilder.withPayload(melding.toJson())
 
-        metricsHelper.measure("selvbetjeningsinfoprodusert") {
+        metricsHelper.measure("oppgavemelding") {
             if (MDC.get(X_REQUEST_ID).isNullOrEmpty()) {
                 val message = messageBuilder.build()
                 kafkaTemplate.send(message)
@@ -37,6 +40,32 @@ class OppgaveHandeler(val kafkaTemplate: KafkaTemplate<String, String>,
                 kafkaTemplate.send(message)
             }
         }
+    }
+
+    //helper function to put message on kafka, will retry 3 times and wait before fail
+    fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
+        logger.info("Trying to resubmit")
+
+        var count = 0
+        val maxTries = 3
+        val waitTime = 8000L
+        var failException : Exception ?= null
+
+        while (count < maxTries) {
+            try {
+                putMeldingPaaKafka(melding)
+                logger.info("put oppgavemelding on kafka queue")
+                return
+            } catch (ex: Exception) {
+                count++
+                logger.warn("Failed to put oppgavemelding on kafka, try nr.: $count, Error message: ${ex.message} ")
+                failException = ex
+                Thread.sleep(waitTime)
+            }
+        }
+        logger.error("Failed to put oppgavemelding on kafka,  meesage: $melding", failException)
+        throw RuntimeException(failException!!.message)
+
     }
 
 }

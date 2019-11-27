@@ -133,17 +133,6 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.debug("JournalPostID: $journalpostId")
 
-                oppgaveHandeler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
-                        sedType = sedHendelse.sedType.name,
-                        journalpostId = journalpostId,
-                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                        aktoerId = aktoerId,
-                        oppgaveType = if(uSupporterteVedlegg.isEmpty()) "JOURNALFORING" else "BEHANDLE_SED",
-                        rinaSakId = sedHendelse.rinaSakId,
-                        hendelseType = hendelseType.name,
-                        filnavn = usupporterteFilnavn(uSupporterteVedlegg)
-                ))
-
                 oppgaveService.opprettOppgave(
                         sedType = sedHendelse.sedType,
                         journalpostId = journalpostId,
@@ -154,6 +143,7 @@ class JournalforingService(private val euxService: EuxService,
                         filnavn = null,
                         hendelseType = hendelseType)
 
+                opprettOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     oppgaveService.opprettOppgave(
@@ -165,7 +155,11 @@ class JournalforingService(private val euxService: EuxService,
                             rinaSakId = sedHendelse.rinaSakId,
                             filnavn = usupporterteFilnavn(uSupporterteVedlegg),
                             hendelseType = hendelseType)
+
+                    opprettOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
+
                 }
+
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
@@ -178,6 +172,19 @@ class JournalforingService(private val euxService: EuxService,
                 throw ex
             }
         }
+    }
+
+    private fun opprettOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
+        oppgaveHandeler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
+                sedType = sedType.name,
+                journalpostId = journalpostId,
+                tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                aktoerId = aktoerId,
+                oppgaveType = oppgaveType,
+                rinaSakId = sedHendelse.rinaSakId,
+                hendelseType = hendelseType.name,
+                filnavn = filnavn
+        ))
     }
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {

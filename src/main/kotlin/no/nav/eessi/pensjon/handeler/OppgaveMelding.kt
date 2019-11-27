@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.handeler
 
-import org.springframework.messaging.Message
+import no.nav.eessi.pensjon.json.toJson
 
 data class OppgaveMelding(
         val sedType : String?,
@@ -11,4 +11,8 @@ data class OppgaveMelding(
         val rinaSakId : String,
         val hendelseType : String?,
         var filnavn : String?
-    )
+    )  {
+    override fun toString(): String {
+        return toJson()
+    }
+}

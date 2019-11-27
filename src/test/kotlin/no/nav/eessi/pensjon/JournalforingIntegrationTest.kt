@@ -38,13 +38,14 @@ import javax.ws.rs.HttpMethod
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
+private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1-test"
 
 private lateinit var mockServer : ClientAndServer
 
 @SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(count = 1, controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC])
+@EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
 class JournalforingIntegrationTest {
 
     @Autowired
@@ -66,6 +67,11 @@ class JournalforingIntegrationTest {
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
         container.start()
         ContainerTestUtils.waitForAssignment(container, embeddedKafka.partitionsPerTopic)
+
+        // oppgave lytter kafka
+        val oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
+        oppgaveContainer.start()
+        ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
 
         // Sett opp producer
         val sedSendtProducerTemplate = settOppProducerTemplate(SED_SENDT_TOPIC)
