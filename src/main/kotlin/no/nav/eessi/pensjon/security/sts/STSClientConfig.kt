@@ -49,7 +49,7 @@ class STSClientConfig {
     }
 
     // Only requestSamlPolicyNoTransportBinding.xml on localhost, should use the requestSamlPolicy.xml with transport binding https when in production.
-    @Value("\${requestsamlpolicy.path:classpath:policy/requestSamlPolicy.xml}")
+    @Value("\${requestsamlpolicy.path}")
     fun setRequestSamlPolicy(path: String) {
         STS_REQUEST_SAML_POLICY = path
     }
