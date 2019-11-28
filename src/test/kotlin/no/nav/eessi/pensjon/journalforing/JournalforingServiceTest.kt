@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.handeler.OppgaveHandeler
+import no.nav.eessi.pensjon.handeler.OppgaveHandler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
@@ -66,7 +66,7 @@ class JournalforingServiceTest {
     private lateinit var pdfService: PDFService
 
     @Mock
-    private lateinit var oppgaveHandeler: OppgaveHandeler
+    private lateinit var oppgaveHandler: OppgaveHandler
 
     private lateinit var journalforingService: JournalforingService
 
@@ -82,7 +82,7 @@ class JournalforingServiceTest {
                 oppgaveRoutingService,
                 pdfService,
                 begrensInnsynService,
-                oppgaveHandeler
+                oppgaveHandler
             )
 
         //MOCK RESPONSES

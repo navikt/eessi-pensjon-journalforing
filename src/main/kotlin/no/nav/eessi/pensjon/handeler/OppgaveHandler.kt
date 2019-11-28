@@ -12,10 +12,10 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 
 @Service
-class OppgaveHandeler(private val kafkaTemplate: KafkaTemplate<String, String>,
-      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
+class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
+                     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
-    private val logger = LoggerFactory.getLogger(OppgaveHandeler::class.java)
+    private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
     private val X_REQUEST_ID = "x_request_id"
 
     @Value("\${kafka.oppgave.topic}")
@@ -31,7 +31,7 @@ class OppgaveHandeler(private val kafkaTemplate: KafkaTemplate<String, String>,
 
         val messageBuilder = MessageBuilder.withPayload(melding.toJson())
 
-        metricsHelper.measure("oppgavemelding") {
+        metricsHelper.measure("publiserOppgavemelding") {
             if (MDC.get(X_REQUEST_ID).isNullOrEmpty()) {
                 val message = messageBuilder.build()
                 kafkaTemplate.send(message)
@@ -44,7 +44,7 @@ class OppgaveHandeler(private val kafkaTemplate: KafkaTemplate<String, String>,
 
     //helper function to put message on kafka, will retry 3 times and wait before fail
     fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
-        logger.info("Trying to resubmit")
+        logger.info("Trying to publish")
 
         var count = 0
         val maxTries = 3
@@ -54,16 +54,16 @@ class OppgaveHandeler(private val kafkaTemplate: KafkaTemplate<String, String>,
         while (count < maxTries) {
             try {
                 putMeldingPaaKafka(melding)
-                logger.info("put oppgavemelding on kafka queue")
+                logger.info("Publishing oppgavemelding")
                 return
             } catch (ex: Exception) {
                 count++
-                logger.warn("Failed to put oppgavemelding on kafka, try nr.: $count, Error message: ${ex.message} ")
+                logger.warn("Failed to publish oppgavemelding on kafka, try nr.: $count, Error message: ${ex.message} ")
                 failException = ex
                 Thread.sleep(waitTime)
             }
         }
-        logger.error("Failed to put oppgavemelding on kafka,  meesage: $melding", failException)
+        logger.error("Failed to publish oppgavemelding on kafka,  meesage: $melding", failException)
         throw RuntimeException(failException!!.message)
 
     }

@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.handeler.OppgaveHandeler
+import no.nav.eessi.pensjon.handeler.OppgaveHandler
 import no.nav.eessi.pensjon.handeler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
@@ -42,7 +42,7 @@ class JournalforingService(private val euxService: EuxService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val begrensInnsynService: BegrensInnsynService,
-                           private val oppgaveHandeler: OppgaveHandeler,
+                           private val oppgaveHandler: OppgaveHandler,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -143,7 +143,7 @@ class JournalforingService(private val euxService: EuxService,
                         filnavn = null,
                         hendelseType = hendelseType)
 
-                opprettOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     oppgaveService.opprettOppgave(
@@ -156,7 +156,7 @@ class JournalforingService(private val euxService: EuxService,
                             filnavn = usupporterteFilnavn(uSupporterteVedlegg),
                             hendelseType = hendelseType)
 
-                    opprettOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
 
                 }
 
@@ -174,8 +174,8 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    private fun opprettOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
-        oppgaveHandeler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
+    private fun publishOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
+        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
                 sedType = sedType.name,
                 journalpostId = journalpostId,
                 tildeltEnhetsnr = tildeltEnhet.enhetsNr,
