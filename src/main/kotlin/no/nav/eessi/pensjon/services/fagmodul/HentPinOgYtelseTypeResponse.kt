@@ -3,11 +3,11 @@ package no.nav.eessi.pensjon.services.fagmodul
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class HentPinOgYtelseTypeResponse(
+class HentPinOgYtelseTypeResponse(
         var fnr: String?,
         var krav: Krav?
         )
-data class Krav(
+class Krav(
         var dato: String?,
         var type: YtelseType?
 ) {

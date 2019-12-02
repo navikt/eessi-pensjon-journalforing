@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.BucType
 
-data class OppgaveRoutingModel(
+class OppgaveRoutingModel(
         var bucType: BucType,
         var tildeltEnhet: Enhet
 ) {
