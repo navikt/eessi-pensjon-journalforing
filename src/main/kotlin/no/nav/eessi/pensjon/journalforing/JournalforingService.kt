@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.handeler.OppgaveHandler
+import no.nav.eessi.pensjon.handeler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -40,6 +42,7 @@ class JournalforingService(private val euxService: EuxService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val begrensInnsynService: BegrensInnsynService,
+                           private val oppgaveHandler: OppgaveHandler,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -140,6 +143,8 @@ class JournalforingService(private val euxService: EuxService,
                         filnavn = null,
                         hendelseType = hendelseType)
 
+                publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     oppgaveService.opprettOppgave(
                             sedType = sedHendelse.sedType,
@@ -150,7 +155,11 @@ class JournalforingService(private val euxService: EuxService,
                             rinaSakId = sedHendelse.rinaSakId,
                             filnavn = usupporterteFilnavn(uSupporterteVedlegg),
                             hendelseType = hendelseType)
+
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
+
                 }
+
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
@@ -163,6 +172,19 @@ class JournalforingService(private val euxService: EuxService,
                 throw ex
             }
         }
+    }
+
+    private fun publishOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
+        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
+                sedType = sedType.name,
+                journalpostId = journalpostId,
+                tildeltEnhetsnr = tildeltEnhet.enhetsNr,
+                aktoerId = aktoerId,
+                oppgaveType = oppgaveType,
+                rinaSakId = sedHendelse.rinaSakId,
+                hendelseType = hendelseType.name,
+                filnavn = filnavn
+        ))
     }
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {
