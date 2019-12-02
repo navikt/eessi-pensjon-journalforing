@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.pdf.SedDokumenter
 import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService

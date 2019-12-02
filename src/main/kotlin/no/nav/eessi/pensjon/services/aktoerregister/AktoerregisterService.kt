@@ -17,13 +17,13 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
 
-data class Identinfo(
+class Identinfo(
         val ident: String,
         val identgruppe: String,
         val gjeldende: Boolean
 )
 
-data class IdentinfoForAktoer(
+class IdentinfoForAktoer(
         val identer: List<Identinfo>?,
         val feilmelding: String?
 )

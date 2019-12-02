@@ -103,7 +103,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
 
 class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)
 
-data class Norg2ArbeidsfordelingRequest(
+class Norg2ArbeidsfordelingRequest(
     val tema: String = "PEN",
     val diskresjonskode: String? = "ANY",
     val behandlingstema: String = "ANY",
@@ -114,7 +114,7 @@ data class Norg2ArbeidsfordelingRequest(
     val temagruppe: String = "ANY"
 )
 
-data class Norg2ArbeidsfordelingItem(
+class Norg2ArbeidsfordelingItem(
     val oppgavetype: String? = null,
     val enhetNr: String? = null,
     val behandlingstema: String? = null,

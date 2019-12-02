@@ -1,11 +1,9 @@
 package no.nav.eessi.pensjon.pdf
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
-data class SedDokumenter(
+class SedDokumenter(
         val sed: EuxDokument,
         val vedlegg: List<EuxDokument>?
 ){
@@ -15,7 +13,7 @@ data class SedDokumenter(
     }
 }
 
-data class EuxDokument(val filnavn: String,
+class EuxDokument(val filnavn: String,
                        val mimeType: MimeType?,
                        val innhold: String)
 
@@ -56,14 +54,14 @@ enum class MimeType  : Code {
     }
 }
 
-data class JournalPostDokument(
+class JournalPostDokument(
         val brevkode: String? = null,
         val dokumentKategori: String? = "SED",
         val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
         val tittel: String? = null
 )
 
-data class Dokumentvarianter(
+class Dokumentvarianter(
     val filtype: String, //REQUIRED
     val fysiskDokument: String, //REQUIRED
     val variantformat: Variantformat //REQUIRED

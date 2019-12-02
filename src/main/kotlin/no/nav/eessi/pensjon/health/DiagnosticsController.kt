@@ -35,13 +35,13 @@ class DiagnosticsController {
     }
 }
 
-data class SelftestResult(
+class SelftestResult(
         val timestamp: Instant = Instant.now(),
         val aggregateResult: Int,
         val checks: List<Check>?
 )
 
-data class Check(
+class Check(
         val endpoint: String,
         val description: String,
         val errorMessage: String,
