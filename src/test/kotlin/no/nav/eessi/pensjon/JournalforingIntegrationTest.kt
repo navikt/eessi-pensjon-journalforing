@@ -38,7 +38,7 @@ import javax.ws.rs.HttpMethod
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
-private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1-test"
+private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1-test"
 
 private lateinit var mockServer : ClientAndServer
 
