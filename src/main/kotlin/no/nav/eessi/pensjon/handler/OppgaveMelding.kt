@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.handeler
+package no.nav.eessi.pensjon.handler
 
 import no.nav.eessi.pensjon.json.toJson
 

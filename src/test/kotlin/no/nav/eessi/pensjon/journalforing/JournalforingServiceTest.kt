@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.handeler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveHandler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service

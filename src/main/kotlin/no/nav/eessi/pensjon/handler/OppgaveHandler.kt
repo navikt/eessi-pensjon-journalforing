@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.handeler
+package no.nav.eessi.pensjon.handler
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.toJson
@@ -27,18 +27,12 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
     private fun putMeldingPaaKafka(melding: OppgaveMelding) {
         kafkaTemplate.defaultTopic = "$oppgaveTopic-$topicPostfix"
 
-        logger.debug("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
-
-        val messageBuilder = MessageBuilder.withPayload(melding.toJson())
+        val key = MDC.get(X_REQUEST_ID)
+        val payload = melding.toJson()
 
         metricsHelper.measure("publiserOppgavemelding") {
-            if (MDC.get(X_REQUEST_ID).isNullOrEmpty()) {
-                val message = messageBuilder.build()
-                kafkaTemplate.send(message)
-            } else {
-                val message = messageBuilder.setHeader(X_REQUEST_ID, MDC.get(X_REQUEST_ID)).build()
-                kafkaTemplate.send(message)
-            }
+            logger.debug("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
+            kafkaTemplate.sendDefault(key, payload)
         }
     }
 
