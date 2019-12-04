@@ -3,8 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.handeler.OppgaveHandler
-import no.nav.eessi.pensjon.handeler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
