@@ -20,7 +20,6 @@ import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
-import no.nav.eessi.pensjon.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.services.personv3.hentGeografiskTilknytning
 import no.nav.eessi.pensjon.services.personv3.hentLandkode
@@ -35,7 +34,6 @@ import java.time.format.DateTimeFormatter
 @Service
 class JournalforingService(private val euxService: EuxService,
                            private val journalpostService: JournalpostService,
-                           private val oppgaveService: OppgaveService,
                            private val aktoerregisterService: AktoerregisterService,
                            private val personV3Service: PersonV3Service,
                            private val fagmodulService: FagmodulService,
@@ -133,29 +131,9 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.debug("JournalPostID: $journalpostId")
 
-                oppgaveService.opprettOppgave(
-                        sedType = sedHendelse.sedType,
-                        journalpostId = journalpostId,
-                        tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                        aktoerId = aktoerId,
-                        oppgaveType = "JOURNALFORING",
-                        rinaSakId = sedHendelse.rinaSakId,
-                        filnavn = null,
-                        hendelseType = hendelseType)
-
                 publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    oppgaveService.opprettOppgave(
-                            sedType = sedHendelse.sedType,
-                            journalpostId = null,
-                            tildeltEnhetsnr = tildeltEnhet.enhetsNr,
-                            aktoerId = aktoerId,
-                            oppgaveType = "BEHANDLE_SED",
-                            rinaSakId = sedHendelse.rinaSakId,
-                            filnavn = usupporterteFilnavn(uSupporterteVedlegg),
-                            hendelseType = hendelseType)
-
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
 
                 }

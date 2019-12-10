@@ -19,7 +19,6 @@ import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
-import no.nav.eessi.pensjon.services.oppgave.OppgaveService
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import org.junit.jupiter.api.BeforeEach
@@ -43,9 +42,6 @@ class JournalforingServiceTest {
 
     @Mock
     private lateinit var journalpostService: JournalpostService
-
-    @Mock
-    private lateinit var oppgaveService: OppgaveService
 
     @Mock
     private lateinit var aktoerregisterService: AktoerregisterService
@@ -75,7 +71,6 @@ class JournalforingServiceTest {
 
         journalforingService = JournalforingService(euxService,
                 journalpostService,
-                oppgaveService,
                 aktoerregisterService,
                 personV3Service,
                 fagmodulService,
@@ -181,7 +176,6 @@ class JournalforingServiceTest {
     @Test
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.SENDT )
-        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.SENDT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId= anyOrNull(),
                 navBruker= anyOrNull(),
@@ -234,16 +228,6 @@ class JournalforingServiceTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2000),
-                eq("123"),
-                eq("0001"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147729"),
-                eq(null),
-                eq(HendelseType.SENDT)
-        )
     }
 
     @Test
@@ -272,27 +256,6 @@ class JournalforingServiceTest {
                 arkivsaksystem= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false)
-        )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2100),
-                eq("123"),
-                eq("4862"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147730"),
-                eq(null),
-                eq(HendelseType.SENDT)
-        )
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2100),
-                eq(null),
-                eq("4862"),
-                eq(null),
-                eq("BEHANDLE_SED"),
-                eq("147730"),
-                eq("usupportertVedlegg.xml "),
-                eq(HendelseType.SENDT)
         )
     }
 
@@ -324,19 +287,6 @@ class JournalforingServiceTest {
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2200),
-                eq("123"),
-                eq("4303"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("148161"),
-                eq(null),
-                eq(HendelseType.SENDT)
-        )
-
-
     }
 
     @Test
@@ -365,17 +315,6 @@ class JournalforingServiceTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
-        
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2000),
-                eq("123"),
-                eq("4862"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147729"),
-                eq(null),
-                eq(HendelseType.SENDT)
-        )
     }
 
     @Test
@@ -395,7 +334,6 @@ class JournalforingServiceTest {
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.MOTTATT )
-        verify(oppgaveService, times(0)).opprettOppgave(any(), any(), any(), any(), any(), any(), any(), eq(HendelseType.MOTTATT))
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= anyOrNull(),
@@ -447,17 +385,6 @@ class JournalforingServiceTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2000),
-                eq("123"),
-                eq("0001"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147729"),
-                eq(null),
-                eq(HendelseType.MOTTATT)
-        )
     }
 
     @Test
@@ -487,27 +414,6 @@ class JournalforingServiceTest {
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2100),
-                eq("123"),
-                eq("4862"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147730"),
-                eq(null),
-                eq(HendelseType.MOTTATT)
-        )
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2100),
-                eq(null),
-                eq("4862"),
-                eq(null),
-                eq("BEHANDLE_SED"),
-                eq("147730"),
-                eq("usupportertVedlegg.xml "),
-                eq(HendelseType.MOTTATT)
-        )
     }
 
     @Test
@@ -535,17 +441,6 @@ class JournalforingServiceTest {
                 arkivsaksystem= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false)
-        )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2200),
-                eq("123"),
-                eq("4303"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("148161"),
-                eq(null),
-                eq(HendelseType.MOTTATT)
         )
     }
 
@@ -575,17 +470,6 @@ class JournalforingServiceTest {
                 arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
-        )
-
-        verify(oppgaveService).opprettOppgave(
-                eq(SedType.P2000),
-                eq("123"),
-                eq("4862"),
-                eq(null),
-                eq("JOURNALFORING"),
-                eq("147729"),
-                eq(null),
-                eq(HendelseType.MOTTATT)
         )
     }
 
