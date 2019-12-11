@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.buc.FdatoService
 import no.nav.eessi.pensjon.buc.FnrService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
@@ -24,6 +23,7 @@ import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
+import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -73,6 +73,9 @@ class JournalforingServiceTest {
     @Mock
     private lateinit var oppgaveHandler: OppgaveHandler
 
+    @Mock
+    private lateinit var penService: PenService
+
     private lateinit var journalforingService: JournalforingService
 
     @BeforeEach
@@ -87,6 +90,7 @@ class JournalforingServiceTest {
                 pdfService,
                 begrensInnsynService,
                 oppgaveHandler,
+                penService,
                 fnrService,
                 fdatoService
             )
@@ -152,7 +156,6 @@ class JournalforingServiceTest {
                         kanal= anyOrNull(),
                         journalfoerendeEnhet= anyOrNull(),
                         arkivsaksnummer= anyOrNull(),
-                        arkivsaksystem= anyOrNull(),
                         dokumenter= anyOrNull(),
                         forsokFerdigstill= anyOrNull()
                 )
@@ -207,7 +210,6 @@ class JournalforingServiceTest {
                 kanal= anyOrNull(),
                 journalfoerendeEnhet= anyOrNull(),
                 arkivsaksnummer= anyOrNull(),
-                arkivsaksystem= anyOrNull(),
                 dokumenter= anyOrNull(),
                 forsokFerdigstill= anyOrNull()
         )
@@ -240,7 +242,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -267,7 +268,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -297,7 +297,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4303"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -324,7 +323,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -362,7 +360,6 @@ class JournalforingServiceTest {
                 kanal= anyOrNull(),
                 journalfoerendeEnhet= anyOrNull(),
                 arkivsaksnummer= anyOrNull(),
-                arkivsaksystem= anyOrNull(),
                 dokumenter= anyOrNull(),
                 forsokFerdigstill= anyOrNull()
         )
@@ -393,7 +390,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -419,7 +415,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -449,7 +444,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -477,7 +471,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4303"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )
@@ -504,7 +497,6 @@ class JournalforingServiceTest {
                 kanal= eq("EESSI"),
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
-                arkivsaksystem= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false)
         )

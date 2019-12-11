@@ -1,9 +1,11 @@
 package no.nav.eessi.pensjon.services.pesys
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.pdf.mapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +22,8 @@ import java.util.*
 class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
                  @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
-     val logger: Logger by lazy { LoggerFactory.getLogger(PenService::class.java) }
+    val logger: Logger by lazy { LoggerFactory.getLogger(PenService::class.java) }
+    val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
     /**
      * Henter pesys sakID for en gitt aktørID og ytelsetype

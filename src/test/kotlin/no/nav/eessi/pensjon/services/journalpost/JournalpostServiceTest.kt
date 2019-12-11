@@ -67,7 +67,6 @@ class JournalpostServiceTest {
                 kanal= "NAV_NO",
                 journalfoerendeEnhet= "9999",
                 arkivsaksnummer= "string",
-                arkivsaksystem= "GSAK",
                 dokumenter= """
                     [{
                         "brevkode": "NAV 14-05.09",
@@ -114,7 +113,6 @@ class JournalpostServiceTest {
                     kanal = "NAV_NO",
                     journalfoerendeEnhet = "9999",
                     arkivsaksnummer = "string",
-                    arkivsaksystem = "GSAK",
                     dokumenter = """
                     [{
                         "brevkode": "NAV 14-05.09",

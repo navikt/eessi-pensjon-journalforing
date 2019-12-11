@@ -28,7 +28,7 @@
   "kanal": "NAV_NO",
   "sak": {
     "arkivsaksnummer": "string",
-    "arkivsaksystem": "GSAK"
+    "arkivsaksystem": "PSAK"
   },
   "tema": "PEN",
   "tilleggsopplysninger": [
