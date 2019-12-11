@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveMelding
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
@@ -500,5 +501,13 @@ class JournalforingServiceTest {
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
         assertTrue(isFnrValid("12345678910"))
+    }
+
+    @Test
+    fun `valider en sedHendelse json`() {
+       val testMleding =  String(Files.readAllBytes(Paths.get("src/test/resources/sed/test.json")))
+        println(testMleding)
+        val melding = SedHendelseModel.fromJson(testMleding)
+
     }
 }
