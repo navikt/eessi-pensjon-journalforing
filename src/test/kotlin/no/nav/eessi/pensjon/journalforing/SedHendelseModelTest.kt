@@ -24,6 +24,6 @@ class SedHendelseModelTest {
         assertEquals(sedHendelse.rinaDokumentId, "b12e06dda2c7474b9998c7139c841646")
         assertEquals(sedHendelse.rinaDokumentVersjon, "2")
         assertEquals(sedHendelse.sedType, SedType.P2000)
-        assertEquals(sedHendelse.navBruker, "12378945601")
+        assertEquals(sedHendelse.navBruker, "12078945602")
     }
 }

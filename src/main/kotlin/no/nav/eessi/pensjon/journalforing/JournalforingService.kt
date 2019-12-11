@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.buc.FdatoService
+import no.nav.eessi.pensjon.buc.FnrService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -41,6 +43,8 @@ class JournalforingService(private val euxService: EuxService,
                            private val pdfService: PDFService,
                            private val begrensInnsynService: BegrensInnsynService,
                            private val oppgaveHandler: OppgaveHandler,
+                           private val fnrService: FnrService,
+                           private val fdatoService: FdatoService,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -65,10 +69,13 @@ class JournalforingService(private val euxService: EuxService,
                 if(person != null) {
                     fnr = sedHendelse.navBruker!!
                 } else {
-                    try {
-                        // TODO buctype fjernes som argument snart fordi fagmodulen bruker den ikke
-                        fnr = fagmodulService.hentFnrFraBuc(sedHendelse.rinaSakId, "fjernes")!!
+                   try {
+                        fnr = fnrService.getFodselsnrFraSedPaaVagtBuc(sedHendelse.rinaSakId)
                         person = hentPerson(fnr)
+                        if (person == null) {
+                            logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                            fnr = null
+                        }
                     } catch (ex: Exception) {
                         logger.info("Ingen treff på fødselsnummer, fortsetter uten")
                     }
@@ -77,12 +84,12 @@ class JournalforingService(private val euxService: EuxService,
                 val personNavn = hentPersonNavn(person)
                 var aktoerId: String? = null
 
+                if (person != null) aktoerId = hentAktoerId(fnr)
+
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
                 val pinOgYtelse = hentPinOgYtelse(sedHendelse)
 
-                if (person != null) aktoerId = hentAktoerId(fnr)
-
-                val fodselsDato = hentFodselsDato(sedHendelse)
+                val fodselsDato = hentFodselsDato(sedHendelse, fnr)
                 val landkode = hentLandkode(person)
 
                 val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
@@ -186,13 +193,18 @@ class JournalforingService(private val euxService: EuxService,
      * Henter fødselsdatoen fra den gjeldende SEDen som skal journalføres, dersom dette feltet er tomt
      * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
      */
-    private fun hentFodselsDato(sedHendelse: SedHendelseModel): LocalDate {
-        var fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+    private fun hentFodselsDato(sedHendelse: SedHendelseModel, fnr: String?): LocalDate {
+        if (isFnrValid(fnr)) {
+            val navfnr = NavFodselsnummer(fnr!!)
+            return navfnr.getBirthDateAsISO()
+        } else {
+            var fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
-        if(fodselsDatoISO.isNullOrEmpty()) {
-            fodselsDatoISO = fagmodulService.hentFodselsdatoFraBuc(sedHendelse.rinaSakId, sedHendelse.bucType!!.name)
+            if (fodselsDatoISO.isNullOrEmpty()) {
+                fodselsDatoISO = fdatoService.getFDatoFromSed(sedHendelse.rinaSakId)
+            }
+            return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
         }
-        return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
     }
 
     private fun hentAktoerId(navBruker: String?): String? {

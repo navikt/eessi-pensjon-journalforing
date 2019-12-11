@@ -47,6 +47,7 @@ class ArchitectureTest {
     fun `Check architecture`() {
         val ROOT = "journalforing"
         val Config = "journalforing.Config"
+        val BUC = "journalforing.Buc"
         val Health = "journalforing.Health"
         val Journalforing = "journalforing.journalforing"
         val JSON = "journalforing.json"
@@ -69,6 +70,7 @@ class ArchitectureTest {
                 Health to "$root.health",
                 Journalforing to "$root.journalforing",
                 JSON to "$root.json",
+                BUC to "$root.buc",
                 Listeners to "$root.listeners",
                 Logging to "$root.logging",
                 Metrics to "$root.metrics",
@@ -94,6 +96,7 @@ class ArchitectureTest {
                 .layer(Health).definedBy(packages[Health])
                 .layer(Journalforing).definedBy(packages[Journalforing])
                 .layer(JSON).definedBy(packages[JSON])
+                .layer(BUC).definedBy(packages[BUC])
                 .layer(Listeners).definedBy(packages[Listeners])
                 .layer(Logging).definedBy(packages[Logging])
                 .layer(Metrics).definedBy(packages[Metrics])
@@ -110,6 +113,7 @@ class ArchitectureTest {
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Config).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Health).mayNotBeAccessedByAnyLayer()
+                .whereLayer(BUC).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT)
                 .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS)
@@ -117,8 +121,8 @@ class ArchitectureTest {
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonV3Service)
                 .whereLayer(AktoerregisterService).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC)
+                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC)
                 .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PersonV3Service).mayOnlyBeAccessedByLayers(ROOT, Journalforing)
