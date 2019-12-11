@@ -60,6 +60,7 @@ fasitResources:
       resourceType: RestService
     - alias: eessipennorg2service
       resourceType: RestService
-
+    - alias: BestemSak
+      resourceType: RestService
 
 

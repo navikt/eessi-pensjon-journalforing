@@ -26,6 +26,7 @@ import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.services.personv3.hentGeografiskTilknytning
 import no.nav.eessi.pensjon.services.personv3.hentLandkode
 import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
+import no.nav.eessi.pensjon.services.pesys.PenService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,6 +44,7 @@ class JournalforingService(private val euxService: EuxService,
                            private val pdfService: PDFService,
                            private val begrensInnsynService: BegrensInnsynService,
                            private val oppgaveHandler: OppgaveHandler,
+                           private val penService: PenService,
                            private val fnrService: FnrService,
                            private val fdatoService: FdatoService,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
@@ -116,6 +118,10 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.debug("tildeltEnhet: $tildeltEnhet")
 
+                var sakId: String? = null
+                if(aktoerId != null)
+                    sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
+
                 val journalpostId = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
                         navBruker = fnr,
@@ -130,8 +136,7 @@ class JournalforingService(private val euxService: EuxService,
                         eksternReferanseId = null,// TODO what value to put here?,
                         kanal = "EESSI",
                         journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                        arkivsaksnummer = null, // TODO what value to put here?,
-                        arkivsaksystem = null, // TODO what value to put here?,
+                        arkivsaksnummer = sakId,
                         dokumenter = documents,
                         forsokFerdigstill = false
                 )
