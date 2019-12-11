@@ -48,7 +48,6 @@ class JournalpostService(
             kanal: String?,
             journalfoerendeEnhet: String?,
             arkivsaksnummer: String?,
-            arkivsaksystem: String?,
             dokumenter: String,
             forsokFerdigstill: Boolean? = false
     ): String? {
@@ -63,7 +62,7 @@ class JournalpostService(
             else -> Bruker(id = navBruker)
         }
         val journalpostType = populerJournalpostType(sedHendelseType)
-        val sak = populerSak(arkivsaksnummer, arkivsaksystem)
+        val sak = populerSak(arkivsaksnummer)
         val tema = BucType.valueOf(bucType).TEMA
         val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
         val tittel = "${journalpostType.decode()} $sedType"
@@ -134,11 +133,11 @@ class JournalpostService(
         }
     }
 
-    private fun populerSak(arkivsaksnummer: String?, arkivsaksystem: String?): Sak? {
-        return if(arkivsaksnummer == null || arkivsaksystem == null){
+    private fun populerSak(arkivsaksnummer: String?): Sak? {
+        return if(arkivsaksnummer == null){
             null
         } else {
-            Sak(arkivsaksnummer, arkivsaksystem)
+            Sak(arkivsaksnummer, "PSAK")
         }
     }
 }
