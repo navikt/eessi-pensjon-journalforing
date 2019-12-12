@@ -122,6 +122,9 @@ class JournalforingService(private val euxService: EuxService,
                 if(aktoerId != null)
                     sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
 
+                var forsokFerdigstill = false
+                sakId?.let { forsokFerdigstill = true }
+
                 val journalpostId = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
                         navBruker = fnr,
@@ -138,16 +141,18 @@ class JournalforingService(private val euxService: EuxService,
                         journalfoerendeEnhet = tildeltEnhet.enhetsNr,
                         arkivsaksnummer = sakId,
                         dokumenter = documents,
-                        forsokFerdigstill = false
+                        forsokFerdigstill = forsokFerdigstill
                 )
 
                 logger.debug("JournalPostID: $journalpostId")
 
-                publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                if(!forsokFerdigstill) {
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
-                if (uSupporterteVedlegg.isNotEmpty()) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType,usupporterteFilnavn(uSupporterteVedlegg))
+                    if (uSupporterteVedlegg.isNotEmpty()) {
+                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
 
+                    }
                 }
 
 
