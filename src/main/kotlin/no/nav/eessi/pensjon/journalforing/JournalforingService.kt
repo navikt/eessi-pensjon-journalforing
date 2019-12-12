@@ -204,17 +204,31 @@ class JournalforingService(private val euxService: EuxService,
      * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
      */
     private fun hentFodselsDato(sedHendelse: SedHendelseModel, fnr: String?): LocalDate {
+        var fodselsDatoISO : String? = null
+
         if (isFnrValid(fnr)) {
-            val navfnr = NavFodselsnummer(fnr!!)
-            return navfnr.getBirthDateAsISO()
-        } else {
-            var fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+            try {
+                val navfnr = NavFodselsnummer(fnr!!)
+                fodselsDatoISO =  navfnr.getBirthDateAsISO()
+                return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+            } catch (ex : Exception) {
+                logger.error("navBruker ikke gyldig for fdato", ex)
+                fodselsDatoISO = null
+            }
+        }
+
+        if (fodselsDatoISO == null) {
+            fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
             if (fodselsDatoISO.isNullOrEmpty()) {
-                fodselsDatoISO = fdatoService.getFDatoFromSed(sedHendelse.rinaSakId)
+                try {
+                    fodselsDatoISO = fdatoService.getFDatoFromSed(sedHendelse.rinaSakId)
+                } catch (ex: Exception) {
+                    logger.error("Ingen gyldige fdato funnet i BUC", ex)
+                }
             }
-            return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
         }
+        return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
