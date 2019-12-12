@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import org.slf4j.Logger
@@ -58,7 +59,7 @@ class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
                 val response = bestemSakOidcRestTemplate.exchange(
                         "/",
                         HttpMethod.POST,
-                        HttpEntity(requestBody.toString(), headers),
+                        HttpEntity(requestBody.toJson(), headers),
                         String::class.java)
                 mapper.readValue(response.body, BestemSakResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
