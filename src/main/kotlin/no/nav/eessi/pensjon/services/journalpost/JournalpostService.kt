@@ -37,10 +37,6 @@ class JournalpostService(
             rinaSakId: String,
             navBruker: String?,
             personNavn: String?,
-            avsenderId: String?,
-            avsenderNavn: String?,
-            mottakerId: String?,
-            mottakerNavn: String?,
             bucType: String,
             sedType: String,
             sedHendelseType: String,
@@ -54,7 +50,8 @@ class JournalpostService(
 
         val avsenderMottaker = populerAvsenderMottaker(
                 navBruker,
-                sedHendelseType
+                sedHendelseType,
+                personNavn
         )
         val behandlingstema = BucType.valueOf(bucType).BEHANDLINGSTEMA
         val bruker = when (navBruker){
@@ -113,15 +110,16 @@ class JournalpostService(
 
     private fun populerAvsenderMottaker(
             navBruker: String?,
-            sedHendelseType: String): AvsenderMottaker {
+            sedHendelseType: String,
+            avsenderNavn: String?): AvsenderMottaker {
         return if(navBruker.isNullOrEmpty()) {
             if(sedHendelseType == "SENDT") {
-                AvsenderMottaker(navOrgnummer, IdType.ORGNR)
+                AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV")
             } else {
-                AvsenderMottaker(null, null)
+                AvsenderMottaker(null, null, null)
             }
         } else {
-            AvsenderMottaker(navBruker, IdType.FNR)
+            AvsenderMottaker(navBruker, IdType.FNR, avsenderNavn)
         }
     }
 

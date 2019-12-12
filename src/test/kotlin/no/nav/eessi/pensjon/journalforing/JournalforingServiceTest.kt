@@ -145,10 +145,6 @@ class JournalforingServiceTest {
                         rinaSakId = anyOrNull(),
                         navBruker= anyOrNull(),
                         personNavn= anyOrNull(),
-                        avsenderId= anyOrNull(),
-                        avsenderNavn= anyOrNull(),
-                        mottakerId= anyOrNull(),
-                        mottakerNavn= anyOrNull(),
                         bucType= anyOrNull(),
                         sedType= anyOrNull(),
                         sedHendelseType= anyOrNull(),
@@ -199,10 +195,6 @@ class JournalforingServiceTest {
                 rinaSakId= anyOrNull(),
                 navBruker= anyOrNull(),
                 personNavn= anyOrNull(),
-                avsenderId= anyOrNull(),
-                avsenderNavn= anyOrNull(),
-                mottakerId= anyOrNull(),
-                mottakerNavn= anyOrNull(),
                 bucType= anyOrNull(),
                 sedType= anyOrNull(),
                 sedHendelseType= anyOrNull(),
@@ -226,15 +218,10 @@ class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2000`(){
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12078945602"))
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("SENDT"),
@@ -252,15 +239,10 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json"))), HendelseType.SENDT )
         verify(personV3Service).hentPerson(eq("12078945602"))
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_02"),
                 sedType= eq(SedType.P2100.name),
                 sedHendelseType= eq("SENDT"),
@@ -281,15 +263,10 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.SENDT )
         verify(fnrService).getFodselsnrFraSedPaaVagtBuc(eq("148161"))
         verify(personV3Service, times(1)).hentPerson(any())
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT002"),
-                mottakerNavn= eq("NAVT002"),
                 bucType= eq("P_BUC_03"),
                 sedType= eq(SedType.P2200.name),
                 sedHendelseType= eq("SENDT"),
@@ -307,15 +284,10 @@ class JournalforingServiceTest {
          journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json"))), HendelseType.SENDT )
 
         verify(personV3Service).hentPerson(eq("12078945602"))
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_10"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("SENDT"),
@@ -349,10 +321,6 @@ class JournalforingServiceTest {
                 rinaSakId = anyOrNull(),
                 navBruker= anyOrNull(),
                 personNavn= anyOrNull(),
-                avsenderId= anyOrNull(),
-                avsenderNavn= anyOrNull(),
-                mottakerId= anyOrNull(),
-                mottakerNavn= anyOrNull(),
                 bucType= anyOrNull(),
                 sedType= anyOrNull(),
                 sedHendelseType= anyOrNull(),
@@ -379,10 +347,6 @@ class JournalforingServiceTest {
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),
@@ -404,10 +368,6 @@ class JournalforingServiceTest {
                 rinaSakId = anyOrNull(),
                 navBruker= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),
@@ -427,16 +387,10 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json"))), HendelseType.MOTTATT )
 
         verify(personV3Service).hentPerson(eq("12078945602"))
-//        verify(euxService).hentFodselsDatoFraSed(eq("147730"), eq("b12e06dda2c7474b9998c7139c841646"))
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_02"),
                 sedType= eq(SedType.P2100.name),
                 sedHendelseType= eq("MOTTATT"),
@@ -455,15 +409,10 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
         verify(fnrService).getFodselsnrFraSedPaaVagtBuc(eq("148161"))
         verify(personV3Service, times(1)).hentPerson(any())
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT002"),
-                mottakerNavn= eq("NAVT002"),
                 bucType= eq("P_BUC_03"),
                 sedType= eq(SedType.P2200.name),
                 sedHendelseType= eq("MOTTATT"),
@@ -481,15 +430,10 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json"))), HendelseType.MOTTATT )
         verify(personV3Service).hentPerson(eq("12078945602"))
-
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 navBruker= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
-                avsenderId= eq("NO:NAVT003"),
-                avsenderNavn= eq("NAVT003"),
-                mottakerId= eq("NO:NAVT007"),
-                mottakerNavn= eq("NAV Test 07"),
                 bucType= eq("P_BUC_10"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),

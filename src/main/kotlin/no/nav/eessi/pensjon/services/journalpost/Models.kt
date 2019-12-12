@@ -68,7 +68,8 @@ class Sak(
  */
 class AvsenderMottaker(
     val id: String?,
-    val idType: IdType?
+    val idType: IdType?,
+    val navn: String?
 )
 
 enum class IdType {
