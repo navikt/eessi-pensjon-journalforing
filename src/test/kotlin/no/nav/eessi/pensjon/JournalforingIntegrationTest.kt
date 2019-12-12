@@ -362,6 +362,17 @@ class JournalforingIntegrationTest {
                                     "{}"
                             )
                     )
+
+            // Mocker bestemSak
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.POST)
+                            .withPath("/"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
+                    )
         }
 
         private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {

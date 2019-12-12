@@ -41,8 +41,8 @@ class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
         }
 
         val resp = kallBestemSak(aktoerId, ytelseType)
-        if(resp != null && resp.sakInformasjon.size == 1) {
-            return resp.sakInformasjon.first().sakId
+        if(resp != null && resp.sakInformasjonListe.size == 1) {
+            return resp.sakInformasjonListe.first().sakId
         }
         return null
     }
@@ -64,14 +64,10 @@ class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
                 mapper.readValue(response.body, BestemSakResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: $ex body: ${ex.responseBodyAsString}")
-                //TODO Throw så fort feature er testet ferdig
-                // throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message} body: ${ex.responseBodyAsString}")
-                null
+                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: $ex")
-                //TODO Throw så fort feature er testet ferdig
-                // throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message}")
-                null
+                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message}")
             }
         }
     }
@@ -83,7 +79,7 @@ class BestemSakRequest ( val aktoerId: String,
                          val consumerId: String)
 
 class BestemSakResponse ( val feil: BestemSakFeil?,
-                          val sakInformasjon: List<SakInformasjon>)
+                          val sakInformasjonListe: List<SakInformasjon>)
 
 class BestemSakFeil( val feilKode: String,  val feilmelding: String)
 
