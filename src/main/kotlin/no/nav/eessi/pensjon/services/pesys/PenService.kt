@@ -82,7 +82,7 @@ class BestemSakRequest ( val aktoerId: String,
                          val callId: String,
                          val consumerId: String)
 
-class BestemSakResponse ( val feil: BestemSakFeil,
+class BestemSakResponse ( val feil: BestemSakFeil?,
                           val sakInformasjon: List<SakInformasjon>)
 
 class BestemSakFeil( val feilKode: String,  val feilmelding: String)
