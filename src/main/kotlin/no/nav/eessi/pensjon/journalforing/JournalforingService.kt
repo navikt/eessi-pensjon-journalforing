@@ -142,7 +142,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
 
-                if(!journalPostResponse!!.journalpostferdigstilt) {
+                if(!journalPostResponse.journalpostferdigstilt) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse!!.journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
