@@ -1,0 +1,310 @@
+{
+  "pensjon": {
+    "antallSokereKjent": "0",
+    "gjenlevende": {
+      "adresse": {
+        "postnummer": "4534",
+        "by": "qertqertqerteqrteqtr",
+        "land": "NO",
+        "gate": "terteqrtqertqert",
+        "bygning": "trqetqerteqrtqert",
+        "region": "dgadgadfgad"
+      },
+      "person": {
+        "kontakt": {
+          "telefon": [
+            {
+              "type": "hjem",
+              "nummer": "345345345345345"
+            }
+          ],
+          "email": [
+            {
+              "adresse": "dfagadfgadfg@agadfgadfgadf.no"
+            }
+          ]
+        },
+        "relasjontilavdod": {
+          "forventetTerim": "1970-08-30",
+          "relasjon": "01",
+          "giftParnerDato": "1977-08-27",
+          "pensjondetalj": [
+            {
+              "mottattPensjonType": "01",
+              "institusjon": {
+                "saksnummer": "1231343453145134513451345134513451345134513451345",
+                "institusjonsnavn": "12347, NAVT002, NO",
+                "institusjonsid": "NO:NAVT002"
+              },
+              "mottattPensjonvedDod": "1",
+              "startDatoPensjonrettighet": "1997-08-12"
+            }
+          ],
+          "sperasjonType": "02",
+          "sammehusholdningfradato": "1976-08-18",
+          "sammehusholdning": "1",
+          "harfellesbarn": "1"
+        },
+        "fornavn": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+        "kjoenn": "K",
+        "nyttEkteskapPartnerskapEtterForsikredeDod": {
+          "borsammen": "1",
+          "fornavn": "fgadfgadfgdagsf",
+          "fraDato": "2015-09-09",
+          "etternavn": "fgafgadfgadfgad"
+        },
+        "fornavnvedfoedsel": "adfgadfgadfgadfgadfgadfg",
+        "foedested": {
+          "land": "DK",
+          "region": "yyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+          "by": "dssdfsdfsdfsd"
+        },
+        "tidligerefornavn": "qertqertqertqertqerteq",
+        "etternavn": "adgadfgadfgadfgadfgadfgadfgadfgadfgadfgadfgdafgdaf",
+        "etternavnvedfoedsel": "gdafgadfgadfgd",
+        "sivilstand": [
+          {
+            "status": "enke_enkemann",
+            "fradato": "2002-12-19"
+          }
+        ],
+        "pin": [
+          {
+            "sektor": "alle",
+            "identifikator": "32451345134513451345",
+            "institusjon": {
+              "institusjonsid": "NO:NAVT002",
+              "institusjonsnavn": "12347, NAVT002, NO"
+            },
+            "land": "DK"
+          }
+        ],
+        "tidligereetternavn": "rtqertqertqertqertqer",
+        "foedselsdato": "1969-09-11",
+        "statsborgerskap": [
+          {
+            "land": "NO"
+          }
+        ]
+      },
+      "far": {
+        "person": {
+          "fornavn": "qetqertqertqertqertqetqerttqertqert",
+          "etternavnvedfoedsel": "tqertqertqerteqtr"
+        }
+      },
+      "mor": {
+        "person": {
+          "etternavnvedfoedsel": "hjkhk hkjhjkhj khjk hjk hhk hkj",
+          "fornavn": "hjkhjkhjkhjkh"
+        }
+      }
+    },
+    "ytelser": [
+      {
+        "ytelseVedSykdom": "1",
+        "status": "01",
+        "beloep": [
+          {
+            "annenbetalingshyppighetytelse": "3332432222222",
+            "gjeldendesiden": "2017-09-09",
+            "beloep": "234234",
+            "valuta": "NOK",
+            "betalingshyppighetytelse": "04"
+          }
+        ],
+        "institusjon": {
+          "saksnummer": "3242342342342342342"
+        },
+        "ytelse": "11"
+      }
+    ],
+    "vedlegg": [
+      "utførlig_medisinsk_rapport",
+      "arbeidsattester",
+      "medisinsk_dokumentasjon",
+      "annet"
+    ],
+    "ytterligeinformasjon": "24562456245",
+    "etterspurtedokumenter": "25624562456",
+    "vedtak": [
+      {
+        "mottaker": [
+          "forsikret_person"
+        ],
+        "trekkgrunnlag": [
+          "987_2009_Art_72_1"
+        ]
+      }
+    ],
+    "vedleggandre": "624562456245"
+  },
+  "nav": {
+    "bruker": {
+      "mor": {
+        "person": {
+          "etternavnvedfoedsel": "aggggggggggggggggggggggggg",
+          "fornavn": "adfgadfgadfgadfgad"
+        }
+      },
+      "person": {
+        "dodsDetalj": {
+          "dato": "2003-05-15",
+          "sted": "Oslo",
+          "arsaker": [
+            {
+              "annenArsak": "rqertqertqe rtqert qertqer tqertqe rtqert qertqe rtqert qert",
+              "arsak": "07"
+            }
+          ]
+        },
+        "fornavn": "blå",
+        "kjoenn": "U",
+        "etternavn": "gul",
+        "foedselsdato": "1987-01-29",
+        "tidligereetternavn": "gadfgadfgadfgadfgadfgadfadfgadfgadfgadfgad",
+        "statsborgerskap": [
+          {
+            "land": "NO"
+          }
+        ],
+        "pin": [
+          {
+            "sektor": "alle",
+            "identifikator": "32451345134513451345",
+            "institusjon": {
+              "institusjonsid": "NO:NAVT002",
+              "institusjonsnavn": "12347, NAVT002, NO"
+            },
+            "land": "DK"
+          }
+        ],
+        "foedested": {
+          "region": "sdfsdf",
+          "land": "DK",
+          "by": "oslo"
+        },
+        "fornavnvedfoedsel": "agfdgadfg",
+        "tidligerefornavn": "sssssssssssssssssssssssssssssssssss",
+        "etternavnvedfoedsel": "agdfgadfga"
+      },
+      "adresse": {
+        "region": "gggggggggggggggggggggggggggggg",
+        "land": "NO",
+        "gate": "fffffffffffffffffffffffffff",
+        "bygning": "gggggggggggggggggggggg",
+        "postnummer": "12345",
+        "by": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+      },
+      "bank": {
+        "konto": {
+          "innehaver": {
+            "navn": "agdfgadfgadfgadfgdagadfgdg adfgdafgdagadg",
+            "rolle": "forsikret_person"
+          },
+          "sepa": {
+            "swift": "AAAADK32323",
+            "iban": "NO1212341234567"
+          }
+        }
+      },
+      "far": {
+        "person": {
+          "fornavn": "afgadg",
+          "etternavnvedfoedsel": "fgadfgad fgadfg"
+        }
+      }
+    },
+    "verge": {
+      "person": {
+        "kontakt": {
+          "telefon": [
+            {
+              "nummer": "234234234234234",
+              "type": "mobil"
+            }
+          ],
+          "email": [
+            {
+              "adresse": "fasdfgadfgadfgadfg@dfgadgadfgadfgadfgadfgadfgadfgadfg.no"
+            }
+          ]
+        },
+        "fornavn": "qertqertqertqert",
+        "etternavn": "qertqertqertqertqe"
+      },
+      "vergemaal": {
+        "mandat": "qertqertqertqertqertqertqertqertqertqertqertqertqerteqrtqertqe eqrt eqrteqt eqtr qertqet qert qet eqtrtqertqert eqrtqerte"
+      },
+      "adresse": {
+        "by": "shsfghsfghsfghsfgh",
+        "postnummer": "345345345",
+        "gate": "qertqerteqrteqrteqrtqer",
+        "land": "NO",
+        "region": "hadfgadfgadfgadfg",
+        "bygning": "qertqertqerteqrtqerter"
+      }
+    },
+    "krav": {
+      "dato": "2015-12-17"
+    },
+    "barn": [
+      {
+        "far": {
+          "person": {
+            "etternavnvedfoedsel": "adgfadfgadfgadfg",
+            "fornavn": "adfgadfgdagadfg"
+          }
+        },
+        "person": {
+          "pin": [
+            {
+              "identifikator": "35345345345345345345345345",
+              "institusjon": {
+                "institusjonsnavn": "12348, NAVT003, NO",
+                "institusjonsid": "NO:NAVT003"
+              },
+              "sektor": "alle",
+              "land": "DK"
+            }
+          ],
+          "foedested": {
+            "by": "fgdfgadfgadgadd",
+            "land": "NO",
+            "region": "adfgdfgadfgdafgdaf"
+          },
+          "foedselsdato": "2005-05-06",
+          "kjoenn": "K",
+          "fornavn": "adgadfgadfg",
+          "statsborgerskap": [
+            {
+              "land": "NO"
+            }
+          ],
+          "etternavn": "gadfgadfgdafg",
+          "doedsdato": "1960-09-23",
+          "etternavnvedfoedsel": "adfgadgfdafg",
+          "fornavnvedfoedsel": "agdfgdafgad gad adgfadfg"
+        },
+        "opplysningeromannetbarn": "asdfgasdfsdfasdgafgadfg",
+        "mor": {
+          "person": {
+            "fornavn": "adfgadfgadfgadfg",
+            "etternavnvedfoedsel": "adgadfgdafgdafg"
+          }
+        }
+      }
+    ],
+    "eessisak": [
+      {
+        "institusjonsid": "NO:NAVT002",
+        "institusjonsnavn": "12347, NAVT002, NO",
+        "saksnummer": "123123124341345134513513451345134513513451345",
+        "land": "NO"
+      }
+    ]
+  },
+  "sedVer": "0",
+  "sedGVer": "4",
+  "sed": "P2100"
+}

@@ -1,0 +1,53 @@
+{
+  "sed" : "P2000",
+  "sedGVer" : "4",
+  "sedVer" : "1",
+  "nav" : {
+    "eessisak" : null,
+    "bruker" : {
+      "mor" : null,
+      "far" : null,
+      "person" : {
+        "pin" : null,
+        "pinland" : null,
+        "pinannen" : null,
+        "statsborgerskap" : null,
+        "etternavn" : null,
+        "fornavn" : "Dummy",
+        "kjoenn" : null,
+        "foedested" : null,
+        "tidligerefornavn" : null,
+        "tidligereetternavn" : null,
+        "fornavnvedfoedsel" : null,
+        "etternavnvedfoedsel" : null,
+        "foedselsdato" : null,
+        "doedsdato" : null,
+        "dodsDetalj" : null,
+        "kontakt" : null,
+        "sivilstand" : null,
+        "relasjontilavdod" : null,
+        "nyttEkteskapPartnerskapEtterForsikredeDod" : null,
+        "rolle" : null
+      },
+      "adresse" : null,
+      "bostedsadresse" : null,
+      "status" : null,
+      "doedsfall" : null,
+      "endringer" : null,
+      "arbeidsforhold" : null,
+      "bank" : null
+    },
+    "ektefelle" : null,
+    "barn" : null,
+    "verge" : null,
+    "krav" : null,
+    "sak" : null,
+    "annenperson" : null,
+    "endredeforhold" : null,
+    "ytterligereinformasjon" : null
+  },
+  "pensjon" : null,
+  "trygdetid" : null,
+  "ignore" : null,
+  "horisontal" : null
+}

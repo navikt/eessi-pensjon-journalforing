@@ -1,0 +1,134 @@
+{
+  "nav" : {
+    "bruker" : {
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "2184",
+          "fornavn" : "2185"
+        }
+      },
+      "person" : {
+        "fornavn" : "Mandag",
+        "kjoenn" : "M",
+        "etternavn" : "Dag",
+        "kontakt" : {
+          "email" : [ {
+            "adresse" : "ingenerhjemme@online.no"
+          } ],
+          "telefon" : [ {
+            "nummer" : "456789321",
+            "type" : "mobil"
+          } ]
+        },
+        "etternavnvedfoedsel" : "215",
+        "foedselsdato" : "1957-05-27",
+        "tidligereetternavn" : "2212",
+        "statsborgerskap" : [ {
+          "land" : "NO"
+        } ],
+        "pin" : [ {
+          "institusjonsnavn" : "12347, NAVT002, NO",
+          "identifikator" : "21712",
+          "sektor" : "pensjoner",
+          "land" : "NO",
+          "institusjonsid" : "NO:NAVT002"
+        } ],
+        "foedested" : {
+          "region" : "21812",
+          "by" : "21811",
+          "land" : "NO"
+        },
+        "fornavnvedfoedsel" : "216",
+        "tidligerefornavn" : "2213"
+      },
+      "adresse" : {
+        "bygning" : "2222",
+        "region" : "2225",
+        "postnummer" : "2224",
+        "by" : "2223",
+        "land" : "NO",
+        "gate" : "2221"
+      },
+      "far" : {
+        "person" : {
+          "fornavn" : "2183",
+          "etternavnvedfoedsel" : "2182"
+        }
+      }
+    },
+    "eessisak" : [ {
+      "institusjonsnavn" : "12347, NAVT002, NO",
+      "saksnummer" : "112",
+      "land" : "NO",
+      "institusjonsid" : "NO:NAVT002"
+    } ],
+    "krav" : {
+      "dato" : "2019-02-01",
+      "type" : "01"
+    }
+  },
+  "pensjon" : {
+    "gjenlevende" : {
+      "person" : {
+        "kontakt" : {
+          "telefon" : [ {
+            "type" : "arbeid",
+            "nummer" : "1234567890"
+          } ],
+          "email" : [ {
+            "adresse" : "knockingonheavens@heaven.com"
+          } ]
+        },
+        "etternavnvedfoedsel" : "325",
+        "foedested" : {
+          "region" : "32812",
+          "by" : "32811",
+          "land" : "NO"
+        },
+        "pin" : [ {
+          "sektor" : "pensjoner",
+          "land" : "NO",
+          "institusjonsid" : "NO:NAVT002",
+          "identifikator" : "32712",
+          "institusjonsnavn" : "12347, NAVT002, NO"
+        } ],
+        "fornavn" : "322",
+        "kjoenn" : "K",
+        "relasjontilavdod" : {
+          "relasjon" : "01"
+        },
+        "tidligereetternavn" : "3312",
+        "fornavnvedfoedsel" : "326",
+        "foedselsdato" : "1962-04-25",
+        "tidligerefornavn" : "3313",
+        "etternavn" : "321",
+        "statsborgerskap" : [ {
+          "land" : "NO"
+        } ]
+      },
+      "adresse" : {
+        "postnummer" : "3324",
+        "by" : "3323",
+        "land" : "NO",
+        "gate" : "3321",
+        "bygning" : "3322",
+        "region" : "3325"
+      },
+      "mor" : {
+        "person" : {
+          "etternavnvedfoedsel" : "3284",
+          "fornavn" : "3285"
+        }
+      },
+      "far" : {
+        "person" : {
+          "fornavn" : "3283",
+          "etternavnvedfoedsel" : "3282"
+        }
+      }
+    }
+  },
+  "sedVer" : "1",
+  "sedGVer" : "4",
+  "sed" : "P15000"
+}

@@ -67,30 +67,9 @@ class NavFodselsnummer(private val fodselsnummer: String) {
         }
     }
 
-    fun getBirthDateAsISO() = LocalDate.parse("${get4DigitBirthYear()}-${getMonth()}-${getDayInMonth()}", DateTimeFormatter.ISO_DATE)
+    fun getBirthDateAsISO() = "${get4DigitBirthYear()}-${getMonth()}-${getDayInMonth()}"
 
     fun getBirthDate() = LocalDate.of(get4DigitBirthYear().toInt(), getMonth().toInt(), getDayInMonth().toInt())
-
-    fun getValidPentionAge(): Boolean {
-        val validAge = 67
-        val nowDate = LocalDate.now()
-        val resultAge = ChronoUnit.YEARS.between(getBirthDate(), nowDate).toInt()
-        return (resultAge >= validAge)
-    }
-
-    fun getYearWhen16(): LocalDate {
-        val copyBdate = LocalDate.from(getBirthDate())
-        return copyBdate.plusYears(16)
-    }
-
-    fun isUnder18Year(): Boolean {
-        val validAge = 18
-        val nowDate = LocalDate.now()
-        val copyBdate = LocalDate.from(getBirthDate())
-        val resultAge = ChronoUnit.YEARS.between(copyBdate, nowDate).toInt()
-        return resultAge < validAge
-    }
-
 
     fun getAge(): Int {
         return ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()

@@ -24,14 +24,14 @@ class FdatoService(private val fagmodulService: FagmodulService,
 
     }
 
-    private fun finnFDatoFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
+    fun finnFDatoFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
         var fdato: String? = null
 
         gyldigeSeds?.forEach {  pair ->
             try {
                 val sedDocumentId =  pair.first
                 val sedType = pair.second
-                val sedJson = euxService.hentSedDokumenter(euxCaseId, sedDocumentId)
+                val sedJson = euxService.hentSed(euxCaseId, sedDocumentId)
                 val sedRootNode = mapper.readTree(sedJson)
 
                 when (sedType) {
