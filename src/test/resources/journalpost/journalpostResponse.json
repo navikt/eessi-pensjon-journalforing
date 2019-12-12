@@ -2,6 +2,10 @@
   "journalpostId": "429434378",
   "journalstatus": "M",
   "melding": "null",
-  "journalpostferdigstilt": "false",
-  "etNyttFeltSomPlutseligKanKomme": "Denne er her for å forsikre at mapperen ikke kræsjer ved nye ukjente felter"
+  "journalpostferdigstilt": false,
+  "dokumenter": [
+    {
+      "dokumentInfoId": "453867272"
+    }
+  ]
 }

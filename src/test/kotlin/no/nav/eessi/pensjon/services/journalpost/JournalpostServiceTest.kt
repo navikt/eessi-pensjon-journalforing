@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.services.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doThrow
+import no.nav.eessi.pensjon.json.toJson
 import org.mockito.Mockito.doReturn
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.*
 import org.springframework.web.client.HttpServerErrorException
@@ -81,7 +83,12 @@ class JournalpostServiceTest {
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
-        assertEquals(journalpostResponse, "429434378")
+        assertTrue(journalpostResponse!!.toJson() == "{\n" +
+                "  \"journalpostId\" : \"429434378\",\n" +
+                "  \"journalstatus\" : \"M\",\n" +
+                "  \"melding\" : \"null\",\n" +
+                "  \"journalpostferdigstilt\" : false\n" +
+                "}")
     }
 
     @Test

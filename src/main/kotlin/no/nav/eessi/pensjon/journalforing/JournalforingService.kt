@@ -125,7 +125,7 @@ class JournalforingService(private val euxService: EuxService,
                 var forsokFerdigstill = false
                 sakId?.let { forsokFerdigstill = true }
 
-                val journalpostId = journalpostService.opprettJournalpost(
+                val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
                         navBruker = fnr,
                         personNavn = personNavn,
@@ -140,10 +140,10 @@ class JournalforingService(private val euxService: EuxService,
                         forsokFerdigstill = forsokFerdigstill
                 )
 
-                logger.debug("JournalPostID: $journalpostId")
+                logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
 
-                if(!forsokFerdigstill) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                if(!journalPostResponse!!.journalpostferdigstilt) {
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse!!.journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
                         publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
