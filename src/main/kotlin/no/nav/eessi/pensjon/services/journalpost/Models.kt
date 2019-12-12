@@ -18,7 +18,7 @@ class JournalPostResponse(
     val journalpostId: String,
     val journalstatus: String,
     val melding: String? = null,
-    val journalpostferdigstilt: String
+    val journalpostferdigstilt: Boolean
 ){
     override fun toString(): String {
         val mapper = jacksonObjectMapper()

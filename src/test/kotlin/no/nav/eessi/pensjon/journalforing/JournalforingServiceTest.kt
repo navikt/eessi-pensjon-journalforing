@@ -139,7 +139,7 @@ class JournalforingServiceTest {
                 .whenever(begrensInnsynService).begrensInnsyn(any())
 
         //JOURNALPOST OPPRETT JOURNALPOST
-        doReturn("123")
+        doReturn(JournalPostResponse("123", "null", null, false))
                 .`when`(journalpostService)
                 .opprettJournalpost(
                         rinaSakId = anyOrNull(),

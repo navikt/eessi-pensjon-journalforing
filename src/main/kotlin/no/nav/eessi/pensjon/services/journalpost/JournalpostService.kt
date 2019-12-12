@@ -46,7 +46,7 @@ class JournalpostService(
             arkivsaksnummer: String?,
             dokumenter: String,
             forsokFerdigstill: Boolean? = false
-    ): String? {
+    ): JournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
                 navBruker,
@@ -93,7 +93,7 @@ class JournalpostService(
                         HttpMethod.POST,
                         HttpEntity(requestBody.toString(), headers),
                         String::class.java)
-                mapper.readValue(response.body, JournalPostResponse::class.java).journalpostId
+                mapper.readValue(response.body, JournalPostResponse::class.java)
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: $ex body: ${ex.responseBodyAsString}")
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
