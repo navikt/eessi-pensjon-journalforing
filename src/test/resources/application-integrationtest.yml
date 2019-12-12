@@ -37,4 +37,4 @@ virksomhet.person.v3:
   endpointurl: http://localhost:${mockServerport}
 eessifagmodulservice_URL: http://localhost:${mockServerport}
 eessipennorg2service_URL: http://localhost:${mockServerport}
-BestemSak_URL: http://someurl
+BestemSak_URL: http://localhost:${mockServerport}
