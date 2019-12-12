@@ -27,7 +27,7 @@ class ModelsTest {
         assertEquals(journalpostRequestModel.journalpostType, JournalpostType.INNGAAENDE)
         assertEquals(journalpostRequestModel.kanal, "NAV_NO")
         assertEquals(journalpostRequestModel.sak?.arkivsaksnummer, "string")
-        assertEquals(journalpostRequestModel.sak?.arkivsaksystem, "GSAK")
+        assertEquals(journalpostRequestModel.sak?.arkivsaksystem, "PSAK")
         assertEquals(journalpostRequestModel.tema, "PEN")
         assertEquals(journalpostRequestModel.tittel, "Inngående P2000 - Krav om alderspensjon")
     }
