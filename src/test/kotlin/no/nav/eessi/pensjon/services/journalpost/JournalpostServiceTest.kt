@@ -56,7 +56,7 @@ class JournalpostServiceTest {
 
         val journalpostResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
-                navBruker= "12345678912",
+                fnr= "12345678912",
                 personNavn= "navn navnesen",
                 bucType= "P_BUC_01",
                 sedType= "P2000 - Krav om alderspensjon",
@@ -79,7 +79,8 @@ class JournalpostServiceTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                forsokFerdigstill= false
+                forsokFerdigstill= false,
+                avsenderLand = "NO"
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
@@ -103,7 +104,7 @@ class JournalpostServiceTest {
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
                     rinaSakId = "1111",
-                    navBruker = "12345678912",
+                    fnr = "12345678912",
                     personNavn = "navn navnesen",
                     bucType = "P_BUC_01",
                     sedType = "P2000 - Krav om alderspensjon",
@@ -126,7 +127,8 @@ class JournalpostServiceTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                    forsokFerdigstill = false
+                    forsokFerdigstill = false,
+                    avsenderLand = "NO"
             )
         }
     }

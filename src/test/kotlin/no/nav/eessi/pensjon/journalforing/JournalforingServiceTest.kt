@@ -143,7 +143,7 @@ class JournalforingServiceTest {
                 .`when`(journalpostService)
                 .opprettJournalpost(
                         rinaSakId = anyOrNull(),
-                        navBruker= anyOrNull(),
+                        fnr= anyOrNull(),
                         personNavn= anyOrNull(),
                         bucType= anyOrNull(),
                         sedType= anyOrNull(),
@@ -153,7 +153,8 @@ class JournalforingServiceTest {
                         journalfoerendeEnhet= anyOrNull(),
                         arkivsaksnummer= anyOrNull(),
                         dokumenter= anyOrNull(),
-                        forsokFerdigstill= anyOrNull()
+                        forsokFerdigstill= anyOrNull(),
+                        avsenderLand = anyOrNull()
                 )
 
         //OPPGAVEROUTING ROUTE
@@ -193,7 +194,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.SENDT )
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId= anyOrNull(),
-                navBruker= anyOrNull(),
+                fnr= anyOrNull(),
                 personNavn= anyOrNull(),
                 bucType= anyOrNull(),
                 sedType= anyOrNull(),
@@ -203,7 +204,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= anyOrNull(),
                 arkivsaksnummer= anyOrNull(),
                 dokumenter= anyOrNull(),
-                forsokFerdigstill= anyOrNull()
+                forsokFerdigstill= anyOrNull(),
+                avsenderLand = anyOrNull()
         )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -220,7 +222,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12078945602"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
@@ -230,7 +232,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -241,7 +244,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12078945602"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_02"),
                 sedType= eq(SedType.P2100.name),
@@ -251,7 +254,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -265,7 +269,7 @@ class JournalforingServiceTest {
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("01055012345"),
+                fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_03"),
                 sedType= eq(SedType.P2200.name),
@@ -275,7 +279,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4303"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -286,7 +291,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12078945602"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_10"),
                 sedType= eq(SedType.P2000.name),
@@ -296,7 +301,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -319,7 +325,7 @@ class JournalforingServiceTest {
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))), HendelseType.MOTTATT )
         verify(journalpostService, times(0)).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= anyOrNull(),
+                fnr= anyOrNull(),
                 personNavn= anyOrNull(),
                 bucType= anyOrNull(),
                 sedType= anyOrNull(),
@@ -329,7 +335,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= anyOrNull(),
                 arkivsaksnummer= anyOrNull(),
                 dokumenter= anyOrNull(),
-                forsokFerdigstill= anyOrNull()
+                forsokFerdigstill= anyOrNull(),
+                avsenderLand = anyOrNull()
         )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -345,7 +352,7 @@ class JournalforingServiceTest {
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
@@ -355,7 +362,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -366,7 +374,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("01055012345"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("01055012345"),
+                fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
@@ -376,7 +384,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("0001"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -389,7 +398,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12078945602"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_02"),
                 sedType= eq(SedType.P2100.name),
@@ -399,7 +408,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -411,7 +421,7 @@ class JournalforingServiceTest {
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("01055012345"),
+                fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_03"),
                 sedType= eq(SedType.P2200.name),
@@ -421,7 +431,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4303"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
@@ -432,7 +443,7 @@ class JournalforingServiceTest {
         verify(personV3Service).hentPerson(eq("12078945602"))
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                navBruker= eq("12078945602"),
+                fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_10"),
                 sedType= eq(SedType.P2000.name),
@@ -442,7 +453,8 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet= eq("4862"),
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
-                forsokFerdigstill= eq(false)
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
         )
     }
 
