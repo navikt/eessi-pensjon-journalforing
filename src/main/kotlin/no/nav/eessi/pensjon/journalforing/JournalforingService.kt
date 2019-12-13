@@ -119,9 +119,11 @@ class JournalforingService(private val euxService: EuxService,
                 logger.debug("tildeltEnhet: $tildeltEnhet")
 
                 var sakId: String? = null
-                if(aktoerId != null)
-                    sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
-
+                if(aktoerId != null) {
+                    if (hendelseType == HendelseType.SENDT) {
+                        sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
+                    }
+                }
                 var forsokFerdigstill = false
                 sakId?.let { forsokFerdigstill = true }
 
