@@ -127,7 +127,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
-                        navBruker = fnr,
+                        fnr = fnr,
                         personNavn = personNavn,
                         bucType = sedHendelse.bucType.name,
                         sedType = sedHendelse.sedType.name,
@@ -137,7 +137,8 @@ class JournalforingService(private val euxService: EuxService,
                         journalfoerendeEnhet = tildeltEnhet.enhetsNr,
                         arkivsaksnummer = sakId,
                         dokumenter = documents,
-                        forsokFerdigstill = forsokFerdigstill
+                        forsokFerdigstill = forsokFerdigstill,
+                        avsenderLand = sedHendelse.avsenderLand
                 )
 
                 logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")

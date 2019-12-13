@@ -35,7 +35,7 @@ class JournalpostService(
 
     fun opprettJournalpost(
             rinaSakId: String,
-            navBruker: String?,
+            fnr: String?,
             personNavn: String?,
             bucType: String,
             sedType: String,
@@ -45,18 +45,20 @@ class JournalpostService(
             journalfoerendeEnhet: String?,
             arkivsaksnummer: String?,
             dokumenter: String,
-            forsokFerdigstill: Boolean? = false
+            forsokFerdigstill: Boolean? = false,
+            avsenderLand: String?
     ): JournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
-                navBruker,
+                fnr,
+                personNavn,
                 sedHendelseType,
-                personNavn
+                avsenderLand
         )
         val behandlingstema = BucType.valueOf(bucType).BEHANDLINGSTEMA
-        val bruker = when (navBruker){
+        val bruker = when (fnr){
             null -> null
-            else -> Bruker(id = navBruker)
+            else -> Bruker(id = fnr)
         }
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer)
@@ -109,17 +111,19 @@ class JournalpostService(
     }
 
     private fun populerAvsenderMottaker(
-            navBruker: String?,
+            fnr: String?,
+            mottakerNavn: String?,
             sedHendelseType: String,
-            avsenderNavn: String?): AvsenderMottaker {
-        return if(navBruker.isNullOrEmpty()) {
-            if(sedHendelseType == "SENDT") {
-                AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV")
-            } else {
-                AvsenderMottaker(null, null, null)
-            }
+            avsenderLand: String?): AvsenderMottaker {
+
+        return if(sedHendelseType == "SENDT") {
+            AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
         } else {
-            AvsenderMottaker(navBruker, IdType.FNR, avsenderNavn)
+            if(fnr.isNullOrEmpty()) {
+                AvsenderMottaker(null, null, null, avsenderLand)
+            } else {
+                AvsenderMottaker(fnr, IdType.FNR, mottakerNavn, avsenderLand)
+            }
         }
     }
 
