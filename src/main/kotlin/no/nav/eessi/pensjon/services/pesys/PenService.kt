@@ -35,7 +35,7 @@ class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
 
         val ytelseType = when(bucType) {
             BucType.P_BUC_01 -> YtelseType.ALDER
-            BucType.P_BUC_02 -> YtelseType.GJENLEV
+            BucType.P_BUC_02 -> return null
             BucType.P_BUC_03 -> YtelseType.UFOREP
             else -> return null
         }
