@@ -25,6 +25,9 @@
 
     <springProfile name="local,test, integrationtest">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+<!--            <encoder>-->
+<!--                <pattern>%magenta(%d{dd-MM-yyyy HH:mm:ss.SSS}) %highlight(%-5level) %logger{30} - %msg%n</pattern>-->
+<!--            </encoder>-->
             <encoder>
                 <pattern>%level %logger %msg %n</pattern>
             </encoder>

@@ -6,8 +6,6 @@ import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.buc.FdatoService
 import no.nav.eessi.pensjon.buc.FnrService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import no.nav.eessi.pensjon.services.personv3.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -24,6 +22,7 @@ import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.personv3.BrukerMock
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.pesys.PenService
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -35,6 +34,8 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -494,4 +495,58 @@ class JournalforingServiceTest {
         val melding = SedHendelseModel.fromJson(testMleding)
 
     }
+
+    @Test
+    fun `valider fdato er fra fnr`() {
+        val fnr = "12078945602"
+        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
+        val expected = LocalDate.parse("1989-07-12", DateTimeFormatter.ISO_DATE)
+
+        val actual = journalforingService.hentFodselsDato(hendese, fnr)
+
+        assertEquals(expected, actual)
+
+    }
+
+    @Test
+    fun `valider fdato fra sed ved ugyldig fnr`() {
+        val fnr = "123"
+        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+
+        val expected = LocalDate.parse("1980-01-01", DateTimeFormatter.ISO_DATE)
+
+        //EUX - HENT SED DOKUMENT
+        doReturn("1980-01-01")
+                .whenever(euxService)
+                .hentFodselsDatoFraSed(anyString(), anyString())
+
+        val actual = journalforingService.hentFodselsDato(hendese, fnr)
+
+        assertEquals(expected, actual)
+
+    }
+
+
+    @Test
+    fun `valider fdato fra sed ved ugyldig fnr lete igjennom alle sed i buc`() {
+        val fnr = "123"
+        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+
+        val expected = LocalDate.parse("1980-10-12", DateTimeFormatter.ISO_DATE)
+
+        doReturn(null)
+                .whenever(euxService)
+                .hentFodselsDatoFraSed(anyString(), anyString())
+
+        doReturn("1980-10-12")
+                .whenever(fdatoService)
+                .getFDatoFromSed(anyString())
+
+        val actual = journalforingService.hentFodselsDato(hendese, fnr)
+
+        assertEquals(expected, actual)
+
+    }
+
+
 }

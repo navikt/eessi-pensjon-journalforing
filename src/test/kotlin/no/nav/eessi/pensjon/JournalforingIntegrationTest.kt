@@ -31,7 +31,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
@@ -93,11 +92,15 @@ class JournalforingIntegrationTest {
         // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
-        // Sender 3 Pensjon SED til Kafka
+        // Sender 5 Pensjon SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+
+        // Sender Sed med ugyldig FNR
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+
     }
 
     private fun shutdown(container: KafkaMessageListenerContainer<String, String>) {
@@ -155,6 +158,15 @@ class JournalforingIntegrationTest {
                     )
 
             // Mocker Eux PDF generator
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                    )
             mockServer.`when`(
                     HttpRequest.request()
                             .withMethod(HttpMethod.GET)
@@ -230,6 +242,17 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
+            //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/7477291/allDocuments"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
+                    )
+
             //Mock fagmodul /buc/{rinanr}/allDocuments
             mockServer.`when`(
                     HttpRequest.request()
@@ -260,6 +283,17 @@ class JournalforingIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.FORBIDDEN_403.code())
                             .withBody("oops")
+                    )
+
+            //Mock eux hent av sed - ugyldig FNR
+            mockServer.`when`(
+                    HttpRequest.request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx" ))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-ugyldigFNR-NAV.json"))))
                     )
 
             //Mock eux hent av sed
@@ -389,6 +423,12 @@ class JournalforingIntegrationTest {
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
+                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
+                VerificationTimes.once()
+        )
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
                         .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"),
                 VerificationTimes.once()
         )
@@ -407,6 +447,13 @@ class JournalforingIntegrationTest {
                 VerificationTimes.once()
         )
 
+        // Verfiy fagmodul allDocuments on Sed ugyldigFNR
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/7477291/allDocuments"),
+                VerificationTimes.atLeast(2)
+        )
 
         // Verfiy fagmodul allDocuments
         mockServer.verify(
@@ -415,6 +462,7 @@ class JournalforingIntegrationTest {
                         .withPath("/buc/.*/allDocuments"),
                 VerificationTimes.atLeast(4)
         )
+
         // Verfiy eux sed
         mockServer.verify(
                 request()
@@ -423,12 +471,21 @@ class JournalforingIntegrationTest {
                 VerificationTimes.atLeast(4)
         )
 
+        // Verfiy eux sed on ugyldig-FNR
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
+                VerificationTimes.atLeast(4)
+        )
+
+
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(4)
+                VerificationTimes.exactly(5)
         )
 
         // Verifiserer at det har blitt forsøkt å hente enhet fra Norg2
@@ -441,7 +498,7 @@ class JournalforingIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 24) { personV3Service.hentPerson(any()) }
+        verify(exactly = 30) { personV3Service.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
