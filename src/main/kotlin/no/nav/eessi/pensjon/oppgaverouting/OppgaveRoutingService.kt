@@ -23,7 +23,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
     fun route(navBruker: String? = null,
               bucType: BucType? = null,
               landkode: String? = null,
-              fodselsDato: LocalDate,
+              fodselsDato: LocalDate? = null,
               geografiskTilknytning: String? = null,
               diskresjonskode: Diskresjonskode? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
@@ -42,7 +42,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
+    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         return when {
                     navBruker == null -> ID_OG_FORDELING
@@ -101,7 +101,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 else -> UTLAND
             }
 
-    private fun isBetween18and60(fodselsDato: LocalDate): Boolean {
+    private fun isBetween18and60(fodselsDato: LocalDate?): Boolean {
         val alder = Period.between(fodselsDato, LocalDate.now())
         return (alder.years >= 18) && (alder.years < 60)
     }

@@ -30,6 +30,7 @@ import no.nav.eessi.pensjon.services.pesys.PenService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -48,6 +49,9 @@ class JournalforingService(private val euxService: EuxService,
                            private val fnrService: FnrService,
                            private val fdatoService: FdatoService,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
+
+    @Value("\${NAIS_NAMESPACE}")
+    private lateinit var namespace: String
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -79,7 +83,9 @@ class JournalforingService(private val euxService: EuxService,
                             fnr = null
                         }
                     } catch (ex: Exception) {
-                        logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                       logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                       person = null
+                       fnr = null
                     }
                 }
 
@@ -92,6 +98,7 @@ class JournalforingService(private val euxService: EuxService,
                 val pinOgYtelse = hentPinOgYtelse(sedHendelse)
 
                 val fodselsDato = hentFodselsDato(sedHendelse, fnr)
+
                 val landkode = hentLandkode(person)
 
                 val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
@@ -100,6 +107,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 //tps bruker gt
                 val geografiskTilknytning = hentGeografiskTilknytning(person)
+
                 //tps bruker diskresjon
                 val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
 
@@ -120,7 +128,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 var sakId: String? = null
                 if(aktoerId != null) {
-                    if (hendelseType == HendelseType.SENDT) {
+                    if (hendelseType == HendelseType.SENDT && namespace == "Q2") {
                         sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
                     }
                 }
@@ -202,32 +210,38 @@ class JournalforingService(private val euxService: EuxService,
      * Henter fødselsdatoen fra den gjeldende SEDen som skal journalføres, dersom dette feltet er tomt
      * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
      */
-    private fun hentFodselsDato(sedHendelse: SedHendelseModel, fnr: String?): LocalDate {
+    fun hentFodselsDato(sedHendelse: SedHendelseModel, fnr: String?): LocalDate? {
         var fodselsDatoISO : String? = null
 
         if (isFnrValid(fnr)) {
             try {
                 val navfnr = NavFodselsnummer(fnr!!)
                 fodselsDatoISO =  navfnr.getBirthDateAsISO()
-                return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
             } catch (ex : Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
                 fodselsDatoISO = null
             }
         }
 
-        if (fodselsDatoISO == null) {
+        if (fodselsDatoISO.isNullOrEmpty()) {
+            logger.debug("provøer å hente inn fodselsDato fra følgende SED : ${sedHendelse.rinaSakId} / ${sedHendelse.rinaDokumentId}")
             fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
             if (fodselsDatoISO.isNullOrEmpty()) {
                 try {
+                    logger.debug("provøer å hente inn fodselsDato fra første og beste SED i BUC : ${sedHendelse.rinaSakId}")
                     fodselsDatoISO = fdatoService.getFDatoFromSed(sedHendelse.rinaSakId)
                 } catch (ex: Exception) {
-                    logger.error("Ingen gyldige fdato funnet i BUC", ex)
+                    logger.error("Ingen gyldige fdato funnet i BUC : ${sedHendelse.rinaSakId}", ex)
                 }
             }
         }
-        return LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+
+        return if (fodselsDatoISO.isNullOrEmpty()) {
+             null
+        } else {
+            LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
+        }
     }
 
     private fun hentAktoerId(navBruker: String?): String? {
@@ -256,7 +270,7 @@ class JournalforingService(private val euxService: EuxService,
             pinOgYtelseType: HentPinOgYtelseTypeResponse?,
             navBruker: String?,
             landkode: String?,
-            fodselsDato: LocalDate,
+            fodselsDato: LocalDate? = null,
             geografiskTilknytning: String?,
             diskresjonskode: Diskresjonskode?
     ): OppgaveRoutingModel.Enhet {

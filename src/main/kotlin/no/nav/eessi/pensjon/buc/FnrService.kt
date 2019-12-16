@@ -29,7 +29,7 @@ class FnrService(private val fagmodulService: FagmodulService,
         gyldigeSeds.forEach { pair ->
             val sedDocumentId =  pair.first
             val sedType = pair.second
-            logger.debug("leter igjennom sedType: $sedType etter norsk pin fra euxCaseId og sedDocid: $euxCaseId / $sedDocumentId ")
+            logger.info("leter igjennom sedType: $sedType etter norsk pin fra euxCaseId og sedDocid: $euxCaseId / $sedDocumentId ")
             try {
                 val sedJson = euxService.hentSed(euxCaseId, sedDocumentId)
                 val sedRootNode = mapper.readTree(sedJson)
