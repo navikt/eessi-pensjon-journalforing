@@ -128,7 +128,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 var sakId: String? = null
                 if(aktoerId != null) {
-                    if (hendelseType == HendelseType.SENDT && namespace == "Q2") {
+                    if (hendelseType == HendelseType.SENDT && namespace == "q2") {
                         sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
                     }
                 }
