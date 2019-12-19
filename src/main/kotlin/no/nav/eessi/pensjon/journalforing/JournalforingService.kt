@@ -70,13 +70,13 @@ class JournalforingService(private val euxService: EuxService,
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
                 var person = hentPerson(sedHendelse.navBruker)
-                var fnr : String? = null
+                var fnr : String?
 
                 if(person != null) {
                     fnr = sedHendelse.navBruker!!
                 } else {
                    try {
-                        fnr = fnrService.getFodselsnrFraSedPaaVagtBuc(sedHendelse.rinaSakId)
+                        fnr = fnrService.getFodselsnrFraSed(sedHendelse.rinaSakId)
                         person = hentPerson(fnr)
                         if (person == null) {
                             logger.info("Ingen treff på fødselsnummer, fortsetter uten")

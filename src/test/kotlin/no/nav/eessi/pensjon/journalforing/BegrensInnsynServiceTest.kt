@@ -68,7 +68,7 @@ class BegrensInnsynServiceTest {
 
         doReturn(BrukerMock.createWith()).whenever(personV3Service).hentPerson(any())
 
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenterFraRinaSak(any())
+        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
         val actual = begrensInnsynService.begrensInnsyn(hendelse)
         val expected = null
@@ -96,7 +96,7 @@ class BegrensInnsynServiceTest {
 
 
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenterFraRinaSak(any())
+        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
         val actual = begrensInnsynService.begrensInnsyn(hendelse)
         val expected = null
@@ -130,7 +130,7 @@ class BegrensInnsynServiceTest {
                 .whenever(personV3Service).hentPerson(any())
 
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenterFraRinaSak(any())
+        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
         val actual = begrensInnsynService.begrensInnsyn(hendelse)
         val expected = Diskresjonskode.SPSF
@@ -160,7 +160,7 @@ class BegrensInnsynServiceTest {
             doReturn(BrukerMock.createWith()).
             doReturn(bruker).whenever(personV3Service).hentPerson(any())
 
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenterFraRinaSak(any())
+        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
         val actual = begrensInnsynService.begrensInnsyn(hendelse)
         val expected = Diskresjonskode.SPSF

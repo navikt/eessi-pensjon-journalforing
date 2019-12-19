@@ -73,7 +73,7 @@ class JournalforingIntegrationTest {
         ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
 
         // Sett opp producer
-        val sedSendtProducerTemplate = settOppProducerTemplate(SED_SENDT_TOPIC)
+        val sedSendtProducerTemplate = settOppProducerTemplate()
 
         // produserer sedSendt meldinger på kafka
         produserSedHendelser(sedSendtProducerTemplate)
@@ -109,11 +109,11 @@ class JournalforingIntegrationTest {
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
-    private fun settOppProducerTemplate(topicNavn: String): KafkaTemplate<Int, String> {
+    private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
         val senderProps = KafkaTestUtils.senderProps(embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
-        template.defaultTopic = topicNavn
+        template.defaultTopic = SED_SENDT_TOPIC
         return template
     }
 
@@ -141,14 +141,13 @@ class JournalforingIntegrationTest {
 
         init {
             // Start Mockserver in memory
-            val lineSeparator = System.lineSeparator()
             val port = randomFrom()
             mockServer = ClientAndServer.startClientAndServer(port)
             System.setProperty("mockServerport", port.toString())
 
             // Mocker STS
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withQueryStringParameter("grant_type", "client_credentials"))
                     .respond(HttpResponse.response()
@@ -159,7 +158,7 @@ class JournalforingIntegrationTest {
 
             // Mocker Eux PDF generator
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"))
                     .respond(HttpResponse.response()
@@ -168,7 +167,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"))
                     .respond(HttpResponse.response()
@@ -177,7 +176,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"))
                     .respond(HttpResponse.response()
@@ -186,7 +185,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"))
                     .respond(HttpResponse.response()
@@ -196,7 +195,7 @@ class JournalforingIntegrationTest {
                     )
 
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer"))
                     .respond(HttpResponse.response()
@@ -206,7 +205,7 @@ class JournalforingIntegrationTest {
                     )
 
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
@@ -215,7 +214,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc"))
                     .respond(HttpResponse.response()
@@ -224,7 +223,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646"))
                     .respond(HttpResponse.response()
@@ -233,7 +232,7 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666"))
                     .respond(HttpResponse.response()
@@ -244,7 +243,7 @@ class JournalforingIntegrationTest {
 
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/7477291/allDocuments"))
                     .respond(HttpResponse.response()
@@ -255,7 +254,7 @@ class JournalforingIntegrationTest {
 
             //Mock fagmodul /buc/{rinanr}/allDocuments
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/.*/allDocuments"))
                     .respond(HttpResponse.response()
@@ -266,7 +265,7 @@ class JournalforingIntegrationTest {
 
             //Mock fagmodul hent fnr fra buc
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/sed/fodselsnr/161558/buctype/fjernes"))
                     .respond(HttpResponse.response()
@@ -276,7 +275,7 @@ class JournalforingIntegrationTest {
                     )
 
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/sed/fodselsnr/148161/buctype/fjernes"))
                     .respond(HttpResponse.response()
@@ -287,7 +286,7 @@ class JournalforingIntegrationTest {
 
             //Mock eux hent av sed - ugyldig FNR
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx" ))
                     .respond(HttpResponse.response()
@@ -298,7 +297,7 @@ class JournalforingIntegrationTest {
 
             //Mock eux hent av sed
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018" ))
                     .respond(HttpResponse.response()
@@ -309,7 +308,7 @@ class JournalforingIntegrationTest {
 
             // Mocker journalføringstjeneste
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/journalpost"))
                     .respond(HttpResponse.response()
@@ -320,7 +319,7 @@ class JournalforingIntegrationTest {
 
             //Mock norg2tjeneste
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/api/v1/arbeidsfordeling")
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))))
@@ -332,7 +331,7 @@ class JournalforingIntegrationTest {
 
             // Mocker aktørregisteret
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/identer")
                             .withQueryStringParameters(
@@ -346,7 +345,7 @@ class JournalforingIntegrationTest {
                     )
             // Mocker STS service discovery
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/.well-known/openid-configuration"))
                     .respond(HttpResponse.response()
@@ -364,7 +363,7 @@ class JournalforingIntegrationTest {
                     )
             // Mocker fagmodul hent ytelsetype
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/sed/ytelseKravtype/161558/sedid/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
@@ -375,7 +374,7 @@ class JournalforingIntegrationTest {
                             )
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/sed/ytelseKravtype/148161/sedid/f899bf659ff04d20bc8b978b186f1ecc"))
                     .respond(HttpResponse.response()
@@ -386,7 +385,7 @@ class JournalforingIntegrationTest {
                             )
                     )
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/sed/ytelseKravtype/147729/sedid/b12e06dda2c7474b9998c7139c841646"))
                     .respond(HttpResponse.response()
@@ -399,7 +398,7 @@ class JournalforingIntegrationTest {
 
             // Mocker bestemSak
             mockServer.`when`(
-                    HttpRequest.request()
+                    request()
                             .withMethod(HttpMethod.POST)
                             .withPath("/"))
                     .respond(HttpResponse.response()
@@ -416,7 +415,6 @@ class JournalforingIntegrationTest {
     }
 
     private fun verifiser() {
-        val lineSeparator = System.lineSeparator()
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux

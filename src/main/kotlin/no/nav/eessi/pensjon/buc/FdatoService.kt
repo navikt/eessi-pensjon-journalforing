@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
@@ -18,16 +19,18 @@ class FdatoService(private val fagmodulService: FagmodulService,
     private val mapper = jacksonObjectMapper()
 
     fun getFDatoFromSed(euxCaseId: String): String? {
-        val allDocuments = fagmodulService.hentAlleDokumenterFraRinaSak(euxCaseId)
-        val gyldigeSeds = filterUtGyldigSedId( allDocuments )
+        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
+        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
+
+        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
         return finnFDatoFraSed(euxCaseId,gyldigeSeds)
 
     }
 
     fun finnFDatoFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
-        var fdato: String? = null
+        var fdato: String?
 
-        gyldigeSeds?.forEach {  pair ->
+        gyldigeSeds.forEach { pair ->
             try {
                 val sedDocumentId =  pair.first
                 val sedType = pair.second
@@ -40,10 +43,10 @@ class FdatoService(private val fagmodulService: FagmodulService,
                     }
                     SEDType.P15000.name -> {
                         val krav = sedRootNode.get("nav").get("krav").textValue()
-                        if (krav == "02") {
-                            fdato = filterGjenlevendeFDatoNode(sedRootNode)
+                        fdato = if (krav == "02") {
+                            filterGjenlevendeFDatoNode(sedRootNode)
                         } else {
-                            fdato = filterPersonFDatoNode(sedRootNode)
+                            filterPersonFDatoNode(sedRootNode)
                         }
                     }
                     else -> {
@@ -84,20 +87,6 @@ class FdatoService(private val fagmodulService: FagmodulService,
         return sedRootNode.at("/nav/bruker/person")
                 .get("foedselsdato").textValue()
     }
-
-    private fun filterUtGyldigSedId(sedJson: String?): List<Pair<String, String>> {
-        val validSedtype = listOf("P2000","P2100","P2200","P1000",
-                "P5000","P6000","P7000", "P8000",
-                "P10000","P1100","P11000","P12000","P14000","P15000")
-        val sedRootNode = mapper.readTree(sedJson)
-        return sedRootNode
-                .filterNot { node -> node.get("status").textValue() =="empty" }
-                .filter { node ->  validSedtype.contains(node.get("type").textValue()) }
-                .map { node -> Pair(node.get("id").textValue(), node.get("type").textValue()) }
-                .sortedBy { (_, sorting) -> sorting }
-                .toList()
-    }
-
 }
 
 //--- Disse er benyttet av restTemplateErrorhandler  -- start

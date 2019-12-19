@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.buc
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
@@ -16,9 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -84,7 +80,7 @@ class FdatoServiceTest {
 
         doReturn(bucJson)
                 .whenever(mockFagmodulService)
-                .hentAlleDokumenterFraRinaSak(eq(euxCaseId))
+                .hentAlleDokumenter(eq(euxCaseId))
 
         doReturn(getTestJsonFile("P2000-NAV.json"))
                 .whenever(mockEuxService)
@@ -96,7 +92,7 @@ class FdatoServiceTest {
     private fun getTestJsonFile(filename: String): String {
         val filepath = "src/test/resources/buc/${filename}"
         val json = String(Files.readAllBytes(Paths.get(filepath)))
-        Assertions.assertTrue(validateJson(json))
+        assertTrue(validateJson(json))
         return json
     }
 

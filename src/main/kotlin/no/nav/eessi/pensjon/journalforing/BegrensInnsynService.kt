@@ -61,7 +61,7 @@ class BegrensInnsynService(private val euxService: EuxService,
 
     fun hentSedsIdfraRina(rinaNr: String): String? {
         logger.debug("Prøver å Henter nødvendige Rina documentid fra rinasaknr: $rinaNr")
-        return fagmodulService.hentAlleDokumenterFraRinaSak(rinaNr)
+        return fagmodulService.hentAlleDokumenter(rinaNr)
     }
 
 

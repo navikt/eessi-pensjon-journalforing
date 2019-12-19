@@ -112,7 +112,7 @@ class FagmodulService(
         }
     }
 
-    fun hentAlleDokumenterFraRinaSak(rinaNr: String): String? {
+    fun hentAlleDokumenter(rinaNr: String): String? {
         return metricsHelper.measure("hentSeds") {
             val path = "/buc/$rinaNr/allDocuments"
             return@measure try {

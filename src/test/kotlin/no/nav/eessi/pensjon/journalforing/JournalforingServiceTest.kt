@@ -116,7 +116,7 @@ class JournalforingServiceTest {
         //EUX - FnrServide (fin pin)
         doReturn("01055012345")
                 .`when`(fnrService)
-                .getFodselsnrFraSedPaaVagtBuc(anyString())
+                .getFodselsnrFraSed(anyString())
 
         //EUX - HENT SED DOKUMENT
         doReturn("MOCK DOCUMENTS")
@@ -211,7 +211,7 @@ class JournalforingServiceTest {
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(fnrService, times(0)).getFodselsnrFraSedPaaVagtBuc(any())
+        verify(fnrService, times(0)).getFodselsnrFraSed(any())
         verify(fdatoService, times(0)).getFDatoFromSed(any())
         verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null), eq(null))
     }
@@ -266,7 +266,7 @@ class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2200`(){
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.SENDT )
-        verify(fnrService).getFodselsnrFraSedPaaVagtBuc(eq("148161"))
+        verify(fnrService).getFodselsnrFraSed(eq("148161"))
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -418,7 +418,7 @@ class JournalforingServiceTest {
     fun `Mottat gyldig Sed P2200`(){
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
-        verify(fnrService).getFodselsnrFraSedPaaVagtBuc(eq("148161"))
+        verify(fnrService).getFodselsnrFraSed(eq("148161"))
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -486,14 +486,6 @@ class JournalforingServiceTest {
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
         assertTrue(isFnrValid("12345678910"))
-    }
-
-    @Test
-    fun `valider en sedHendelse json`() {
-       val testMleding =  String(Files.readAllBytes(Paths.get("src/test/resources/sed/test.json")))
-        println(testMleding)
-        val melding = SedHendelseModel.fromJson(testMleding)
-
     }
 
     @Test

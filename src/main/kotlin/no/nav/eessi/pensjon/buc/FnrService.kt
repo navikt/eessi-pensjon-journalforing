@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
@@ -17,9 +18,10 @@ class FnrService(private val fagmodulService: FagmodulService,
 
     private val mapper = jacksonObjectMapper()
 
-    fun getFodselsnrFraSedPaaVagtBuc(euxCaseId: String): String? {
-        val allDocuments = fagmodulService.hentAlleDokumenterFraRinaSak(euxCaseId)
-        val gyldigeSeds = filterUtGyldigSedId( allDocuments )
+    fun getFodselsnrFraSed(euxCaseId: String): String? {
+        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
+        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
+        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
         return getFodselsnrFraSed(euxCaseId, gyldigeSeds)
     }
 
@@ -40,10 +42,10 @@ class FnrService(private val fagmodulService: FagmodulService,
                     }
                     SEDType.P15000.name -> {
                         val krav = sedRootNode.get("nav").get("krav").textValue()
-                        if (krav == "02") {
-                            fnr = filterGjenlevendePinNode(sedRootNode)
+                        fnr = if (krav == "02") {
+                            filterGjenlevendePinNode(sedRootNode)
                         } else {
-                            fnr = filterPersonPinNode(sedRootNode)
+                            filterPersonPinNode(sedRootNode)
                         }
                     }
                     else -> {
@@ -76,37 +78,23 @@ class FnrService(private val fagmodulService: FagmodulService,
         return null
     }
 
-    private fun filterGjenlevendePinNode(node: JsonNode): String? {
-        return node
+    private fun filterGjenlevendePinNode(sedRootNode: JsonNode): String? {
+        return sedRootNode
                 .at("/pensjon/gjenlevende")
                 .findValue("pin")
-                .filter{ node -> node.get("land").textValue() =="NO" }
-                .map { node -> node.get("identifikator").textValue() }
+                .filter{ pin -> pin.get("land").textValue() =="NO" }
+                .map { pin -> pin.get("identifikator").textValue() }
                 .lastOrNull()
     }
 
-    private fun filterPersonPinNode(node: JsonNode): String? {
-        return node
+    private fun filterPersonPinNode(sedRootNode: JsonNode): String? {
+        return sedRootNode
                 .at("/nav/bruker")
                 .findValue("pin")
-                .filter{ node -> node.get("land").textValue() =="NO" }
-                .map { node -> node.get("identifikator").textValue() }
+                .filter{ pin -> pin.get("land").textValue() =="NO" }
+                .map { pin -> pin.get("identifikator").textValue() }
                 .lastOrNull()
     }
-
-    private fun filterUtGyldigSedId(sedJson: String?): List<Pair<String, String>> {
-        val validSedtype = listOf("P2000","P2100","P2200","P1000",
-                "P5000","P6000","P7000", "P8000",
-                "P10000","P1100","P11000","P12000","P14000","P15000")
-        val sedRootNode = mapper.readTree(sedJson)
-        return sedRootNode
-                .filterNot { node -> node.get("status").textValue() =="empty" }
-                .filter { node ->  validSedtype.contains(node.get("type").textValue()) }
-                .map { node -> Pair(node.get("id").textValue(), node.get("type").textValue()) }
-                .sortedBy { (_, sorting) -> sorting }
-                .toList()
-    }
-
 }
 
 //--- Disse er benyttet av restTemplateErrorhandler  -- start
