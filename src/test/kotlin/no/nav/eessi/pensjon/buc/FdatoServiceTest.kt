@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.json.validateJson
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +43,7 @@ class FdatoServiceTest {
                 .whenever(mockEuxService)
                 .hentSed( eq(euxCaseId), ArgumentMatchers.anyString())
 
-        org.junit.jupiter.api.assertThrows<FdatoIkkeFunnetException> {
+        org.junit.jupiter.api.assertThrows<RuntimeException> {
             service.finnFDatoFraSed( eq(euxCaseId), eq(mock))
         }
     }

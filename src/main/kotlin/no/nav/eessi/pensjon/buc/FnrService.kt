@@ -6,9 +6,7 @@ import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.ResponseStatus
 
 @Service
 class FnrService(private val fagmodulService: FagmodulService,
@@ -26,7 +24,7 @@ class FnrService(private val fagmodulService: FagmodulService,
     }
 
     fun getFodselsnrFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
-        var fnr: String?
+        var fnr: String? = null
 
         gyldigeSeds.forEach { pair ->
             val sedDocumentId =  pair.first
@@ -58,12 +56,13 @@ class FnrService(private val fagmodulService: FagmodulService,
                     }
                 }
             } catch (ex: Exception) {
-                logger.error("Feil ved henting av fødselnr buc: $euxCaseId", ex.message)
-                throw IkkeFunnetException("Feil ved henting av fødselsnr på buc med rinaNr: $euxCaseId")
+                logger.error("Noe gikk galt under henting av fnr fra buc: $euxCaseId", ex.message)
+                throw RuntimeException("Noe gikk galt under henting av fnr fra buc: rinaNr: $euxCaseId")
             }
-            if (fnr != null) return fnr
+            if(fnr != null)
+                return fnr
         }
-        throw IkkeFunnetException("Ingen fødselsnr funnet på buc med rinaNr: $euxCaseId")
+        return fnr
     }
 
     fun filterAnnenpersonPinNode(node: JsonNode): String? {
@@ -96,7 +95,3 @@ class FnrService(private val fagmodulService: FagmodulService,
                 .lastOrNull()
     }
 }
-
-//--- Disse er benyttet av restTemplateErrorhandler  -- start
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-class IkkeFunnetException(message: String) : RuntimeException(message)
