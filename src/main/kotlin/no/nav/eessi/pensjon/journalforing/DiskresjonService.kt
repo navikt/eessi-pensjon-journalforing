@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.person.Diskresjonskode
 import no.nav.eessi.pensjon.services.person.PersonV3Service
 import org.slf4j.LoggerFactory
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class DiskresjonService(private val euxService: EuxService,
-                        private val fagmodulService: FagmodulService,
                         private val personV3Service: PersonV3Service,
                         private val sedFnrSøk: SedFnrSøk)  {
 
@@ -21,13 +19,13 @@ class DiskresjonService(private val euxService: EuxService,
     private val mapper = jacksonObjectMapper()
 
 
-    fun hentDiskresjonskode(sedHendelse: SedHendelseModel): Diskresjonskode? {
+    fun hentDiskresjonskode(sedHendelse: SedHendelseModel, alleDokumenter: String?): Diskresjonskode? {
 
         val diskresjonskode = finnDiskresjonkode(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
         if (diskresjonskode == null) {
             //hvis null prøver vi samtlige SEDs på bucken
-            val documentsIds = hentSedDocumentsIds(hentSedsIdfraRina(sedHendelse.rinaSakId))
+            val documentsIds = hentSedDocumentsIds(alleDokumenter)
 
             documentsIds.forEach { documentId ->
                 return finnDiskresjonkode(sedHendelse.rinaSakId, documentId)
@@ -58,13 +56,6 @@ class DiskresjonService(private val euxService: EuxService,
         }
         return null
     }
-
-
-    fun hentSedsIdfraRina(rinaNr: String): String? {
-        logger.debug("Prøver å Henter nødvendige Rina documentid fra rinasaknr: $rinaNr")
-        return fagmodulService.hentAlleDokumenter(rinaNr)
-    }
-
 
     fun hentSedDocumentsIds(sedJson: String?): List<String> {
         val sedRootNode = mapper.readTree(sedJson)

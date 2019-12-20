@@ -138,7 +138,7 @@ class JournalforingServiceTest {
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
         doReturn(null)
-                .whenever(diskresjonService).hentDiskresjonskode(any())
+                .whenever(diskresjonService).hentDiskresjonskode(any(), any())
 
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(JournalPostResponse("123", "null", null, false))

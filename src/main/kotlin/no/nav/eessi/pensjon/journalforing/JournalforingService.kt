@@ -270,7 +270,8 @@ class JournalforingService(private val euxService: EuxService,
 
         if (person != null) aktoerId = hentAktoerId(fnr)
 
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
+        val alleDokumenter = fagmodulService.hentAlleDokumenter(sedHendelse.rinaSakId)
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse, alleDokumenter)
         val fdato = hentFodselsDato(sedHendelse, fnr)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
