@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingRequestException
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.slf4j.LoggerFactory
@@ -25,7 +24,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
               landkode: String? = null,
               fodselsDato: LocalDate? = null,
               geografiskTilknytning: String? = null,
-              diskresjonskode: Diskresjonskode? = null,
+              diskresjonskode: String? = null,
               ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
@@ -42,12 +41,12 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: Diskresjonskode?): Enhet {
+    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         return when {
                     navBruker == null -> ID_OG_FORDELING
 
-                    diskresjonskode != null && diskresjonskode == Diskresjonskode.SPSF -> DISKRESJONSKODE
+                    diskresjonskode != null && diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
                     NORGE == bosatt(landkode) ->
                         when (bucType) {
@@ -73,7 +72,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 }
     }
 
-    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonskode: Diskresjonskode?): Enhet? {
+    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonskode: String?): Enhet? {
         if (navBruker == null) return null
 
         return when(bucType) {

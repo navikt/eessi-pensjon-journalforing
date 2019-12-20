@@ -22,7 +22,6 @@ import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.person.*
 import no.nav.eessi.pensjon.services.pesys.PenService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
@@ -67,67 +66,32 @@ class JournalforingService(private val euxService: EuxService,
 
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-                var person = hentPerson(sedHendelse.navBruker)
-                var fnr : String?
-
-                if(person != null) {
-                    fnr = sedHendelse.navBruker!!
-                } else {
-                   try {
-                        fnr = fnrService.getFodselsnrFraSed(sedHendelse.rinaSakId)
-                        person = hentPerson(fnr)
-                        if (person == null) {
-                            logger.info("Ingen treff på fødselsnummer, fortsetter uten")
-                            fnr = null
-                        }
-                    } catch (ex: Exception) {
-                       logger.info("Ingen treff på fødselsnummer, fortsetter uten")
-                       person = null
-                       fnr = null
-                    }
-                }
-
-                val personNavn = hentPersonNavn(person)
-                var aktoerId: String? = null
-
-                if (person != null) aktoerId = hentAktoerId(fnr)
+                val person = identifiserPerson(sedHendelse)
 
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
                 val pinOgYtelse = hentPinOgYtelse(sedHendelse)
-
-                val fodselsDato = hentFodselsDato(sedHendelse, fnr)
-
-                val landkode = hentLandkode(person)
 
                 val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-                //tps bruker gt
-                val geografiskTilknytning = hentGeografiskTilknytning(person)
-
-                //tps bruker diskresjon
-                val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
-
-                logger.debug("geografiskTilknytning: $geografiskTilknytning")
-
                 val tildeltEnhet = hentTildeltEnhet(
                         sedHendelse.sedType,
                         sedHendelse.bucType!!,
                         pinOgYtelse,
-                        fnr,
-                        landkode,
-                        fodselsDato,
-                        geografiskTilknytning,
-                        diskresjonskode
+                        person.fnr,
+                        person.landkode,
+                        person.fdato,
+                        person.geografiskTilknytning,
+                        person.diskresjonskode
                 )
 
                 logger.debug("tildeltEnhet: $tildeltEnhet")
 
                 var sakId: String? = null
-                if(aktoerId != null) {
+                if(person.aktoerId != null) {
                     if (hendelseType == HendelseType.SENDT && namespace == "q2") {
-                        sakId = penService.hentSakId(aktoerId, sedHendelse.bucType)
+                        sakId = penService.hentSakId(person.aktoerId, sedHendelse.bucType)
                     }
                 }
                 var forsokFerdigstill = false
@@ -135,8 +99,8 @@ class JournalforingService(private val euxService: EuxService,
 
                 val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
-                        fnr = fnr,
-                        personNavn = personNavn,
+                        fnr = person.fnr,
+                        personNavn = person.personNavn,
                         bucType = sedHendelse.bucType.name,
                         sedType = sedHendelse.sedType.name,
                         sedHendelseType = hendelseType.name,
@@ -152,10 +116,10 @@ class JournalforingService(private val euxService: EuxService,
                 logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
 
                 if(!journalPostResponse.journalpostferdigstilt) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, person.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
-                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
+                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, person.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
 
                     }
                 }
@@ -212,12 +176,12 @@ class JournalforingService(private val euxService: EuxService,
         var fodselsDatoISO : String? = null
 
         if (isFnrValid(fnr)) {
-            try {
+            fodselsDatoISO = try {
                 val navfnr = NavFodselsnummer(fnr!!)
-                fodselsDatoISO =  navfnr.getBirthDateAsISO()
+                navfnr.getBirthDateAsISO()
             } catch (ex : Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
-                fodselsDatoISO = null
+                null
             }
         }
 
@@ -270,7 +234,7 @@ class JournalforingService(private val euxService: EuxService,
             landkode: String?,
             fodselsDato: LocalDate? = null,
             geografiskTilknytning: String?,
-            diskresjonskode: Diskresjonskode?
+            diskresjonskode: String?
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
             val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
@@ -278,6 +242,40 @@ class JournalforingService(private val euxService: EuxService,
         } else {
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode)
         }
+    }
+
+    fun identifiserPerson(sedHendelse: SedHendelseModel) : Person {
+        var person = hentPerson(sedHendelse.navBruker)
+        var fnr : String?
+
+        if(person != null) {
+            fnr = sedHendelse.navBruker!!
+        } else {
+            try {
+                fnr = fnrService.getFodselsnrFraSed(sedHendelse.rinaSakId)
+                person = hentPerson(fnr)
+                if (person == null) {
+                    logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                    fnr = null
+                }
+            } catch (ex: Exception) {
+                logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                person = null
+                fnr = null
+            }
+        }
+
+        val personNavn = hentPersonNavn(person)
+        var aktoerId: String? = null
+
+        if (person != null) aktoerId = hentAktoerId(fnr)
+
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
+        val fdato = hentFodselsDato(sedHendelse, fnr)
+        val landkode = hentLandkode(person)
+        val geografiskTilknytning = hentGeografiskTilknytning(person)
+
+        return Person(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
 }
 
@@ -298,3 +296,11 @@ private class HentYtelseTypeMapper {
         }
     }
 }
+
+class Person(val fnr : String?,
+             val aktoerId: String?,
+             val fdato: LocalDate?,
+             val personNavn: String?,
+             val diskresjonskode: String?,
+             val landkode: String?,
+             val geografiskTilknytning: String?)

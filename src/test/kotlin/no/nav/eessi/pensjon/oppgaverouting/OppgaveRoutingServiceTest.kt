@@ -10,7 +10,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -159,10 +158,10 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder60aar, ytelse = AP))
         assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, ytelse = AP))
 
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, fodselsDato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = Diskresjonskode.SPSF, ytelse = AP))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = Diskresjonskode.SPFO , ytelse = UT))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, ytelse = GP))
-        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, ytelse = GP))
+        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, fodselsDato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = "SPSF", ytelse = AP))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = "SPFO" , ytelse = UT))
+        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = "SPFO", ytelse = GP))
+        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = "SPSF", ytelse = GP))
     }
 
     @Test
@@ -207,7 +206,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01, Diskresjonskode.SPSF)
+        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01, "SPSF")
         val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
@@ -249,7 +248,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01, Diskresjonskode.SPSF)
+        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01, "SPSF")
         val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
@@ -259,7 +258,7 @@ class OppgaveRoutingServiceTest {
                          land: String? = null,
                          fodselsDato: LocalDate,
                          geografiskTilknytning: String? = null,
-                         diskresjonskode: Diskresjonskode? = null,
+                         diskresjonskode: String? = null,
                          ytelse: OppgaveRoutingModel.YtelseType? = null): OppgaveRoutingModel.Enhet {
         return routingService.route(
                 "01010101010",

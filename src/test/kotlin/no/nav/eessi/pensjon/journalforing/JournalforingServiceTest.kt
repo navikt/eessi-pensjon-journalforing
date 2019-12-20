@@ -21,7 +21,7 @@ import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.person.BrukerMock
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
+import no.nav.eessi.pensjon.services.person.Diskresjonskode
 import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -182,7 +182,7 @@ class JournalforingServiceTest {
 
         doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_05), anyString(), any(),  anyString(), eq(Diskresjonskode.SPSF),  eq(null))
+                .route(anyString(), eq(BucType.P_BUC_05), anyString(), any(),  anyString(), eq(Diskresjonskode.SPSF.name),  eq(null))
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
