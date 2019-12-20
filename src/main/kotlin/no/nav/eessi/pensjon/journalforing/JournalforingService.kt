@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
@@ -22,10 +23,7 @@ import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
-import no.nav.eessi.pensjon.services.personv3.hentGeografiskTilknytning
-import no.nav.eessi.pensjon.services.personv3.hentLandkode
-import no.nav.eessi.pensjon.services.personv3.hentPersonNavn
+import no.nav.eessi.pensjon.services.person.*
 import no.nav.eessi.pensjon.services.pesys.PenService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
@@ -43,7 +41,7 @@ class JournalforingService(private val euxService: EuxService,
                            private val fagmodulService: FagmodulService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
-                           private val begrensInnsynService: BegrensInnsynService,
+                           private val diskresjonService: DiskresjonService,
                            private val oppgaveHandler: OppgaveHandler,
                            private val penService: PenService,
                            private val fnrService: FnrService,
@@ -109,7 +107,7 @@ class JournalforingService(private val euxService: EuxService,
                 val geografiskTilknytning = hentGeografiskTilknytning(person)
 
                 //tps bruker diskresjon
-                val diskresjonskode = begrensInnsynService.begrensInnsyn(sedHendelse)
+                val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
 
                 logger.debug("geografiskTilknytning: $geografiskTilknytning")
 

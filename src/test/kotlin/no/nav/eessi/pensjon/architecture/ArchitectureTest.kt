@@ -62,7 +62,7 @@ class ArchitectureTest {
         val FagmodulService = "journalforing.services.fagmodul"
         val JournalPostService = "journalforing.services.journalpost"
         val OppgaveService = "journalforing.services.oppgave"
-        val PersonV3Service = "journalforing.services.personv3"
+        val PersonV3Service = "journalforing.services.person"
 
         val packages: Map<String, String> = mapOf(
                 ROOT to root,
@@ -82,7 +82,7 @@ class ArchitectureTest {
                 FagmodulService to "$root.services.fagmodul",
                 JournalPostService to "$root.services.journalpost",
                 OppgaveService to "$root.services.oppgave",
-                PersonV3Service to "$root.services.personv3"
+                PersonV3Service to "$root.services.person"
         )
 
         /*

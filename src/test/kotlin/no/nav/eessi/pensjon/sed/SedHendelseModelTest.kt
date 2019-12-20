@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.sed
 
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType

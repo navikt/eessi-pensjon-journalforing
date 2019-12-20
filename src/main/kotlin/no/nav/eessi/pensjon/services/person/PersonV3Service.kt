@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.personv3
+package no.nav.eessi.pensjon.services.person
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
