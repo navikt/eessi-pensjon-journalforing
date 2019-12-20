@@ -28,11 +28,19 @@ class FagmodulService(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
 
+    private val hentYtelseTypeMapper = YtelseTypeMapper()
+
     /**
      * Henter pin og ytelsetype , støttede SED typer:
      *  P2100 og P15000
      */
-    fun hentPinOgYtelseType(rinaNr: String, dokumentId: String): HentPinOgYtelseTypeResponse? {
+    fun hentYtelseKravType(rinaNr: String, dokumentId: String): String? {
+        val ytelse = kallhentYtelseKravType(rinaNr, dokumentId)
+        return hentYtelseTypeMapper.map(ytelse)
+    }
+
+
+    private fun kallhentYtelseKravType(rinaNr: String, dokumentId: String): HentYtelseTypeResponse? {
         return metricsHelper.measure("hentYtelseKravtype") {
             val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
             return@measure try {
@@ -40,7 +48,7 @@ class FagmodulService(
                 fagmodulOidcRestTemplate.exchange(path,
                         HttpMethod.GET,
                         HttpEntity(""),
-                        HentPinOgYtelseTypeResponse::class.java).body
+                        HentYtelseTypeResponse::class.java).body
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under henting av ytelsetype ex: $ex body: ${ex.responseBodyAsString}")
                 throw RuntimeException("En feil oppstod under henting av ytelsetype ex: ${ex.message} body: ${ex.responseBodyAsString}")
