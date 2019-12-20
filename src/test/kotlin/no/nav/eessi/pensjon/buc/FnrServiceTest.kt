@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -126,44 +125,4 @@ class FnrServiceTest {
         val expected = "21712"
         assertEquals(expected, actual)
     }
-
-
-//    @Test
-//    fun `letter igjennom beste Sed på valgt buc P10000 annenperson etter norsk personnr`() {
-//        val mockEuxCaseID = "123123"
-//        val mock = listOf(Pair("04117b9f8374420e82a4d980a48df6b3","P2100"),Pair("04117b9f8374420e82a4d980a48df6b3","P10000"))
-//
-//        doReturn(mockSedResponse(getTestJsonFile("P2100-PinDK-NAV.json")))
-//        .doReturn(mockSedResponse(getTestJsonFile("P10000-01Gjenlevende-NAV.json")))
-//        .whenever(mockEuxrestTemplate)
-//        .exchange(ArgumentMatchers.contains(
-//                "buc/$mockEuxCaseID/sed/")
-//                , eq(HttpMethod.GET)
-//                , eq(null)
-//                , eq(String::class.java)
-//        )
-//
-//        val actual = service.getFodselsnrFraSed(mockEuxCaseID, mock)
-//        val expected = "287654321"
-//        assertEquals(expected, actual)
-//    }
-
-
-
-    @Test
-    fun `letter igjennom beste Sed på valgt buc P2100 etter norsk personnr feiler kaster exception`() {
-        val mockEuxCaseID = "123123"
-        val mock = listOf(Pair("04117b9f8374420e82a4d980a48df6b3","P2100"))
-
-            doReturn(getTestJsonFile("P2100-PinDK-NAV.json"))
-                    .whenever(mockEuxService)
-                    .hentSed(eq(mockEuxCaseID), ArgumentMatchers.anyString()
-                    )
-
-
-            assertThrows<IkkeFunnetException> {
-            service.getFodselsnrFraSed(mockEuxCaseID, mock)
-        }
-    }
-
 }

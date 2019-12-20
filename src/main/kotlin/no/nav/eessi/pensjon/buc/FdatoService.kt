@@ -6,9 +6,7 @@ import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.ResponseStatus
 
 @Service
 class FdatoService(private val fagmodulService: FagmodulService,
@@ -57,14 +55,16 @@ class FdatoService(private val fagmodulService: FagmodulService,
                         }
                     }
                 }
+                if(fdato != null) {
+                    return fdato
+                }
             } catch (ex: Exception) {
-                logger.error("Feil ved henting av fødseldato, ${ex.message}", ex)
-                throw FdatoIkkeFunnetException("Ingen fødselsdato funnet")
+                logger.error("Noe gikk galt ved henting av fødselsdato for bucId: $euxCaseId , ${ex.message}", ex)
+                throw RuntimeException("Noe gikk galt ved henting av fødselsdato for bucId: $euxCaseId")
             }
-            print(fdato)
-            if (fdato != null) return fdato
         }
-        throw FdatoIkkeFunnetException("Ingen fødselsdato funnet")
+        // Fødselsnummer er ikke nødvendig for å fortsette journalføring men fødselsdato er obligatorisk felt i alle krav SED og bør finnes for enhver BUC
+        throw RuntimeException("Fant ikke fødselsdato i bucId: $euxCaseId")
     }
 
     private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {
@@ -88,7 +88,3 @@ class FdatoService(private val fagmodulService: FagmodulService,
                 .get("foedselsdato").textValue()
     }
 }
-
-//--- Disse er benyttet av restTemplateErrorhandler  -- start
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-class FdatoIkkeFunnetException(message: String) : RuntimeException(message)
