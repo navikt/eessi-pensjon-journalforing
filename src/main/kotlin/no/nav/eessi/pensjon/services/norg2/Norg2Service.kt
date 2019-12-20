@@ -29,7 +29,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         BOSATT_UTLAND("ae0107")
     }
 
-    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: Diskresjonskode?): String? {
+    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
 
         val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
         logger.debug("følgende request til Norg2 : $request")
@@ -39,7 +39,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         return enhet
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: Diskresjonskode?): Norg2ArbeidsfordelingRequest {
+    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
         val request: Norg2ArbeidsfordelingRequest =
                 when {
                     landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
@@ -50,9 +50,9 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
                             geografiskOmraade = "ANY",
                             behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
                     )
-                    diskresjonKode != null && diskresjonKode == Diskresjonskode.SPSF -> Norg2ArbeidsfordelingRequest(
+                    diskresjonKode != null && diskresjonKode == "SPSF" -> Norg2ArbeidsfordelingRequest(
                             tema = "ANY",
-                            diskresjonskode = Diskresjonskode.SPSF.name
+                            diskresjonskode = "SPSF"
                     )
                     else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
                 }

@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
+import no.nav.eessi.pensjon.services.person.Diskresjonskode
 import no.nav.eessi.pensjon.services.person.BrukerMock
 import no.nav.eessi.pensjon.services.person.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.services.person.PersonV3Service
