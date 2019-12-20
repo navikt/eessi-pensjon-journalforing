@@ -1,26 +1,27 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.services.person.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class BegrensInnsynService(private val euxService: EuxService,
-                           private val fagmodulService: FagmodulService,
-                           private val personV3Service: PersonV3Service,
-                           private val sedFnrSøk: SedFnrSøk)  {
+class DiskresjonService(private val euxService: EuxService,
+                        private val fagmodulService: FagmodulService,
+                        private val personV3Service: PersonV3Service,
+                        private val sedFnrSøk: SedFnrSøk)  {
 
-    private val logger = LoggerFactory.getLogger(BegrensInnsynService::class.java)
+    private val logger = LoggerFactory.getLogger(DiskresjonService::class.java)
 
     private val mapper = jacksonObjectMapper()
 
 
-    fun begrensInnsyn(sedHendelse: SedHendelseModel): Diskresjonskode? {
+    fun hentDiskresjonskode(sedHendelse: SedHendelseModel): Diskresjonskode? {
 
         val diskresjonskode = finnDiskresjonkode(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
 
@@ -72,5 +73,4 @@ class BegrensInnsynService(private val euxService: EuxService,
                 .map { it.get("id").textValue() }
                 .toList()
     }
-
 }

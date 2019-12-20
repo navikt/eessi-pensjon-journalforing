@@ -1,9 +1,6 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.services.person
 
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 /**
  * fra stash...
@@ -69,12 +66,6 @@ class NavFodselsnummer(private val fodselsnummer: String) {
 
     fun getBirthDateAsISO() = "${get4DigitBirthYear()}-${getMonth()}-${getDayInMonth()}"
 
-    fun getBirthDate() = LocalDate.of(get4DigitBirthYear().toInt(), getMonth().toInt(), getDayInMonth().toInt())
-
-    fun getAge(): Int {
-        return ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
-    }
-
     private fun getIndividnummer(): String {
         return fodselsnummer.substring(6, 9)
     }
@@ -102,5 +93,4 @@ class NavFodselsnummer(private val fodselsnummer: String) {
     fun getFirstDigit(): Int {
         return Integer.parseInt(fodselsnummer.substring(0, 1))
     }
-
 }

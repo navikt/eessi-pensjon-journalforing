@@ -6,20 +6,21 @@ import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.buc.FdatoService
 import no.nav.eessi.pensjon.buc.FnrService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.services.person.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
-import no.nav.eessi.pensjon.services.personv3.BrukerMock
+import no.nav.eessi.pensjon.services.person.BrukerMock
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
 import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.Assertions.*
@@ -60,7 +61,7 @@ class JournalforingServiceTest {
     private lateinit var oppgaveRoutingService: OppgaveRoutingService
 
     @Mock
-    private lateinit var begrensInnsynService: BegrensInnsynService
+    private lateinit var diskresjonService: DiskresjonService
 
     @Mock
     private lateinit var pdfService: PDFService
@@ -89,7 +90,7 @@ class JournalforingServiceTest {
                 fagmodulService,
                 oppgaveRoutingService,
                 pdfService,
-                begrensInnsynService,
+                diskresjonService,
                 oppgaveHandler,
                 penService,
                 fnrService,
@@ -137,7 +138,7 @@ class JournalforingServiceTest {
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
         doReturn(null)
-                .whenever(begrensInnsynService).begrensInnsyn(any())
+                .whenever(diskresjonService).hentDiskresjonskode(any())
 
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(JournalPostResponse("123", "null", null, false))

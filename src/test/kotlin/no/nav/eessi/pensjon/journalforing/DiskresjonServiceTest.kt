@@ -1,13 +1,14 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.nhaarman.mockitokotlin2.*
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.norg2.Diskresjonskode
-import no.nav.eessi.pensjon.services.personv3.BrukerMock
-import no.nav.eessi.pensjon.services.personv3.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.services.personv3.PersonV3Service
+import no.nav.eessi.pensjon.services.person.BrukerMock
+import no.nav.eessi.pensjon.services.person.PersonV3IkkeFunnetException
+import no.nav.eessi.pensjon.services.person.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
-class BegrensInnsynServiceTest {
+class DiskresjonServiceTest {
 
     @Mock
     private lateinit var euxService: EuxService
@@ -30,7 +31,7 @@ class BegrensInnsynServiceTest {
     @Mock
     private lateinit var personV3Service: PersonV3Service
 
-    private lateinit var begrensInnsynService: BegrensInnsynService
+    private lateinit var diskresjonService: DiskresjonService
 
     private lateinit var sedFnrSøk: SedFnrSøk
 
@@ -38,7 +39,7 @@ class BegrensInnsynServiceTest {
     fun setup() {
         sedFnrSøk = SedFnrSøk()
 
-        begrensInnsynService = BegrensInnsynService(
+        diskresjonService = DiskresjonService(
                 euxService,
                 fagmodulService,
                 personV3Service,
@@ -50,7 +51,7 @@ class BegrensInnsynServiceTest {
     fun sjekkeUtJacksonMapper() {
         val json = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
         val expected = listOf("44cb68f89a2f4e748934fb4722721018")
-        val actual = begrensInnsynService.hentSedDocumentsIds(json)
+        val actual = diskresjonService.hentSedDocumentsIds(json)
 
         Assertions.assertEquals(expected, actual)
 
@@ -70,7 +71,7 @@ class BegrensInnsynServiceTest {
 
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = begrensInnsynService.begrensInnsyn(hendelse)
+        val actual = diskresjonService.hentDiskresjonskode(hendelse)
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -98,7 +99,7 @@ class BegrensInnsynServiceTest {
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = begrensInnsynService.begrensInnsyn(hendelse)
+        val actual = diskresjonService.hentDiskresjonskode(hendelse)
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -132,7 +133,7 @@ class BegrensInnsynServiceTest {
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = begrensInnsynService.begrensInnsyn(hendelse)
+        val actual = diskresjonService.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)
@@ -162,7 +163,7 @@ class BegrensInnsynServiceTest {
 
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = begrensInnsynService.begrensInnsyn(hendelse)
+        val actual = diskresjonService.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.sed
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
