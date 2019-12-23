@@ -270,7 +270,6 @@ class JournalforingService(private val euxService: EuxService,
             euxService.hentSed(euxCaseId, sedDocumentId)
         }
     }
-}
 
     fun isFnrValid(navBruker: String?): Boolean {
         if(navBruker == null) return false
@@ -278,6 +277,7 @@ class JournalforingService(private val euxService: EuxService,
 
         return true
     }
+}
 
 class Person(val fnr : String?,
              val aktoerId: String?,

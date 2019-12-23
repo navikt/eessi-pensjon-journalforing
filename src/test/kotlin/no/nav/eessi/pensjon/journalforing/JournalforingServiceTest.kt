@@ -416,28 +416,29 @@ class JournalforingServiceTest {
         )
     }
 
-//    @Test
-//    fun `Mottat gyldig Sed P2200`(){
-//
-//        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
-//        verify(fnrHelper).getFodselsnrFraSed(eq("148161"))
-//        verify(personV3Service, times(1)).hentPerson(any())
-//        verify(journalpostService).opprettJournalpost(
-//                rinaSakId = anyOrNull(),
-//                fnr= eq("01055012345"),
-//                personNavn= eq("Test Testesen"),
-//                bucType= eq("P_BUC_03"),
-//                sedType= eq(SedType.P2200.name),
-//                sedHendelseType= eq("MOTTATT"),
-//                eksternReferanseId= eq(null),
-//                kanal= eq("EESSI"),
-//                journalfoerendeEnhet= eq("4303"),
-//                arkivsaksnummer= eq(null),
-//                dokumenter= eq("P2200 Supported Documents"),
-//                forsokFerdigstill= eq(false),
-//                avsenderLand = anyOrNull()
-//        )
-//    }
+    @Test
+    fun `Mottat gyldig Sed P2200`(){
+        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
+        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
+
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
+        verify(personV3Service, times(1)).hentPerson(any())
+        verify(journalpostService).opprettJournalpost(
+                rinaSakId = anyOrNull(),
+                fnr= eq("01055012345"),
+                personNavn= eq("Test Testesen"),
+                bucType= eq("P_BUC_03"),
+                sedType= eq(SedType.P2200.name),
+                sedHendelseType= eq("MOTTATT"),
+                eksternReferanseId= eq(null),
+                kanal= eq("EESSI"),
+                journalfoerendeEnhet= eq("4303"),
+                arkivsaksnummer= eq(null),
+                dokumenter= eq("P2200 Supported Documents"),
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull()
+        )
+    }
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
@@ -477,16 +478,16 @@ class JournalforingServiceTest {
 
     @Test
     fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(isFnrValid(null))
+        assertFalse(journalforingService.isFnrValid(null))
     }
 
     @Test
     fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(isFnrValid("1234"))
+        assertFalse(journalforingService.isFnrValid("1234"))
     }
 
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
-        assertTrue(isFnrValid("12345678910"))
+        assertTrue(journalforingService.isFnrValid("12345678910"))
     }
 }
