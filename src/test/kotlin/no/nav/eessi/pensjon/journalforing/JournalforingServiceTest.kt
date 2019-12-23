@@ -370,12 +370,15 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat ugyldig PIN Sed P2000`(){
+    fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`(){
+        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
+        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
+
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))), HendelseType.MOTTATT )
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("7477291"),
-                fnr= eq(null),
-                personNavn= eq(null),
+                fnr= eq("01055012345"),
+                personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
                 sedType= eq(SedType.P2000.name),
                 sedHendelseType= eq("MOTTATT"),

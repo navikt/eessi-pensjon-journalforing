@@ -165,7 +165,7 @@ class JournalforingService(private val euxService: EuxService,
     /**
      * Henter første treff på dato fra listen av SEDer
      */
-    fun hentFodselsDato(fnr: String?, seder: List<String?>): LocalDate {
+    fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
         var fodselsDatoISO : String? = null
 
         if (isFnrValid(fnr)) {
@@ -179,7 +179,7 @@ class JournalforingService(private val euxService: EuxService,
         }
 
         if (fodselsDatoISO.isNullOrEmpty()) {
-            fodselsDatoISO = fdatoHelper.finnFDatoFraSeder(seder)
+            fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
         }
 
         return if (fodselsDatoISO.isNullOrEmpty()) {
@@ -229,15 +229,16 @@ class JournalforingService(private val euxService: EuxService,
 
         if(person != null) {
             fnr = sedHendelse.navBruker!!
+            fdato = hentFodselsDato(fnr, null)
         } else {
             try {
                 val alleSediBuc = hentAlleSedIBuc(sedHendelse.rinaSakId)
                 fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
+                fdato = hentFodselsDato(fnr, alleSediBuc)
                 person = hentPerson(fnr)
                 if (person == null) {
                     logger.info("Ingen treff på fødselsnummer, fortsetter uten")
                     fnr = null
-                    fdato = hentFodselsDato(fnr, alleSediBuc)
                 }
             } catch (ex: Exception) {
                 logger.info("Ingen treff på fødselsnummer, fortsetter uten")
