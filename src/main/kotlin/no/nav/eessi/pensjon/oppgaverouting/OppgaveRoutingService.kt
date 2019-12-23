@@ -6,13 +6,13 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
 import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingRequestException
 import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.Period
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 
 @Service
 class OppgaveRoutingService(private val norg2Service: Norg2Service) {
@@ -25,7 +25,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
               fodselsDato: LocalDate? = null,
               geografiskTilknytning: String? = null,
               diskresjonskode: String? = null,
-              ytelseType: OppgaveRoutingModel.YtelseType? = null): Enhet {
+              ytelseType: String? = null): Enhet {
 
         logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
 
@@ -41,7 +41,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: OppgaveRoutingModel.YtelseType?, diskresjonskode: String?): Enhet {
+    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: String?, diskresjonskode: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         return when {
                     navBruker == null -> ID_OG_FORDELING
@@ -55,7 +55,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                                 if (isBetween18and60(fodselsDato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             P_BUC_10 ->
-                                if (ytelseType == UT) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                                if (ytelseType == UT.name) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             else -> NFP_UTLAND_AALESUND // Ukjent buc-type
                         }
 
@@ -66,7 +66,8 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                                 if (isBetween18and60(fodselsDato)) UFORE_UTLAND else PENSJON_UTLAND
                             P_BUC_10 ->
-                                if (ytelseType == UT) UFORE_UTLAND else PENSJON_UTLAND
+
+                                if (ytelseType == UT.name) UFORE_UTLAND else PENSJON_UTLAND
                             else -> PENSJON_UTLAND // Ukjent buc-type
                         }
                 }

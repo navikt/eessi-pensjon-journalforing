@@ -19,8 +19,6 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
-import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.services.person.*
 import no.nav.eessi.pensjon.services.pesys.PenService
@@ -45,14 +43,10 @@ class JournalforingService(private val euxService: EuxService,
                            private val penService: PenService,
                            private val fnrService: FnrService,
                            private val fdatoService: FdatoService,
+                           @Value("\${NAIS_NAMESPACE}") private val namespace: String,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
-    @Value("\${NAIS_NAMESPACE}")
-    private lateinit var namespace: String
-
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
-
-    private val hentYtelseTypeMapper = HentYtelseTypeMapper()
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
@@ -69,7 +63,7 @@ class JournalforingService(private val euxService: EuxService,
                 val person = identifiserPerson(sedHendelse)
 
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
-                val pinOgYtelse = hentPinOgYtelse(sedHendelse)
+                val pinOgYtelse = hentYtelseKravType(sedHendelse)
 
                 val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
@@ -157,10 +151,10 @@ class JournalforingService(private val euxService: EuxService,
         return filnavn
     }
 
-    private fun hentPinOgYtelse(sedHendelse: SedHendelseModel): HentPinOgYtelseTypeResponse? {
+    private fun hentYtelseKravType(sedHendelse: SedHendelseModel): String? {
         if(sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
             return try{
-                fagmodulService.hentPinOgYtelseType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                fagmodulService.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             } catch (ex: Exception) {
                 null
             }
@@ -229,7 +223,7 @@ class JournalforingService(private val euxService: EuxService,
     private fun hentTildeltEnhet(
             sedType: SedType,
             bucType: BucType,
-            pinOgYtelseType: HentPinOgYtelseTypeResponse?,
+            ytelseType: String?,
             navBruker: String?,
             landkode: String?,
             fodselsDato: LocalDate? = null,
@@ -237,14 +231,13 @@ class JournalforingService(private val euxService: EuxService,
             diskresjonskode: String?
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
-            val ytelseType = hentYtelseTypeMapper.map(pinOgYtelseType)
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode, ytelseType)
         } else {
             oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode)
         }
     }
 
-    fun identifiserPerson(sedHendelse: SedHendelseModel) : Person {
+    fun identifiserPerson(sedHendelse: SedHendelseModel) : JournalforingPerson {
         var person = hentPerson(sedHendelse.navBruker)
         var fnr : String?
 
@@ -275,27 +268,16 @@ class JournalforingService(private val euxService: EuxService,
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return Person(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
+        return JournalforingPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
 }
 
-fun isFnrValid(navBruker: String?): Boolean {
-    if(navBruker == null) return false
-    if(navBruker.length != 11) return false
+    fun isFnrValid(navBruker: String?): Boolean {
+        if(navBruker == null) return false
+        if(navBruker.length != 11) return false
 
-    return true
-}
-
-private class HentYtelseTypeMapper {
-    fun map(hentPinOgYtelseTypeResponse: HentPinOgYtelseTypeResponse?) : OppgaveRoutingModel.YtelseType? {
-        return when(hentPinOgYtelseTypeResponse?.krav?.type) {
-            Krav.YtelseType.AP -> OppgaveRoutingModel.YtelseType.AP
-            Krav.YtelseType.GP -> OppgaveRoutingModel.YtelseType.GP
-            Krav.YtelseType.UT -> OppgaveRoutingModel.YtelseType.UT
-            null -> null
-        }
+        return true
     }
-}
 
 class Person(val fnr : String?,
              val aktoerId: String?,

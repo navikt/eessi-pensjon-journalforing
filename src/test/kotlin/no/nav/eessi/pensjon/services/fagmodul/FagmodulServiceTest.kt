@@ -47,7 +47,7 @@ class FagmodulServiceTest {
         val dokumentId = "456"
 
         val responseBody = mapper.readValue(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/pinogytelseResponse.json"))),
-                HentPinOgYtelseTypeResponse::class.java)
+                HentYtelseTypeResponse::class.java)
         val responseEntity = ResponseEntity(responseBody, HttpStatus.OK)
 
         doReturn(responseEntity)
@@ -55,11 +55,10 @@ class FagmodulServiceTest {
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
-                        eq(HentPinOgYtelseTypeResponse::class.java))
+                        eq(HentYtelseTypeResponse::class.java))
 
-        val resp = fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
-        assertEquals(resp!!.fnr, "12345678910")
-        assertEquals(resp.krav!!.type!!.name, "AP")
+        val resp = fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
+        assertEquals(resp, "AP")
     }
 
     @Test
@@ -75,10 +74,10 @@ class FagmodulServiceTest {
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
-                        eq(HentPinOgYtelseTypeResponse::class.java))
+                        eq(HentYtelseTypeResponse::class.java))
 
         assertThrows<RuntimeException> {
-            fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+            fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
         }
     }
 
@@ -92,9 +91,9 @@ class FagmodulServiceTest {
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
-                        eq(HentPinOgYtelseTypeResponse::class.java))
+                        eq(HentYtelseTypeResponse::class.java))
         assertThrows<RuntimeException> {
-            fagmodulService.hentPinOgYtelseType(rinaNr, dokumentId)
+            fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
         }
     }
 
@@ -145,7 +144,7 @@ class FagmodulServiceTest {
                         eq("/sed/ytelseKravtype/$rinaNr/sedid/$buctype"),
                         any(HttpMethod::class.java),
                         any(HttpEntity::class.java),
-                        eq(HentPinOgYtelseTypeResponse::class.java))
+                        eq(HentYtelseTypeResponse::class.java))
         assertThrows<RuntimeException> {
             fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
         }

@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.fagmodul.HentPinOgYtelseTypeResponse
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.person.BrukerMock
@@ -94,7 +93,8 @@ class JournalforingServiceTest {
                 oppgaveHandler,
                 penService,
                 fnrService,
-                fdatoService
+                fdatoService,
+                "q2"
             )
 
         //MOCK RESPONSES
@@ -185,9 +185,9 @@ class JournalforingServiceTest {
                 .route(anyString(), eq(BucType.P_BUC_05), anyString(), any(),  anyString(), eq(Diskresjonskode.SPSF.name),  eq(null))
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
-        doReturn(HentPinOgYtelseTypeResponse("FNR", Krav( "DATE", Krav.YtelseType.UT)))
+        doReturn(Krav.YtelseType.UT.name)
                 .`when`(fagmodulService)
-                .hentPinOgYtelseType(anyString(), anyString())
+                .hentYtelseKravType(anyString(), anyString())
 
     }
 
@@ -343,7 +343,7 @@ class JournalforingServiceTest {
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(fagmodulService, times(0)).hentPinOgYtelseType(any(), any())
+        verify(fagmodulService, times(0)).hentYtelseKravType(any(), any())
         verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null),eq(null))
     }
 
