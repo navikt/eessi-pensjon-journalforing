@@ -20,16 +20,4 @@ enum class SEDType {
     H070,
     H120,
     H121;
-
-    companion object {
-        @JvmStatic
-        fun isValidSEDType(input: String): Boolean {
-            return try {
-                valueOf(input)
-                true
-            } catch (ia: IllegalArgumentException) {
-                false
-            }
-        }
-    }
 }

@@ -2,43 +2,27 @@ package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class FnrService(private val fagmodulService: FagmodulService,
-        private val euxService: EuxService) {
+@Component
+class FnrHelper {
 
-    private val logger = LoggerFactory.getLogger(FnrService::class.java)
-
+    private val logger = LoggerFactory.getLogger(FnrHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun getFodselsnrFraSed(euxCaseId: String): String? {
-        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
-        return getFodselsnrFraSed(euxCaseId, gyldigeSeds)
-    }
-
-    fun getFodselsnrFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
+    fun getFodselsnrFraSeder(seder: List<String?>): String? {
         var fnr: String? = null
 
-        gyldigeSeds.forEach { pair ->
-            val sedDocumentId =  pair.first
-            val sedType = pair.second
-            logger.info("leter igjennom sedType: $sedType etter norsk pin fra euxCaseId og sedDocid: $euxCaseId / $sedDocumentId ")
+        seder.forEach { sed ->
             try {
-                val sedJson = euxService.hentSed(euxCaseId, sedDocumentId)
-                val sedRootNode = mapper.readTree(sedJson)
+                val sedRootNode = mapper.readTree(sed)
 
-                when (sedType) {
-                    SEDType.P2100.name -> {
+                when (SEDType.valueOf(sedRootNode.get("sed").textValue())) {
+                    SEDType.P2100 -> {
                         fnr = filterGjenlevendePinNode(sedRootNode)
                     }
-                    SEDType.P15000.name -> {
+                    SEDType.P15000 -> {
                         val krav = sedRootNode.get("nav").get("krav").textValue()
                         fnr = if (krav == "02") {
                             filterGjenlevendePinNode(sedRootNode)
@@ -48,7 +32,6 @@ class FnrService(private val fagmodulService: FagmodulService,
                     }
                     else -> {
                         fnr = filterAnnenpersonPinNode(sedRootNode)
-
                         if (fnr == null) {
                             //P2000 - P2200 -- andre..
                             fnr =  filterPersonPinNode(sedRootNode)
@@ -56,8 +39,8 @@ class FnrService(private val fagmodulService: FagmodulService,
                     }
                 }
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under henting av fnr fra buc: $euxCaseId", ex.message)
-                throw RuntimeException("Noe gikk galt under henting av fnr fra buc: rinaNr: $euxCaseId")
+                logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
+                throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
             if(fnr != null)
                 return fnr
