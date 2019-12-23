@@ -32,8 +32,9 @@
                 <includeCallerData>true</includeCallerData>
             </encoder>
         </appender>
+
         <root level="info">
-            <appender-ref ref="STDOUT" />
+            <appender-ref ref="stdout_json"/>
         </root>
 
         <logger name="io" level="ERROR"/>
