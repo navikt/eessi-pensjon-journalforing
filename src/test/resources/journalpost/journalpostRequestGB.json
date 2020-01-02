@@ -1,0 +1,43 @@
+{
+  "avsenderMottaker": {
+    "id": "12345678912",
+    "idType": "FNR",
+    "navn": "navn navnesen",
+    "land": "GB"
+  },
+  "behandlingstema": "ab0254",
+  "bruker": {
+    "id": "12345678912",
+    "idType": "FNR"
+  },
+  "dokumenter": [
+    {
+      "brevkode": "NAV 14-05.09",
+      "dokumentKategori": "SOK",
+      "dokumentvarianter": [
+        {
+          "filtype": "PDF/A",
+          "fysiskDokument": "string",
+          "variantformat": "ARKIV"
+        }
+      ],
+      "tittel": "Søknad om foreldrepenger ved fødsel"
+    }
+  ],
+  "eksternReferanseId": "string",
+  "journalfoerendeEnhet": "9999",
+  "journalpostType": "INNGAAENDE",
+  "kanal": "NAV_NO",
+  "sak": {
+    "arkivsaksnummer": "string",
+    "arkivsaksystem": "PSAK"
+  },
+  "tema": "PEN",
+  "tilleggsopplysninger": [
+    {
+      "nokkel":"eessi_pensjon_bucid",
+      "verdi":"1111"
+    }
+  ],
+  "tittel": "Inngående P2000 - Krav om alderspensjon"
+}
