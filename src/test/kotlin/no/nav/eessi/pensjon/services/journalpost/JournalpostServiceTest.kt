@@ -132,4 +132,63 @@ class JournalpostServiceTest {
             )
         }
     }
+
+    @Test
+    fun `gittEnUKJournalpostSåByttTilGBFordiPesysKunStøtterGB`() {
+
+        val journalpostCaptor = argumentCaptor<HttpEntity<Any>>()
+
+        val mapper = jacksonObjectMapper()
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        val responseBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json")))
+        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequestGB.json")))
+
+
+        doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        contains("/journalpost?forsoekFerdigstill=false"),
+                        any(),
+                        journalpostCaptor.capture(),
+                        eq(String::class.java))
+
+        val journalpostResponse = journalpostService.opprettJournalpost(
+                rinaSakId = "1111",
+                fnr= "12345678912",
+                personNavn= "navn navnesen",
+                bucType= "P_BUC_01",
+                sedType= "P2000 - Krav om alderspensjon",
+                sedHendelseType= "MOTTATT",
+                eksternReferanseId= "string",
+                kanal= "NAV_NO",
+                journalfoerendeEnhet= "9999",
+                arkivsaksnummer= "string",
+                dokumenter= """
+                    [{
+                        "brevkode": "NAV 14-05.09",
+                        "dokumentKategori": "SOK",
+                        "dokumentvarianter": [
+                                {
+                                    "filtype": "PDF/A",
+                                    "fysiskDokument": "string",
+                                    "variantformat": "ARKIV"
+                                }
+                            ],
+                            "tittel": "Søknad om foreldrepenger ved fødsel"
+                    }]
+                """.trimIndent(),
+                forsokFerdigstill= false,
+                avsenderLand = "UK"
+        )
+
+        assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
+        assertTrue(journalpostResponse!!.toJson() == "{\n" +
+                "  \"journalpostId\" : \"429434378\",\n" +
+                "  \"journalstatus\" : \"M\",\n" +
+                "  \"melding\" : \"null\",\n" +
+                "  \"journalpostferdigstilt\" : false\n" +
+                "}")
+    }
 }

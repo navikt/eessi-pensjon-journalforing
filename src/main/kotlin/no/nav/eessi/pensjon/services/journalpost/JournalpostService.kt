@@ -119,12 +119,23 @@ class JournalpostService(
         return if(sedHendelseType == "SENDT") {
             AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
         } else {
+            val justertAvsenderLand = justerAvsenderLand(avsenderLand)
             if(fnr.isNullOrEmpty()) {
-                AvsenderMottaker(null, null, null, avsenderLand)
+                AvsenderMottaker(null, null, null, justertAvsenderLand)
             } else {
-                AvsenderMottaker(fnr, IdType.FNR, mottakerNavn, avsenderLand)
+                AvsenderMottaker(fnr, IdType.FNR, mottakerNavn, justertAvsenderLand)
             }
         }
+    }
+
+    /**
+     * PESYS støtter kun GB
+     */
+    private fun justerAvsenderLand(avsenderLand: String?): String? {
+        if (avsenderLand == "UK") {
+            return  "GB"
+        }
+        return avsenderLand
     }
 
     private fun populerJournalpostType(sedHendelseType: String): JournalpostType {
