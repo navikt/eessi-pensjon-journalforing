@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.services.norg2
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
@@ -29,35 +30,30 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         BOSATT_UTLAND("ae0107")
     }
 
-    fun hentArbeidsfordelingEnhet(geografiskTilknytning: String?, landkode: String?, diskresjonKode: String?): String? {
-
-        val request = opprettNorg2ArbeidsfordelingRequest(landkode, geografiskTilknytning, diskresjonKode)
+    fun hentArbeidsfordelingEnhet(person: JournalforingPerson): String? {
+        val request = opprettNorg2ArbeidsfordelingRequest(person)
         logger.debug("følgende request til Norg2 : $request")
         val enheter = hentArbeidsfordelingEnheter(request)
-        val enhet = finnKorrektArbeidsfordelingEnheter(request, enheter)
 
-        return enhet
+        return finnKorrektArbeidsfordelingEnheter(request, enheter)
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(landkode: String?, geografiskTilknytning: String?, diskresjonKode: String?): Norg2ArbeidsfordelingRequest {
-        val request: Norg2ArbeidsfordelingRequest =
-                when {
-                    landkode == "NOR" && geografiskTilknytning != null && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
-                            geografiskOmraade = geografiskTilknytning,
-                            behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
-                    )
-                    landkode != "NOR" && diskresjonKode == null -> Norg2ArbeidsfordelingRequest(
-                            geografiskOmraade = "ANY",
-                            behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
-                    )
-                    diskresjonKode != null && diskresjonKode == "SPSF" -> Norg2ArbeidsfordelingRequest(
-                            tema = "ANY",
-                            diskresjonskode = "SPSF"
-                    )
-                    else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
-                }
-        logger.debug("Request: ${request.toJson()}")
-        return request
+    fun opprettNorg2ArbeidsfordelingRequest(person: JournalforingPerson): Norg2ArbeidsfordelingRequest {
+        return when {
+            person.landkode == "NOR" && person.geografiskTilknytning != null && person.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+                    geografiskOmraade = person.geografiskTilknytning,
+                    behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
+            )
+            person.landkode != "NOR" && person.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+                    geografiskOmraade = "ANY",
+                    behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
+            )
+            person.diskresjonskode != null && person.diskresjonskode == "SPSF" -> Norg2ArbeidsfordelingRequest(
+                    tema = "ANY",
+                    diskresjonskode = "SPSF"
+            )
+            else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
+        }
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {

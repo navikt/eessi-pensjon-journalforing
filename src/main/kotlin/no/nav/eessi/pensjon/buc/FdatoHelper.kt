@@ -2,44 +2,27 @@ package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.buc.BucHelper.Companion.filterUtGyldigSedId
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class FdatoService(private val fagmodulService: FagmodulService,
-                   private val euxService: EuxService) {
+@Component
+class FdatoHelper {
 
-    private val logger = LoggerFactory.getLogger(FdatoService::class.java)
-
+    private val logger = LoggerFactory.getLogger(FdatoHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun getFDatoFromSed(euxCaseId: String): String? {
-        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-
-        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
-        return finnFDatoFraSed(euxCaseId,gyldigeSeds)
-
-    }
-
-    fun finnFDatoFraSed(euxCaseId: String, gyldigeSeds: List<Pair<String, String>>): String? {
+    fun finnFDatoFraSeder(seder: List<String?>): String {
         var fdato: String?
 
-        gyldigeSeds.forEach { pair ->
+        seder.forEach { sed ->
             try {
-                val sedDocumentId =  pair.first
-                val sedType = pair.second
-                val sedJson = euxService.hentSed(euxCaseId, sedDocumentId)
-                val sedRootNode = mapper.readTree(sedJson)
+                val sedRootNode = mapper.readTree(sed)
 
-                when (sedType) {
-                    SEDType.P2100.name -> {
+                when (SEDType.valueOf(sedRootNode.get("sed").textValue())) {
+                    SEDType.P2100 -> {
                         fdato = filterGjenlevendeFDatoNode(sedRootNode)
                     }
-                    SEDType.P15000.name -> {
+                    SEDType.P15000 -> {
                         val krav = sedRootNode.get("nav").get("krav").textValue()
                         fdato = if (krav == "02") {
                             filterGjenlevendeFDatoNode(sedRootNode)
@@ -56,15 +39,16 @@ class FdatoService(private val fagmodulService: FagmodulService,
                     }
                 }
                 if(fdato != null) {
-                    return fdato
+                    return fdato!!
                 }
+                throw RuntimeException("Fant ingen fdato i listen av SEDer")
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt ved henting av fødselsdato for bucId: $euxCaseId , ${ex.message}", ex)
-                throw RuntimeException("Noe gikk galt ved henting av fødselsdato for bucId: $euxCaseId")
+                logger.error("Noe gikk galt ved henting av fødselsdato fra liste av SEDer, ${ex.message}")
+                throw RuntimeException("Noe gikk galt ved henting av fødselsdato fra liste av SEDer")
             }
         }
         // Fødselsnummer er ikke nødvendig for å fortsette journalføring men fødselsdato er obligatorisk felt i alle krav SED og bør finnes for enhver BUC
-        throw RuntimeException("Fant ikke fødselsdato i bucId: $euxCaseId")
+        throw RuntimeException("Fant ikke fødselsdato i BUC")
     }
 
     private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {

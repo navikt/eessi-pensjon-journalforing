@@ -3,8 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.buc.FdatoService
-import no.nav.eessi.pensjon.buc.FnrService
+import no.nav.eessi.pensjon.buc.FdatoHelper
+import no.nav.eessi.pensjon.buc.FnrHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.services.person.PersonV3Service
 import no.nav.eessi.pensjon.models.BucType
@@ -13,14 +13,12 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.fagmodul.Krav
 import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.person.BrukerMock
-import no.nav.eessi.pensjon.services.person.Diskresjonskode
 import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -34,8 +32,6 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -66,10 +62,10 @@ class JournalforingServiceTest {
     private lateinit var pdfService: PDFService
 
     @Mock
-    private lateinit var fnrService: FnrService
+    private lateinit var fnrHelper: FnrHelper
 
     @Mock
-    private lateinit var fdatoService: FdatoService
+    private lateinit var fdatoHelper: FdatoHelper
 
     @Mock
     private lateinit var oppgaveHandler: OppgaveHandler
@@ -92,8 +88,8 @@ class JournalforingServiceTest {
                 diskresjonService,
                 oppgaveHandler,
                 penService,
-                fnrService,
-                fdatoService,
+                fnrHelper,
+                fdatoHelper,
                 "q2"
             )
 
@@ -111,13 +107,13 @@ class JournalforingServiceTest {
 
         //EUX - Fdatoservice (fin fdato)
         doReturn("1964-04-01")
-                .`when`(fdatoService)
-                .getFDatoFromSed(anyString())
+                .`when`(fdatoHelper)
+                .finnFDatoFraSeder(any())
 
         //EUX - FnrServide (fin pin)
         doReturn("01055012345")
-                .`when`(fnrService)
-                .getFodselsnrFraSed(anyString())
+                .`when`(fnrHelper)
+                .getFodselsnrFraSeder(any())
 
         //EUX - HENT SED DOKUMENT
         doReturn("MOCK DOCUMENTS")
@@ -162,33 +158,33 @@ class JournalforingServiceTest {
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_01), any(), any(), anyString(), eq(null), eq(null))
+                .route(any(), eq(BucType.P_BUC_01), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_02), any(), any(), anyString(), eq(null), eq(null))
+                .route(any(), eq(BucType.P_BUC_02), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
-                .route(eq("01055012345"), eq(BucType.P_BUC_03), eq("NOR"), any(), any(), eq(null), eq(null))
+                .route(any(),
+                    eq(BucType.P_BUC_03), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), any(),  anyString(), eq(null), any())
+                .route(any(), eq(BucType.P_BUC_10), any())
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_10), anyString(), any(),  anyString(), eq(null), eq(null))
+                .route(any(), eq(BucType.P_BUC_10), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
                 .`when`(oppgaveRoutingService)
-                .route(anyString(), eq(BucType.P_BUC_05), anyString(), any(),  anyString(), eq(Diskresjonskode.SPSF.name),  eq(null))
+                .route(any(), eq(BucType.P_BUC_05), eq(null))
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(Krav.YtelseType.UT.name)
                 .`when`(fagmodulService)
                 .hentYtelseKravType(anyString(), anyString())
-
     }
 
     @Test
@@ -212,9 +208,9 @@ class JournalforingServiceTest {
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
-        verify(fnrService, times(0)).getFodselsnrFraSed(any())
-        verify(fdatoService, times(0)).getFDatoFromSed(any())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null), eq(null))
+        verify(fnrHelper, times(0)).getFodselsnrFraSeder(any())
+        verify(fdatoHelper, times(0)).finnFDatoFraSeder(any())
+        verify(oppgaveRoutingService, times(0)).route(any(), any(), eq(null))
     }
 
 
@@ -265,9 +261,13 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2200`(){
+        //FAGMODUL HENT ALLE DOKUMENTER
+        doReturn(String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json"))))
+                .`when`(fagmodulService)
+                .hentAlleDokumenter(anyString())
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.SENDT )
-        verify(fnrService).getFodselsnrFraSed(eq("148161"))
+        verify(fnrHelper, times(1)).getFodselsnrFraSeder(any())
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -344,7 +344,7 @@ class JournalforingServiceTest {
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
         verify(personV3Service, times(0)).hentPerson(any())
         verify(fagmodulService, times(0)).hentYtelseKravType(any(), any())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), any(), any(), anyString() ,eq(null),eq(null))
+        verify(oppgaveRoutingService, times(0)).route(any(), any(), eq(null))
     }
 
     @Test
@@ -370,12 +370,13 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat ugyldig PIN Sed P2000`(){
-        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))), HendelseType.MOTTATT )
+    fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`(){
+        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
+        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        verify(personV3Service).hentPerson(eq("01055012345"))
+        journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))), HendelseType.MOTTATT )
         verify(journalpostService).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("7477291"),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
@@ -387,7 +388,7 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = eq("NO")
         )
     }
 
@@ -417,9 +418,10 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2200`(){
+        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
+        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
 
         journalforingService.journalfor(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))), HendelseType.MOTTATT )
-        verify(fnrService).getFodselsnrFraSed(eq("148161"))
         verify(personV3Service, times(1)).hentPerson(any())
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -476,70 +478,16 @@ class JournalforingServiceTest {
 
     @Test
     fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(isFnrValid(null))
+        assertFalse(journalforingService.isFnrValid(null))
     }
 
     @Test
     fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(isFnrValid("1234"))
+        assertFalse(journalforingService.isFnrValid("1234"))
     }
 
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
-        assertTrue(isFnrValid("12345678910"))
+        assertTrue(journalforingService.isFnrValid("12345678910"))
     }
-
-    @Test
-    fun `valider fdato er fra fnr`() {
-        val fnr = "12078945602"
-        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
-        val expected = LocalDate.parse("1989-07-12", DateTimeFormatter.ISO_DATE)
-
-        val actual = journalforingService.hentFodselsDato(hendese, fnr)
-
-        assertEquals(expected, actual)
-
-    }
-
-    @Test
-    fun `valider fdato fra sed ved ugyldig fnr`() {
-        val fnr = "123"
-        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
-
-        val expected = LocalDate.parse("1980-01-01", DateTimeFormatter.ISO_DATE)
-
-        //EUX - HENT SED DOKUMENT
-        doReturn("1980-01-01")
-                .whenever(euxService)
-                .hentFodselsDatoFraSed(anyString(), anyString())
-
-        val actual = journalforingService.hentFodselsDato(hendese, fnr)
-
-        assertEquals(expected, actual)
-
-    }
-
-
-    @Test
-    fun `valider fdato fra sed ved ugyldig fnr lete igjennom alle sed i buc`() {
-        val fnr = "123"
-        val hendese = SedHendelseModel.fromJson(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
-
-        val expected = LocalDate.parse("1980-10-12", DateTimeFormatter.ISO_DATE)
-
-        doReturn(null)
-                .whenever(euxService)
-                .hentFodselsDatoFraSed(anyString(), anyString())
-
-        doReturn("1980-10-12")
-                .whenever(fdatoService)
-                .getFDatoFromSed(anyString())
-
-        val actual = journalforingService.hentFodselsDato(hendese, fnr)
-
-        assertEquals(expected, actual)
-
-    }
-
-
 }

@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.services.norg2
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class Norg2ServiceTest {
@@ -103,7 +105,11 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", "0422",null)
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(
+                fnr = "12345678910",
+                landkode = "NOR",
+                geografiskTilknytning = "0422",
+                fdato = LocalDate.of(1950,1,1)))
 
         val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(4, result?.size)
@@ -123,7 +129,7 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(null, null,null)
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(fdato = LocalDate.of(1950,1,1)))
 
         val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(2, result?.size)
@@ -143,7 +149,11 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest("NOR", null, "SPSF")
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(
+                fnr = "12345678910",
+                landkode = "NOR",
+                diskresjonskode = "SPSF",
+                fdato = LocalDate.of(1950,1,1)))
 
         val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(3, result?.size)

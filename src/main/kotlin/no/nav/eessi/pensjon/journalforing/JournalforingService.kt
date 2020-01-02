@@ -2,14 +2,17 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.buc.FdatoService
-import no.nav.eessi.pensjon.buc.FnrService
+import no.nav.eessi.pensjon.buc.BucHelper
+import no.nav.eessi.pensjon.buc.FdatoHelper
+import no.nav.eessi.pensjon.buc.FnrHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -41,12 +44,13 @@ class JournalforingService(private val euxService: EuxService,
                            private val diskresjonService: DiskresjonService,
                            private val oppgaveHandler: OppgaveHandler,
                            private val penService: PenService,
-                           private val fnrService: FnrService,
-                           private val fdatoService: FdatoService,
+                           private val fnrHelper: FnrHelper,
+                           private val fdatoHelper: FdatoHelper,
                            @Value("\${NAIS_NAMESPACE}") private val namespace: String,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
+    private val mapper = jacksonObjectMapper()
 
     fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
@@ -73,11 +77,7 @@ class JournalforingService(private val euxService: EuxService,
                         sedHendelse.sedType,
                         sedHendelse.bucType!!,
                         pinOgYtelse,
-                        person.fnr,
-                        person.landkode,
-                        person.fdato,
-                        person.geografiskTilknytning,
-                        person.diskresjonskode
+                        person
                 )
 
                 logger.debug("tildeltEnhet: $tildeltEnhet")
@@ -163,10 +163,9 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     /**
-     * Henter fødselsdatoen fra den gjeldende SEDen som skal journalføres, dersom dette feltet er tomt
-     * hentes fødselsdatoen fra første SED i samme BUC som har fødselsdato satt.
+     * Henter første treff på dato fra listen av SEDer
      */
-    fun hentFodselsDato(sedHendelse: SedHendelseModel, fnr: String?): LocalDate? {
+    fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
         var fodselsDatoISO : String? = null
 
         if (isFnrValid(fnr)) {
@@ -180,21 +179,11 @@ class JournalforingService(private val euxService: EuxService,
         }
 
         if (fodselsDatoISO.isNullOrEmpty()) {
-            logger.debug("provøer å hente inn fodselsDato fra følgende SED : ${sedHendelse.rinaSakId} / ${sedHendelse.rinaDokumentId}")
-            fodselsDatoISO = euxService.hentFodselsDatoFraSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-
-            if (fodselsDatoISO.isNullOrEmpty()) {
-                try {
-                    logger.debug("provøer å hente inn fodselsDato fra første og beste SED i BUC : ${sedHendelse.rinaSakId}")
-                    fodselsDatoISO = fdatoService.getFDatoFromSed(sedHendelse.rinaSakId)
-                } catch (ex: Exception) {
-                    logger.error("Ingen gyldige fdato funnet i BUC : ${sedHendelse.rinaSakId}", ex)
-                }
-            }
+            fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
         }
 
         return if (fodselsDatoISO.isNullOrEmpty()) {
-             null
+             throw(RuntimeException("Kunne ikke finne fdato i listen av SEDer"))
         } else {
             LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
         }
@@ -224,28 +213,28 @@ class JournalforingService(private val euxService: EuxService,
             sedType: SedType,
             bucType: BucType,
             ytelseType: String?,
-            navBruker: String?,
-            landkode: String?,
-            fodselsDato: LocalDate? = null,
-            geografiskTilknytning: String?,
-            diskresjonskode: String?
+            person: JournalforingPerson
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode, ytelseType)
+            oppgaveRoutingService.route(person, bucType, ytelseType)
         } else {
-            oppgaveRoutingService.route(navBruker, bucType, landkode, fodselsDato, geografiskTilknytning, diskresjonskode)
+            oppgaveRoutingService.route(person, bucType)
         }
     }
 
     fun identifiserPerson(sedHendelse: SedHendelseModel) : JournalforingPerson {
         var person = hentPerson(sedHendelse.navBruker)
         var fnr : String?
+        var fdato: LocalDate? = null
 
         if(person != null) {
             fnr = sedHendelse.navBruker!!
+            fdato = hentFodselsDato(fnr, null)
         } else {
             try {
-                fnr = fnrService.getFodselsnrFraSed(sedHendelse.rinaSakId)
+                val alleSediBuc = hentAlleSedIBuc(sedHendelse.rinaSakId)
+                fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
+                fdato = hentFodselsDato(fnr, alleSediBuc)
                 person = hentPerson(fnr)
                 if (person == null) {
                     logger.info("Ingen treff på fødselsnummer, fortsetter uten")
@@ -264,13 +253,23 @@ class JournalforingService(private val euxService: EuxService,
         if (person != null) aktoerId = hentAktoerId(fnr)
 
         val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
-        val fdato = hentFodselsDato(sedHendelse, fnr)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return JournalforingPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
+        return JournalforingPerson(fnr, aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
-}
+
+    fun hentAlleSedIBuc(euxCaseId: String): List<String?> {
+        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
+        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
+
+        val gyldigeSeds = BucHelper.filterUtGyldigSedId(alleDokumenterJsonNode)
+
+        return gyldigeSeds.map { pair ->
+            val sedDocumentId = pair.first
+            euxService.hentSed(euxCaseId, sedDocumentId)
+        }
+    }
 
     fun isFnrValid(navBruker: String?): Boolean {
         if(navBruker == null) return false
@@ -278,6 +277,7 @@ class JournalforingService(private val euxService: EuxService,
 
         return true
     }
+}
 
 class Person(val fnr : String?,
              val aktoerId: String?,

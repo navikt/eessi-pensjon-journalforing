@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -56,112 +57,112 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
-        val enhet = routingService.route(bucType = P_BUC_01, landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning)
+        val enhet = routingService.route(JournalforingPerson(fdato = irrelevantDato(), landkode = MANGLER_LAND, geografiskTilknytning = dummyTilknytning), bucType = P_BUC_01)
         assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
     fun `Gitt manglende buc-type saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(navBruker = "010101010101", landkode = MANGLER_LAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning)
+        val enhet = routingService.route(JournalforingPerson(fnr = "010101010101", landkode = MANGLER_LAND, fdato = irrelevantDato()))
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(navBruker = "010101010101", bucType = P_BUC_10, landkode = MANGLER_LAND, fodselsDato = irrelevantDato())
+        val enhet = routingService.route(JournalforingPerson(fnr = "010101010101", landkode = MANGLER_LAND, fdato = irrelevantDato()), bucType = P_BUC_10)
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
     @Test
     fun `Routing for vanlige BUC'er`() {
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_01, land = NORGE, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato(), geografiskTilknytning = dummyTilknytning))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_01, land = UTLAND, fodselsDato = irrelevantDato()))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, fnr = "01010101010"), bucType = P_BUC_01))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_01))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_01))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_01))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_02, fodselsDato = irrelevantDato()))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_02, land = NORGE, fodselsDato = irrelevantDato()))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_02, land = UTLAND, fodselsDato = irrelevantDato()))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), fnr = "01010101010"), bucType = P_BUC_02))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_02))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_02))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_03, fodselsDato = irrelevantDato()))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_03, land = NORGE, fodselsDato = irrelevantDato()))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_03, land = UTLAND, fodselsDato = irrelevantDato()))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), fnr = "01010101010"), bucType = P_BUC_03))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_03))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_03))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_04, fodselsDato = irrelevantDato()))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_04, land = NORGE, fodselsDato = irrelevantDato()))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_04, land = UTLAND, fodselsDato = irrelevantDato()))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), fnr = "01010101010"), bucType = P_BUC_04))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_04))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_04))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_05, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_05, land = NORGE, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_05, land = UTLAND, fodselsDato = alder18aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_05, fodselsDato = alder17aar))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType =  P_BUC_05, land = NORGE, fodselsDato = alder17aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_05, land = UTLAND, fodselsDato = alder17aar))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_05))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_05))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_05))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_05))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_05))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_05))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_06, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_06, land = NORGE, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_06, land = UTLAND, fodselsDato = alder18aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_06, fodselsDato = alder17aar))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_06,land = NORGE, fodselsDato = alder17aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_06, land = UTLAND, fodselsDato = alder17aar))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_06))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_06))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_06))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_06))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_06))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_06))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_07, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_07, land = NORGE, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_07, land = UTLAND, fodselsDato = alder18aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_07, fodselsDato = alder17aar))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_07, land = NORGE, fodselsDato = alder17aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_07, land = UTLAND, fodselsDato = alder17aar))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_07))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_07))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_07))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_07))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_07))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_07))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_08, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_08, land = NORGE, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_08, land = UTLAND, fodselsDato = alder18aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_08, fodselsDato = alder17aar))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_08, land = NORGE, fodselsDato = alder17aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_08, land = UTLAND, fodselsDato = alder17aar))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_08))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_08))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_08))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_08))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_08))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_08))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_09, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_09, land = NORGE, fodselsDato = alder18aar))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_09, land = UTLAND, fodselsDato = alder18aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_09, fodselsDato = alder17aar))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_09, land = NORGE, fodselsDato = alder17aar))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_09, land = UTLAND, fodselsDato = alder17aar))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_09))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_09))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_09))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_09))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_09))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_09))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = AP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = AP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = AP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = AP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = GP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = GP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = GP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = GP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = GP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = GP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder18aar, ytelse = UT.name))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder18aar, ytelse = UT.name))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder18aar, ytelse = UT.name))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
 
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder17aar, ytelse = UT.name))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder17aar, ytelse = UT.name))
-        assertEquals(UFORE_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder17aar, ytelse = UT.name))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
+        assertEquals(UFORE_UTLAND, enhetFor(JournalforingPerson(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = UT.name))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder59aar, ytelse = AP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder59aar, ytelse = AP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder59aar, ytelse = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder59aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder59aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder59aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
 
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, fodselsDato = alder60aar, ytelse = AP.name))
-        assertEquals(NFP_UTLAND_AALESUND, enhetFor(bucType = P_BUC_10, land = NORGE, fodselsDato = alder60aar, ytelse = AP.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, ytelse = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder60aar, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(NFP_UTLAND_AALESUND, enhetFor(JournalforingPerson(fdato = alder60aar, landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder60aar, landkode = UTLAND, fnr = "01010101010"), bucType = P_BUC_10, ytelseType = AP.name))
 
-        assertEquals(DISKRESJONSKODE, enhetFor(P_BUC_01, fodselsDato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = "SPSF", ytelse = AP.name))
-        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(P_BUC_03, NORGE, alder60aar, diskresjonskode = "SPFO" , ytelse = UT.name))
-        assertEquals(PENSJON_UTLAND, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = "SPFO", ytelse = GP.name))
-        assertEquals(DISKRESJONSKODE, enhetFor(bucType = P_BUC_10, land = UTLAND, fodselsDato = alder60aar, diskresjonskode = "SPSF", ytelse = GP.name))
+        assertEquals(DISKRESJONSKODE, enhetFor(JournalforingPerson(fdato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = "SPSF", fnr = "01010101010"), bucType = P_BUC_01, ytelseType = AP.name))
+        assertEquals(UFORE_UTLANDSTILSNITT, enhetFor(JournalforingPerson(fdato = alder60aar, diskresjonskode = "SPFO", landkode = NORGE, fnr = "01010101010"), bucType = P_BUC_03, ytelseType = UT.name))
+        assertEquals(PENSJON_UTLAND, enhetFor(JournalforingPerson(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPFO", fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
+        assertEquals(DISKRESJONSKODE, enhetFor(JournalforingPerson(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPSF", fnr = "01010101010"), bucType = P_BUC_10, ytelseType = GP.name))
     }
 
     @Test
@@ -170,7 +171,11 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925",null,"SVE",P_BUC_01,null)
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                landkode = "SVE",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = PENSJON_UTLAND
 
         assertEquals(expected,actual)
@@ -182,7 +187,12 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "0322",
+                landkode = "NOR",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = NFP_UTLAND_OSLO
 
         assertEquals(expected,actual)
@@ -194,7 +204,12 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01,null)
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "1102",
+                landkode = "NOR",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = NFP_UTLAND_AALESUND
 
         assertEquals(expected,actual)
@@ -206,7 +221,13 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","1102","NOR",P_BUC_01, "SPSF")
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "1102",
+                landkode = "NOR",
+                diskresjonskode = "SPSF",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
@@ -214,7 +235,12 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
-       val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_03,null)
+       val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+               fnr = "1208201515925",
+               geografiskTilknytning = "0322",
+               landkode = "NOR",
+               fdato = LocalDate.of(1950,1,1)),
+            P_BUC_03)
        val expected = null
 
         assertEquals(expected,actual)
@@ -225,7 +251,12 @@ class OppgaveRoutingServiceTest {
         doReturn(listOf<Norg2ArbeidsfordelingItem>())
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "0322",
+                landkode = "NOR",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = null
 
         assertEquals(expected,actual)
@@ -236,7 +267,12 @@ class OppgaveRoutingServiceTest {
         doThrow(RuntimeException("dummy"))
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01,null)
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "0322",
+                landkode = "NOR",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = null
 
         assertEquals(expected,actual)
@@ -248,27 +284,22 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet("1208201515925","0322","NOR",P_BUC_01, "SPSF")
+        val actual = routingService.hentNorg2Enhet(JournalforingPerson(
+                fnr = "1208201515925",
+                geografiskTilknytning = "0322",
+                landkode = "NOR",
+                diskresjonskode = "SPSF",
+                fdato = LocalDate.of(1950,1,1)),
+            P_BUC_01)
         val expected = DISKRESJONSKODE
 
         assertEquals(expected,actual)
     }
 
-    private fun enhetFor(bucType: BucType,
-                         land: String? = null,
-                         fodselsDato: LocalDate,
-                         geografiskTilknytning: String? = null,
-                         diskresjonskode: String? = null,
-                         ytelse: String? = null): OppgaveRoutingModel.Enhet {
-        return routingService.route(
-                "01010101010",
-                bucType,
-                land,
-                fodselsDato,
-                geografiskTilknytning,
-                diskresjonskode,
-                ytelse
-            )
+    private fun enhetFor(person: JournalforingPerson,
+                         bucType: BucType,
+                         ytelseType: String? = null): OppgaveRoutingModel.Enhet {
+        return routingService.route(person, bucType, ytelseType)
         }
 
     @Test

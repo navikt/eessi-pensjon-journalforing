@@ -1,0 +1,887 @@
+[
+  {
+    "id": "eb292c5d94264796b85b3147d8f028f8",
+    "parentDocumentId": null,
+    "type": "X009",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Reminder",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "1466682dd6a54f0da023fb7810a00b37",
+    "parentDocumentId": null,
+    "type": "H020",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Claim for - Reimbursement - Administrative Check /Medical information",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "31e6163c4ee745ed90706ce768037854",
+    "parentDocumentId": null,
+    "type": "P4000",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Report on insurance history",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "c1ef7c726b0f4ba799e65447b9019ed1",
+    "parentDocumentId": null,
+    "type": "P5000",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Insurance/residence periods",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "f73b63148e87496689a64a9e6bca15ff",
+    "parentDocumentId": null,
+    "type": "P8000",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Request for additional information",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "5647d8300e48416b9625126b5a54c264",
+    "parentDocumentId": null,
+    "type": "H070",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Notification of death",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "87bd977ede4b453cb075ba6d14012ca0",
+    "parentDocumentId": null,
+    "type": "H121",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Notification of Medical Information / Reply to request for Medical Information",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "925c98f25f46438888315a6cfa0005ac",
+    "parentDocumentId": null,
+    "type": "X007",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Forward Case",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "16996b5ab413474ab48f82b6bda64763",
+    "parentDocumentId": null,
+    "type": "P6000",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Pension decision",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "5af8cd9a1a244234b1698090e45e16d1",
+    "parentDocumentId": null,
+    "type": "P7000",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Notification of Summary note",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "6113bef652c9484898dde8fb33fc4ab0",
+    "parentDocumentId": null,
+    "type": "P2200",
+    "status": "sent",
+    "creationDate": 1577105375530,
+    "lastUpdate": 1577105395085,
+    "displayName": "Invalidity pension claim",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "2"
+  },
+  {
+    "id": "9dbd9ca611a748e195505327c586c28c",
+    "parentDocumentId": "6113bef652c9484898dde8fb33fc4ab0",
+    "type": "X008",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Invalidate Sed",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "5eb34baf072c4af1b5b4149ab72b404e",
+    "parentDocumentId": null,
+    "type": "P10000",
+    "status": "empty",
+    "creationDate": 1577105403000,
+    "lastUpdate": 1577105403000,
+    "displayName": "Transfer of additional information",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "6e3ae42e729b4615b721e7f34a1eee64",
+    "parentDocumentId": null,
+    "type": "P3000_NO",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Country specific information",
+    "participants": [
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  },
+  {
+    "id": "5dd4e97d15ec4bce9d53a3dc34355157",
+    "parentDocumentId": null,
+    "type": "X005",
+    "status": "empty",
+    "creationDate": 1577105402000,
+    "lastUpdate": 1577105402000,
+    "displayName": "Add New Participant",
+    "participants": [
+      {
+        "role": "Sender",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT07",
+          "accessPoint": null
+        },
+        "selected": false
+      },
+      {
+        "role": "Receiver",
+        "organisation": {
+          "address": {
+            "country": "NO",
+            "town": null,
+            "street": null,
+            "postalCode": null,
+            "region": null
+          },
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "registryNumber": null,
+          "acronym": "NAV ACCT 08",
+          "countryCode": "NO",
+          "contactMethods": null,
+          "name": "NAV ACCEPTANCE TEST 08",
+          "location": null,
+          "assignedBUCs": null,
+          "id": "NO:NAVAT08",
+          "accessPoint": null
+        },
+        "selected": false
+      }
+    ],
+    "attachments": [],
+    "version": "1"
+  }
+]

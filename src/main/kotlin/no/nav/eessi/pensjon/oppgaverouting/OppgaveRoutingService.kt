@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
@@ -19,41 +20,37 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
-    fun route(navBruker: String? = null,
+    fun route(person: JournalforingPerson,
               bucType: BucType? = null,
-              landkode: String? = null,
-              fodselsDato: LocalDate? = null,
-              geografiskTilknytning: String? = null,
-              diskresjonskode: String? = null,
               ytelseType: String? = null): Enhet {
 
-        logger.debug("navBruker: $navBruker  bucType: $bucType  landkode: $landkode  fodselsDato: $fodselsDato  geografiskTilknytning: $geografiskTilknytning  ytelseType: $ytelseType")
+        logger.debug("person: $person,  bucType: $bucType, ytelseType: $ytelseType")
 
-        val tildeltEnhet = hentNorg2Enhet(navBruker, geografiskTilknytning, landkode, bucType, diskresjonskode) ?: bestemTildeltEnhet(navBruker, landkode, bucType, fodselsDato, ytelseType, diskresjonskode)
+        val tildeltEnhet = hentNorg2Enhet(person, bucType) ?: bestemTildeltEnhet(person, bucType, ytelseType)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
                 "Buc: $bucType, " +
-                "Landkode: $landkode, " +
-                "Fødselsdato: $fodselsDato, " +
-                "Geografisk Tilknytning: $geografiskTilknytning, " +
+                "Landkode: ${person.landkode}, " +
+                "Fødselsdato: ${person.fdato}, " +
+                "Geografisk Tilknytning: ${person.geografiskTilknytning}, " +
                 "Ytelsetype: $ytelseType")
 
         return tildeltEnhet
     }
 
-    private fun bestemTildeltEnhet(navBruker: String?, landkode: String?, bucType: BucType?, fodselsDato: LocalDate?, ytelseType: String?, diskresjonskode: String?): Enhet {
+    private fun bestemTildeltEnhet(person: JournalforingPerson, bucType: BucType?, ytelseType: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         return when {
-                    navBruker == null -> ID_OG_FORDELING
+                    person.fnr == null -> ID_OG_FORDELING
 
-                    diskresjonskode != null && diskresjonskode == "SPSF" -> DISKRESJONSKODE
+                    person.diskresjonskode != null && person.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
-                    NORGE == bosatt(landkode) ->
+                    NORGE == bosatt(person.landkode) ->
                         when (bucType) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
                             P_BUC_03 -> UFORE_UTLANDSTILSNITT
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
-                                if (isBetween18and60(fodselsDato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                                if (isBetween18and60(person.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             P_BUC_10 ->
                                 if (ytelseType == UT.name) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             else -> NFP_UTLAND_AALESUND // Ukjent buc-type
@@ -64,7 +61,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                             P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
                             P_BUC_03 -> UFORE_UTLAND
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
-                                if (isBetween18and60(fodselsDato)) UFORE_UTLAND else PENSJON_UTLAND
+                                if (isBetween18and60(person.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                             P_BUC_10 ->
 
                                 if (ytelseType == UT.name) UFORE_UTLAND else PENSJON_UTLAND
@@ -73,13 +70,13 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 }
     }
 
-    fun hentNorg2Enhet(navBruker: String?, geografiskTilknytning: String?, landkode: String?, bucType: BucType?, diskresjonskode: String?): Enhet? {
-        if (navBruker == null) return null
+    fun hentNorg2Enhet(person: JournalforingPerson, bucType: BucType?): Enhet? {
+        if (person.fnr == null) return null
 
         return when(bucType) {
             P_BUC_01 -> {
                 try {
-                    val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(geografiskTilknytning, landkode, diskresjonskode)
+                    val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(person)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {
@@ -101,7 +98,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 else -> UTLAND
             }
 
-    private fun isBetween18and60(fodselsDato: LocalDate?): Boolean {
+    private fun isBetween18and60(fodselsDato: LocalDate): Boolean {
         val alder = Period.between(fodselsDato, LocalDate.now())
         return (alder.years >= 18) && (alder.years < 60)
     }
