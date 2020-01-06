@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
-import no.nav.eessi.pensjon.services.journalpost.IdType.FNR
 
 class ModelsTest {
 
@@ -16,8 +15,6 @@ class ModelsTest {
         val journalpostRequestJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json")))
 
         val journalpostRequestModel = mapper.readValue(journalpostRequestJson, JournalpostRequest::class.java)
-        assertEquals(journalpostRequestModel.avsenderMottaker.id , "12345678912")
-        assertEquals(journalpostRequestModel.avsenderMottaker.idType, FNR)
         assertEquals(journalpostRequestModel.behandlingstema, "ab0254")
         assertEquals(journalpostRequestModel.bruker?.id, "12345678912")
         assertEquals(journalpostRequestModel.bruker?.idType, "FNR")
