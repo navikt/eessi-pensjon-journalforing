@@ -50,8 +50,6 @@ class JournalpostService(
     ): JournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
-                fnr,
-                personNavn,
                 sedHendelseType,
                 avsenderLand
         )
@@ -111,8 +109,6 @@ class JournalpostService(
     }
 
     private fun populerAvsenderMottaker(
-            fnr: String?,
-            mottakerNavn: String?,
             sedHendelseType: String,
             avsenderLand: String?): AvsenderMottaker {
 
@@ -120,11 +116,7 @@ class JournalpostService(
             AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
         } else {
             val justertAvsenderLand = justerAvsenderLand(avsenderLand)
-            if(fnr.isNullOrEmpty()) {
-                AvsenderMottaker(null, null, null, justertAvsenderLand)
-            } else {
-                AvsenderMottaker(fnr, IdType.FNR, mottakerNavn, justertAvsenderLand)
-            }
+            AvsenderMottaker(null, null, null, justertAvsenderLand)
         }
     }
 

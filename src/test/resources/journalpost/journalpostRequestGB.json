@@ -1,8 +1,5 @@
 {
   "avsenderMottaker": {
-    "id": "12345678912",
-    "idType": "FNR",
-    "navn": "navn navnesen",
     "land": "GB"
   },
   "behandlingstema": "ab0254",
