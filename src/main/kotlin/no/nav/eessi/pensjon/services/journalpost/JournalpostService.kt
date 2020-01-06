@@ -46,10 +46,12 @@ class JournalpostService(
             arkivsaksnummer: String?,
             dokumenter: String,
             forsokFerdigstill: Boolean? = false,
-            avsenderLand: String?
+            avsenderLand: String?,
+            avsenderNavn: String?
     ): JournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
+                avsenderNavn,
                 sedHendelseType,
                 avsenderLand
         )
@@ -109,6 +111,7 @@ class JournalpostService(
     }
 
     private fun populerAvsenderMottaker(
+            avsenderNavn: String?,
             sedHendelseType: String,
             avsenderLand: String?): AvsenderMottaker {
 
@@ -116,7 +119,7 @@ class JournalpostService(
             AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
         } else {
             val justertAvsenderLand = justerAvsenderLand(avsenderLand)
-            AvsenderMottaker(null, null, null, justertAvsenderLand)
+            AvsenderMottaker(null, null, avsenderNavn, justertAvsenderLand)
         }
     }
 

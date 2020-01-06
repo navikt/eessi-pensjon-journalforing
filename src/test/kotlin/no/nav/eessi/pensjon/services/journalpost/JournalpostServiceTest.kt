@@ -80,7 +80,8 @@ class JournalpostServiceTest {
                     }]
                 """.trimIndent(),
                 forsokFerdigstill= false,
-                avsenderLand = "NO"
+                avsenderLand = "NO",
+                avsenderNavn = null
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
@@ -128,7 +129,8 @@ class JournalpostServiceTest {
                     }]
                 """.trimIndent(),
                     forsokFerdigstill = false,
-                    avsenderLand = "NO"
+                    avsenderLand = "NO",
+                    avsenderNavn = null
             )
         }
     }
@@ -180,7 +182,8 @@ class JournalpostServiceTest {
                     }]
                 """.trimIndent(),
                 forsokFerdigstill= false,
-                avsenderLand = "UK"
+                avsenderLand = "UK",
+                avsenderNavn = null
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
