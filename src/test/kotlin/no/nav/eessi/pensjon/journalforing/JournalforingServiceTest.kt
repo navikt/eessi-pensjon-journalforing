@@ -152,7 +152,8 @@ class JournalforingServiceTest {
                         arkivsaksnummer= anyOrNull(),
                         dokumenter= anyOrNull(),
                         forsokFerdigstill= anyOrNull(),
-                        avsenderLand = anyOrNull()
+                        avsenderLand = anyOrNull(),
+                        avsenderNavn = anyOrNull()
                 )
 
         //OPPGAVEROUTING ROUTE
@@ -203,7 +204,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= anyOrNull(),
                 dokumenter= anyOrNull(),
                 forsokFerdigstill= anyOrNull(),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -231,7 +233,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -253,7 +256,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -282,7 +286,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -304,7 +309,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -338,7 +344,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= anyOrNull(),
                 dokumenter= anyOrNull(),
                 forsokFerdigstill= anyOrNull(),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
         verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
         verify(aktoerregisterService, times(0)).hentGjeldendeAktoerIdForNorskIdent(any())
@@ -365,7 +372,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -388,7 +396,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = eq("NO")
+                avsenderLand = eq("NO"),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -412,7 +421,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -436,7 +446,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 
@@ -458,7 +469,8 @@ class JournalforingServiceTest {
                 arkivsaksnummer= eq(null),
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
-                avsenderLand = anyOrNull()
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull()
         )
     }
 

@@ -104,7 +104,8 @@ class JournalforingService(private val euxService: EuxService,
                         arkivsaksnummer = sakId,
                         dokumenter = documents,
                         forsokFerdigstill = forsokFerdigstill,
-                        avsenderLand = sedHendelse.avsenderLand
+                        avsenderLand = sedHendelse.avsenderLand,
+                        avsenderNavn = sedHendelse.avsenderNavn
                 )
 
                 logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
