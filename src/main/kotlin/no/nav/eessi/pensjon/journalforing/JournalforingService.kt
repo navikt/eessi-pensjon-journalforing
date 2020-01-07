@@ -224,12 +224,15 @@ class JournalforingService(private val euxService: EuxService,
     }
 
     fun identifiserPerson(sedHendelse: SedHendelseModel) : JournalforingPerson {
-        var person = hentPerson(sedHendelse.navBruker)
+        val regex = "[^0-9.]".toRegex()
+        val filtrertNavBruker = sedHendelse.navBruker?.replace(regex, "")
+
+        var person = hentPerson(filtrertNavBruker)
         var fnr : String?
         var fdato: LocalDate? = null
 
         if(person != null) {
-            fnr = sedHendelse.navBruker!!
+            fnr = filtrertNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
             try {

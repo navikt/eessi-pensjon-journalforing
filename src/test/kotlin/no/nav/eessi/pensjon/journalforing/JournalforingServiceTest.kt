@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
@@ -472,6 +473,24 @@ class JournalforingServiceTest {
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull()
         )
+    }
+
+    @Test
+    fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
+        journalforingService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
+    }
+
+    @Test
+    fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
+        journalforingService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
+    }
+
+    @Test
+    fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`(){
+        journalforingService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
     }
 
     @Test
