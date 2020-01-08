@@ -2,69 +2,53 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.buc.BucHelper
-import no.nav.eessi.pensjon.buc.FdatoHelper
-import no.nav.eessi.pensjon.buc.FnrHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.services.person.*
 import no.nav.eessi.pensjon.services.pesys.PenService
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Service
 class JournalforingService(private val euxService: EuxService,
                            private val journalpostService: JournalpostService,
-                           private val aktoerregisterService: AktoerregisterService,
-                           private val personV3Service: PersonV3Service,
                            private val fagmodulService: FagmodulService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
-                           private val diskresjonService: DiskresjonService,
                            private val oppgaveHandler: OppgaveHandler,
                            private val penService: PenService,
-                           private val fnrHelper: FnrHelper,
-                           private val fdatoHelper: FdatoHelper,
                            @Value("\${NAIS_NAMESPACE}") private val namespace: String,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
-    private val mapper = jacksonObjectMapper()
 
-    fun journalfor(hendelseJson: String, hendelseType: HendelseType) {
+    fun journalfor(sedHendelse: SedHendelseModel,
+                   hendelseType: HendelseType,
+                   identifisertPerson: IdentifisertPerson) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
             try {
-                val sedHendelse = SedHendelseModel.fromJson(hendelseJson)
-
                 if (sedHendelse.sektorKode != "P") {
                     // Vi ignorerer alle hendelser som ikke har vår sektorkode
                     return@measure
                 }
 
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-
-                val person = identifiserPerson(sedHendelse)
 
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
                 val pinOgYtelse = hentYtelseKravType(sedHendelse)
@@ -77,15 +61,15 @@ class JournalforingService(private val euxService: EuxService,
                         sedHendelse.sedType,
                         sedHendelse.bucType!!,
                         pinOgYtelse,
-                        person
+                        identifisertPerson
                 )
 
                 logger.debug("tildeltEnhet: $tildeltEnhet")
 
                 var sakId: String? = null
-                if(person.aktoerId != null) {
+                if(identifisertPerson.aktoerId != null) {
                     if (hendelseType == HendelseType.SENDT && namespace == "q2") {
-                        sakId = penService.hentSakId(person.aktoerId, sedHendelse.bucType)
+                        sakId = penService.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType)
                     }
                 }
                 var forsokFerdigstill = false
@@ -93,8 +77,8 @@ class JournalforingService(private val euxService: EuxService,
 
                 val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
-                        fnr = person.fnr,
-                        personNavn = person.personNavn,
+                        fnr = identifisertPerson.fnr,
+                        personNavn = identifisertPerson.personNavn,
                         bucType = sedHendelse.bucType.name,
                         sedType = sedHendelse.sedType.name,
                         sedHendelseType = hendelseType.name,
@@ -111,15 +95,13 @@ class JournalforingService(private val euxService: EuxService,
                 logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
 
                 if(!journalPostResponse.journalpostferdigstilt) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, person.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
-                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, person.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
+                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
 
                     }
                 }
-
-
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
                 throw ex
@@ -163,58 +145,11 @@ class JournalforingService(private val euxService: EuxService,
         return null
     }
 
-    /**
-     * Henter første treff på dato fra listen av SEDer
-     */
-    fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
-        var fodselsDatoISO : String? = null
-
-        if (isFnrValid(fnr)) {
-            fodselsDatoISO = try {
-                val navfnr = NavFodselsnummer(fnr!!)
-                navfnr.getBirthDateAsISO()
-            } catch (ex : Exception) {
-                logger.error("navBruker ikke gyldig for fdato", ex)
-                null
-            }
-        }
-
-        if (fodselsDatoISO.isNullOrEmpty()) {
-            fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
-        }
-
-        return if (fodselsDatoISO.isNullOrEmpty()) {
-             throw(RuntimeException("Kunne ikke finne fdato i listen av SEDer"))
-        } else {
-            LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-        }
-    }
-
-    private fun hentAktoerId(navBruker: String?): String? {
-        if (!isFnrValid(navBruker)) return null
-        return try {
-            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
-            aktoerId
-        } catch (ex: Exception) {
-            logger.error("Det oppstod en feil ved henting av aktørid: $ex")
-            null
-        }
-    }
-
-    private fun hentPerson(navBruker: String?): Bruker? {
-        if (!isFnrValid(navBruker)) return null
-        return try {
-            personV3Service.hentPerson(navBruker!!)
-        } catch (ex: Exception) {
-            null
-        }
-    }
-
     private fun hentTildeltEnhet(
             sedType: SedType,
             bucType: BucType,
             ytelseType: String?,
-            person: JournalforingPerson
+            person: IdentifisertPerson
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
             oppgaveRoutingService.route(person, bucType, ytelseType)
@@ -223,64 +158,6 @@ class JournalforingService(private val euxService: EuxService,
         }
     }
 
-    fun identifiserPerson(sedHendelse: SedHendelseModel) : JournalforingPerson {
-        val regex = "[^0-9.]".toRegex()
-        val filtrertNavBruker = sedHendelse.navBruker?.replace(regex, "")
-
-        var person = hentPerson(filtrertNavBruker)
-        var fnr : String?
-        var fdato: LocalDate? = null
-
-        if(person != null) {
-            fnr = filtrertNavBruker!!
-            fdato = hentFodselsDato(fnr, null)
-        } else {
-            try {
-                val alleSediBuc = hentAlleSedIBuc(sedHendelse.rinaSakId)
-                fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
-                fdato = hentFodselsDato(fnr, alleSediBuc)
-                person = hentPerson(fnr)
-                if (person == null) {
-                    logger.info("Ingen treff på fødselsnummer, fortsetter uten")
-                    fnr = null
-                }
-            } catch (ex: Exception) {
-                logger.info("Ingen treff på fødselsnummer, fortsetter uten")
-                person = null
-                fnr = null
-            }
-        }
-
-        val personNavn = hentPersonNavn(person)
-        var aktoerId: String? = null
-
-        if (person != null) aktoerId = hentAktoerId(fnr)
-
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
-        val landkode = hentLandkode(person)
-        val geografiskTilknytning = hentGeografiskTilknytning(person)
-
-        return JournalforingPerson(fnr, aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
-    }
-
-    fun hentAlleSedIBuc(euxCaseId: String): List<String?> {
-        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-
-        val gyldigeSeds = BucHelper.filterUtGyldigSedId(alleDokumenterJsonNode)
-
-        return gyldigeSeds.map { pair ->
-            val sedDocumentId = pair.first
-            euxService.hentSed(euxCaseId, sedDocumentId)
-        }
-    }
-
-    fun isFnrValid(navBruker: String?): Boolean {
-        if(navBruker == null) return false
-        if(navBruker.length != 11) return false
-
-        return true
-    }
 }
 
 class Person(val fnr : String?,

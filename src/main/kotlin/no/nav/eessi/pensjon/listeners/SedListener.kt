@@ -9,15 +9,17 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.models.HendelseType.*
+import no.nav.eessi.pensjon.personidentifisering.IdentifiserPersonHelper
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.kafka.annotation.KafkaHandler
 import java.util.*
 
 @Service
 class SedListener(
         private val journalforingService: JournalforingService,
+        private val identifiserPersonHelper: IdentifiserPersonHelper,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -36,7 +38,9 @@ class SedListener(
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
-                    journalforingService.journalfor(hendelse, SENDT)
+                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                    journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
@@ -59,7 +63,9 @@ class SedListener(
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
-                    journalforingService.journalfor(hendelse, MOTTATT)
+                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                    journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
                     acknowledgment.acknowledge()
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {

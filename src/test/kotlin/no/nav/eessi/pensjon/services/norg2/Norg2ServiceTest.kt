@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.services.norg2
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
-import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -105,7 +105,7 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
                 fnr = "12345678910",
                 landkode = "NOR",
                 geografiskTilknytning = "0422",
@@ -129,7 +129,7 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(fdato = LocalDate.of(1950,1,1)))
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(fdato = LocalDate.of(1950,1,1)))
 
         val result = norg2Service.hentArbeidsfordelingEnheter(request)
         assertEquals(2, result?.size)
@@ -149,7 +149,7 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(JournalforingPerson(
+        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
                 fnr = "12345678910",
                 landkode = "NOR",
                 diskresjonskode = "SPSF",
