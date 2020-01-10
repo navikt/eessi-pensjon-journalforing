@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.validateJson
-import no.nav.eessi.pensjon.personidentifisering.services.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

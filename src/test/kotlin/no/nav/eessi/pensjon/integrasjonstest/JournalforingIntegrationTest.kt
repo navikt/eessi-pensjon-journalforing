@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.slot
 import io.mockk.*
-import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personidentifisering.BrukerMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
@@ -54,7 +54,7 @@ class JournalforingIntegrationTest {
     lateinit var sedListener: SedListener
 
     @Autowired
-    lateinit var  personV3Service: PersonV3Service
+    lateinit var  personV3Klient: PersonV3Klient
 
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
@@ -134,7 +134,7 @@ class JournalforingIntegrationTest {
 
     private fun capturePersonMock() {
         val slot = slot<String>()
-        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
+        every { personV3Klient.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
     }
 
     companion object {
@@ -496,7 +496,7 @@ class JournalforingIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 30) { personV3Service.hentPerson(any()) }
+        verify(exactly = 30) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
@@ -507,8 +507,8 @@ class JournalforingIntegrationTest {
         fun personV3(): PersonV3 = mockk()
 
         @Bean
-        fun personV3Service(personV3: PersonV3): PersonV3Service {
-            return spyk(PersonV3Service(personV3))
+        fun personV3Klient(personV3: PersonV3): PersonV3Klient {
+            return spyk(PersonV3Klient(personV3))
         }
     }
 }

@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.personidentifisering.services.DiskresjonService
+import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.personidentifisering.services.SedFnrSøk
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.personidentifisering.services.Diskresjonskode
-import no.nav.eessi.pensjon.personidentifisering.services.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -29,9 +29,9 @@ class DiskresjonServiceTest {
     private lateinit var fagmodulService: FagmodulService
 
     @Mock
-    private lateinit var personV3Service: PersonV3Service
+    private lateinit var personV3Klient: PersonV3Klient
 
-    private lateinit var diskresjonService: DiskresjonService
+    private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
 
     private lateinit var sedFnrSøk: SedFnrSøk
 
@@ -39,10 +39,10 @@ class DiskresjonServiceTest {
     fun setup() {
         sedFnrSøk = SedFnrSøk()
 
-        diskresjonService = DiskresjonService(
+        diskresjonkodeHelper = DiskresjonkodeHelper(
                 euxService,
                 fagmodulService,
-                personV3Service,
+                personV3Klient,
                 sedFnrSøk
         )
     }
@@ -51,7 +51,7 @@ class DiskresjonServiceTest {
     fun sjekkeUtJacksonMapper() {
         val json = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
         val expected = listOf("44cb68f89a2f4e748934fb4722721018")
-        val actual = diskresjonService.hentSedDocumentsIds(json)
+        val actual = diskresjonkodeHelper.hentSedDocumentsIds(json)
 
         Assertions.assertEquals(expected, actual)
 
@@ -67,11 +67,11 @@ class DiskresjonServiceTest {
 
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
 
-        doReturn(BrukerMock.createWith()).whenever(personV3Service).hentPerson(any())
+        doReturn(BrukerMock.createWith()).whenever(personV3Klient).hentPerson(any())
 
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = diskresjonService.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -93,13 +93,13 @@ class DiskresjonServiceTest {
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doReturn(BrukerMock.createWith())
                 .doReturn(BrukerMock.createWith())
-                .whenever(personV3Service).hentPerson(any())
+                .whenever(personV3Klient).hentPerson(any())
 
 
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = diskresjonService.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -128,12 +128,12 @@ class DiskresjonServiceTest {
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doReturn(BrukerMock.createWith())
                 .doReturn(brukerSF)
-                .whenever(personV3Service).hentPerson(any())
+                .whenever(personV3Klient).hentPerson(any())
 
         doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = diskresjonService.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)
@@ -159,11 +159,11 @@ class DiskresjonServiceTest {
 
             doReturn(BrukerMock.createWith()).
             doReturn(BrukerMock.createWith()).
-            doReturn(bruker).whenever(personV3Service).hentPerson(any())
+            doReturn(bruker).whenever(personV3Klient).hentPerson(any())
 
         doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
 
-        val actual = diskresjonService.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)

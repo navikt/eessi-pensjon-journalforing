@@ -9,7 +9,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 import no.nav.eessi.pensjon.models.HendelseType.*
-import no.nav.eessi.pensjon.personidentifisering.IdentifiserPersonHelper
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.MDC
@@ -19,7 +19,7 @@ import java.util.*
 @Service
 class SedListener(
         private val journalforingService: JournalforingService,
-        private val identifiserPersonHelper: IdentifiserPersonHelper,
+        private val personidentifiseringService: PersonidentifiseringService,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -41,7 +41,7 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
-                        val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
                     }
                     acknowledgment.acknowledge()
@@ -69,7 +69,7 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
-                        val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse)
                         journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
                     }
                     acknowledgment.acknowledge()

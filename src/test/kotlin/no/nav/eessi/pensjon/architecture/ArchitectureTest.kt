@@ -61,7 +61,8 @@ class ArchitectureTest {
         val JournalPostService = "journalforing.services.journalpost"
         val OppgaveService = "journalforing.services.oppgave"
         val Personidentifisering = "journalforing.personidentifisering"
-        val PersonidentifiseringServices = "journalforing.personidentifisering.services"
+        val PersonidentifiseringKlienter = "journalforing.personidentifisering.klienter"
+        val PersonidentifiseringHelpers = "journalforing.personidentifisering.helpers"
         val Integrasjonstest = "journalforing.integrasjonstest"
 
         val packages: Map<String, String> = mapOf(
@@ -82,7 +83,8 @@ class ArchitectureTest {
                 JournalPostService to "$root.services.journalpost",
                 OppgaveService to "$root.services.oppgave",
                 Personidentifisering to "$root.personidentifisering",
-                PersonidentifiseringServices to "$root.personidentifisering.services",
+                PersonidentifiseringKlienter to "$root.personidentifisering.klienter",
+                PersonidentifiseringHelpers to "$root.personidentifisering.helpers",
                 Integrasjonstest to "$root.integrasjonstest"
         )
 
@@ -109,24 +111,26 @@ class ArchitectureTest {
                 .layer(JournalPostService).definedBy(packages[JournalPostService])
                 .layer(OppgaveService).definedBy(packages[OppgaveService])
                 .layer(Personidentifisering).definedBy(packages[Personidentifisering])
-                .layer(PersonidentifiseringServices).definedBy(packages[PersonidentifiseringServices])
+                .layer(PersonidentifiseringKlienter).definedBy(packages[PersonidentifiseringKlienter])
+                .layer(PersonidentifiseringHelpers).definedBy(packages[PersonidentifiseringHelpers])
                 .layer(Integrasjonstest).definedBy(packages[Integrasjonstest])
                 //define rules
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Config).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Health).mayNotBeAccessedByAnyLayer()
-                .whereLayer(BUC).mayOnlyBeAccessedByLayers(Journalforing, Personidentifisering, PersonidentifiseringServices) // TODO Personidentifisering og PersonidentifiseringServices må vekk
+                .whereLayer(BUC).mayOnlyBeAccessedByLayers(Journalforing, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
                 .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT, Integrasjonstest)
                 .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS)
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringServices)
-                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringServices) // TODO Personidentifisering og PersonidentifiseringServices må vekk
-                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringServices) // TODO Personidentifisering og PersonidentifiseringServices må vekk
+                .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter)
+                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
+                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
                 .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing)
-                //.whereLayer(PersonidentifiseringServices).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
+                //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
+                //.whereLayer(PersonidentifiseringHelpers).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //Verify rules
                 .check(classesToAnalyze)
     }

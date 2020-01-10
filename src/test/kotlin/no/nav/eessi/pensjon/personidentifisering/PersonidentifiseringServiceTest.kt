@@ -1,16 +1,16 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.personidentifisering.services.FdatoHelper
-import no.nav.eessi.pensjon.personidentifisering.services.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.personidentifisering.services.AktoerregisterService
-import no.nav.eessi.pensjon.personidentifisering.services.DiskresjonService
+import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
+import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,16 +25,16 @@ import org.mockito.quality.Strictness
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class IdentifiserPersonHelperTest {
+class PersonidentifiseringServiceTest {
 
     @Mock
-    private lateinit var aktoerregisterService: AktoerregisterService
+    private lateinit var aktoerregisterKlient: AktoerregisterKlient
 
     @Mock
-    private lateinit var personV3Service: PersonV3Service
+    private lateinit var personV3Klient: PersonV3Klient
 
     @Mock
-    private lateinit var diskresjonService: DiskresjonService
+    private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
 
     @Mock
     private lateinit var fnrHelper: FnrHelper
@@ -49,14 +49,14 @@ class IdentifiserPersonHelperTest {
     private lateinit var fagmodulService: FagmodulService
 
 
-    private lateinit var identifiserPersonService: IdentifiserPersonHelper
+    private lateinit var personidentifiseringService: PersonidentifiseringService
 
     @BeforeEach
     fun setup() {
 
-        identifiserPersonService = IdentifiserPersonHelper(aktoerregisterService,
-                personV3Service,
-                diskresjonService,
+        personidentifiseringService = PersonidentifiseringService(aktoerregisterKlient,
+                personV3Klient,
+                diskresjonkodeHelper,
                 fnrHelper,
                 fdatoHelper,
                 fagmodulService,
@@ -66,7 +66,7 @@ class IdentifiserPersonHelperTest {
 
         //PERSONV3 - HENT PERSON
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
+                .`when`(personV3Klient)
                 .hentPerson(ArgumentMatchers.anyString())
 
         //EUX - HENT FODSELSDATO
@@ -93,34 +93,34 @@ class IdentifiserPersonHelperTest {
 
     @Test
     fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
-        identifiserPersonService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"))
-        verify(personV3Service).hentPerson(eq("12078945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"))
+        verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
-        identifiserPersonService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"))
-        verify(personV3Service).hentPerson(eq("12078945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"))
+        verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`(){
-        identifiserPersonService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"))
-        verify(personV3Service).hentPerson(eq("12078945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"))
+        verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(identifiserPersonService.isFnrValid(null))
+        assertFalse(personidentifiseringService.isFnrValid(null))
     }
 
     @Test
     fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(identifiserPersonService.isFnrValid("1234"))
+        assertFalse(personidentifiseringService.isFnrValid("1234"))
     }
 
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
-        assertTrue(identifiserPersonService.isFnrValid("12345678910"))
+        assertTrue(personidentifiseringService.isFnrValid("12345678910"))
     }
 }

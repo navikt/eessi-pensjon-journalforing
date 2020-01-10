@@ -2,7 +2,11 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.buc.BucHelper
-import no.nav.eessi.pensjon.personidentifisering.services.*
+import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.klienter.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
@@ -13,15 +17,15 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Component
-class IdentifiserPersonHelper(private val aktoerregisterService: AktoerregisterService,
-                              private val personV3Service: PersonV3Service,
-                              private val diskresjonService: DiskresjonService,
-                              private val fnrHelper: FnrHelper,
-                              private val fdatoHelper: FdatoHelper,
-                              private val fagmodulService: FagmodulService,
-                              private val euxService: EuxService)  {
+class PersonidentifiseringService(private val aktoerregisterKlient: AktoerregisterKlient,
+                                  private val personV3Klient: PersonV3Klient,
+                                  private val diskresjonService: DiskresjonkodeHelper,
+                                  private val fnrHelper: FnrHelper,
+                                  private val fdatoHelper: FdatoHelper,
+                                  private val fagmodulService: FagmodulService,
+                                  private val euxService: EuxService)  {
 
-    private val logger = LoggerFactory.getLogger(IdentifiserPersonHelper::class.java)
+    private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
     private val mapper = jacksonObjectMapper()
 
@@ -107,7 +111,7 @@ class IdentifiserPersonHelper(private val aktoerregisterService: AktoerregisterS
     private fun hentAktoerId(navBruker: String?): String? {
         if (!isFnrValid(navBruker)) return null
         return try {
-            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
+            val aktoerId = aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
             aktoerId
         } catch (ex: Exception) {
             logger.error("Det oppstod en feil ved henting av aktørid: $ex")
@@ -118,7 +122,7 @@ class IdentifiserPersonHelper(private val aktoerregisterService: AktoerregisterS
     private fun hentPerson(navBruker: String?): Bruker? {
         if (!isFnrValid(navBruker)) return null
         return try {
-            personV3Service.hentPerson(navBruker!!)
+            personV3Klient.hentPerson(navBruker!!)
         } catch (ex: Exception) {
             null
         }

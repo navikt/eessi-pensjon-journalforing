@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.personidentifisering.services
+package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -32,12 +32,12 @@ class IdentinfoForAktoer(
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Service
-class AktoerregisterService(
+class AktoerregisterKlient(
         private val aktoerregisterRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(AktoerregisterService::class.java)
+    private val logger = LoggerFactory.getLogger(AktoerregisterKlient::class.java)
 
     @Value("\${app.name}")
     lateinit var appName: String
