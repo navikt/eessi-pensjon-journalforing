@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
 import com.nhaarman.mockitokotlin2.*
+import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -29,11 +30,14 @@ class SedListenerTest {
     @Mock
     lateinit var personidentifiseringService: PersonidentifiseringService
 
+    @Mock
+    lateinit var sedDokumentHelper: SedDokumentHelper
+
     lateinit var sedListener: SedListener
 
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService)
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper)
     }
 
     @Test

@@ -46,7 +46,7 @@ class ArchitectureTest {
     fun `Check architecture`() {
         val ROOT = "journalforing"
         val Config = "journalforing.Config"
-        val BUC = "journalforing.Buc"
+        val BUC = "journalforing.buc"
         val Health = "journalforing.Health"
         val Journalforing = "journalforing.journalforing"
         val JSON = "journalforing.json"
@@ -118,15 +118,15 @@ class ArchitectureTest {
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Config).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Health).mayNotBeAccessedByAnyLayer()
-                .whereLayer(BUC).mayOnlyBeAccessedByLayers(Journalforing, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
+                .whereLayer(BUC).mayOnlyBeAccessedByLayers(Listeners, Journalforing)
                 .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT, Integrasjonstest)
                 .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS)
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter)
-                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
-                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC, Personidentifisering, PersonidentifiseringKlienter, PersonidentifiseringHelpers) // TODO Personidentifisering og PersonidentifiseringServices må vekk
+                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
+                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing)
                 //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset

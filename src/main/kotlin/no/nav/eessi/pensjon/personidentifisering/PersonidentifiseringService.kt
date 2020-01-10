@@ -1,15 +1,11 @@
 package no.nav.eessi.pensjon.personidentifisering
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.buc.BucHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.klienter.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -21,15 +17,11 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
                                   private val personV3Klient: PersonV3Klient,
                                   private val diskresjonService: DiskresjonkodeHelper,
                                   private val fnrHelper: FnrHelper,
-                                  private val fdatoHelper: FdatoHelper,
-                                  private val fagmodulService: FagmodulService,
-                                  private val euxService: EuxService)  {
+                                  private val fdatoHelper: FdatoHelper)  {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
-    private val mapper = jacksonObjectMapper()
-
-    fun identifiserPerson(sedHendelse: SedHendelseModel) : IdentifisertPerson {
+    fun identifiserPerson(sedHendelse: SedHendelseModel, alleSediBuc: List<String?>) : IdentifisertPerson {
         val regex = "[^0-9.]".toRegex()
         val filtrertNavBruker = sedHendelse.navBruker?.replace(regex, "")
 
@@ -42,7 +34,6 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             fdato = hentFodselsDato(fnr, null)
         } else {
             try {
-                val alleSediBuc = hentAlleSedIBuc(sedHendelse.rinaSakId)
                 fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
                 fdato = hentFodselsDato(fnr, alleSediBuc)
                 person = hentPerson(fnr)
@@ -67,18 +58,6 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
         return IdentifisertPerson(fnr, aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
-    }
-
-    fun hentAlleSedIBuc(euxCaseId: String): List<String?> {
-        val alleDokumenter = fagmodulService.hentAlleDokumenter(euxCaseId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-
-        val gyldigeSeds = BucHelper.filterUtGyldigSedId(alleDokumenterJsonNode)
-
-        return gyldigeSeds.map { pair ->
-            val sedDocumentId = pair.first
-            euxService.hentSed(euxCaseId, sedDocumentId)
-        }
     }
 
     /**
