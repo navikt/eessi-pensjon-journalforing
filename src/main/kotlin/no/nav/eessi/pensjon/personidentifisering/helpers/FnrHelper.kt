@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.buc.SEDType
+import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -18,24 +18,27 @@ class FnrHelper {
         seder.forEach { sed ->
             try {
                 val sedRootNode = mapper.readTree(sed)
+                val sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
 
-                when (SEDType.valueOf(sedRootNode.get("sed").textValue())) {
-                    SEDType.P2100 -> {
-                        fnr = filterGjenlevendePinNode(sedRootNode)
-                    }
-                    SEDType.P15000 -> {
-                        val krav = sedRootNode.get("nav").get("krav").textValue()
-                        fnr = if (krav == "02") {
-                            filterGjenlevendePinNode(sedRootNode)
-                        } else {
-                            filterPersonPinNode(sedRootNode)
+                if(sedType.kanInneholdeFnrEllerFdato) {
+                    when (sedType) {
+                        SedType.P2100 -> {
+                            fnr = filterGjenlevendePinNode(sedRootNode)
                         }
-                    }
-                    else -> {
-                        fnr = filterAnnenpersonPinNode(sedRootNode)
-                        if (fnr == null) {
-                            //P2000 - P2200 -- andre..
-                            fnr =  filterPersonPinNode(sedRootNode)
+                        SedType.P15000 -> {
+                            val krav = sedRootNode.get("nav").get("krav").textValue()
+                            fnr = if (krav == "02") {
+                                filterGjenlevendePinNode(sedRootNode)
+                            } else {
+                                filterPersonPinNode(sedRootNode)
+                            }
+                        }
+                        else -> {
+                            fnr = filterAnnenpersonPinNode(sedRootNode)
+                            if (fnr == null) {
+                                //P2000 - P2200 -- andre..
+                                fnr = filterPersonPinNode(sedRootNode)
+                            }
                         }
                     }
                 }
