@@ -1,12 +1,10 @@
-package no.nav.eessi.pensjon.personidentifisering
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
@@ -20,7 +18,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
-class DiskresjonServiceTest {
+class DiskresjonkodeHelperTest {
 
     @Mock
     private lateinit var euxService: EuxService

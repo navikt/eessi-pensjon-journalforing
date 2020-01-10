@@ -1,10 +1,7 @@
-package no.nav.eessi.pensjon.personidentifisering
+package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
-import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterException
-import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterIkkeFunnetException
-import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers

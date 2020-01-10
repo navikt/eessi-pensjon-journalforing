@@ -1,6 +1,5 @@
-package no.nav.eessi.pensjon.personidentifisering
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.nio.file.Files

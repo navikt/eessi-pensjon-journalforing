@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
+import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient

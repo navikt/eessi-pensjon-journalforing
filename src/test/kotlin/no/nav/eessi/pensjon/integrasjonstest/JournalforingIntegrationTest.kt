@@ -4,7 +4,7 @@ import io.mockk.slot
 import io.mockk.*
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
-import no.nav.eessi.pensjon.personidentifisering.BrukerMock
+import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

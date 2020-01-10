@@ -1,7 +1,6 @@
-package no.nav.eessi.pensjon.personidentifisering
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.json.validateJson
-import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
