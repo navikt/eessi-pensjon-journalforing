@@ -1,9 +1,11 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering
 
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.spyk
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3SikkerhetsbegrensningException
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
@@ -19,11 +21,11 @@ import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PersonV3ServiceTest {
+class PersonV3KlientTest {
 
     private lateinit var personV3 : PersonV3
 
-    lateinit var personV3Service : PersonV3Service
+    lateinit var personV3Klient : PersonV3Klient
 
     private val subject = "23037329381"
     private val ikkeFunnetSubject = "33037329381"
@@ -32,9 +34,9 @@ class PersonV3ServiceTest {
     @BeforeEach
     fun setup() {
         personV3 = spyk()
-        personV3Service = spyk(PersonV3Service(personV3))
+        personV3Klient = spyk(PersonV3Klient(personV3))
 
-        every { personV3Service.konfigurerSamlToken() } just Runs
+        every { personV3Klient.konfigurerSamlToken() } just Runs
 
         every { personV3.hentPerson(requestBuilder(subject, listOf(Informasjonsbehov.ADRESSE))) } returns
                 HentPersonResponse().withPerson(BrukerMock.createWith())
@@ -49,7 +51,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentPerson med gyldig subject`(){
         try {
-            assertEquals(personV3Service.hentPerson(subject), BrukerMock.createWith())
+            assertEquals(personV3Klient.hentPerson(subject), BrukerMock.createWith())
         }catch(ex: Exception){
             assert(false)
         }
@@ -58,7 +60,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentPerson med subject som ikke finnes`(){
         try {
-            val person = personV3Service.hentPerson(ikkeFunnetSubject)
+            val person = personV3Klient.hentPerson(ikkeFunnetSubject)
             assertNull(person)
         }catch(ex: Exception){
            fail("Skulle ikke ha kastet exeption ved person ikke funnet, men returnert null istedet")
@@ -68,7 +70,7 @@ class PersonV3ServiceTest {
     @Test
     fun `Kaller hentPerson med subject med sikkerhetsbegrensing`(){
         try {
-            personV3Service.hentPerson(sikkerhetsbegrensingSubject)
+            personV3Klient.hentPerson(sikkerhetsbegrensingSubject)
             assert(false)
         }catch(ex: Exception){
             assert(ex is PersonV3SikkerhetsbegrensningException)

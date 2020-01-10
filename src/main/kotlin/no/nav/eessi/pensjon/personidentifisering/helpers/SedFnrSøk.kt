@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.sed
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import org.slf4j.LoggerFactory
 

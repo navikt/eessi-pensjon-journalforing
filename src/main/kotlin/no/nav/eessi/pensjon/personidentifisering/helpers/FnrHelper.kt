@@ -1,7 +1,8 @@
-package no.nav.eessi.pensjon.buc
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.buc.SEDType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

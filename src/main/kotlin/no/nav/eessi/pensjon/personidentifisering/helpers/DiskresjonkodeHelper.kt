@@ -1,22 +1,20 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.person.Diskresjonskode
-import no.nav.eessi.pensjon.services.person.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class DiskresjonService(private val euxService: EuxService,
-                        private val fagmodulService: FagmodulService,
-                        private val personV3Service: PersonV3Service,
-                        private val sedFnrSøk: SedFnrSøk)  {
+class DiskresjonkodeHelper(private val euxService: EuxService,
+                           private val fagmodulService: FagmodulService,
+                           private val personV3Klient: PersonV3Klient,
+                           private val sedFnrSøk: SedFnrSøk)  {
 
-    private val logger = LoggerFactory.getLogger(DiskresjonService::class.java)
+    private val logger = LoggerFactory.getLogger(DiskresjonkodeHelper::class.java)
 
     private val mapper = jacksonObjectMapper()
 
@@ -43,7 +41,7 @@ class DiskresjonService(private val euxService: EuxService,
         val fnre = sedFnrSøk.finnAlleFnrDnrISed(sed!!)
         fnre.forEach { fnr ->
             try {
-                val person = personV3Service.hentPerson(fnr)
+                val person = personV3Klient.hentPerson(fnr)
                 person?.diskresjonskode?.value?.let { kode ->
                     logger.debug("Diskresjonskode: $kode")
                     val diskresjonskode = Diskresjonskode.valueOf(kode)
@@ -73,4 +71,9 @@ class DiskresjonService(private val euxService: EuxService,
                 .map { it.get("id").textValue() }
                 .toList()
     }
+}
+
+enum class Diskresjonskode(val term: String) {
+    SPFO("Sperret adresse, fortrolig"),
+    SPSF("Sperret adresse, strengt fortrolig"),
 }

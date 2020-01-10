@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
@@ -14,13 +13,14 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.Period
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
 @Service
 class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
-    fun route(person: JournalforingPerson,
+    fun route(person: IdentifisertPerson,
               bucType: BucType? = null,
               ytelseType: String? = null): Enhet {
 
@@ -38,7 +38,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun bestemTildeltEnhet(person: JournalforingPerson, bucType: BucType?, ytelseType: String?): Enhet {
+    private fun bestemTildeltEnhet(person: IdentifisertPerson, bucType: BucType?, ytelseType: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         return when {
                     person.fnr == null -> ID_OG_FORDELING
@@ -70,7 +70,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 }
     }
 
-    fun hentNorg2Enhet(person: JournalforingPerson, bucType: BucType?): Enhet? {
+    fun hentNorg2Enhet(person: IdentifisertPerson, bucType: BucType?): Enhet? {
         if (person.fnr == null) return null
 
         return when(bucType) {

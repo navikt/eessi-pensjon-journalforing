@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration
 
 
 @Configuration
-class PersonV3Config {
+class PersonV3KlientConfig {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Config::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3KlientConfig::class.java) }
 
     @Value("\${virksomhet.person.v3.endpointurl}")
     lateinit var endpointUrl: String

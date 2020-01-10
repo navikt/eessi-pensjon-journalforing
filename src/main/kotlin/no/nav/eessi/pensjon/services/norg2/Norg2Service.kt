@@ -1,11 +1,11 @@
 package no.nav.eessi.pensjon.services.norg2
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.models.JournalforingPerson
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
@@ -30,7 +30,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         BOSATT_UTLAND("ae0107")
     }
 
-    fun hentArbeidsfordelingEnhet(person: JournalforingPerson): String? {
+    fun hentArbeidsfordelingEnhet(person: IdentifisertPerson): String? {
         val request = opprettNorg2ArbeidsfordelingRequest(person)
         logger.debug("følgende request til Norg2 : $request")
         val enheter = hentArbeidsfordelingEnheter(request)
@@ -38,7 +38,7 @@ class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
         return finnKorrektArbeidsfordelingEnheter(request, enheter)
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(person: JournalforingPerson): Norg2ArbeidsfordelingRequest {
+    fun opprettNorg2ArbeidsfordelingRequest(person: IdentifisertPerson): Norg2ArbeidsfordelingRequest {
         return when {
             person.landkode == "NOR" && person.geografiskTilknytning != null && person.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
                     geografiskOmraade = person.geografiskTilknytning,

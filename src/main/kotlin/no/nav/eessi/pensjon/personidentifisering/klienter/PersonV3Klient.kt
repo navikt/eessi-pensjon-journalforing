@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -28,12 +28,12 @@ fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Service
-class PersonV3Service(
+class PersonV3Klient(
         private val service: PersonV3,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Klient::class.java) }
 
     fun hentPerson(fnr: String): Bruker? {
         return metricsHelper.measure("hentperson") {
