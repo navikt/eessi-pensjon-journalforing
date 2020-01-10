@@ -1,12 +1,9 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.personidentifisering.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.sed.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.person.Diskresjonskode
-import no.nav.eessi.pensjon.services.person.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

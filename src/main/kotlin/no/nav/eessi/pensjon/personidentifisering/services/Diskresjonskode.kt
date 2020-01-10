@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering.services
 
 
 enum class Diskresjonskode(val term: String) {

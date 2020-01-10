@@ -1,14 +1,14 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.personidentifisering
 
 import com.nhaarman.mockitokotlin2.*
+import no.nav.eessi.pensjon.personidentifisering.services.DiskresjonService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.sed.SedFnrSøk
+import no.nav.eessi.pensjon.personidentifisering.services.SedFnrSøk
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.person.Diskresjonskode
-import no.nav.eessi.pensjon.services.person.BrukerMock
-import no.nav.eessi.pensjon.services.person.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.services.person.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.services.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.services.PersonV3IkkeFunnetException
+import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

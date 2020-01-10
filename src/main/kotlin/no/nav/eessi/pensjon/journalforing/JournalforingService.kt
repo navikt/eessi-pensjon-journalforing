@@ -43,11 +43,6 @@ class JournalforingService(private val euxService: EuxService,
                    identifisertPerson: IdentifisertPerson) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
             try {
-                if (sedHendelse.sektorKode != "P") {
-                    // Vi ignorerer alle hendelser som ikke har vår sektorkode
-                    return@measure
-                }
-
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse

@@ -2,14 +2,10 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.buc.BucHelper
-import no.nav.eessi.pensjon.buc.FdatoHelper
-import no.nav.eessi.pensjon.buc.FnrHelper
-import no.nav.eessi.pensjon.journalforing.DiskresjonService
+import no.nav.eessi.pensjon.personidentifisering.services.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.person.*
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

@@ -39,8 +39,11 @@ class SedListener(
                 logger.debug(hendelse)
                 try {
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                    val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
-                    journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
+
+                    if (sedHendelse.sektorKode == "P") {
+                        val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
+                    }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
@@ -64,8 +67,11 @@ class SedListener(
                 logger.debug(hendelse)
                 try {
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                    val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
-                    journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
+
+                    if (sedHendelse.sektorKode == "P") {
+                        val identifisertPerson = identifiserPersonHelper.identifiserPerson(sedHendelse)
+                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
+                    }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {

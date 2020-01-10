@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 

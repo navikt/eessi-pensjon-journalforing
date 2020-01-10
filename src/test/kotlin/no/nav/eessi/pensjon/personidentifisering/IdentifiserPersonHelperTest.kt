@@ -1,17 +1,16 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.personidentifisering
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.buc.FdatoHelper
-import no.nav.eessi.pensjon.buc.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.services.FdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.services.FnrHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.personidentifisering.IdentifiserPersonHelper
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personidentifisering.services.AktoerregisterService
+import no.nav.eessi.pensjon.personidentifisering.services.DiskresjonService
 import no.nav.eessi.pensjon.services.eux.EuxService
 import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.person.BrukerMock
-import no.nav.eessi.pensjon.services.person.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

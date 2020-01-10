@@ -1,7 +1,5 @@
 package no.nav.eessi.pensjon.journalforing
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.models.BucType
@@ -10,7 +8,6 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
-import no.nav.eessi.pensjon.personidentifisering.IdentifiserPersonHelper
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.services.eux.EuxService
@@ -20,7 +17,6 @@ import no.nav.eessi.pensjon.services.journalpost.*
 import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.junit.jupiter.api.extension.ExtendWith
@@ -55,9 +51,6 @@ class JournalforingServiceTest {
 
     @Mock
     private lateinit var penService: PenService
-
-    @Mock
-    private lateinit var identifiserPersonService: IdentifiserPersonHelper
 
     private lateinit var journalforingService: JournalforingService
 
@@ -149,39 +142,6 @@ class JournalforingServiceTest {
         doReturn(Krav.YtelseType.UT.name)
                 .`when`(fagmodulService)
                 .hentYtelseKravType(anyString(), anyString())
-    }
-
-    @Test
-    fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
-                "12078945602",
-                LocalDate.of(89, 7, 12),
-                "Test Testesen",
-                null,
-                null,
-                null)
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
-        verify(journalpostService, times(0)).opprettJournalpost(
-                rinaSakId= anyOrNull(),
-                fnr= anyOrNull(),
-                personNavn= anyOrNull(),
-                bucType= anyOrNull(),
-                sedType= anyOrNull(),
-                sedHendelseType= anyOrNull(),
-                eksternReferanseId= anyOrNull(),
-                kanal= anyOrNull(),
-                journalfoerendeEnhet= anyOrNull(),
-                arkivsaksnummer= anyOrNull(),
-                dokumenter= anyOrNull(),
-                forsokFerdigstill= anyOrNull(),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
-        verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), eq(null))
     }
 
 
@@ -289,7 +249,7 @@ class JournalforingServiceTest {
     fun `Sendt Sed i P_BUC_10`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("01055012345",
+        val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
@@ -315,78 +275,6 @@ class JournalforingServiceTest {
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull()
         )
-    }
-
-    @Test
-    fun `Sendt Sed med ugyldige verdier`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-
-        val identifisertPerson = IdentifisertPerson("01055012345",
-                "12078945602",
-                LocalDate.of(89, 7, 12),
-                "Test Testesen",
-                null,
-                null,
-                null)
-
-        assertThrows<MismatchedInputException> {
-            journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
-        }
-    }
-
-    @Test
-    fun `Sendt Sed med ugyldige felter`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_02.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-
-        val identifisertPerson = IdentifisertPerson("01055012345",
-                "12078945602",
-                LocalDate.of(89, 7, 12),
-                "Test Testesen",
-                null,
-                null,
-                null)
-
-        assertThrows<MissingKotlinParameterException> {
-            journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
-        }
-    }
-
-    @Test
-    fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-
-        val identifisertPerson = IdentifisertPerson("01055012345",
-                "12078945602",
-                LocalDate.of(89, 7, 12),
-                "Test Testesen",
-                null,
-                null,
-                null)
-
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
-
-        verify(journalpostService, times(0)).opprettJournalpost(
-                rinaSakId = anyOrNull(),
-                fnr= anyOrNull(),
-                personNavn= anyOrNull(),
-                bucType= anyOrNull(),
-                sedType= anyOrNull(),
-                sedHendelseType= anyOrNull(),
-                eksternReferanseId= anyOrNull(),
-                kanal= anyOrNull(),
-                journalfoerendeEnhet= anyOrNull(),
-                arkivsaksnummer= anyOrNull(),
-                dokumenter= anyOrNull(),
-                forsokFerdigstill= anyOrNull(),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
-        verify(euxService, times(0)).hentSedDokumenter(anyString(), anyString())
-        verify(fagmodulService, times(0)).hentYtelseKravType(any(), any())
-        verify(oppgaveRoutingService, times(0)).route(any(), any(), eq(null))
     }
 
     @Test
@@ -430,7 +318,7 @@ class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson("01055012345",
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",

@@ -1,9 +1,11 @@
-package no.nav.eessi.pensjon.services.person
+package no.nav.eessi.pensjon.personidentifisering
 
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.spyk
+import no.nav.eessi.pensjon.personidentifisering.services.PersonV3Service
+import no.nav.eessi.pensjon.personidentifisering.services.PersonV3SikkerhetsbegrensningException
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
