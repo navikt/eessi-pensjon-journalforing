@@ -107,7 +107,7 @@ class JournalpostService(
     }
 
     fun oppdaterDistribusjonsinfo(journalpostId: String) {
-        val path = "/journalpost/{$journalpostId}/oppdaterDistribusjonsinfo"
+        val path = "/journalpost/$journalpostId/oppdaterDistribusjonsinfo"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         return metricsHelper.measure("oppdaterDistribusjonsinfo") {

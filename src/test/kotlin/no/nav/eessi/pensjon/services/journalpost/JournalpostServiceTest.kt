@@ -210,7 +210,7 @@ class JournalpostServiceTest {
         doReturn(
                 ResponseEntity.ok(""))
                 .`when`(mockrestTemplate).exchange(
-                        eq("/journalpost/{$journalpostId}/oppdaterDistribusjonsinfo"),
+                        eq("/journalpost/$journalpostId/oppdaterDistribusjonsinfo"),
                         any(),
                         journalpostCaptor.capture(),
                         eq(String::class.java))
