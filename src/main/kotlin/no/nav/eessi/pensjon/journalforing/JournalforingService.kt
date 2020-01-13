@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class JournalforingService(private val euxService: EuxService,
@@ -59,8 +58,6 @@ class JournalforingService(private val euxService: EuxService,
                         identifisertPerson
                 )
 
-                logger.debug("tildeltEnhet: $tildeltEnhet")
-
                 var sakId: String? = null
                 if(identifisertPerson.aktoerId != null) {
                     if (hendelseType == HendelseType.SENDT && namespace == "q2") {
@@ -87,14 +84,16 @@ class JournalforingService(private val euxService: EuxService,
                         avsenderNavn = sedHendelse.avsenderNavn
                 )
 
-                logger.debug("JournalPostID: ${journalPostResponse!!.journalpostId}")
-
-                if(!journalPostResponse.journalpostferdigstilt) {
+                if(!journalPostResponse!!.journalpostferdigstilt) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
                         publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
 
+                    }
+                } else {
+                    if(namespace == "q2") {
+                        journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                     }
                 }
             } catch (ex: MismatchedInputException) {
@@ -152,13 +151,4 @@ class JournalforingService(private val euxService: EuxService,
             oppgaveRoutingService.route(person, bucType)
         }
     }
-
 }
-
-class Person(val fnr : String?,
-             val aktoerId: String?,
-             val fdato: LocalDate?,
-             val personNavn: String?,
-             val diskresjonskode: String?,
-             val landkode: String?,
-             val geografiskTilknytning: String?)

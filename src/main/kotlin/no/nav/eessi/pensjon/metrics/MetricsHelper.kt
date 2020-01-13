@@ -33,7 +33,8 @@ class MetricsHelper(val registry: MeterRegistry) {
                 "hentFodselsdatoFraBuc",
                 "hentFnrFraBUC",
                 "publiserOppgavemelding",
-                "hentPesysSaker"
+                "hentPesysSaker",
+                "oppdaterDistribusjonsinfo"
                 ).forEach {counterName ->
             Counter.builder(measureMeterName)
                     .tag(typeTag, successTypeTagValue)

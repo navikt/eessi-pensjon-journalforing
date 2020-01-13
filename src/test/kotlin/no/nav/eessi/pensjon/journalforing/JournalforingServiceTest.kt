@@ -93,7 +93,7 @@ class JournalforingServiceTest {
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
         //JOURNALPOST OPPRETT JOURNALPOST
-        doReturn(JournalPostResponse("123", "null", null, false))
+        doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostService)
                 .opprettJournalpost(
                         rinaSakId = anyOrNull(),

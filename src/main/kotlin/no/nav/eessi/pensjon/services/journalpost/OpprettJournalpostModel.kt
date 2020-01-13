@@ -12,21 +12,12 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import java.io.IOException
 
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-class JournalPostResponse(
-    val journalpostId: String,
-    val journalstatus: String,
-    val melding: String? = null,
-    val journalpostferdigstilt: Boolean
-){
-    override fun toString(): String {
-        val mapper = jacksonObjectMapper()
-        return mapper.writeValueAsString(this)
-    }
-}
-
-class JournalpostRequest(
+/**
+ * /rest/journalpostapi/v1/journalpost
+ *
+ * Oppretter en journalpost i fagarkivet, med eller uten dokumenter
+ */
+class OpprettJournalpostRequest(
         val avsenderMottaker: AvsenderMottaker,
         val behandlingstema: String? = null,
         val bruker: Bruker? = null,
@@ -97,5 +88,18 @@ private class JsonAsStringDeserializer : JsonDeserializer<String>() {
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): String {
         val tree = jsonParser.codec.readTree<TreeNode>(jsonParser)
         return tree.toString()
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class OpprettJournalPostResponse(
+        val journalpostId: String,
+        val journalstatus: String,
+        val melding: String? = null,
+        val journalpostferdigstilt: Boolean
+){
+    override fun toString(): String {
+        val mapper = jacksonObjectMapper()
+        return mapper.writeValueAsString(this)
     }
 }

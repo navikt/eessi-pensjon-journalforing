@@ -314,7 +314,7 @@ class JournalforingIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json"))))
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
                     )
 
             //Mock norg2tjeneste
