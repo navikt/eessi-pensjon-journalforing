@@ -60,7 +60,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestCountInterceptor(meterRegistry),
                         UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                    requestFactory = BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory()) // Trengs for å kjøre http-method: PATCH
                 }
     }
 
