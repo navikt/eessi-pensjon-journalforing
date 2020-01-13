@@ -118,7 +118,7 @@ class JournalpostService(
 
                 journalpostOidcRestTemplate.exchange(
                         builder.toUriString(),
-                        HttpMethod.POST,
+                        HttpMethod.PATCH,
                         HttpEntity(OppdaterDistribusjonsinfoRequest().toString(), headers),
                         String::class.java)
 
