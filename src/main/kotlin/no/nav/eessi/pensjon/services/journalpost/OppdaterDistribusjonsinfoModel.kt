@@ -10,7 +10,7 @@ import no.nav.eessi.pensjon.json.mapAnyToJson
  *  Fullfører journalføringen og låser journalposten for senere endringer
  */
 class OppdaterDistribusjonsinfoRequest {
-    val settStatusEkspedert: String = "true"
+    val settStatusEkspedert: Boolean = true
     val utsendingsKanal: String = "EESSI"
 
     override fun toString(): String {
