@@ -92,7 +92,7 @@ class JournalforingService(private val euxService: EuxService,
 
                     }
                 } else {
-                    if(namespace == "q2") {
+                    if(sakId != null && namespace == "q2") {
                         journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                     }
                 }
