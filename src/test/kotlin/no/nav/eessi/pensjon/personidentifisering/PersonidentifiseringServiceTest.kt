@@ -9,8 +9,6 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,13 +41,6 @@ class PersonidentifiseringServiceTest {
     @Mock
     private lateinit var fdatoHelper: FdatoHelper
 
-    @Mock
-    private lateinit var euxService: EuxService
-
-    @Mock
-    private lateinit var fagmodulService: FagmodulService
-
-
     private lateinit var personidentifiseringService: PersonidentifiseringService
 
     @BeforeEach
@@ -59,9 +50,7 @@ class PersonidentifiseringServiceTest {
                 personV3Klient,
                 diskresjonkodeHelper,
                 fnrHelper,
-                fdatoHelper,
-                fagmodulService,
-                euxService)
+                fdatoHelper)
 
         //MOCK RESPONSES
 
@@ -69,11 +58,6 @@ class PersonidentifiseringServiceTest {
         doReturn(BrukerMock.createWith(landkoder = true))
                 .`when`(personV3Klient)
                 .hentPerson(ArgumentMatchers.anyString())
-
-        //EUX - HENT FODSELSDATO
-        doReturn("1964-04-19")
-                .`when`(euxService)
-                .hentFodselsDatoFraSed(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
 
         //EUX - Fdatoservice (fin fdato)
         doReturn("1964-04-01")
@@ -84,29 +68,23 @@ class PersonidentifiseringServiceTest {
         doReturn("01055012345")
                 .`when`(fnrHelper)
                 .getFodselsnrFraSeder(any())
-
-        //EUX - HENT SED DOKUMENT
-        doReturn("MOCK DOCUMENTS")
-                .`when`(euxService)
-                .hentSedDokumenter(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
-
     }
 
     @Test
     fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"), emptyList())
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"), listOf(""))
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"))
+        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"), emptyList())
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 

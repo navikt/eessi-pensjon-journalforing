@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ import java.util.*
 class SedListener(
         private val journalforingService: JournalforingService,
         private val personidentifiseringService: PersonidentifiseringService,
+        private val sedDokumentHelper: SedDokumentHelper,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -41,7 +43,8 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse)
+                        val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
                     }
                     acknowledgment.acknowledge()
@@ -69,7 +72,8 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse)
+                        val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
                     }
                     acknowledgment.acknowledge()
