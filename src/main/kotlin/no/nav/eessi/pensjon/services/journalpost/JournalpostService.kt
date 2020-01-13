@@ -48,7 +48,7 @@ class JournalpostService(
             forsokFerdigstill: Boolean? = false,
             avsenderLand: String?,
             avsenderNavn: String?
-    ): JournalPostResponse? {
+    ): OpprettJournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
                 avsenderNavn,
@@ -66,7 +66,7 @@ class JournalpostService(
         val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
         val tittel = "${journalpostType.decode()} $sedType"
 
-        val requestBody = JournalpostRequest(
+        val requestBody = OpprettJournalpostRequest(
                 avsenderMottaker,
                 behandlingstema,
                 bruker,
@@ -95,13 +95,39 @@ class JournalpostService(
                         HttpMethod.POST,
                         HttpEntity(requestBody.toString(), headers),
                         String::class.java)
-                mapper.readValue(response.body, JournalPostResponse::class.java)
+                mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
             } catch(ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: $ex body: ${ex.responseBodyAsString}")
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: $ex")
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
+            }
+        }
+    }
+
+    fun oppdaterDistribusjonsinfo(journalpostId: String) {
+        val path = "/journalpost/{$journalpostId}/oppdaterDistribusjonsinfo"
+        val builder = UriComponentsBuilder.fromUriString(path).build()
+
+        return metricsHelper.measure("oppdaterDistribusjonsinfo") {
+            try {
+                logger.info("Oppdaterer distribusjonsinfo for journalpost: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                        builder.toUriString(),
+                        HttpMethod.POST,
+                        HttpEntity(OppdaterDistribusjonsinfoRequest().toString(), headers),
+                        String::class.java)
+
+            } catch(ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch(ex: Exception) {
+                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: $ex")
+                throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message}")
             }
         }
     }

@@ -42,8 +42,8 @@ class JournalpostServiceTest {
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        val responseBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json")))
-        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequest.json")))
+        val responseBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
+        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostRequest.json")))
 
 
         doReturn(
@@ -144,8 +144,8 @@ class JournalpostServiceTest {
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
-        val responseBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostResponse.json")))
-        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/journalpostRequestGB.json")))
+        val responseBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
+        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostRequestGB.json")))
 
 
         doReturn(
@@ -193,5 +193,30 @@ class JournalpostServiceTest {
                 "  \"melding\" : \"null\",\n" +
                 "  \"journalpostferdigstilt\" : false\n" +
                 "}")
+    }
+
+    @Test
+    fun `gittJournalpostIdNårOppdaterDistribusjonsinfoSåOppdaterJournalpostMedEESSI`() {
+
+        val journalpostCaptor = argumentCaptor<HttpEntity<Any>>()
+
+        val mapper = jacksonObjectMapper()
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        val requestBody = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/oppdaterDistribusjonsinfoRequest.json")))
+        val journalpostId = "12345"
+
+        doReturn(
+                ResponseEntity.ok(""))
+                .`when`(mockrestTemplate).exchange(
+                        eq("/journalpost/{$journalpostId}/oppdaterDistribusjonsinfo"),
+                        any(),
+                        journalpostCaptor.capture(),
+                        eq(String::class.java))
+
+        journalpostService.oppdaterDistribusjonsinfo(journalpostId)
+
+        assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
     }
 }
