@@ -62,5 +62,11 @@ fasitResources:
       resourceType: RestService
     - alias: BestemSak
       resourceType: RestService
+    - alias: sedSendtTopic
+      resourceType: ApplicationProperties
+    - alias: sedMottattTopic
+      resourceType: ApplicationProperties
+
+
 
 
