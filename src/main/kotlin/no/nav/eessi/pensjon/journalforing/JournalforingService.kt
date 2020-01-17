@@ -93,8 +93,7 @@ class JournalforingService(private val euxService: EuxService,
                     }
                 } else {
                     if(sakId != null && namespace == "q2") {
-                        //TODO dette skrus på når joark fikser kjent bug
-                        //journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
+                        journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                     }
                 }
             } catch (ex: MismatchedInputException) {
