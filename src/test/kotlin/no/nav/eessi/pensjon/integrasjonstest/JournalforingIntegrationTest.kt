@@ -406,6 +406,17 @@ class JournalforingIntegrationTest {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
                     )
+
+            // Mocker oppdaterDistribusjonsinfo
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.PATCH)
+                            .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody("")
+                    )
         }
 
         private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
@@ -484,15 +495,6 @@ class JournalforingIntegrationTest {
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
                 VerificationTimes.exactly(5)
-        )
-
-        // Verifiserer at det har blitt forsøkt å hente enhet fra Norg2
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.POST)
-                        .withPath("/api/v1/arbeidsfordeling")
-                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))),
-                VerificationTimes.exactly(2)
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps

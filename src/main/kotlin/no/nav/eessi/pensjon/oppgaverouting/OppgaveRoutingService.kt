@@ -93,7 +93,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private fun bosatt(landkode: String?): Bosatt =
             when {
-                landkode.isNullOrEmpty() -> UKJENT
+                landkode.isNullOrEmpty() -> Bosatt.UKJENT
                 landkode == "NOR" -> NORGE
                 else -> UTLAND
             }
