@@ -47,31 +47,40 @@ class JournalforingService(private val euxService: EuxService,
                 // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
                 val pinOgYtelse = hentYtelseKravType(sedHendelse)
 
+
+                // Henter dokumenter
                 val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-                val tildeltEnhet = hentTildeltEnhet(
-                        sedHendelse.sedType,
-                        sedHendelse.bucType!!,
-                        pinOgYtelse,
-                        identifisertPerson
-                )
-
+                // Henter saksId for utgående dokumenter
                 var sakId: String? = null
-                if(identifisertPerson.aktoerId != null) {
-                    if (hendelseType == HendelseType.SENDT && namespace == "q2") {
-                        sakId = penService.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType)
-                    }
-                }
-                var forsokFerdigstill = false
-                sakId?.let { forsokFerdigstill = true }
 
+                if(identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
+                    sakId = penService.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                }
+
+                // Identifiserer enhet og journalpost-type
+                var forsokFerdigstill = false
+                var tildeltEnhet = OppgaveRoutingModel.Enhet.UKJENT
+
+                if(sakId == null) {
+                    tildeltEnhet = hentTildeltEnhet(
+                            sedHendelse.sedType,
+                            sedHendelse.bucType!!,
+                            pinOgYtelse,
+                            identifisertPerson
+                    )
+                } else {
+                    forsokFerdigstill = true
+                }
+
+                // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
                         fnr = identifisertPerson.fnr,
                         personNavn = identifisertPerson.personNavn,
-                        bucType = sedHendelse.bucType.name,
+                        bucType = sedHendelse.bucType!!.name,
                         sedType = sedHendelse.sedType.name,
                         sedHendelseType = hendelseType.name,
                         eksternReferanseId = null,// TODO what value to put here?,
@@ -84,16 +93,16 @@ class JournalforingService(private val euxService: EuxService,
                         avsenderNavn = sedHendelse.avsenderNavn
                 )
 
+                // Oppdaterer distribusjonsinfo
+                if(sakId != null) {
+                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
+                }
+
                 if(!journalPostResponse!!.journalpostferdigstilt) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
 
                     if (uSupporterteVedlegg.isNotEmpty()) {
                         publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
-
-                    }
-                } else {
-                    if(sakId != null && namespace == "q2") {
-                        journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                     }
                 }
             } catch (ex: MismatchedInputException) {
