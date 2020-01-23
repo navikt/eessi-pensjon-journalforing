@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "bruker": {
+      "person": {
+        "kjoenn": "K",
+        "etternavn": "Staude",
+        "fornavn": "Raus",
+        "foedselsdato": "1948-06-28",
+        "pin" : [ {
+          "sektor" : "alle",
+          "institusjonsnavn" : "NOINST002, NO INST002, NO",
+          "identifikator" : "28064843062",
+          "land" : "NO",
+          "institusjonsid" : "NO:noinst002"
+        } ]
+      }
+    }
+  },
+  "sed": "P10000",
+  "sedGVer": "4",
+  "sedVer": "1"
+}
+

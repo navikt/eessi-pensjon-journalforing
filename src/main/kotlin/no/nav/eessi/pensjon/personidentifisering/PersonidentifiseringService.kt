@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.log
 
 @Component
 class PersonidentifiseringService(private val aktoerregisterKlient: AktoerregisterKlient,
@@ -35,14 +36,17 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         } else {
             try {
                 fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
+                logger.debug("følgende fnr: $fnr")
                 fdato = hentFodselsDato(fnr, alleSediBuc)
+                logger.debug("følgende fdato: $fdato")
                 person = hentPerson(fnr)
+                logger.debug("henter person: $person")
                 if (person == null) {
-                    logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                    logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
                     fnr = null
                 }
             } catch (ex: Exception) {
-                logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                logger.info("Feil ved henting av person / fødselsnummer, fortsetter uten")
                 person = null
                 fnr = null
             }
@@ -78,6 +82,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
         if (fodselsDatoISO.isNullOrEmpty()) {
             fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
+            logger.debug("Fant følgende fdato: $fodselsDatoISO")
         }
 
         return if (fodselsDatoISO.isNullOrEmpty()) {
