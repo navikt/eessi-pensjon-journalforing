@@ -33,18 +33,28 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             fnr = filtrertNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
+            //Pørve fnr
             try {
                 fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
-                fdato = hentFodselsDato(fnr, alleSediBuc)
+                logger.debug("følgende fnr: $fnr")
                 person = hentPerson(fnr)
+
+                logger.debug("henter person: $person")
                 if (person == null) {
-                    logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                    logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
                     fnr = null
                 }
             } catch (ex: Exception) {
-                logger.info("Ingen treff på fødselsnummer, fortsetter uten")
+                logger.info("Feil ved henting av person / fødselsnummer, fortsetter uten")
                 person = null
                 fnr = null
+            }
+            //Prøve fdato
+            try {
+                fdato = hentFodselsDato(fnr, alleSediBuc)
+                logger.debug("følgende fdato: $fdato")
+            } catch (ex:  Exception) {
+                logger.info("Feil ved henting av fdato på valgt sed")
             }
         }
 
@@ -78,6 +88,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
         if (fodselsDatoISO.isNullOrEmpty()) {
             fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
+            logger.debug("Fant følgende fdato: $fodselsDatoISO")
         }
 
         return if (fodselsDatoISO.isNullOrEmpty()) {
