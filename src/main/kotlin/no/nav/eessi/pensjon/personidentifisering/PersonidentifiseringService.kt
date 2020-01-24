@@ -34,12 +34,12 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             fnr = filtrertNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
+            //Pørve fnr
             try {
                 fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
                 logger.debug("følgende fnr: $fnr")
-                fdato = hentFodselsDato(fnr, alleSediBuc)
-                logger.debug("følgende fdato: $fdato")
                 person = hentPerson(fnr)
+
                 logger.debug("henter person: $person")
                 if (person == null) {
                     logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
@@ -49,6 +49,13 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
                 logger.info("Feil ved henting av person / fødselsnummer, fortsetter uten")
                 person = null
                 fnr = null
+            }
+            //Prøve fdato
+            try {
+                fdato = hentFodselsDato(fnr, alleSediBuc)
+                logger.debug("følgende fdato: $fdato")
+            } catch (ex:  Exception) {
+                logger.info("Feil ved henting av fdato på valgt sed")
             }
         }
 
