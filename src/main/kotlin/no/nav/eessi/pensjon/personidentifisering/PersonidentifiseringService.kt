@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.math.log
 
 @Component
 class PersonidentifiseringService(private val aktoerregisterKlient: AktoerregisterKlient,
