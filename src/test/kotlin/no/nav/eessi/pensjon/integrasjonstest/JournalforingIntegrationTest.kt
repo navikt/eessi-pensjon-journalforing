@@ -34,6 +34,7 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.ws.rs.HttpMethod
+import org.junit.jupiter.api.Disabled
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
@@ -41,6 +42,7 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1-test"
 
 private lateinit var mockServer : ClientAndServer
 
+@Disabled
 @SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
