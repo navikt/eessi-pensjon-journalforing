@@ -2,7 +2,7 @@ kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
   name: eessi-pensjon-journalforing
-  namespace: default
+  namespace: q2
   labels:
     team: eessipensjon
 spec:
