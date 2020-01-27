@@ -1,0 +1,33 @@
+name: Build, push, and deploy
+on:
+  repository_dispatch:
+    types: [prodsett-command]
+
+jobs:
+  deploy_manuelt:
+    name: 'Build, push, and deploy'
+    runs-on: ubuntu-latest
+    steps:
+      # LOGGER VARIABLE
+      - name: 'Pull repo'
+        uses: actions/checkout@v1
+      - run: |
+          echo "versjon: ${{ github.event.client_payload.slash_command.arg1 }}"
+          echo "cluster: ${{ github.event.client_payload.slash_command.arg2 }}"
+          echo "resource: ${{ github.event.client_payload.slash_command.arg2 }}-${{ github.event.client_payload.slash_command.arg3 }}.yml"
+          echo "vars: ${{ github.event.client_payload.slash_command.arg2 }}-${{ github.event.client_payload.slash_command.arg3 }}.json"
+          echo "image: docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ github.event.client_payload.slash_command.arg1 }}"
+
+      # PULLER REPO
+      - name: 'Pull repo'
+        uses: actions/checkout@v1
+      - run: git fetch --prune
+      # DEPLOYER TIL NAIS
+      - name: 'Deploy to NAIS'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ github.event.client_payload.slash_command.arg2 }}
+          RESOURCE: nais/${{ github.event.client_payload.slash_command.arg2 }}-${{ github.event.client_payload.slash_command.arg3 }}.yml
+          VARS: nais/${{ github.event.client_payload.slash_command.arg2 }}-${{ github.event.client_payload.slash_command.arg3 }}.json
+          IMAGE: docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ github.event.client_payload.slash_command.arg1 }}

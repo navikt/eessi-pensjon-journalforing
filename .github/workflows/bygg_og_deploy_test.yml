@@ -1,0 +1,60 @@
+name: Build, push, and deploy
+
+on:
+  push:
+    branches:
+      - master
+      - 'feature/refactoringNaiserator'
+jobs:
+  tag_build_and_deploy:
+    name: 'Build, push, and deploy'
+    runs-on: ubuntu-latest
+    steps:
+      # SETTER JAVA VERSJON
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '1.11' # The JDK version to make available on the path. Takes a whole or semver JDK version, or 1.x syntax (e.g. 1.8 => Jdk 8.x). To specify a specific version for JDK 8 or older use the following pattern (8.0.x)
+      - run: java -version
+
+      # PULLER REPO
+      - name: 'Pull repo'
+        uses: actions/checkout@v1
+      - run: git fetch --prune
+
+      # OPPRETTER GIT TAG
+      - name: 'Bump version and push tag'
+        uses: anothrNick/github-tag-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCHES: .*
+
+      # HENTER NYESTE TAG FOR Å BRUKE DET SOM VERSJONSNUMMER
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # OPPRETTER IMAGE VARIABEL MED VERSJONSNUMMER
+      - name: 'Set Image'
+        run: echo "::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ steps.previoustag.outputs.tag }}"
+
+      # BYGGER DOCKER CONTAINER
+      - name: 'Build and publish Docker image'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew -s -i -Pgithub test build
+          docker build --tag ${{ env.IMAGE }} .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${{ env.IMAGE }}
+
+      # DEPLOYER TIL NAIS
+      - name: 'Deploy to NAIS'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais/dev-fss-q2.yml
+          VARS: nais/dev-fss-q2.json
+          IMAGE: ${{ env.IMAGE }}

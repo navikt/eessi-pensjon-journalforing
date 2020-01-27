@@ -1,0 +1,4 @@
+{
+  "cluster": "preprod",
+  "serviceuserkv": "/serviceuser/data/dev/srveessi-pensjon-journalforing"
+}
