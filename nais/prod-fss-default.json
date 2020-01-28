@@ -1,0 +1,4 @@
+{
+  "cluster": "prod",
+  "serviceuserkv": "/serviceuser/data/prod/srveessi-pensjon-journalforing"
+}

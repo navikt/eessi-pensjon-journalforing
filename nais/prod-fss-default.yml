@@ -1,0 +1,83 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: eessi-pensjon-journalforing
+  namespace: default
+  labels:
+    team: eessipensjon
+spec:
+  env:
+    - name: NAV_TRUSTSTORE_KEYSTOREALIAS
+      value: na
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: NAMESPACE
+      value: q2
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
+    - name: EUX_RINA_API_V1_URL
+      value: https://eux-rina-api.nais.adeo.no/cpi
+    - name: JOURNALPOST_V1_DESCRIPTION
+      value: Rest-tjeneste til bruk ifm. oppretting, oppdatering eller ferdigstilling
+        journalposter.
+    - name: JOURNALPOST_V1_URL
+      value: https://dokarkiv.nais.adeo.no/rest/journalpostapi/v1
+    - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
+      value: SAML
+    - name: VIRKSOMHET_PERSON_V3_ENDPOINTURL
+      value: https://wasapp.adeo.no/tpsws/ws/Person/v3
+    - name: VIRKSOMHET_PERSON_V3_WSDLURL
+      value: http://maven.adeo.no/nexus/content/groups/public/no/nav/tjenester/nav-person-v3-tjenestespesifikasjon/3.6.1/nav-person-v3-tjenestespesifikasjon-3.6.1.zip
+    - name: SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL
+      value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
+    - name: SECURITYTOKENSERVICE_URL
+      value: https://sts.adeo.no/SecurityTokenServiceProvider/
+    - name: OPPGAVE_OPPGAVER_URL
+      value: https://oppgave.nais.adeo.no/api/v1/oppgaver
+    - name: AKTOERREGISTER_API_V1_DESCRIPTION
+      value: Versjon 1 av REST-API for aktoerregisteret
+    - name: AKTOERREGISTER_API_V1_URL
+      value: https://app.adeo.no/aktoerregister/api/v1
+    - name: EESSIFAGMODULSERVICE_URL
+      value: https://eessi-fagmodul.nais.adeo.no/
+    - name: EESSIPENNORG2SERVICE_URL
+      value: https://app.adeo.no/norg2
+    - name: BESTEMSAK_DESCRIPTION
+      value: Tjeneste som henter sakInformasjon basert paa aktoerId og ytelsetype
+    - name: BESTEMSAK_URL
+      value: https://wasapp.adeo.no/pensjon-ws/api/bestemsak/v1
+    - name: KAFKA_SEDSENDT_TOPIC
+      value: eessi-basis-sedSendt-v1
+    - name: KAFKA_SEDMOTTATT_TOPIC
+      value: eessi-basis-sedMottatt-v1
+  image: {{ image }}
+  ingresses:
+    - https://eessi-pensjon-journalforing.nais.adeo.no
+  liveness:
+    path: /internal/isalive
+    port: 8080
+    initialDelay: 20
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
+  readiness:
+    path: /internal/isready
+    port: 8080
+    initialDelay: 20
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "4"
+      memory: 8096Mi
+    requests:
+      cpu: 400m
+      memory: 4024Mi
+  vault:
+    enabled: true
+    paths:
+      - kvPath: {{serviceuserkv}}
+        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing

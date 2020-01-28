@@ -23,7 +23,6 @@ import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 import org.springframework.web.client.HttpClientErrorException
-import sun.net.www.http.HttpClient
 
 @ExtendWith(MockitoExtension::class)
 class EuxServiceTest {

@@ -6,8 +6,7 @@ kafka:
     topic: eessi-pensjon-oppgave-v1
     groupid: eessi-pensjon-group
 
-FASIT_ENVIRONMENT_NAME: 'test'
-NAIS_NAMESPACE: 'test'
+namespace: 'test'
 
 spring:
   kafka:
@@ -25,7 +24,7 @@ spring:
 securityTokenService:
   discoveryUrl: http://localhost:${mockServerport}/.well-known/openid-configuration
 
-app.name: eessi-pensjon-journalforing
+NAIS_APP_NAME: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
 securitytokenservice.url: http://someurl

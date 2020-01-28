@@ -8,7 +8,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,7 +20,7 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
     @Value("\${kafka.oppgave.topic}")
     private lateinit var oppgaveTopic: String
 
-    @Value("\${FASIT_ENVIRONMENT_NAME}")
+    @Value("\${namespace}")
     private lateinit var topicPostfix: String
 
     private fun putMeldingPaaKafka(melding: OppgaveMelding) {
