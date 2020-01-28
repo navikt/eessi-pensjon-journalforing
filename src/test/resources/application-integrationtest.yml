@@ -6,8 +6,7 @@ kafka:
     topic: eessi-pensjon-oppgave-v1
     groupid: eessi-pensjon-group
 
-FASIT_ENVIRONMENT_NAME: 'test'
-NAIS_NAMESPACE: 'test'
+namespace: 'test'
 
 spring:
   kafka:
