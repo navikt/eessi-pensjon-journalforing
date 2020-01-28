@@ -180,9 +180,11 @@ repositories {
 		maven {
 			url "https://repo.adeo.no/repository/maven-central"
 		}
+		maven {
+			url "https://repo.adeo.no/repository/maven-releases"
+		}
 	}
 }
-
 wrapper {
 	distributionType = Wrapper.DistributionType.ALL
 }
