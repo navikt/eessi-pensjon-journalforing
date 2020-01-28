@@ -11,10 +11,10 @@ spec:
       value: na
     - name: SPRING_PROFILES_ACTIVE
       value: prod
+    - name: NAMESPACE
+      value: q2
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
-    - name: SRVUSERNAME
-      value: srveessi-pensjon-j
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.nais.adeo.no/cpi
     - name: JOURNALPOST_V1_DESCRIPTION
