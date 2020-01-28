@@ -24,7 +24,7 @@ spring:
 securityTokenService:
   discoveryUrl: http://localhost:${mockServerport}/.well-known/openid-configuration
 
-app.name: eessi-pensjon-journalforing
+NAIS_APP_NAME: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
 securitytokenservice.url: http://someurl

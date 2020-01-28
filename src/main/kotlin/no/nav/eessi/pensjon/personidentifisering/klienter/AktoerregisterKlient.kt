@@ -39,7 +39,7 @@ class AktoerregisterKlient(
 
     private val logger = LoggerFactory.getLogger(AktoerregisterKlient::class.java)
 
-    @Value("\${app.name}")
+    @Value("\${NAIS_APP_NAME}")
     lateinit var appName: String
 
     fun hentGjeldendeNorskIdentForAkteorId(aktoerid: String): String {
