@@ -16,7 +16,6 @@ import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@Disabled
 @ExtendWith(MockitoExtension::class)
 class SedListenerTest {
 

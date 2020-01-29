@@ -64,16 +64,10 @@ class SedListener(
         }
     }
 
-    //@KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
-    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}",
-            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "12740")])])
+    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
-
-                //offsett å hente opp (P2000, P4000 og en P5000
-                if (cr.offset() == 12741L || cr.offset() == 12824L || cr.offset() == 12894L) {
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
@@ -96,12 +90,7 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-
-                } else {
-                    acknowledgment.acknowledge()
-                }
             }
-
         }
     }
 
