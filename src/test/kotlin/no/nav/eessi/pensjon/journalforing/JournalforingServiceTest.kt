@@ -63,8 +63,7 @@ class JournalforingServiceTest {
                 oppgaveRoutingService,
                 pdfService,
                 oppgaveHandler,
-                penService,
-                "q2"
+                penService
             )
 
         //MOCK RESPONSES

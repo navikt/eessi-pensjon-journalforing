@@ -43,14 +43,6 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Gitt en json dokument med manglende filnavn saa kastes MissingKotlinParameterException`() {
-        val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeFilnavn.json")))
-        assertThrows<MissingKotlinParameterException> {
-            pdfService.parseJsonDocuments(fileContent, SedType.P2000)
-        }
-    }
-
-    @Test
     fun `Gitt en json dokument med manglende innhold saa kastes MissingKotlinParameterException`() {
         val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedManglendeInnhold.json")))
         assertThrows<MissingKotlinParameterException> {
