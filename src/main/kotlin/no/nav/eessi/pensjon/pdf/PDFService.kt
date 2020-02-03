@@ -31,8 +31,10 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                 val convertedDocuments = listOf(sedDokument).plus(documents.vedlegg ?: listOf())
                         .map { convert(it) }
 
-                val (supportedDocuments, unsupportedDocuments) = convertedDocuments
-                        .partition { it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA }
+                val (supportedDocuments, unsupportedDocuments) = convertedDocuments.
+                        partition{
+                            (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null
+                        }
 
                 val unnsupportedDocumentsJson = if (unsupportedDocuments.isNotEmpty()) {
                     unsupportedDocuments
@@ -85,7 +87,7 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
             MimeType.PDFA -> document
             else -> try {
                 EuxDokument(
-                        filnavn = konverterFilendingTilPdf(document.filnavn),
+                        filnavn = konverterFilendingTilPdf(document.filnavn!!),
                         mimeType = MimeType.PDF,
                         innhold = ImageConverter.toBase64PDF(document.innhold)
                 )

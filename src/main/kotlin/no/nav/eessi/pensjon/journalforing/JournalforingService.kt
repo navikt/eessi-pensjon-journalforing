@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.services.journalpost.JournalpostService
 import no.nav.eessi.pensjon.services.pesys.PenService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,7 +31,6 @@ class JournalforingService(private val euxService: EuxService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
                            private val penService: PenService,
-                           @Value("\${NAIS_NAMESPACE}") private val namespace: String,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -100,10 +98,10 @@ class JournalforingService(private val euxService: EuxService,
 
                 if(!journalPostResponse!!.journalpostferdigstilt) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                }
 
-                    if (uSupporterteVedlegg.isNotEmpty()) {
-                        publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
-                    }
+                if(uSupporterteVedlegg.isNotEmpty()) {
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
                 }
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)

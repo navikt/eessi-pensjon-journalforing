@@ -13,7 +13,7 @@ class SedDokumenter(
     }
 }
 
-class EuxDokument(val filnavn: String,
+class EuxDokument(val filnavn: String?,
                        val mimeType: MimeType?,
                        val innhold: String)
 
