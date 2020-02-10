@@ -6,54 +6,32 @@ on:
       - master
 jobs:
   tag_build_and_deploy:
-    name: 'Build, push, and deploy'
+    name: 'Build, deploy and tag'
     runs-on: ubuntu-latest
     steps:
-      # SETTER JAVA VERSJON
-      - uses: actions/setup-java@v1
-        with:
-          java-version: '1.8' # The JDK version to make available on the path. Takes a whole or semver JDK version, or 1.x syntax (e.g. 1.8 => Jdk 8.x). To specify a specific version for JDK 8 or older use the following pattern (8.0.x)
-      - run: java -version
-
       # PULLER REPO
       - name: 'Pull repo'
         uses: actions/checkout@v1
-      - run: git fetch --prune
 
-      # OPPRETTER GIT TAG
-      - name: 'Bump version and push tag'
-        uses: anothrNick/github-tag-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_BRANCHES: .*
+      # SETTER DATO OG COMMIT VARIABEL
+      - name: 'Setter dato og commit variabel'
+        run: |
+          export TZ=CET
+          echo "::set-env name=DATE::$(date "+%Y-%m-%d--%H-%M-%S")"
+          echo "::set-env name=COMMIT_HASH::$(git rev-parse HEAD)"
 
-      # HENTER NYESTE TAG FOR Å BRUKE DET SOM VERSJONSNUMMER
-      - name: 'Get Previous tag'
-        id: previoustag
-        uses: WyriHaximus/github-action-get-previous-tag@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # OPPRETTER IMAGE VARIABEL MED VERSJONSNUMMER
-      - name: 'Set Image'
-        run: echo "::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ steps.previoustag.outputs.tag }}"
+      # SETTER IMAGE VARIABEL
+      - name: 'Setter Image'
+        run: echo "::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}"
 
       # BYGGER DOCKER CONTAINER
-      - name: 'Build and publish Docker image'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Bygg og publiser docker image'
         run: |
           ./gradlew -Pgithub clean build
           docker build --tag ${{ env.IMAGE }} .
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.DISPATCH_TOKEN }}
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ env.IMAGE }}
-
-      # DEPLOYER TIL NAIS
-      - name: 'Deploy to NAIS'
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: nais/dev-fss-q2.yml
-          VARS: nais/dev-fss-q2.json
-          IMAGE: ${{ env.IMAGE }}
+      # OPPRETTER GIT TAG
+      - name: 'Opprett git tag'
+        run: |
+          curl -v -s -X POST https://api.github.com/repos/navikt/eessi-pensjon-journalforing/git/refs -H "Authorization: token  ${{ secrets.GITHUB_TOKEN }}" -d '{ "ref": "refs/tags/${{ env.DATE }}---${{ env.COMMIT_HASH }}",  "sha": "${{ env.COMMIT_HASH }}" }'
