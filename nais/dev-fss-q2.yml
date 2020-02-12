@@ -7,8 +7,6 @@ metadata:
     team: eessipensjon
 spec:
   env:
-    - name: NAV_TRUSTSTORE_KEYSTOREALIAS
-      value: na
     - name: SPRING_PROFILES_ACTIVE
       value: test
     - name: NAMESPACE
@@ -17,9 +15,6 @@ spec:
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.nais.preprod.local/cpi
-    - name: JOURNALPOST_V1_DESCRIPTION
-      value: Rest-tjeneste til bruk ifm. oppretting, oppdatering eller ferdigstilling
-        journalposter.
     - name: JOURNALPOST_V1_URL
       value: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
@@ -34,16 +29,12 @@ spec:
       value: https://sts-q2.preprod.local/SecurityTokenServiceProvider/
     - name: OPPGAVE_OPPGAVER_URL
       value: https://oppgave-q2.nais.preprod.local/api/v1/oppgaver
-    - name: AKTOERREGISTER_API_V1_DESCRIPTION
-      value: Versjon 1 av REST-API for aktoerregisteret
     - name: AKTOERREGISTER_API_V1_URL
       value: https://app-q2.adeo.no/aktoerregister/api/v1
     - name: EESSIFAGMODULSERVICE_URL
       value: https://eessi-pensjon-fagmodul-q2.nais.preprod.local/
     - name: EESSIPENNORG2SERVICE_URL
       value: https://app-q4.adeo.no/norg2/
-    - name: BESTEMSAK_DESCRIPTION
-      value: Tjeneste som henter sakInformasjon basert paa aktoerId og ytelsetype
     - name: BESTEMSAK_URL
       value: https://wasapp-q2.adeo.no/pensjon-ws/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
