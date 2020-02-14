@@ -1,9 +1,12 @@
+KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedSendt-v1'
+KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
+
 kafka:
   sedSendt:
-    topic: eessi-basis-sedSendt-v1
+    topic: ${KAFKA_SEDMOTTATT_TOPIC}
     groupid: eessi-pensjon-group
   oppgave:
-    topic: eessi-pensjon-oppgave-v1
+    topic: ${KAFKA_OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group
 
 namespace: 'test'

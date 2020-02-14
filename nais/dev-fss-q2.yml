@@ -41,6 +41,8 @@ spec:
       value: eessi-basis-sedSendt-v1-q2
     - name: KAFKA_SEDMOTTATT_TOPIC
       value: eessi-basis-sedMottatt-v1-q2
+    - name: KAFKA_OPPGAVE_TOPIC
+      value: privat-eessipensjon-oppgave-v1-q2
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing-q2.nais.preprod.local

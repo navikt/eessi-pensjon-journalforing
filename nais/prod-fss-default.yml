@@ -50,6 +50,8 @@ spec:
       value: eessi-basis-sedSendt-v1
     - name: KAFKA_SEDMOTTATT_TOPIC
       value: eessi-basis-sedMottatt-v1
+    - name: KAFKA_OPPGAVE_TOPIC
+      value: privat-eessipensjon-oppgave-v1-p
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing.nais.adeo.no
