@@ -1,12 +1,12 @@
 kafka:
   sedSendt:
-    topic: eessi-basis-sedSendt-v1
+    topic: ${KAFKA_SEDSENDT_TOPIC}
     groupid: eessi-pensjon-group
   sedMottatt:
-    topic: eessi-basis-sedMottatt-v1
+    topic: ${KAFKA_SEDMOTTATT_TOPIC}
     groupid: eessi-pensjon-group
   oppgave:
-      topic: privat-eessipensjon-oppgave-v1
+      topic: ${KAFKA_OPPGAVE_TOPIC}
       groupid: eessi-pensjon-group
 
 #Spring
