@@ -31,6 +31,17 @@ jobs:
           docker build --tag ${{ env.IMAGE }} .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ env.IMAGE }}
+
+      # DEPLOYER TIL NAIS
+      - name: 'Deploy to NAIS'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais/dev-fss-q2.yml
+          VARS: nais/dev-fss-q2.json
+          IMAGE: ${{ env.IMAGE }}
+
       # OPPRETTER GIT TAG
       - name: 'Opprett git tag'
         run: |
