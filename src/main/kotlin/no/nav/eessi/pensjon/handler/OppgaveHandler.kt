@@ -20,11 +20,8 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
     @Value("\${kafka.oppgave.topic}")
     private lateinit var oppgaveTopic: String
 
-    @Value("\${namespace}")
-    private lateinit var topicPostfix: String
-
     private fun putMeldingPaaKafka(melding: OppgaveMelding) {
-        kafkaTemplate.defaultTopic = "$oppgaveTopic-$topicPostfix"
+        kafkaTemplate.defaultTopic = oppgaveTopic
 
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()
