@@ -39,7 +39,7 @@ spec:
     - name: AKTOERREGISTER_API_V1_URL
       value: https://app.adeo.no/aktoerregister/api/v1
     - name: EESSIFAGMODULSERVICE_URL
-      value: https://eessi-fagmodul.nais.adeo.no/
+      value: https://eessi-pensjon-fagmodul.nais.adeo.no/
     - name: EESSIPENNORG2SERVICE_URL
       value: https://app.adeo.no/norg2
     - name: BESTEMSAK_DESCRIPTION
