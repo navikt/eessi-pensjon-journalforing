@@ -74,35 +74,28 @@ class SedListener(
             metricsHelper.measure("consumeIncomingSed") {
 
                 //rerun journal liste med offset id som må kjøres på nytt
-                val list = listOf<Long>(16017, 16018, 16019, 16275, 16280, 16287, 16293)
-
                 //offsett å hente opp (P2000, P4000 og en P5000 henter tapte journalføringer på oppgave)
-                if (list.contains(cr.offset())) {
+                if (cr.offset() == 16293L || cr.offset() == 16287L) {
 
                     logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                     logger.debug(hendelse)
 /*
                     følgende feilet mot topic oppgave med dobbelt envclass (-p-p)
-                    Acket sedMottatt melding med offset: 16017 i partisjon 0
-                    Acket sedMottatt melding med offset: 16018 i partisjon 0
-                    Acket sedMottatt melding med offset: 16019 i partisjon 0
-                    Acket sedMottatt melding med offset: 16275 i partisjon 0
-                    Acket sedMottatt melding med offset: 16280 i partisjon 0
                     Acket sedMottatt melding med offset: 16287 i partisjon 0
                     Acket sedMottatt melding med offset: 16293 i partisjon 0
 */
-
                     try {
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                         if (sedHendelse.sektorKode == "P") {
-                            logger.info("*** Starter innkommende hournalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                             val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
+
                     } catch (ex: Exception) {
                         logger.error(
                                 "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
