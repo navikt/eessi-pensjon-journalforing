@@ -45,6 +45,7 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
+                        logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
@@ -64,32 +65,59 @@ class SedListener(
         }
     }
 
-    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
+//    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
+    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}",
+            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "16000")])])
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
 
-                logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                logger.debug(hendelse)
+                //rerun journal liste med offset id som må kjøres på nytt
+                val list = listOf<Long>(16017, 16018, 16019, 16275, 16280, 16287, 16293)
 
-                try {
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                //offsett å hente opp (P2000, P4000 og en P5000 henter tapte journalføringer på oppgave)
+                if (list.contains(cr.offset())) {
 
-                    if (sedHendelse.sektorKode == "P") {
-                        val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
+                    logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+                    logger.debug(hendelse)
+/*
+                    følgende feilet mot topic oppgave med dobbelt envclass (-p-p)
+                    Acket sedMottatt melding med offset: 16017 i partisjon 0
+                    Acket sedMottatt melding med offset: 16018 i partisjon 0
+                    Acket sedMottatt melding med offset: 16019 i partisjon 0
+                    Acket sedMottatt melding med offset: 16275 i partisjon 0
+                    Acket sedMottatt melding med offset: 16280 i partisjon 0
+                    Acket sedMottatt melding med offset: 16287 i partisjon 0
+                    Acket sedMottatt melding med offset: 16293 i partisjon 0
+*/
+
+                    try {
+                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+                        if (sedHendelse.sektorKode == "P") {
+                            logger.info("*** Starter innkommende hournalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
+                        }
+                        acknowledgment.acknowledge()
+                        logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
+                    } catch (ex: Exception) {
+                        logger.error(
+                                "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
+                                        "${ex.message}",
+                                ex
+                        )
+                        throw RuntimeException(ex.message)
                     }
+
+                } else {
+
                     acknowledgment.acknowledge()
-                    logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
-                } catch (ex: Exception) {
-                    logger.error(
-                            "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
-                                    "${ex.message}",
-                            ex
-                    )
-                    throw RuntimeException(ex.message)
+
                 }
+
             }
         }
     }
