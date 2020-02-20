@@ -28,7 +28,7 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
 
         metricsHelper.measure("publiserOppgavemelding") {
             logger.info("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
-            kafkaTemplate.sendDefault(key, payload)
+            kafkaTemplate.sendDefault(key, payload).get()
         }
     }
 

@@ -63,9 +63,6 @@ class SedListener(
         }
     }
 
-//    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}",
-//            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-//                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "16000")])])
     @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
@@ -98,5 +95,4 @@ class SedListener(
             }
         }
     }
-
 }
