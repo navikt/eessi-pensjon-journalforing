@@ -77,7 +77,7 @@ class SedListener(
                 }
 
                 //rerun journal liste med offset id som må kjøres på nytt
-                val list = listOf<Long>(16287, 16293)
+                val list = listOf<Long>(16293)
 
                 if (list.contains(cr.offset())) {
 

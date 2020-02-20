@@ -16,6 +16,7 @@ spring:
       ack-mode: manual
     consumer:
       enable-auto-commit: false
+      max-poll-records: 1
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
     properties:
       security.protocol: SASL_SSL
