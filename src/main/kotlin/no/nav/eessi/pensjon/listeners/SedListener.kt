@@ -68,10 +68,12 @@ class SedListener(
     //    @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}",
             topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "16287")])])
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "16293")])])
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             metricsHelper.measure("consumeIncomingSed") {
+                logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+
                 if(cr.offset() >=  16571L) {
                     throw java.lang.RuntimeException("stopper konsumering av nye hendelser")
                 }
@@ -81,7 +83,7 @@ class SedListener(
 
                 if (list.contains(cr.offset())) {
 
-                    logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+                    logger.info("behandler sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
                     try {
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -104,7 +106,7 @@ class SedListener(
                     }
 
                 } else {
-
+                    logger.info("acker irrelevant sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                     acknowledgment.acknowledge()
 
                 }
