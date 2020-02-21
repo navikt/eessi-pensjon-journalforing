@@ -1,0 +1,18 @@
+name: Build, push, and deploy
+
+on:
+  push:
+
+jobs:
+  tag_build_and_deploy:
+    name: 'Bygg alle brancher'
+    runs-on: ubuntu-latest
+    steps:
+      # PULLER REPO
+      - name: 'Pull repo'
+        uses: actions/checkout@v1
+
+      # BYGGER DOCKER CONTAINER
+      - name: 'Bygg'
+        run: |
+          ./gradlew -Pgithub clean build
