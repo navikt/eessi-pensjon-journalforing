@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mock
@@ -16,7 +15,6 @@ import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@Disabled
 @ExtendWith(MockitoExtension::class)
 class SedListenerTest {
 
