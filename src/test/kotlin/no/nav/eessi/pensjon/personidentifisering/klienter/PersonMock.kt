@@ -3,8 +3,9 @@ package no.nav.eessi.pensjon.personidentifisering.klienter
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 
 object BrukerMock {
-    internal fun createWith(landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
+    internal fun createWith(fnr: String? = null, landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
             Bruker? = Bruker()
+            .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
             .withPersonnavn(Personnavn()
                     .withEtternavn(etternavn)
                     .withFornavn(fornavn)

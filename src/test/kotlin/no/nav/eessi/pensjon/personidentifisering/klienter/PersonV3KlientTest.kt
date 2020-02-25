@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.spyk
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.BeforeEach
@@ -17,8 +18,8 @@ class PersonV3KlientTest {
     lateinit var personV3Klient : PersonV3Klient
 
     private val subject = "23037329381"
-    private val ikkeFunnetSubject = "33037329381"
-    private val sikkerhetsbegrensingSubject = "43037329381"
+    private val ikkeFunnetSubject = "33037329382"
+    private val sikkerhetsbegrensingSubject = "43037329383"
 
     @BeforeEach
     fun setup() {
@@ -27,7 +28,7 @@ class PersonV3KlientTest {
 
         every { personV3Klient.konfigurerSamlToken() } just Runs
 
-        every { personV3Klient.hentPerson(subject) } returns BrukerMock.createWith()
+        every { personV3Klient.hentPerson(subject) } returns BrukerMock.createWith(subject)
 
         every { personV3Klient.hentPerson(ikkeFunnetSubject) } returns null
 
@@ -38,7 +39,8 @@ class PersonV3KlientTest {
     @Test
     fun `Kaller hentPerson med gyldig subject`(){
         try {
-            assertEquals(personV3Klient.hentPerson(subject), BrukerMock.createWith())
+            val person = personV3Klient.hentPerson(subject)
+            assertEquals("23037329381", (person!!.aktoer as PersonIdent).ident.ident)
         }catch(ex: Exception){
             assert(false)
         }
