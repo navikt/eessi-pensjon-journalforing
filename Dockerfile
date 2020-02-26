@@ -1,4 +1,4 @@
-FROM navikt/java:8
+FROM navikt/java:8-appdynamics
 
 COPY build/libs/eessi-pensjon-journalforing-*.jar /app/app.jar
 
