@@ -3,7 +3,8 @@ name: Build, push, and deploy
 on:
   push:
     branches:
-      - "*"
+      - '*'
+      - '*/*'
       - '!master'
 
 jobs:
