@@ -8,3 +8,4 @@ RUN chmod +x /init-scripts/*
 ENV APPD_NAME eessi-pensjon
 ENV APPD_TIER journalforing
 ENV APPD_ENABLED true
+ENV APPDYNAMICS_CONTROLLER_HOST_NAME appdynamics.adeo.no

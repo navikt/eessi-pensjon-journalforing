@@ -41,8 +41,6 @@ spec:
       value: eessi-basis-sedMottatt-v1
     - name: KAFKA_OPPGAVE_TOPIC
       value: privat-eessipensjon-oppgave-v1-p
-    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
-      value: appdynamics.adeo.no
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing.nais.adeo.no
