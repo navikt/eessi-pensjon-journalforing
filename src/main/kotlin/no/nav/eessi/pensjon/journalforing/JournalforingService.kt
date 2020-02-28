@@ -37,7 +37,8 @@ class JournalforingService(private val euxService: EuxService,
 
     fun journalfor(sedHendelse: SedHendelseModel,
                    hendelseType: HendelseType,
-                   identifisertPerson: IdentifisertPerson) {
+                   identifisertPerson: IdentifisertPerson,
+                   offset: Long = 0) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
@@ -56,6 +57,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 if(identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
                     sakId = penService.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
                 }
 
                 // Identifiserer enhet og journalpost-type
