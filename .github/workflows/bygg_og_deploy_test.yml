@@ -1,4 +1,4 @@
-name: Build, push, and deploy
+name: Bygg og deploy Q2
 
 on:
   push:
