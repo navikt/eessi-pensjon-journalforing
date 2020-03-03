@@ -1,3 +1,6 @@
+![](https://github.com/navikt/eessi-pensjon-journalforing/workflows/Bygg%20og%20deploy%20Q2/badge.svg)
+![](https://github.com/navikt/eessi-pensjon-journalforing/workflows/Manuell%20deploy/badge.svg)
+
 # eessi-pensjon-journalforing
 Journalfører utgående SED når kafka meldinger konsumeres
 
