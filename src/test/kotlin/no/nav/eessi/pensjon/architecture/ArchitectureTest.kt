@@ -5,6 +5,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
 import com.tngtech.archunit.library.Architectures.layeredArchitecture
+import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -37,10 +38,10 @@ class ArchitectureTest {
 //    }
 
 
-//    @Test
-//    fun `Services should not depend on eachother`() {
-//        slices().matching("..$root.services.(**)").should().notDependOnEachOther().check(classesToAnalyze)
-//    }
+    @Test
+    fun `Services should not depend on eachother`() {
+        slices().matching("..$root.services.(**)").should().notDependOnEachOther().check(classesToAnalyze)
+    }
 
     @Test
     fun `Check architecture`() {
