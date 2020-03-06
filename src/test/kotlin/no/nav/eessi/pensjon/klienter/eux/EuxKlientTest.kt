@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.eux
+package no.nav.eessi.pensjon.klienter.eux
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
@@ -25,19 +25,19 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.web.client.HttpClientErrorException
 
 @ExtendWith(MockitoExtension::class)
-class EuxServiceTest {
+class EuxKlientTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    lateinit var euxService: EuxService
+    lateinit var euxKlient: EuxKlient
 
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
 
     @BeforeEach
     fun setup() {
-        euxService = EuxService(mockrestTemplate)
+        euxKlient = EuxKlient(mockrestTemplate)
     }
 
     @Test
@@ -52,7 +52,7 @@ class EuxServiceTest {
                     any(HttpEntity::class.java),
                     eq(String::class.java))
 
-        val resp = euxService.hentSedDokumenter(rinaNr, dokumentId)
+        val resp = euxKlient.hentSedDokumenter(rinaNr, dokumentId)
         val innhold = mapper.readValue(resp, JsonNode::class.java).path("sed").path("innhold").textValue()
         assertEquals("JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G", innhold)
     }
@@ -69,7 +69,7 @@ class EuxServiceTest {
                         eq(String::class.java))
 
         assertThrows<RuntimeException> {
-            euxService.hentSedDokumenter(rinaNr, dokumentId)
+            euxKlient.hentSedDokumenter(rinaNr, dokumentId)
         }
     }
 
@@ -86,7 +86,7 @@ class EuxServiceTest {
                         eq(String::class.java))
 
 
-        val resp = euxService.hentFodselsDatoFraSed(rinaNr, dokumentId)
+        val resp = euxKlient.hentFodselsDatoFraSed(rinaNr, dokumentId)
         assertEquals("1980-01-01", resp)
     }
 }

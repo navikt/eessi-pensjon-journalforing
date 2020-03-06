@@ -6,8 +6,8 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingRequestException
-import no.nav.eessi.pensjon.services.norg2.Norg2Service
+import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingRequestException
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -16,7 +16,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
 @Service
-class OppgaveRoutingService(private val norg2Service: Norg2Service) {
+class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
@@ -76,7 +76,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return when(bucType) {
             P_BUC_01 -> {
                 try {
-                    val enhetVerdi = norg2Service.hentArbeidsfordelingEnhet(person)
+                    val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
                 } catch (rqe: Norg2ArbeidsfordelingRequestException) {

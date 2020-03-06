@@ -13,7 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ResponseStatus
 
 fun hentLandkode(person: Person?) =
@@ -27,7 +27,7 @@ fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
-@Service
+@Component
 class PersonV3Klient(
         private val service: PersonV3,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
@@ -37,10 +37,10 @@ class PersonV3Klient(
 
     fun hentPerson(fnr: String): Bruker? {
         return metricsHelper.measure("hentperson") {
-            logger.info("Henter person fra PersonV3Service")
+            logger.info("Henter person fra PersonV3Klient")
 
             try {
-                logger.info("Kaller PersonV3.hentPerson service")
+                logger.info("Kaller PersonV3.hentPerson")
                 val resp = kallPersonV3(fnr)
                 resp.person as Bruker
             } catch (pif: HentPersonPersonIkkeFunnet) {

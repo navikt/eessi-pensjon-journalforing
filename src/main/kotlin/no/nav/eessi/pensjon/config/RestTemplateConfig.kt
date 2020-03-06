@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
-import no.nav.eessi.pensjon.security.sts.STSService
+import no.nav.eessi.pensjon.security.sts.STSKlient
 import no.nav.eessi.pensjon.security.sts.UsernameToOidcInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Configuration
-class RestTemplateConfig(private val securityTokenExchangeService: STSService, private val meterRegistry: MeterRegistry) {
+class RestTemplateConfig(private val securityTokenExchangeKlient: STSKlient, private val meterRegistry: MeterRegistry) {
 
     @Value("\${aktoerregister.api.v1.url}")
     lateinit var aktoerregisterUrl: String
@@ -33,10 +33,10 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     @Value("\${EUX_RINA_API_V1_URL}")
     lateinit var euxUrl: String
 
-    @Value("\${eessifagmodulservice_URL}")
+    @Value("\${EESSI_PENSJON_FAGMODUL_URL}")
     lateinit var fagmodulUrl: String
 
-    @Value("\${eessipennorg2service_URL}")
+    @Value("\${NORG2_URL}")
     lateinit var norg2Url: String
 
     @Value("\${BestemSak_URL}")
@@ -58,7 +58,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestResponseLoggerInterceptor(),
                         RequestIdHeaderInterceptor(),
                         RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                        UsernameToOidcInterceptor(securityTokenExchangeKlient))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory()) // Trengs for å kjøre http-method: PATCH
                 }
@@ -105,7 +105,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                 .additionalInterceptors(
                         RequestIdHeaderInterceptor(),
                         RequestResponseLoggerInterceptor(),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                        UsernameToOidcInterceptor(securityTokenExchangeKlient))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }
@@ -120,7 +120,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestIdHeaderInterceptor(),
                         RequestResponseLoggerInterceptor(),
                         RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                        UsernameToOidcInterceptor(securityTokenExchangeKlient))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }
@@ -135,7 +135,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestIdHeaderInterceptor(),
                         RequestResponseLoggerInterceptor(),
                         RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                        UsernameToOidcInterceptor(securityTokenExchangeKlient))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }
@@ -150,7 +150,7 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestIdHeaderInterceptor(),
                         RequestResponseLoggerInterceptor(),
                         RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
+                        UsernameToOidcInterceptor(securityTokenExchangeKlient))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }

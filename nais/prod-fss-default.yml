@@ -29,9 +29,9 @@ spec:
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
     - name: AKTOERREGISTER_API_V1_URL
       value: https://app.adeo.no/aktoerregister/api/v1
-    - name: EESSIFAGMODULSERVICE_URL
+    - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul.nais.adeo.no/
-    - name: EESSIPENNORG2SERVICE_URL
+    - name: NORG2_URL
       value: https://app.adeo.no/norg2
     - name: BESTEMSAK_URL
       value: https://wasapp.adeo.no/pensjon-ws/api/bestemsak/v1

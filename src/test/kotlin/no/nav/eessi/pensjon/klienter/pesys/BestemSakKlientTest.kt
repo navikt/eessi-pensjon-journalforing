@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.pesys
+package no.nav.eessi.pensjon.klienter.pesys
 
 import no.nav.eessi.pensjon.models.BucType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,16 +18,15 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
-class PenServiceTest {
+class BestemSakKlientTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    private lateinit var penService: PenService
-
+    private lateinit var bestemSakKlient: BestemSakKlient
     @BeforeEach
     fun setup() {
-        penService = PenService(mockrestTemplate)
+        bestemSakKlient = BestemSakKlient(mockrestTemplate)
     }
 
 
@@ -44,6 +43,6 @@ class PenServiceTest {
                         any(),
                         eq(String::class.java))
 
-        assertEquals("22873157", penService.hentSakId("12345678901", BucType.P_BUC_01))
+        assertEquals("22873157", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_01))
     }
 }

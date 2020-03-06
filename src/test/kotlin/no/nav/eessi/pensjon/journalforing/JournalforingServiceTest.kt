@@ -2,6 +2,12 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.Krav
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
@@ -10,11 +16,6 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.fagmodul.Krav
-import no.nav.eessi.pensjon.services.journalpost.*
-import no.nav.eessi.pensjon.services.pesys.PenService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -29,16 +30,16 @@ import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class JournalforingServiceTest {
+class JournalforingKlientTest {
 
     @Mock
-    private lateinit var euxService: EuxService
+    private lateinit var euxKlient: EuxKlient
 
     @Mock
-    private lateinit var journalpostService: JournalpostService
+    private lateinit var journalpostKlient: JournalpostKlient
 
     @Mock
-    private lateinit var fagmodulService: FagmodulService
+    private lateinit var fagmodulKlient: FagmodulKlient
 
     @Mock
     private lateinit var oppgaveRoutingService: OppgaveRoutingService
@@ -50,32 +51,32 @@ class JournalforingServiceTest {
     private lateinit var oppgaveHandler: OppgaveHandler
 
     @Mock
-    private lateinit var penService: PenService
+    private lateinit var bestemSakKlient: BestemSakKlient
 
     private lateinit var journalforingService: JournalforingService
 
     @BeforeEach
     fun setup() {
 
-        journalforingService = JournalforingService(euxService,
-                journalpostService,
-                fagmodulService,
+        journalforingService = JournalforingService(euxKlient,
+                journalpostKlient,
+                fagmodulKlient,
                 oppgaveRoutingService,
                 pdfService,
                 oppgaveHandler,
-                penService
+                bestemSakKlient
             )
 
         //MOCK RESPONSES
 
         //EUX - HENT FODSELSDATO
         doReturn("1964-04-19")
-                .`when`(euxService)
+                .`when`(euxKlient)
                 .hentFodselsDatoFraSed(anyString(), anyString())
 
         //EUX - HENT SED DOKUMENT
         doReturn("MOCK DOCUMENTS")
-                .`when`(euxService)
+                .`when`(euxKlient)
                 .hentSedDokumenter(anyString(), anyString())
 
         //PDF -
@@ -93,7 +94,7 @@ class JournalforingServiceTest {
 
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
-                .`when`(journalpostService)
+                .`when`(journalpostKlient)
                 .opprettJournalpost(
                         rinaSakId = anyOrNull(),
                         fnr= anyOrNull(),
@@ -139,7 +140,7 @@ class JournalforingServiceTest {
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(Krav.YtelseType.UT.name)
-                .`when`(fagmodulService)
+                .`when`(fagmodulKlient)
                 .hentYtelseKravType(anyString(), anyString())
     }
 
@@ -157,7 +158,7 @@ class JournalforingServiceTest {
                 null)
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -189,7 +190,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -211,7 +212,7 @@ class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2200`(){
         //FAGMODUL HENT ALLE DOKUMENTER
         doReturn(String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json"))))
-                .`when`(fagmodulService)
+                .`when`(fagmodulKlient)
                 .hentAlleDokumenter(anyString())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
@@ -226,7 +227,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -256,9 +257,9 @@ class JournalforingServiceTest {
                 null,
                 null)
 
-         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -291,7 +292,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -312,7 +313,7 @@ class JournalforingServiceTest {
     @Test
     fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`(){
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
-        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -327,7 +328,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("7477291"),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -360,7 +361,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -381,7 +382,7 @@ class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2200`(){
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
-        doReturn(allDocuments).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -396,7 +397,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -429,7 +430,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
-        verify(journalpostService).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),

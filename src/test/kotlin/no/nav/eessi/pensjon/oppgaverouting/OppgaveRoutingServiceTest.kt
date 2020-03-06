@@ -6,13 +6,13 @@ import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.services.norg2.Norg2ArbeidsfordelingItem
-import no.nav.eessi.pensjon.services.norg2.Norg2Service
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,13 +27,13 @@ import java.time.LocalDate
 class OppgaveRoutingServiceTest {
 
     @Spy
-    private lateinit var norg2Service: Norg2Service
+    private lateinit var norg2Klient: Norg2Klient
 
     private lateinit var routingService: OppgaveRoutingService
 
     @BeforeEach
     fun setup() {
-        routingService = OppgaveRoutingService(norg2Service)
+        routingService = OppgaveRoutingService(norg2Klient)
     }
 
     companion object {
@@ -169,7 +169,7 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt utland`() {
         val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -185,7 +185,7 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt Norge`() {
         val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -202,7 +202,7 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt nord-Norge`() {
         val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -219,7 +219,7 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for diskresjonkode`() {
         val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -249,7 +249,7 @@ class OppgaveRoutingServiceTest {
     @Test
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2`() {
         doReturn(listOf<Norg2ArbeidsfordelingItem>())
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -265,7 +265,7 @@ class OppgaveRoutingServiceTest {
     @Test
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2 error`() {
         doThrow(RuntimeException("dummy"))
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",
@@ -282,7 +282,7 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
         val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
-                .whenever(norg2Service).hentArbeidsfordelingEnheter(any())
+                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
                 fnr = "1208201515925",

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.fagmodul
+package no.nav.eessi.pensjon.klienter.fagmodul
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -27,18 +27,18 @@ import org.springframework.web.client.RestClientException
 
 
 @ExtendWith(MockitoExtension::class)
-class FagmodulServiceTest {
+class FagmodulKlientTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    private lateinit var fagmodulService: FagmodulService
+    private lateinit var fagmodulKlient: FagmodulKlient
 
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
     @BeforeEach
     fun setup() {
-        fagmodulService = FagmodulService(mockrestTemplate)
+        fagmodulKlient = FagmodulKlient(mockrestTemplate)
     }
 
     @Test
@@ -57,7 +57,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(HentYtelseTypeResponse::class.java))
 
-        val resp = fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
+        val resp = fagmodulKlient.hentYtelseKravType(rinaNr, dokumentId)
         assertEquals(resp, "AP")
     }
 
@@ -77,7 +77,7 @@ class FagmodulServiceTest {
                         eq(HentYtelseTypeResponse::class.java))
 
         assertThrows<RuntimeException> {
-            fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
+            fagmodulKlient.hentYtelseKravType(rinaNr, dokumentId)
         }
     }
 
@@ -93,7 +93,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(HentYtelseTypeResponse::class.java))
         assertThrows<RuntimeException> {
-            fagmodulService.hentYtelseKravType(rinaNr, dokumentId)
+            fagmodulKlient.hentYtelseKravType(rinaNr, dokumentId)
         }
     }
 
@@ -111,7 +111,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-        val resp = fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+        val resp = fagmodulKlient.hentFodselsdatoFraBuc(rinaNr, buctype)
         assertEquals(resp, "2011-05-28")
     }
 
@@ -130,7 +130,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
         assertThrows<RuntimeException> {
-            fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+            fagmodulKlient.hentFodselsdatoFraBuc(rinaNr, buctype)
         }
     }
 
@@ -146,7 +146,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(HentYtelseTypeResponse::class.java))
         assertThrows<RuntimeException> {
-            fagmodulService.hentFodselsdatoFraBuc(rinaNr, buctype)
+            fagmodulKlient.hentFodselsdatoFraBuc(rinaNr, buctype)
         }
     }
 
@@ -162,7 +162,7 @@ class FagmodulServiceTest {
                         any(HttpEntity::class.java),
                         eq(String::class.java))
 
-        assertNull(fagmodulService.hentFnrFraBuc(rinaNr, buctype))
+        assertNull(fagmodulKlient.hentFnrFraBuc(rinaNr, buctype))
     }
 
     @Test
@@ -178,7 +178,7 @@ class FagmodulServiceTest {
                         eq(String::class.java))
 
         assertThrows<RuntimeException> {
-            fagmodulService.hentFnrFraBuc(rinaNr, buctype)
+            fagmodulKlient.hentFnrFraBuc(rinaNr, buctype)
         }
     }
 }

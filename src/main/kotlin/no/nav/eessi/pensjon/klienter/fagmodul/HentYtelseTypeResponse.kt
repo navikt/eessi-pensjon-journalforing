@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.fagmodul
+package no.nav.eessi.pensjon.klienter.fagmodul
 
 
 import com.fasterxml.jackson.annotation.JsonProperty

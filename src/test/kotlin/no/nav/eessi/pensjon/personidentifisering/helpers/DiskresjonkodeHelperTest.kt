@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.nhaarman.mockitokotlin2.*
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
@@ -21,10 +21,10 @@ import java.nio.file.Paths
 class DiskresjonkodeHelperTest {
 
     @Mock
-    private lateinit var euxService: EuxService
+    private lateinit var euxKlient: EuxKlient
 
     @Mock
-    private lateinit var fagmodulService: FagmodulService
+    private lateinit var fagmodulKlient: FagmodulKlient
 
     @Mock
     private lateinit var personV3Klient: PersonV3Klient
@@ -38,8 +38,8 @@ class DiskresjonkodeHelperTest {
         sedFnrSøk = SedFnrSøk()
 
         diskresjonkodeHelper = DiskresjonkodeHelper(
-                euxService,
-                fagmodulService,
+                euxKlient,
+                fagmodulKlient,
                 personV3Klient,
                 sedFnrSøk
         )
@@ -63,11 +63,11 @@ class DiskresjonkodeHelperTest {
         val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
         val hendelse = SedHendelseModel.fromJson(json)
 
-        doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
+        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
 
         doReturn(BrukerMock.createWith()).whenever(personV3Klient).hentPerson(any())
 
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = null
@@ -94,8 +94,8 @@ class DiskresjonkodeHelperTest {
                 .whenever(personV3Klient).hentPerson(any())
 
 
-        doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
+        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = null
@@ -128,8 +128,8 @@ class DiskresjonkodeHelperTest {
                 .doReturn(brukerSF)
                 .whenever(personV3Klient).hentPerson(any())
 
-        doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
+        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF
@@ -145,7 +145,7 @@ class DiskresjonkodeHelperTest {
         val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
         val hendelse = SedHendelseModel.fromJson(json)
 
-        doReturn(p2000Json).whenever(euxService).hentSed(any(), any())
+        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
 
         val bruker = BrukerMock.createWith()
         bruker?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
@@ -159,7 +159,7 @@ class DiskresjonkodeHelperTest {
             doReturn(BrukerMock.createWith()).
             doReturn(bruker).whenever(personV3Klient).hentPerson(any())
 
-        doReturn(allSedsJson).whenever(fagmodulService).hentAlleDokumenter(any())
+        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
         val expected = Diskresjonskode.SPSF

@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
-import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import javax.annotation.PostConstruct
 import no.nav.eessi.pensjon.json.mapAnyToJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import org.springframework.web.client.*
 import java.lang.RuntimeException
 
@@ -44,13 +44,13 @@ class WellKnownSTS(
  *
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
-@Service
-class STSService(
+@Component
+class STSKlient(
         private val securityTokenExchangeBasicAuthRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(STSService::class.java)
+    private val logger = LoggerFactory.getLogger(STSKlient::class.java)
 
     @Value("\${securityTokenService.discoveryUrl}")
     lateinit var discoveryUrl: String

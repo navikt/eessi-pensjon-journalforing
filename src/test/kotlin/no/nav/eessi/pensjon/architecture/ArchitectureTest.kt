@@ -39,8 +39,8 @@ class ArchitectureTest {
 
 
     @Test
-    fun `Services should not depend on eachother`() {
-        slices().matching("..$root.services.(**)").should().notDependOnEachOther().check(classesToAnalyze)
+    fun `Klienter should not depend on eachother`() {
+        slices().matching("..$root.klienter.(**)").should().notDependOnEachOther().check(classesToAnalyze)
     }
 
     @Test
@@ -57,10 +57,10 @@ class ArchitectureTest {
         val OppgaveRouting = "journalforing.oppgaverouting"
         val PDF = "journalforing.pdf"
         val STS = "journalforing.security.sts"
-        val EuxService = "journalforing.services.eux"
-        val FagmodulService = "journalforing.services.fagmodul"
-        val JournalPostService = "journalforing.services.journalpost"
-        val OppgaveService = "journalforing.services.oppgave"
+        val EuxKlient = "journalforing.klienter.eux"
+        val FagmodulKlient = "journalforing.klienter.fagmodul"
+        val JournalpostKlient = "journalforing.klienter.journalpost"
+        val OppgaveKlient = "journalforing.klienter.oppgave"
         val Personidentifisering = "journalforing.personidentifisering"
         val PersonidentifiseringKlienter = "journalforing.personidentifisering.klienter"
         val PersonidentifiseringHelpers = "journalforing.personidentifisering.helpers"
@@ -79,10 +79,10 @@ class ArchitectureTest {
                 OppgaveRouting to "$root.oppgaverouting",
                 PDF to "$root.pdf",
                 STS to "$root.security.sts",
-                EuxService to "$root.services.eux",
-                FagmodulService to "$root.services.fagmodul",
-                JournalPostService to "$root.services.journalpost",
-                OppgaveService to "$root.services.oppgave",
+                EuxKlient to "$root.klienter.eux",
+                FagmodulKlient to "$root.klienter.fagmodul",
+                JournalpostKlient to "$root.klienter.journalpost",
+                OppgaveKlient to "$root.klienter.oppgave",
                 Personidentifisering to "$root.personidentifisering",
                 PersonidentifiseringKlienter to "$root.personidentifisering.klienter",
                 PersonidentifiseringHelpers to "$root.personidentifisering.helpers",
@@ -91,7 +91,7 @@ class ArchitectureTest {
 
         /*
         TODO do something about the dependencies surrounding STS, but there is a bit too much black magic there for me ...
-        TODO look at/refactor the relationship between journalforing.JournalpostModel and services.journalpost.JournalpostService ...
+        TODO look at/refactor the relationship between journalforing.JournalpostModel and klienter.journalpost.JournalpostKlient ...
          */
         layeredArchitecture()
                 //Define components
@@ -107,10 +107,10 @@ class ArchitectureTest {
                 .layer(OppgaveRouting).definedBy(packages[OppgaveRouting])
                 .layer(PDF).definedBy(packages[PDF])
                 .layer(STS).definedBy(packages[STS])
-                .layer(EuxService).definedBy(packages[EuxService])
-                .layer(FagmodulService).definedBy(packages[FagmodulService])
-                .layer(JournalPostService).definedBy(packages[JournalPostService])
-                .layer(OppgaveService).definedBy(packages[OppgaveService])
+                .layer(EuxKlient).definedBy(packages[EuxKlient])
+                .layer(FagmodulKlient).definedBy(packages[FagmodulKlient])
+                .layer(JournalpostKlient).definedBy(packages[JournalpostKlient])
+                .layer(OppgaveKlient).definedBy(packages[OppgaveKlient])
                 .layer(Personidentifisering).definedBy(packages[Personidentifisering])
                 .layer(PersonidentifiseringKlienter).definedBy(packages[PersonidentifiseringKlienter])
                 .layer(PersonidentifiseringHelpers).definedBy(packages[PersonidentifiseringHelpers])
@@ -126,10 +126,10 @@ class ArchitectureTest {
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter)
-                .whereLayer(EuxService).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
-                .whereLayer(FagmodulService).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
-                .whereLayer(JournalPostService).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(OppgaveService).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
+                .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
+                .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(OppgaveKlient).mayOnlyBeAccessedByLayers(Journalforing)
                 //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //.whereLayer(PersonidentifiseringHelpers).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //Verify rules

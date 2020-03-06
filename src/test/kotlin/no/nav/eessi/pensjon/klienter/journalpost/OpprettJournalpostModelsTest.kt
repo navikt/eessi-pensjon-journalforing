@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.journalpost
+package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test

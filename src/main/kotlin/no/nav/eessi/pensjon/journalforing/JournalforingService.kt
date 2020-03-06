@@ -15,22 +15,22 @@ import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.services.journalpost.JournalpostService
-import no.nav.eessi.pensjon.services.pesys.PenService
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class JournalforingService(private val euxService: EuxService,
-                           private val journalpostService: JournalpostService,
-                           private val fagmodulService: FagmodulService,
+class JournalforingService(private val euxKlient: EuxKlient,
+                           private val journalpostKlient: JournalpostKlient,
+                           private val fagmodulKlient: FagmodulKlient,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
-                           private val penService: PenService,
+                           private val bestemSakKlient: BestemSakKlient,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -48,7 +48,7 @@ class JournalforingService(private val euxService: EuxService,
 
 
                 // Henter dokumenter
-                val sedDokumenterJSON = euxService.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
@@ -56,7 +56,7 @@ class JournalforingService(private val euxService: EuxService,
                 var sakId: String? = null
 
                 if(identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                    sakId = penService.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                    sakId = bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
                     logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
                 }
 
@@ -76,7 +76,7 @@ class JournalforingService(private val euxService: EuxService,
                 }
 
                 // Oppretter journalpost
-                val journalPostResponse = journalpostService.opprettJournalpost(
+                val journalPostResponse = journalpostKlient.opprettJournalpost(
                         rinaSakId = sedHendelse.rinaSakId,
                         fnr = identifisertPerson.fnr,
                         personNavn = identifisertPerson.personNavn,
@@ -95,7 +95,7 @@ class JournalforingService(private val euxService: EuxService,
 
                 // Oppdaterer distribusjonsinfo
                 if(sakId != null) {
-                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
+                    journalpostKlient.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 
                 if(!journalPostResponse!!.journalpostferdigstilt) {
@@ -140,7 +140,7 @@ class JournalforingService(private val euxService: EuxService,
     private fun hentYtelseKravType(sedHendelse: SedHendelseModel): String? {
         if(sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
             return try{
-                fagmodulService.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                fagmodulKlient.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             } catch (ex: Exception) {
                 null
             }

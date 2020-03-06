@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.norg2
+package no.nav.eessi.pensjon.klienter.norg2
 
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
@@ -22,16 +22,16 @@ import java.nio.file.Paths
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
-class Norg2ServiceTest {
+class Norg2KlientTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    private lateinit var norg2Service: Norg2Service
+    private lateinit var norg2Klient: Norg2Klient
 
     @BeforeEach
     fun setup() {
-        norg2Service = Norg2Service(mockrestTemplate)
+        norg2Klient = Norg2Klient(mockrestTemplate)
     }
 
     @Test
@@ -44,7 +44,7 @@ class Norg2ServiceTest {
         )
 
         val expected = "0001"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -59,7 +59,7 @@ class Norg2ServiceTest {
         )
 
         val expected = null
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -74,7 +74,7 @@ class Norg2ServiceTest {
         )
 
         val expected = "4803"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -89,7 +89,7 @@ class Norg2ServiceTest {
         )
 
         val expected = "4862"
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -105,16 +105,16 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
+        val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
                 fnr = "12345678910",
                 landkode = "NOR",
                 geografiskTilknytning = "0422",
                 fdato = LocalDate.of(1950,1,1)))
 
-        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+        val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(4, result?.size)
 
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("4803", actual)
     }
 
@@ -129,12 +129,12 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(fdato = LocalDate.of(1950,1,1)))
+        val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(fdato = LocalDate.of(1950,1,1)))
 
-        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+        val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(2, result?.size)
 
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("0001", actual)
     }
 
@@ -149,16 +149,16 @@ class Norg2ServiceTest {
                         eq(String::class.java)
                 )
 
-        val request = norg2Service.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
+        val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(IdentifisertPerson(
                 fnr = "12345678910",
                 landkode = "NOR",
                 diskresjonskode = "SPSF",
                 fdato = LocalDate.of(1950,1,1)))
 
-        val result = norg2Service.hentArbeidsfordelingEnheter(request)
+        val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(3, result?.size)
 
-        val actual = norg2Service.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("2103", actual)
     }
 
