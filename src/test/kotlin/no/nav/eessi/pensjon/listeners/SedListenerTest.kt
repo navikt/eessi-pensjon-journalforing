@@ -92,7 +92,7 @@ class SedListenerTest {
 
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any())
     }
 
     @Test
@@ -101,7 +101,7 @@ class SedListenerTest {
 
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
 
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any())
     }
 
 }

@@ -40,13 +40,14 @@ class SedListener(
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
+                    val offset = cr.offset()
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
                         logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson)
+                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, offset)
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -72,14 +73,17 @@ class SedListener(
                 logger.debug(hendelse)
 
                 try {
+                    val offset = cr.offset()
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
+
                         logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson)
+                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
                     }
+
                     acknowledgment.acknowledge()
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
