@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.fagmodul
+package no.nav.eessi.pensjon.klienter.fagmodul
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.HttpStatusCodeException
@@ -16,17 +15,18 @@ import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
 import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.failureTypeTagValue
 import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.successTypeTagValue
+import org.springframework.stereotype.Component
 
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
-@Service
-class FagmodulService(
+@Component
+class FagmodulKlient(
         private val fagmodulOidcRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulService::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulKlient::class.java) }
 
     private val hentYtelseTypeMapper = YtelseTypeMapper()
 

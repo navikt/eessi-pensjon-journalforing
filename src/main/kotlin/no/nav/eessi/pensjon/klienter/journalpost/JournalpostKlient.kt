@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.journalpost
+package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -10,23 +10,23 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
-@Service
-class JournalpostService(
+@Component
+class JournalpostKlient(
         private val journalpostOidcRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostService::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostKlient::class.java) }
     private val mapper = jacksonObjectMapper()
     private final val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
 

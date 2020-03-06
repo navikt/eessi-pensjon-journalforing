@@ -3,14 +3,14 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import no.nav.eessi.pensjon.services.eux.EuxService
-import no.nav.eessi.pensjon.services.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class DiskresjonkodeHelper(private val euxService: EuxService,
-                           private val fagmodulService: FagmodulService,
+class DiskresjonkodeHelper(private val euxKlient: EuxKlient,
+                           private val fagmodulKlient: FagmodulKlient,
                            private val personV3Klient: PersonV3Klient,
                            private val sedFnrSøk: SedFnrSøk)  {
 
@@ -36,7 +36,7 @@ class DiskresjonkodeHelper(private val euxService: EuxService,
 
     private fun finnDiskresjonkode(rinaNr: String, sedDokumentId: String): Diskresjonskode? {
         logger.debug("Henter Sed dokument for å lete igjennom FNR for diskresjonkode")
-        val sed = euxService.hentSed(rinaNr, sedDokumentId)
+        val sed = euxKlient.hentSed(rinaNr, sedDokumentId)
 
         val fnre = sedFnrSøk.finnAlleFnrDnrISed(sed!!)
         fnre.forEach { fnr ->
@@ -60,7 +60,7 @@ class DiskresjonkodeHelper(private val euxService: EuxService,
 
     fun hentSedsIdfraRina(rinaNr: String): String? {
         logger.debug("Prøver å Henter nødvendige Rina documentid fra rinasaknr: $rinaNr")
-        return fagmodulService.hentAlleDokumenter(rinaNr)
+        return fagmodulKlient.hentAlleDokumenter(rinaNr)
     }
 
 

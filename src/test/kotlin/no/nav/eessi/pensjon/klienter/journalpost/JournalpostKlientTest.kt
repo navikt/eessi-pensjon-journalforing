@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.journalpost
+package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -21,16 +21,16 @@ import org.springframework.http.*
 import org.springframework.web.client.HttpServerErrorException
 
 @ExtendWith(MockitoExtension::class)
-class JournalpostServiceTest {
+class JournalpostKlientTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    private lateinit var journalpostService: JournalpostService
+    private lateinit var journalpostKlient: JournalpostKlient
 
     @BeforeEach
     fun setup() {
-        journalpostService = JournalpostService(mockrestTemplate)
+        journalpostKlient = JournalpostKlient(mockrestTemplate)
     }
 
     @Test
@@ -54,7 +54,7 @@ class JournalpostServiceTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostService.opprettJournalpost(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -103,7 +103,7 @@ class JournalpostServiceTest {
                         eq(String::class.java))
 
         assertThrows<RuntimeException> {
-            journalpostService.opprettJournalpost(
+            journalpostKlient.opprettJournalpost(
                     rinaSakId = "1111",
                     fnr = "12345678912",
                     personNavn = "navn navnesen",
@@ -156,7 +156,7 @@ class JournalpostServiceTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostService.opprettJournalpost(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -215,7 +215,7 @@ class JournalpostServiceTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        journalpostService.oppdaterDistribusjonsinfo(journalpostId)
+        journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
     }

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.fagmodul
+package no.nav.eessi.pensjon.klienter.fagmodul
 
 class YtelseTypeMapper {
     fun map(hentYtelseTypeResponse: HentYtelseTypeResponse?) : String? {

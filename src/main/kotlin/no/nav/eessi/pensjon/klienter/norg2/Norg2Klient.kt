@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.norg2
+package no.nav.eessi.pensjon.klienter.norg2
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapJsonToAny
@@ -12,17 +12,17 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
-@Service
-class Norg2Service(private val norg2OidcRestTemplate: RestTemplate,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
+@Component
+class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
+                  @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     constructor(): this(RestTemplate())
 
-    private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
+    private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
 
     //https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
     protected enum class BehandlingsTyper(val kode : String) {

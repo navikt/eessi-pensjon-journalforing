@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.journalpost
+package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.json.mapAnyToJson
 

@@ -39,6 +39,6 @@ JOURNALPOST_V1_URL: http://localhost:${mockServerport}
 aktoerregister.api.v1.url: http://localhost:${mockServerport}
 virksomhet.person.v3:
   endpointurl: http://localhost:${mockServerport}
-eessifagmodulservice_URL: http://localhost:${mockServerport}
-eessipennorg2service_URL: http://localhost:${mockServerport}
+EESSI_PENSJON_FAGMODUL_URL: http://localhost:${mockServerport}
+NORG2_URL: http://localhost:${mockServerport}
 BestemSak_URL: http://localhost:${mockServerport}

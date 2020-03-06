@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.services.pesys
+package no.nav.eessi.pensjon.klienter.pesys
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,16 +14,16 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-@Service
-class PenService(private val bestemSakOidcRestTemplate: RestTemplate,
-                 @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
+@Component
+class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
+                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
-    val logger: Logger by lazy { LoggerFactory.getLogger(PenService::class.java) }
+    val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
     val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
     /**
