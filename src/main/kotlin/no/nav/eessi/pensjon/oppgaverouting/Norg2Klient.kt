@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.norg2
+package no.nav.eessi.pensjon.oppgaverouting
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapJsonToAny
@@ -98,7 +98,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
 
 class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)
 
-data class NorgKlientRequest(val diskresjonskode: String? = null,
+class NorgKlientRequest(val diskresjonskode: String? = null,
                               val landkode: String? = null,
                               val geografiskTilknytning: String? = null)
 

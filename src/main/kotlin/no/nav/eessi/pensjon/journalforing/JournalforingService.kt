@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
@@ -19,6 +18,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -43,9 +43,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-                // TODO pin og ytelse skal gjøres om til å returnere kun ytelse
-                val pinOgYtelse = hentYtelseKravType(sedHendelse)
-
+                val ytelseType = hentYtelseKravType(sedHendelse)
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
@@ -67,9 +65,13 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 if(sakId == null) {
                     tildeltEnhet = hentTildeltEnhet(
                             sedHendelse.sedType,
-                            sedHendelse.bucType!!,
-                            pinOgYtelse,
-                            identifisertPerson
+                            OppgaveRoutingRequest(identifisertPerson.fnr,
+                                    identifisertPerson.fdato,
+                                    identifisertPerson.diskresjonskode,
+                                    identifisertPerson.landkode,
+                                    identifisertPerson.geografiskTilknytning,
+                                    sedHendelse.bucType,
+                                    ytelseType)
                     )
                 } else {
                     forsokFerdigstill = true
@@ -150,14 +152,12 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
     private fun hentTildeltEnhet(
             sedType: SedType,
-            bucType: BucType,
-            ytelseType: String?,
-            person: IdentifisertPerson
+            oppgaveRoutingRequest: OppgaveRoutingRequest
     ): OppgaveRoutingModel.Enhet {
         return if(sedType == SedType.P15000){
-            oppgaveRoutingService.route(person, bucType, ytelseType)
+            oppgaveRoutingService.route(oppgaveRoutingRequest)
         } else {
-            oppgaveRoutingService.route(person, bucType)
+            oppgaveRoutingService.route(oppgaveRoutingRequest)
         }
     }
 }
