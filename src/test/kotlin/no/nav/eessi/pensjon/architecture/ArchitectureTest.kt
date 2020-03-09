@@ -32,11 +32,10 @@ class ArchitectureTest {
         }
     }
 
-//    @Test
-//    fun `Packages should not have cyclic depenedencies`() {
-//        slices().matching("$root.(*)..").should().beFreeOfCycles().check(classesToAnalyze)
-//    }
-
+    @Test
+    fun `Packages should not have cyclic depenedencies`() {
+        slices().matching("$root.(*)..").should().beFreeOfCycles().check(classesToAnalyze)
+    }
 
     @Test
     fun `Klienter should not depend on eachother`() {

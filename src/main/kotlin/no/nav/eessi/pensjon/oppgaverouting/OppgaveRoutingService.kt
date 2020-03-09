@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingRequestException
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
+import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -25,8 +26,10 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
               ytelseType: String? = null): Enhet {
 
         logger.debug("person: $person,  bucType: $bucType, ytelseType: $ytelseType")
+        if (person.fnr == null) return ID_OG_FORDELING
+        val norgKlientRequest = NorgKlientRequest(person.diskresjonskode, person.landkode, person.geografiskTilknytning)
 
-        val tildeltEnhet = hentNorg2Enhet(person, bucType) ?: bestemTildeltEnhet(person, bucType, ytelseType)
+        val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, bucType) ?: bestemTildeltEnhet(person, bucType, ytelseType)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
                 "Buc: $bucType, " +
@@ -70,8 +73,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                 }
     }
 
-    fun hentNorg2Enhet(person: IdentifisertPerson, bucType: BucType?): Enhet? {
-        if (person.fnr == null) return null
+    fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
 
         return when(bucType) {
             P_BUC_01 -> {
