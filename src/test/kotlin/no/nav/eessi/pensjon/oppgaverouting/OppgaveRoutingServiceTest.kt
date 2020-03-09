@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
+import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
@@ -171,11 +172,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
-                landkode = "SVE",
-                fdato = LocalDate.of(1950,1,1)),
-            P_BUC_01)
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(landkode = "SVE"),P_BUC_01)
         val expected = PENSJON_UTLAND
 
         assertEquals(expected,actual)
@@ -187,11 +184,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
-                geografiskTilknytning = "0322",
-                landkode = "NOR",
-                fdato = LocalDate.of(1950,1,1)),
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
             P_BUC_01)
         val expected = NFP_UTLAND_OSLO
 
@@ -204,11 +197,7 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
-                geografiskTilknytning = "1102",
-                landkode = "NOR",
-                fdato = LocalDate.of(1950,1,1)),
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR"),
             P_BUC_01)
         val expected = NFP_UTLAND_AALESUND
 
@@ -221,12 +210,10 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "1102",
                 landkode = "NOR",
-                diskresjonskode = "SPSF",
-                fdato = LocalDate.of(1950,1,1)),
+                diskresjonskode = "SPSF"),
             P_BUC_01)
         val expected = DISKRESJONSKODE
 
@@ -235,11 +222,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
-       val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-               fnr = "1208201515925",
-               geografiskTilknytning = "0322",
-               landkode = "NOR",
-               fdato = LocalDate.of(1950,1,1)),
+       val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
             P_BUC_03)
        val expected = null
 
@@ -251,11 +234,7 @@ class OppgaveRoutingServiceTest {
         doReturn(listOf<Norg2ArbeidsfordelingItem>())
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
-                geografiskTilknytning = "0322",
-                landkode = "NOR",
-                fdato = LocalDate.of(1950,1,1)),
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
             P_BUC_01)
         val expected = null
 
@@ -267,11 +246,7 @@ class OppgaveRoutingServiceTest {
         doThrow(RuntimeException("dummy"))
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
-                geografiskTilknytning = "0322",
-                landkode = "NOR",
-                fdato = LocalDate.of(1950,1,1)),
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
             P_BUC_01)
         val expected = null
 
@@ -284,12 +259,10 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(IdentifisertPerson(
-                fnr = "1208201515925",
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "0322",
                 landkode = "NOR",
-                diskresjonskode = "SPSF",
-                fdato = LocalDate.of(1950,1,1)),
+                diskresjonskode = "SPSF"),
             P_BUC_01)
         val expected = DISKRESJONSKODE
 
