@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.norg2
+package no.nav.eessi.pensjon.oppgaverouting
 
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq

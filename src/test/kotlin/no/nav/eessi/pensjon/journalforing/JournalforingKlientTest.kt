@@ -115,28 +115,27 @@ class JournalforingKlientTest {
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_01), eq(null))
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_01 && arg.ytelseType == null })
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_02), eq(null))
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == null })
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
-                .route(any(),
-                    eq(BucType.P_BUC_03), eq(null))
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_03 && arg.ytelseType == null })
 
         doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_10), any())
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_10 && arg.ytelseType == null })
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_10), eq(null))
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_10 && arg.ytelseType == null })
 
         doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
                 .`when`(oppgaveRoutingService)
-                .route(any(), eq(BucType.P_BUC_05), eq(null))
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_05 && arg.ytelseType == null })
 
         //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
         doReturn(Krav.YtelseType.UT.name)
@@ -187,6 +186,10 @@ class JournalforingKlientTest {
                 null,
                 null,
                 null)
+
+        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
 
@@ -358,6 +361,10 @@ class JournalforingKlientTest {
                 null,
                 null,
                 null)
+
+        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
 
