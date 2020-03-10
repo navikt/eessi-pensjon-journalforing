@@ -1,9 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
@@ -21,12 +18,6 @@ import java.nio.file.Paths
 class DiskresjonkodeHelperTest {
 
     @Mock
-    private lateinit var euxKlient: EuxKlient
-
-    @Mock
-    private lateinit var fagmodulKlient: FagmodulKlient
-
-    @Mock
     private lateinit var personV3Klient: PersonV3Klient
 
     private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
@@ -38,8 +29,6 @@ class DiskresjonkodeHelperTest {
         sedFnrSøk = SedFnrSøk()
 
         diskresjonkodeHelper = DiskresjonkodeHelper(
-                euxKlient,
-                fagmodulKlient,
                 personV3Klient,
                 sedFnrSøk
         )
@@ -57,19 +46,9 @@ class DiskresjonkodeHelperTest {
 
     @Test
     fun sjekkForIngenDiskresjonskode() {
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-
-        doReturn(BrukerMock.createWith()).whenever(personV3Klient).hentPerson(any())
-
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -77,11 +56,7 @@ class DiskresjonkodeHelperTest {
 
     @Test
     fun sjekkForIngenDiskresjonskodePersonIkkeFunnetException() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
@@ -93,11 +68,7 @@ class DiskresjonkodeHelperTest {
                 .doReturn(BrukerMock.createWith())
                 .whenever(personV3Klient).hentPerson(any())
 
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -105,11 +76,7 @@ class DiskresjonkodeHelperTest {
 
     @Test
     fun sjekkForIngenDiskresjonskodePersonIkkeFunnetExceptionSaaFunnetMedDiskresjon() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         val brukerFO = BrukerMock.createWith()
         brukerFO?.diskresjonskode = Diskresjonskoder().withValue("SPFO")
@@ -128,10 +95,7 @@ class DiskresjonkodeHelperTest {
                 .doReturn(brukerSF)
                 .whenever(personV3Klient).hentPerson(any())
 
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)
@@ -139,13 +103,7 @@ class DiskresjonkodeHelperTest {
 
     @Test
     fun sjekkForDiskresjonskodeSPSFFunnet() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         val bruker = BrukerMock.createWith()
         bruker?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
@@ -159,9 +117,8 @@ class DiskresjonkodeHelperTest {
             doReturn(BrukerMock.createWith()).
             doReturn(bruker).whenever(personV3Klient).hentPerson(any())
 
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = Diskresjonskode.SPSF
 
         Assertions.assertEquals(expected, actual)
