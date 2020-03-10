@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -11,13 +10,9 @@ class DiskresjonkodeHelper(private val personV3Klient: PersonV3Klient,
 
     private val logger = LoggerFactory.getLogger(DiskresjonkodeHelper::class.java)
 
-    private val mapper = jacksonObjectMapper()
-
-
     fun hentDiskresjonskode(alleSediBuc: List<String?>): Diskresjonskode? {
 
         val diskresjonskode = null
-
         alleSediBuc.forEach { sed -> return finnDiskresjonkode(sed!!) }
 
         return diskresjonskode
@@ -43,14 +38,6 @@ class DiskresjonkodeHelper(private val personV3Klient: PersonV3Klient,
             }
         }
         return null
-    }
-
-    fun hentSedDocumentsIds(sedJson: String?): List<String> {
-        val sedRootNode = mapper.readTree(sedJson)
-        return sedRootNode
-                .filterNot { it.get("status").textValue() =="empty" }
-                .map { it.get("id").textValue() }
-                .toList()
     }
 }
 

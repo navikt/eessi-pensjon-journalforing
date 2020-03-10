@@ -35,16 +35,6 @@ class DiskresjonkodeHelperTest {
     }
 
     @Test
-    fun sjekkeUtJacksonMapper() {
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val expected = listOf("44cb68f89a2f4e748934fb4722721018")
-        val actual = diskresjonkodeHelper.hentSedDocumentsIds(json)
-
-        Assertions.assertEquals(expected, actual)
-
-    }
-
-    @Test
     fun sjekkForIngenDiskresjonskode() {
         val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
