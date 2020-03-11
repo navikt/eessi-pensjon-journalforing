@@ -126,8 +126,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     }
 }
 
-
-data class IdentifisertPerson(val fnr : String? = null,
+class IdentifisertPerson(val fnr : String? = null,
                               val aktoerId: String? = null,
                               val fdato: LocalDate,
                               val personNavn: String? = null,
