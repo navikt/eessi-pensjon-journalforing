@@ -159,7 +159,7 @@ class Norg2KlientTest {
     }
 
     @Test
-    fun `Gitt en ukjent norg2Klient request kast NotImplementedError`() {
+    fun `Gitt en ukjent norg2Klient request kast IllegalArgumentException`() {
         Assertions.assertThrows(IllegalArgumentException::class.java) {
             norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
                     landkode = "BOGUS",
