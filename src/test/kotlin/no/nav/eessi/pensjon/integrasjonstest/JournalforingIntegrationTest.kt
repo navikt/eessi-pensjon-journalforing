@@ -461,7 +461,7 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/7477291/allDocuments"),
-                VerificationTimes.atLeast(2)
+                VerificationTimes.once()
         )
 
         // Verfiy fagmodul allDocuments
@@ -485,7 +485,7 @@ class JournalforingIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
-                VerificationTimes.exactly(3)
+                VerificationTimes.once()
         )
 
 
@@ -498,7 +498,7 @@ class JournalforingIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 30) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 23) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP

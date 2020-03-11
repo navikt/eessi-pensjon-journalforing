@@ -1,9 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
@@ -16,15 +13,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import java.nio.file.Files
 import java.nio.file.Paths
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
 
 @ExtendWith(MockitoExtension::class)
 class DiskresjonkodeHelperTest {
-
-    @Mock
-    private lateinit var euxKlient: EuxKlient
-
-    @Mock
-    private lateinit var fagmodulKlient: FagmodulKlient
 
     @Mock
     private lateinit var personV3Klient: PersonV3Klient
@@ -38,50 +30,23 @@ class DiskresjonkodeHelperTest {
         sedFnrSøk = SedFnrSøk()
 
         diskresjonkodeHelper = DiskresjonkodeHelper(
-                euxKlient,
-                fagmodulKlient,
                 personV3Klient,
                 sedFnrSøk
         )
     }
 
     @Test
-    fun sjekkeUtJacksonMapper() {
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val expected = listOf("44cb68f89a2f4e748934fb4722721018")
-        val actual = diskresjonkodeHelper.hentSedDocumentsIds(json)
+    fun `Gitt ingen brukere med diskresjonskode SPSF når diskresjonskodehelper leter etter SPSF koder i alle SEDer i en BUC så returner diskresjonskode`() {
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
-        Assertions.assertEquals(expected, actual)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
-    }
-
-    @Test
-    fun sjekkForIngenDiskresjonskode() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-
-        doReturn(BrukerMock.createWith()).whenever(personV3Klient).hentPerson(any())
-
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
-        val expected = null
-
-        Assertions.assertEquals(expected, actual)
+        Assertions.assertEquals(null, actual)
     }
 
     @Test
     fun sjekkForIngenDiskresjonskodePersonIkkeFunnetException() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
@@ -93,11 +58,7 @@ class DiskresjonkodeHelperTest {
                 .doReturn(BrukerMock.createWith())
                 .whenever(personV3Klient).hentPerson(any())
 
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = null
 
         Assertions.assertEquals(expected, actual)
@@ -105,11 +66,7 @@ class DiskresjonkodeHelperTest {
 
     @Test
     fun sjekkForIngenDiskresjonskodePersonIkkeFunnetExceptionSaaFunnetMedDiskresjon() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         val brukerFO = BrukerMock.createWith()
         brukerFO?.diskresjonskode = Diskresjonskoder().withValue("SPFO")
@@ -118,52 +75,27 @@ class DiskresjonkodeHelperTest {
         brukerSF?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
 
         doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-
                 .doReturn(brukerFO)
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doReturn(BrukerMock.createWith())
                 .doReturn(brukerSF)
                 .whenever(personV3Klient).hentPerson(any())
 
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
-        val expected = Diskresjonskode.SPSF
-
-        Assertions.assertEquals(expected, actual)
+        Assertions.assertEquals(SPSF, actual)
     }
 
     @Test
-    fun sjekkForDiskresjonskodeSPSFFunnet() {
-
-        val json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
-        val p2000Json = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
-        val allSedsJson = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json")))
-        val hendelse = SedHendelseModel.fromJson(json)
-
-        doReturn(p2000Json).whenever(euxKlient).hentSed(any(), any())
+    fun `Gitt en bruker med diskresjonskode SPSF når diskresjonskodehelper leter etter SPSF koder i alle SEDer i en BUC`() {
+        val p2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
 
         val bruker = BrukerMock.createWith()
         bruker?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
 
-            doReturn(BrukerMock.createWith()).
-            doReturn(BrukerMock.createWith()).
-            doReturn(BrukerMock.createWith()).
-            doReturn(BrukerMock.createWith()).
+        doReturn(bruker).whenever(personV3Klient).hentPerson(any())
 
-            doReturn(BrukerMock.createWith()).
-            doReturn(BrukerMock.createWith()).
-            doReturn(bruker).whenever(personV3Klient).hentPerson(any())
+        val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
-        doReturn(allSedsJson).whenever(fagmodulKlient).hentAlleDokumenter(any())
-
-        val actual = diskresjonkodeHelper.hentDiskresjonskode(hendelse)
-        val expected = Diskresjonskode.SPSF
-
-        Assertions.assertEquals(expected, actual)
+        Assertions.assertEquals(SPSF, actual)
     }
 }

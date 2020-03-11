@@ -63,7 +63,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
         if (person != null) aktoerId = hentAktoerId(fnr)
 
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(sedHendelse)
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
@@ -126,8 +126,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     }
 }
 
-
-data class IdentifisertPerson(val fnr : String? = null,
+class IdentifisertPerson(val fnr : String? = null,
                               val aktoerId: String? = null,
                               val fdato: LocalDate,
                               val personNavn: String? = null,
