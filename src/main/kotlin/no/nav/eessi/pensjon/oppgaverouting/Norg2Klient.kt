@@ -37,21 +37,22 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         return finnKorrektArbeidsfordelingEnheter(request, enheter)
     }
 
-    fun opprettNorg2ArbeidsfordelingRequest(person: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
+    fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
         return when {
-            person.landkode == "NOR" && person.geografiskTilknytning != null && person.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
-                    geografiskOmraade = person.geografiskTilknytning,
+            req.landkode == "NOR" && req.geografiskTilknytning != null && req.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+                    geografiskOmraade = req.geografiskTilknytning,
                     behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
             )
-            person.landkode != "NOR" && person.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+            req.landkode != "NOR" && req.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
                     geografiskOmraade = "ANY",
                     behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
             )
-            person.diskresjonskode != null && person.diskresjonskode == "SPSF" -> Norg2ArbeidsfordelingRequest(
+            req.diskresjonskode != null && req.diskresjonskode == "SPSF" -> Norg2ArbeidsfordelingRequest(
                     tema = "ANY",
                     diskresjonskode = "SPSF"
             )
-            else -> throw Norg2ArbeidsfordelingRequestException("Feiler ved oppretting av request")
+            else ->
+                throw IllegalArgumentException("Klarte ikke opprette norg2Arbeidsfordeling request for input: $req")
         }
     }
 
@@ -95,10 +96,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
     }
 }
 
-
-class Norg2ArbeidsfordelingRequestException(melding: String): RuntimeException(melding)
-
-class NorgKlientRequest(val diskresjonskode: String? = null,
+data class NorgKlientRequest(val diskresjonskode: String? = null,
                               val landkode: String? = null,
                               val geografiskTilknytning: String? = null)
 

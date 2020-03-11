@@ -75,10 +75,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                     val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
-                } catch (rqe: Norg2ArbeidsfordelingRequestException) {
-                    logger.error("Norg2 request feil ${rqe.message}")
-                    null
-                } catch (ex: Exception) {
+                }  catch (ex: Exception) {
                     logger.error("Ukjent feil oppstod; ${ex.message}")
                     null
                 }
