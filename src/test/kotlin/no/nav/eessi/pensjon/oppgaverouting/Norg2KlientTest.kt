@@ -5,11 +5,13 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.contains
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpEntity
@@ -154,6 +156,15 @@ class Norg2KlientTest {
 
         val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
         assertEquals("2103", actual)
+    }
+
+    @Test
+    fun `Gitt en ukjent norg2Klient request kast NotImplementedError`() {
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
+                    landkode = "BOGUS",
+                    diskresjonskode = "SPFO"))
+        }
     }
 
     fun getJsonFileFromResource(filename: String): String {
