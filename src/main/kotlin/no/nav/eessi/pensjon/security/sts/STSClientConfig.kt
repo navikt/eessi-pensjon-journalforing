@@ -53,17 +53,18 @@ class STSClientConfig {
     fun setRequestSamlPolicy(path: String) {
         STS_REQUEST_SAML_POLICY = path
     }
+
+    fun <T> configureRequestSamlToken(service: T) {
+        val client = ClientProxy.getClient(service)
+        configureSTSRequestSamlToken(client, true)
+    }
+
+    private fun configureSTSRequestSamlToken(client: Client, cacheTokenInEndpoint: Boolean) {
+        val stsClient = createCustomSTSClient(client.bus)
+        configureSTSWithPolicyForClient(stsClient, client, STS_REQUEST_SAML_POLICY, cacheTokenInEndpoint)
+    }
 }
 
-fun <T> configureRequestSamlToken(service: T) {
-    val client = ClientProxy.getClient(service)
-    configureSTSRequestSamlToken(client, true)
-}
-
-private fun configureSTSRequestSamlToken(client: Client, cacheTokenInEndpoint: Boolean) {
-    val stsClient = createCustomSTSClient(client.bus)
-    configureSTSWithPolicyForClient(stsClient, client, STS_REQUEST_SAML_POLICY, cacheTokenInEndpoint)
-}
 
 /**
  * Creating custom STS client because the STS on Datapower requires KeyType as a child to RequestSecurityToken and

@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
+import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
 
 object BrukerMock {
     internal fun createWith(fnr: String? = null, landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
@@ -26,3 +27,9 @@ object BrukerMock {
                 else -> null
             })
 }
+
+object HentPersonResponse {
+    internal fun createWith(fnr: String? = null, landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
+            HentPersonResponse = HentPersonResponse().withPerson(BrukerMock.createWith(fnr, landkoder, fornavn, etternavn))
+}
+

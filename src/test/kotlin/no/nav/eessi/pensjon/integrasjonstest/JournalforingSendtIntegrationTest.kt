@@ -6,6 +6,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
+import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -526,14 +527,14 @@ class JournalforingSendtIntegrationTest {
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
     @TestConfiguration
-    class TestConfig{
+    class TestConfig(private val stsClientConfig: STSClientConfig){
         @Bean
         @Primary
         fun personV3(): PersonV3 = mockk()
 
         @Bean
         fun personV3Klient(personV3: PersonV3): PersonV3Klient {
-            return spyk(PersonV3Klient(personV3))
+            return spyk(PersonV3Klient(personV3, stsClientConfig))
         }
     }
 }

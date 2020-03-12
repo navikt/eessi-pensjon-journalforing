@@ -1,22 +1,29 @@
 package no.nav.eessi.pensjon.personidentifisering.klienter
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.spyk
+import no.nav.eessi.pensjon.security.sts.STSClientConfig
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
+import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
+import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet
+import no.nav.tjeneste.virksomhet.person.v3.feil.Sikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
 class PersonV3KlientTest {
 
     private lateinit var personV3 : PersonV3
+
+    @Mock
+    private lateinit var stsClientConfig: STSClientConfig
 
     lateinit var personV3Klient : PersonV3Klient
 
@@ -27,20 +34,13 @@ class PersonV3KlientTest {
     @BeforeEach
     fun setup() {
         personV3 = spyk()
-        personV3Klient = spyk(PersonV3Klient(personV3))
-
-        every { personV3Klient.konfigurerSamlToken() } just Runs
-
-        every { personV3Klient.hentPerson(subject) } returns BrukerMock.createWith(subject)
-
-        every { personV3Klient.hentPerson(ikkeFunnetSubject) } returns null
-
-        every { personV3Klient.hentPerson(sikkerhetsbegrensingSubject) } throws
-                PersonV3SikkerhetsbegrensningException("$sikkerhetsbegrensingSubject har sikkerhetsbegrensning")
+        personV3Klient = PersonV3Klient(personV3, stsClientConfig)
     }
 
     @Test
     fun `Kaller hentPerson med gyldig subject`(){
+        every {personV3.hentPerson(any())} returns HentPersonResponse.createWith(subject)
+
         try {
             val person = personV3Klient.hentPerson(subject)
             assertEquals("23037329381", (person!!.aktoer as PersonIdent).ident.ident)
@@ -51,6 +51,8 @@ class PersonV3KlientTest {
 
     @Test
     fun `Kaller hentPerson med subject som ikke finnes`(){
+        every {personV3.hentPerson(any())} throws HentPersonPersonIkkeFunnet("whoooops", PersonIkkeFunnet())
+
         try {
             val person = personV3Klient.hentPerson(ikkeFunnetSubject)
             assertNull(person)
@@ -61,6 +63,8 @@ class PersonV3KlientTest {
 
     @Test
     fun `Kaller hentPerson med subject med sikkerhetsbegrensing`(){
+        every {personV3.hentPerson(any())} throws HentPersonSikkerhetsbegrensning("$sikkerhetsbegrensingSubject har sikkerhetsbegrensning", Sikkerhetsbegrensning())
+
         try {
             personV3Klient.hentPerson(sikkerhetsbegrensingSubject)
             assert(false)
