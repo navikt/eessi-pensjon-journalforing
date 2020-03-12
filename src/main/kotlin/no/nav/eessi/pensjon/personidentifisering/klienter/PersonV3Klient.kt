@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ResponseStatus
+import javax.xml.ws.soap.SOAPFaultException
 
 fun hentLandkode(person: Person?) =
         person?.bostedsadresse?.strukturertAdresse?.landkode?.value
@@ -46,11 +47,19 @@ class PersonV3Klient(
             } catch (pif: HentPersonPersonIkkeFunnet) {
                 logger.warn("Personen finnes ikke", pif)
                 null
-            } catch (psb: HentPersonSikkerhetsbegrensning) {
-                logger.error("Sikkerhetsbegrensning hindret henting av person", psb)
-                throw PersonV3SikkerhetsbegrensningException(psb.message)
+            } catch (sfe: SOAPFaultException) {
+                if (sfe.fault.faultString.contains("F002001F")) {
+                    logger.warn("PersonV3: Kunne ikke hente person, ugyldig input", sfe)
+                    null
+                } else {
+                    logger.error("PersonV3: Ukjent SoapFaultException", sfe)
+                    throw sfe
+                }
+            } catch (sb: HentPersonSikkerhetsbegrensning) {
+                logger.error("PersonV3: Kunne ikke hente person, sikkerhetsbegrensning", sb)
+                throw PersonV3SikkerhetsbegrensningException(sb.message)
             } catch (ex: Exception) {
-                logger.error("En ukjent feil oppstod under henting av person", ex)
+                logger.error("PersonV3: Kunne ikke hente person", ex)
                 throw ex
             }
         }
