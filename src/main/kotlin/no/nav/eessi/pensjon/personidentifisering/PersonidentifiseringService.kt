@@ -111,11 +111,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
     private fun hentPerson(navBruker: String?): Bruker? {
         if (!isFnrValid(navBruker)) return null
-        return try {
-            personV3Klient.hentPerson(navBruker!!)
-        } catch (ex: Exception) {
-            null
-        }
+        return personV3Klient.hentPerson(navBruker!!)
     }
 
     fun isFnrValid(navBruker: String?): Boolean {
