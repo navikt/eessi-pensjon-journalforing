@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.klienter
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.security.sts.configureRequestSamlToken
+import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
@@ -31,6 +31,7 @@ fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.
 @Component
 class PersonV3Klient(
         private val service: PersonV3,
+        private val stsClientConfig: STSClientConfig,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -79,7 +80,7 @@ class PersonV3Klient(
     }
 
     fun konfigurerSamlToken(){
-        configureRequestSamlToken(service)
+        stsClientConfig.configureRequestSamlToken(service)
     }
 }
 
