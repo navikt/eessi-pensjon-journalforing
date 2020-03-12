@@ -31,9 +31,9 @@ spec:
       value: https://oppgave-q2.nais.preprod.local/api/v1/oppgaver
     - name: AKTOERREGISTER_API_V1_URL
       value: https://app-q1.adeo.no/aktoerregister/api/v1
-    - name: EESSIFAGMODULSERVICE_URL
+    - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul-q1.nais.preprod.local/
-    - name: EESSIPENNORG2SERVICE_URL
+    - name: NORG2_URL
       value: https://app-q4.adeo.no/norg2/
     - name: BESTEMSAK_URL
       value: https://wasapp-q1.adeo.no/pensjon-ws/api/bestemsak/v1
@@ -74,3 +74,5 @@ spec:
     paths:
       - kvPath: {{serviceuserkv}}
         mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing
+      - kvPath: /apikey/appdynamics/dev
+        mountPath: /var/run/secrets/nais.io/vault
