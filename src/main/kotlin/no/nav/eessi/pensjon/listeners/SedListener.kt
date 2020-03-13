@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -27,6 +28,7 @@ class SedListener(
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
     private val latch = CountDownLatch(6)
+    private val mapper = jacksonObjectMapper()
 
     fun getLatch(): CountDownLatch {
         return latch
@@ -74,16 +76,14 @@ class SedListener(
 
                 try {
                     val offset = cr.offset()
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-                    if (sedHendelse.sektorKode == "P") {
-
-                        logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
-                        val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
+                    if (gyldigInnkommendeHendelse(hendelse)) {
+                            val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                            logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
                     }
-
                     acknowledgment.acknowledge()
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
@@ -95,8 +95,19 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-
+                latch.countDown()
             }
         }
     }
+
+    fun gyldigInnkommendeHendelse(hendelse: String): Boolean {
+        val gyldigeHendelser = listOf("P", "H_BUC_07")
+        return innkommendeHendelse(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
+    }
+
+    private fun innkommendeHendelse(hendelse: String): List<String> {
+        val rootNode = mapper.readTree(hendelse)
+        return listOf(rootNode.get("sektorKode").textValue(), rootNode.get("bucType").textValue())
+    }
+
 }

@@ -41,11 +41,11 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
 
-@SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
+@SpringBootTest(classes = [ JournalforingMottattIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-class JournalforingIntegrationTest {
+class JournalforingMottattIntegrationTest {
 
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
@@ -57,13 +57,13 @@ class JournalforingIntegrationTest {
     lateinit var  personV3Klient: PersonV3Klient
 
     @Test
-    fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
+    fun `Når en sedMottatt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
         // Mock personV3
         capturePersonMock()
 
         // Vent til kafka er klar
-        val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
+        val container = settOppUtitlityConsumer(SED_MOTTATT_TOPIC)
         container.start()
         ContainerTestUtils.waitForAssignment(container, embeddedKafka.partitionsPerTopic)
 
@@ -92,6 +92,9 @@ class JournalforingIntegrationTest {
         // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
+        // Seder 1 i H_BUC_07 SED til Kafka
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
+
         // Sender 5 Pensjon SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
@@ -113,7 +116,7 @@ class JournalforingIntegrationTest {
         val senderProps = KafkaTestUtils.senderProps(embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
-        template.defaultTopic = SED_SENDT_TOPIC
+        template.defaultTopic = SED_MOTTATT_TOPIC
         return template
     }
 
@@ -252,6 +255,17 @@ class JournalforingIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
                     )
 
+            //Mock fagmodul /buc/{rinanr}/allDocuments -
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/747729177/allDocuments"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsH_BUC_07.json"))))
+                    )
+
             //Mock fagmodul /buc/{rinanr}/allDocuments
             mockServer.`when`(
                     request()
@@ -304,6 +318,17 @@ class JournalforingIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json"))))
+                    )
+
+            //Mock eux hent av sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113" ))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
                     )
 
             // Mocker journalføringstjeneste
@@ -464,6 +489,14 @@ class JournalforingIntegrationTest {
                 VerificationTimes.once()
         )
 
+        // Verfiy fagmodul allDocuments on BUC H_BUC_07
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/747729177/allDocuments"),
+                VerificationTimes.once()
+        )
+
         // Verfiy fagmodul allDocuments
         mockServer.verify(
                 request()
@@ -479,6 +512,15 @@ class JournalforingIntegrationTest {
                         .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
                 VerificationTimes.atLeast(4)
         )
+
+        // Verfiy eux sed on H_BUC_07
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113"),
+                VerificationTimes.once()
+        )
+
 
         // Verfiy eux sed on ugyldig-FNR
         mockServer.verify(
@@ -498,7 +540,7 @@ class JournalforingIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 23) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 24) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
