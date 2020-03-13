@@ -97,6 +97,9 @@ class JournalforingSendtIntegrationTest {
         // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
+        // Seder 1 i H_BUC_07 SED til Kafka
+        // sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
+
         // Sender 5 Pensjon SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
