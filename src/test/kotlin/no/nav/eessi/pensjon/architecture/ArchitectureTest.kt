@@ -121,10 +121,10 @@ class ArchitectureTest {
                 .whereLayer(BUC).mayOnlyBeAccessedByLayers(Listeners, Journalforing)
                 .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT, Integrasjonstest)
-                .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS)
+                .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS, PersonidentifiseringKlienter)
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter)
+                .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter, Integrasjonstest)
                 .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
