@@ -54,13 +54,6 @@ class SedListenerTest {
     }
 
     @Test
-    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres på H_BUC så så ack melding`() {
-        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))),cr, acknowledgment)
-        verify(acknowledgment).acknowledge()
-    }
-
-
-    @Test
     fun `gitt en exception ved sedSendt så kastes RunTimeException og meldig blir IKKE ack'et`() {
         assertThrows<RuntimeException> {
             sedListener.consumeSedSendt("Explode!",cr, acknowledgment)
