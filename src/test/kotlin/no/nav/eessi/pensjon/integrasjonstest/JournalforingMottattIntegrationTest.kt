@@ -89,10 +89,10 @@ class JournalforingMottattIntegrationTest {
     }
 
     private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
-        // Sender 1 Foreldre SED til Kafka
+//        // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
-        // Seder 1 i H_BUC_07 SED til Kafka
+//        // Seder 1 i H_BUC_07 SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
 
         // Sender 5 Pensjon SED til Kafka
@@ -164,6 +164,15 @@ class JournalforingMottattIntegrationTest {
                     request()
                             .withMethod(HttpMethod.GET)
                             .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                    )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -436,7 +445,7 @@ class JournalforingMottattIntegrationTest {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.PATCH)
-                            .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
+                            .withPath("/journalpost/.*/oppdaterDistrmmibusjonsinfo"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -460,10 +469,11 @@ class JournalforingMottattIntegrationTest {
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
                 VerificationTimes.once()
         )
+
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"),
+                        .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113/filer"),
                 VerificationTimes.once()
         )
 
@@ -536,11 +546,11 @@ class JournalforingMottattIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(5)
+                VerificationTimes.exactly(6)
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 24) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 25) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
