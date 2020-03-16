@@ -23,7 +23,7 @@
             "fakturaer"
           ]
         },
-        "doedsdato": "1988-02-11"
+        "doedsdato": "2019-02-11"
       },
       "mor": {
         "person": {
@@ -35,26 +35,26 @@
         "pin": [
           {
             "sektor": "familieytelser",
-            "land": "DE",
+            "land": "NO",
             "institusjonsid": "asdfds fdsfad",
             "institusjonsnavn": "sdaf sdafafd",
-            "identifikator": "r23ffwv"
+            "identifikator": "12078945602"
           }
         ],
-        "fornavn": "asdfaf sadff",
+        "fornavn": "Bamse Brun",
         "foedested": {
-          "region": "asdf fsafsaf",
-          "by": "fasdf sdaffasdf",
+          "region": "Kobenhavn",
+          "by": "Kobenhavn",
           "land": "DK"
         },
         "kjoenn": "M",
-        "etternavn": "sadf dsaff",
+        "etternavn": "Og Hvit",
         "etternavnvedfoedsel": "qwer weqrqwerwe",
         "fornavnvedfoedsel": "wqer weqrwrr",
         "foedselsdato": "1955-09-12",
         "statsborgerskap": [
           {
-            "land": "SE"
+            "land": "NO"
           }
         ]
       },

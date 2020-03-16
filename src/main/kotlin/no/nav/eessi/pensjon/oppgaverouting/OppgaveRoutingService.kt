@@ -50,6 +50,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                                 if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                             P_BUC_10 ->
                                 if (ytelseType == UT.name) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                            H_BUC_07 ->
+                                if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else  NFP_UTLAND_OSLO
                             else -> NFP_UTLAND_AALESUND // Ukjent buc-type
                         }
 
@@ -60,8 +62,9 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                             P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                                 if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                             P_BUC_10 ->
-
                                 if (ytelseType == UT.name) UFORE_UTLAND else PENSJON_UTLAND
+                            H_BUC_07 ->
+                                if (isBetween18and60(routingRequest.fdato))  UFORE_UTLAND else  PENSJON_UTLAND
                             else -> PENSJON_UTLAND // Ukjent buc-type
                         }
                 }

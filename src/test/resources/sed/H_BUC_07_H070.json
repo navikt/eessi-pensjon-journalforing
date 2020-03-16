@@ -1,6 +1,6 @@
 {
   "id": 1869,
-  "sedId": "H070_b12e06dda2c7474b9998c7139c841646_2",
+  "sedId": "H070_9498fc46933548518712e4a1d5133113_2",
   "sektorKode": "H",
   "bucType": "H_BUC_07",
   "rinaSakId": "747729177",
@@ -10,7 +10,7 @@
   "mottakerId": "NO:NAVT007",
   "mottakerNavn": "NAV Test 07",
   "mottakerLand": "NO",
-  "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
+  "rinaDokumentId": "9498fc46933548518712e4a1d5133113",
   "rinaDokumentVersjon": "2",
   "sedType": "H070",
   "navBruker": "12078945602"
