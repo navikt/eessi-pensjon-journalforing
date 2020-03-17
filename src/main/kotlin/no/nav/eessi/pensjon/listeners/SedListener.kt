@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -27,13 +28,13 @@ class SedListener(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val latch = CountDownLatch(6)
+    private val sendtLatch = CountDownLatch(6)
+    private val mottattLatch = CountDownLatch(7)
     private val mapper = jacksonObjectMapper()
+    private val gyldigeHendelser = listOf("P", "H_BUC_07")
 
-    fun getLatch(): CountDownLatch {
-        return latch
-    }
-
+    fun getLatch() = sendtLatch
+    fun getMottattLatch() = mottattLatch
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
@@ -61,7 +62,7 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-            latch.countDown()
+                sendtLatch.countDown()
             }
         }
     }
@@ -77,7 +78,7 @@ class SedListener(
                 try {
                     val offset = cr.offset()
 
-                    if (gyldigInnkommendeHendelse(hendelse)) {
+                    if (gyldigMottattHendelse(hendelse)) {
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
@@ -95,17 +96,14 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-                latch.countDown()
+                mottattLatch.countDown()
             }
         }
     }
 
-    fun gyldigInnkommendeHendelse(hendelse: String): Boolean {
-        val gyldigeHendelser = listOf("P", "H_BUC_07")
-        return innkommendeHendelse(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
-    }
+    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
 
-    private fun innkommendeHendelse(hendelse: String): List<String> {
+    private fun getHendelseList(hendelse: String): List<String> {
         val rootNode = mapper.readTree(hendelse)
         return listOf(rootNode.get("sektorKode").textValue(), rootNode.get("bucType").textValue())
     }

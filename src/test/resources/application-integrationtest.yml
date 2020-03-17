@@ -6,6 +6,9 @@ kafka:
   sedSendt:
     topic: ${KAFKA_SEDSENDT_TOPIC}
     groupid: eessi-pensjon-group
+  sedMottatt:
+    topic: ${KAFKA_SEDMOTTATT_TOPIC}
+    groupid: eessi-pensjon-group
   oppgave:
     topic: ${KAFKA_OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group

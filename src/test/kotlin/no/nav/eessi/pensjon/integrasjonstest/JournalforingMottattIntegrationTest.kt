@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
+import org.aspectj.apache.bcel.generic.InstructionConstants
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
@@ -47,6 +48,7 @@ private lateinit var mockServer : ClientAndServer
 @EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
 class JournalforingMottattIntegrationTest {
 
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
 
@@ -73,10 +75,10 @@ class JournalforingMottattIntegrationTest {
         ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
 
         // Sett opp producer
-        val sedSendtProducerTemplate = settOppProducerTemplate()
+        val sedMottattProducerTemplate = settOppProducerTemplate()
 
         // produserer sedSendt meldinger på kafka
-        produserSedHendelser(sedSendtProducerTemplate)
+        produserSedHendelser(sedMottattProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
         sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
@@ -85,30 +87,31 @@ class JournalforingMottattIntegrationTest {
         verifiser()
 
         // Shutdown
-        shutdown(container)
+        shutdown(container, oppgaveContainer)
     }
 
-    private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
+    private fun produserSedHendelser(sedMottattProducerTemplate: KafkaTemplate<Int, String>) {
 //        // Sender 1 Foreldre SED til Kafka
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
 
 //        // Seder 1 i H_BUC_07 SED til Kafka
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
 
         // Sender 5 Pensjon SED til Kafka
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
 
         // Sender Sed med ugyldig FNR
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
 
     }
 
-    private fun shutdown(container: KafkaMessageListenerContainer<String, String>) {
+    private fun shutdown(container: KafkaMessageListenerContainer<String, String>, oppgaveContainer: KafkaMessageListenerContainer<String, String>) {
         mockServer.stop()
         container.stop()
+        oppgaveContainer.stop()
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
@@ -460,7 +463,14 @@ class JournalforingMottattIntegrationTest {
     }
 
     private fun verifiser() {
-        assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
+        assertEquals(0, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
+
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/.well-known/openid-configuration"),
+                VerificationTimes.atLeast(1)
+        )
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
@@ -539,7 +549,6 @@ class JournalforingMottattIntegrationTest {
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
                 VerificationTimes.once()
         )
-
 
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
