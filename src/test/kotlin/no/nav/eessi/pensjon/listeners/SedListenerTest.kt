@@ -76,14 +76,23 @@ class SedListenerTest {
         verify(acknowledgment, times(0)).acknowledge()
     }
 
-//    @Test
-//    fun `Mottat Sed med ugyldige verdier`(){
-//        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json")))
-//
-//        assertThrows<RuntimeException> {
-//            sedListener.consumeSedMottatt(hendelse,cr, acknowledgment)
-//        }
-//    }
+    @Test
+    fun `Sendt Sed med ugyldige verdier`(){
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json")))
+
+        assertThrows<RuntimeException> {
+            sedListener.consumeSedSendt(hendelse,cr, acknowledgment)
+        }
+    }
+
+    @Test
+    fun `Mottat Sed med ugyldige verdier`(){
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/BAD_BUC_01.json")))
+
+        sedListener.consumeSedMottatt( hendelse, cr, acknowledgment)
+        //denne inneholder da ikke guldig P eller H_BUC_07
+        verify(acknowledgment).acknowledge()
+    }
 
     @Test
     fun `Mottat Sed med ugyldige felter`(){
@@ -116,7 +125,7 @@ class SedListenerTest {
     fun `gitt en mottatt hendelse inneholder H_BUC_07 skal behandlsens og resultat blie true`()  {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json")))
 
-        val result = sedListener.gyldigInnkommendeHendelse(hendelse)
+        val result = sedListener.gyldigMottattHendelse(hendelse)
 
         Assertions.assertEquals(true, result)
 
@@ -126,7 +135,7 @@ class SedListenerTest {
     fun `gitt en mottatt hendelse inneholder sektorKode P skal behandlsens og resultat blie true`()  {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
 
-        val result = sedListener.gyldigInnkommendeHendelse(hendelse)
+        val result = sedListener.gyldigMottattHendelse(hendelse)
 
         Assertions.assertEquals(true, result)
 
@@ -136,7 +145,7 @@ class SedListenerTest {
     fun `gitt en mottatt hendelse IKKE inneholder sektorKode P eller H_BUC_07 skal det ignoreres og resultat bli false`()  {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json")))
 
-        val result = sedListener.gyldigInnkommendeHendelse(hendelse)
+        val result = sedListener.gyldigMottattHendelse(hendelse)
 
         Assertions.assertEquals(false, result)
 
