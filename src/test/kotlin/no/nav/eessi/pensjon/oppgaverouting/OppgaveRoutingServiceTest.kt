@@ -70,6 +70,18 @@ class OppgaveRoutingServiceTest {
     }
 
     @Test
+    fun `Routing for mottatt H_BUC_07`() {
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = H_BUC_07)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, fnr = "01010101010",  bucType = H_BUC_07)))
+
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder18aar,landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
+        assertEquals(NFP_UTLAND_OSLO, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
+
+        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE,  bucType = H_BUC_07)))
+
+    }
+
+    @Test
     fun `Routing for vanlige BUC'er`() {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, fnr = "01010101010",bucType = P_BUC_01)))
         assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, landkode = NORGE, fnr = "01010101010", bucType = P_BUC_01)))
@@ -160,6 +172,7 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPFO", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
         assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPSF", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
     }
+
 
     @Test
     fun `hentNorg2Enhet for bosatt utland`() {
