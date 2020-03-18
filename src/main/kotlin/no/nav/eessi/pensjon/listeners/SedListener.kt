@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -26,12 +27,13 @@ class SedListener(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val latch = CountDownLatch(6)
+    private val sendtLatch = CountDownLatch(6)
+    private val mottattLatch = CountDownLatch(7)
+    private val mapper = jacksonObjectMapper()
+    private val gyldigeHendelser = listOf("P", "H_BUC_07")
 
-    fun getLatch(): CountDownLatch {
-        return latch
-    }
-
+    fun getLatch() = sendtLatch
+    fun getMottattLatch() = mottattLatch
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
@@ -59,7 +61,7 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-            latch.countDown()
+                sendtLatch.countDown()
             }
         }
     }
@@ -74,14 +76,13 @@ class SedListener(
 
                 try {
                     val offset = cr.offset()
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-                    if (sedHendelse.sektorKode == "P") {
-
-                        logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
-                        val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
+                    if (gyldigMottattHendelse(hendelse)) {
+                            val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                            logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
                     }
 
                     acknowledgment.acknowledge()
@@ -95,8 +96,16 @@ class SedListener(
                     )
                     throw RuntimeException(ex.message)
                 }
-
+                mottattLatch.countDown()
             }
         }
     }
+
+    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
+
+    private fun getHendelseList(hendelse: String): List<String> {
+        val rootNode = mapper.readTree(hendelse)
+        return listOf(rootNode.get("sektorKode").textValue(), rootNode.get("bucType").textValue())
+    }
+
 }

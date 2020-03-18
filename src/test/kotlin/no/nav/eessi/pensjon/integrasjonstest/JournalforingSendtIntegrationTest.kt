@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.nhaarman.mockitokotlin2.mock
 import io.mockk.slot
 import io.mockk.*
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
@@ -10,8 +11,10 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
+import org.mockserver.matchers.Times
 import org.mockserver.model.*
 import org.mockserver.model.HttpRequest.request
+import org.mockserver.verify.Verification
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,12 +45,13 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
 
-@SpringBootTest(classes = [ JournalforingIntegrationTest.TestConfig::class])
+@SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-class JournalforingIntegrationTest {
+class JournalforingSendtIntegrationTest {
 
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
 
@@ -92,6 +96,9 @@ class JournalforingIntegrationTest {
     private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
         // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
+
+        // Seder 1 i H_BUC_07 SED til Kafka
+        // sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
 
         // Sender 5 Pensjon SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
@@ -316,6 +323,7 @@ class JournalforingIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
+                            .withDelay(TimeUnit.SECONDS, 1)
                     )
 
             //Mock norg2tjeneste
@@ -401,11 +409,13 @@ class JournalforingIntegrationTest {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.POST)
-                            .withPath("/"))
+                            .withPath("/")
+                    )
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
+                            .withDelay(TimeUnit.SECONDS, 1)
                     )
 
             // Mocker oppdaterDistribusjonsinfo
@@ -417,6 +427,7 @@ class JournalforingIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody("")
+                            .withDelay(TimeUnit.SECONDS, 1)
                     )
         }
 
@@ -429,13 +440,15 @@ class JournalforingIntegrationTest {
     private fun verifiser() {
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
-        // Verifiserer at det har blitt forsøkt å hente PDF fra eux
+
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
-                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
-                VerificationTimes.once()
+                        .withPath("/.well-known/openid-configuration"),
+                VerificationTimes.atLeast(1)
         )
+
+        // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
@@ -448,6 +461,13 @@ class JournalforingIntegrationTest {
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"),
                 VerificationTimes.once()
+        )
+
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
+                VerificationTimes.atLeast(1)
         )
 
         mockServer.verify(
@@ -473,29 +493,35 @@ class JournalforingIntegrationTest {
                 VerificationTimes.atLeast(4)
         )
 
-        // Verfiy eux sed
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(4)
-        )
-
         // Verfiy eux sed on ugyldig-FNR
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
-                VerificationTimes.once()
+                VerificationTimes.atLeast(1)
         )
 
+        // Verfiy eux sed
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
+                VerificationTimes.atLeast( 4 )
+        )
 
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(5)
+                VerificationTimes.atLeast(3)
+        )
+
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.PATCH)
+                        .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"),
+                VerificationTimes.atLeast(1)
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
