@@ -1,17 +1,19 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import io.mockk.slot
 import io.mockk.*
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
-import org.aspectj.apache.bcel.generic.InstructionConstants
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
-import org.mockserver.model.*
+import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.Parameter
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -564,14 +566,14 @@ class JournalforingMottattIntegrationTest {
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
     @TestConfiguration
-    class TestConfig{
+    class TestConfig(private val stsClientConfig: STSClientConfig){
         @Bean
         @Primary
         fun personV3(): PersonV3 = mockk()
 
         @Bean
         fun personV3Klient(personV3: PersonV3): PersonV3Klient {
-            return spyk(PersonV3Klient(personV3))
+            return spyk(PersonV3Klient(personV3, stsClientConfig))
         }
     }
 }
