@@ -46,7 +46,7 @@ class SedListener(
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
                     if (sedHendelse.sektorKode == "P") {
-                        logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                        logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor bucType: ${sedHendelse.bucType} sedType: ${sedHendelse.sedType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, offset)
