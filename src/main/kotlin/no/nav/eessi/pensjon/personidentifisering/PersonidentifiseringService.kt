@@ -33,15 +33,16 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             fnr = filtrertNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
-            //Pørve fnr
+            //Prøve fnr
             try {
-                fnr = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
-                logger.debug("følgende fnr: $fnr")
-                person = hentPerson(fnr)
-
-                logger.debug("henter person: $person")
-                if (person == null) {
+                val personFnrPair = fnrHelper.getPersonOgFnrFraSeder(alleSediBuc)
+                if (personFnrPair != null) {
+                    person = personFnrPair.first
+                    fnr = personFnrPair.second
+                    logger.debug("hentet person: $person")
+                } else {
                     logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
+                    person = null
                     fnr = null
                 }
             } catch (ex: Exception) {

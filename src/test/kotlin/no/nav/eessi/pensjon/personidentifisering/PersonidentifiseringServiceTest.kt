@@ -37,16 +37,16 @@ class PersonidentifiseringServiceTest {
     private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
 
     @Mock
-    private lateinit var fnrHelper: FnrHelper
-
-    @Mock
     private lateinit var fdatoHelper: FdatoHelper
 
+    @Mock
+    private lateinit var fnrHelper: FnrHelper
 
     private lateinit var personidentifiseringService: PersonidentifiseringService
 
     @BeforeEach
     fun setup() {
+        //fnrHelper = FnrHelper(personV3Klient)
         personidentifiseringService = PersonidentifiseringService(aktoerregisterKlient,
                 personV3Klient,
                 diskresjonkodeHelper,
@@ -66,9 +66,9 @@ class PersonidentifiseringServiceTest {
                 .finnFDatoFraSeder(any())
 
         //EUX - FnrServide (fin pin)
-        doReturn("01055012345")
+        doReturn( Pair(BrukerMock.createWith(landkoder = true), "01055012345"))
                 .`when`(fnrHelper)
-                .getFodselsnrFraSeder(any())
+                .getPersonOgFnrFraSeder(any())
     }
 
     @Test
@@ -92,7 +92,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val fdatoHelper2 = FdatoHelper()
-        val fnrHelper2 = FnrHelper()
+        val fnrHelper2 = FnrHelper(personV3Klient)
 
         val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterKlient,
                 personV3Klient,
