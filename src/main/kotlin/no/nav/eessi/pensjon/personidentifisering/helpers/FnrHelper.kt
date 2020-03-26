@@ -15,7 +15,7 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
     private val logger = LoggerFactory.getLogger(FnrHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun getFodselsnrFraSeder(seder: List<String?>): Pair<Bruker?, String?>? {
+    fun getPersonOgFnrFraSeder(seder: List<String?>): Pair<Bruker?, String?>? {
         var fnr: String? = null
         var sedType: SedType
 
@@ -51,7 +51,7 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                 logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
-            if(fnr != null)
+            if(fnr != null) {
                 try {
                     val person = personV3Klient.hentPerson(fnr!!)
                     logger.info("Funnet person validert og hentet ut fra sed: $sedType")
@@ -59,8 +59,9 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                 } catch (ex:Exception) {
                     logger.error("Feil ved henting av PersonV3, fortsetter å sjekke neste sed for fnr")
                 }
+            }
+            logger.info("Ingen person funnet ut fra sed: $sedType")
         }
-        logger.warn("Ingen gyldig fnr funnet i samtlige seder.")
         return null
     }
 

@@ -7,8 +7,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.klienter.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -37,12 +35,11 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         } else {
             //Prøve fnr
             try {
-                val personFnrPair = fnrHelper.getFodselsnrFraSeder(alleSediBuc)
+                val personFnrPair = fnrHelper.getPersonOgFnrFraSeder(alleSediBuc)
                 if (personFnrPair != null) {
                     person = personFnrPair.first
                     fnr = personFnrPair.second
                     logger.debug("hentet person: $person")
-
                 } else {
                     logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
                     person = null
