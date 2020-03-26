@@ -20,7 +20,6 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
     properties:
       security.protocol: SASL_SSL
-      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
       key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       sasl:
