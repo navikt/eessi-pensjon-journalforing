@@ -94,19 +94,19 @@ class JournalforingMottattIntegrationTest {
 
     private fun produserSedHendelser(sedMottattProducerTemplate: KafkaTemplate<Int, String>) {
 //        // Sender 1 Foreldre SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json"))))
 
 //        // Seder 1 i H_BUC_07 SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json"))))
 
         // Sender 5 Pensjon SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_05_X008.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
 
         // Sender Sed med ugyldig FNR
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json"))))
 
     }
 

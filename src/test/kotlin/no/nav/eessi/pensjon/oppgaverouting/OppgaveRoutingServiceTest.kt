@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType.*
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -78,6 +79,27 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_OSLO, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
 
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE,  bucType = H_BUC_07)))
+
+    }
+
+    // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-Anmodning_om_motregning.json
+    @Test
+    fun `Routing av mottatte seder i R_BUC_02`() {
+        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
+                fdato = irrelevantDato(),
+                landkode = NORGE,
+                geografiskTilknytning = dummyTilknytning,
+                fnr = "01010101010",
+                bucType = R_BUC_02,
+                hendelseType = HendelseType.MOTTATT)))
+
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(
+                fdato = irrelevantDato(),
+                landkode = UTLAND,
+                geografiskTilknytning = dummyTilknytning,
+                fnr = "01010101010",
+                bucType = R_BUC_02,
+                hendelseType = HendelseType.MOTTATT)))
 
     }
 

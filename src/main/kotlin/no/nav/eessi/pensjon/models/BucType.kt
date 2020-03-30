@@ -4,7 +4,7 @@ package no.nav.eessi.pensjon.models
 enum class Behandlingstema : Code {
     GJENLEVENDEPENSJON {
         override fun toString() = "ab0011"
-        override fun decode() = "Gjenlevendepensjon"
+        override fun decode() = "Gjenlevendepensjon" //TODO: må finne ut om det er gjenlevende eller barnepensjon
     },
     ALDERSPENSJON {
         override fun toString() = "ab0254"
@@ -13,6 +13,10 @@ enum class Behandlingstema : Code {
     UFOREPENSJON {
         override fun toString() = "ab0194"
         override fun decode() = "Uførepensjon"
+    },
+    TILBAKEBETALING {
+        override fun toString() = "ab0007"
+        override fun decode() = "Tilbakebetaling" //TODO: Er dette riktig?
     }
 }
 
@@ -39,7 +43,8 @@ enum class BucType (val BEHANDLINGSTEMA: String, val TEMA: String){
     P_BUC_08(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString())
+    H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
+    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString())
 
 }
 

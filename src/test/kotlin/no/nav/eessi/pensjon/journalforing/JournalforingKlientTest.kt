@@ -146,7 +146,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -177,7 +177,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Sendt gyldig Sed P2100`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -218,7 +218,7 @@ class JournalforingKlientTest {
                 .`when`(fagmodulKlient)
                 .hentAlleDokumenter(anyString())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("01055012345",
                 "12078945602",
@@ -250,7 +250,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -282,7 +282,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
@@ -318,7 +318,7 @@ class JournalforingKlientTest {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("01055012345",
@@ -351,7 +351,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Mottat gyldig Sed P2100`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
@@ -391,7 +391,7 @@ class JournalforingKlientTest {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("01055012345",
@@ -424,7 +424,7 @@ class JournalforingKlientTest {
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
