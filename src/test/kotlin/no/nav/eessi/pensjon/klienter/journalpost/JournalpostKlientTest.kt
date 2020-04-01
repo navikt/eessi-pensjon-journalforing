@@ -54,7 +54,7 @@ class JournalpostKlientTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostKlient.opprettJournalpost(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -81,8 +81,9 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                 forsokFerdigstill= false,
                 avsenderLand = "NO",
-                avsenderNavn = null
-        )
+                avsenderNavn = null,
+                ytelseType = null
+        ))
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
         assertTrue(journalpostResponse!!.toJson() == "{\n" +
@@ -103,7 +104,7 @@ class JournalpostKlientTest {
                         eq(String::class.java))
 
         assertThrows<RuntimeException> {
-            journalpostKlient.opprettJournalpost(
+            journalpostKlient.opprettJournalpost(JournalpostKlientModel(
                     rinaSakId = "1111",
                     fnr = "12345678912",
                     personNavn = "navn navnesen",
@@ -130,8 +131,9 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                     forsokFerdigstill = false,
                     avsenderLand = "NO",
-                    avsenderNavn = null
-            )
+                    avsenderNavn = null,
+                    ytelseType = null
+            ))
         }
     }
 
@@ -156,7 +158,7 @@ class JournalpostKlientTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostKlient.opprettJournalpost(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -183,8 +185,9 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                 forsokFerdigstill= false,
                 avsenderLand = "UK",
-                avsenderNavn = null
-        )
+                avsenderNavn = null,
+                ytelseType = null
+        ))
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
         assertTrue(journalpostResponse!!.toJson() == "{\n" +

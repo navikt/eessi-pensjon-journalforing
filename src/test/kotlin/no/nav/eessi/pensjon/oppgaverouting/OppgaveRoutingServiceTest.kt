@@ -82,7 +82,7 @@ class OppgaveRoutingServiceTest {
 
     }
 
-    // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-Anmodning_om_motregning.json
+    // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
     @Test
     fun `Routing av mottatte seder i R_BUC_02`() {
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(

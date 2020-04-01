@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.Krav
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlientModel
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -96,6 +97,7 @@ class JournalforingKlientTest {
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostKlient)
                 .opprettJournalpost(
+                        JournalpostKlientModel(
                         rinaSakId = anyOrNull(),
                         fnr= anyOrNull(),
                         personNavn= anyOrNull(),
@@ -109,8 +111,9 @@ class JournalforingKlientTest {
                         dokumenter= anyOrNull(),
                         forsokFerdigstill= anyOrNull(),
                         avsenderLand = anyOrNull(),
-                        avsenderNavn = anyOrNull()
-                )
+                        avsenderNavn = anyOrNull(),
+                        ytelseType = anyOrNull()
+                ))
 
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -156,8 +159,8 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
-        verify(journalpostKlient).opprettJournalpost(
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "")
+        verify(journalpostKlient).opprettJournalpost( JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -171,8 +174,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -191,9 +195,9 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -207,8 +211,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -228,9 +233,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -244,8 +249,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -260,9 +266,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null)
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -276,8 +282,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -293,9 +300,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,"")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -309,8 +316,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -329,9 +337,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,"")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = eq("7477291"),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -345,8 +353,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = eq("NO"),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -366,9 +375,9 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,"")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -382,8 +391,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -402,9 +412,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null)
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
@@ -418,8 +428,9 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 
     @Test
@@ -435,9 +446,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, "")
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
                 rinaSakId = anyOrNull(),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
@@ -451,7 +462,8 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
-        )
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
+        ))
     }
 }

@@ -25,7 +25,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         if (routingRequest.fnr == null) return ID_OG_FORDELING
         val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
-        val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType) ?: bestemTildeltEnhet(routingRequest, routingRequest.bucType, routingRequest.ytelseType)
+        val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
+                ?: bestemTildeltEnhet(routingRequest, routingRequest.bucType, routingRequest.ytelseType)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
                 "Buc: ${routingRequest.bucType}, " +
@@ -45,9 +46,10 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
             NORGE == bosatt(routingRequest.landkode) -> {
-                if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-                     if (R_BUC_02 == bucType)
-                         return ID_OG_FORDELING
+                if (R_BUC_02 == bucType) {
+                    if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+                        return ID_OG_FORDELING
+                    }
                 }
                 when (bucType) {
                     P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
@@ -85,17 +87,17 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
 
-        return when(bucType) {
+        return when (bucType) {
             P_BUC_01 -> {
                 try {
                     val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
                     enhetVerdi?.let { Enhet.getEnhet(it) }
-                }  catch (ex: Exception) {
+                } catch (ex: Exception) {
                     logger.error("Ukjent feil oppstod; ${ex.message}")
                     null
                 }
-           }
+            }
             else -> null
         }
     }
@@ -114,12 +116,12 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 }
 
 class OppgaveRoutingRequest(
-                        val fnr: String? = null,
-                        val fdato: LocalDate,
-                        val diskresjonskode: String? = null,
-                        val landkode: String? = null,
-                        val geografiskTilknytning: String? = null,
-                        val bucType: BucType? = null,
-                        val ytelseType: String? = null,
-                        val sedType: SedType? = null,
-                        val hendelseType: HendelseType? = null)
+        val fnr: String? = null,
+        val fdato: LocalDate,
+        val diskresjonskode: String? = null,
+        val landkode: String? = null,
+        val geografiskTilknytning: String? = null,
+        val bucType: BucType? = null,
+        val ytelseType: String? = null,
+        val sedType: SedType? = null,
+        val hendelseType: HendelseType? = null)

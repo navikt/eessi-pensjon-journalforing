@@ -49,8 +49,9 @@ class SedListener(
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, offset)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc.values.toList())
+                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
+                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, ytelseType, offset)
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -82,8 +83,9 @@ class SedListener(
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
-                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc.values.toList())
+                            val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, ytelseType, offset)
                     }
 
                     acknowledgment.acknowledge()
