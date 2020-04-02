@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-data class JournalpostKlientModel (
+open class JournalpostKlientModel (
 
     val rinaSakId: String,
     val fnr: String?,

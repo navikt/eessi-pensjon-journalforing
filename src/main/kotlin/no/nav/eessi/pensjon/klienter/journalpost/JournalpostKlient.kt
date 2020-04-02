@@ -49,7 +49,7 @@ class JournalpostKlient(
         val sak = populerSak(journalpostModel.arkivsaksnummer)
         val tema = BucType.valueOf(journalpostModel.bucType).TEMA
         val tilleggsopplysninger = populerTilleggsopplysninger(journalpostModel.rinaSakId)
-        val tittel = "${journalpostType.decode()} $journalpostModel.sedType"
+        val tittel = "${journalpostType.decode()} ${journalpostModel.sedType}"
 
         val requestBody = OpprettJournalpostRequest(
                 avsenderMottaker,
@@ -67,7 +67,7 @@ class JournalpostKlient(
 
 
         //Send Request
-        val path = "/journalpost?forsoekFerdigstill=$journalpostModel.forsokFerdigstill"
+        val path = "/journalpost?forsoekFerdigstill=${journalpostModel.forsokFerdigstill}"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         return metricsHelper.measure("opprettjournalpost") {

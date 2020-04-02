@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.matchers.Times
@@ -45,6 +46,7 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
 
+@Disabled
 @SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext

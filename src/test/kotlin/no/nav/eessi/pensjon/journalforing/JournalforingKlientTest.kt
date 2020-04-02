@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.runner.RunWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -96,24 +97,25 @@ class JournalforingKlientTest {
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostKlient)
-                .opprettJournalpost(
-                        JournalpostKlientModel(
-                        rinaSakId = anyOrNull(),
-                        fnr= anyOrNull(),
-                        personNavn= anyOrNull(),
-                        bucType= anyOrNull(),
-                        sedType= anyOrNull(),
-                        sedHendelseType= anyOrNull(),
-                        eksternReferanseId= anyOrNull(),
-                        kanal= anyOrNull(),
-                        journalfoerendeEnhet= anyOrNull(),
-                        arkivsaksnummer= anyOrNull(),
-                        dokumenter= anyOrNull(),
-                        forsokFerdigstill= anyOrNull(),
-                        avsenderLand = anyOrNull(),
-                        avsenderNavn = anyOrNull(),
-                        ytelseType = anyOrNull()
-                ))
+                .opprettJournalpost(anyOrNull()
+                        //JournalpostKlientModel(
+//                        rinaSakId = any(),
+//                        fnr= anyOrNull(),
+//                        personNavn= anyOrNull(),
+//                        bucType= anyOrNull(),
+//                        sedType= anyOrNull(),
+//                        sedHendelseType= anyOrNull(),
+//                        eksternReferanseId= anyOrNull(),
+//                        kanal= anyOrNull(),
+//                        journalfoerendeEnhet= anyOrNull(),
+//                        arkivsaksnummer= anyOrNull(),
+//                        dokumenter= anyOrNull(),
+//                        forsokFerdigstill= anyOrNull(),
+//                        avsenderLand = anyOrNull(),
+//                        avsenderNavn = anyOrNull(),
+//                        ytelseType = anyOrNull()
+//                )
+                )
 
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
@@ -269,7 +271,7 @@ class JournalforingKlientTest {
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null)
 
         verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_10"),
@@ -300,10 +302,10 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,"")
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null)
 
         verify(journalpostKlient).opprettJournalpost(JournalpostKlientModel(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),

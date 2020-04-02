@@ -17,6 +17,7 @@ import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.eq
 import org.springframework.http.*
 import org.springframework.web.client.HttpServerErrorException
 
@@ -50,7 +51,7 @@ class JournalpostKlientTest {
                 ResponseEntity.ok(responseBody))
                 .`when`(mockrestTemplate).exchange(
                         contains("/journalpost?forsoekFerdigstill=false"),
-                        any(),
+                        eq(HttpMethod.POST),
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
