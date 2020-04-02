@@ -79,21 +79,21 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
-                        rinaSakId = sedHendelse.rinaSakId,
-                        fnr = identifisertPerson.fnr,
-                        personNavn = identifisertPerson.personNavn,
-                        bucType = sedHendelse.bucType!!.name,
-                        sedType = sedHendelse.sedType.name,
-                        sedHendelseType = hendelseType.name,
-                        eksternReferanseId = null,// TODO what value to put here?,
-                        kanal = "EESSI",
-                        journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                        arkivsaksnummer = sakId,
-                        dokumenter = documents,
-                        forsokFerdigstill = forsokFerdigstill,
-                        avsenderLand = sedHendelse.avsenderLand,
-                        avsenderNavn = sedHendelse.avsenderNavn,
-                        ytelseType = ytelseType
+                    rinaSakId = sedHendelse.rinaSakId,
+                    fnr = identifisertPerson.fnr,
+                    personNavn = identifisertPerson.personNavn,
+                    bucType = sedHendelse.bucType!!.name,
+                    sedType = sedHendelse.sedType.name,
+                    sedHendelseType = hendelseType.name,
+                    eksternReferanseId = null,// TODO what value to put here?,
+                    kanal = "EESSI",
+                    journalfoerendeEnhet = tildeltEnhet.enhetsNr,
+                    arkivsaksnummer = sakId,
+                    dokumenter = documents,
+                    forsokFerdigstill = forsokFerdigstill,
+                    avsenderLand = sedHendelse.avsenderLand,
+                    avsenderNavn = sedHendelse.avsenderNavn,
+                    ytelseType = ytelseType
                 )
 
                 // Oppdaterer distribusjonsinfo

@@ -33,33 +33,48 @@ class JournalpostKlient(
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
 
-    fun opprettJournalpost(journalpostModel: JournalpostKlientModel): OpprettJournalPostResponse? {
+    fun opprettJournalpost(
+            rinaSakId: String,
+            fnr: String?,
+            personNavn: String?,
+            bucType: String,
+            sedType: String,
+            sedHendelseType: String,
+            eksternReferanseId: String?,
+            kanal: String?,
+            journalfoerendeEnhet: String?,
+            arkivsaksnummer: String?,
+            dokumenter: String,
+            forsokFerdigstill: Boolean? = false,
+            avsenderLand: String?,
+            avsenderNavn: String?,
+            ytelseType: String?): OpprettJournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
-                journalpostModel.avsenderNavn,
-                journalpostModel.sedHendelseType,
-                journalpostModel.avsenderLand
+                avsenderNavn,
+                sedHendelseType,
+                avsenderLand
         )
-        val behandlingstema = BucType.valueOf(journalpostModel.bucType).BEHANDLINGSTEMA
-        val bruker = when (journalpostModel.fnr){
+        val behandlingstema = BucType.valueOf(bucType).BEHANDLINGSTEMA
+        val bruker = when (fnr){
             null -> null
-            else -> Bruker(id = journalpostModel.fnr)
+            else -> Bruker(id = fnr)
         }
-        val journalpostType = populerJournalpostType(journalpostModel.sedHendelseType)
-        val sak = populerSak(journalpostModel.arkivsaksnummer)
-        val tema = BucType.valueOf(journalpostModel.bucType).TEMA
-        val tilleggsopplysninger = populerTilleggsopplysninger(journalpostModel.rinaSakId)
-        val tittel = "${journalpostType.decode()} ${journalpostModel.sedType}"
+        val journalpostType = populerJournalpostType(sedHendelseType)
+        val sak = populerSak(arkivsaksnummer)
+        val tema = BucType.valueOf(bucType).TEMA
+        val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
+        val tittel = "${journalpostType.decode()} $sedType"
 
         val requestBody = OpprettJournalpostRequest(
                 avsenderMottaker,
                 behandlingstema,
                 bruker,
-                journalpostModel.dokumenter,
-                journalpostModel.eksternReferanseId,
-                journalpostModel.journalfoerendeEnhet,
+                dokumenter,
+                eksternReferanseId,
+                journalfoerendeEnhet,
                 journalpostType,
-                journalpostModel.kanal,
+                kanal,
                 sak,
                 tema,
                 tilleggsopplysninger,
@@ -67,7 +82,7 @@ class JournalpostKlient(
 
 
         //Send Request
-        val path = "/journalpost?forsoekFerdigstill=${journalpostModel.forsokFerdigstill}"
+        val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill}"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         return metricsHelper.measure("opprettjournalpost") {

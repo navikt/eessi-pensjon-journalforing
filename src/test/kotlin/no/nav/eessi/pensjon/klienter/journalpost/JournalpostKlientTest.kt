@@ -55,7 +55,7 @@ class JournalpostKlientTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostKlient.opprettJournalpost(JournalpostKlientModel(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -84,7 +84,7 @@ class JournalpostKlientTest {
                 avsenderLand = "NO",
                 avsenderNavn = null,
                 ytelseType = null
-        ))
+        )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
         assertTrue(journalpostResponse!!.toJson() == "{\n" +
@@ -105,7 +105,7 @@ class JournalpostKlientTest {
                         eq(String::class.java))
 
         assertThrows<RuntimeException> {
-            journalpostKlient.opprettJournalpost(JournalpostKlientModel(
+            journalpostKlient.opprettJournalpost(
                     rinaSakId = "1111",
                     fnr = "12345678912",
                     personNavn = "navn navnesen",
@@ -134,7 +134,7 @@ class JournalpostKlientTest {
                     avsenderLand = "NO",
                     avsenderNavn = null,
                     ytelseType = null
-            ))
+            )
         }
     }
 
@@ -159,7 +159,7 @@ class JournalpostKlientTest {
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
-        val journalpostResponse = journalpostKlient.opprettJournalpost(JournalpostKlientModel(
+        val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
                 fnr= "12345678912",
                 personNavn= "navn navnesen",
@@ -188,7 +188,7 @@ class JournalpostKlientTest {
                 avsenderLand = "UK",
                 avsenderNavn = null,
                 ytelseType = null
-        ))
+        )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
         assertTrue(journalpostResponse!!.toJson() == "{\n" +
