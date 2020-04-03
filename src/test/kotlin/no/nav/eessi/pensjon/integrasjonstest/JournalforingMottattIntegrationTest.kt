@@ -44,7 +44,6 @@ private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
-@Disabled
 @SpringBootTest(classes = [ JournalforingMottattIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext

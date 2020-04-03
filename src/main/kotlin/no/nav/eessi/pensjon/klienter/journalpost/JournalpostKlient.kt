@@ -3,7 +3,9 @@ package no.nav.eessi.pensjon.klienter.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Tema
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -55,14 +57,14 @@ class JournalpostKlient(
                 sedHendelseType,
                 avsenderLand
         )
-        val behandlingstema = BucType.valueOf(bucType).BEHANDLINGSTEMA
+        val behandlingstema = hentBehandlingsTema(bucType, ytelseType)
         val bruker = when (fnr){
             null -> null
             else -> Bruker(id = fnr)
         }
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer)
-        val tema = BucType.valueOf(bucType).TEMA
+        val tema = hentTema(bucType, ytelseType)
         val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
         val tittel = "${journalpostType.decode()} $sedType"
 
@@ -104,6 +106,30 @@ class JournalpostKlient(
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
         }
+    }
+
+    fun hentBehandlingsTema(bucType: String, ytelseType: String?): String {
+        return if (bucType == BucType.R_BUC_02.name) {
+            return when (ytelseType) {
+                "uforetrygd" -> Behandlingstema.UFOREPENSJON.toString()
+                "gjennlevende" -> Behandlingstema.GJENLEVENDEPENSJON.toString()
+                else -> Behandlingstema.ALDERSPENSJON.toString()
+            }
+        } else {
+            BucType.valueOf(bucType).BEHANDLINGSTEMA
+        }
+    }
+
+    fun hentTema(bucType: String, ytelseType: String?): String {
+        return if (bucType == BucType.R_BUC_02.name) {
+            return when (ytelseType) {
+                "uforetrygd" -> Tema.UFORETRYGD.toString()
+                else -> Tema.PENSJON.toString()
+            }
+        } else {
+            BucType.valueOf(bucType).TEMA
+        }
+
     }
 
     /**

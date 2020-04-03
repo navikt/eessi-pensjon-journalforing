@@ -13,7 +13,6 @@ import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@Disabled
 @ExtendWith(MockitoExtension::class)
 class SedListenerTest {
 
@@ -67,15 +66,13 @@ class SedListenerTest {
         verify(acknowledgment, times(0)).acknowledge()
     }
 
-    @Disabled
-    @Test
-    fun `Sendt Sed med ugyldige verdier`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
-
-        assertThrows<RuntimeException> {
-            sedListener.consumeSedSendt(hendelse,cr, acknowledgment)
-        }
-    }
+//    @Test
+//    fun `Sendt Sed med ugyldige verdier`(){
+//        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
+//        assertThrows<RuntimeException> {
+//            sedListener.consumeSedSendt(hendelse,cr, acknowledgment)
+//        }
+//    }
 
     @Test
     fun `Mottat Sed med ugyldige verdier`(){
@@ -96,17 +93,15 @@ class SedListenerTest {
     @Test
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
-
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
-
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
     }
 
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
     }
 
     @Test

@@ -15,21 +15,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private val mapper = jacksonObjectMapper()
 
-    fun hentAlleSedIBuc2(seds: Map<String,String?>) = seds.values.toList()
-
-
-//    fun hentAlleSedIBuc3(rinaSakId: String): List<String?> = hentAlleSedIBucPair(rinaSakId).values.toList()
-
-    fun hentAlleSedIBucPair2(rinaSakId: String): List<Pair<String?,String>> {
-        val alleDokumenter = fagmodulKlient.hentAlleDokumenter(rinaSakId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-
-        val gyldigeSeds = BucHelper.filterUtGyldigSedId(alleDokumenterJsonNode)
-
-        return gyldigeSeds.map { pair ->
-            val sedDocumentId = pair.first
-            Pair(euxKlient.hentSed(rinaSakId, sedDocumentId),pair.second)
-        }
+    fun hentAlleSeds(seds: Map<String,String?>): List<String?> {
+        return seds.map { it.value }.toList()
     }
 
     fun hentAlleSedIBuc(rinaSakId: String): Map<String,String?> {
@@ -45,49 +32,36 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
         }.toMap()
     }
 
-    fun hentYtelseType(sedHendelse: SedHendelseModel, seds: Map<String,String?>): String? {
+    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: Map<String,String?>): String? {
+        //hent ytelsetype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == BucType.R_BUC_02) {
-            var r005Sed = seds[SedType.R005.name]
-
+            val r005Sed = alleSedIBuc[SedType.R005.name]
             if (r005Sed != null){
-                val sedRootNode = no.nav.eessi.pensjon.pdf.mapper.readTree(r005Sed)
-                return filterYtelseType(sedRootNode)
-
+                val sedRootNode = mapper.readTree(r005Sed)
+                return filterYtelseTypeR005(sedRootNode)
             }
-        } else {
-            return hentYtelseKravType(sedHendelse)
-        }
-
-        return null
-    }
-
-    private fun hentYtelseKravType(sedHendelse: SedHendelseModel): String? {
-        if (sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
-            return try {
-                fagmodulKlient.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-            } catch (ex: Exception) {
-                null
+        //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
+        } else if (sedHendelse.sedType == SedType.P15000) {
+            val sed = alleSedIBuc[SedType.P15000.name]
+            if (sed != null) {
+                val sedRootNode = mapper.readTree(sed)
+                val krav = sedRootNode.get("nav").get("krav").get("type").textValue()
+                return when (krav) {
+                    "02" -> "GP"
+                    "03" -> "UT"
+                    else -> "AP"
+                }
             }
         }
         return null
     }
 
-
-    private fun filterYtelseType(sedRootNode: JsonNode): String? {
+    private fun filterYtelseTypeR005(sedRootNode: JsonNode): String? {
         return sedRootNode
                 .at("/tilbakekreving")
                 .findValue("feilutbetaling")
                 .findValue("type")
                 .textValue()
     }
-}
 
-//"tilbakekreving": {
-//    "anmodning":
-//
-//    { "type": "foreløpig" }
-//    ,
-//    "feilutbetaling": {
-//        "ytelse":
-//
-//        { "type": "alderspensjon" }
+}

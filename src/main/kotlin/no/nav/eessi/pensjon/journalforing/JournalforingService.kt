@@ -44,7 +44,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-//               val ytelseType = hentYtelseKravType(sedHendelse)
+                //val ytelseType = hentYtelseKravType(sedHendelse)  //TODO kan fjernes da denne er nå høyere opp
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)

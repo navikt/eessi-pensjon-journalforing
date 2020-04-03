@@ -46,7 +46,6 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
 
-@Disabled
 @SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
