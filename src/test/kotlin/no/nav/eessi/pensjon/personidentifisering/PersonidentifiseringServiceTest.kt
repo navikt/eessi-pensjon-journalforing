@@ -73,19 +73,22 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", bucType = BucType.P_BUC_10, sedType = SedType.P2000, navBruker = "1207 8945602"), emptyList())
+        val navBruker = "1207 8945602"
+        personidentifiseringService.identifiserPerson(navBruker, emptyList())
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207-8945602"), listOf(""))
+        val navBruker = "1207-8945602"
+        personidentifiseringService.identifiserPerson(navBruker, listOf(""))
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`(){
-        personidentifiseringService.identifiserPerson(SedHendelseModel(sektorKode = "P", rinaDokumentId = "b12e06dda2c7474b9998c7139c841646", rinaSakId = "147729", navBruker = "1207/8945602"), emptyList())
+        val navBruker = "1207/8945602"
+        personidentifiseringService.identifiserPerson(navBruker, emptyList())
         verify(personV3Klient).hentPerson(eq("12078945602"))
     }
 
@@ -101,7 +104,8 @@ class PersonidentifiseringServiceTest {
                 fdatoHelper2)
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        var actual = personidentifiseringService2.identifiserPerson(SedHendelseModel(id = 16898, sektorKode = "P", bucType = BucType.P_BUC_06, rinaDokumentId = "c7bf5b349010461bb0d706deb914ba2d", navBruker = null, mottakerLand = "NO", rinaSakId = "774535"), listOf(sed))
+        val navBruker = null
+        val actual = personidentifiseringService2.identifiserPerson(navBruker, listOf(sed))
 
         println(actual)
         assertEquals("1958-07-11", actual.fdato.toString())
@@ -112,7 +116,8 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
         val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-enkel.json")))
         val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        var actual = personidentifiseringService.identifiserPerson(SedHendelseModel(id = 16898, sektorKode = "P", bucType = BucType.P_BUC_06, rinaDokumentId = "c7bf5b349010461bb0d706deb914ba2d", navBruker = null, mottakerLand = "NO", rinaSakId = "774535"), listOf(sed2, sed1))
+        val navBruker = null
+        val actual = personidentifiseringService.identifiserPerson(navBruker, listOf(sed2, sed1))
 
         println(actual)
         assertEquals("1950-05-01", actual.fdato.toString())
@@ -146,7 +151,7 @@ class PersonidentifiseringServiceTest {
                 fdatoHelper2)
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        var actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed))
+        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed))
 
         assertEquals("1958-07-11", actual.toString())
     }
@@ -164,7 +169,7 @@ class PersonidentifiseringServiceTest {
         val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-enkel.json")))
         val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2000-NAV.json")))
 
-        var actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed2, sed1))
+        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed2, sed1))
         assertEquals("1980-01-01", actual.toString())
     }
 
