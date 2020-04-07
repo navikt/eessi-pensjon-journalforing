@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.klienter.*
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -21,15 +20,17 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
     fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>) : IdentifisertPerson {
-        val regex = "[^0-9.]".toRegex()
-        val filtrertNavBruker = navBruker?.replace(regex, "")
+        val trimmetNavBruker = trimBrukerId(navBruker)
 
-        var person = hentPerson(filtrertNavBruker)
         var fnr : String?
         var fdato: LocalDate? = null
 
+        val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
+
+        var person = personForNavBruker
+
         if(person != null) {
-            fnr = filtrertNavBruker!!
+            fnr = trimmetNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
             //Prøve fnr
@@ -72,6 +73,8 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         return IdentifisertPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
 
+    private fun trimBrukerId(navBruker: String?) = navBruker?.replace("[^0-9.]".toRegex(), "")
+
     /**
      * Henter første treff på dato fra listen av SEDer
      */
@@ -111,17 +114,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         }
     }
 
-    private fun hentPerson(navBruker: String?): Bruker? {
-        if (!isFnrValid(navBruker)) return null
-        return personV3Klient.hentPerson(navBruker!!)
-    }
-
-    fun isFnrValid(navBruker: String?): Boolean {
-        if(navBruker == null) return false
-        if(navBruker.length != 11) return false
-
-        return true
-    }
+    fun isFnrValid(navBruker: String?) = navBruker != null && navBruker.length == 11
 }
 
 class IdentifisertPerson(val fnr : String? = null,
