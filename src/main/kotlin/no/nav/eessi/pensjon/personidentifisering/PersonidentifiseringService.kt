@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.klienter.*
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -21,9 +20,9 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
-    fun identifiserPerson(sedHendelse: SedHendelseModel, alleSediBuc: List<String?>) : IdentifisertPerson {
+    fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>) : IdentifisertPerson {
         val regex = "[^0-9.]".toRegex()
-        val filtrertNavBruker = sedHendelse.navBruker?.replace(regex, "")
+        val filtrertNavBruker = navBruker?.replace(regex, "")
 
         var person = hentPerson(filtrertNavBruker)
         var fnr : String?
@@ -68,7 +67,9 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return IdentifisertPerson(fnr, aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
+        if (fdato == null) throw NullPointerException("Unexpected null for fdato-variable")
+
+        return IdentifisertPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
 
     /**

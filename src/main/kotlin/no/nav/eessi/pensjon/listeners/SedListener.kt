@@ -48,7 +48,7 @@ class SedListener(
                     if (sedHendelse.sektorKode == "P") {
                         logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor bucType: ${sedHendelse.bucType} sedType: ${sedHendelse.sedType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, offset)
                     }
                     acknowledgment.acknowledge()
@@ -81,7 +81,7 @@ class SedListener(
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, alleSedIBuc)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, alleSedIBuc)
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
                     }
 
