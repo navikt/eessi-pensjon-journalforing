@@ -54,10 +54,11 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
             if(fnr != null) {
                 try {
                     val person = personV3Klient.hentPerson(fnr!!)
+                            ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr")
                     logger.info("Funnet person validert og hentet ut fra sed: $sedType")
                     return Pair(person,fnr)
                 } catch (ex:Exception) {
-                    logger.error("Feil ved henting av PersonV3, fortsetter å sjekke neste sed for fnr")
+                    logger.error("Feil ved henting av PersonV3, fortsetter å sjekke neste sed for fnr", ex)
                 }
             }
             logger.info("Ingen person funnet ut fra sed: $sedType")
