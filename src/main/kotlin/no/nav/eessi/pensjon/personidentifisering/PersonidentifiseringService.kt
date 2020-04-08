@@ -20,7 +20,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
     fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>) : IdentifisertPerson {
-        val trimmetNavBruker = trimBrukerId(navBruker)
+        val trimmetNavBruker = navBruker?.let{ FnrHelper.trimFnrString(it) }
 
         val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
@@ -72,8 +72,6 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
         return IdentifisertPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
     }
-
-    private fun trimBrukerId(navBruker: String?) = navBruker?.replace("[^0-9.]".toRegex(), "")
 
     /**
      * Henter første treff på dato fra listen av SEDer

@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
@@ -14,6 +15,10 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
 
     private val logger = LoggerFactory.getLogger(FnrHelper::class.java)
     private val mapper = jacksonObjectMapper()
+
+    companion object {
+        fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
+    }
 
     fun getPersonOgFnrFraSeder(seder: List<String?>): Pair<Bruker?, String?>? {
         var fnr: String? = null
@@ -51,10 +56,12 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                 logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
+
             if(fnr != null) {
                 try {
-                    val person = personV3Klient.hentPerson(fnr!!)
-                            ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr")
+                    val trimmetFnr = trimFnrString(fnr!!)
+                    val person = personV3Klient.hentPerson(trimmetFnr)
+                            ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr trimmet: $trimmetFnr")
                     logger.info("Funnet person validert og hentet ut fra sed: $sedType")
                     return Pair(person,fnr)
                 } catch (ex:Exception) {
