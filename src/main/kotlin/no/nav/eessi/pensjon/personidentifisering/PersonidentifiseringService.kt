@@ -22,10 +22,10 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>) : IdentifisertPerson {
         val trimmetNavBruker = trimBrukerId(navBruker)
 
+        val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
+
         var fnr : String?
         var fdato: LocalDate? = null
-
-        val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
         var person = personForNavBruker
 
@@ -79,29 +79,23 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
      * Henter første treff på dato fra listen av SEDer
      */
     fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
-        var fodselsDatoISO : String? = null
+        val fdatoFraFnr = fodselsDatoFra(fnr)
+        if (fdatoFraFnr != null) {
+            return fdatoFraFnr
+        }
+        if (!seder.isNullOrEmpty()) {
+            return fdatoHelper.finnEnFdatoFraSEDer(seder)
+        }
+        throw RuntimeException("Kunne ikke finne fdato i listen av SEDer")
+    }
 
-        if (isFnrValid(fnr)) {
-            fodselsDatoISO = try {
-                val navfnr = NavFodselsnummer(fnr!!)
-                navfnr.getBirthDateAsISO()
-            } catch (ex : Exception) {
+    private fun fodselsDatoFra(fnr: String?) =
+            try {
+                LocalDate.parse(NavFodselsnummer(fnr!!).getBirthDateAsISO(), DateTimeFormatter.ISO_DATE)
+            } catch (ex: Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
                 null
             }
-        }
-
-        if (fodselsDatoISO.isNullOrEmpty()) {
-            fodselsDatoISO = seder?.let { fdatoHelper.finnFDatoFraSeder(it) }
-            logger.debug("Fant følgende fdato: $fodselsDatoISO")
-        }
-
-        return if (fodselsDatoISO.isNullOrEmpty()) {
-            throw(RuntimeException("Kunne ikke finne fdato i listen av SEDer"))
-        } else {
-            LocalDate.parse(fodselsDatoISO, DateTimeFormatter.ISO_DATE)
-        }
-    }
 
     private fun hentAktoerId(navBruker: String?): String? {
         if (!isFnrValid(navBruker)) return null

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class FdatoHelper {
@@ -12,7 +14,7 @@ class FdatoHelper {
     private val logger = LoggerFactory.getLogger(FdatoHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun finnFDatoFraSeder(seder: List<String?>): String {
+    fun finnEnFdatoFraSEDer(seder: List<String?>): LocalDate {
         var fdato: String?
 
         seder.forEach { sed ->
@@ -42,7 +44,7 @@ class FdatoHelper {
                         }
                     }
                     if(fdato != null) {
-                        return fdato!!
+                        return LocalDate.parse(fdato, DateTimeFormatter.ISO_DATE)
                     }
                 }
                 throw RuntimeException("Fant ingen fdato i listen av SEDer")

@@ -3,9 +3,6 @@ package no.nav.eessi.pensjon.personidentifisering
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
@@ -21,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 
 
 @ExtendWith(MockitoExtension::class)
@@ -61,9 +59,9 @@ class PersonidentifiseringServiceTest {
                 .hentPerson(ArgumentMatchers.anyString())
 
         //EUX - Fdatoservice (fin fdato)
-        doReturn("1964-04-01")
+        doReturn(LocalDate.of(1964, 4,1))
                 .`when`(fdatoHelper)
-                .finnFDatoFraSeder(any())
+                .finnEnFdatoFraSEDer(any())
 
         //EUX - FnrServide (fin pin)
         doReturn( Pair(BrukerMock.createWith(landkoder = true), "01055012345"))
