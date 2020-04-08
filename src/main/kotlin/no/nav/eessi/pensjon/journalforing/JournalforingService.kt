@@ -31,7 +31,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
                            private val bestemSakKlient: BestemSakKlient,
-                           @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()))  {
+                           @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
@@ -51,31 +51,30 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
                 // Henter saksId for utgående dokumenter
-                var sakId: String? = null
+                val sakId=
+                        if (identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
+                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                        } else { null }
 
-                if(identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                    sakId = bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                if (sakId != null) {
                     logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
                 }
 
-                // Identifiserer enhet og journalpost-type
-                var forsokFerdigstill = false
-                var tildeltEnhet = OppgaveRoutingModel.Enhet.UKJENT
+                val forsokFerdigstill = sakId != null
 
-                if(sakId == null) {
-                    tildeltEnhet = hentTildeltEnhet(
-                            sedHendelse.sedType,
-                            OppgaveRoutingRequest(identifisertPerson.fnr,
+                val tildeltEnhet =
+                        if (sakId == null) {
+                            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson.fnr,
                                     identifisertPerson.fdato,
                                     identifisertPerson.diskresjonskode,
                                     identifisertPerson.landkode,
                                     identifisertPerson.geografiskTilknytning,
                                     sedHendelse.bucType,
                                     ytelseType)
-                    )
-                } else {
-                    forsokFerdigstill = true
-                }
+                            )
+                        } else {
+                            OppgaveRoutingModel.Enhet.UKJENT
+                        }
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
@@ -96,15 +95,15 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 )
 
                 // Oppdaterer distribusjonsinfo
-                if(sakId != null) {
+                if (sakId != null) {
                     journalpostKlient.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 
-                if(!journalPostResponse!!.journalpostferdigstilt) {
+                if (!journalPostResponse!!.journalpostferdigstilt) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
                 }
 
-                if(uSupporterteVedlegg.isNotEmpty()) {
+                if (uSupporterteVedlegg.isNotEmpty()) {
                     publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
                 }
             } catch (ex: MismatchedInputException) {
@@ -140,24 +139,13 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     private fun hentYtelseKravType(sedHendelse: SedHendelseModel): String? {
-        if(sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
-            return try{
+        if (sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
+            return try {
                 fagmodulKlient.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
             } catch (ex: Exception) {
                 null
             }
         }
         return null
-    }
-
-    private fun hentTildeltEnhet(
-            sedType: SedType,
-            oppgaveRoutingRequest: OppgaveRoutingRequest
-    ): OppgaveRoutingModel.Enhet {
-        return if(sedType == SedType.P15000){
-            oppgaveRoutingService.route(oppgaveRoutingRequest)
-        } else {
-            oppgaveRoutingService.route(oppgaveRoutingRequest)
-        }
     }
 }
