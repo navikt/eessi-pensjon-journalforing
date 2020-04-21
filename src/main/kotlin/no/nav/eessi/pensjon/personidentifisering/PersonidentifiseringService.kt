@@ -77,7 +77,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
      * Henter første treff på dato fra listen av SEDer
      */
     fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
-        val fdatoFraFnr = fodselsDatoFra(fnr)
+        val fdatoFraFnr = if(fnr == null) null else fodselsDatoFra(fnr)
         if (fdatoFraFnr != null) {
             return fdatoFraFnr
         }
@@ -87,9 +87,10 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         throw RuntimeException("Kunne ikke finne fdato i listen av SEDer")
     }
 
-    private fun fodselsDatoFra(fnr: String?) =
+    private fun fodselsDatoFra(fnr: String) =
             try {
-                LocalDate.parse(NavFodselsnummer(fnr!!).getBirthDateAsISO(), DateTimeFormatter.ISO_DATE)
+                val trimmedFnr = FnrHelper.trimFnrString(fnr)
+                LocalDate.parse(NavFodselsnummer(trimmedFnr).getBirthDateAsISO(), DateTimeFormatter.ISO_DATE)
             } catch (ex: Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
                 null
