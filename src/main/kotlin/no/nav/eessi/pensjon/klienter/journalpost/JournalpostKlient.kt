@@ -111,8 +111,8 @@ class JournalpostKlient(
     fun hentBehandlingsTema(bucType: String, ytelseType: String?): String {
         return if (bucType == BucType.R_BUC_02.name) {
             return when (ytelseType) {
-                "uforetrygd" -> Behandlingstema.UFOREPENSJON.toString()
-                "gjennlevende" -> Behandlingstema.GJENLEVENDEPENSJON.toString()
+                "UT" -> Behandlingstema.UFOREPENSJON.toString()
+                "GP" -> Behandlingstema.GJENLEVENDEPENSJON.toString()
                 else -> Behandlingstema.ALDERSPENSJON.toString()
             }
         } else {
@@ -123,7 +123,7 @@ class JournalpostKlient(
     fun hentTema(bucType: String, ytelseType: String?): String {
         return if (bucType == BucType.R_BUC_02.name) {
             return when (ytelseType) {
-                "uforetrygd" -> Tema.UFORETRYGD.toString()
+                "UT" -> Tema.UFORETRYGD.toString()
                 else -> Tema.PENSJON.toString()
             }
         } else {

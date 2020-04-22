@@ -40,15 +40,17 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
+        val bosatt = bosatt(routingRequest.landkode)
+
         return when {
             routingRequest.fnr == null -> ID_OG_FORDELING
-
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
-            NORGE == bosatt(routingRequest.landkode) -> {
-                if (R_BUC_02 == bucType) {
-                    if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-                        return ID_OG_FORDELING
+            NORGE == bosatt -> {
+                if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
+                    return when (bosatt) {
+                        NORGE ->  ID_OG_FORDELING
+                        else -> PENSJON_UTLAND
                     }
                 }
                 when (bucType) {
@@ -62,13 +64,13 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_OSLO
                     else -> NFP_UTLAND_AALESUND // Ukjent buc-type
                 }
-
             }
             else -> {
-
-                if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-                    if (R_BUC_02 == bucType)
-                        return PENSJON_UTLAND
+                if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
+                    return when (bosatt) {
+                        NORGE ->  ID_OG_FORDELING
+                        else -> PENSJON_UTLAND
+                    }
                 }
                 when (bucType) {
                     P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
@@ -84,6 +86,15 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             }
         }
     }
+
+//    fun betemEnhetRbuc(bosatt: Bosatt, routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: String?): Enhet {
+//        if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
+//            return when (bosatt) {
+//                NORGE ->  ID_OG_FORDELING
+//                else -> PENSJON_UTLAND
+//            }
+//        }
+//    }
 
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
 

@@ -30,7 +30,7 @@ class SedListener(
     private val sendtLatch = CountDownLatch(6)
     private val mottattLatch = CountDownLatch(7)
     private val mapper = jacksonObjectMapper()
-    private val gyldigeHendelser = listOf("P", "H_BUC_07", "R_BUC_02")
+    private val gyldigeInnkommendeHendelser = listOf("P", "H_BUC_07", "R_BUC_02")
     private val gyldigeUtgaendeHendelser = listOf("P", "R_BUC_02")
 
     fun getLatch() = sendtLatch
@@ -104,7 +104,7 @@ class SedListener(
         }
     }
 
-    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
+    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeInnkommendeHendelser.contains( it ) }.contains(true)
 
     fun gyldigSendtHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeUtgaendeHendelser.contains( it ) }.contains(true)
 

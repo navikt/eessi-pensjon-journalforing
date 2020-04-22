@@ -46,7 +46,7 @@ class SedDokumentHelperTest {
         val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
-        Assertions.assertEquals("alderspensjon",actual)
+        Assertions.assertEquals("AP",actual)
     }
 
     @Test
@@ -58,7 +58,7 @@ class SedDokumentHelperTest {
         val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
-        Assertions.assertEquals("uføretrygd",actual)
+        Assertions.assertEquals("UT",actual)
     }
 
     @Test

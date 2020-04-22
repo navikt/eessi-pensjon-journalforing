@@ -38,7 +38,11 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             val r005Sed = alleSedIBuc[SedType.R005.name]
             if (r005Sed != null){
                 val sedRootNode = mapper.readTree(r005Sed)
-                return filterYtelseTypeR005(sedRootNode)
+                return when (filterYtelseTypeR005(sedRootNode)) {
+                    "alderspensjon" -> "AP"
+                    "uføretrygd" -> "UT"
+                    else -> "GP"
+                }
             }
         //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
         } else if (sedHendelse.sedType == SedType.P15000) {
