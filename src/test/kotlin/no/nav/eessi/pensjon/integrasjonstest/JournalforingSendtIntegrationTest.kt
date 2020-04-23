@@ -270,6 +270,28 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_R004.json"))))
                     )
 
+            //Mock eux hent sed R_BUC_02 -- R005 sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02-R005-AP.json"))))
+                    )
+
+            //Mock eux hent sed R_BUC_02 -- H070 sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
+                    )
+
 
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
             mockServer.`when`(
@@ -501,7 +523,7 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"),
-                VerificationTimes.once()
+                VerificationTimes.atLeast(1)
         )
 
         mockServer.verify(
@@ -550,11 +572,25 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.atLeast(1)
         )
 
-        //verify sed R004
+        //verify R_BUC_02 sed R004
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"),
+                VerificationTimes.atLeast(0)
+        )
+        //verify R_BUC_02 sed R005
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"),
+                VerificationTimes.atLeast(1)
+        )
+        //verify R_BUC_02 sed H070
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"),
                 VerificationTimes.atLeast(1)
         )
 
@@ -572,7 +608,7 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.atLeast(3)
+                VerificationTimes.atLeast(4)
         )
 
         mockServer.verify(
@@ -583,7 +619,7 @@ class JournalforingSendtIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 24) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 26) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
