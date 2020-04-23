@@ -98,14 +98,13 @@ class JournalforingSendtIntegrationTest {
         // Sender 1 Foreldre SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json"))))
 
-        // Seder 1 i H_BUC_07 SED til Kafka
-        // sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
-
         // Sender 5 Pensjon SED til Kafka
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_05_X008.json"))))
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json"))))
 
         // Sender Sed med ugyldig FNR
         sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json"))))
@@ -202,6 +201,15 @@ class JournalforingSendtIntegrationTest {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                    )
 
             mockServer.`when`(
                     request()
@@ -213,6 +221,7 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json"))))
                     )
 
+            //Mock eux hent av sed
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
@@ -250,6 +259,18 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
+            //Mock eux hent sed R_BUC_02 -- R004 sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_R004.json"))))
+                    )
+
+
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
             mockServer.`when`(
                     request()
@@ -259,6 +280,17 @@ class JournalforingSendtIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
+                    )
+
+            //Mock fagmodul /buc/{rinanr}/allDocuments - RBUC
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/allDocuments"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsR_BUC_02.json"))))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments
@@ -464,6 +496,14 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.once()
         )
 
+        //verify R_BUC_02_R004
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"),
+                VerificationTimes.once()
+        )
+
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
@@ -475,6 +515,14 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
+                VerificationTimes.once()
+        )
+
+        // Verfiy fagmodul allDocuments R_BUC_02 R004 sed
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/allDocuments"),
                 VerificationTimes.once()
         )
 
@@ -501,6 +549,15 @@ class JournalforingSendtIntegrationTest {
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
                 VerificationTimes.atLeast(1)
         )
+
+        //verify sed R004
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"),
+                VerificationTimes.atLeast(1)
+        )
+
 
         // Verfiy eux sed
         mockServer.verify(
