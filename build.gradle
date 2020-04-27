@@ -29,6 +29,8 @@ plugins {
 	id 'com.adarshr.test-logger' version '2.0.0'
 }
 
+assert JavaVersion.current().isJava11Compatible(): "Java 11 or newer is required"
+
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'org.springframework.boot'
@@ -97,6 +99,7 @@ dependencies {
 
 	// Tjenestespesifikasjoner
 	compile("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
+	implementation("com.sun.xml.ws:jaxws-ri:2.3.2")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
@@ -114,17 +117,22 @@ test {
 	useJUnitPlatform()
 }
 
+java {
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
+}
+
 compileKotlin {
 	kotlinOptions {
 		freeCompilerArgs = ["-Xjsr305=strict"]
-		jvmTarget = "1.8"
+		jvmTarget = "11"
 	}
 }
 
 compileTestKotlin {
 	kotlinOptions {
 		freeCompilerArgs = ['-Xjsr305=strict']
-		jvmTarget = '1.8'
+		jvmTarget = '11'
 	}
 }
 
