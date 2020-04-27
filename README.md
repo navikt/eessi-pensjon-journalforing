@@ -10,6 +10,15 @@ Kjør med java 1.8
 
 ## Komme i gang
 
+Dette prosjektet bygger med avhengigheter som ligger i Github Package Registry.
+Du må opprette et Personal Access Token (PAT) og enten legge det i
+`~/.gradle/gradle.properties`:
+```properties
+gpr.key=<ditt-token-her>
+```
+eller sette miljøvariabelen `GITHUB_TOKEN` til verdien av tokenet ditt.
+
+Deretter kan du bygge med:
 ```
 ./gradlew build
 ```

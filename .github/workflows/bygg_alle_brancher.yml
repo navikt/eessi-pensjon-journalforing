@@ -20,3 +20,5 @@ jobs:
       - name: 'Bygg'
         run: |
           ./gradlew -Pgithub clean build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
