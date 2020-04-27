@@ -49,7 +49,7 @@ class SedListener(
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
                         val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, ytelseType, offset)
                     }
@@ -83,7 +83,7 @@ class SedListener(
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
                             val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, ytelseType, offset)
                     }
