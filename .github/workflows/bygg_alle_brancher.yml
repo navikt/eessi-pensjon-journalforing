@@ -19,6 +19,6 @@ jobs:
       # BYGGER DOCKER CONTAINER
       - name: 'Bygg'
         run: |
-          ./gradlew -Pgithub clean build
+          ./gradlew build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

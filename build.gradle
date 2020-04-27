@@ -7,17 +7,9 @@ buildscript {
 		oidcTokenSupportVersion = '0.2.9'
 		logstashLogbackVersion = '6.1'
 		pensjonInformasjonVersion = '9.4.10'
-		personV3Version = '3.6.1'
 	}
 	repositories {
-
-		if (project.hasProperty('github')) {
-			mavenCentral()
-		} else {
-			maven {
-				url "https://repo.adeo.no/repository/maven-releases"
-			}
-		}
+		mavenCentral()
 	}
 
 	dependencies {
@@ -104,11 +96,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:eessi-pensjon-metrics:0.1.0")
 
 	// Tjenestespesifikasjoner
-	if (project.hasProperty('github')) {
-		compile("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
-	} else {
-		implementation("no.nav.tjenester:nav-person-v3-tjenestespesifikasjon:${personV3Version}")
-	}
+	compile("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
@@ -143,11 +131,6 @@ compileTestKotlin {
 repositories {
 	mavenCentral()
 
-	if (!project.hasProperty('github')) {
-		maven {
-			url "https://repo.adeo.no/repository/maven-releases"
-		}
-	}
 	["maven-release","tjenestespesifikasjoner","eessi-pensjon-metrics"].each { repo ->
 		String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
 		if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
