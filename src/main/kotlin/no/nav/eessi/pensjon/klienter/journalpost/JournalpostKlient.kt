@@ -5,19 +5,20 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.util.UriComponentsBuilder
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -44,7 +45,7 @@ class JournalpostKlient(
             sedHendelseType: String,
             eksternReferanseId: String?,
             kanal: String?,
-            journalfoerendeEnhet: String?,
+            journalfoerendeEnhet: String,
             arkivsaksnummer: String?,
             dokumenter: String,
             forsokFerdigstill: Boolean? = false,
@@ -64,7 +65,7 @@ class JournalpostKlient(
         }
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer)
-        val tema = hentTema(bucType, ytelseType)
+        val tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType)
         val tilleggsopplysninger = populerTilleggsopplysninger(rinaSakId)
         val tittel = "${journalpostType.decode()} $sedType"
 
@@ -120,8 +121,11 @@ class JournalpostKlient(
         }
     }
 
-    fun hentTema(bucType: String, ytelseType: String?): String {
+    fun hentTema(bucType: String, sedType: String, enhet: String, ytelseType: String?): String {
         return if (bucType == BucType.R_BUC_02.name) {
+            if (sedType == SedType.R004.name && enhet == "4819"){
+                return Tema.PENSJON.toString()
+            }
             return when (ytelseType) {
                 "UT" -> Tema.UFORETRYGD.toString()
                 else -> Tema.PENSJON.toString()

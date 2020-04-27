@@ -20,13 +20,14 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-
+        println(routingRequest)
         logger.debug("person: $routingRequest,  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
+
         if (routingRequest.fnr == null) return ID_OG_FORDELING
         val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
         val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
-                ?: bestemTildeltEnhet(routingRequest, routingRequest.bucType, routingRequest.ytelseType)
+                ?: bestemEnhet(routingRequest, routingRequest.bucType)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
                 "Buc: ${routingRequest.bucType}, " +
@@ -38,21 +39,22 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         return tildeltEnhet
     }
 
+    private fun bestemEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?) : Enhet {
+        return when {
+            routingRequest.fnr == null -> ID_OG_FORDELING
+            routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
+
+            bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest, bucType)
+            else -> bestemTildeltEnhet(routingRequest, bucType, routingRequest.ytelseType)
+        }
+    }
+
     private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: String?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
 
         return when {
-            routingRequest.fnr == null -> ID_OG_FORDELING
-            routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
-
             NORGE == bosatt -> {
-                if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
-                    return when (bosatt) {
-                        NORGE ->  ID_OG_FORDELING
-                        else -> PENSJON_UTLAND
-                    }
-                }
                 when (bucType) {
                     P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
                     P_BUC_03 -> UFORE_UTLANDSTILSNITT
@@ -66,12 +68,6 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                 }
             }
             else -> {
-                if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
-                    return when (bosatt) {
-                        NORGE ->  ID_OG_FORDELING
-                        else -> PENSJON_UTLAND
-                    }
-                }
                 when (bucType) {
                     P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
                     P_BUC_03 -> UFORE_UTLAND
@@ -87,14 +83,26 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         }
     }
 
-//    fun betemEnhetRbuc(bosatt: Bosatt, routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: String?): Enhet {
-//        if (R_BUC_02 == bucType && HendelseType.MOTTATT == routingRequest.hendelseType) {
-//            return when (bosatt) {
-//                NORGE ->  ID_OG_FORDELING
-//                else -> PENSJON_UTLAND
-//            }
-//        }
-//    }
+    private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?): Enhet {
+        val bosatt = bosatt(routingRequest.landkode)
+        if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+            return when (bosatt) {
+                NORGE ->  ID_OG_FORDELING
+                else -> PENSJON_UTLAND
+            }
+        } else {
+            return when (bosatt) {
+                NORGE ->  ID_OG_FORDELING
+                else -> {
+                    if (routingRequest.sedType == SedType.R004) {
+                        OKONOMI_PENSJON
+                    } else
+                    PENSJON_UTLAND
+                }
+            }
+        }
+
+    }
 
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
 

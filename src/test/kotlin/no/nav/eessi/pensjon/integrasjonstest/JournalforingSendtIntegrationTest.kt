@@ -259,17 +259,6 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
-            //Mock eux hent sed R_BUC_02 -- R004 sed
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET)
-                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_R004.json"))))
-                    )
-
             //Mock eux hent sed R_BUC_02 -- R005 sed
             mockServer.`when`(
                     request()
@@ -474,7 +463,7 @@ class JournalforingSendtIntegrationTest {
                     )
 
             // Mocker oppdaterDistribusjonsinfo
-            mockServer.`when`(
+           mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.PATCH)
                             .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
@@ -486,7 +475,7 @@ class JournalforingSendtIntegrationTest {
                     )
         }
 
-        private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
+        private fun randomFrom(from : Int = 1024, to: Int = 65535): Int {
             val random = Random()
             return random.nextInt(to - from) + from
         }
@@ -494,14 +483,6 @@ class JournalforingSendtIntegrationTest {
 
     private fun verifiser() {
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
-
-
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/.well-known/openid-configuration"),
-                VerificationTimes.atLeast(1)
-        )
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
@@ -523,7 +504,7 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"),
-                VerificationTimes.atLeast(1)
+                VerificationTimes.once()
         )
 
         mockServer.verify(
@@ -572,13 +553,6 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.atLeast(1)
         )
 
-        //verify R_BUC_02 sed R004
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"),
-                VerificationTimes.atLeast(0)
-        )
         //verify R_BUC_02 sed R005
         mockServer.verify(
                 request()

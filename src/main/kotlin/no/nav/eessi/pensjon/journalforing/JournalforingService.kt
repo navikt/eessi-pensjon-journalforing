@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
@@ -71,10 +72,14 @@ class JournalforingService(private val euxKlient: EuxKlient,
                                     identifisertPerson.landkode,
                                     identifisertPerson.geografiskTilknytning,
                                     sedHendelse.bucType,
-                                    ytelseType)
-                            )
-                        } else {
-                            OppgaveRoutingModel.Enhet.UKJENT
+                                    ytelseType,
+                                    sedHendelse.sedType,
+                                    hendelseType).also {
+                                println(it.toJson())
+                            }
+                    )
+                } else {
+                    OppgaveRoutingModel.Enhet.UKJENT
                         }
 
                 // Oppretter journalpost

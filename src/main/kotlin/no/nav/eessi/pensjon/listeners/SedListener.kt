@@ -27,7 +27,7 @@ class SedListener(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val sendtLatch = CountDownLatch(6)
+    private val sendtLatch = CountDownLatch(7)
     private val mottattLatch = CountDownLatch(7)
     private val mapper = jacksonObjectMapper()
     private val gyldigeInnkommendeHendelser = listOf("P", "H_BUC_07", "R_BUC_02")

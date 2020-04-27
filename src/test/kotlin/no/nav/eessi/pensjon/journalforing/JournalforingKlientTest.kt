@@ -94,6 +94,15 @@ class JournalforingKlientTest {
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
+        doReturn(Pair<String, List<EuxDokument>>("R004 - Melding om utbetaling", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.R004))
+
+        doReturn(Pair<String, List<EuxDokument>>("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.R005))
+
+
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostKlient)
@@ -119,6 +128,14 @@ class JournalforingKlientTest {
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_01 && arg.ytelseType == null })
+
+        doReturn(OppgaveRoutingModel.Enhet.OKONOMI_PENSJON)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R004 })
+
+        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R005 })
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
@@ -146,6 +163,69 @@ class JournalforingKlientTest {
                 .hentYtelseKravType(anyString(), anyString())
     }
 
+    @Test
+    fun `Sendt gyldig Sed R004 på R_BUC_02`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val identifisertPerson = IdentifisertPerson("12078945602",
+                "12078945602",
+                LocalDate.of(89, 7, 12),
+                "Test Testesen",
+                null,
+                landkode = "SE"
+            )
+
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "AP", 0)
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("2536475861"),
+                fnr= eq("12078945602"),
+                personNavn= eq("Test Testesen"),
+                bucType= eq("R_BUC_02"),
+                sedType= eq(SedType.R004.name),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq("EESSI"),
+                journalfoerendeEnhet= eq("4819"),
+                arkivsaksnummer= eq(null),
+                dokumenter= eq("R004 - Melding om utbetaling"),
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq("AP")
+        )
+    }
+
+    @Test
+    fun `Sendt gyldig Sed R005 på R_BUC_02`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val identifisertPerson = IdentifisertPerson("12078945602",
+                "12078945602",
+                LocalDate.of(89, 7, 12),
+                "Test Testesen",
+                null,
+                landkode = "SE"
+        )
+
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "UT", 0)
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("25896280"),
+                fnr= eq("12078945602"),
+                personNavn= eq("Test Testesen"),
+                bucType= eq("R_BUC_02"),
+                sedType= eq(SedType.R005.name),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq("EESSI"),
+                journalfoerendeEnhet= eq("0001"),
+                arkivsaksnummer= eq(null),
+                dokumenter= eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq("UT")
+        )
+    }
 
     @Test
     fun `Sendt gyldig Sed P2000`(){

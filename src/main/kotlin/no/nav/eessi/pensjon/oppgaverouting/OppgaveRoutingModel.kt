@@ -27,6 +27,7 @@ class OppgaveRoutingModel(
         NFP_UTLAND_OSLO("4803"),
         ID_OG_FORDELING("4303"),
         DISKRESJONSKODE("2103"),
+        OKONOMI_PENSJON("4819"),
         UKJENT("9999");
 
         companion object {
