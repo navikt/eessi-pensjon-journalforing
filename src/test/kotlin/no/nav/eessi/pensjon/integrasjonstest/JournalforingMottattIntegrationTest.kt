@@ -47,7 +47,7 @@ private lateinit var mockServer : ClientAndServer
 @SpringBootTest(classes = [ JournalforingMottattIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
+@EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafka"])
 class JournalforingMottattIntegrationTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
