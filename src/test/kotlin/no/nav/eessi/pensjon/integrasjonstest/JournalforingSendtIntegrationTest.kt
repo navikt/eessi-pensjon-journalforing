@@ -293,7 +293,7 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
                     )
 
-            //Mock fagmodul /buc/{rinanr}/allDocuments - RBUC
+            //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
@@ -560,6 +560,7 @@ class JournalforingSendtIntegrationTest {
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"),
                 VerificationTimes.atLeast(1)
         )
+
         //verify R_BUC_02 sed H070
         mockServer.verify(
                 request()

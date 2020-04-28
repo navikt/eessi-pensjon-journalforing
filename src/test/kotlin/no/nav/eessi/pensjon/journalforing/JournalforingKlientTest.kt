@@ -209,7 +209,7 @@ class JournalforingKlientTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "UT", 0)
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = eq("25896280"),
+                rinaSakId = eq("2536475861"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("R_BUC_02"),
