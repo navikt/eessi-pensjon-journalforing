@@ -6,8 +6,6 @@ Journalfører utgående SED når kafka meldinger konsumeres
 
 # Utvikling
 
-Kjør med java 1.8
-
 ## Komme i gang
 
 Dette prosjektet bygger med avhengigheter som ligger i Github Package Registry.
