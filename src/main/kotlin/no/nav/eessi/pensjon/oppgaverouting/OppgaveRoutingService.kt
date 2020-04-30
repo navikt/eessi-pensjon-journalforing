@@ -5,14 +5,15 @@ import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.NORGE
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.Period
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 
 @Service
 class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
@@ -44,7 +45,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             routingRequest.fnr == null -> ID_OG_FORDELING
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
-            bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest, bucType)
+            bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest)
             else -> bestemTildeltEnhet(routingRequest, bucType, routingRequest.ytelseType)
         }
     }
@@ -83,7 +84,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         }
     }
 
-    private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?): Enhet {
+    private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         val bosatt = bosatt(routingRequest.landkode)
         if (HendelseType.MOTTATT == routingRequest.hendelseType) {
             return when (bosatt) {
