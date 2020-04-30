@@ -80,10 +80,11 @@ dependencies {
 	implementation("net.jodah:expiringmap:0.5.9")
 
 	//mock - test
+	implementation("org.mockito:mockito-core:3.3.3")
 	testImplementation("org.junit.jupiter:junit-jupiter:5.5.1")
 	testImplementation("org.junit.jupiter:junit-jupiter-params:5.5.1")
-	testImplementation('org.mockito:mockito-junit-jupiter:2.23.0')
-	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
+	testImplementation('org.mockito:mockito-junit-jupiter:2.25.0')
+	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 	testImplementation("org.mock-server:mockserver-netty:5.4.1") {
 		exclude module: 'junit'
 	}
