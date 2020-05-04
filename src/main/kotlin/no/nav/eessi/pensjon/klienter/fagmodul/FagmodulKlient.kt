@@ -13,9 +13,8 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
-import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.failureTypeTagValue
-import no.nav.eessi.pensjon.metrics.MetricsHelper.Configuration.successTypeTagValue
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 
 
 /**
@@ -30,6 +29,19 @@ class FagmodulKlient(
 
     private val hentYtelseTypeMapper = YtelseTypeMapper()
 
+    private lateinit var hentYtelseKravtype: MetricsHelper.Metric
+    private lateinit var hentFodselsdatoFraBuc: MetricsHelper.Metric
+    private lateinit var hentSeds: MetricsHelper.Metric
+    private lateinit var hentFnrFraBUC: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentYtelseKravtype = metricsHelper.init("hentYtelseKravtype")
+        hentFodselsdatoFraBuc = metricsHelper.init("hentFodselsdatoFraBuc")
+        hentSeds = metricsHelper.init("hentSeds")
+        hentFnrFraBUC = metricsHelper.init("hentFnrFraBUC")
+    }
+
     /**
      * Henter pin og ytelsetype , støttede SED typer:
      *  P2100 og P15000
@@ -41,7 +53,7 @@ class FagmodulKlient(
 
 
     private fun kallhentYtelseKravType(rinaNr: String, dokumentId: String): HentYtelseTypeResponse? {
-        return metricsHelper.measure("hentYtelseKravtype") {
+        return hentYtelseKravtype.measure {
             val path = "/sed/ytelseKravtype/$rinaNr/sedid/$dokumentId"
             return@measure try {
                 logger.info("Henter ytelsetype for P_BUC_10 for rinaNr: $rinaNr , dokumentId: $dokumentId")
@@ -66,7 +78,7 @@ class FagmodulKlient(
      *  @param buctype BUC-type
      */
     fun hentFodselsdatoFraBuc(rinaNr: String, buctype: String) : String? {
-        return metricsHelper.measure("hentFodselsdatoFraBuc") {
+        return hentFodselsdatoFraBuc.measure {
             val path = "/sed/fodselsdato/$rinaNr/buctype/$buctype"
             try {
                 logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
@@ -92,36 +104,35 @@ class FagmodulKlient(
      */
     fun hentFnrFraBuc(rinaNr: String, buctype: String) : String? {
         val path = "/sed/fodselsnr/$rinaNr/buctype/$buctype"
-        try {
-            logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
-            val fnr = fagmodulOidcRestTemplate.exchange(path,
-                    HttpMethod.GET,
-                    HttpEntity(""),
-                    String::class.java).body
-            metricsHelper.increment("hentFnrFraBUC", successTypeTagValue)
-            return fnr
-        } catch(ex: HttpClientErrorException) {
-            // Ved ikke ikke treff på fnr fortsetter vi som om fnr ikke var utfylt
-            if (ex.statusCode == HttpStatus.NOT_FOUND) {
-                logger.info("Fant ikke fnr i noen SEDer i BUC : $rinaNr")
-                return null
+        return hentFnrFraBUC.measure {
+            try {
+                logger.info("Henter fødselsdato for rinaNr: $rinaNr , buctype: $buctype")
+                val fnr = fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        HttpEntity(""),
+                        String::class.java).body
+                fnr
+            } catch (ex: HttpClientErrorException) {
+                // Ved ikke ikke treff på fnr fortsetter vi som om fnr ikke var utfylt
+                if (ex.statusCode == HttpStatus.NOT_FOUND) {
+                    logger.info("Fant ikke fnr i noen SEDer i BUC : $rinaNr")
+                    return@measure null
+                } else {
+                    logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
+                    throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                }
+            } catch (ex: HttpServerErrorException) {
+                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
+                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex")
+                throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message}")
             }
-            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
-            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
-            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
-        } catch(ex: HttpServerErrorException) {
-            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
-            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex body: ${ex.responseBodyAsString}")
-            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message} body: ${ex.responseBodyAsString}")
-        } catch(ex: Exception) {
-            metricsHelper.increment("hentFnrFraBUC", failureTypeTagValue)
-            logger.error("En feil oppstod under henting av fødselsnummer fra buc ex: $ex")
-            throw RuntimeException("En feil oppstod under henting av fødselsnummer fra buc ex: ${ex.message}")
         }
     }
 
     fun hentAlleDokumenter(rinaNr: String): String? {
-        return metricsHelper.measure("hentSeds") {
+        return hentSeds.measure {
             val path = "/buc/$rinaNr/allDocuments"
             return@measure try {
                 logger.info("Henter jsondata for alle sed for rinaNr: $rinaNr")

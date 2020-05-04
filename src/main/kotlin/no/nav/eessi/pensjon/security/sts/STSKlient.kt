@@ -57,9 +57,15 @@ class STSKlient(
 
     lateinit var wellKnownSTS: WellKnownSTS
 
+    private lateinit var disoverSTS: MetricsHelper.Metric
+    private lateinit var getSystemOidcToken: MetricsHelper.Metric
+
     @PostConstruct
-    fun discoverEndpoints() {
-        metricsHelper.measure("disoverSTS") {
+    fun initMetrics() {
+        disoverSTS = metricsHelper.init("disoverSTS")
+        getSystemOidcToken = metricsHelper.init("getSystemOidcToken")
+
+        disoverSTS.measure {
             try {
                 logger.info("Henter STS endepunkter fra well.known " + discoveryUrl)
                     wellKnownSTS = RestTemplate().exchange(discoveryUrl,
@@ -77,7 +83,7 @@ class STSKlient(
     }
 
     fun getSystemOidcToken(): String {
-        return metricsHelper.measure("getSystemOidcToken") {
+        return getSystemOidcToken.measure {
             try {
                 val uri = UriComponentsBuilder.fromUriString(wellKnownSTS.tokenEndpoint)
                         .queryParam("grant_type", "client_credentials")

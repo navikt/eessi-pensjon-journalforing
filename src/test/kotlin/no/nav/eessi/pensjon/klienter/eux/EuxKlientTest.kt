@@ -38,6 +38,7 @@ class EuxKlientTest {
     @BeforeEach
     fun setup() {
         euxKlient = EuxKlient(mockrestTemplate)
+        euxKlient.initMetrics()
     }
 
     @Test

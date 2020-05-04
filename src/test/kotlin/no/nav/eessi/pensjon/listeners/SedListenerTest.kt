@@ -49,6 +49,7 @@ class SedListenerTest {
         `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("P", "H_BUC_07"))
 
         sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
+        sedListener.initMetrics()
     }
 
     @Test
@@ -75,6 +76,7 @@ class SedListenerTest {
         `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("R_BUC_02"))
 
         val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
+        sedListener2.initMetrics()
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
 
         sedListener2.consumeSedMottatt(hendelse, cr, acknowledgment)

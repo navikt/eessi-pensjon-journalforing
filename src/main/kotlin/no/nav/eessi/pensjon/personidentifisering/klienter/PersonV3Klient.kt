@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ResponseStatus
+import javax.annotation.PostConstruct
 import javax.xml.ws.soap.SOAPFaultException
 
 fun hentLandkode(person: Person?) =
@@ -37,8 +38,15 @@ class PersonV3Klient(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Klient::class.java) }
 
+    private lateinit var hentperson: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentperson = metricsHelper.init("hentperson")
+    }
+
     fun hentPerson(fnr: String): Bruker? {
-        return metricsHelper.measure("hentperson") {
+        return hentperson.measure {
             logger.info("Henter person fra PersonV3Klient")
 
             try {

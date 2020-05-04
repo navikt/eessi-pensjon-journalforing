@@ -68,6 +68,7 @@ class JournalforingKlientTest {
                 oppgaveHandler,
                 bestemSakKlient
             )
+        journalforingService.initMetrics()
 
         //MOCK RESPONSES
 

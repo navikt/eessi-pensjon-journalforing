@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
+import javax.annotation.PostConstruct
 
 
 val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
@@ -23,8 +24,15 @@ val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeatur
 class PDFService(@Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
+    private lateinit var pdfConverter: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        pdfConverter = metricsHelper.init("pdfConverter")
+    }
+
     fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, List<EuxDokument>>{
-        return metricsHelper.measure("pdfConverter") {
+        return pdfConverter.measure {
             try {
                 val documents = mapper.readValue(json, SedDokumenter::class.java)
                 val sedDokument = konverterTilLesbartFilnavn(sedType, documents)

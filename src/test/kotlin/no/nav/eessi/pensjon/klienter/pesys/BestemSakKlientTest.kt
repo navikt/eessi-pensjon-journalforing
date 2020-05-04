@@ -27,6 +27,7 @@ class BestemSakKlientTest {
     @BeforeEach
     fun setup() {
         bestemSakKlient = BestemSakKlient(mockrestTemplate)
+        bestemSakKlient.initMetrics()
     }
 
 

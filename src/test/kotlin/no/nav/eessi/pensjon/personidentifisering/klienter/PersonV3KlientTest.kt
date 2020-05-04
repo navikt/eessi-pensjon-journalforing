@@ -35,6 +35,7 @@ class PersonV3KlientTest {
     fun setup() {
         personV3 = spyk()
         personV3Klient = PersonV3Klient(personV3, stsClientConfig)
+        personV3Klient.initMetrics()
     }
 
     @Test

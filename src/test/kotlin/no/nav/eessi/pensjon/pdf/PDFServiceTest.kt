@@ -8,6 +8,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import no.nav.eessi.pensjon.models.SedType
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -17,6 +18,11 @@ import org.junit.jupiter.api.assertThrows
 class PDFServiceTest {
 
     val pdfService = PDFService()
+
+    @BeforeEach
+    fun init() {
+        pdfService.initMetrics()
+    }
 
     @Test
     fun `Gitt en json dokument uten vedlegg saa konverter til json dokument med pdf innhold`() {

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import javax.annotation.PostConstruct
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -35,6 +36,15 @@ class JournalpostKlient(
 
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
+
+    private lateinit var opprettjournalpost: MetricsHelper.Metric
+    private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        opprettjournalpost = metricsHelper.init("opprettjournalpost")
+        oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
+    }
 
     fun opprettJournalpost(
             rinaSakId: String,
@@ -88,7 +98,7 @@ class JournalpostKlient(
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill}"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
-        return metricsHelper.measure("opprettjournalpost") {
+        return opprettjournalpost.measure {
             return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost")
                 val headers = HttpHeaders()
@@ -143,7 +153,7 @@ class JournalpostKlient(
         val path = "/journalpost/$journalpostId/oppdaterDistribusjonsinfo"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
-        return metricsHelper.measure("oppdaterDistribusjonsinfo") {
+        return oppdaterDistribusjonsinfo.measure {
             try {
                 logger.info("Oppdaterer distribusjonsinfo for journalpost: $journalpostId")
                 val headers = HttpHeaders()

@@ -18,6 +18,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import javax.annotation.PostConstruct
 
 @Service
 class SedListener(
@@ -35,13 +36,22 @@ class SedListener(
     private val gyldigeInnkommendeHendelser = gyldigeHendelser.gyldigeInnkommendeHendelser()
     private val gyldigeUtgaendeHendelser = gyldigeHendelser.gyldigeUtgaendeHendelser()
 
+    private lateinit var consumeOutgoingSed: MetricsHelper.Metric
+    private lateinit var consumeIncomingSed: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        consumeOutgoingSed = metricsHelper.init("consumeOutgoingSed")
+        consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
+    }
+
     fun getLatch() = sendtLatch
     fun getMottattLatch() = mottattLatch
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
-            metricsHelper.measure("consumeOutgoingSed") {
+            consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)
                 try {
@@ -73,7 +83,7 @@ class SedListener(
     @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
-            metricsHelper.measure("consumeIncomingSed") {
+            consumeIncomingSed.measure {
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 logger.debug(hendelse)

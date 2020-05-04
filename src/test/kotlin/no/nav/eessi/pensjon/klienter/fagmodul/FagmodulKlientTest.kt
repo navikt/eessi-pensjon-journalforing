@@ -39,6 +39,7 @@ class FagmodulKlientTest {
     @BeforeEach
     fun setup() {
         fagmodulKlient = FagmodulKlient(mockrestTemplate)
+        fagmodulKlient.initMetrics()
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 
 @Service
 class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
@@ -16,6 +17,13 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
 
     private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
     private val X_REQUEST_ID = "x_request_id"
+
+    private lateinit var publiserOppgavemelding: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        publiserOppgavemelding = metricsHelper.init("publiserOppgavemelding")
+    }
 
     @Value("\${kafka.oppgave.topic}")
     private lateinit var oppgaveTopic: String
@@ -26,7 +34,7 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()
 
-        metricsHelper.measure("publiserOppgavemelding") {
+        publiserOppgavemelding.measure {
             logger.info("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
             kafkaTemplate.sendDefault(key, payload).get()
         }

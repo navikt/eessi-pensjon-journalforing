@@ -32,6 +32,7 @@ class Norg2KlientTest {
     @BeforeEach
     fun setup() {
         norg2Klient = Norg2Klient(mockrestTemplate)
+        norg2Klient.initMetrics()
     }
 
     @Test

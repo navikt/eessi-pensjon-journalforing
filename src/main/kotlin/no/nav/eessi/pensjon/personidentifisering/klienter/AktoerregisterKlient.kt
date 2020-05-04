@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
+import javax.annotation.PostConstruct
 
 class Identinfo(
         val ident: String,
@@ -41,6 +42,13 @@ class AktoerregisterKlient(
 
     @Value("\${NAIS_APP_NAME}")
     lateinit var appName: String
+
+    private lateinit var aktoerregister: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        aktoerregister = metricsHelper.init("aktoerregister")
+    }
 
     fun hentGjeldendeNorskIdentForAkteorId(aktoerid: String): String {
         try {
@@ -88,7 +96,7 @@ class AktoerregisterKlient(
     private fun doRequest(ident: String,
                           identGruppe: String,
                           gjeldende: Boolean = true): Map<String, IdentinfoForAktoer> {
-        return metricsHelper.measure("aktoerregister") {
+        return aktoerregister.measure {
             val headers = HttpHeaders()
             headers["Nav-Personidenter"] = ident
             headers["Nav-Consumer-Id"] = appName

@@ -23,6 +23,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 
 @Service
 class JournalforingService(private val euxKlient: EuxKlient,
@@ -36,12 +37,19 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
+    private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
+    }
+
     fun journalfor(sedHendelse: SedHendelseModel,
                    hendelseType: HendelseType,
                    identifisertPerson: IdentifisertPerson,
                    ytelseType: String?,
                    offset: Long = 0) {
-        metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
+        journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 

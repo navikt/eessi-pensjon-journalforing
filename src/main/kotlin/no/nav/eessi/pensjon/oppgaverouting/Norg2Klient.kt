@@ -14,6 +14,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
+import javax.annotation.PostConstruct
 
 @Component
 class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
@@ -22,6 +23,13 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
     constructor(): this(RestTemplate())
 
     private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
+
+    private lateinit var hentArbeidsfordeling: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentArbeidsfordeling = metricsHelper.init("hentArbeidsfordeling")
+    }
 
     //https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
     protected enum class BehandlingsTyper(val kode : String) {
@@ -57,7 +65,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
-        return metricsHelper.measure("hentArbeidsfordeling") {
+        return hentArbeidsfordeling.measure {
 
             try {
                 val headers = HttpHeaders()

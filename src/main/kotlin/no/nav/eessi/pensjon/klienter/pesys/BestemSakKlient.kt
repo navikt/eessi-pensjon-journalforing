@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import javax.annotation.PostConstruct
 
 @Component
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
@@ -25,6 +26,13 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
     val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
     val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+
+    private lateinit var hentPesysSaker: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentPesysSaker = metricsHelper.init("hentPesysSaker")
+    }
 
     /**
      * Henter pesys sakID for en gitt aktørID og ytelsetype
@@ -51,7 +59,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
         val randomId = UUID.randomUUID().toString()
         val requestBody = BestemSakRequest(aktoerId, ytelseType, randomId, randomId)
 
-        return metricsHelper.measure("hentPesysSaker") {
+        return hentPesysSaker.measure {
             return@measure try {
                 logger.info("Kaller bestemSak i PESYS")
                 val headers = HttpHeaders()

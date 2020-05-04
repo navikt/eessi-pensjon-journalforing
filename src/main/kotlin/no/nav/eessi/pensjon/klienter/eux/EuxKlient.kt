@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
+import javax.annotation.PostConstruct
 
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
@@ -28,6 +29,15 @@ class EuxKlient(
     private val logger: Logger by lazy { LoggerFactory.getLogger(EuxKlient::class.java) }
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
+    private lateinit var hentpdf: MetricsHelper.Metric
+    private lateinit var hentSed: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentpdf = metricsHelper.init("hentpdf")
+        hentSed = metricsHelper.init("hentSed")
+    }
+
     /**
      * Henter SED og tilhørende vedlegg i json format
      *
@@ -35,7 +45,7 @@ class EuxKlient(
      * @param dokumentId SED-id
      */
     fun hentSedDokumenter(rinaNr: String, dokumentId: String): String? {
-        return metricsHelper.measure("hentpdf") {
+        return hentpdf.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId/filer"
             return@measure try {
                 logger.info("Henter PDF for SED og tilhørende vedlegg for rinaNr: $rinaNr , dokumentId: $dokumentId")
@@ -60,7 +70,7 @@ class EuxKlient(
      * @param dokumentId SED-id
      */
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
-        return metricsHelper.measure("hentSed") {
+        return hentSed.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId"
             return@measure try {
                 logger.info("Henter SED for rinaNr: $rinaNr , dokumentId: $dokumentId")
