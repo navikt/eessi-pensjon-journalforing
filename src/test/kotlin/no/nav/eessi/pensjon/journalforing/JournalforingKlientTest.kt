@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.Krav
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlientModel
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -92,30 +94,48 @@ class JournalforingKlientTest {
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2200))
 
+        doReturn(Pair<String, List<EuxDokument>>("R004 - Melding om utbetaling", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.R004))
+
+        doReturn(Pair<String, List<EuxDokument>>("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.R005))
+
+
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostKlient)
                 .opprettJournalpost(
-                        rinaSakId = anyOrNull(),
-                        fnr= anyOrNull(),
-                        personNavn= anyOrNull(),
-                        bucType= anyOrNull(),
-                        sedType= anyOrNull(),
-                        sedHendelseType= anyOrNull(),
-                        eksternReferanseId= anyOrNull(),
-                        kanal= anyOrNull(),
-                        journalfoerendeEnhet= anyOrNull(),
-                        arkivsaksnummer= anyOrNull(),
-                        dokumenter= anyOrNull(),
-                        forsokFerdigstill= anyOrNull(),
-                        avsenderLand = anyOrNull(),
-                        avsenderNavn = anyOrNull()
+                    rinaSakId = anyOrNull(),
+                    fnr= anyOrNull(),
+                    personNavn= anyOrNull(),
+                    bucType= anyOrNull(),
+                    sedType= anyOrNull(),
+                    sedHendelseType= anyOrNull(),
+                    eksternReferanseId= anyOrNull(),
+                    kanal= anyOrNull(),
+                    journalfoerendeEnhet= anyOrNull(),
+                    arkivsaksnummer= anyOrNull(),
+                    dokumenter= anyOrNull(),
+                    forsokFerdigstill= anyOrNull(),
+                    avsenderLand = anyOrNull(),
+                    avsenderNavn = anyOrNull(),
+                    ytelseType = anyOrNull()
                 )
 
         //OPPGAVEROUTING ROUTE
         doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_01 && arg.ytelseType == null })
+
+        doReturn(OppgaveRoutingModel.Enhet.OKONOMI_PENSJON)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R004 })
+
+        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R005 })
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
@@ -143,10 +163,73 @@ class JournalforingKlientTest {
                 .hentYtelseKravType(anyString(), anyString())
     }
 
+    @Test
+    fun `Sendt gyldig Sed R004 på R_BUC_02`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val identifisertPerson = IdentifisertPerson("12078945602",
+                "12078945602",
+                LocalDate.of(89, 7, 12),
+                "Test Testesen",
+                null,
+                landkode = "SE"
+            )
+
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "AP", 0)
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("2536475861"),
+                fnr= eq("12078945602"),
+                personNavn= eq("Test Testesen"),
+                bucType= eq("R_BUC_02"),
+                sedType= eq(SedType.R004.name),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq("EESSI"),
+                journalfoerendeEnhet= eq("4819"),
+                arkivsaksnummer= eq(null),
+                dokumenter= eq("R004 - Melding om utbetaling"),
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq("AP")
+        )
+    }
+
+    @Test
+    fun `Sendt gyldig Sed R005 på R_BUC_02`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val identifisertPerson = IdentifisertPerson("12078945602",
+                "12078945602",
+                LocalDate.of(89, 7, 12),
+                "Test Testesen",
+                null,
+                landkode = "SE"
+        )
+
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "UT", 0)
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("2536475861"),
+                fnr= eq("12078945602"),
+                personNavn= eq("Test Testesen"),
+                bucType= eq("R_BUC_02"),
+                sedType= eq(SedType.R005.name),
+                sedHendelseType= eq("SENDT"),
+                eksternReferanseId= eq(null),
+                kanal= eq("EESSI"),
+                journalfoerendeEnhet= eq("0001"),
+                arkivsaksnummer= eq(null),
+                dokumenter= eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
+                forsokFerdigstill= eq(false),
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq("UT")
+        )
+    }
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -156,9 +239,9 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
@@ -171,13 +254,14 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
     @Test
     fun `Sendt gyldig Sed P2100`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -191,7 +275,7 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -207,7 +291,8 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
@@ -218,7 +303,7 @@ class JournalforingKlientTest {
                 .`when`(fagmodulKlient)
                 .hentAlleDokumenter(anyString())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("01055012345",
                 "12078945602",
@@ -228,7 +313,7 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -244,13 +329,14 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson("12078945602",
                 "12078945602",
@@ -260,10 +346,10 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_10"),
@@ -276,13 +362,14 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
     @Test
     fun `Mottat gyldig Sed P2000`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
@@ -293,10 +380,10 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
@@ -309,7 +396,8 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
@@ -318,7 +406,7 @@ class JournalforingKlientTest {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("01055012345",
@@ -329,10 +417,10 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = eq("7477291"),
+                rinaSakId = anyString(),
                 fnr= eq("01055012345"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_01"),
@@ -345,13 +433,14 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = eq("NO"),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
     @Test
     fun `Mottat gyldig Sed P2100`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
@@ -366,10 +455,10 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147730"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_02"),
@@ -382,7 +471,8 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2100 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
@@ -391,7 +481,7 @@ class JournalforingKlientTest {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("01055012345",
@@ -402,7 +492,7 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -418,13 +508,14 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2200 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson("12078945602",
@@ -435,10 +526,10 @@ class JournalforingKlientTest {
                 null,
                 null)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
-                rinaSakId = anyOrNull(),
+                rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
                 personNavn= eq("Test Testesen"),
                 bucType= eq("P_BUC_10"),
@@ -451,7 +542,8 @@ class JournalforingKlientTest {
                 dokumenter= eq("P2000 Supported Documents"),
                 forsokFerdigstill= eq(false),
                 avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull()
+                avsenderNavn = anyOrNull(),
+                ytelseType = anyOrNull()
         )
     }
 }

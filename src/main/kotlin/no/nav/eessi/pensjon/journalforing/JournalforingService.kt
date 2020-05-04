@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
@@ -38,12 +39,13 @@ class JournalforingService(private val euxKlient: EuxKlient,
     fun journalfor(sedHendelse: SedHendelseModel,
                    hendelseType: HendelseType,
                    identifisertPerson: IdentifisertPerson,
+                   ytelseType: String?,
                    offset: Long = 0) {
         metricsHelper.measure("journalforOgOpprettOppgaveForSed") {
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
 
-                val ytelseType = hentYtelseKravType(sedHendelse)
+                //val ytelseType = hentYtelseKravType(sedHendelse)  //TODO kan fjernes da denne er nå høyere opp
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
@@ -70,28 +72,33 @@ class JournalforingService(private val euxKlient: EuxKlient,
                                     identifisertPerson.landkode,
                                     identifisertPerson.geografiskTilknytning,
                                     sedHendelse.bucType,
-                                    ytelseType)
-                            )
-                        } else {
-                            OppgaveRoutingModel.Enhet.UKJENT
+                                    ytelseType,
+                                    sedHendelse.sedType,
+                                    hendelseType).also {
+                                println(it.toJson())
+                            }
+                    )
+                } else {
+                    OppgaveRoutingModel.Enhet.UKJENT
                         }
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
-                        rinaSakId = sedHendelse.rinaSakId,
-                        fnr = identifisertPerson.fnr,
-                        personNavn = identifisertPerson.personNavn,
-                        bucType = sedHendelse.bucType!!.name,
-                        sedType = sedHendelse.sedType.name,
-                        sedHendelseType = hendelseType.name,
-                        eksternReferanseId = null,// TODO what value to put here?,
-                        kanal = "EESSI",
-                        journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                        arkivsaksnummer = sakId,
-                        dokumenter = documents,
-                        forsokFerdigstill = forsokFerdigstill,
-                        avsenderLand = sedHendelse.avsenderLand,
-                        avsenderNavn = sedHendelse.avsenderNavn
+                    rinaSakId = sedHendelse.rinaSakId,
+                    fnr = identifisertPerson.fnr,
+                    personNavn = identifisertPerson.personNavn,
+                    bucType = sedHendelse.bucType!!.name,
+                    sedType = sedHendelse.sedType.name,
+                    sedHendelseType = hendelseType.name,
+                    eksternReferanseId = null,// TODO what value to put here?,
+                    kanal = "EESSI",
+                    journalfoerendeEnhet = tildeltEnhet.enhetsNr,
+                    arkivsaksnummer = sakId,
+                    dokumenter = documents,
+                    forsokFerdigstill = forsokFerdigstill,
+                    avsenderLand = sedHendelse.avsenderLand,
+                    avsenderNavn = sedHendelse.avsenderNavn,
+                    ytelseType = ytelseType
                 )
 
                 // Oppdaterer distribusjonsinfo
@@ -136,16 +143,5 @@ class JournalforingService(private val euxKlient: EuxKlient,
         var filnavn = ""
         uSupporterteVedlegg.forEach { vedlegg -> filnavn += vedlegg.filnavn + " " }
         return filnavn
-    }
-
-    private fun hentYtelseKravType(sedHendelse: SedHendelseModel): String? {
-        if (sedHendelse.sedType == SedType.P2100 || sedHendelse.sedType == SedType.P15000) {
-            return try {
-                fagmodulKlient.hentYtelseKravType(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-            } catch (ex: Exception) {
-                null
-            }
-        }
-        return null
     }
 }

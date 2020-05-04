@@ -17,6 +17,7 @@ import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.eq
 import org.springframework.http.*
 import org.springframework.web.client.HttpServerErrorException
 
@@ -50,7 +51,7 @@ class JournalpostKlientTest {
                 ResponseEntity.ok(responseBody))
                 .`when`(mockrestTemplate).exchange(
                         contains("/journalpost?forsoekFerdigstill=false"),
-                        any(),
+                        eq(HttpMethod.POST),
                         journalpostCaptor.capture(),
                         eq(String::class.java))
 
@@ -81,7 +82,8 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                 forsokFerdigstill= false,
                 avsenderLand = "NO",
-                avsenderNavn = null
+                avsenderNavn = null,
+                ytelseType = null
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
@@ -130,7 +132,8 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                     forsokFerdigstill = false,
                     avsenderLand = "NO",
-                    avsenderNavn = null
+                    avsenderNavn = null,
+                    ytelseType = null
             )
         }
     }
@@ -183,7 +186,8 @@ class JournalpostKlientTest {
                 """.trimIndent(),
                 forsokFerdigstill= false,
                 avsenderLand = "UK",
-                avsenderNavn = null
+                avsenderNavn = null,
+                ytelseType = null
         )
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))

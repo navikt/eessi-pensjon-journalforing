@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.matchers.Times
@@ -95,19 +96,18 @@ class JournalforingSendtIntegrationTest {
 
     private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
         // Sender 1 Foreldre SED til Kafka
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/FB_BUC_01_F001.json"))))
-
-        // Seder 1 i H_BUC_07 SED til Kafka
-        // sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/H_BUC_07_H070.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json"))))
 
         // Sender 5 Pensjon SED til Kafka
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_03_P2200.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_05_X008.json"))))
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_05_X008.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json"))))
 
         // Sender Sed med ugyldig FNR
-        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_01_P2000_ugyldigFNR.json"))))
+        sedSendtProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json"))))
 
     }
 
@@ -201,6 +201,15 @@ class JournalforingSendtIntegrationTest {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
                     )
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                    )
 
             mockServer.`when`(
                     request()
@@ -212,6 +221,7 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json"))))
                     )
 
+            //Mock eux hent av sed
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET)
@@ -249,6 +259,29 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
+            //Mock eux hent sed R_BUC_02 -- R005 sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02-R005-AP.json"))))
+                    )
+
+            //Mock eux hent sed R_BUC_02 -- H070 sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
+                    )
+
+
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
             mockServer.`when`(
                     request()
@@ -258,6 +291,17 @@ class JournalforingSendtIntegrationTest {
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
+                    )
+
+            //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET)
+                            .withPath("/buc/2536475861/allDocuments"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsR_BUC_02.json"))))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments
@@ -419,7 +463,7 @@ class JournalforingSendtIntegrationTest {
                     )
 
             // Mocker oppdaterDistribusjonsinfo
-            mockServer.`when`(
+           mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.PATCH)
                             .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
@@ -431,7 +475,7 @@ class JournalforingSendtIntegrationTest {
                     )
         }
 
-        private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
+        private fun randomFrom(from : Int = 1024, to: Int = 65535): Int {
             val random = Random()
             return random.nextInt(to - from) + from
         }
@@ -439,14 +483,6 @@ class JournalforingSendtIntegrationTest {
 
     private fun verifiser() {
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
-
-
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET)
-                        .withPath("/.well-known/openid-configuration"),
-                VerificationTimes.atLeast(1)
-        )
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
@@ -463,6 +499,14 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.once()
         )
 
+        //verify R_BUC_02_R004
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"),
+                VerificationTimes.once()
+        )
+
         mockServer.verify(
                 request()
                         .withMethod(HttpMethod.GET)
@@ -474,6 +518,14 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET)
                         .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
+                VerificationTimes.once()
+        )
+
+        // Verfiy fagmodul allDocuments R_BUC_02 R004 sed
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/allDocuments"),
                 VerificationTimes.once()
         )
 
@@ -501,6 +553,23 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.atLeast(1)
         )
 
+        //verify R_BUC_02 sed R005
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"),
+                VerificationTimes.atLeast(1)
+        )
+
+        //verify R_BUC_02 sed H070
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET)
+                        .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"),
+                VerificationTimes.atLeast(1)
+        )
+
+
         // Verfiy eux sed
         mockServer.verify(
                 request()
@@ -514,7 +583,7 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST)
                         .withPath("/journalpost"),
-                VerificationTimes.atLeast(3)
+                VerificationTimes.atLeast(4)
         )
 
         mockServer.verify(
@@ -525,7 +594,7 @@ class JournalforingSendtIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 24) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 27) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP

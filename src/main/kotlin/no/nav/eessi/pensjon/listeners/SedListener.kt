@@ -5,32 +5,35 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import org.slf4j.LoggerFactory
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.Acknowledgment
-import org.springframework.stereotype.Service
-import java.util.concurrent.CountDownLatch
-import no.nav.eessi.pensjon.models.HendelseType.*
+import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
+import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.CountDownLatch
 
 @Service
 class SedListener(
         private val journalforingService: JournalforingService,
         private val personidentifiseringService: PersonidentifiseringService,
         private val sedDokumentHelper: SedDokumentHelper,
+        private val gyldigeHendelser: GyldigeHendelser,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val sendtLatch = CountDownLatch(6)
-    private val mottattLatch = CountDownLatch(7)
+    private val sendtLatch = CountDownLatch(7)
+    private val mottattLatch = CountDownLatch(8)
     private val mapper = jacksonObjectMapper()
-    private val gyldigeHendelser = listOf("P", "H_BUC_07")
+    private val gyldigeInnkommendeHendelser = gyldigeHendelser.gyldigeInnkommendeHendelser()
+    private val gyldigeUtgaendeHendelser = gyldigeHendelser.gyldigeUtgaendeHendelser()
 
     fun getLatch() = sendtLatch
     fun getMottattLatch() = mottattLatch
@@ -43,13 +46,14 @@ class SedListener(
                 logger.debug(hendelse)
                 try {
                     val offset = cr.offset()
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-                    if (sedHendelse.sektorKode == "P") {
-                        logger.info("*** Starter utgående journalføring for SED innen Pensjonsektor bucType: ${sedHendelse.bucType} sedType: ${sedHendelse.sedType} bucid: ${sedHendelse.rinaSakId} ***")
+                    if (gyldigSendtHendelse(hendelse)) {
+                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, alleSedIBuc)
-                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, offset)
+                        val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
+                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
+                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, ytelseType, offset)
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -79,10 +83,11 @@ class SedListener(
 
                     if (gyldigMottattHendelse(hendelse)) {
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                            logger.info("*** Starter innkommende journalføring for SED innen Pensjonsektor type: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, alleSedIBuc)
-                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, offset)
+                            val identifisertPerson = personidentifiseringService.identifiserPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc))
+                            val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, ytelseType, offset)
                     }
 
                     acknowledgment.acknowledge()
@@ -101,7 +106,9 @@ class SedListener(
         }
     }
 
-    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeHendelser.contains( it ) }.contains(true)
+    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeInnkommendeHendelser.contains( it ) }.contains(true)
+
+    fun gyldigSendtHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeUtgaendeHendelser.contains( it ) }.contains(true)
 
     private fun getHendelseList(hendelse: String): List<String> {
         val rootNode = mapper.readTree(hendelse)

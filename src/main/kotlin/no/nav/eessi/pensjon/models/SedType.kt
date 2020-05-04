@@ -193,6 +193,9 @@ enum class SedType(val kanInneholdeFnrEllerFdato: Boolean) {
     X050(false) {
         override fun toString() = "X050 - Unntaksfeil"
     },
+    X100(false) {
+        override fun toString() = "X100 - Endre deltaker"
+    },
 
     // Horisontale
     H001(false) {
@@ -215,5 +218,16 @@ enum class SedType(val kanInneholdeFnrEllerFdato: Boolean) {
     },
     H121(true) {
         override fun toString() = "H121 - Melding om medisinsk informasjon / Svar på forespørsel om medisinsk informasjon"
+    },
+
+    // Seder i R_BUC_02 Motregning av overskytende utbetaling i etterbetalinger er
+    R004(true) {
+        override fun toString() = "R004 - Melding om utbetaling"
+    },
+    R005(true) {
+        override fun toString() = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"
+    },
+    R006(true) {
+        override fun toString() = "R006 - Svar på anmodning om informasjon"
     }
 }

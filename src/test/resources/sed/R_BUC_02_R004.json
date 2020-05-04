@@ -1,0 +1,208 @@
+{
+  "nav": {
+    "bruker": [
+      {
+        "person": {
+          "pin": [
+            {
+              "sektor": "familieytelser",
+              "institusjonsid": "asdfsdf asdfdsf",
+              "identifikator": "asdfasfd",
+              "institusjonsnavn": "asdfsd asdfdsf",
+              "land": "DK"
+            },
+            {
+              "identifikator": "asdddfasfd",
+              "land": "NO",
+              "institusjonsnavn": "asdfasddfdsf",
+              "sektor": "alle",
+              "institusjonsid": "asdfsasddsdfdsf"
+            }
+          ],
+          "statsborgerskap": [
+            {
+              "land": "GR"
+            },
+            {
+              "land": "FR"
+            }
+          ],
+          "foedested": {
+            "region": "sdfasdf",
+            "land": "HR",
+            "by": "sdaf sf"
+          },
+          "doedsdato": "2018-10-10",
+          "etternavn": "das sadad",
+          "fornavnvedfoedsel": "asdij ijojoo",
+          "fornavn": "dasdaadn",
+          "foedselsdato": "1998-04-05",
+          "etternavnvedfoedsel": "asdn ijninJ",
+          "kjoenn": "M"
+        },
+        "mor": {
+          "person": {
+            "etternavnvedfoedsel": "asdfsdfsdaf",
+            "fornavn": "asdfasdf sdfafa"
+          }
+        },
+        "far": {
+          "person": {
+            "etternavnvedfoedsel": "asdfdsf sadfa",
+            "fornavn": "sadffsda"
+          }
+        }
+      },
+      {
+        "person": {
+          "foedselsdato": "1997-04-05",
+          "pin": [
+            {
+              "sektor": "yrkesskade_og_yrkessykdom",
+              "institusjonsnavn": "asddasdfdsf",
+              "land": "NO",
+              "identifikator": "addasfd",
+              "institusjonsid": "asdfsdddfdsf"
+            },
+            {
+              "institusjonsid": "asdfsdsdfdsf",
+              "sektor": "tIlbakekreving",
+              "institusjonsnavn": "asdfasdghjdfdsf",
+              "identifikator": "asdggfasfd",
+              "land": "DE"
+            }
+          ],
+          "fornavn": "dasrdaadn",
+          "fornavnvedfoedsel": "asdifjojoo",
+          "foedested": {
+            "by": "sdaffsf",
+            "region": "sdfffdf",
+            "land": "FI"
+          },
+          "statsborgerskap": [
+            {
+              "land": "DK"
+            },
+            {
+              "land": "SK"
+            }
+          ],
+          "doedsdato": "2018-09-10",
+          "kjoenn": "K",
+          "etternavn": "dasrrdad",
+          "etternavnvedfoedsel": "asfninJ"
+        },
+        "far": {
+          "person": {
+            "fornavn": "saddsda",
+            "etternavnvedfoedsel": "asdfddsadfa"
+          }
+        },
+        "mor": {
+          "person": {
+            "etternavnvedfoedsel": "asdsdfsdaf",
+            "fornavn": "asdfasdf dfafa"
+          }
+        }
+      }
+    ],
+    "eessisak": [
+      {
+        "institusjonsnavn": "qwdwedqwd",
+        "saksnummer": "2342314",
+        "land": "DE",
+        "institusjonsid": "2134kjnkj"
+      },
+      {
+        "saksnummer": "234233314",
+        "institusjonsnavn": "qwdweadsdqwd",
+        "institusjonsid": "2134sdakjnkj",
+        "land": "FI"
+      }
+    ],
+    "ytterligereinformasjon": "asdj hkjhiuhiu"
+  },
+  "tilbakekreving": {
+    "bruker": [
+      {
+        "person": {
+          "tidligerefornavn": [
+            {
+              "navn": "adssdas sadasd"
+            },
+            {
+              "navn": "adsdasd sadasd"
+            },
+            {
+              "navn": "ajojjoasd"
+            }
+          ],
+          "tidligereetternavn": [
+            {
+              "navn": "djaij oij"
+            },
+            {
+              "navn": "djaiasdij"
+            },
+            {
+              "navn": "djaasdoij"
+            }
+          ],
+          "tilbakekrevingsivilstand": {
+            "status": "gift"
+          }
+        },
+        "status": {
+          "type": "debitor",
+          "annen": "adsojasdoji iojoij"
+        }
+      },
+      {
+        "status": {
+          "type": "forsikret_person",
+          "annen": "adsojadasdsdofghj"
+        },
+        "person": {
+          "tidligerefornavn": [
+            {
+              "navn": "adssdddadasd"
+            }
+          ],
+          "tidligereetternavn": [
+            {
+              "navn": "djafh oij"
+            }
+          ],
+          "tilbakekrevingsivilstand": {
+            "status": "registrert_partnerskap"
+          }
+        }
+      }
+    ],
+    "utbetaling": [
+      {
+        "grunn": {
+          "type": "refusjon_av_foreløpig_innbetalte_trygdeavgifter"
+        },
+        "valuta": "NOK",
+        "type": "hele_beløpet",
+        "dato": "2018-02-02",
+        "referanse": "asdsdj ljlk",
+        "beloep": "12,33"
+      },
+      {
+        "grunn": {
+          "type": "motregning_av_feilutbetalt_ytelse"
+        },
+        "type": "delvis_betaling",
+        "dato": "2016-02-02",
+        "beloep": "13,33",
+        "referanse": "asdssdfjlk",
+        "valuta": "SEK"
+      }
+    ]
+  },
+  "sedVer": "1",
+  "sedGVer": "4",
+  "sed": "R004"
+}
