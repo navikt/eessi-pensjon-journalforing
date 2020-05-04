@@ -5,24 +5,26 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import org.slf4j.LoggerFactory
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.support.Acknowledgment
-import org.springframework.stereotype.Service
-import java.util.concurrent.CountDownLatch
-import no.nav.eessi.pensjon.models.HendelseType.*
+import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
+import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.CountDownLatch
 
 @Service
 class SedListener(
         private val journalforingService: JournalforingService,
         private val personidentifiseringService: PersonidentifiseringService,
         private val sedDokumentHelper: SedDokumentHelper,
+        private val gyldigeHendelser: GyldigeHendelser,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -30,8 +32,8 @@ class SedListener(
     private val sendtLatch = CountDownLatch(7)
     private val mottattLatch = CountDownLatch(8)
     private val mapper = jacksonObjectMapper()
-    private val gyldigeInnkommendeHendelser = listOf("P", "H_BUC_07", "R_BUC_02")
-    private val gyldigeUtgaendeHendelser = listOf("P", "R_BUC_02")
+    private val gyldigeInnkommendeHendelser = gyldigeHendelser.gyldigeInnkommendeHendelser()
+    private val gyldigeUtgaendeHendelser = gyldigeHendelser.gyldigeUtgaendeHendelser()
 
     fun getLatch() = sendtLatch
     fun getMottattLatch() = mottattLatch

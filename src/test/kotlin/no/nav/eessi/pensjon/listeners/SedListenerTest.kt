@@ -1,13 +1,19 @@
 package no.nav.eessi.pensjon.listeners
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.junit.jupiter.api.*
-import org.mockito.Mock
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
@@ -33,9 +39,16 @@ class SedListenerTest {
 
     lateinit var sedListener: SedListener
 
+    @Mock
+    lateinit var gyldigeHendelser: GyldigeHendelser
+
+
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper)
+        `when`(gyldigeHendelser.gyldigeUtgaendeHendelser()).thenReturn(listOf("P"))
+        `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("P", "H_BUC_07"))
+
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
     }
 
     @Test
@@ -45,10 +58,29 @@ class SedListenerTest {
     }
 
     @Test
-    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så så ack melding`() {
+    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))),cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }
+
+    @Test
+    fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så saa blir den ignorert`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
+        `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("R_BUC_02"))
+
+        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+
+        sedListener2.consumeSedMottatt(hendelse, cr, acknowledgment)
+        verify(acknowledgment).acknowledge()
+    }
+
 
     @Test
     fun `gitt en exception ved sedSendt så kastes RunTimeException og meldig blir IKKE ack'et`() {
