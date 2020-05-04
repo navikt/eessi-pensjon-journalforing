@@ -96,6 +96,7 @@ dependencies {
 	// Micrometer
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("no.nav.eessi.pensjon:eessi-pensjon-metrics:0.1.0")
+	implementation("no.nav.eessi.pensjon:eessi-pensjon-logging:0.0.1")
 
 	// Tjenestespesifikasjoner
 	compile("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
