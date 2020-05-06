@@ -60,7 +60,7 @@ class ArchitectureTest {
         val EuxKlient = "journalforing.klienter.eux"
         val FagmodulKlient = "journalforing.klienter.fagmodul"
         val JournalpostKlient = "journalforing.klienter.journalpost"
-        val OppgaveKlient = "journalforing.klienter.oppgave"
+        val PesysKlient = "journalforing.klienter.pesys"
         val Personidentifisering = "journalforing.personidentifisering"
         val PersonidentifiseringKlienter = "journalforing.personidentifisering.klienter"
         val PersonidentifiseringHelpers = "journalforing.personidentifisering.helpers"
@@ -82,7 +82,7 @@ class ArchitectureTest {
                 EuxKlient to "$root.klienter.eux",
                 FagmodulKlient to "$root.klienter.fagmodul",
                 JournalpostKlient to "$root.klienter.journalpost",
-                OppgaveKlient to "$root.klienter.oppgave",
+                PesysKlient to "$root.klienter.pesys",
                 Personidentifisering to "$root.personidentifisering",
                 PersonidentifiseringKlienter to "$root.personidentifisering.klienter",
                 PersonidentifiseringHelpers to "$root.personidentifisering.helpers",
@@ -110,7 +110,7 @@ class ArchitectureTest {
                 .layer(EuxKlient).definedBy(packages[EuxKlient])
                 .layer(FagmodulKlient).definedBy(packages[FagmodulKlient])
                 .layer(JournalpostKlient).definedBy(packages[JournalpostKlient])
-                .layer(OppgaveKlient).definedBy(packages[OppgaveKlient])
+                .layer(PesysKlient).definedBy(packages[PesysKlient])
                 .layer(Personidentifisering).definedBy(packages[Personidentifisering])
                 .layer(PersonidentifiseringKlienter).definedBy(packages[PersonidentifiseringKlienter])
                 .layer(PersonidentifiseringHelpers).definedBy(packages[PersonidentifiseringHelpers])
@@ -129,7 +129,7 @@ class ArchitectureTest {
                 .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(OppgaveKlient).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing)
                 //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //.whereLayer(PersonidentifiseringHelpers).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //Verify rules
