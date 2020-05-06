@@ -60,10 +60,14 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
             if(fnr != null) {
                 try {
                     val trimmetFnr = trimFnrString(fnr!!)
-                    val person = personV3Klient.hentPerson(trimmetFnr)
-                            ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr trimmet: $trimmetFnr")
-                    logger.info("Funnet person validert og hentet ut fra sed: $sedType")
-                    return Pair(person,trimmetFnr)
+                    if(trimmetFnr.isNotBlank()) {
+                        val person = personV3Klient.hentPerson(trimmetFnr)
+                                ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr trimmet: $trimmetFnr")
+                        logger.info("Funnet person validert og hentet ut fra sed: $sedType")
+                        return Pair(person, trimmetFnr)
+                    } else {
+                        logger.warn("Feil i personidentifikator ikkenumerisk: $fnr")
+                    }
                 } catch (ex:Exception) {
                     logger.error("Feil ved henting av PersonV3, fortsetter å sjekke neste sed for fnr", ex)
                 }
