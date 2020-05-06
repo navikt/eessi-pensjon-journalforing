@@ -100,7 +100,7 @@ class JournalpostKlient(
 
         return opprettjournalpost.measure {
             return@measure try {
-                logger.info("Kaller Joark for å generere en journalpost")
+                logger.info("Kaller Joark for å generere en journalpost: $path")
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
                 val response = journalpostOidcRestTemplate.exchange(
