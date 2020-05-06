@@ -95,7 +95,7 @@ class JournalpostKlient(
 
 
         //Send Request
-        val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill}"
+        val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
         val builder = UriComponentsBuilder.fromUriString(path).build()
 
         return opprettjournalpost.measure {
