@@ -83,7 +83,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                                     ytelseType,
                                     sedHendelse.sedType,
                                     hendelseType).also {
-                                println(it.toJson())
                             }
                     )
                 } else {
