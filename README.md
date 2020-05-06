@@ -37,6 +37,8 @@ Dersom du er supertrygg på testene kan du forsøke en oppdatering av alle avhen
 
 ## OWASP avhengighetssjekk
 
+(Pass på at du kan nå `ossindex.sonatype.org` og `nvd.nist.gov` gjennom evt proxy e.l.) 
+
 ```
-./gradlew dependencyCheckAnalyze || open build/reports/dependency-check-report.html
+./gradlew dependencyCheckAnalyze && open build/reports/dependency-check-report.html
 ```
