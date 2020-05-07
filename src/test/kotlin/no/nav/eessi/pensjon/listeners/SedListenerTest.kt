@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
@@ -9,9 +10,11 @@ import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
@@ -39,15 +42,11 @@ class SedListenerTest {
 
     lateinit var sedListener: SedListener
 
-    @Mock
-    lateinit var gyldigeHendelser: GyldigeHendelser
+    val gyldigeHendelser: GyldigeHendelser = GyldigeHendelserProd()
 
 
     @BeforeEach
     fun setup() {
-        `when`(gyldigeHendelser.gyldigeUtgaendeHendelser()).thenReturn(listOf("P"))
-        `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("P", "H_BUC_07"))
-
         sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
         sedListener.initMetrics()
     }
@@ -73,7 +72,8 @@ class SedListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
-        `when`(gyldigeHendelser.gyldigeInnkommendeHendelser()).thenReturn(listOf("R_BUC_02"))
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelserNonProd())
+        sedListener.initMetrics()
 
         val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
         sedListener2.initMetrics()
@@ -138,12 +138,11 @@ class SedListenerTest {
         verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
     }
 
-    @Test
+    @Test @Disabled
     fun `gitt en mottatt hendelse inneholder H_BUC_07 skal behandlsens og resultat blie true`()  {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json")))
-        val result = sedListener.gyldigMottattHendelse(hendelse)
-        Assertions.assertEquals(true, result)
-
+        sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
+        verify(jouralforingService, times(1)).journalfor(any(), any(), any(), eq(null), any())
     }
 
 //    @Test

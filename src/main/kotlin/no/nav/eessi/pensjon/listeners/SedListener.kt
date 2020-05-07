@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.listeners
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -32,9 +31,6 @@ class SedListener(
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
     private val sendtLatch = CountDownLatch(7)
     private val mottattLatch = CountDownLatch(8)
-    private val mapper = jacksonObjectMapper()
-    private val gyldigeInnkommendeHendelser = gyldigeHendelser.gyldigeInnkommendeHendelser()
-    private val gyldigeUtgaendeHendelser = gyldigeHendelser.gyldigeUtgaendeHendelser()
 
     private lateinit var consumeOutgoingSed: MetricsHelper.Metric
     private lateinit var consumeIncomingSed: MetricsHelper.Metric
@@ -57,7 +53,7 @@ class SedListener(
                 try {
                     val offset = cr.offset()
 
-                    if (gyldigSendtHendelse(hendelse)) {
+                    if (gyldigeHendelser.sendtHendelse(hendelse)) {
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
@@ -91,7 +87,7 @@ class SedListener(
                 try {
                     val offset = cr.offset()
 
-                    if (gyldigMottattHendelse(hendelse)) {
+                    if (gyldigeHendelser.mottattHendelse(hendelse)) {
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
@@ -114,15 +110,6 @@ class SedListener(
                 mottattLatch.countDown()
             }
         }
-    }
-
-    fun gyldigMottattHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeInnkommendeHendelser.contains( it ) }.contains(true)
-
-    fun gyldigSendtHendelse(hendelse: String) = getHendelseList(hendelse).map { gyldigeUtgaendeHendelser.contains( it ) }.contains(true)
-
-    private fun getHendelseList(hendelse: String): List<String> {
-        val rootNode = mapper.readTree(hendelse)
-        return listOf(rootNode.get("sektorKode").textValue(), rootNode.get("bucType").textValue())
     }
 
 }
