@@ -44,6 +44,9 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                                 filterPersonPinNode(sedRootNode)
                             }
                         }
+                        SedType.R005 -> {
+                            fnr = filterPinPersonR005(sedRootNode)
+                        }
                         else -> {
                             // P10000, P9000
                             fnr = filterAnnenpersonPinNode(sedRootNode)
@@ -93,20 +96,35 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
     }
 
     private fun filterGjenlevendePinNode(sedRootNode: JsonNode): String? {
-        return sedRootNode
-                .at("/pensjon/gjenlevende")
-                .findValue("pin")
-                .filter{ pin -> pin.get("land").textValue() =="NO" }
-                .map { pin -> pin.get("identifikator").textValue() }
-                .lastOrNull()
+        return finPin(sedRootNode.at("/pensjon/gjenlevende"))
     }
 
     private fun filterPersonPinNode(sedRootNode: JsonNode): String? {
-        return sedRootNode
-                .at("/nav/bruker")
-                .findValue("pin")
-                .filter{ pin -> pin.get("land").textValue() =="NO" }
-                .map { pin -> pin.get("identifikator").textValue() }
-                .lastOrNull()
+        return finPin(sedRootNode.at("/nav/bruker"))
+    }
+
+    /**
+     * R005 har mulighet for flere personer.
+     * har sed kun en person retureres dette fnr/dnr
+     * har sed flere personer leter vi etter status 07/avdød_mottaker_av_ytelser og returnerer dette fnr/dnr
+     *
+     * * hvis ingen intreffer returnerer vi null
+     */
+    private fun filterPinPersonR005(sedRootNode: JsonNode): String? {
+        val subnode = sedRootNode.at("/nav/bruker").toList()
+        return if ( subnode.size == 1 ) {
+            finPin(subnode.first().get("person"))
+        } else {
+            //lete etter  -- status 07 (avdød) status 03 enke?
+            val avdodnode = subnode.filter { node -> node.get("tilbakekreving").get("status").get("type").textValue() == "avdød_mottaker_av_ytelser" }.first()
+            finPin(avdodnode)
+        }
+    }
+
+    private fun finPin(pinNode: JsonNode): String? {
+        return pinNode.findValue("pin")
+            .filter{ pin -> pin.get("land").textValue() =="NO" }
+            .map { pin -> pin.get("identifikator").textValue() }
+            .lastOrNull()
     }
 }
