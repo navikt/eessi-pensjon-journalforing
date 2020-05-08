@@ -90,10 +90,6 @@ class SedFnrSøk {
         return false
     }
 
-    private fun erFnrDnrFormat(id: String?) : Boolean {
-        return id != null && id.length == 11
-    }
-
     /**
      * Finner fnr i identifikator, kompetenteuland og oppholdsland feltene
      *
@@ -119,26 +115,26 @@ class SedFnrSøk {
         val pin = jsonNode.get("pin")
         pin?.let {
             val idNode = pin.get("identifikator")
-            if (idNode != null && erFnrDnrFormat(idNode.asText())) {
+            if (idNode != null && FnrHelper.erFnrDnrFormat(idNode.asText())) {
                 return listOf(idNode.textValue())
             }
 
             val fnre = mutableListOf<String>()
 
             val kompetenteulandNode = pin.get("kompetenteuland")
-            if (kompetenteulandNode != null && erFnrDnrFormat(kompetenteulandNode.asText())) {
+            if (kompetenteulandNode != null && FnrHelper.erFnrDnrFormat(kompetenteulandNode.asText())) {
                 fnre.add(kompetenteulandNode.textValue())
             }
 
             val oppholdslandNode = pin.get("oppholdsland")
-            if (oppholdslandNode != null && erFnrDnrFormat(oppholdslandNode.asText())) {
+            if (oppholdslandNode != null && FnrHelper.erFnrDnrFormat(oppholdslandNode.asText())) {
                 fnre.add(oppholdslandNode.textValue())
             }
             if(fnre.isNotEmpty()) return fnre
         }
 
         val idNode = jsonNode.get("identifikator")
-        if (idNode != null && erFnrDnrFormat(idNode.asText())) {
+        if (idNode != null && FnrHelper.erFnrDnrFormat(idNode.asText())) {
             return listOf(idNode.asText())
         }
         return emptyList()

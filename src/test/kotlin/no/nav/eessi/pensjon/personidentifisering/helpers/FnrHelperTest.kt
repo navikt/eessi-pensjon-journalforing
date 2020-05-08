@@ -62,7 +62,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2100-PinDK-NAV.json"),
                 getTestJsonFile("P2000-NAV.json")))
 
-        val expectedFnr = "970970970"
+        val expectedFnr = "97097097000"
         assertEquals(Pair(mockExpectedPerson, expectedFnr), actual)
     }
 
@@ -73,7 +73,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2000-NAV.json"),
                 getTestJsonFile("P15000-NAV.json")))
 
-        val expectedFnr = "970970970"
+        val expectedFnr = "97097097000"
         assertEquals(Pair(mockExpectedPerson, expectedFnr), actual)
     }
 
@@ -83,7 +83,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2100-PinDK-NAV.json"),
                 getTestJsonFile("P15000-NAV.json")))
 
-        val expectedFnr = "21712"
+        val expectedFnr = "21712000000"
         assertEquals(Pair(mockExpectedPerson, expectedFnr), actual)
     }
 
@@ -93,7 +93,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2100-PinDK-NAV.json"),
                 getTestJsonFile("P15000Gjennlevende-NAV.json")
         ))
-        val expectedFnr = "21712"
+        val expectedFnr = "97097097000"
         assertEquals(Pair(mockExpectedPerson, expectedFnr), actual)
     }
 

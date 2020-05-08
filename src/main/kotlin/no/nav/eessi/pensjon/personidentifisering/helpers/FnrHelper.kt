@@ -3,9 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
-import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -18,6 +16,10 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
 
     companion object {
         fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
+
+        fun erFnrDnrFormat(id: String?) : Boolean {
+            return id != null && id.length == 11 && id.isNotBlank()
+        }
     }
 
     fun getPersonOgFnrFraSeder(seder: List<String?>): Pair<Bruker?, String?>? {
@@ -60,7 +62,7 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
             if(fnr != null) {
                 try {
                     val trimmetFnr = trimFnrString(fnr!!)
-                    if(trimmetFnr.isNotBlank()) {
+                    if(erFnrDnrFormat(trimmetFnr)) {
                         val person = personV3Klient.hentPerson(trimmetFnr)
                                 ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr trimmet: $trimmetFnr")
                         logger.info("Funnet person validert og hentet ut fra sed: $sedType")
