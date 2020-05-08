@@ -35,6 +35,9 @@ class FdatoHelper {
                                 filterPersonFDatoNode(sedRootNode)
                             }
                         }
+                        SedType.R005 -> {
+                            fdato = filterPersonR005DatoNode(sedRootNode)
+                        }
                         else -> {
                             fdato = filterAnnenPersonFDatoNode(sedRootNode)
                             if (fdato == null) {
@@ -55,6 +58,29 @@ class FdatoHelper {
         }
         // Fødselsnummer er ikke nødvendig for å fortsette journalføring men fødselsdato er obligatorisk felt i alle krav SED og bør finnes for enhver BUC
         throw RuntimeException("Fant ikke fødselsdato i BUC")
+    }
+
+
+    /**
+     * R005 har mulighet for flere personer.
+     * har sed kun en person retureres dette fdato
+     * har sed flere personer leter vi etter status 07/avdød_mottaker_av_ytelser og returnerer dette fdato
+     *
+     * * hvis ingen intreffer returnerer vi null
+     */
+    private fun filterPersonR005DatoNode(sedRootNode: JsonNode): String? {
+        val subnode = sedRootNode.at("/nav/bruker").toList()
+        return if ( subnode.size == 1 ) {
+            subnode.first()
+                .get("person")
+                .get("foedselsdato").textValue()
+        } else {
+            //lete etter  -- status 07 (avdød) status 03 enke?
+            subnode.filter { node -> node.get("tilbakekreving").get("status").get("type").textValue() == "avdød_mottaker_av_ytelser" }
+                .map { node -> node.get("person").get("foedselsdato").textValue() }
+                .first()
+        }
+
     }
 
     private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {

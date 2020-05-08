@@ -1,0 +1,80 @@
+{
+  "nav": {
+    "bruker": [
+      {
+        "person": {
+          "doedsdato": "2020-05-08",
+          "etternavn": "BAMSE",
+          "fornavn": "NYLIGAVØD",
+          "foedselsdato": "2000-08-26",
+          "pin": [
+            {
+              "identifikator": "28115518943",
+              "land": "NO"
+            }
+          ],
+          "kjoenn": "M"
+        },
+        "adresse": [
+          {
+            "type": "bosted",
+            "land": "NO",
+            "by": "Oslo"
+          }
+        ],
+        "tilbakekreving": {
+          "status": {
+            "type": "avdød_mottaker_av_ytelser"
+          }
+        }
+      },
+      {
+        "person": {
+          "foedselsdato": "2000-05-18",
+          "fornavn": "ENKELENKE",
+          "pin": [
+            {
+              "land": "NO",
+              "identifikator": "28125518943"
+            }
+          ],
+          "kjoenn": "K",
+          "etternavn": "BAMSE"
+        },
+        "tilbakekreving": {
+          "status": {
+            "type": "enke_eller_enkemann"
+          }
+        },
+        "adresse": [
+          {
+            "type": "bosted",
+            "land": "NO",
+            "by": "Bergen"
+          }
+        ]
+      }
+    ],
+    "eessisak": [
+      {
+        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+        "saksnummer": "12312312312312312312312313",
+        "land": "NO",
+        "institusjonsid": "NO:NAVAT07"
+      }
+    ]
+  },
+  "sedVer": "2",
+  "tilbakekreving": {
+    "feilutbetaling": {
+      "ytelse": {
+        "type": "alderspensjon"
+      }
+    },
+    "anmodning": {
+      "type": "foreløpig"
+    }
+  },
+  "sedGVer": "4",
+  "sed": "R005"
+}
