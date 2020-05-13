@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
@@ -22,8 +23,13 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
         }
     }
 
+    /**
+     * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
+     * ved R_BUC_02 leter etter alle personer i Seder og lever liste
+     */
     fun getPersonOgFnrFraSeder(seder: List<String?>): Pair<Bruker?, String?>? {
         var fnr: String? = null
+        var fnrListe = mutableListOf<Pair<String?, PersonRelasjon>?>()
         var sedType: SedType
 
         seder.forEach { sed ->
@@ -45,7 +51,7 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                             }
                         }
                         SedType.R005 -> {
-                            fnr = filterPinPersonR005(sedRootNode)
+                            fnrListe = filterPinPersonR005(sedRootNode)
                         }
                         else -> {
                             // P10000, P9000
@@ -62,14 +68,23 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
 
-            if(fnr != null) {
+
+            if (fnr != null) {
+                fnrListe.add(Pair(fnr, PersonRelasjon.FORSIKRET))
+            }
+
+            val personList = mutableSetOf<Triple<Bruker, String, PersonRelasjon>?>()
+            fnrListe.forEach {
                 try {
+                    val fnr = it?.first
+                    val type = it?.second
                     val trimmetFnr = trimFnrString(fnr!!)
                     if(erFnrDnrFormat(trimmetFnr)) {
                         val person = personV3Klient.hentPerson(trimmetFnr)
                                 ?: throw NullPointerException("PersonV3Klient returnerte null for fnr: $fnr trimmet: $trimmetFnr")
                         logger.info("Funnet person validert og hentet ut fra sed: $sedType")
-                        return Pair(person, trimmetFnr)
+
+                        personList.add( Triple(person, trimmetFnr, type) )
                     } else {
                         logger.warn("Feil i personidentifikator ikkenumerisk: $fnr")
                     }
@@ -77,6 +92,7 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
                     logger.error("Feil ved henting av PersonV3, fortsetter å sjekke neste sed for fnr", ex)
                 }
             }
+            return personList
             logger.info("Ingen person funnet ut fra sed: $sedType")
         }
         return null
@@ -110,14 +126,26 @@ class FnrHelper (private val personV3Klient: PersonV3Klient) {
      *
      * * hvis ingen intreffer returnerer vi null
      */
-    private fun filterPinPersonR005(sedRootNode: JsonNode): String? {
+    private fun filterPinPersonR005(sedRootNode: JsonNode): MutableList<Pair<String?, PersonRelasjon>?>{
         val subnode = sedRootNode.at("/nav/bruker").toList()
-        return if ( subnode.size == 1 ) {
-            finPin(subnode.first().get("person"))
-        } else {
-            //lete etter  -- status 07 (avdød) status 03 enke?
-            val avdodnode = subnode.filter { node -> node.get("tilbakekreving").get("status").get("type").textValue() == "avdød_mottaker_av_ytelser" }.first()
-            finPin(avdodnode)
+
+        var pairList  = mutableListOf<Pair<String?, PersonRelasjon>?>()
+        subnode.forEach {
+            val enkelNode = it.get("person")
+            val type = getType(enkelNode)
+            val pin = finPin(enkelNode)
+            pairList.add(Pair(pin, type))
+        }
+        return pairList
+    }
+
+    //Kun for R_BUC_02
+    private fun getType(node: JsonNode): PersonRelasjon {
+        val personType = node.get("tilbakekreving").get("status").get("type").textValue()
+        return when(personType) {
+            "enke_eller_enkemann" -> PersonRelasjon.FORSIKRET
+            "avdød_mottaker_av_ytelser" -> PersonRelasjon.AVDOD
+            else -> PersonRelasjon.ANNET
         }
     }
 

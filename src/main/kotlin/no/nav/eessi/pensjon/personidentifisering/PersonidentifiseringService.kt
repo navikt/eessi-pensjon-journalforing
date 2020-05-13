@@ -15,21 +15,21 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
                                   private val personV3Klient: PersonV3Klient,
                                   private val diskresjonService: DiskresjonkodeHelper,
                                   private val fnrHelper: FnrHelper,
-                                  private val fdatoHelper: FdatoHelper)  {
+                                  private val fdatoHelper: FdatoHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
-    fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>) : IdentifisertPerson {
-        val trimmetNavBruker = navBruker?.let{ FnrHelper.trimFnrString(it) }
+    fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>): IdentifisertPerson {
+        val trimmetNavBruker = navBruker?.let { FnrHelper.trimFnrString(it) }
 
         val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
-        var fnr : String?
+        var fnr: String?
         var fdato: LocalDate? = null
 
         var person = personForNavBruker
 
-        if(person != null) {
+        if (person != null) {
             fnr = trimmetNavBruker!!
             fdato = hentFodselsDato(fnr, null)
         } else {
@@ -54,7 +54,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             try {
                 fdato = hentFodselsDato(fnr, alleSediBuc)
                 logger.debug("følgende fdato: $fdato")
-            } catch (ex:  Exception) {
+            } catch (ex: Exception) {
                 logger.info("Feil ved henting av fdato på valgt sed")
             }
         }
@@ -77,7 +77,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
      * Henter første treff på dato fra listen av SEDer
      */
     fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
-        val fdatoFraFnr = if(fnr == null) null else fodselsDatoFra(fnr)
+        val fdatoFraFnr = if (fnr == null) null else fodselsDatoFra(fnr)
         if (fdatoFraFnr != null) {
             return fdatoFraFnr
         }
@@ -110,10 +110,20 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     fun isFnrValid(navBruker: String?) = navBruker != null && navBruker.length == 11
 }
 
-class IdentifisertPerson(val fnr : String? = null,
-                              val aktoerId: String? = null,
-                              val fdato: LocalDate,
-                              val personNavn: String? = null,
-                              val diskresjonskode: String? = null,
-                              val landkode: String? = null,
-                              val geografiskTilknytning: String? = null)
+class IdentifisertPerson(val fnr: String? = null,
+                         val aktoerId: String? = null,
+                         val fdato: LocalDate,
+                         val personNavn: String? = null,
+                         val diskresjonskode: String? = null,
+                         val landkode: String? = null,
+                         val geografiskTilknytning: String? = null,
+                         val personRelasjon: PersonRelasjon
+)
+
+enum class PersonRelasjon {
+    BARN,
+    FORSIKRET,
+    GJENLEVENDE,
+    AVDOD,
+    ANNET
+}
