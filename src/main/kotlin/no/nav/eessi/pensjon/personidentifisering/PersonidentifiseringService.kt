@@ -62,7 +62,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
                     fdato = hentFodselsDato(fnr, alleSediBuc)
                     logger.debug("følgende fdato: $fdato")
                 } catch (ex: Exception) {
-                    logger.info("Feil ved henting av fdato på valgt sed")
+                    logger.error("Feil ved henting av fdato på valgt sed", ex)
                 }
             }
         }
