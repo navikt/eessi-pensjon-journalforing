@@ -19,12 +19,20 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
 
+    companion object {
+        fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
+
+        fun erFnrDnrFormat(id: String?): Boolean {
+            return id != null && id.length == 11 && id.isNotBlank()
+        }
+    }
+
     fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>): IdentifisertPerson {
-        val trimmetNavBruker = navBruker?.let { FnrHelper.trimFnrString(it) }
+        val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
 
         val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
-        var fnr: String?
+        var fnr: String? = null
         var fdato: LocalDate? = null
 
         var person = personForNavBruker
@@ -35,27 +43,27 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         } else {
             //Prøve fnr
             try {
-                val personFnrPair = fnrHelper.getPersonOgFnrFraSeder(alleSediBuc)
-                if (personFnrPair != null) {
-                    person = personFnrPair.first
-                    fnr = personFnrPair.second
-                    logger.debug("hentet person: $person")
-                } else {
-                    logger.info("Ingen treff på person eller fødselsnummer, fortsetter uten")
-                    person = null
-                    fnr = null
+                val potensielleFnr = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
+
+                potensielleFnr.forEach {
+                    person = personV3Klient.hentPerson(trimFnrString(it.fnr!!))
+                    if (person != null) {
+                        fnr = trimFnrString(it.fnr)
+                        fdato = hentFodselsDato(fnr, null)
+                        return@forEach
+                    }
                 }
             } catch (ex: Exception) {
                 logger.info("Feil ved henting av person / fødselsnummer, fortsetter uten")
-                person = null
-                fnr = null
             }
             //Prøve fdato
-            try {
-                fdato = hentFodselsDato(fnr, alleSediBuc)
-                logger.debug("følgende fdato: $fdato")
-            } catch (ex: Exception) {
-                logger.info("Feil ved henting av fdato på valgt sed")
+            if (fdato == null) {
+                try {
+                    fdato = hentFodselsDato(fnr, alleSediBuc)
+                    logger.debug("følgende fdato: $fdato")
+                } catch (ex: Exception) {
+                    logger.info("Feil ved henting av fdato på valgt sed")
+                }
             }
         }
 
@@ -70,7 +78,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
         if (fdato == null) throw NullPointerException("Unexpected null for fdato-variable")
 
-        return IdentifisertPerson(fnr, aktoerId, fdato, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning)
+        return IdentifisertPerson(aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning, PersonRelasjon(fnr,Relasjon.ANNET))
     }
 
     /**
@@ -89,7 +97,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
     private fun fodselsDatoFra(fnr: String) =
             try {
-                val trimmedFnr = FnrHelper.trimFnrString(fnr)
+                val trimmedFnr = trimFnrString(fnr)
                 LocalDate.parse(NavFodselsnummer(trimmedFnr).getBirthDateAsISO(), DateTimeFormatter.ISO_DATE)
             } catch (ex: Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
@@ -110,20 +118,26 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     fun isFnrValid(navBruker: String?) = navBruker != null && navBruker.length == 11
 }
 
-class IdentifisertPerson(val fnr: String? = null,
-                         val aktoerId: String? = null,
-                         val fdato: LocalDate,
-                         val personNavn: String? = null,
-                         val diskresjonskode: String? = null,
-                         val landkode: String? = null,
-                         val geografiskTilknytning: String? = null,
-                         val personRelasjon: PersonRelasjon
+data class IdentifisertPerson(
+        val aktoerId: String? = null,
+        val fdato: LocalDate,
+        val personNavn: String? = null,
+        val diskresjonskode: String? = null,
+        val landkode: String? = null,
+        val geografiskTilknytning: String? = null,
+        val personRelasjon: PersonRelasjon
 )
 
-enum class PersonRelasjon {
+data class PersonRelasjon(
+        val fnr: String? = null,
+        val relasjon: Relasjon
+)
+
+enum class Relasjon {
     BARN,
     FORSIKRET,
     GJENLEVENDE,
     AVDOD,
     ANNET
 }
+

@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.erFnrDnrFormat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -115,26 +116,26 @@ class SedFnrSøk {
         val pin = jsonNode.get("pin")
         pin?.let {
             val idNode = pin.get("identifikator")
-            if (idNode != null && FnrHelper.erFnrDnrFormat(idNode.asText())) {
+            if (idNode != null && erFnrDnrFormat(idNode.asText())) {
                 return listOf(idNode.textValue())
             }
 
             val fnre = mutableListOf<String>()
 
             val kompetenteulandNode = pin.get("kompetenteuland")
-            if (kompetenteulandNode != null && FnrHelper.erFnrDnrFormat(kompetenteulandNode.asText())) {
+            if (kompetenteulandNode != null && erFnrDnrFormat(kompetenteulandNode.asText())) {
                 fnre.add(kompetenteulandNode.textValue())
             }
 
             val oppholdslandNode = pin.get("oppholdsland")
-            if (oppholdslandNode != null && FnrHelper.erFnrDnrFormat(oppholdslandNode.asText())) {
+            if (oppholdslandNode != null && erFnrDnrFormat(oppholdslandNode.asText())) {
                 fnre.add(oppholdslandNode.textValue())
             }
             if(fnre.isNotEmpty()) return fnre
         }
 
         val idNode = jsonNode.get("identifikator")
-        if (idNode != null && FnrHelper.erFnrDnrFormat(idNode.asText())) {
+        if (idNode != null && erFnrDnrFormat(idNode.asText())) {
             return listOf(idNode.asText())
         }
         return emptyList()
