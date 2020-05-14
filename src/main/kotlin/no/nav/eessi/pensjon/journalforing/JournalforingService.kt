@@ -74,7 +74,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 val tildeltEnhet =
                         if (sakId == null) {
-                            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson.fnr,
+                            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson.aktoerId,
                                     identifisertPerson.fdato,
                                     identifisertPerson.diskresjonskode,
                                     identifisertPerson.landkode,
@@ -92,7 +92,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
                     rinaSakId = sedHendelse.rinaSakId,
-                    fnr = identifisertPerson.fnr,
+                    fnr = identifisertPerson.personRelasjon.fnr,
                     personNavn = identifisertPerson.personNavn,
                     bucType = sedHendelse.bucType!!.name,
                     sedType = sedHendelse.sedType.name,

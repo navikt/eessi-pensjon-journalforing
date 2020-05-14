@@ -9,7 +9,6 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class ArchitectureTest {
@@ -126,7 +125,7 @@ class ArchitectureTest {
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, PersonidentifiseringKlienter, Integrasjonstest)
-                .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
+                .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC)
                 .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing)

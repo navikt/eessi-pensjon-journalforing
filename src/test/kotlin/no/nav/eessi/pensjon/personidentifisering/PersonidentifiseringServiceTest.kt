@@ -64,9 +64,9 @@ class PersonidentifiseringServiceTest {
                 .finnEnFdatoFraSEDer(any())
 
         //EUX - FnrServide (fin pin)
-        doReturn( Pair(BrukerMock.createWith(landkoder = true), "01055012345"))
+        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
                 .`when`(fnrHelper)
-                .getPersonOgFnrFraSeder(any())
+                .getPotensielleFnrFraSeder(any())
     }
 
     @Test
@@ -93,7 +93,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val fdatoHelper2 = FdatoHelper()
-        val fnrHelper2 = FnrHelper(personV3Klient)
+        val fnrHelper2 = FnrHelper()
 
         val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterKlient,
                 personV3Klient,
@@ -119,7 +119,7 @@ class PersonidentifiseringServiceTest {
 
         println(actual)
         assertEquals("1950-05-01", actual.fdato.toString())
-        assertEquals("01055012345", actual.fnr)
+        assertEquals("01055012345", actual.personRelasjon.fnr)
 
     }
 

@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.Krav
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlientModel
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -16,13 +15,14 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -168,12 +168,13 @@ class JournalforingKlientTest {
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
-                landkode = "SE"
+                landkode = "SE",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
             )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "AP", 0)
@@ -200,12 +201,13 @@ class JournalforingKlientTest {
     fun `Sendt gyldig Sed R005 på R_BUC_02`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
-                landkode = "SE"
+                landkode = "SE",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "UT", 0)
@@ -232,13 +234,15 @@ class JournalforingKlientTest {
     fun `Sendt gyldig Sed P2000`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
         verify(journalpostKlient).opprettJournalpost(
@@ -264,13 +268,15 @@ class JournalforingKlientTest {
     fun `Sendt gyldig Sed P2100`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
@@ -306,13 +312,15 @@ class JournalforingKlientTest {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("01055012345",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
 
@@ -339,13 +347,15 @@ class JournalforingKlientTest {
     fun `Sendt Sed i P_BUC_10`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
 
@@ -373,13 +383,15 @@ class JournalforingKlientTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null, 0)
 
@@ -410,13 +422,15 @@ class JournalforingKlientTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("01055012345",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
 
@@ -444,13 +458,15 @@ class JournalforingKlientTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
                 .`when`(oppgaveRoutingService)
@@ -485,13 +501,15 @@ class JournalforingKlientTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("01055012345",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null)
 
@@ -519,13 +537,15 @@ class JournalforingKlientTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson("12078945602",
+        val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
-                null)
+                null,
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
 
