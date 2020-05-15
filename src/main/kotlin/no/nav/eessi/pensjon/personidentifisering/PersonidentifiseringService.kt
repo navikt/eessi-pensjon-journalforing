@@ -30,7 +30,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     fun identifiserPerson(navBruker: String?, alleSediBuc: List<String?>): IdentifisertPerson {
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
 
-        val personForNavBruker = if (isFnrValid(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
+        val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
         var fnr: String? = null
         var fdato: LocalDate? = null
@@ -85,7 +85,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
      * Henter første treff på dato fra listen av SEDer
      */
     fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
-        val fdatoFraFnr = if (fnr == null) null else fodselsDatoFra(fnr)
+        val fdatoFraFnr = if (!erFnrDnrFormat(fnr)) null else fodselsDatoFra(fnr!!)
         if (fdatoFraFnr != null) {
             return fdatoFraFnr
         }
@@ -105,7 +105,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             }
 
     private fun hentAktoerId(navBruker: String?): String? {
-        if (!isFnrValid(navBruker)) return null
+        if (!erFnrDnrFormat(navBruker)) return null
         return try {
             val aktoerId = aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
             aktoerId
@@ -114,8 +114,6 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             null
         }
     }
-
-    fun isFnrValid(navBruker: String?) = navBruker != null && navBruker.length == 11
 }
 
 data class IdentifisertPerson(

@@ -125,17 +125,22 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(personidentifiseringService.isFnrValid(null))
+        assertFalse(PersonidentifiseringService.erFnrDnrFormat(null))
     }
 
     @Test
     fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(personidentifiseringService.isFnrValid("1234"))
+        assertFalse(PersonidentifiseringService.erFnrDnrFormat("1234"))
     }
 
     @Test
     fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
-        assertTrue(personidentifiseringService.isFnrValid("12345678910"))
+        assertTrue(PersonidentifiseringService.erFnrDnrFormat("12345678910"))
+    }
+
+    @Test
+    fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar valid`(){
+        assertFalse(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("52015410191/ 22435184")))
     }
 
     @Test
