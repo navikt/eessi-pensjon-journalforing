@@ -41,6 +41,32 @@ class FdatoHelperTest {
         assertEquals(LocalDate.of(1980,1,1), helper.finnEnFdatoFraSEDer(listOf(getTestJsonFile("P2000-NAV.json"))))
     }
 
+
+    @Test
+    fun `Calling getFDatoFromSed   returns valid resultset on P10000 P_BUC_06` () {
+        assertEquals(LocalDate.of(1948,6,28), helper.finnEnFdatoFraSEDer(listOf(getTestJsonFile("P10000-enkel.json"))))
+    }
+
+    @Test
+    fun `Calling getFDatoFromSed   returns valid resultset on P10000 superenkel P_BUC_06` () {
+        assertEquals(LocalDate.of(1958,7,11), helper.finnEnFdatoFraSEDer(listOf(getTestJsonFile("P10000-superenkel.json"))))
+    }
+
+    @Test
+    fun `Calling getFDatoFromSed   returns valid resultset on P10000 person og annenperson P_BUC_06` () {
+        assertEquals(LocalDate.of(1986,1,29), helper.finnEnFdatoFraSEDer(listOf(getTestJsonFile("P10000-person-annenperson.json"))))
+    }
+
+    @Test
+    fun `Calling getFDatoFromSed   returns valid resultset multipleSeds ` () {
+        val seds = listOf(
+                getTestJsonFile("EmptySED.json"),
+                getTestJsonFile("EmptySED.json"),
+                getTestJsonFile("P10000-superenkel.json"))
+
+        assertEquals(LocalDate.of(1958,7,11), helper.finnEnFdatoFraSEDer(seds))
+    }
+
     @Test
     fun `ved henting ved fdato på R005 når kun en person hentes personen` () {
         assertEquals(LocalDate.of(1980,10,22), helper.finnEnFdatoFraSEDer(listOf(getSedTestJsonFile("R_BUC_02-R005-IkkePin.json"))))

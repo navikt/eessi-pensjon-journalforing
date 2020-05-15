@@ -50,14 +50,12 @@ class FdatoHelper {
                         return LocalDate.parse(fdato, DateTimeFormatter.ISO_DATE)
                     }
                 }
-                throw RuntimeException("Fant ingen fdato i listen av SEDer")
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt ved henting av fødselsdato fra liste av SEDer, ${ex.message}")
-                throw RuntimeException("Noe gikk galt ved henting av fødselsdato fra liste av SEDer")
+                logger.error("Noe gikk galt ved henting av fødselsdato fra SED", ex)
             }
         }
         // Fødselsnummer er ikke nødvendig for å fortsette journalføring men fødselsdato er obligatorisk felt i alle krav SED og bør finnes for enhver BUC
-        throw RuntimeException("Fant ikke fødselsdato i BUC")
+        throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
     }
 
 
@@ -83,12 +81,16 @@ class FdatoHelper {
 
     }
 
+    /**
+     * P10000 - [01] Søker til etterlattepensjon
+     * P10000 - [02] Forsørget/familiemedlem
+     * P10000 - [03] Barn
+     */
     private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {
         val subNode = sedRootNode.at("/nav/annenperson") ?: return null
         if (subNode.at("/person/rolle").textValue() == "01") {
             return subNode.get("person")
-                    .map { node -> node.get("foedselsdato").textValue() }
-                    .lastOrNull()
+                    .get("foedselsdato").textValue()
         }
         return null
     }
