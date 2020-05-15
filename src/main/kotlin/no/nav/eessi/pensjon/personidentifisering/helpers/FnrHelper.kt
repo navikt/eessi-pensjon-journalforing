@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -59,7 +60,7 @@ class FnrHelper {
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
 
-            if (fnr != null) {
+            if (PersonidentifiseringService.erFnrDnrFormat(fnr)) {
                 fnrListe.add(PersonRelasjon(fnr!!, Relasjon.FORSIKRET))
             }
             logger.info("Ingen person funnet ut fra sed: $sedType")

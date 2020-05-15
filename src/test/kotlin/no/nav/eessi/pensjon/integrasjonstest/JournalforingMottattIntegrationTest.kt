@@ -640,7 +640,7 @@ class JournalforingMottattIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 29) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 28) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
