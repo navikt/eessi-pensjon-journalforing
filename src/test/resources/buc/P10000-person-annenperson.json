@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "bruker": {
+      "person": {
+        "kjoenn": "K",
+        "etternavn": "SAKS",
+        "fornavn": "taremel",
+        "foedselsdato": "1986-01-29",
+        "pin": [
+          {
+            "land": "AT",
+            "identifikator": "1254"
+          }
+        ]
+      }
+    },
+    "annenperson": {
+      "person": {
+        "pin": [
+          {
+            "land": "AT",
+            "identifikator": "1254"
+          }
+        ],
+        "etternavn": "saks",
+        "fornavn": "taremel",
+        "rolle": "01",
+        "kjoenn": "K",
+        "foedselsdato": "1986-01-29"
+      }
+    }
+  },
+  "sedGVer": "4",
+  "pensjon": {
+    "merinformasjon": {
+      "tilleggsinformasjon": "test 14.05.2020 1625"
+    }
+  },
+  "sedVer": "2",
+  "sed": "P10000"
+}
