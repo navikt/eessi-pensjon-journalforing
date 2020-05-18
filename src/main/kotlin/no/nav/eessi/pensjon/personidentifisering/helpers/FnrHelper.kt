@@ -19,9 +19,9 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<String?>): List<PersonRelasjon> {
+    fun getPotensielleFnrFraSeder(seder: List<String?>):Set<PersonRelasjon> {
         var fnr: String? = null
-        val fnrListe = mutableListOf<PersonRelasjon>()
+        val fnrListe = mutableSetOf<PersonRelasjon>()
         var sedType: SedType
 
         seder.forEach { sed ->

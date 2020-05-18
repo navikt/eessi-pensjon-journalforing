@@ -64,7 +64,7 @@ class PersonidentifiseringServiceTest {
                 .finnEnFdatoFraSEDer(any())
 
         //EUX - FnrServide (fin pin)
-        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
+        doReturn( setOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
                 .`when`(fnrHelper)
                 .getPotensielleFnrFraSeder(any())
     }
