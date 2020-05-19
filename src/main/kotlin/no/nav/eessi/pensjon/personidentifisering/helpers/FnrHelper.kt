@@ -19,8 +19,7 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<String?>):Set<PersonRelasjon> {
-        var fnr: String? = null
+    fun getPotensielleFnrFraSeder(seder: List<String?>): Set<PersonRelasjon> {
         val fnrListe = mutableSetOf<PersonRelasjon>()
         var sedType: SedType
 
@@ -29,29 +28,27 @@ class FnrHelper {
                 val sedRootNode = mapper.readTree(sed)
                 sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
 
-                if(sedType.kanInneholdeFnrEllerFdato) {
+                if (sedType.kanInneholdeFnrEllerFdato) {
                     when (sedType) {
                         SedType.P2100 -> {
-                            fnr = filterGjenlevendePinNode(sedRootNode)
+                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                         }
                         SedType.P15000 -> {
                             val krav = sedRootNode.get("nav").get("krav").textValue()
-                            fnr = if (krav == "02") {
-                                filterGjenlevendePinNode(sedRootNode)
+                            if (krav == "02") {
+                                leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                             } else {
-                                filterPersonPinNode(sedRootNode)
+                                leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
                             }
                         }
                         SedType.R005 -> {
-                            fnrListe.addAll( filterPinPersonR005(sedRootNode) )
+                            fnrListe.addAll(filterPinPersonR005(sedRootNode))
                         }
                         else -> {
                             // P10000, P9000
-                            fnr = filterAnnenpersonPinNode(sedRootNode)
-                            if (fnr == null) {
-                                //P2000 - P2200 -- andre..
-                                fnr = filterPersonPinNode(sedRootNode)
-                            }
+                            leggTilAnnenForsikretFnrHvisFinnes(sedRootNode, fnrListe)
+                            //P2000 - P2200 -- andre..
+                            leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
                         }
                     }
                 }
@@ -59,16 +56,28 @@ class FnrHelper {
                 logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
-
-            if (PersonidentifiseringService.erFnrDnrFormat(fnr)) {
-                fnrListe.add(PersonRelasjon(fnr!!, Relasjon.FORSIKRET))
-            }
             logger.info("Ingen person funnet ut fra sed: $sedType")
         }
         return fnrListe
-
     }
 
+    private fun leggTilAnnenForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+        filterAnnenpersonPinNode(sedRootNode)?.let {
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+        }
+    }
+
+    private fun leggTilForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+        filterPersonPinNode(sedRootNode)?.let {
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+        }
+    }
+
+    private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+        filterGjenlevendePinNode(sedRootNode)?.let {
+            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
+        }
+    }
 
     fun filterAnnenpersonPinNode(node: JsonNode): String? {
         val subNode = node.at("/nav/annenperson") ?: return null
@@ -83,11 +92,11 @@ class FnrHelper {
     }
 
     private fun filterGjenlevendePinNode(sedRootNode: JsonNode): String? {
-        return finPin(sedRootNode.at("/pensjon/gjenlevende"))
+        return finnPin(sedRootNode.at("/pensjon/gjenlevende"))
     }
 
     private fun filterPersonPinNode(sedRootNode: JsonNode): String? {
-        return finPin(sedRootNode.at("/nav/bruker"))
+        return finnPin(sedRootNode.at("/nav/bruker"))
     }
 
     /**
@@ -97,13 +106,13 @@ class FnrHelper {
      *
      * * hvis ingen intreffer returnerer vi null
      */
-    private fun filterPinPersonR005(sedRootNode: JsonNode): MutableList<PersonRelasjon>{
+    private fun filterPinPersonR005(sedRootNode: JsonNode): MutableList<PersonRelasjon> {
         val subnode = sedRootNode.at("/nav/bruker").toList()
 
-        val personRelasjoner  = mutableListOf<PersonRelasjon>()
+        val personRelasjoner = mutableListOf<PersonRelasjon>()
         subnode.forEach {
             val enkelNode = it.get("person")
-            val pin = finPin(enkelNode)
+            val pin = finnPin(enkelNode)
             val type = getType(it)
             personRelasjoner.add(PersonRelasjon(pin!!, type))
         }
@@ -112,7 +121,7 @@ class FnrHelper {
 
     //Kun for R_BUC_02
     private fun getType(node: JsonNode): Relasjon {
-        return when(node.get("tilbakekreving").get("status").get("type").textValue()) {
+        return when (node.get("tilbakekreving").get("status").get("type").textValue()) {
             "enke_eller_enkemann" -> Relasjon.GJENLEVENDE
             "forsikret_person" -> Relasjon.FORSIKRET
             "avdød_mottaker_av_ytelser" -> Relasjon.AVDOD
@@ -120,10 +129,11 @@ class FnrHelper {
         }
     }
 
-    private fun finPin(pinNode: JsonNode): String? {
+    private fun finnPin(pinNode: JsonNode): String? {
         return pinNode.findValue("pin")
-            .filter{ pin -> pin.get("land").textValue() =="NO" }
-            .map { pin -> pin.get("identifikator").textValue() }
-            .lastOrNull()
+                .filter { pin -> pin.get("land").textValue() == "NO" }
+                .map { pin -> pin.get("identifikator").textValue() }
+                .filter { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
+                .lastOrNull()
     }
 }

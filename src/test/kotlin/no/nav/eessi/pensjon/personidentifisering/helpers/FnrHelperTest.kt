@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.validateJson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +48,7 @@ class FnrHelperTest {
 
         val expectedFnr = "97097097000"
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET), actual.first())
+        assertTrue(actual.contains(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET)))
     }
 
     @Test
@@ -59,9 +58,11 @@ class FnrHelperTest {
                 getTestJsonFile("P2000-NAV.json"),
                 getTestJsonFile("P15000-NAV.json")))
 
-        val expectedFnr = "97097097000"
+        val expected = setOf(PersonRelasjon(fnr="97097097000", relasjon= Relasjon.FORSIKRET),
+                PersonRelasjon(fnr="21712000000", relasjon= Relasjon.FORSIKRET))
+
         assertEquals(2,actual.size)
-        assertTrue(actual.contains(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET)))
+        assertTrue(actual.containsAll(expected))
     }
 
     @Test
@@ -87,7 +88,7 @@ class FnrHelperTest {
     }
 
     @Test
-    fun `leter igjennom R_BUC_02 og R005 med flere personer etter fnr på avød`() {
+    fun `leter igjennom R_BUC_02 og R005 med flere personer etter fnr på avdød`() {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 getSedTestJsonFile("R005-avdod-enke-NAV.json")))
