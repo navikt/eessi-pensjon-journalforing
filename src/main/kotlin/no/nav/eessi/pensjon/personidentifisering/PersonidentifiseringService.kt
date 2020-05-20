@@ -36,21 +36,46 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         var fdato: LocalDate? = null
 
         var person = personForNavBruker
+        var personRelasjon: PersonRelasjon? = null
 
         if (person != null) {
             fnr = trimmetNavBruker!!
             fdato = hentFodselsDato(fnr, null)
+            personRelasjon = PersonRelasjon(fnr!!, Relasjon.FORSIKRET)
         } else {
             //Prøve fnr
             try {
                 val potensielleFnr = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
-
                 potensielleFnr.forEach {
-                    person = personV3Klient.hentPerson(trimFnrString(it.fnr!!))
-                    if (person != null) {
-                        fnr = trimFnrString(it.fnr)
-                        fdato = hentFodselsDato(fnr, null)
-                        return@forEach
+                    val personen = personV3Klient.hentPerson(trimFnrString(it.fnr))
+                    when (it.relasjon) {
+                        Relasjon.AVDOD -> {
+                            if (personen != null) {
+                                fnr = trimFnrString(it.fnr)
+                                fdato = hentFodselsDato(fnr, null)
+                                person = personen
+                                personRelasjon = it
+                                return@forEach
+                            }
+                        }
+                        Relasjon.FORSIKRET -> {
+                            if (personen != null) {
+                                fnr = trimFnrString(it.fnr)
+                                fdato = hentFodselsDato(fnr, null)
+                                person = personen
+                                personRelasjon = it
+                                return@forEach
+                            }
+                        }
+                        else -> {
+                            if (personen != null) {
+                                fnr = trimFnrString(it.fnr)
+                                fdato = hentFodselsDato(fnr, null)
+                                person = personen
+                                personRelasjon = it
+                                return@forEach
+                            }
+                        }
                     }
                 }
             } catch (ex: Exception) {
@@ -58,12 +83,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             }
             //Prøve fdato
             if (fdato == null) {
-                try {
-                    fdato = hentFodselsDato(fnr, alleSediBuc)
-                    logger.debug("følgende fdato: $fdato")
-                } catch (ex: Exception) {
-                    logger.error("Feil ved henting av fdato på valgt sed", ex)
-                }
+                fdato = hentFodselsDato(fnr, alleSediBuc)
             }
         }
 
@@ -76,9 +96,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        if (fdato == null) throw NullPointerException("Unexpected null for fdato-variable")
-
-        return IdentifisertPerson(aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning, PersonRelasjon(fnr,Relasjon.ANNET))
+        return IdentifisertPerson(aktoerId, fdato!!, personNavn, diskresjonskode?.name, landkode, geografiskTilknytning, personRelasjon)
     }
 
     /**
@@ -90,9 +108,10 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             return fdatoFraFnr
         }
         if (!seder.isNullOrEmpty()) {
+            logger.info("Henter fdato fra SEDer")
             return fdatoHelper.finnEnFdatoFraSEDer(seder)
         }
-        throw RuntimeException("Kunne ikke finne fdato i listen av SEDer")
+        throw RuntimeException("Kunne ikke finne fdato i listen over SEDer")
     }
 
     private fun fodselsDatoFra(fnr: String) =
@@ -123,11 +142,11 @@ data class IdentifisertPerson(
         val diskresjonskode: String? = null,
         val landkode: String? = null,
         val geografiskTilknytning: String? = null,
-        val personRelasjon: PersonRelasjon
+        val personRelasjon: PersonRelasjon? = null
 )
 
 data class PersonRelasjon(
-        val fnr: String? = null,
+        val fnr: String,
         val relasjon: Relasjon
 )
 
