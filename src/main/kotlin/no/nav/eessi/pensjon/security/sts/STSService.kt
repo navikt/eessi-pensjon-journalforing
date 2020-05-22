@@ -45,12 +45,12 @@ class WellKnownSTS(
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Component
-class STSKlient(
+class STSService(
         private val securityTokenExchangeBasicAuthRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(STSKlient::class.java)
+    private val logger = LoggerFactory.getLogger(STSService::class.java)
 
     @Value("\${securityTokenService.discoveryUrl}")
     lateinit var discoveryUrl: String
