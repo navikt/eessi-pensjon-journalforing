@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -37,7 +38,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
-import javax.ws.rs.HttpMethod
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
@@ -159,7 +159,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker STS
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withQueryStringParameter("grant_type", "client_credentials"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -170,7 +170,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker Eux PDF generator
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -179,7 +179,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -188,7 +188,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -197,7 +197,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -206,7 +206,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -216,7 +216,7 @@ class JournalforingMottattIntegrationTest {
 
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -226,7 +226,7 @@ class JournalforingMottattIntegrationTest {
 
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999/filer"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -237,7 +237,7 @@ class JournalforingMottattIntegrationTest {
             //Mock eux hent sed R_BUC_02 -- R005 sed
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -248,7 +248,7 @@ class JournalforingMottattIntegrationTest {
             //Mock eux hent sed R_BUC_02 -- H070 sed
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -259,7 +259,7 @@ class JournalforingMottattIntegrationTest {
 
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -268,7 +268,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -277,7 +277,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -286,7 +286,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -297,7 +297,7 @@ class JournalforingMottattIntegrationTest {
             //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/2536475861/allDocuments"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -308,7 +308,7 @@ class JournalforingMottattIntegrationTest {
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/7477291/allDocuments"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -319,7 +319,7 @@ class JournalforingMottattIntegrationTest {
             //Mock fagmodul /buc/{rinanr}/allDocuments -
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/747729177/allDocuments"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -330,7 +330,7 @@ class JournalforingMottattIntegrationTest {
             //Mock fagmodul /buc/{rinanr}/allDocuments
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/.*/allDocuments"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -341,7 +341,7 @@ class JournalforingMottattIntegrationTest {
             //Mock fagmodul hent fnr fra buc
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/sed/fodselsnr/161558/buctype/fjernes"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -351,7 +351,7 @@ class JournalforingMottattIntegrationTest {
 
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/sed/fodselsnr/148161/buctype/fjernes"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -362,7 +362,7 @@ class JournalforingMottattIntegrationTest {
             //Mock eux hent av sed - ugyldig FNR
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx" ))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -373,7 +373,7 @@ class JournalforingMottattIntegrationTest {
             //Mock eux hent av sed
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018" ))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -384,7 +384,7 @@ class JournalforingMottattIntegrationTest {
             //Mock eux hent av sed
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113" ))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -395,7 +395,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker journalføringstjeneste
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.POST)
+                            .withMethod(HttpMethod.POST.name)
                             .withPath("/journalpost"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -406,7 +406,7 @@ class JournalforingMottattIntegrationTest {
             //Mock norg2tjeneste
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.POST)
+                            .withMethod(HttpMethod.POST.name)
                             .withPath("/api/v1/arbeidsfordeling")
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))))
                     .respond(HttpResponse.response()
@@ -418,7 +418,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker aktørregisteret
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/identer")
                             .withQueryStringParameters(
                                     listOf(
@@ -432,7 +432,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker STS service discovery
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/.well-known/openid-configuration"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -450,7 +450,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker fagmodul hent ytelsetype
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/sed/ytelseKravtype/161558/sedid/40b5723cd9284af6ac0581f3981f3044"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -461,7 +461,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/sed/ytelseKravtype/148161/sedid/f899bf659ff04d20bc8b978b186f1ecc"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -472,7 +472,7 @@ class JournalforingMottattIntegrationTest {
                     )
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.GET)
+                            .withMethod(HttpMethod.GET.name)
                             .withPath("/sed/ytelseKravtype/147729/sedid/b12e06dda2c7474b9998c7139c841646"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -485,7 +485,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker bestemSak
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.POST)
+                            .withMethod(HttpMethod.POST.name)
                             .withPath("/"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -496,7 +496,7 @@ class JournalforingMottattIntegrationTest {
             // Mocker oppdaterDistribusjonsinfo
             mockServer.`when`(
                     request()
-                            .withMethod(HttpMethod.PATCH)
+                            .withMethod(HttpMethod.PATCH.name)
                             .withPath("/journalpost/.*/oppdaterDistrmmibusjonsinfo"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -516,7 +516,7 @@ class JournalforingMottattIntegrationTest {
 
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/.well-known/openid-configuration"),
                 VerificationTimes.atLeast(1)
         )
@@ -524,28 +524,28 @@ class JournalforingMottattIntegrationTest {
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
                 VerificationTimes.once()
         )
 
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113/filer"),
                 VerificationTimes.once()
         )
 
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"),
                 VerificationTimes.once()
         )
 
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
                 VerificationTimes.once()
         )
@@ -553,7 +553,7 @@ class JournalforingMottattIntegrationTest {
         //verify R_BUC_02_R005
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999/filer"),
                 VerificationTimes.once()
         )
@@ -561,7 +561,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy fagmodul allDocuments R_BUC_02
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/2536475861/allDocuments"),
                 VerificationTimes.once()
         )
@@ -569,7 +569,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy fagmodul allDocuments on Sed ugyldigFNR
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/7477291/allDocuments"),
                 VerificationTimes.once()
         )
@@ -577,7 +577,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy fagmodul allDocuments on BUC H_BUC_07
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/747729177/allDocuments"),
                 VerificationTimes.once()
         )
@@ -585,7 +585,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy fagmodul allDocuments
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/.*/allDocuments"),
                 VerificationTimes.atLeast(4)
         )
@@ -593,7 +593,7 @@ class JournalforingMottattIntegrationTest {
         //verify R_BUC_02 sed R005
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"),
                 VerificationTimes.atLeast(1)
         )
@@ -601,7 +601,7 @@ class JournalforingMottattIntegrationTest {
         //verify R_BUC_02 sed H070
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"),
                 VerificationTimes.atLeast(1)
         )
@@ -609,7 +609,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy eux sed
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
                 VerificationTimes.atLeast(4)
         )
@@ -617,7 +617,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy eux sed on H_BUC_07
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/747729177/sed/9498fc46933548518712e4a1d5133113"),
                 VerificationTimes.once()
         )
@@ -626,7 +626,7 @@ class JournalforingMottattIntegrationTest {
         // Verfiy eux sed on ugyldig-FNR
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.GET)
+                        .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
                 VerificationTimes.once()
         )
@@ -634,7 +634,7 @@ class JournalforingMottattIntegrationTest {
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
-                        .withMethod(HttpMethod.POST)
+                        .withMethod(HttpMethod.POST.name)
                         .withPath("/journalpost"),
                 VerificationTimes.exactly(7)
         )

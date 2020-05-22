@@ -65,10 +65,6 @@ dependencies {
 		because "spring-kafka-test needs it - but we should not use it in our code"
 	}
 
-	// OIDC
-	implementation("no.nav.security:oidc-spring-support:0.2.18")
-	implementation("no.nav.security:oidc-test-support:0.2.18")
-
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
