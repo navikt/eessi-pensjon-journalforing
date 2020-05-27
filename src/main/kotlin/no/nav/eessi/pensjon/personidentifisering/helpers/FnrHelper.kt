@@ -47,7 +47,7 @@ class FnrHelper {
                         else -> {
                             // P10000, P9000
                             leggTilAnnenForsikretFnrHvisFinnes(sedRootNode, fnrListe)
-                            //P2000 - P2200 -- andre..
+                            //P2000 - P2200 -- andre..  (H070)
                             leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
                         }
                     }
@@ -56,7 +56,6 @@ class FnrHelper {
                 logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
-            logger.info("Ingen person funnet ut fra sed: $sedType")
         }
         return fnrListe
     }
@@ -79,6 +78,9 @@ class FnrHelper {
         }
     }
 
+    /***
+     * /person/rolle 01 : forsikret person
+     */
     fun filterAnnenpersonPinNode(node: JsonNode): String? {
         val subNode = node.at("/nav/annenperson") ?: return null
         if (subNode.at("/person/rolle").textValue() == "01") {

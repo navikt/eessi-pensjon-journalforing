@@ -13,16 +13,17 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.pdf.*
+import no.nav.eessi.pensjon.pdf.EuxDokument
+import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.quality.Strictness
@@ -57,8 +58,11 @@ class JournalforingKlientTest {
 
     private lateinit var journalforingService: JournalforingService
 
+    private lateinit var fdato: LocalDate
+
     @BeforeEach
     fun setup() {
+        fdato = LocalDate.now()
 
         journalforingService = JournalforingService(euxKlient,
                 journalpostKlient,
@@ -170,14 +174,13 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 landkode = "SE",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
-            )
+        )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "AP", 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, "AP", 0)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr= eq("12078945602"),
@@ -203,14 +206,13 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 landkode = "SE",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, "UT", 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,"UT", 0)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr= eq("12078945602"),
@@ -236,7 +238,6 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -244,7 +245,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr= eq("12078945602"),
@@ -270,7 +271,6 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -282,7 +282,7 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -314,7 +314,6 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -322,7 +321,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -349,7 +348,6 @@ class JournalforingKlientTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -357,7 +355,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -385,7 +383,6 @@ class JournalforingKlientTest {
 
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -393,7 +390,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -424,7 +421,6 @@ class JournalforingKlientTest {
 
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -432,7 +428,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyString(),
@@ -460,7 +456,6 @@ class JournalforingKlientTest {
 
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -472,7 +467,7 @@ class JournalforingKlientTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == "UT" })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -503,7 +498,6 @@ class JournalforingKlientTest {
 
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -511,7 +505,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -539,7 +533,6 @@ class JournalforingKlientTest {
 
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
-                LocalDate.of(89, 7, 12),
                 "Test Testesen",
                 null,
                 null,
@@ -547,7 +540,7 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null, 0)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),

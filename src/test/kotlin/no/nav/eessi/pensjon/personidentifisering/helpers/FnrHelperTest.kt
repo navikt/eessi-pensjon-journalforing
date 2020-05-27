@@ -46,9 +46,12 @@ class FnrHelperTest {
                 getTestJsonFile("P2100-PinDK-NAV.json"),
                 getTestJsonFile("P2000-NAV.json")))
 
-        val expectedFnr = "97097097000"
+        val expectedFnr = "67097097000"
         assertEquals(1,actual.size)
         assertTrue(actual.contains(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET)))
+        val nav = NavFodselsnummer(expectedFnr)
+        assertEquals(nav.isDNumber(), true)
+        assertEquals(nav.getBirthDateAsISO(), "1970-09-27")
     }
 
     @Test
@@ -58,7 +61,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2000-NAV.json"),
                 getTestJsonFile("P15000-NAV.json")))
 
-        val expected = setOf(PersonRelasjon(fnr="97097097000", relasjon= Relasjon.FORSIKRET),
+        val expected = setOf(PersonRelasjon(fnr="67097097000", relasjon= Relasjon.FORSIKRET),
                 PersonRelasjon(fnr="21712000000", relasjon= Relasjon.FORSIKRET))
 
         assertEquals(2,actual.size)

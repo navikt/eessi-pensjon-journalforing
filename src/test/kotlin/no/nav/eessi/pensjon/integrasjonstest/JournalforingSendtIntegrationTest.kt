@@ -1,21 +1,19 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import com.nhaarman.mockitokotlin2.mock
-import io.mockk.slot
 import io.mockk.*
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
+import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
-import org.mockserver.matchers.Times
-import org.mockserver.model.*
+import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
-import org.mockserver.verify.Verification
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.Parameter
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -594,7 +592,7 @@ class JournalforingSendtIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 26) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 23) { personV3Klient.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP

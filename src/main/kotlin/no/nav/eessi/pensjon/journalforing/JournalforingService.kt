@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
@@ -46,6 +47,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
     fun journalfor(sedHendelse: SedHendelseModel,
                    hendelseType: HendelseType,
                    identifisertPerson: IdentifisertPerson,
+                   fdato: LocalDate,
                    ytelseType: String?,
                    offset: Long = 0) {
         journalforOgOpprettOppgaveForSed.measure {
@@ -74,7 +76,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 val tildeltEnhet =
                         if (sakId == null) {
                             oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson.aktoerId,
-                                    identifisertPerson.fdato,
+                                    fdato,
                                     identifisertPerson.diskresjonskode,
                                     identifisertPerson.landkode,
                                     identifisertPerson.geografiskTilknytning,

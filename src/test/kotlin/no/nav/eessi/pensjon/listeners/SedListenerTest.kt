@@ -1,22 +1,17 @@
 package no.nav.eessi.pensjon.listeners
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
@@ -47,13 +42,21 @@ class SedListenerTest {
 
     @BeforeEach
     fun setup() {
+//        whenever(personidentifiseringService.identifiserPerson(any(), any(), any()))
+//                .thenReturn(listOf(IdentifisertPerson(null, "", "", "", "", null)))
+
+//        doReturn(listOf(IdentifisertPerson(null, "", "", "", "", null)))
+//                .whenever(personidentifiseringService.identifiserPerson(any(), any(), any()))
+
+//        doReturn(LocalDate.now()).whenever(personidentifiseringService.hentFodselsDato(any(), any()))
+
         sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
         sedListener.initMetrics()
     }
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))),cr,  acknowledgment)
+        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr,  acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
@@ -112,14 +115,14 @@ class SedListenerTest {
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any())
     }
 
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any())
     }
 
     @Test
