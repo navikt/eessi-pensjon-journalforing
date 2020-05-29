@@ -3,10 +3,7 @@ package no.nav.eessi.pensjon.klienter.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,7 +58,7 @@ class JournalpostKlient(
             forsokFerdigstill: Boolean? = false,
             avsenderLand: String?,
             avsenderNavn: String?,
-            ytelseType: String?): OpprettJournalPostResponse? {
+            ytelseType: YtelseType?): OpprettJournalPostResponse? {
 
         val avsenderMottaker = populerAvsenderMottaker(
                 avsenderNavn,
@@ -119,11 +116,11 @@ class JournalpostKlient(
         }
     }
 
-    fun hentBehandlingsTema(bucType: String, ytelseType: String?): String {
+    fun hentBehandlingsTema(bucType: String, ytelseType: YtelseType?): String {
         return if (bucType == BucType.R_BUC_02.name) {
             return when (ytelseType) {
-                "UT" -> Behandlingstema.UFOREPENSJON.toString()
-                "GP" -> Behandlingstema.GJENLEVENDEPENSJON.toString()
+                YtelseType.UFOREP -> Behandlingstema.UFOREPENSJON.toString()
+                YtelseType.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON.toString()
                 else -> Behandlingstema.ALDERSPENSJON.toString()
             }
         } else {
@@ -131,13 +128,13 @@ class JournalpostKlient(
         }
     }
 
-    fun hentTema(bucType: String, sedType: String, enhet: String, ytelseType: String?): String {
+    fun hentTema(bucType: String, sedType: String, enhet: String, ytelseType: YtelseType?): String {
         return if (bucType == BucType.R_BUC_02.name) {
             if (sedType == SedType.R004.name && enhet == "4819"){
                 return Tema.PENSJON.toString()
             }
             return when (ytelseType) {
-                "UT" -> Tema.UFORETRYGD.toString()
+                YtelseType.UFOREP -> Tema.UFORETRYGD.toString()
                 else -> Tema.PENSJON.toString()
             }
         } else {

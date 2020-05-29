@@ -47,7 +47,7 @@ private lateinit var mockServer : ClientAndServer
 @SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafka"])
+@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafka"])
 class JournalforingSendtIntegrationTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -83,7 +83,7 @@ class JournalforingSendtIntegrationTest {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(15000, TimeUnit.MILLISECONDS)
+        sedListener.getLatch().await(20000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()

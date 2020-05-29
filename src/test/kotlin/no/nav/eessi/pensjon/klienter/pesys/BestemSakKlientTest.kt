@@ -44,6 +44,6 @@ class BestemSakKlientTest {
                         any(),
                         eq(String::class.java))
 
-        assertEquals("22873157", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_01))
+        assertEquals("22873157", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_01, null))
     }
 }

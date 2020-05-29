@@ -29,7 +29,12 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         }
     }
 
-    fun identifiserPersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
+    fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType): IdentifisertPerson? {
+        val identifisertePersoner = hentIdentifisertePersoner(navBruker, alleSediBuc, bucType)
+        return identifisertPersonUtvelger(identifisertePersoner, bucType)
+    }
+
+    fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
         val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null

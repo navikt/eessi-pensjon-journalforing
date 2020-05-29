@@ -4,12 +4,12 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.NORGE
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.UT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -21,7 +21,6 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        println(routingRequest)
         logger.debug("person: $routingRequest,  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
 
         if (routingRequest.fnr == null) return ID_OG_FORDELING
@@ -50,7 +49,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         }
     }
 
-    private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: String?): Enhet {
+    private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: YtelseType?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
 
@@ -62,7 +61,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                     P_BUC_10 ->
-                        if (ytelseType == UT.name) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                        if (ytelseType == YtelseType.UFOREP) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                     H_BUC_07 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_OSLO
                     else -> NFP_UTLAND_AALESUND // Ukjent buc-type
@@ -75,7 +74,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                     P_BUC_10 ->
-                        if (ytelseType == UT.name) UFORE_UTLAND else PENSJON_UTLAND
+                        if (ytelseType == YtelseType.UFOREP) UFORE_UTLAND else PENSJON_UTLAND
                     H_BUC_07 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                     else -> PENSJON_UTLAND // Ukjent buc-type
@@ -142,6 +141,6 @@ class OppgaveRoutingRequest(
         val landkode: String? = null,
         val geografiskTilknytning: String? = null,
         val bucType: BucType? = null,
-        val ytelseType: String? = null,
+        val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
         val hendelseType: HendelseType? = null)

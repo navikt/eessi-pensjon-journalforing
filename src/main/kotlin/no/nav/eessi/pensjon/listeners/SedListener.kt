@@ -57,8 +57,7 @@ class SedListener(
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertePersoner = personidentifiseringService.identifiserPersoner(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                        val identifisertPerson = personidentifiseringService.identifisertPersonUtvelger(identifisertePersoner, sedHendelse.bucType)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
                         val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset)
@@ -93,9 +92,7 @@ class SedListener(
                             val sedHendelse = SedHendelseModel.fromJson(hendelse)
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-
-                            val identifisertePersoner = personidentifiseringService.identifiserPersoner(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                            val identifisertPerson = personidentifiseringService.identifisertPersonUtvelger(identifisertePersoner, sedHendelse.bucType)
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
                             val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
 

@@ -4,22 +4,23 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doThrow
 import no.nav.eessi.pensjon.json.toJson
-import org.mockito.Mockito.doReturn
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.*
-import org.mockito.Mock
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.contains
+import org.mockito.Mock
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.eq
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.http.*
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.eq
-import org.springframework.http.*
-import org.springframework.web.client.HttpServerErrorException
 
 @ExtendWith(MockitoExtension::class)
 class JournalpostKlientTest {
@@ -58,16 +59,16 @@ class JournalpostKlientTest {
 
         val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
-                fnr= "12345678912",
-                personNavn= "navn navnesen",
-                bucType= "P_BUC_01",
-                sedType= "P2000 - Krav om alderspensjon",
-                sedHendelseType= "MOTTATT",
-                eksternReferanseId= "string",
-                kanal= "NAV_NO",
-                journalfoerendeEnhet= "9999",
-                arkivsaksnummer= "string",
-                dokumenter= """
+                fnr = "12345678912",
+                personNavn = "navn navnesen",
+                bucType = "P_BUC_01",
+                sedType = "P2000 - Krav om alderspensjon",
+                sedHendelseType = "MOTTATT",
+                eksternReferanseId = "string",
+                kanal = "NAV_NO",
+                journalfoerendeEnhet = "9999",
+                arkivsaksnummer = "string",
+                dokumenter = """
                     [{
                         "brevkode": "NAV 14-05.09",
                         "dokumentKategori": "SOK",
@@ -81,7 +82,7 @@ class JournalpostKlientTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                forsokFerdigstill= false,
+                forsokFerdigstill = false,
                 avsenderLand = "NO",
                 avsenderNavn = null,
                 ytelseType = null
@@ -162,16 +163,16 @@ class JournalpostKlientTest {
 
         val journalpostResponse = journalpostKlient.opprettJournalpost(
                 rinaSakId = "1111",
-                fnr= "12345678912",
-                personNavn= "navn navnesen",
-                bucType= "P_BUC_01",
-                sedType= "P2000 - Krav om alderspensjon",
-                sedHendelseType= "MOTTATT",
-                eksternReferanseId= "string",
-                kanal= "NAV_NO",
-                journalfoerendeEnhet= "9999",
-                arkivsaksnummer= "string",
-                dokumenter= """
+                fnr = "12345678912",
+                personNavn = "navn navnesen",
+                bucType = "P_BUC_01",
+                sedType = "P2000 - Krav om alderspensjon",
+                sedHendelseType = "MOTTATT",
+                eksternReferanseId = "string",
+                kanal = "NAV_NO",
+                journalfoerendeEnhet = "9999",
+                arkivsaksnummer = "string",
+                dokumenter = """
                     [{
                         "brevkode": "NAV 14-05.09",
                         "dokumentKategori": "SOK",
@@ -185,7 +186,7 @@ class JournalpostKlientTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                forsokFerdigstill= false,
+                forsokFerdigstill = false,
                 avsenderLand = "UK",
                 avsenderNavn = null,
                 ytelseType = null

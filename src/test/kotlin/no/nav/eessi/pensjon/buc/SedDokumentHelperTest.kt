@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.buc
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +46,7 @@ class SedDokumentHelperTest {
         val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
-        Assertions.assertEquals("AP",actual)
+        Assertions.assertEquals(YtelseType.ALDER ,actual)
     }
 
     @Test
@@ -58,7 +58,7 @@ class SedDokumentHelperTest {
         val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
-        Assertions.assertEquals("UT",actual)
+        Assertions.assertEquals(YtelseType.UFOREP,actual)
     }
 
     @Test
@@ -70,7 +70,7 @@ class SedDokumentHelperTest {
         val seds = mapOf<String,String?>(SedType.R005.name to sedR005, SedType.P15000.name to sed)
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
-        Assertions.assertEquals("AP" ,actual)
+        Assertions.assertEquals(YtelseType.ALDER ,actual)
     }
 
     @Test

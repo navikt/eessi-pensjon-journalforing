@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.springframework.stereotype.Component
 
@@ -32,16 +33,16 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
         }.toMap()
     }
 
-    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: Map<String,String?>): String? {
+    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: Map<String,String?>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == BucType.R_BUC_02) {
             val r005Sed = alleSedIBuc[SedType.R005.name]
             if (r005Sed != null){
                 val sedRootNode = mapper.readTree(r005Sed)
                 return when (filterYtelseTypeR005(sedRootNode)) {
-                    "alderspensjon" -> "AP"
-                    "uføretrygd" -> "UT"
-                    else -> "GP"
+                    "alderspensjon" -> YtelseType.ALDER
+                    "uføretrygd" -> YtelseType.UFOREP
+                    else -> YtelseType.GJENLEV
                 }
             }
         //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
@@ -51,9 +52,9 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 val sedRootNode = mapper.readTree(sed)
                 val krav = sedRootNode.get("nav").get("krav").get("type").textValue()
                 return when (krav) {
-                    "02" -> "GP"
-                    "03" -> "UT"
-                    else -> "AP"
+                    "02" -> YtelseType.GJENLEV
+                    "03" -> YtelseType.UFOREP
+                    else -> YtelseType.ALDER
                 }
             }
         }

@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -48,7 +49,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                    hendelseType: HendelseType,
                    identifisertPerson: IdentifisertPerson?,
                    fdato: LocalDate,
-                   ytelseType: String?,
+                   ytelseType: YtelseType?,
                    offset: Long = 0) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -64,7 +65,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 // Henter saksId for utgående dokumenter
                 val sakId=
                         if (identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType)
+                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType, ytelseType)
                         } else { null }
 
                 if (sakId != null) {

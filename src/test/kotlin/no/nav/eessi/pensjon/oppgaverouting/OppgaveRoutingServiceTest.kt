@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.YtelseType.*
 
 @ExtendWith(MockitoExtension::class)
 class OppgaveRoutingServiceTest {
@@ -76,7 +76,7 @@ class OppgaveRoutingServiceTest {
         assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = H_BUC_07)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, fnr = "01010101010",  bucType = H_BUC_07)))
 
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder18aar,landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
         assertEquals(NFP_UTLAND_OSLO, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, fnr = "01010101010",  bucType = H_BUC_07)))
 
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE,  bucType = H_BUC_07)))
@@ -147,7 +147,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing for vanlige BUC'er`() {
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, fnr = "01010101010",bucType = P_BUC_01)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, fnr = "01010101010", bucType = P_BUC_01)))
         assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, landkode = NORGE, fnr = "01010101010", bucType = P_BUC_01)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), geografiskTilknytning = dummyTilknytning, landkode = UTLAND, fnr = "01010101010", bucType = P_BUC_01)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_01)))
@@ -199,42 +199,42 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_09)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_09)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
 
-        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
-        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder18aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
 
-        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
-        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = UT.name)))
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder17aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.UFOREP)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder59aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = AP.name)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
 
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = "SPSF", fnr = "01010101010",  bucType = P_BUC_01, ytelseType = AP.name)))
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, diskresjonskode = "SPFO", landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_03, ytelseType = UT.name)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPFO", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPSF", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = GP.name)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, geografiskTilknytning = dummyTilknytning, diskresjonskode = "SPSF", fnr = "01010101010",  bucType = P_BUC_01, ytelseType = YtelseType.ALDER)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, diskresjonskode = "SPFO", landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_03, ytelseType = YtelseType.UFOREP)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPFO", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = UTLAND, diskresjonskode = "SPSF", fnr = "01010101010",  bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
     }
 
 
