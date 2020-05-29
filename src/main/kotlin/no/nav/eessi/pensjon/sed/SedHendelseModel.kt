@@ -10,7 +10,7 @@ class SedHendelseModel (
         val id: Long? = 0,
         val sedId: String? = null,
         val sektorKode: String,
-        val bucType: BucType? = null,
+        val bucType: BucType,
         val rinaSakId: String,
         val avsenderId: String? = null,
         val avsenderNavn: String? = null,

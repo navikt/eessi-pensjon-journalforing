@@ -547,13 +547,13 @@ class JournalforingMottattIntegrationTest {
                 VerificationTimes.once()
         )
 
-        //verify R_BUC_02_R005
-//        mockServer.verify(
-//                request()
-//                        .withMethod(HttpMethod.GET.name)
-//                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999/filer"),
-//                VerificationTimes.once()
-//        )
+       // Verify R_BUC_02_R005
+        mockServer.verify(
+                request()
+                        .withMethod(HttpMethod.GET.name)
+                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999/filer"),
+                VerificationTimes.once()
+        )
 
         // Verfiy fagmodul allDocuments R_BUC_02
         mockServer.verify(
@@ -633,13 +633,13 @@ class JournalforingMottattIntegrationTest {
                 request()
                         .withMethod(HttpMethod.POST.name)
                         .withPath("/journalpost"),
-                VerificationTimes.exactly(6)
+                VerificationTimes.exactly(7)
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 34) { personV3Klient.hentPerson(any()) }
 
-        assertEquals(1, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
+        assertEquals(0, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP

@@ -175,8 +175,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                landkode = "SE",
+                "",
+                "SE",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -207,8 +208,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                landkode = "SE",
+                "",
+                "SE",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -239,9 +241,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -272,9 +274,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -315,9 +317,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
@@ -349,9 +351,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -384,9 +386,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -422,9 +424,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
@@ -457,9 +459,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
@@ -499,9 +501,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
@@ -534,9 +536,9 @@ class JournalforingKlientTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 

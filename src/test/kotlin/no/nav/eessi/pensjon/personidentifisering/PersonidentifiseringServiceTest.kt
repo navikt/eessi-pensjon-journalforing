@@ -79,6 +79,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt et gyldig fnr og relasjon forsikret så skal det identifiseres en person`() {
         whenever(personV3Klient.hentPerson(eq("67097097000"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(diskresjonkodeHelper.hentDiskresjonskode(any())).thenReturn(null)
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2000-NAV.json")))
         val actual = personidentifiseringService.identifiserPersoner(null, listOf(sed), BucType.P_BUC_01 )
@@ -133,7 +134,7 @@ class PersonidentifiseringServiceTest {
         val navBruker = null
         val actual = personidentifiseringService.identifiserPersoner(navBruker, listOf(sed), BucType.P_BUC_06 )
         val personOne = actual.first()
-        val fdato = personidentifiseringService.hentFodselsDato(personOne.personRelasjon?.fnr, null)
+        val fdato = personidentifiseringService.hentFodselsDato(personOne, null)
         assertEquals("1950-05-01", fdato.toString())
 
     }
@@ -154,7 +155,7 @@ class PersonidentifiseringServiceTest {
         val navBruker = null
         val actual = personidentifiseringService.identifiserPersoner(navBruker, listOf(sed2, sed1), BucType.P_BUC_06)
         val personOne = actual.first()
-        val fdato = personidentifiseringService.hentFodselsDato(personOne.personRelasjon?.fnr, listOf(sed2, sed1))
+        val fdato = personidentifiseringService.hentFodselsDato(personOne, listOf(sed2, sed1))
 
         println(actual)
         assertEquals("1950-05-01", fdato.toString())

@@ -46,7 +46,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
     fun journalfor(sedHendelse: SedHendelseModel,
                    hendelseType: HendelseType,
-                   identifisertPerson: IdentifisertPerson,
+                   identifisertPerson: IdentifisertPerson?,
                    fdato: LocalDate,
                    ytelseType: String?,
                    offset: Long = 0) {
@@ -63,28 +63,27 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 // Henter saksId for utgående dokumenter
                 val sakId=
-                        if (identifisertPerson.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType!!)
+                        if (identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) {
+                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType)
                         } else { null }
 
                 if (sakId != null) {
-                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
+                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
                 }
 
                 val forsokFerdigstill = sakId != null
 
                 val tildeltEnhet =
                         if (sakId == null) {
-                            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson.aktoerId,
+                            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                                     fdato,
-                                    identifisertPerson.diskresjonskode,
-                                    identifisertPerson.landkode,
-                                    identifisertPerson.geografiskTilknytning,
+                                    identifisertPerson?.diskresjonskode,
+                                    identifisertPerson?.landkode,
+                                    identifisertPerson?.geografiskTilknytning,
                                     sedHendelse.bucType,
                                     ytelseType,
                                     sedHendelse.sedType,
-                                    hendelseType).also {
-                            }
+                                    hendelseType)
                     )
                 } else {
                     OppgaveRoutingModel.Enhet.UKJENT
@@ -93,9 +92,9 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
                     rinaSakId = sedHendelse.rinaSakId,
-                    fnr = identifisertPerson.personRelasjon?.fnr,
-                    personNavn = identifisertPerson.personNavn,
-                    bucType = sedHendelse.bucType!!.name,
+                    fnr = identifisertPerson?.personRelasjon?.fnr,
+                    personNavn = identifisertPerson?.personNavn,
+                    bucType = sedHendelse.bucType.name,
                     sedType = sedHendelse.sedType.name,
                     sedHendelseType = hendelseType.name,
                     eksternReferanseId = null,// TODO what value to put here?,
@@ -115,11 +114,11 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 }
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson?.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
                 }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson?.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
                 }
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)

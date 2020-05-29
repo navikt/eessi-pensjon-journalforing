@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -59,8 +58,8 @@ class SedListener(
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertePersoner = personidentifiseringService.identifiserPersoner(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                        val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner)
-                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson.personRelasjon?.fnr, alleSedIBuc.values.toList())
+                        val identifisertPerson = personidentifiseringService.identifisertPersonUtvelger(identifisertePersoner, sedHendelse.bucType)
+                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
                         val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset)
                     }
@@ -77,22 +76,6 @@ class SedListener(
                 sendtLatch.countDown()
             }
         }
-    }
-
-    private fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>): IdentifisertPerson {
-        val identifisertPerson: IdentifisertPerson
-        if (identifisertePersoner.isEmpty()) {
-            identifisertPerson = IdentifisertPerson()
-        } else {
-            logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
-            if (identifisertePersoner.size == 1) {
-                identifisertPerson = identifisertePersoner.first()
-            }
-            else {
-                throw RuntimeException("Stopper Journalføring, usikker på hovedperson")
-            }
-        }
-        return identifisertPerson
     }
 
     @KafkaListener(topics = ["\${kafka.sedMottatt.topic}"], groupId = "\${kafka.sedMottatt.groupid}")
@@ -112,9 +95,9 @@ class SedListener(
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
 
                             val identifisertePersoner = personidentifiseringService.identifiserPersoner(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                            val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner)
+                            val identifisertPerson = personidentifiseringService.identifisertPersonUtvelger(identifisertePersoner, sedHendelse.bucType)
                             val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson.personRelasjon?.fnr, alleSedIBuc.values.toList())
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
 
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset)
                     }

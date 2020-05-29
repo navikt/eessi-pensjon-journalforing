@@ -34,14 +34,8 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
         val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
 
-        var fnr: String? = null
-        var fdato: LocalDate? = null
-
         if (personForNavBruker != null) {
-            fnr = trimmetNavBruker!!
-            fdato = hentFodselsDato(fnr, null)
-
-            return listOf(identifisertPerson(personForNavBruker, fnr, alleSediBuc, fdato, PersonRelasjon(fnr!!, Relasjon.FORSIKRET)))
+            return listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
 
         } else {
             //Prøve fnr
@@ -52,39 +46,58 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
                     val personen = personV3Klient.hentPerson(trimFnrString(personRelasjon.fnr))
                     if (personen != null) {
-                        val identifisertPerson = identifisertPerson(
+                        val identifisertPerson = populerIdentifisertPerson(
                                 personen,
-                                personRelasjon.fnr,
                                 alleSediBuc,
-                                hentFodselsDato(personRelasjon.fnr, alleSediBuc),
                                 personRelasjon)
                         identifisertePersonRelasjoner.add(identifisertPerson)
                     }
                 }
             } catch (ex: Exception) {
-                logger.info("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten")
+                logger.warn("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten", ex)
             }
             return identifisertePersonRelasjoner
         }
     }
 
-    private fun identifisertPerson(person: Bruker?, fnr: String?, alleSediBuc: List<String?>, fdato: LocalDate?, personRelasjon: PersonRelasjon?): IdentifisertPerson {
+    private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
-        var aktoerId: String? = null
-
-        if (person != null) aktoerId = hentAktoerId(fnr)
-
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
+        val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)?.name
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return IdentifisertPerson(aktoerId,  personNavn, diskresjonskode?.name, landkode, geografiskTilknytning, personRelasjon)
+        return IdentifisertPerson(aktoerId, personNavn!!, diskresjonskode, landkode!!, geografiskTilknytning!!, personRelasjon)
+    }
+
+    /**
+     * Forsøker å finne om identifisert person er en eller fler med avdød person
+     */
+    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType): IdentifisertPerson? {
+        if (identifisertePersoner.isEmpty()) {
+            return null
+        } else {
+            logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
+            if (identifisertePersoner.size == 1) {
+                return identifisertePersoner.first()
+            } else {
+                if (bucType == BucType.R_BUC_02) {
+                    val identifisertAvdod = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.AVDOD }
+                            .map { it }
+                    if (identifisertAvdod.size == 1) {
+                        return identifisertAvdod.first()
+                    }
+                }
+                return null
+            }
+        }
     }
 
     /**
      * Henter første treff på dato fra listen av SEDer
      */
-    fun hentFodselsDato(fnr: String?, seder: List<String?>?): LocalDate {
+    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<String?>?): LocalDate {
+        val fnr = identifisertPerson?.personRelasjon?.fnr
         val fdatoFraFnr = if (!erFnrDnrFormat(fnr)) null else fodselsDatoFra(fnr!!)
         if (fdatoFraFnr != null) {
             return fdatoFraFnr
@@ -118,12 +131,12 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 }
 
 data class IdentifisertPerson(
-        val aktoerId: String? = null,
-        val personNavn: String? = null,
+        val aktoerId: String,
+        val personNavn: String,
         val diskresjonskode: String? = null,
-        val landkode: String? = null,
-        val geografiskTilknytning: String? = null,
-        val personRelasjon: PersonRelasjon? = null
+        val landkode: String,
+        val geografiskTilknytning: String,
+        val personRelasjon: PersonRelasjon
 )
 
 data class PersonRelasjon(
