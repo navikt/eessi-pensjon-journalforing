@@ -4,7 +4,6 @@ import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.Krav
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
@@ -67,7 +66,6 @@ class JournalforingKlientTest {
 
         journalforingService = JournalforingService(euxKlient,
                 journalpostKlient,
-                fagmodulKlient,
                 oppgaveRoutingService,
                 pdfService,
                 oppgaveHandler,
@@ -162,11 +160,6 @@ class JournalforingKlientTest {
         doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_05 && arg.ytelseType == null })
-
-        //FAGMODUL HENT YTELSETYPE FOR P_BUC_10
-        doReturn(Krav.YtelseType.UT.name)
-                .`when`(fagmodulKlient)
-                .hentYtelseKravType(anyString(), anyString())
     }
 
     @Test

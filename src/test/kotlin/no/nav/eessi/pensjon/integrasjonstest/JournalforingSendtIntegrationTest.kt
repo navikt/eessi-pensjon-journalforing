@@ -313,27 +313,6 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
                     )
 
-            //Mock fagmodul hent fnr fra buc
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/sed/fodselsnr/161558/buctype/fjernes"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.FORBIDDEN_403.code())
-                            .withBody("oops")
-                    )
-
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/sed/fodselsnr/148161/buctype/fjernes"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.FORBIDDEN_403.code())
-                            .withBody("oops")
-                    )
-
             //Mock eux hent av sed - ugyldig FNR
             mockServer.`when`(
                     request()
@@ -410,40 +389,6 @@ class JournalforingSendtIntegrationTest {
                                             "  \"jwks_uri\": \"http://localhost:$port/rest/v1/sts/jwks\",\n" +
                                             "  \"subject_types_supported\": [\"public\"]\n" +
                                             "}"
-                            )
-                    )
-            // Mocker fagmodul hent ytelsetype
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/sed/ytelseKravtype/161558/sedid/40b5723cd9284af6ac0581f3981f3044"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(
-                                    "{}"
-                            )
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/sed/ytelseKravtype/148161/sedid/f899bf659ff04d20bc8b978b186f1ecc"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(
-                                    "{}"
-                            )
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/sed/ytelseKravtype/147729/sedid/b12e06dda2c7474b9998c7139c841646"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(
-                                    "{}"
                             )
                     )
 
