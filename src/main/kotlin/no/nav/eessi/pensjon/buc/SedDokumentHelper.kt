@@ -41,8 +41,9 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 val sedRootNode = mapper.readTree(r005Sed)
                 return when (filterYtelseTypeR005(sedRootNode)) {
                     "alderspensjon" -> YtelseType.ALDER
-                    "uføretrygd" -> YtelseType.UFOREP
-                    else -> YtelseType.GJENLEV
+                    "uførepensjon" -> YtelseType.UFOREP
+                    "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> YtelseType.GJENLEV
+                    else -> throw RuntimeException("Klarte ikke å finne ytelsetype for R_BUC_02")
                 }
             }
         //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)

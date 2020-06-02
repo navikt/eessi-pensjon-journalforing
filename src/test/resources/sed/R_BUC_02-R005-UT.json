@@ -33,7 +33,7 @@
     "feilutbetaling": {
       "ytelse":
 
-      { "type": "uføretrygd" }
+      { "type": "uførepensjon" }
     }
   },
   "sedVer": "1",
