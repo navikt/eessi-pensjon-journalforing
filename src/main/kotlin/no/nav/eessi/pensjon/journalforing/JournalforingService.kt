@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -29,7 +28,6 @@ import javax.annotation.PostConstruct
 @Service
 class JournalforingService(private val euxKlient: EuxKlient,
                            private val journalpostKlient: JournalpostKlient,
-                           private val fagmodulKlient: FagmodulKlient,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
