@@ -85,7 +85,7 @@ class OppgaveRoutingServiceTest {
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
     @Test
-    fun `Routing av mottatte seder i R_BUC_02`() {
+    fun `Routing av mottatte sed R005 på R_BUC_02 ingen ytelse`() {
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = NORGE,
@@ -93,16 +93,58 @@ class OppgaveRoutingServiceTest {
                 fnr = "01010101010",
                 bucType = R_BUC_02,
                 hendelseType = HendelseType.MOTTATT)))
+    }
 
+    @Test
+    fun `Routing av mottatte sed R005 på R_BUC_02 alderpensjon ytelse`() {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = UTLAND,
                 geografiskTilknytning = dummyTilknytning,
                 fnr = "01010101010",
                 bucType = R_BUC_02,
+                ytelseType = YtelseType.ALDER,
                 hendelseType = HendelseType.MOTTATT)))
-
     }
+
+    @Test
+    fun `Routing av mottatte sed R005 på R_BUC_02 uforepensjon ytelse`() {
+        assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(
+                fdato = irrelevantDato(),
+                landkode = UTLAND,
+                geografiskTilknytning = dummyTilknytning,
+                fnr = "01010101010",
+                bucType = R_BUC_02,
+                ytelseType = YtelseType.UFOREP,
+                hendelseType = HendelseType.MOTTATT)))
+    }
+
+    @Test
+    fun `Routing av mottatte sed R004 på R_BUC_02`() {
+        assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
+                fdato = irrelevantDato(),
+                landkode = UTLAND,
+                geografiskTilknytning = dummyTilknytning,
+                fnr = "01010101010",
+                bucType = R_BUC_02,
+                sedType = SedType.R004,
+                ytelseType = YtelseType.UFOREP,
+                hendelseType = HendelseType.MOTTATT)))
+    }
+
+    @Test
+    fun `Routing av mottatte sed R004 på R_BUC_02 ukjent ident`() {
+        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
+                fdato = irrelevantDato(),
+                landkode = UTLAND,
+                geografiskTilknytning = dummyTilknytning,
+                fnr = null,
+                bucType = R_BUC_02,
+                sedType = SedType.R004,
+                ytelseType = YtelseType.UFOREP,
+                hendelseType = HendelseType.MOTTATT)))
+    }
+
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
     @Test
@@ -116,7 +158,7 @@ class OppgaveRoutingServiceTest {
                 sedType = SedType.R005,
                 hendelseType = HendelseType.SENDT)))
 
-        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
+        assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = NORGE,
                 geografiskTilknytning = dummyTilknytning,
@@ -134,7 +176,7 @@ class OppgaveRoutingServiceTest {
                 sedType = SedType.R004,
                 hendelseType = HendelseType.SENDT)))
 
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(
+        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = UTLAND,
                 geografiskTilknytning = dummyTilknytning,

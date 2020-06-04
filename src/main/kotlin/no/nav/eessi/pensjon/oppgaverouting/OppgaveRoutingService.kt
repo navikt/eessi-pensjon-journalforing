@@ -53,8 +53,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
 
-        return when {
-            NORGE == bosatt -> {
+        return when (NORGE) {
+            bosatt -> {
                 when (bucType) {
                     P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
                     P_BUC_03 -> UFORE_UTLANDSTILSNITT
@@ -84,24 +84,24 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        val bosatt = bosatt(routingRequest.landkode)
+        val ytelseType = routingRequest.ytelseType
+
         if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-            return when (bosatt) {
-                NORGE ->  ID_OG_FORDELING
-                else -> PENSJON_UTLAND
+            if (routingRequest.sedType == SedType.R004) {
+                return OKONOMI_PENSJON
+            }
+            return when (ytelseType) {
+                YtelseType.ALDER -> PENSJON_UTLAND
+                YtelseType.UFOREP -> UFORE_UTLAND
+                else -> ID_OG_FORDELING
             }
         } else {
-            return when (bosatt) {
-                NORGE ->  ID_OG_FORDELING
-                else -> {
-                    if (routingRequest.sedType == SedType.R004) {
-                        OKONOMI_PENSJON
-                    } else
-                    PENSJON_UTLAND
-                }
+            return if (routingRequest.sedType == SedType.R004) {
+                OKONOMI_PENSJON
+            } else {
+                ID_OG_FORDELING
             }
         }
-
     }
 
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
