@@ -68,16 +68,9 @@ class FdatoHelper {
      */
     private fun filterPersonR005DatoNode(sedRootNode: JsonNode): String? {
         val subnode = sedRootNode.at("/nav/bruker").toList()
-        return if ( subnode.size == 1 ) {
-            subnode.first()
+        return subnode.first()
                 .get("person")
                 .get("foedselsdato").textValue()
-        } else {
-            //lete etter  -- status 07 (avdød) status 03 enke?
-            subnode.filter { node -> node.get("tilbakekreving").get("status").get("type").textValue() == "avdød_mottaker_av_ytelser" }
-                .map { node -> node.get("person").get("foedselsdato").textValue() }
-                .first()
-        }
 
     }
 

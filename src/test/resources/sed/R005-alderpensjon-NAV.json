@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "bruker": [
+      {
+        "person": {
+          "fornavn": "LUR",
+          "pin": [
+            {
+              "identifikator": "04117922400",
+              "land": "NO"
+            }
+          ],
+          "foedselsdato": "1979-11-04",
+          "etternavn": "TRANE",
+          "kjoenn": "K"
+        },
+        "tilbakekreving": {
+          "status": {
+            "type": "debitor"
+          }
+        }
+      }
+    ]
+  },
+  "sed": "R005",
+  "sedGVer": "4",
+  "tilbakekreving": {
+    "anmodning": {
+      "type": "foreløpig"
+    },
+    "feilutbetaling": {
+      "ytelse": {
+        "type": "alderspensjon"
+      }
+    }
+  },
+  "sedVer": "2"
+}

@@ -122,7 +122,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
-        doReturn( setOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
+        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
                 .`when`(fnrHelper)
                 .getPotensielleFnrFraSeder(any())
         //PERSONV3 - HENT PERSON
@@ -142,7 +142,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
         //EUX - FnrServide (fin pin)
-        doReturn( setOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
+        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
                 .`when`(fnrHelper)
                 .getPotensielleFnrFraSeder(any())
         //PERSONV3 - HENT PERSON
@@ -245,7 +245,7 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
-    fun `Gitt en liste med avdød når buc er R_BUC_02 så velg den avdøde`(){
+    fun `Gitt en liste med to hovedpersoner så kast RuntimeException`(){
         val avdod = IdentifisertPerson(
                 "123",
                 "Testern",
@@ -261,11 +261,11 @@ class PersonidentifiseringServiceTest {
                 "NO",
                 "010",
                 PersonRelasjon("12345678910", Relasjon.GJENLEVENDE))
-        assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02), avdod)
+        assertThrows<RuntimeException>{personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02)}
     }
 
     @Test
-    fun `Gitt en liste med flere avdøde på R_BUC_02 så vreturnerer vi null`(){
+    fun `Gitt en liste med flere avdøde på R_BUC_02 så vreturnerer vi RuntimeException`(){
         val avdod = IdentifisertPerson(
                 "123",
                 "Testern",
@@ -273,11 +273,11 @@ class PersonidentifiseringServiceTest {
                 "NO",
                 "010",
                 PersonRelasjon("12345678910", Relasjon.AVDOD))
-        assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, avdod, avdod, avdod, avdod), BucType.R_BUC_02), null)
+        assertThrows<RuntimeException>{personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, avdod, avdod, avdod, avdod), BucType.R_BUC_02)}
     }
 
     @Test
-    fun `Gitt en liste med flere forsikrede på P_BUC_01 så vreturnerer vi null`(){
+    fun `Gitt en liste med flere forsikrede på P_BUC_01 så kaster vi en RuntimeException`(){
         val forsikret = IdentifisertPerson(
                 "123",
                 "Testern",
@@ -285,7 +285,10 @@ class PersonidentifiseringServiceTest {
                 "NO",
                 "010",
                 PersonRelasjon("12345678910", Relasjon.FORSIKRET))
-        assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf( forsikret,forsikret, forsikret), BucType.P_BUC_01), null)
+
+        assertThrows<RuntimeException> {
+            personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01)
+        }
     }
 
 
