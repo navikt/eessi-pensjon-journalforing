@@ -240,7 +240,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R005-avdod-enke-NAV.json"))))
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R005-alderpensjon-NAV.json"))))
                     )
 
             //Mock eux hent sed R_BUC_02 -- H070 sed
@@ -251,7 +251,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_H070-NAV.json"))))
                     )
 
 
@@ -582,7 +582,7 @@ class JournalforingMottattIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 34) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 25) { personV3Klient.hentPerson(any()) }
 
         assertEquals(0, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
     }

@@ -19,7 +19,7 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<String?>): Set<PersonRelasjon> {
+    fun getPotensielleFnrFraSeder(seder: List<String?>): List<PersonRelasjon> {
         val fnrListe = mutableSetOf<PersonRelasjon>()
         var sedType: SedType
 
@@ -57,7 +57,8 @@ class FnrHelper {
                 throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
             }
         }
-        return fnrListe
+
+        return fnrListe.distinctBy { it.fnr }
     }
 
     private fun leggTilAnnenForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {

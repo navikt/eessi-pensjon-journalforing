@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -78,10 +77,8 @@ class FdatoHelperTest {
     }
 
     @Test
-    fun `ved henting ved fdato på R005 når det er flere personer og ingen er avdød feiler det` () {
-        assertThrows<RuntimeException> {
-            helper.finnEnFdatoFraSEDer(listOf(getSedTestJsonFile("R005-enke-ikkeavdod-NAV.json")))
-        }
+    fun `ved henting ved fdato på R005 ved den person som debitor og sak er alderpensjon` () {
+        assertEquals(LocalDate.of(1979,11,4), helper.finnEnFdatoFraSEDer(listOf(getSedTestJsonFile("R005-alderpensjon-NAV.json"))))
     }
 
     private fun getSedTestJsonFile(filename: String): String {

@@ -121,6 +121,30 @@ class FnrHelperTest {
     }
 
     @Test
+    fun `Gitt en R_BUC og sed R005 med flere flere personer så returner det en liste med Relasjon`() {
+        val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-personer-debitor-alderpensjon-NAV.json")))
+        val forste = PersonRelasjon("02087922262", Relasjon.ANNET)
+        val andre = PersonRelasjon("04117922400", Relasjon.ANNET)
+
+        assertEquals(2,actual.size)
+        assertTrue(actual.contains(forste))
+        assertTrue(actual.contains(andre))
+    }
+
+    @Test
+    fun `Gitt en R_BUC og flere seder har samme person så returnerer vi en unik liste med en Relasjon`() {
+        val actual = helper.getPotensielleFnrFraSeder(
+                listOf(
+                        getSedTestJsonFile("R005-alderpensjon-NAV.json"),
+                        getSedTestJsonFile("R_BUC_02_H070-NAV.json")
+                ))
+        val forste = PersonRelasjon("04117922400", Relasjon.ANNET)
+
+        assertEquals(1,actual.size)
+        assertTrue(actual.contains(forste))
+    }
+
+    @Test
     fun `leter igjennom R_BUC_02 og R005 med flere person ikke avdød`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-enke-ikkeavdod-NAV.json")))
         val enke = PersonRelasjon("28125518943", Relasjon.GJENLEVENDE)
@@ -129,7 +153,15 @@ class FnrHelperTest {
         assertEquals(2,actual.size)
         assertTrue(actual.contains(enke))
         assertTrue(actual.contains(annen))
+    }
 
+    @Test
+    fun `leter igjennom R_BUC_02 og R005 med kun en person debitor alderpensjon returnerer liste med en Relasjon`() {
+        val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-alderpensjon-NAV.json")))
+        val annen = PersonRelasjon("04117922400", Relasjon.ANNET)
+
+        assertEquals(1,actual.size)
+        assertTrue(actual.contains(annen))
     }
 
     private fun getSedTestJsonFile(filename: String): String {

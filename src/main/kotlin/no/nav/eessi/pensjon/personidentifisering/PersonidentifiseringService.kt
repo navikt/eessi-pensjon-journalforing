@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
@@ -79,21 +80,15 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
     fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType): IdentifisertPerson? {
-        if (identifisertePersoner.isEmpty()) {
-            return null
+        return if (identifisertePersoner.isEmpty()) {
+            null
         } else {
             logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
             if (identifisertePersoner.size == 1) {
-                return identifisertePersoner.first()
+                identifisertePersoner.first()
             } else {
-                if (bucType == BucType.R_BUC_02) {
-                    val identifisertAvdod = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.AVDOD }
-                            .map { it }
-                    if (identifisertAvdod.size == 1) {
-                        return identifisertAvdod.first()
-                    }
-                }
-                return null
+                logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
+                throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
             }
         }
     }
