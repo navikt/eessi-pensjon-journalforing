@@ -1,10 +1,10 @@
-name: Deploy Q1
+name: Deploy PROD
 on:
   repository_dispatch:
-    types: [deploy-q1]
+    types: [deploy-prod]
 jobs:
   tag_deploy_q1:
-    name: 'Deploy til Q1'
+    name: 'Deploy til PROD'
     runs-on: ubuntu-latest
     steps:
       # GET version
@@ -16,11 +16,11 @@ jobs:
         run: |
           echo "image-tag: ${{ github.event.client_payload.image }}"
 
-      - name: 'NAIS-deploy to Q1'
+      - name: 'NAIS-deploy to PROD'
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: nais/dev-fss-q1.yml
-          VARS: nais/dev-fss-q1.json
+          CLUSTER: prod-fss
+          RESOURCE: nais/prod-fss-default.yml
+          VARS: nais/prod-fss-default.json
           IMAGE: ${{ github.event.client_payload.image }}
