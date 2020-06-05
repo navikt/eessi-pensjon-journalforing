@@ -116,7 +116,7 @@ class JournalforingSendtIntegrationTest {
     }
 
     private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
-        val senderProps = KafkaTestUtils.senderProps(embeddedKafka.brokersAsString)
+        val senderProps = KafkaTestUtils.producerProps(embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
         template.defaultTopic = SED_SENDT_TOPIC
