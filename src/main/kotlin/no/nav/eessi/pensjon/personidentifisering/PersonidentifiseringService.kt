@@ -73,7 +73,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return IdentifisertPerson(aktoerId, personNavn!!, diskresjonskode, landkode!!, geografiskTilknytning!!, personRelasjon)
+        return IdentifisertPerson(aktoerId, personNavn, diskresjonskode, landkode, geografiskTilknytning, personRelasjon)
     }
 
     /**
@@ -132,10 +132,10 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
 
 data class IdentifisertPerson(
         val aktoerId: String,
-        val personNavn: String,
+        val personNavn: String?,
         val diskresjonskode: String? = null,
-        val landkode: String,
-        val geografiskTilknytning: String,
+        val landkode: String?,
+        val geografiskTilknytning: String?,
         val personRelasjon: PersonRelasjon
 )
 
