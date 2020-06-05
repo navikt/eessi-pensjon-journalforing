@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import javax.annotation.PostConstruct
 import javax.xml.ws.soap.SOAPFaultException
 
-fun hentLandkode(person: Person?) =
-        person?.bostedsadresse?.strukturertAdresse?.landkode?.value
+fun hentLandkode(person: Person) =
+        person.bostedsadresse?.strukturertAdresse?.landkode?.value
 
-fun hentPersonNavn(person: Person?) =
-        person?.personnavn?.sammensattNavn
+fun hentPersonNavn(person: Person) =
+        person.personnavn?.sammensattNavn
 
 fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
 
