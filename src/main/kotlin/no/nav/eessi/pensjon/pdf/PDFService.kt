@@ -31,25 +31,34 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 
-    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, List<EuxDokument>>{
+    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, List<EuxDokument>> {
         return pdfConverter.measure {
             try {
                 val documents = mapper.readValue(json, SedDokumenter::class.java)
-                val sedDokument = konverterTilLesbartFilnavn(sedType, documents)
-                val convertedDocuments = listOf(sedDokument).plus(documents.vedlegg ?: listOf())
-                        .map { convert(it) }
-
-                val (supportedDocuments, unsupportedDocuments) = convertedDocuments.
-                        partition{
-                            (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null
+                val hovedDokument = EuxDokument("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
+                val vedlegg = (documents.vedlegg ?: listOf())
+                        .mapIndexed { index, vedlegg ->
+                            if (vedlegg.filnavn == null) {
+                                EuxDokument(genererFilnavn(sedType, index, vedlegg)
+                                        , vedlegg.mimeType
+                                        , vedlegg.innhold)
+                            } else {
+                                vedlegg
+                            }
                         }
+                        .map { konverterEventuelleBilderTilPDF(it) }
+                val convertedDocuments = listOf(hovedDokument).plus(vedlegg)
 
-                val unnsupportedDocumentsJson = if (unsupportedDocuments.isNotEmpty()) {
-                    unsupportedDocuments
-                } else {
-                    emptyList()
+                logger.info("SED omfatter ${convertedDocuments.size} dokumenter, inkludert vedlegg")
+
+                val (supportedDocuments, unsupportedDocuments) = convertedDocuments.partition {
+                    (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null
                 }
 
+                logger.info("SED omfatter ${unsupportedDocuments.size} dokumenter som vi ikke har klart å konvertere til PDF")
+                unsupportedDocuments.forEach {
+                    logger.info("Usupportert dokument: ${it.filnavn} - av type${it.mimeType}")
+                }
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
                     mapper.writeValueAsString(supportedDocuments.map {
                         JournalPostDokument(
@@ -67,7 +76,8 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                 } else {
                     throw RuntimeException("No supported documents, $json")
                 }
-                Pair(supportedDocumentsJson, unnsupportedDocumentsJson)
+
+                Pair(supportedDocumentsJson, unsupportedDocuments)
             } catch (ex: RuntimeException) {
                 logger.error("RuntimeException: Noe gikk galt under parsing av json, $json", ex)
                 throw ex
@@ -78,18 +88,17 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
         }
     }
 
-    /**
-     *  Konverterer SED filnavn til menneskelesbart filnavn
-     *
-     *  fra format: P2200_f899bf659ff04d20bc8b978b186f1ecc_1
-     *  til format: P2200.pdf
-     */
-    private fun konverterTilLesbartFilnavn(sedType: SedType, documents: SedDokumenter): EuxDokument {
-        return EuxDokument("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
+
+    private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: EuxDokument): String? {
+        return if (vedlegg.mimeType != null) {
+            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType.decode().toLowerCase()}"
+        } else {
+            vedlegg.filnavn
+        }
     }
 
-    private fun convert(document: EuxDokument): EuxDokument{
-        return when (document.mimeType){
+    private fun konverterEventuelleBilderTilPDF(document: EuxDokument): EuxDokument {
+        return when (document.mimeType) {
             null -> document
             MimeType.PDF -> document
             MimeType.PDFA -> document
@@ -99,7 +108,7 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                         mimeType = MimeType.PDF,
                         innhold = ImageConverter.toBase64PDF(document.innhold)
                 )
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 document
             }
         }

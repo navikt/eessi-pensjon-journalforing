@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.SedType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -69,6 +70,26 @@ class PDFServiceTest {
         assertThrows<MismatchedInputException> {
             pdfService.parseJsonDocuments(fileContent, SedType.P2000)
         }
+    }
+    @Test
+    fun `Gitt en sed med et vedlegg uten filnavn saa opprettes et løpenavn`() {
+        val fileContent = String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResonseMedP2000MedVedlegg.json")))
+        val (supportereVedlegg, usupportertVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+
+        assertTrue ( supportereVedlegg.contains("P2000_vedlegg_1.pdf"))
+        assertEquals(0, usupportertVedlegg.size)
+
+    }
+
+    @Test
+    fun `Gitt en sed med et vedlegg uten filnavn og uten mimetype saa legges til unsupportertVedlegg`() {
+        val fileContent = SedDokumenter(EuxDokument("P2000",MimeType.PDF, "dokInnhold"),
+                listOf(EuxDokument("filnavn", null, "dokInnhold"))).toJson()
+
+        val (supportereVedlegg, usupportertVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+
+        assertEquals(1, usupportertVedlegg.size)
+        assertEquals("filnavn", usupportertVedlegg[0].filnavn)
     }
 
     @Test
