@@ -46,6 +46,12 @@ class SedListener(
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() == 25196L) {
+            acknowledgment.acknowledge()
+            logger.warn("HOPPET OVER innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+            return
+        }
+
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
