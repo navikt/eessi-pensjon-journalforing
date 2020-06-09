@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.annotation.PartitionOffset
+import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
@@ -46,12 +48,6 @@ class SedListener(
 
     @KafkaListener(topics = ["\${kafka.sedSendt.topic}"], groupId = "\${kafka.sedSendt.groupid}")
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        if (cr.offset() == 25196L) {
-            acknowledgment.acknowledge()
-            logger.warn("HOPPET OVER innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-            return
-        }
-
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
@@ -62,10 +58,10 @@ class SedListener(
                     if (gyldigeHendelser.sendtHendelse(hendelse)) {
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
-                        val alleSedIBuc  = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                        val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
-                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse,alleSedIBuc)
+                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset)
                     }
                     acknowledgment.acknowledge()
@@ -95,14 +91,14 @@ class SedListener(
                     val offset = cr.offset()
                     logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
                     if (gyldigeHendelser.mottattHendelse(hendelse)) {
-                            val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                            logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
-                            val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                            val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
+                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                        val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
+                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
+                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
 
-                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset)
+                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset)
                     }
 
                     acknowledgment.acknowledge()
@@ -118,6 +114,18 @@ class SedListener(
                 }
                 mottattLatch.countDown()
             }
+        }
+    }
+
+    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
+            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "35598")])])
+    fun recoverConsumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if(cr.offset() == 35598L) {
+            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
+            consumeSedMottatt(hendelse, cr, acknowledgment)
+        } else {
+            acknowledgment.acknowledge()
         }
     }
 }
