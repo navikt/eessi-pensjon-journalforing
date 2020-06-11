@@ -1,4 +1,4 @@
-name: Build branch
+name: Bygg alle brancher
 
 on:
   push:
@@ -8,23 +8,34 @@ on:
       - '!master'
 
 jobs:
-  tag_build_and_deploy:
+  bygg:
     name: 'Bygg alle brancher'
     runs-on: ubuntu-latest
     steps:
-      # PULLER REPO
       - name: 'Pull repo'
         uses: actions/checkout@v1
 
-      # JAVA 11
       - name: 'Java 11'
         uses: actions/setup-java@v1.3.0
         with:
           java-version: 11
 
-      # BYGGER DOCKER CONTAINER
-      - name: 'Bygg'
+      - name: 'Setter dato og commit variabel'
         run: |
-          ./gradlew build
+          export TZ=CET
+          echo "::set-env name=DATE::$(date "+%Y-%m-%d--%H-%M-%S")"
+          echo "::set-env name=COMMIT_HASH::$(git rev-parse HEAD)"
+
+      - name: 'Setter Image'
+        run: echo "::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}"
+
+      - name: 'Bygg og publiser docker image'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export TZ=CET
+          ./gradlew build
+          docker build --tag ${{ env.IMAGE }} .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
+          docker push ${{ env.IMAGE }}
+
