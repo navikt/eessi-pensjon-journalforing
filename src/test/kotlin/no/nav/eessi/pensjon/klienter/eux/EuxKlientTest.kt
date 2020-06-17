@@ -27,6 +27,7 @@ import org.springframework.web.client.HttpClientErrorException
 @ExtendWith(MockitoExtension::class)
 class EuxKlientTest {
 
+
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 

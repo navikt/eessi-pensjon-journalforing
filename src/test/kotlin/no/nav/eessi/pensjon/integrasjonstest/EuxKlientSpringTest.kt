@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
+import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.HttpClientErrorException
@@ -32,6 +33,10 @@ private lateinit var mockServer: ClientAndServer
 @AutoConfigureMockMvc
 @EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafka"])
 class EuxKlientSpringTest {
+
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    lateinit var embeddedKafka: EmbeddedKafkaBroker
 
     @MockBean
     lateinit var sedDokumentHelper : SedDokumentHelper
@@ -64,6 +69,7 @@ class EuxKlientSpringTest {
         Assertions.assertEquals("mockSed", actual)
         verify(euxOidcRestTemplate, times(2)).exchange(eq(path), eq(HttpMethod.GET), eq(HttpEntity("")), eq(String::class.java))
 
+        embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
     companion object {
