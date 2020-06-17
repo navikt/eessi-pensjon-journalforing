@@ -11,7 +11,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.lang.RuntimeException
@@ -69,6 +73,11 @@ class EuxKlient(
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */
+    @Retryable(include = [
+        HttpServerErrorException::class
+        , HttpClientErrorException.Unauthorized::class
+        , HttpClientErrorException.NotFound::class]
+        , backoff = Backoff(delay = 30000L, multiplier = 3.0))
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
         return hentSed.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId"
@@ -78,12 +87,9 @@ class EuxKlient(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-            } catch(ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under henting av SED ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En feil oppstod under henting av SED ex: ${ex.message} body: ${ex.responseBodyAsString}")
-            } catch(ex: Exception) {
-                logger.error("En feil oppstod under henting av SED ex: $ex")
-                throw RuntimeException("En feil oppstod under henting av SED ex: ${ex.message}")
+          } catch(ex: Exception) {
+                logger.warn("En feil oppstod under henting av SED ex: $path", ex)
+                throw ex
             }
         }
     }
