@@ -14,11 +14,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
-import java.lang.RuntimeException
 import javax.annotation.PostConstruct
 
 /**
@@ -73,10 +70,7 @@ class EuxKlient(
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */
-    @Retryable(include = [
-        HttpServerErrorException::class
-        , HttpClientErrorException.Unauthorized::class
-        , HttpClientErrorException.NotFound::class]
+    @Retryable(include = [HttpStatusCodeException::class]
         , backoff = Backoff(delay = 30000L, multiplier = 3.0))
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
         return hentSed.measure {
