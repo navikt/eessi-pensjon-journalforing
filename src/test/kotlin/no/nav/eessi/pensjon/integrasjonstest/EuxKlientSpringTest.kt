@@ -31,7 +31,7 @@ private lateinit var mockServer: ClientAndServer
 @SpringBootTest(classes = [EessiPensjonJournalforingApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = ["integrationtest"])
 @AutoConfigureMockMvc
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafka"])
+@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkaeux"])
 class EuxKlientSpringTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
