@@ -5,8 +5,10 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.security.sts.STSService
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -29,6 +31,7 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 private lateinit var mockServer: ClientAndServer
 
 @SpringBootTest(classes = [EessiPensjonJournalforingApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles(profiles = ["integrationtest"])
 @AutoConfigureMockMvc
 @EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkaeux"])
@@ -68,9 +71,33 @@ class EuxKlientSpringTest {
         val actual = euxKlient.hentSed(rinaNr, dokumentId)
         Assertions.assertEquals("mockSed", actual)
         verify(euxOidcRestTemplate, times(2)).exchange(eq(path), eq(HttpMethod.GET), eq(HttpEntity("")), eq(String::class.java))
+    }
 
+    @Test
+    fun `check retry pdf files from eux`() {
+        val rinaNr = "123541254A"
+        val dokumentId = "65465fdghdfhgdfg6546B"
+        val path = "/buc/$rinaNr/sed/$dokumentId/filer"
+
+        doThrow(HttpClientErrorException.Unauthorized::class)
+                .doReturn(ResponseEntity.ok().body("mockSed2"))
+                .whenever(euxOidcRestTemplate).exchange(
+                        path,
+                        HttpMethod.GET,
+                        HttpEntity(""),
+                        String::class.java
+                )
+
+        val actual = euxKlient.hentSedDokumenter(rinaNr, dokumentId)
+        Assertions.assertEquals("mockSed2", actual)
+        verify(euxOidcRestTemplate, times(2)).exchange(eq(path), eq(HttpMethod.GET), eq(HttpEntity("")), eq(String::class.java))
+    }
+
+    @AfterAll
+    fun takeItAllDown() {
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
+
 
     companion object {
 
@@ -85,5 +112,6 @@ class EuxKlientSpringTest {
             val random = Random()
             return random.nextInt(to - from) + from
         }
+
     }
 }

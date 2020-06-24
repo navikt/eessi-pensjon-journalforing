@@ -45,6 +45,8 @@ class EuxKlient(
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */
+    @Retryable(include = [HttpStatusCodeException::class]
+            , backoff = Backoff(delay = 30000L, multiplier = 3.0))
     fun hentSedDokumenter(rinaNr: String, dokumentId: String): String? {
         return hentpdf.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId/filer"
@@ -54,12 +56,9 @@ class EuxKlient(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-            } catch(ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under henting av PDF ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En feil oppstod henting av PDF ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
-                logger.error("En feil oppstod under henting av PDF ex: $ex")
-                throw RuntimeException("En feil oppstod under henting av PDF ex: ${ex.message}")
+                logger.warn("En feil oppstod under henting av PDF", ex)
+                throw ex
             }
         }
     }
