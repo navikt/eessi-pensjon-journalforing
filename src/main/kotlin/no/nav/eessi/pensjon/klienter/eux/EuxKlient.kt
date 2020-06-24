@@ -46,7 +46,7 @@ class EuxKlient(
      * @param dokumentId SED-id
      */
     @Retryable(include = [HttpStatusCodeException::class]
-            , backoff = Backoff(delay = 30000L, multiplier = 3.0))
+            , backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
     fun hentSedDokumenter(rinaNr: String, dokumentId: String): String? {
         return hentpdf.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId/filer"
@@ -70,7 +70,7 @@ class EuxKlient(
      * @param dokumentId SED-id
      */
     @Retryable(include = [HttpStatusCodeException::class]
-        , backoff = Backoff(delay = 30000L, multiplier = 3.0))
+        , backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
     fun hentSed(rinaNr: String, dokumentId: String) : String? {
         return hentSed.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId"

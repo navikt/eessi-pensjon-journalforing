@@ -5,10 +5,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.security.sts.STSService
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -35,6 +32,7 @@ private lateinit var mockServer: ClientAndServer
 @ActiveProfiles(profiles = ["integrationtest"])
 @AutoConfigureMockMvc
 @EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkaeux"])
+@Disabled
 class EuxKlientSpringTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
