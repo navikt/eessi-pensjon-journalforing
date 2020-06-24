@@ -87,16 +87,22 @@ class SedListener(
 
                 try {
                     val offset = cr.offset()
-                    logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
-                    if (gyldigeHendelser.mottattHendelse(hendelse)) {
-                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                        logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
-                        val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                        val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
-                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
+                    if (offset == 38518L) {
+                        logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
+                    } else {
 
-                        journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset)
+                        logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
+                        if (gyldigeHendelser.mottattHendelse(hendelse)) {
+                            val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                            logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
+                            val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
+                            val ytelseType = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
+
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset)
+                        }
+
                     }
 
                     acknowledgment.acknowledge()
