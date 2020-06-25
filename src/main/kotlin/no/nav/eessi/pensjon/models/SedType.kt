@@ -138,7 +138,7 @@ enum class SedType(val kanInneholdeFnrEllerFdato: Boolean) {
     P11000(false) {
         override fun toString() = "P11000 - Anmodning om pensjonsbeløp"
     },
-    P12000(false) {
+    P12000(true) {
         override fun toString() = "P12000 - Informasjon om pensjonsbeløp"
     },
     P13000(false) {
