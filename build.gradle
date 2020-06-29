@@ -63,6 +63,7 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
 		exclude module: "mockito-core"
+		exclude module: "junit-vintage-engine"
 	}
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testCompileOnly('junit:junit:4.12') {
