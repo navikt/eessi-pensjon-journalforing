@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.personidentifisering.klienter
+package no.nav.eessi.pensjon.personoppslag.personv3
 
 import io.mockk.every
 import io.mockk.spyk

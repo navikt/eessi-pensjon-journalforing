@@ -2,8 +2,8 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.*
 import no.nav.eessi.pensjon.listeners.SedListener
-import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals

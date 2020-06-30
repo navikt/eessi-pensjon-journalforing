@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

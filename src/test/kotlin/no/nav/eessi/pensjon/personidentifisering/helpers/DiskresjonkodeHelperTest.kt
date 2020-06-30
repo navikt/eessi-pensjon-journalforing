@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3IkkeFunnetException
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

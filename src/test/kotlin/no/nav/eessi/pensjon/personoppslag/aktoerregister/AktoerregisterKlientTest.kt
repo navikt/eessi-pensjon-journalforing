@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.personidentifisering.klienter
+package no.nav.eessi.pensjon.personoppslag.aktoerregister
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever

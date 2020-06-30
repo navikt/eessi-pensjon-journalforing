@@ -5,9 +5,9 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.klienter.AktoerregisterKlient
-import no.nav.eessi.pensjon.personidentifisering.klienter.BrukerMock
-import no.nav.eessi.pensjon.personidentifisering.klienter.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterKlient
+import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

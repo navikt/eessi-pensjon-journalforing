@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.personidentifisering.klienter
+package no.nav.eessi.pensjon.personoppslag.personv3
 
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse

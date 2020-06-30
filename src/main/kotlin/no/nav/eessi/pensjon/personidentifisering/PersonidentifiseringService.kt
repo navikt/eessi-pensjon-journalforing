@@ -6,7 +6,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
-import no.nav.eessi.pensjon.personidentifisering.klienter.*
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterKlient
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.hentGeografiskTilknytning
+import no.nav.eessi.pensjon.personoppslag.personv3.hentLandkode
+import no.nav.eessi.pensjon.personoppslag.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
