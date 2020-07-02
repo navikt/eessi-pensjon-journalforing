@@ -6,8 +6,8 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterKlient
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.eessi.pensjon.personoppslag.personv3.hentGeografiskTilknytning
 import no.nav.eessi.pensjon.personoppslag.personv3.hentLandkode
 import no.nav.eessi.pensjon.personoppslag.personv3.hentPersonNavn
@@ -18,8 +18,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Component
-class PersonidentifiseringService(private val aktoerregisterKlient: AktoerregisterKlient,
-                                  private val personV3Klient: PersonV3Klient,
+class PersonidentifiseringService(private val aktoerregisterService: AktoerregisterService,
+                                  private val personV3Service: PersonV3Service,
                                   private val diskresjonService: DiskresjonkodeHelper,
                                   private val fnrHelper: FnrHelper,
                                   private val fdatoHelper: FdatoHelper) {
@@ -42,7 +42,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
-        val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Klient.hentPerson(trimmetNavBruker!!) else null
+        val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Service.hentPerson(trimmetNavBruker!!) else null
 
         if (personForNavBruker != null) {
             return listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
@@ -54,7 +54,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
             try {
                 val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
-                    val personen = personV3Klient.hentPerson(trimFnrString(personRelasjon.fnr))
+                    val personen = personV3Service.hentPerson(trimFnrString(personRelasjon.fnr))
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(
                                 personen,
@@ -125,7 +125,7 @@ class PersonidentifiseringService(private val aktoerregisterKlient: Aktoerregist
     private fun hentAktoerId(navBruker: String?): String? {
         if (!erFnrDnrFormat(navBruker)) return null
         return try {
-            val aktoerId = aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
+            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
             aktoerId
         } catch (ex: Exception) {
             logger.error("Det oppstod en feil ved henting av aktørid: $ex")

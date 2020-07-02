@@ -33,12 +33,12 @@ class IdentinfoForAktoer(
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Service
-class AktoerregisterKlient(
+class AktoerregisterService(
         private val aktoerregisterRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(AktoerregisterKlient::class.java)
+    private val logger = LoggerFactory.getLogger(AktoerregisterService::class.java)
 
     @Value("\${NAIS_APP_NAME}")
     lateinit var appName: String

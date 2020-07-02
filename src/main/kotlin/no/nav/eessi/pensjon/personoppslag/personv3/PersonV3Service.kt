@@ -30,13 +30,13 @@ fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Component
-class PersonV3Klient(
+class PersonV3Service(
         private val service: PersonV3,
         private val stsClientConfig: STSClientConfig,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Klient::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
     private lateinit var hentperson: MetricsHelper.Metric
 

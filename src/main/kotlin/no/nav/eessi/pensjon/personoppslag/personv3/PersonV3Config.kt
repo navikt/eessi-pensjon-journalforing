@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration
 
 
 @Configuration
-class PersonV3KlientConfig {
+class PersonV3Config {
 
-    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3KlientConfig::class.java) }
+    private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Config::class.java) }
 
     @Value("\${virksomhet.person.v3.endpointurl}")
     lateinit var endpointUrl: String

@@ -20,18 +20,18 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.web.client.HttpClientErrorException
 
 @ExtendWith(MockitoExtension::class)
-class AktoerregisterKlientTest {
+class AktoerregisterServiceTest {
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    lateinit var aktoerregisterKlient: AktoerregisterKlient
+    lateinit var aktoerregisterService: AktoerregisterService
 
     @BeforeEach
     fun setup() {
-        aktoerregisterKlient = AktoerregisterKlient(mockrestTemplate)
-        aktoerregisterKlient.appName = "unittests"
-        aktoerregisterKlient.initMetrics()
+        aktoerregisterService = AktoerregisterService(mockrestTemplate)
+        aktoerregisterService.appName = "unittests"
+        aktoerregisterService.initMetrics()
     }
 
 
@@ -43,7 +43,7 @@ class AktoerregisterKlientTest {
         val testAktoerId = "1000101917358"
         val expectedNorskIdent = "18128126178"
 
-        val response = aktoerregisterKlient.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
+        val response = aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         assertEquals(expectedNorskIdent, response,"AktørId 1000101917358 har norskidenten 18128126178")
     }
 
@@ -56,7 +56,7 @@ class AktoerregisterKlientTest {
         val testAktoerId = "12078945602"
         val expectedNorskIdent = "1000101917358"
 
-        val response = aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
+        val response = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         assertEquals(expectedNorskIdent, response, "NorskIdent 18128126178 skal ha AktoerId 100010191735818128126178")
     }
 
@@ -69,7 +69,7 @@ class AktoerregisterKlientTest {
         val testAktoerId = "1234"
         val rte = assertThrows<AktoerregisterIkkeFunnetException> {
             // the mock returns NorskIdent 18128126178, not 1234 as we asked for
-            aktoerregisterKlient.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         }
         assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
     }
@@ -83,7 +83,7 @@ class AktoerregisterKlientTest {
 
         val rte = assertThrows<AktoerregisterIkkeFunnetException> {
             // the mock returns a valid response, but has no idents
-            aktoerregisterKlient.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         }
         assertTrue(rte.message!!.contains(testAktoerId), "Exception skal si noe om hvilken identen som ikke ble funnet")
     }
@@ -97,7 +97,7 @@ class AktoerregisterKlientTest {
         val testAktoerId = "10000609641830456"
         val are = assertThrows<AktoerregisterException> {
             // the mock returns a valid response, but with a message in 'feilmelding'
-            aktoerregisterKlient.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
+            aktoerregisterService.hentGjeldendeNorskIdentForAkteorId(testAktoerId)
         }
         assertEquals("Den angitte personidenten finnes ikke", are.message!!, "Feilmeldingen fra aktørregisteret skal være exception-message")
     }
@@ -111,7 +111,7 @@ class AktoerregisterKlientTest {
 
         val rte = assertThrows<AktoerregisterException> {
             // the mock returns a valid response, but has 2 gjeldende AktoerId
-            aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
+            aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         }
         assertEquals("Forventet 1 ident, fant 2", rte.message!!, "RuntimeException skal kastes dersom mer enn 1 ident returneres")
     }
@@ -124,7 +124,7 @@ class AktoerregisterKlientTest {
 
         val arre = assertThrows<RuntimeException> {
             // the mock returns 403-forbidden
-            aktoerregisterKlient.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
+            aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(testAktoerId)
         }
         assertEquals("En feil oppstod under kall til aktørregisteret ex: 403 FORBIDDEN body: ", arre.message!!)
     }

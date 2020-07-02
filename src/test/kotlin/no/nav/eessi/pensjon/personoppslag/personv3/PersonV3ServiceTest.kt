@@ -18,14 +18,14 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
-class PersonV3KlientTest {
+class PersonV3ServiceTest {
 
     private lateinit var personV3 : PersonV3
 
     @Mock
     private lateinit var stsClientConfig: STSClientConfig
 
-    lateinit var personV3Klient : PersonV3Klient
+    lateinit var personV3Service : PersonV3Service
 
     private val subject = "23037329381"
     private val ikkeFunnetSubject = "33037329382"
@@ -34,8 +34,8 @@ class PersonV3KlientTest {
     @BeforeEach
     fun setup() {
         personV3 = spyk()
-        personV3Klient = PersonV3Klient(personV3, stsClientConfig)
-        personV3Klient.initMetrics()
+        personV3Service = PersonV3Service(personV3, stsClientConfig)
+        personV3Service.initMetrics()
     }
 
     @Test
@@ -43,7 +43,7 @@ class PersonV3KlientTest {
         every {personV3.hentPerson(any())} returns HentPersonResponse.createWith(subject)
 
         try {
-            val person = personV3Klient.hentPerson(subject)
+            val person = personV3Service.hentPerson(subject)
             assertEquals("23037329381", (person!!.aktoer as PersonIdent).ident.ident)
         }catch(ex: Exception){
             assert(false)
@@ -55,7 +55,7 @@ class PersonV3KlientTest {
         every {personV3.hentPerson(any())} throws HentPersonPersonIkkeFunnet("whoooops", PersonIkkeFunnet())
 
         try {
-            val person = personV3Klient.hentPerson(ikkeFunnetSubject)
+            val person = personV3Service.hentPerson(ikkeFunnetSubject)
             assertNull(person)
         }catch(ex: Exception){
            fail("Skulle ikke ha kastet exeption ved person ikke funnet, men returnert null istedet")
@@ -67,7 +67,7 @@ class PersonV3KlientTest {
         every {personV3.hentPerson(any())} throws HentPersonSikkerhetsbegrensning("$sikkerhetsbegrensingSubject har sikkerhetsbegrensning", Sikkerhetsbegrensning())
 
         try {
-            personV3Klient.hentPerson(sikkerhetsbegrensingSubject)
+            personV3Service.hentPerson(sikkerhetsbegrensingSubject)
             assert(false)
         }catch(ex: Exception){
             assert(ex is PersonV3SikkerhetsbegrensningException)

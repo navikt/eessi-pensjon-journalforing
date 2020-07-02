@@ -5,9 +5,9 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterKlient
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -28,10 +28,10 @@ import java.nio.file.Paths
 class PersonidentifiseringServiceTest {
 
     @Mock
-    private lateinit var aktoerregisterKlient: AktoerregisterKlient
+    private lateinit var aktoerregisterService: AktoerregisterService
 
     @Mock
-    private lateinit var personV3Klient: PersonV3Klient
+    private lateinit var personV3Service: PersonV3Service
 
     @Mock
     private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
@@ -47,8 +47,8 @@ class PersonidentifiseringServiceTest {
     @BeforeEach
     fun setup() {
         //fnrHelper = FnrHelper(personV3Klient)
-        personidentifiseringService = PersonidentifiseringService(aktoerregisterKlient,
-                personV3Klient,
+        personidentifiseringService = PersonidentifiseringService(aktoerregisterService,
+                personV3Service,
                 diskresjonkodeHelper,
                 fnrHelper,
                 fdatoHelper)
@@ -56,7 +56,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
-        whenever(personV3Klient.hentPerson(eq("01055012666"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(personV3Service.hentPerson(eq("01055012666"))).thenReturn(BrukerMock.createWith(landkoder = true))
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
         val actual = personidentifiseringService.hentIdentifisertePersoner(null, listOf(sed), BucType.P_BUC_02 )
@@ -66,7 +66,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr og relasjon avdod så skal det identifiseres en person`() {
-        whenever(personV3Klient.hentPerson(eq("28115518943"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(personV3Service.hentPerson(eq("28115518943"))).thenReturn(BrukerMock.createWith(landkoder = true))
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/sed/R005-avdod-enke-NAV.json")))
         val actual = personidentifiseringService.hentIdentifisertePersoner(null, listOf(sed), BucType.R_BUC_02 )
@@ -78,7 +78,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr og relasjon forsikret så skal det identifiseres en person`() {
-        whenever(personV3Klient.hentPerson(eq("67097097000"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(personV3Service.hentPerson(eq("67097097000"))).thenReturn(BrukerMock.createWith(landkoder = true))
         whenever(diskresjonkodeHelper.hentDiskresjonskode(any())).thenReturn(null)
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2000-NAV.json")))
@@ -92,32 +92,32 @@ class PersonidentifiseringServiceTest {
     fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
         //PERSONV3 - HENT PERSON
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Klient)
+                .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
 
         val navBruker = "1207 8945602"
         personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_01)
-        verify(personV3Klient).hentPerson(eq("12078945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Klient)
+                .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
         val navBruker = "1207-8945602"
         personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(""), BucType.P_BUC_01 )
-        verify(personV3Klient).hentPerson(eq("12078945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
     }
 
     @Test
     fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`(){
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Klient)
+                .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
         val navBruker = "1207/8945602"
         personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_03 )
-        verify(personV3Klient).hentPerson(eq("12078945602"))
+        verify(personV3Service).hentPerson(eq("12078945602"))
     }
 
     @Test
@@ -127,7 +127,7 @@ class PersonidentifiseringServiceTest {
                 .getPotensielleFnrFraSeder(any())
         //PERSONV3 - HENT PERSON
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Klient)
+                .`when`(personV3Service)
                 .hentPerson(eq("01055012345"))
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
@@ -147,7 +147,7 @@ class PersonidentifiseringServiceTest {
                 .getPotensielleFnrFraSeder(any())
         //PERSONV3 - HENT PERSON
         doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Klient)
+                .`when`(personV3Service)
                 .hentPerson(eq("01055012345"))
 
         val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-enkel.json")))
@@ -187,8 +187,8 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr og en liste med sed som inneholder fdato som gir en gyldig fdato`(){
         val fdatoHelper2 = FdatoHelper()
 
-        val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterKlient,
-                personV3Klient,
+        val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterService,
+                personV3Service,
                 diskresjonkodeHelper,
                 fnrHelper,
                 fdatoHelper2)

@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3IkkeFunnetException
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +19,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
 class DiskresjonkodeHelperTest {
 
     @Mock
-    private lateinit var personV3Klient: PersonV3Klient
+    private lateinit var personV3Service: PersonV3Service
 
     private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
 
@@ -30,7 +30,7 @@ class DiskresjonkodeHelperTest {
         sedFnrSøk = SedFnrSøk()
 
         diskresjonkodeHelper = DiskresjonkodeHelper(
-                personV3Klient,
+                personV3Service,
                 sedFnrSøk
         )
     }
@@ -56,7 +56,7 @@ class DiskresjonkodeHelperTest {
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doReturn(BrukerMock.createWith())
                 .doReturn(BrukerMock.createWith())
-                .whenever(personV3Klient).hentPerson(any())
+                .whenever(personV3Service).hentPerson(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
         val expected = null
@@ -78,7 +78,7 @@ class DiskresjonkodeHelperTest {
                 .doReturn(brukerFO)
                 .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
                 .doReturn(brukerSF)
-                .whenever(personV3Klient).hentPerson(any())
+                .whenever(personV3Service).hentPerson(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
@@ -92,7 +92,7 @@ class DiskresjonkodeHelperTest {
         val bruker = BrukerMock.createWith()
         bruker?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
 
-        doReturn(bruker).whenever(personV3Klient).hentPerson(any())
+        doReturn(bruker).whenever(personV3Service).hentPerson(any())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 

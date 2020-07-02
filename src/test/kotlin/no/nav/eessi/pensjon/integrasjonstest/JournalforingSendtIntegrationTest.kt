@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Klient
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,7 +59,7 @@ class JournalforingSendtIntegrationTest {
     lateinit var sedListener: SedListener
 
     @Autowired
-    lateinit var  personV3Klient: PersonV3Klient
+    lateinit var personV3Service: PersonV3Service
 
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
@@ -140,7 +141,7 @@ class JournalforingSendtIntegrationTest {
 
     private fun capturePersonMock() {
         val slot = slot<String>()
-        every { personV3Klient.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
+        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
     }
 
     companion object {
@@ -537,7 +538,7 @@ class JournalforingSendtIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 23) { personV3Klient.hentPerson(any()) }
+        verify(exactly = 23) { personV3Service.hentPerson(any()) }
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
@@ -548,8 +549,8 @@ class JournalforingSendtIntegrationTest {
         fun personV3(): PersonV3 = mockk()
 
         @Bean
-        fun personV3Klient(personV3: PersonV3): PersonV3Klient {
-            return spyk(PersonV3Klient(personV3, stsClientConfig))
+        fun personV3Service(personV3: PersonV3): PersonV3Service {
+            return spyk(PersonV3Service(personV3, stsClientConfig))
         }
     }
 }
