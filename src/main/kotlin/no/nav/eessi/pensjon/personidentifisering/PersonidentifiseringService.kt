@@ -125,7 +125,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private fun hentAktoerId(navBruker: String?): String? {
         if (!erFnrDnrFormat(navBruker)) return null
         return try {
-            val aktoerId = aktoerregisterService.hentGjeldendeAktoerIdForNorskIdent(navBruker!!)
+            val aktoerId = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(navBruker!!)
             aktoerId
         } catch (ex: Exception) {
             logger.error("Det oppstod en feil ved henting av aktørid: $ex")
