@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component
 @Profile("prod")
 @Component
 class GyldigeHendelserProd : GyldigeHendelser {
-    override fun innkommende() = listOf("P", "H_BUC_07")
-    override fun utgaende() = listOf("P")
+    override fun innkommende() = listOf("P", "H_BUC_07", "R_BUC_02")
+    override fun utgaende() = listOf("P", "R_BUC_02")
 }
 
 @Profile("!prod")
