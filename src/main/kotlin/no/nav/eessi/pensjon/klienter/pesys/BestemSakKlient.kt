@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.models.YtelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -23,6 +24,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
+                      private val toggleBestemSak: ToggleBestemSak,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
@@ -44,15 +46,29 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
         val ytelseType = when(bucType) {
             BucType.P_BUC_01 -> YtelseType.ALDER
-            BucType.P_BUC_02 -> return null
+            BucType.P_BUC_02 -> {
+                if (toggleBestemSak.toggleGjenlevende()) {
+                    YtelseType.GJENLEV
+                } else {
+                    return null
+                }
+            }
             BucType.P_BUC_03 -> YtelseType.UFOREP
             BucType.R_BUC_02 -> ytelsesType!!
             else -> return null
         }
 
+        logger.debug("kallBestemSak aktoer: $aktoerId ytelseType: $ytelseType bucType: $bucType")
         val resp = kallBestemSak(aktoerId, ytelseType)
         if(resp != null && resp.sakInformasjonListe.size == 1) {
-            return resp.sakInformasjonListe.first().sakId
+
+            val sakInformasjon = resp.sakInformasjonListe
+            logger.debug("resultat en sakInformasjon: ${sakInformasjon.toJson()}")
+            return sakInformasjon.first().sakId
+
+        } else {
+            val sakInformasjon = resp?.sakInformasjonListe
+            logger.debug("resultat flere sakInformasjon: ${sakInformasjon?.toJson()}")
         }
         return null
     }
@@ -106,3 +122,29 @@ enum class SakStatus {
     LOPENDE
 }
 
+
+@Profile("!prod")
+@Component
+class BestemSakToggleNonProd: ToggleBestemSak {
+
+    override fun toggleGjenlevende(): Boolean {
+        return true
+    }
+
+}
+
+@Profile("prod")
+@Component
+class BestemSakToggleProd: ToggleBestemSak {
+
+    override fun toggleGjenlevende(): Boolean {
+        return false
+    }
+
+}
+
+interface ToggleBestemSak {
+
+    fun toggleGjenlevende() : Boolean
+
+}
