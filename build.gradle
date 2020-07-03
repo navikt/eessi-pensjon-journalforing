@@ -100,12 +100,13 @@ dependencies {
 	implementation("io.micrometer:micrometer-registry-prometheus")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:0.3.6")
-	implementation("no.nav.eessi.pensjon:ep-logging:0.0.12")
-	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.8")
+	implementation("no.nav.eessi.pensjon:ep-metrics:0.4.0")
+	implementation("no.nav.eessi.pensjon:ep-logging:0.0.17")
+	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
 
-	// Tjenestespesifikasjoner
-	compile("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
+	// Personoppslag
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:3.3.0")
+	implementation("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
 	implementation("com.sun.xml.ws:jaxws-ri:2.3.3")
 
 	// PDF box
