@@ -1,7 +1,0 @@
-{
-  "timestamp": "2018-08-31T08:36:52.617+0000",
-  "status": 403,
-  "error": "Forbidden",
-  "message": "Access Denied",
-  "path": "/aktoerregister/api/v1/identer"
-}
