@@ -13,23 +13,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
+import org.springframework.retry.annotation.Retryable
+import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ResponseStatus
 import javax.annotation.PostConstruct
 import javax.xml.ws.soap.SOAPFaultException
 
-fun hentLandkode(person: Person) =
-        person.bostedsadresse?.strukturertAdresse?.landkode?.value
-
-fun hentPersonNavn(person: Person) =
-        person.personnavn?.sammensattNavn
-
-fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
-
 /**
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
-@Component
+@Service
 class PersonV3Service(
         private val service: PersonV3,
         private val stsClientConfig: STSClientConfig,
@@ -38,23 +31,23 @@ class PersonV3Service(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(PersonV3Service::class.java) }
 
-    private lateinit var hentperson: MetricsHelper.Metric
+    private lateinit var hentPerson: MetricsHelper.Metric
 
     @PostConstruct
     fun initMetrics() {
-        hentperson = metricsHelper.init("hentperson")
+        hentPerson = metricsHelper.init("hentperson")
     }
 
     fun hentPerson(fnr: String): Bruker? {
-        return hentperson.measure {
-            logger.info("Henter person fra PersonV3Klient")
+        return hentPerson.measure {
+            logger.info("Henter person fra PersonV3Service")
 
             try {
-                logger.info("Kaller PersonV3.hentPerson")
+                logger.info("Kaller PersonV3.hentPerson service")
                 val resp = kallPersonV3(fnr)
                 resp.person as Bruker
             } catch (pif: HentPersonPersonIkkeFunnet) {
-                logger.warn("Personen finnes ikke", pif)
+                logger.warn("PersonV3: Kunne ikke hente person, ikke funnet", pif)
                 null
             } catch (sfe: SOAPFaultException) {
                 if (sfe.fault.faultString.contains("F002001F")) {
@@ -92,8 +85,9 @@ class PersonV3Service(
     }
 }
 
+@ResponseStatus(value = HttpStatus.FORBIDDEN)
+class PersonV3SikkerhetsbegrensningException(message: String?): Exception(message)
+
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 class PersonV3IkkeFunnetException(message: String?): Exception(message)
 
-@ResponseStatus(value = HttpStatus.FORBIDDEN)
-class PersonV3SikkerhetsbegrensningException(message: String?): Exception(message)

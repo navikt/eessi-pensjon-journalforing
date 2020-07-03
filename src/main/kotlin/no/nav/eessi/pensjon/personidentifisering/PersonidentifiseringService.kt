@@ -8,10 +8,8 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import no.nav.eessi.pensjon.personoppslag.personv3.hentGeografiskTilknytning
-import no.nav.eessi.pensjon.personoppslag.personv3.hentLandkode
-import no.nav.eessi.pensjon.personoppslag.personv3.hentPersonNavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -156,3 +154,10 @@ enum class Relasjon {
     ANNET
 }
 
+fun hentLandkode(person: Person) =
+        person.bostedsadresse?.strukturertAdresse?.landkode?.value
+
+fun hentPersonNavn(person: Person) =
+        person.personnavn?.sammensattNavn
+
+fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
