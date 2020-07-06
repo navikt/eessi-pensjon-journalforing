@@ -47,7 +47,7 @@ class FnrHelper {
                         }
                         else -> {
                             // P10000, P9000
-                            leggTilAnnenForsikretFnrHvisFinnes(sedRootNode, fnrListe)
+                            leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                             //P2000 - P2200 -- andre..  (H070)
                             leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
                         }
@@ -61,9 +61,9 @@ class FnrHelper {
         return fnrListe.distinctBy { it.fnr }
     }
 
-    private fun leggTilAnnenForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+    private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
         filterAnnenpersonPinNode(sedRootNode)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
         }
     }
 

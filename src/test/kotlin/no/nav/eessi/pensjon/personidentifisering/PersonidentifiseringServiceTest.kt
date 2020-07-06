@@ -171,6 +171,35 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Gitt fnr på navbruker på en P_BUC_02 med P2100 og P10000 så skal det slås opp fnr og fdato i seder og returnere gyldig gjenlevendefnr`() {
+        //EUX - FnrServide (fin pin)
+        val navBruker = "28127822044" //avdød bruker fra eux
+        val gjenlevende = "05127921999"
+        val bucType = BucType.P_BUC_02
+
+        //PERSONV3 - HENT PERSON
+        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende"))
+                .`when`(personV3Service)
+                .hentPerson(eq("05127921999"))
+
+        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død"))
+                .`when`(personV3Service)
+                .hentPerson(eq("28127822044"))
+
+        val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
+        val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+        val sed3 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-person-annenperson.json")))
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed3, sed1, sed2), bucType)
+        assertEquals(2, actual.size)
+
+        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType)
+        assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual?.personRelasjon?.relasjon)
+
+    }
+
+    @Test
     fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
         assertFalse(PersonidentifiseringService.erFnrDnrFormat(null))
     }
