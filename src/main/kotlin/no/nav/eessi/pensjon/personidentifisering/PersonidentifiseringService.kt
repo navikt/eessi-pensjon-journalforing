@@ -56,6 +56,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
             try {
                 val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
+                logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
                     val personen = personV3Service.hentPerson(trimFnrString(personRelasjon.fnr))
                     if (personen != null) {
@@ -87,17 +88,21 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
     fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType): IdentifisertPerson? {
-        return if (identifisertePersoner.isEmpty()) {
-            null
-        } else {
-            logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
-            when {
-                identifisertePersoner.size == 1 -> identifisertePersoner.first()
-                bucType == BucType.P_BUC_02 -> identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }.map { it }.first()
-                else -> {
-                    logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
-                    throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
+        logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
+        return when {
+            identifisertePersoner.isEmpty() -> null
+            identifisertePersoner.size == 1 -> identifisertePersoner.first()
+            bucType == BucType.P_BUC_02 -> {
+                val identer = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }.map { it }
+                if (identer.isEmpty()) {
+                    null
+                } else {
+                    identer.first()
                 }
+            }
+            else -> {
+                logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
+                throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
             }
         }
     }

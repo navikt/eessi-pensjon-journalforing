@@ -298,5 +298,61 @@ class PersonidentifiseringServiceTest {
         }
     }
 
+    @Test
+    fun `Gitt at det finnes tre personer når en er gjenlevende så skal kun gjenlevende returneres`() {
+
+        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.GJENLEVENDE))
+
+        val list = listOf(person1, person2, person3)
+
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        assertEquals(Relasjon.GJENLEVENDE, actual?.personRelasjon?.relasjon)
+    }
+
+    @Test
+    fun `Gitt at det finnes tre personer når ingen personer er gjenlevende så skal returneres null`() {
+
+        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+
+        val list = listOf(person1, person2, person3)
+
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        assertEquals(null, actual)
+    }
+
+    @Test
+    fun `Gitt at det finnes tre personer når det er en buc så skal det kastes en runtimeexception`() {
+
+        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+
+        val list = listOf(person1, person2, person3)
+
+        assertThrows<RuntimeException> {
+            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01)
+        }
+        assertThrows<RuntimeException> {
+            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03)
+        }
+        assertThrows<RuntimeException> {
+            personidentifiseringService.identifisertPersonUtvelger(list, BucType.R_BUC_02)
+        }
+    }
+
+
+    @Test
+    fun `Gitt at det ikke finnes personer på en buc så skal kun null returneres`() {
+
+        val list = listOf<IdentifisertPerson>()
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        assertEquals(null, actual)
+    }
+
+
 
 }
