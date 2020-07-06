@@ -39,29 +39,25 @@ class PersonidentifiseringServiceTest {
     @Spy
     private lateinit var fdatoHelper: FdatoHelper
 
-    @Spy
-    private lateinit var fnrHelper: FnrHelper
-
     private lateinit var personidentifiseringService: PersonidentifiseringService
 
     @BeforeEach
     fun setup() {
-        //fnrHelper = FnrHelper(personV3Klient)
         personidentifiseringService = PersonidentifiseringService(aktoerregisterService,
                 personV3Service,
                 diskresjonkodeHelper,
-                fnrHelper,
+                FnrHelper(),
                 fdatoHelper)
     }
 
     @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
-        whenever(personV3Service.hentPerson(eq("01055012666"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
-        val actual = personidentifiseringService.hentIdentifisertePersoner(null, listOf(sed), BucType.P_BUC_02 )
-        val expected = PersonRelasjon("01055012666", Relasjon.GJENLEVENDE)
-        assertEquals(expected, actual.first().personRelasjon)
+        val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(sed), BucType.P_BUC_02 )
+        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE)
+        assertEquals(expected, actual?.personRelasjon)
     }
 
     @Test
@@ -122,44 +118,55 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
-        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
-                .`when`(fnrHelper)
-                .getPotensielleFnrFraSeder(any())
-        //PERSONV3 - HENT PERSON
-        doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
-                .hentPerson(eq("01055012345"))
-
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        val navBruker = null
-        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed), BucType.P_BUC_06 )
-        val personOne = actual.first()
-        val fdato = personidentifiseringService.hentFodselsDato(personOne, null)
-        assertEquals("1950-05-01", fdato.toString())
-
+        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_06 )
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed))
+        assertEquals("1958-07-11", fdato.toString())
     }
 
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
-        //EUX - FnrServide (fin pin)
-        doReturn( listOf(PersonRelasjon("01055012345",Relasjon.FORSIKRET)))
-                .`when`(fnrHelper)
-                .getPotensielleFnrFraSeder(any())
+
         //PERSONV3 - HENT PERSON
         doReturn(BrukerMock.createWith(landkoder = true))
                 .`when`(personV3Service)
-                .hentPerson(eq("01055012345"))
+                .hentPerson(eq("28064843062"))
 
         val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-enkel.json")))
         val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        val navBruker = null
-        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed2, sed1), BucType.P_BUC_06)
-        val personOne = actual.first()
-        val fdato = personidentifiseringService.hentFodselsDato(personOne, listOf(sed2, sed1))
+        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed2, sed1), BucType.P_BUC_06)
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed2, sed1))
 
-        println(actual)
-        assertEquals("1950-05-01", fdato.toString())
-        assertEquals("01055012345", actual.first().personRelasjon?.fnr)
+        assertEquals("1948-06-28", fdato.toString())
+        assertEquals("28064843062", actual?.personRelasjon?.fnr)
+
+    }
+
+    @Test
+    fun `Gitt fnr på navbruker på en P_BUC_02 så skal det slås opp fnr og fdato i seder og returnere gyldig gjenlevendefnr`() {
+        //EUX - FnrServide (fin pin)
+        val navBruker = "28127822044" //avdød bruker fra eux
+        val gjenlevende = "05127921999"
+        val bucType = BucType.P_BUC_02
+
+        //PERSONV3 - HENT PERSON
+        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende"))
+                .`when`(personV3Service)
+                .hentPerson(eq("05127921999"))
+
+        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død"))
+                .`when`(personV3Service)
+                .hentPerson(eq("28127822044"))
+
+        val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
+        val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed1, sed2), bucType)
+        assertEquals(2, actual.size)
+
+        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType)
+        assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual?.personRelasjon?.relasjon)
 
     }
 
@@ -190,7 +197,7 @@ class PersonidentifiseringServiceTest {
         val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterService,
                 personV3Service,
                 diskresjonkodeHelper,
-                fnrHelper,
+                FnrHelper(),
                 fdatoHelper2)
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
@@ -115,9 +114,8 @@ class FnrHelperTest {
 
     @Test
     fun `leter igjennom R_BUC_02 og R005 med kun en person uten pin`() {
-        assertThrows<RuntimeException> {
-            helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R_BUC_02-R005-IkkePin.json")))
-        }
+        val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R_BUC_02-R005-IkkePin.json")))
+        assert(actual.isEmpty())
     }
 
     @Test

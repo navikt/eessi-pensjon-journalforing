@@ -40,7 +40,12 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
-        val personForNavBruker = if (erFnrDnrFormat(trimmetNavBruker)) personV3Service.hentPerson(trimmetNavBruker!!) else null
+
+        val personForNavBruker = when {
+            bucType == BucType.P_BUC_02 -> null
+            erFnrDnrFormat(trimmetNavBruker) -> personV3Service.hentPerson(trimmetNavBruker!!)
+            else -> null
+        }
 
         if (personForNavBruker != null) {
             return listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
@@ -86,11 +91,13 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             null
         } else {
             logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
-            if (identifisertePersoner.size == 1) {
-                identifisertePersoner.first()
-            } else {
-                logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
-                throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
+            when {
+                identifisertePersoner.size == 1 -> identifisertePersoner.first()
+                bucType == BucType.P_BUC_02 -> identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }.map { it }.first()
+                else -> {
+                    logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
+                    throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
+                }
             }
         }
     }

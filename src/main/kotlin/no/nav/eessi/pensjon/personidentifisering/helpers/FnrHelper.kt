@@ -29,6 +29,7 @@ class FnrHelper {
                 sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
 
                 if (sedType.kanInneholdeFnrEllerFdato) {
+                    logger.debug("SED: $sedType")
                     when (sedType) {
                         SedType.P2100 -> {
                             leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
@@ -53,8 +54,7 @@ class FnrHelper {
                     }
                 }
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under henting av fnr fra buc", ex.message)
-                throw RuntimeException("Noe gikk galt under henting av fnr fra buc")
+                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex.message)
             }
         }
 
@@ -95,7 +95,7 @@ class FnrHelper {
     }
 
     private fun filterGjenlevendePinNode(sedRootNode: JsonNode): String? {
-        return finnPin(sedRootNode.at("/pensjon/gjenlevende"))
+        return finnPin(sedRootNode.at("/pensjon/gjenlevende/person"))
     }
 
     private fun filterPersonPinNode(sedRootNode: JsonNode): String? {
