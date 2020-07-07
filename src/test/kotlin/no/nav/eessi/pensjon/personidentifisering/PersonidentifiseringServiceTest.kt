@@ -6,6 +6,9 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.Result
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import org.junit.jupiter.api.Assertions.*
@@ -43,6 +46,9 @@ class PersonidentifiseringServiceTest {
 
     @BeforeEach
     fun setup() {
+        whenever(aktoerregisterService.hentGjeldendeIdentFraGruppe(eq(IdentGruppe.AktoerId), any<NorskIdent>()))
+                .thenReturn(Result.NotFound("Tests don't care about aktoerId"))
+
         personidentifiseringService = PersonidentifiseringService(aktoerregisterService,
                 personV3Service,
                 diskresjonkodeHelper,

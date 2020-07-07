@@ -6,7 +6,12 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterIkkeFunnetException
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.ManglerAktoerIdException
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.Result
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
@@ -132,14 +137,18 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 null
             }
 
-    private fun hentAktoerId(navBruker: String?): String? {
+    private fun hentAktoerId(navBruker: String): String? {
         if (!erFnrDnrFormat(navBruker)) return null
-        return try {
-            val aktoerId = aktoerregisterService.hentGjeldendeAktorIdForNorskIdent(navBruker!!)
-            aktoerId
-        } catch (ex: Exception) {
-            logger.error("Det oppstod en feil ved henting av aktørid: $ex")
-            null
+        return when(val result = aktoerregisterService.hentGjeldendeIdentFraGruppe(IdentGruppe.AktoerId, NorskIdent(navBruker))) {
+            is Result.Found -> result.value.id
+            is Result.NotFound -> {
+                logger.info("Ingen AktoerId funnet: ${result.reason}")
+                null
+            }
+            is Result.Failure -> {
+                logger.warn("Det oppstod en feil ved henting av aktørid: ${result.cause}", result.cause)
+                null
+            }
         }
     }
 }
