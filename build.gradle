@@ -73,13 +73,7 @@ dependencies {
 	// Forced version due to RCE error in Apache CXF above ( Snyk ): spring-boot-starter-web 2.1.15.RELEASE spring-boot-starter-web, legger til spring-boot-starter-web 2.3.2.RELEASE
 	implementation("org.springframework.boot:spring-boot-starter-web:2.3.2.RELEASE")
 
-	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}") {
-		exclude module: 'wss4j-ws-security-dom'
-	}
-
-	// Forced version due to Insecure Encryption error in Apache CXF above ( Snyk ): wss4j-ws-security-dom:2.5 spring-boot-starter-web, legger til wss4j-ws-security-dom:2.3.0
-	implementation("org.apache.wss4j:wss4j-ws-security-dom:2.3.0")
-
+	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
 	implementation("commons-io:commons-io:2.6")
 	implementation("org.hibernate:hibernate-validator:6.1.5.Final")
 
