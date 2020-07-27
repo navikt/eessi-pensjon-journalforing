@@ -67,7 +67,12 @@ dependencies {
 	}
 
 	// Apache CXF
-	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
+	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}") {
+		exclude module: 'spring-boot-starter-web'
+	}
+	// Forced version due to RCE error in Apache CXF above ( Snyk ): spring-boot-starter-web 2.1.15.RELEASE spring-boot-starter-web, legger til spring-boot-starter-web 2.3.2.RELEASE
+	implementation("org.springframework.boot:spring-boot-starter-web:2.3.2.RELEASE")
+
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
 	implementation("commons-io:commons-io:2.6")
 	implementation("org.hibernate:hibernate-validator:6.1.5.Final")
