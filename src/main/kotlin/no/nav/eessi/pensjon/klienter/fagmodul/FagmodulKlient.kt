@@ -45,10 +45,10 @@ class FagmodulKlient(
                         null,
                         String::class.java).body
             } catch(ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}")
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}", ex)
                 throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch(ex: Exception) {
-                logger.error("En feil oppstod under henting av alledokumenter ex: $ex")
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex", ex)
                 throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message}")
             }
         }
