@@ -35,8 +35,8 @@ class EuxKlient(
 
     @PostConstruct
     fun initMetrics() {
-        hentpdf = metricsHelper.init("hentpdf")
-        hentSed = metricsHelper.init("hentSed")
+        hentpdf = metricsHelper.init("hentpdf", alert = MetricsHelper.Toggle.OFF)
+        hentSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
     }
 
     /**
