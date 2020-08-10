@@ -1,0 +1,59 @@
+{
+  "P2100": {
+    "Miscellaneous": {
+      "additionalInformation": "03.08.2020/10:27/",
+      "dateClaim": "2020-07-02"
+    },
+    "sedPackage": "Sector Components/Pensions/P2100",
+    "sedGVer": "4",
+    "InsuredPerson": {
+      "PersonIdentification": {
+        "forename": "KLØKTIG",
+        "familyName": "SNERK",
+        "sex": {
+          "value": [
+            "02"
+          ]
+        },
+        "PINPersonInEachInstitution": {
+          "PersonalIdentificationNumber": [
+            {
+              "country": {
+                "value": [
+                  "NO"
+                ]
+              },
+              "personalIdentificationNumber": "02116921297"
+            }
+          ]
+        },
+        "dateBirth": "1969-11-02"
+      }
+    },
+    "sedVer": "2",
+    "Claimant": {
+      "PersonIdentification": {
+        "forename": "RASK",
+        "familyName": "MULDVARP",
+        "sex": {
+          "value": [
+            "02"
+          ]
+        },
+        "PINPersonInEachInstitution": {
+          "PersonalIdentificationNumber": [
+            {
+              "country": {
+                "value": [
+                  "NO"
+                ]
+              },
+              "personalIdentificationNumber": "28116925275"
+            }
+          ]
+        },
+        "dateBirth": "1969-11-28"
+      }
+    }
+  }
+}
