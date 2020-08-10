@@ -45,6 +45,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
             bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest)
+
             else -> bestemTildeltEnhet(routingRequest, bucType, routingRequest.ytelseType)
         }
     }
@@ -56,7 +57,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         return when (NORGE) {
             bosatt -> {
                 when (bucType) {
-                    P_BUC_01, P_BUC_02, P_BUC_04 -> NFP_UTLAND_AALESUND
+                    P_BUC_01, P_BUC_04 -> NFP_UTLAND_AALESUND
+                    P_BUC_02 -> UKJENT
                     P_BUC_03 -> UFORE_UTLANDSTILSNITT
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND

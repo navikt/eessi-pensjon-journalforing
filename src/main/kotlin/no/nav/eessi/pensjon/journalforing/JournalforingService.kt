@@ -83,8 +83,8 @@ class JournalforingService(private val euxKlient: EuxKlient,
                                     hendelseType)
                     )
                 } else {
-                    OppgaveRoutingModel.Enhet.UKJENT
-                        }
+                        OppgaveRoutingModel.Enhet.UKJENT
+                }
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(

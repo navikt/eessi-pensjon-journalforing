@@ -94,6 +94,10 @@ class JournalforingKlientTest {
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2100))
 
+        doReturn(Pair<String, List<EuxDokument>>("P2100 Krav om etterlattepensjon", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.P2100))
+
         doReturn(Pair<String, List<EuxDokument>>("P2200 Supported Documents", emptyList()))
                 .`when`(pdfService)
                 .parseJsonDocuments(any(), eq(SedType.P2200))
@@ -556,4 +560,257 @@ class JournalforingKlientTest {
                 ytelseType = anyOrNull()
         )
     }
+
+    @Test
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen automatisk journalføres`() {
+
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
+        doReturn("111111")
+                .`when`(bestemSakKlient)
+                .hentSakId(any(), any(), any())
+
+        doReturn(OppgaveRoutingModel.Enhet.UKJENT)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+
+        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+
+        println(actual)
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("147730"),
+                fnr = eq("12078945602"),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq("SENDT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(false),
+                avsenderLand = eq("NO"),
+                avsenderNavn = eq("NAVT003"),
+                ytelseType = eq(null)
+        )
+
+        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+
+    }
+
+    @Test
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen automatisk journalføres`() {
+
+        val avdodFnr = "02116921297"
+        val hendelse = """
+            {
+              "id": 27403,
+              "sedId": "P2100_e6b0d1bfede5443face4059e720e9d43_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_02",
+              "rinaSakId": "1033470",
+              "avsenderId": "NO:NAVAT07",
+              "avsenderNavn": "NAV ACCEPTANCE TEST 07",
+              "avsenderLand": "NO",
+              "mottakerId": "NO:NAVAT08",
+              "mottakerNavn": "Vilniaus",
+              "mottakerLand": "LI",
+              "rinaDokumentId": "e6b0d1bfede5443face4059e720e9d43",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P2100",
+              "navBruker": "$avdodFnr"
+            }
+        """.trimIndent()
+
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
+
+        doReturn("111111")
+                .`when`(bestemSakKlient)
+                .hentSakId(any(), any(), any())
+
+        doReturn(OppgaveRoutingModel.Enhet.UKJENT)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+
+        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+
+        println(actual)
+
+        val sokersFnr = "28116925275"
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("147730"),
+                fnr = eq(sokersFnr),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq("SENDT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(false),
+                avsenderLand = eq("LI"),
+                avsenderNavn = eq("Vilniaus"),
+                ytelseType = eq(null)
+        )
+
+        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+
+    }
+
+    @Test
+    fun `Gitt at saksbehandler har opprettet en p2100 med et norsk fnr eller dnr for gjenlevende så skal SEDen automatisk journalføres`() {
+
+        //norsk fnr finnes
+        //auto journalføring
+        //enhet 9999
+        //tema basert på bestem sak
+
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
+
+        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+
+        println(actual)
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("147729"),
+                fnr = eq("12078945602"),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq("SENDT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(true),
+                avsenderLand = eq("Norge"),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq(YtelseType.GJENLEV)
+        )
+
+        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+
+    }
+
+    @Test
+    fun `Gitt at saksbehandler har opprettet en p2100 med mangelfullt fnr eller dnr så skal det opprettes en journalføringsoppgave og settes til enhet 4303`() {
+
+        //Mangler fnr
+        //opprette journalføringspost for utgående sed
+        //Tema settes til PEN
+        //settes til 4303 ID og fordeling
+
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
+
+        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+
+        println(actual)
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("147729"),
+                fnr = eq("12078945602"),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq("SENDT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(true),
+                avsenderLand = eq("Norge"),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq(YtelseType.GJENLEV)
+        )
+    }
+
+    @Test
+    fun `Gitt at saksbehandler har opprettet en P2100 og bestemsak returnerer ALDER og UFOREP som sakstyper så skal det opprettes en journalføringsoppgave og enhet setttes til 4303 NAV Id og fordeling`() {
+
+        //bestemsak returnerer ALDER og UFOREP
+        //opprett jjournalføringsoppgave på utgående sed
+        //settes til enhet 4303
+        //tema settes til PEN
+        //tema kan endres til UFO hvis bruker har uforetrygd
+
+
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+        )
+
+        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+
+        println(actual)
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("147729"),
+                fnr = eq("12078945602"),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq("SENDT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(true),
+                avsenderLand = eq("Norge"),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq(YtelseType.GJENLEV)
+        )
+    }
+
 }

@@ -77,6 +77,9 @@ class FnrHelper {
         filterGjenlevendePinNode(sedRootNode)?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
         }
+        filterPersonPinNode(sedRootNode)?.let{
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+        }
     }
 
     /***
