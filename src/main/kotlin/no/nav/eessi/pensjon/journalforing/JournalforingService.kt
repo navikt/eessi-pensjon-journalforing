@@ -61,7 +61,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 // Henter saksId for utgående dokumenter
                 val sakId=
                         if (identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType, ytelseType)
+                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType, (ytelseType ?: identifisertPerson.personRelasjon.ytelseType))
                         } else { null }
 
                 if (sakId != null) {

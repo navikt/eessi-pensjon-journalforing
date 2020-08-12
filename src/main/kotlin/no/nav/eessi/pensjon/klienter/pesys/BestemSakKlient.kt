@@ -48,7 +48,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
             BucType.P_BUC_01 -> YtelseType.ALDER
             BucType.P_BUC_02 -> {
                 if (toggleBestemSak.toggleGjenlevende()) {
-                    YtelseType.GJENLEV
+                    ytelsesType ?: return null
                 } else {
                     return null
                 }
@@ -68,7 +68,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
         } else {
             val sakInformasjon = resp?.sakInformasjonListe
-            logger.error("resultat flere sakInformasjon: ${sakInformasjon?.toJson()}")
+            logger.info("resultat flere sakInformasjon: ${sakInformasjon?.toJson()}")
         }
         return null
     }

@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -74,11 +75,21 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
-        filterGjenlevendePinNode(sedRootNode)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
-        }
         filterPersonPinNode(sedRootNode)?.let{
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+        }
+        filterGjenlevendePinNode(sedRootNode)?.let {
+            if (finnGjenlevendeRelasjontilavdod(sedRootNode) == null) {
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
+                return
+            }
+            //forbedres
+            val barn = listOf("06","07","08","08")
+            if ( barn.contains(finnGjenlevendeRelasjontilavdod(sedRootNode)) ) {
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.BARNEP))
+            } else {
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.GJENLEV))
+            }
         }
     }
 
@@ -95,6 +106,10 @@ class FnrHelper {
                     .lastOrNull()
         }
         return null
+    }
+
+    private fun finnGjenlevendeRelasjontilavdod(sedRootNode: JsonNode): String? {
+        return sedRootNode.at("/pensjon/gjenlevende/person/relasjontilavdod/relasjon").textValue()
     }
 
     private fun filterGjenlevendePinNode(sedRootNode: JsonNode): String? {

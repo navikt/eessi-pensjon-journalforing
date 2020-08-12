@@ -58,7 +58,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             bosatt -> {
                 when (bucType) {
                     P_BUC_01, P_BUC_04 -> NFP_UTLAND_AALESUND
-                    P_BUC_02 -> UKJENT
+                    P_BUC_02 -> ID_OG_FORDELING
                     P_BUC_03 -> UFORE_UTLANDSTILSNITT
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND

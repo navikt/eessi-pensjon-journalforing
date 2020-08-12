@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -164,7 +165,8 @@ data class IdentifisertPerson(
 
 data class PersonRelasjon(
         val fnr: String,
-        val relasjon: Relasjon
+        val relasjon: Relasjon,
+        val ytelseType: YtelseType? = null
 )
 
 enum class Relasjon {
