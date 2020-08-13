@@ -195,7 +195,7 @@ class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_01)))
 
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), fnr = "01010101010",  bucType = P_BUC_02)))
-        assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_02)))
+        assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = NORGE, fnr = "01010101010",  bucType = P_BUC_02)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = UTLAND, fnr = "01010101010",  bucType = P_BUC_02)))
 
         assertEquals(UFORE_UTLAND, routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), fnr = "01010101010",  bucType = P_BUC_03)))

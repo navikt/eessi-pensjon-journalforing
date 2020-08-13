@@ -86,7 +86,6 @@ class SedDokumentHelperTest {
         Assertions.assertEquals(SedType.P2000.name, actual.keys.toList().get(0))
         Assertions.assertEquals(sedP2000, actual[SedType.P2000.name])
         Assertions.assertEquals(sedP2000, helper.hentAlleSeds(actual)[0])
-
     }
 
 }

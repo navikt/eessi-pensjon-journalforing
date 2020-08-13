@@ -1,0 +1,17 @@
+{
+  "id": 27403,
+  "sedId": "P2100_e6b0d1bfede5443face4059e720e9d43_2",
+  "sektorKode": "P",
+  "bucType": "P_BUC_02",
+  "rinaSakId": "1033470",
+  "avsenderId": "NO:NAVAT07",
+  "avsenderNavn": "NAV ACCEPTANCE TEST 07",
+  "avsenderLand": "NO",
+  "mottakerId": "NO:NAVAT08",
+  "mottakerNavn": "NAV ACCEPTANCE TEST 08",
+  "mottakerLand": "NO",
+  "rinaDokumentId": "e6b0d1bfede5443face4059e720e9d43",
+  "rinaDokumentVersjon": "2",
+  "sedType": "P2100",
+  "navBruker": "02116921297"
+}

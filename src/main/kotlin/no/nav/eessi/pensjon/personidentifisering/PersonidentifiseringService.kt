@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -77,6 +78,8 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
+//    fun hentGjenlevende()
+
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
@@ -96,7 +99,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             identifisertePersoner.isEmpty() -> null
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             bucType == BucType.P_BUC_02 -> {
-                val identer = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }.map { it }
+                val identer = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
                 if (identer.isEmpty()) {
                     null
                 } else {
@@ -162,7 +165,8 @@ data class IdentifisertPerson(
 
 data class PersonRelasjon(
         val fnr: String,
-        val relasjon: Relasjon
+        val relasjon: Relasjon,
+        val ytelseType: YtelseType? = null
 )
 
 enum class Relasjon {

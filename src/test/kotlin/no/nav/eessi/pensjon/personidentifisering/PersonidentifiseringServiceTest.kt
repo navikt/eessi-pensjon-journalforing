@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import com.nhaarman.mockitokotlin2.*
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -62,7 +63,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
         val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(sed), BucType.P_BUC_02 )
-        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE)
+        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, YtelseType.GJENLEV )
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -387,6 +388,52 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
         assertEquals(null, actual)
     }
+
+    @Test
+    fun `hent ut person gjenlevende fra pBuc02`() {
+
+        val avdodBrukerFnr = "02116921297"
+        val gjenlevendeFnr = "28116925275"
+
+        val avdodPerson = IdentifisertPerson("","avgott Testesen", null,"NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET))
+        val gjenlevendePerson = IdentifisertPerson("","gjenlevende Testesen", null,"NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE))
+
+        val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
+
+        val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P_BUC_02_P2100_Sendt.json")))
+        val sedListFraBuc = listOf(sed1)
+
+
+        doReturn(BrukerMock.createWith(fornavn = "gjenlevende"))
+                .`when`(personV3Service)
+                .hentPerson(eq(gjenlevendeFnr))
+
+        doReturn(BrukerMock.createWith(fornavn = "avgott"))
+                .`when`(personV3Service)
+                .hentPerson(eq(avdodBrukerFnr))
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(avdodBrukerFnr, sedListFraBuc, BucType.P_BUC_02)
+
+        assertEquals(identifisertePersoner, actual)
+    }
+
+    @Test
+    fun `hent ut gjenlevende`(){
+
+
+        val gjenlevende = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.GJENLEVENDE))
+        val avdod = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("5678", Relasjon.FORSIKRET))
+
+        val list = listOf<IdentifisertPerson>(gjenlevende, avdod)
+
+
+
+
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+
+        assertEquals(gjenlevende, actual)
+    }
+
 
 
 
