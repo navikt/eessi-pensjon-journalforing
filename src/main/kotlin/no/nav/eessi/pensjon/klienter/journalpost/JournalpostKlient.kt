@@ -130,13 +130,15 @@ class JournalpostKlient(
 
     fun hentTema(bucType: String, sedType: String, enhet: String, ytelseType: YtelseType?): String {
         return if (bucType == BucType.R_BUC_02.name) {
-            if (sedType == SedType.R004.name && enhet == "4819"){
+            if (sedType == SedType.R004.name && enhet == "4819") {
                 return Tema.PENSJON.toString()
             }
             return when (ytelseType) {
                 YtelseType.UFOREP -> Tema.UFORETRYGD.toString()
                 else -> Tema.PENSJON.toString()
             }
+        } else if (BucType.P_BUC_02.name == bucType && YtelseType.UFOREP == ytelseType) {
+            Tema.UFORETRYGD.toString()
         } else {
             BucType.valueOf(bucType).TEMA
         }

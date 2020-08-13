@@ -7,6 +7,8 @@ import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
+import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
@@ -33,7 +35,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class JournalforingKlientTest {
+class JournalforingServiceTest {
 
     @Mock
     private lateinit var euxKlient: EuxKlient
@@ -537,9 +539,9 @@ class JournalforingKlientTest {
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
-        doReturn("111111")
+        doReturn(SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
                 .`when`(bestemSakKlient)
-                .hentSakId(any(), any(), any())
+                .hentSakInformasjon(any(), any(), any())?.sakId
 
         doReturn(OppgaveRoutingModel.Enhet.UKJENT)
                 .`when`(oppgaveRoutingService)
@@ -572,7 +574,7 @@ class JournalforingKlientTest {
     }
 
     @Test
-    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen automatisk journalføres`() {
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen automatisk journalføres på Gjenlevnde`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """
@@ -597,7 +599,7 @@ class JournalforingKlientTest {
 
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPerson(
+        val identifisertGjenlevendePerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
                 "",
@@ -606,20 +608,20 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
         )
 
-        doReturn("111111")
+        doReturn(SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
                 .`when`(bestemSakKlient)
-                .hentSakId(any(), any(), any())
+                .hentSakInformasjon(any(), any(), any())?.sakId
 
         doReturn(OppgaveRoutingModel.Enhet.UKJENT)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato,null, 0)
 
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("1033470"),
-                fnr = eq("12078945602"),
+                fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
                 personNavn = eq("Test Testesen"),
                 bucType = eq("P_BUC_02"),
                 sedType = eq(SedType.P2100.name),
@@ -632,7 +634,7 @@ class JournalforingKlientTest {
                 forsokFerdigstill = eq(true),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAV ACCEPTANCE TEST 07"),
-                ytelseType = eq(null)
+                ytelseType = eq(YtelseType.GJENLEV)
         )
 
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -641,11 +643,6 @@ class JournalforingKlientTest {
 
     @Test
     fun `Gitt at saksbehandler har opprettet en p2100 med et norsk fnr eller dnr for gjenlevende så skal SEDen automatisk journalføres`() {
-
-        //norsk fnr finnes
-        //auto journalføring
-        //enhet 9999
-        //tema basert på bestem sak
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -659,13 +656,9 @@ class JournalforingKlientTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        doReturn("111222")
+        doReturn(SakInformasjon("111222", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
                 .`when`(bestemSakKlient)
-                .hentSakId(any(), any(), eq(null))
-
-        doReturn(OppgaveRoutingModel.Enhet.UKJENT)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+                .hentSakInformasjon(any(), any(), eq(null))?.sakId
 
        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
 
@@ -684,7 +677,7 @@ class JournalforingKlientTest {
                 forsokFerdigstill = eq(true),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
+                ytelseType = eq(YtelseType.GJENLEV)
         )
 
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -748,7 +741,7 @@ class JournalforingKlientTest {
 
         doReturn(null)
                 .`when`(bestemSakKlient)
-                .hentSakId(any(), any(), eq(null))
+                .hentSakInformasjon(any(), any(), eq(null))
 
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)

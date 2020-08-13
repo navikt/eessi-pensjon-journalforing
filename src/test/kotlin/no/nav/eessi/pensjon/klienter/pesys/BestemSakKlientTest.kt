@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.klienter.pesys
 
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,13 +25,10 @@ class BestemSakKlientTest {
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
 
-    @Mock
-    private lateinit var toggleBestemSak: ToggleBestemSak
-
     private lateinit var bestemSakKlient: BestemSakKlient
     @BeforeEach
     fun setup() {
-        bestemSakKlient = BestemSakKlient(mockrestTemplate, toggleBestemSak)
+        bestemSakKlient = BestemSakKlient(mockrestTemplate)
         bestemSakKlient.initMetrics()
     }
 
@@ -50,7 +46,7 @@ class BestemSakKlientTest {
                         any(),
                         eq(String::class.java))
 
-        assertEquals("22873157", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_01, null))
+        assertEquals("22873157", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_01, null)?.sakId)
     }
 
     @Test
@@ -65,9 +61,8 @@ class BestemSakKlientTest {
                         any(),
                         eq(String::class.java))
 
-        doReturn(true).whenever(toggleBestemSak).toggleGjenlevende()
 
-        assertEquals("22873157", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV))
+        assertEquals("22873157", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV)?.sakId)
 
     }
 
@@ -95,23 +90,49 @@ class BestemSakKlientTest {
                         any(),
                         eq(String::class.java))
 
-        doReturn(true).whenever(toggleBestemSak).toggleGjenlevende()
+        assertEquals("2345678975414", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.BARNEP)?.sakId)
+    }
 
-        assertEquals("2345678975414", bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_02, YtelseType.BARNEP))
+    @Test
+    fun `Gitt en P_BUC_02 med UFOREP med en kjent aktørId så skal det returneres et saksnummer og sakstype UFOREP`(){
+        val responseBody = """
+            {
+              "sakInformasjonListe": [
+                {
+                  "sakId": "2345678975414",
+                  "sakType": "UFOREP",
+                  "sakStatus": "LOPENDE",
+                  "saksbehandlendeEnhetId": "4808",
+                  "nyopprettet": false
+                }
+              ]
+            }
+        """.trimIndent()
+
+        Mockito.doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        ArgumentMatchers.contains("/"),
+                        eq(HttpMethod.POST),
+                        any(),
+                        eq(String::class.java))
+
+        val expectedSakInformasjon = SakInformasjon("2345678975414", YtelseType.UFOREP, SakStatus.LOPENDE, "4808", false)
+
+        assertEquals(expectedSakInformasjon.toJson(), bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV)?.toJson())
     }
 
     @Test
     fun `Gitt en P_BUC_02 med utkjent ytelse en kjent aktørId og toggle er på aå returneres null`(){
 
-        assertEquals(null, bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_02, null))
+        assertEquals(null, bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, null))
 
     }
 
     @Test
     fun `Gitt en P_BUC_02 med en kjent aktørID og toggle er av så skal det returneres null`(){
-        doReturn(false).whenever(toggleBestemSak).toggleGjenlevende()
 
-        assertEquals(null, bestemSakKlient.hentSakId("12345678901", BucType.P_BUC_02, null))
+        assertEquals(null, bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, null))
 
     }
 }

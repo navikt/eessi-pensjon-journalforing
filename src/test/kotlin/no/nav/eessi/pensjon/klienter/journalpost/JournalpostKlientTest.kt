@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doThrow
 import no.nav.eessi.pensjon.json.toJson
+import no.nav.eessi.pensjon.models.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -225,4 +226,48 @@ class JournalpostKlientTest {
 
         assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
     }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med ytelsetype BARNEP så skal det settes teama PEN`() {
+        val result = journalpostKlient.hentTema("P_BUC_02", "P2100", "1212", YtelseType.BARNEP)
+        assertEquals("PEN", result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med ytelsetype UFOREP så skal det settes teama UFO`() {
+        val result = journalpostKlient.hentTema("P_BUC_02", "P2100", "1212", YtelseType.UFOREP)
+        assertEquals("UFO", result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med ytelsetype GJENLEVENDE så skal det settes teama PEN`() {
+        val result = journalpostKlient.hentTema("P_BUC_02", "P2100", "1212", YtelseType.GJENLEV)
+        assertEquals("PEN", result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_01 med ytelsetype ALDER så skal det settes teama PEN`() {
+        val result = journalpostKlient.hentTema("P_BUC_01", "P6000", "1212", null)
+        assertEquals("PEN", result)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
+        val result = journalpostKlient.hentTema("R_BUC_02", "R004", "4819", YtelseType.ALDER)
+        assertEquals("PEN", result)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
+        val result = journalpostKlient.hentTema("R_BUC_02", "R006", "4819", YtelseType.UFOREP)
+        assertEquals("UFO", result)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
+        val result = journalpostKlient.hentTema("R_BUC_02", "R006", "4819", YtelseType.ALDER)
+        assertEquals("PEN", result)
+    }
+
+
 }

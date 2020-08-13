@@ -11,7 +11,6 @@ import no.nav.eessi.pensjon.models.YtelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -24,7 +23,6 @@ import javax.annotation.PostConstruct
 
 @Component
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
-                      private val toggleBestemSak: ToggleBestemSak,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
@@ -42,17 +40,11 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
      *
      * Foreløbig er alder, uføre og gjenlevende støttet i her men tjenesten støtter alle typer
      */
-    fun hentSakId(aktoerId: String, bucType: BucType, ytelsesType: YtelseType?) : String? {
+    fun hentSakInformasjon(aktoerId: String, bucType: BucType, ytelsesType: YtelseType? = null) : SakInformasjon? {
 
         val ytelseType = when(bucType) {
             BucType.P_BUC_01 -> YtelseType.ALDER
-            BucType.P_BUC_02 -> {
-                if (toggleBestemSak.toggleGjenlevende()) {
-                    ytelsesType ?: return null
-                } else {
-                    return null
-                }
-            }
+            BucType.P_BUC_02 -> ytelsesType ?: return null
             BucType.P_BUC_03 -> YtelseType.UFOREP
             BucType.R_BUC_02 -> ytelsesType!!
             else -> return null
@@ -64,7 +56,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
             val sakInformasjon = resp.sakInformasjonListe
             logger.info("resultat en sakInformasjon: ${sakInformasjon.toJson()}")
-            return sakInformasjon.first().sakId
+            return sakInformasjon.first()
 
         } else {
             val sakInformasjon = resp?.sakInformasjonListe
@@ -120,31 +112,4 @@ enum class SakStatus {
     TIL_BEHANDLING,
     AVSLUTTET,
     LOPENDE
-}
-
-
-@Profile("!prod")
-@Component
-class BestemSakToggleNonProd: ToggleBestemSak {
-
-    override fun toggleGjenlevende(): Boolean {
-        return true
-    }
-
-}
-
-@Profile("prod")
-@Component
-class BestemSakToggleProd: ToggleBestemSak {
-
-    override fun toggleGjenlevende(): Boolean {
-        return false
-    }
-
-}
-
-interface ToggleBestemSak {
-
-    fun toggleGjenlevende() : Boolean
-
 }

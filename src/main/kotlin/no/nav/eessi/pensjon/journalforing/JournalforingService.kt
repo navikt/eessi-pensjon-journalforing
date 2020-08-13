@@ -58,20 +58,20 @@ class JournalforingService(private val euxKlient: EuxKlient,
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-                // Henter saksId for utgående dokumenter
-                val sakId=
+                // Henter sakInformasjon for utgående dokumenter
+                val sakInformasjon=
                         if (identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) {
-                            bestemSakKlient.hentSakId(identifisertPerson.aktoerId, sedHendelse.bucType, (ytelseType ?: identifisertPerson.personRelasjon.ytelseType))
+                            bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, (ytelseType ?: identifisertPerson.personRelasjon.ytelseType))
                         } else { null }
 
-                if (sakId != null) {
-                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakId på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
+                if (sakInformasjon != null) {
+                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakInformasjon på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
                 }
 
-                val forsokFerdigstill = sakId != null
+                val forsokFerdigstill = sakInformasjon != null
 
                 val tildeltEnhet =
-                        if (sakId == null) {
+                        if (sakInformasjon == null) {
                             oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                                     fdato,
                                     identifisertPerson?.diskresjonskode,
@@ -97,16 +97,16 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
                     journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                    arkivsaksnummer = sakId,
+                    arkivsaksnummer = sakInformasjon?.sakId,
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelse.avsenderLand,
                     avsenderNavn = sedHendelse.avsenderNavn,
-                    ytelseType = ytelseType
+                    ytelseType = ytelseType ?: sakInformasjon?.sakType
                 )
 
                 // Oppdaterer distribusjonsinfo
-                if (sakId != null) {
+                if (sakInformasjon != null) {
                     journalpostKlient.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 

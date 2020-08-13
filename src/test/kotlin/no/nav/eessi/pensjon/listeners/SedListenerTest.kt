@@ -42,14 +42,6 @@ class SedListenerTest {
 
     @BeforeEach
     fun setup() {
-//        whenever(personidentifiseringService.identifiserPerson(any(), any(), any()))
-//                .thenReturn(listOf(IdentifisertPerson(null, "", "", "", "", null)))
-
-//        doReturn(listOf(IdentifisertPerson(null, "", "", "", "", null)))
-//                .whenever(personidentifiseringService.identifiserPerson(any(), any(), any()))
-
-//        doReturn(LocalDate.now()).whenever(personidentifiseringService.hentFodselsDato(any(), any()))
-
         sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
         sedListener.initMetrics()
     }
