@@ -140,16 +140,11 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     private fun hentAktoerId(navBruker: String): String? {
         if (!erFnrDnrFormat(navBruker)) return null
-        return when(val result = aktoerregisterService.hentGjeldendeIdentFraGruppe(IdentGruppe.AktoerId, NorskIdent(navBruker))) {
-            is Result.Found -> result.value.id
-            is Result.NotFound -> {
-                logger.info("Ingen AktoerId funnet: ${result.reason}")
-                null
-            }
-            is Result.Failure -> {
-                logger.warn("Det oppstod en feil ved henting av aktørid: ${result.cause}", result.cause)
-                null
-            }
+        return try {
+            aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(navBruker))?.id
+        } catch(e: Exception) {
+            logger.warn("Det oppstod en feil ved henting av aktørid: ${e.cause}", e)
+            null
         }
     }
 }
