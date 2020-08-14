@@ -47,8 +47,8 @@ class PersonidentifiseringServiceTest {
 
     @BeforeEach
     fun setup() {
-        whenever(aktoerregisterService.hentGjeldendeIdentFraGruppe(eq(IdentGruppe.AktoerId), any<NorskIdent>()))
-                .thenReturn(Result.NotFound("Tests don't care about aktoerId"))
+        whenever(aktoerregisterService.hentGjeldendeIdent(eq(IdentGruppe.AktoerId), any<NorskIdent>()))
+                .thenReturn(null)
 
         personidentifiseringService = PersonidentifiseringService(aktoerregisterService,
                 personV3Service,
