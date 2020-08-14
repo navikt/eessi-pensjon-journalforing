@@ -768,4 +768,72 @@ class JournalforingServiceTest {
         )
     }
 
+    @Test
+    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid der det finnes kun en sakstype så skal SEDen automatisk journalføres`() {
+
+        val avdodFnr = "02116921297"
+        val hendelse = """
+            {
+              "id": 27403,
+              "sedId": "P2100_e6b0d1bfede5443face4059e720e9d43_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_02",
+              "rinaSakId": "1033470",
+              "avsenderId": "NO:NAVAT07",
+              "avsenderNavn": "POLEN",
+              "avsenderLand": "PL",
+              "mottakerId": "NO:NAVAT08",
+              "mottakerNavn": "Oslo",
+              "mottakerLand": "NO",
+              "rinaDokumentId": "e6b0d1bfede5443face4059e720e9d43",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P2100",
+              "navBruker": "$avdodFnr"
+            }
+        """.trimIndent()
+
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertGjenlevendePerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12071245602", Relasjon.GJENLEVENDE, YtelseType.BARNEP)
+        )
+
+        doReturn(SakInformasjon("111111", YtelseType.BARNEP, SakStatus.LOPENDE, "4862", false))
+                .`when`(bestemSakKlient)
+                .hentSakInformasjon(any(), any(), any())?.sakId
+
+//        doReturn(OppgaveRoutingModel.Enhet.UKJENT)
+//                .`when`(oppgaveRoutingService)
+//                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato,null, 0)
+
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("1033470"),
+                fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq(HendelseType.MOTTATT.name),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("9999"),
+                arkivsaksnummer = eq("111111"),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(true),
+                avsenderLand = eq("PL"),
+                avsenderNavn = eq("POLEN"),
+                ytelseType = eq(YtelseType.BARNEP)
+        )
+
+        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+
+    }
+
 }

@@ -53,6 +53,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: YtelseType?): Enhet {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
+        val fnr = routingRequest.fnr
 
         return when (NORGE) {
             bosatt -> {
@@ -71,7 +72,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             }
             else -> {
                 when (bucType) {
-                    P_BUC_01, P_BUC_02, P_BUC_04 -> PENSJON_UTLAND
+                    P_BUC_01, P_BUC_04 -> PENSJON_UTLAND
+                    P_BUC_02 -> ID_OG_FORDELING
                     P_BUC_03 -> UFORE_UTLAND
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
