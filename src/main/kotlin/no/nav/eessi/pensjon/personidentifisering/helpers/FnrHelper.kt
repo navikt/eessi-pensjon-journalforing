@@ -83,7 +83,7 @@ class FnrHelper {
                 fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
                 return
             }
-            val gyldigeBarn = listOf("06","07","08","09")
+            val gyldigeBarn = listOf("06","07","08","08")
             if ( gyldigeBarn.contains(finnGjenlevendeRelasjontilavdod(sedRootNode)) ) {
                 fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.BARNEP))
             } else {
