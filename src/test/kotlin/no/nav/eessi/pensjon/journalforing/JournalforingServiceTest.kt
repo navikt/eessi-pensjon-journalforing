@@ -807,10 +807,6 @@ class JournalforingServiceTest {
                 .`when`(bestemSakKlient)
                 .hentSakInformasjon(any(), any(), any())?.sakId
 
-//        doReturn(OppgaveRoutingModel.Enhet.UKJENT)
-//                .`when`(oppgaveRoutingService)
-//                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato,null, 0)
 
 

@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
@@ -60,7 +61,8 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 // Henter sakInformasjon for utgående dokumenter
                 val sakInformasjon=
-                        if (identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) {
+                        if ((identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) ||
+                                (identifisertPerson?.aktoerId != null && sedHendelse.bucType == BucType.P_BUC_02)) {
                             bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, (ytelseType ?: identifisertPerson.personRelasjon.ytelseType))
                         } else { null }
 
