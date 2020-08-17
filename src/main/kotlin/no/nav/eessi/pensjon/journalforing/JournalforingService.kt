@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -32,7 +32,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
-                           private val bestemSakKlient: BestemSakKlient,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -49,7 +48,8 @@ class JournalforingService(private val euxKlient: EuxKlient,
                    identifisertPerson: IdentifisertPerson?,
                    fdato: LocalDate,
                    ytelseType: YtelseType?,
-                   offset: Long = 0) {
+                   offset: Long = 0,
+                   sakInformasjon: SakInformasjon?) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
@@ -59,12 +59,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-                // Henter sakInformasjon for utgående dokumenter
-                val sakInformasjon=
-                        if ((identifisertPerson?.aktoerId != null && hendelseType == HendelseType.SENDT) ||
-                                (identifisertPerson?.aktoerId != null && sedHendelse.bucType == BucType.P_BUC_02)) {
-                            bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, (ytelseType ?: identifisertPerson.personRelasjon.ytelseType))
-                        } else { null }
 
                 if (sakInformasjon != null) {
                     logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakInformasjon på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
@@ -73,7 +67,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 val forsokFerdigstill = sakInformasjon != null
 
                 val tildeltEnhet =
-                        if (sakInformasjon == null) {
+                        if (sakInformasjon == null || sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.MOTTATT) {
                             oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                                     fdato,
                                     identifisertPerson?.diskresjonskode,
@@ -104,7 +98,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelse.avsenderLand,
                     avsenderNavn = sedHendelse.avsenderNavn,
-                    ytelseType = ytelseType ?: sakInformasjon?.sakType
+                    ytelseType = ytelseType
                 )
 
                 // Oppdaterer distribusjonsinfo

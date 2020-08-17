@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.*
 import no.nav.eessi.pensjon.models.HendelseType
@@ -27,7 +28,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
         val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
-                ?: bestemEnhet(routingRequest, routingRequest.bucType)
+                ?: bestemEnhet(routingRequest)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
                 "Buc: ${routingRequest.bucType}, " +
@@ -39,46 +40,45 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         return tildeltEnhet
     }
 
-    private fun bestemEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?) : Enhet {
+    private fun bestemEnhet(routingRequest: OppgaveRoutingRequest) : Enhet {
         return when {
             routingRequest.fnr == null -> ID_OG_FORDELING
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
-            bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest)
+            routingRequest.bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest)
 
-            else -> bestemTildeltEnhet(routingRequest, bucType, routingRequest.ytelseType)
+            else -> bestemTildeltEnhet(routingRequest)
         }
     }
 
-    private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest, bucType: BucType?, ytelseType: YtelseType?): Enhet {
+    private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
-        val fnr = routingRequest.fnr
 
         return when (NORGE) {
             bosatt -> {
-                when (bucType) {
+                when (routingRequest.bucType) {
                     P_BUC_01, P_BUC_04 -> NFP_UTLAND_AALESUND
-                    P_BUC_02 -> ID_OG_FORDELING
+                    P_BUC_02 -> bestemPBuc02Enhet(routingRequest, bosatt)
                     P_BUC_03 -> UFORE_UTLANDSTILSNITT
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                     P_BUC_10 ->
-                        if (ytelseType == YtelseType.UFOREP) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
+                        if (routingRequest.ytelseType == YtelseType.UFOREP) UFORE_UTLANDSTILSNITT else NFP_UTLAND_AALESUND
                     H_BUC_07 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT else NFP_UTLAND_OSLO
                     else -> NFP_UTLAND_AALESUND // Ukjent buc-type
                 }
             }
             else -> {
-                when (bucType) {
+                when (routingRequest.bucType) {
                     P_BUC_01, P_BUC_04 -> PENSJON_UTLAND
-                    P_BUC_02 -> ID_OG_FORDELING
+                    P_BUC_02 -> bestemPBuc02Enhet(routingRequest, bosatt)
                     P_BUC_03 -> UFORE_UTLAND
                     P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                     P_BUC_10 ->
-                        if (ytelseType == YtelseType.UFOREP) UFORE_UTLAND else PENSJON_UTLAND
+                        if (routingRequest.ytelseType == YtelseType.UFOREP) UFORE_UTLAND else PENSJON_UTLAND
                     H_BUC_07 ->
                         if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND else PENSJON_UTLAND
                     else -> PENSJON_UTLAND // Ukjent buc-type
@@ -86,6 +86,29 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             }
         }
     }
+
+    private fun bestemPBuc02Enhet(routingRequest: OppgaveRoutingRequest, bosatt: Bosatt): Enhet =
+
+            when (NORGE) {
+                bosatt -> {
+                    when (routingRequest.ytelseType) {
+                        YtelseType.UFOREP  -> if(routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
+                        YtelseType.ALDER  ->  NFP_UTLAND_AALESUND
+                        YtelseType.BARNEP  -> NFP_UTLAND_AALESUND
+                        YtelseType.GJENLEV -> NFP_UTLAND_AALESUND
+                        else -> ID_OG_FORDELING
+                    }
+                }
+                else -> {
+                    when (routingRequest.ytelseType) {
+                        YtelseType.UFOREP  -> if(routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLAND else ID_OG_FORDELING
+                        YtelseType.ALDER  ->  PENSJON_UTLAND
+                        YtelseType.BARNEP  -> PENSJON_UTLAND
+                        YtelseType.GJENLEV -> PENSJON_UTLAND
+                        else -> ID_OG_FORDELING
+                    }
+                }
+            }
 
     private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         val ytelseType = routingRequest.ytelseType
@@ -147,4 +170,5 @@ class OppgaveRoutingRequest(
         val bucType: BucType? = null,
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
-        val hendelseType: HendelseType? = null)
+        val hendelseType: HendelseType? = null,
+        val sakStatus: SakStatus? = null)
