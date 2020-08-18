@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
 import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.models.BucType
@@ -55,9 +54,6 @@ class JournalforingServiceTest {
     @Mock
     private lateinit var oppgaveHandler: OppgaveHandler
 
-    @Mock
-    private lateinit var bestemSakKlient: BestemSakKlient
-
     private lateinit var journalforingService: JournalforingService
 
     private lateinit var fdato: LocalDate
@@ -70,8 +66,7 @@ class JournalforingServiceTest {
                 journalpostKlient,
                 oppgaveRoutingService,
                 pdfService,
-                oppgaveHandler,
-                bestemSakKlient
+                oppgaveHandler
             )
         journalforingService.initMetrics()
 
@@ -181,7 +176,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
@@ -214,7 +209,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
@@ -247,7 +242,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
@@ -285,7 +280,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -319,7 +314,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -354,7 +349,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -392,7 +387,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyString(),
@@ -431,7 +426,7 @@ class JournalforingServiceTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == YtelseType.UFOREP })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -469,7 +464,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -504,7 +499,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -539,17 +534,14 @@ class JournalforingServiceTest {
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
-        doReturn(SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
-                .`when`(bestemSakKlient)
-                .hentSakInformasjon(any(), any(), any())?.sakId
+        val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
         doReturn(OppgaveRoutingModel.Enhet.UKJENT)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
 
-        val actual =   journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0,saksInfo)
 
-        println(actual)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -561,9 +553,9 @@ class JournalforingServiceTest {
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
                 journalfoerendeEnhet = eq("9999"),
-                arkivsaksnummer = eq(null),
+                arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
+                forsokFerdigstill = eq(true),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
@@ -607,16 +599,13 @@ class JournalforingServiceTest {
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
         )
-
-        doReturn(SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
-                .`when`(bestemSakKlient)
-                .hentSakInformasjon(any(), any(), any())?.sakId
+        val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
         doReturn(OppgaveRoutingModel.Enhet.UKJENT)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, saksInfo )
 
 
         verify(journalpostKlient).opprettJournalpost(
@@ -655,12 +644,9 @@ class JournalforingServiceTest {
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
+        val saksInfo = SakInformasjon("111222", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        doReturn(SakInformasjon("111222", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false))
-                .`when`(bestemSakKlient)
-                .hentSakInformasjon(any(), any(), eq(null))?.sakId
-
-       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.GJENLEV, 0, saksInfo)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -703,7 +689,7 @@ class JournalforingServiceTest {
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null )
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -739,15 +725,11 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        doReturn(null)
-                .`when`(bestemSakKlient)
-                .hentSakInformasjon(any(), any(), eq(null))
-
         doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
                 .`when`(oppgaveRoutingService)
                 .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -766,6 +748,72 @@ class JournalforingServiceTest {
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
         )
+    }
+
+    @Test
+    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid der det finnes kun en sakstype så skal SEDen automatisk journalføres`() {
+
+        val avdodFnr = "02116921297"
+        val hendelse = """
+            {
+              "id": 27403,
+              "sedId": "P2100_e6b0d1bfede5443face4059e720e9d43_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_02",
+              "rinaSakId": "1033470",
+              "avsenderId": "NO:NAVAT07",
+              "avsenderNavn": "POLEN",
+              "avsenderLand": "PL",
+              "mottakerId": "NO:NAVAT08",
+              "mottakerNavn": "Oslo",
+              "mottakerLand": "NO",
+              "rinaDokumentId": "e6b0d1bfede5443face4059e720e9d43",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P2100",
+              "navBruker": "$avdodFnr"
+            }
+        """.trimIndent()
+
+        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+
+
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+        val identifisertGjenlevendePerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "",
+                personRelasjon = PersonRelasjon("12071245602", Relasjon.GJENLEVENDE, YtelseType.BARNEP)
+        )
+        val saksInfo = SakInformasjon("111111", YtelseType.BARNEP, SakStatus.LOPENDE, "4862", false)
+
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, saksInfo)
+
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("1033470"),
+                fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("P_BUC_02"),
+                sedType = eq(SedType.P2100.name),
+                sedHendelseType = eq(HendelseType.MOTTATT.name),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("0001"),
+                arkivsaksnummer = eq("111111"),
+                dokumenter = eq("P2100 Krav om etterlattepensjon"),
+                forsokFerdigstill = eq(false),
+                avsenderLand = eq("PL"),
+                avsenderNavn = eq("POLEN"),
+                ytelseType = eq(YtelseType.BARNEP)
+        )
+
+        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+
     }
 
 }

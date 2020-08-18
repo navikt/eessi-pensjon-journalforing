@@ -123,16 +123,108 @@ class BestemSakKlientTest {
     }
 
     @Test
-    fun `Gitt en P_BUC_02 med utkjent ytelse en kjent aktørId og toggle er på aå returneres null`(){
+    fun `Gitt en P_BUC_02 med ukjent ytelse og en kjent aktørId så skal det returneres null`(){
 
         assertEquals(null, bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, null))
 
     }
 
     @Test
-    fun `Gitt en P_BUC_02 med en kjent aktørID og toggle er av så skal det returneres null`(){
+    fun `Gitt at vi har en P_BUC_02 med uførep og en med Alder og aktørId så skal enhet behandlende enhet null returneres`(){
 
-        assertEquals(null, bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, null))
+        val responseBody = """
+            {
+              "sakInformasjonListe": [
+                {
+                  "sakId": "2345678975414",
+                  "sakType": "UFOREP",
+                  "sakStatus": "AVSLUTTET",
+                  "saksbehandlendeEnhetId": "4476",
+                  "nyopprettet": false
+                }
+              ,
+                {
+                  "sakId": "2345123975414",
+                  "sakType": "ALDER",
+                  "sakStatus": "LOPENDE",
+                  "saksbehandlendeEnhetId": "4303",
+                  "nyopprettet": false
+                }
+              ]
+            }
+        """.trimIndent()
 
+        Mockito.doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        ArgumentMatchers.contains("/"),
+                        eq(HttpMethod.POST),
+                        any(),
+                        eq(String::class.java))
+
+
+        assertEquals(null, bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV)?.saksbehandlendeEnhetId)
     }
+
+    @Test
+    fun `Gitt at vi har en P_BUC_02 med uførep og aktørId så skal enhet behandlende enhet 4476 returneres`(){
+
+        val responseBody = """
+            {
+              "sakInformasjonListe": [
+                {
+                  "sakId": "2345678975414",
+                  "sakType": "UFOREP",
+                  "sakStatus": "LOPENDE",
+                  "saksbehandlendeEnhetId": "4476",
+                  "nyopprettet": false
+                }
+              ]
+            }
+        """.trimIndent()
+
+        Mockito.doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        ArgumentMatchers.contains("/"),
+                        eq(HttpMethod.POST),
+                        any(),
+                        eq(String::class.java))
+
+
+        assertEquals("4476", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV)?.saksbehandlendeEnhetId)
+    }
+
+    @Test
+    fun `Gitt at vi har en P_BUC_02 med kjent aktørId bosatt utland så skal behandlende enhet 0001 returneres`(){
+
+        val responseBody = """
+            {
+              "sakInformasjonListe": [
+                {
+                  "sakId": "2345678975414",
+                  "sakType": "BARNEP",
+                  "sakStatus": "LOPENDE",
+                  "saksbehandlendeEnhetId": "0001",
+                  "nyopprettet": false
+                }
+              ]
+            }
+        """.trimIndent()
+
+        Mockito.doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        ArgumentMatchers.contains("/"),
+                        eq(HttpMethod.POST),
+                        any(),
+                        eq(String::class.java))
+
+
+        assertEquals("0001", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.GJENLEV)?.saksbehandlendeEnhetId)
+    }
+
+
+
+
 }

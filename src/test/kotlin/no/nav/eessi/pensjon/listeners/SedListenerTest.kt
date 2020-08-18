@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +36,9 @@ class SedListenerTest {
     @Mock
     lateinit var sedDokumentHelper: SedDokumentHelper
 
+    @Mock
+    lateinit var bestemSakKlient: BestemSakKlient
+
     lateinit var sedListener: SedListener
 
     val gyldigeHendelser: GyldigeHendelser = GyldigeHendelserProd()
@@ -42,7 +46,7 @@ class SedListenerTest {
 
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient)
         sedListener.initMetrics()
     }
 
@@ -67,10 +71,10 @@ class SedListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelserNonProd())
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelserNonProd(), bestemSakKlient)
         sedListener.initMetrics()
 
-        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser)
+        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient)
         sedListener2.initMetrics()
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
 
@@ -107,14 +111,14 @@ class SedListenerTest {
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any())
+        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test

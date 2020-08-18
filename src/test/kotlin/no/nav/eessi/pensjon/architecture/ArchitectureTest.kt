@@ -128,7 +128,7 @@ class ArchitectureTest {
                 .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, Integrasjonstest)
                 .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
                 .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing, Listeners, OppgaveRouting)
                 //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //.whereLayer(PersonidentifiseringHelpers).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //Verify rules
