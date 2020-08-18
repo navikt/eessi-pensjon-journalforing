@@ -806,7 +806,7 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq("0001"),
                 arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(true),
+                forsokFerdigstill = eq(false),
                 avsenderLand = eq("PL"),
                 avsenderNavn = eq("POLEN"),
                 ytelseType = eq(YtelseType.BARNEP)
