@@ -10,4 +10,5 @@ class EessiPensjonJournalforingApplication
 
 fun main(args: Array<String>) {
 	runApplication<EessiPensjonJournalforingApplication>(*args)
+
 }
