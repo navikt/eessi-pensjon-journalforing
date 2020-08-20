@@ -77,17 +77,23 @@ class FnrHelper {
     private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
         filterPersonPinNode(sedRootNode)?.let{
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+            logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
+
         }
         filterGjenlevendePinNode(sedRootNode)?.let {
-            if (finnGjenlevendeRelasjontilavdod(sedRootNode) == null) {
+            val gjenlevendeRelasjon = finnGjenlevendeRelasjontilavdod(sedRootNode)
+            if (gjenlevendeRelasjon == null) {
                 fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
+                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
                 return
             }
             val gyldigeBarn = listOf("06","07","08","09")
-            if ( gyldigeBarn.contains(finnGjenlevendeRelasjontilavdod(sedRootNode)) ) {
+            if ( gyldigeBarn.contains(gjenlevendeRelasjon) ) {
                 fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.BARNEP))
+                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
             } else {
                 fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.GJENLEV))
+                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
             }
         }
     }
