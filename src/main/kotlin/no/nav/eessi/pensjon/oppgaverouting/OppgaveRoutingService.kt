@@ -40,7 +40,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         return tildeltEnhet
     }
 
-    private fun bestemEnhet(routingRequest: OppgaveRoutingRequest) : Enhet {
+    private fun bestemEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         return when {
             routingRequest.fnr == null -> ID_OG_FORDELING
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
@@ -92,18 +92,18 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             when (NORGE) {
                 bosatt -> {
                     when (routingRequest.ytelseType) {
-                        YtelseType.UFOREP  -> if(routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
-                        YtelseType.ALDER  ->  NFP_UTLAND_AALESUND
-                        YtelseType.BARNEP  -> NFP_UTLAND_AALESUND
+                        YtelseType.UFOREP -> if (routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
+                        YtelseType.ALDER -> NFP_UTLAND_AALESUND
+                        YtelseType.BARNEP -> NFP_UTLAND_AALESUND
                         YtelseType.GJENLEV -> NFP_UTLAND_AALESUND
                         else -> ID_OG_FORDELING
                     }
                 }
                 else -> {
                     when (routingRequest.ytelseType) {
-                        YtelseType.UFOREP  -> if(routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLAND else ID_OG_FORDELING
-                        YtelseType.ALDER  ->  PENSJON_UTLAND
-                        YtelseType.BARNEP  -> PENSJON_UTLAND
+                        YtelseType.UFOREP -> if (routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLAND else ID_OG_FORDELING
+                        YtelseType.ALDER -> PENSJON_UTLAND
+                        YtelseType.BARNEP -> PENSJON_UTLAND
                         YtelseType.GJENLEV -> PENSJON_UTLAND
                         else -> ID_OG_FORDELING
                     }
@@ -113,21 +113,19 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         val ytelseType = routingRequest.ytelseType
 
-        if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-            if (routingRequest.sedType == SedType.R004) {
-                return OKONOMI_PENSJON
-            }
-            return when (ytelseType) {
+        if (routingRequest.sedType == SedType.R004) {
+            return OKONOMI_PENSJON
+        }
+
+        return if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+
+            when (ytelseType) {
                 YtelseType.ALDER -> PENSJON_UTLAND
                 YtelseType.UFOREP -> UFORE_UTLAND
                 else -> ID_OG_FORDELING
             }
         } else {
-            return if (routingRequest.sedType == SedType.R004) {
-                OKONOMI_PENSJON
-            } else {
-                ID_OG_FORDELING
-            }
+            ID_OG_FORDELING
         }
     }
 
