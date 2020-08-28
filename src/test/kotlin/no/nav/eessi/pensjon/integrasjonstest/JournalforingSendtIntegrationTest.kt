@@ -1,22 +1,13 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.given
-import com.nhaarman.mockitokotlin2.isNull
 import io.mockk.*
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
 import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.common.errors.AuthorizationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.willThrow
-import org.mockito.Mockito.mock
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
@@ -30,24 +21,21 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod
-import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.event.ConsumerStoppingEvent
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.time.Duration
 import java.util.*
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
@@ -73,65 +61,36 @@ class JournalforingSendtIntegrationTest {
     lateinit var personV3Service: PersonV3Service
 
     @Test
-    @Throws(Exception::class)
-    fun testFatalErrorOnAuthorizationException() {
-        val cf: ConsumerFactory<*, *>? = mock(ConsumerFactory::class.java)
-        val consumer: Consumer<*, *>? = mock(Consumer::class.java)
-        given(cf?.createConsumer(eq("grp"), eq("clientId"), isNull(), any())).willReturn(consumer)
-        given(cf?.getConfigurationProperties()).willReturn(HashMap())
+    fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
-        willThrow(AuthorizationException::class.java)
-                .given(consumer)?.poll(eq(Duration.ofMillis(5000)))
+        // Mock personV3
+        capturePersonMock()
 
-
-        val containerProps = ContainerProperties(SED_SENDT_TOPIC)
-        containerProps.groupId = "grp"
-        containerProps.clientId = "clientId"
-        containerProps.messageListener = MessageListener<Int, String> { r: ConsumerRecord<*, *>? -> }
-        val container = KafkaMessageListenerContainer(cf, containerProps)
-        val stopping = CountDownLatch(1)
-        container.setApplicationEventPublisher { e: Any? ->
-            if (e is ConsumerStoppingEvent) {
-                stopping.countDown()
-            }
-        }
+        // Vent til kafka er klar
+        val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
         container.start()
-        stopping.await(20, TimeUnit.SECONDS)
-//        assertThat(stopping.await(10, TimeUnit.SECONDS)).isTrue()
-        container.stop()
-    }
+        ContainerTestUtils.waitForAssignment(container, embeddedKafka.partitionsPerTopic)
 
-//    @Test
-//    fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
-//
-//        // Mock personV3
-//        capturePersonMock()
-//
-//        // Vent til kafka er klar
-//        val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
-//        container.start()
-//        ContainerTestUtils.waitForAssignment(container, embeddedKafka.partitionsPerTopic)
-//
-//        // oppgave lytter kafka
-//        val oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
-//        oppgaveContainer.start()
-//        ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
-//
-//        // Sett opp producer
-//        val sedSendtProducerTemplate = settOppProducerTemplate()
-//
-//        // produserer sedSendt meldinger på kafka
-//        produserSedHendelser(sedSendtProducerTemplate)
-//
-//        // Venter på at sedListener skal consumeSedSendt meldingene
-//        sedListener.getLatch().await(20000, TimeUnit.MILLISECONDS)
-//
-//        // Verifiserer alle kall
-//        verifiser()
-//
-//        // Shutdown
-//        shutdown(container)
-//    }
+        // oppgave lytter kafka
+        val oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
+        oppgaveContainer.start()
+        ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
+
+        // Sett opp producer
+        val sedSendtProducerTemplate = settOppProducerTemplate()
+
+        // produserer sedSendt meldinger på kafka
+        produserSedHendelser(sedSendtProducerTemplate)
+
+        // Venter på at sedListener skal consumeSedSendt meldingene
+        sedListener.getLatch().await(20000, TimeUnit.MILLISECONDS)
+
+        // Verifiserer alle kall
+        verifiser()
+
+        // Shutdown
+        shutdown(container)
+    }
 
     private fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
         // Sender 1 Foreldre SED til Kafka
