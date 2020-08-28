@@ -397,7 +397,7 @@ class JournalforingSendtIntegrationTest {
                     request()
                             .withMethod(HttpMethod.POST.name)
                             .withPath("/")
-            )
+                    )
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -406,7 +406,7 @@ class JournalforingSendtIntegrationTest {
                     )
 
             // Mocker oppdaterDistribusjonsinfo
-            mockServer.`when`(
+           mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.PATCH.name)
                             .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
