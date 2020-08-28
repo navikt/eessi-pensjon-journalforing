@@ -44,10 +44,10 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
 
-@SpringBootTest(classes = [JournalforingSendtIntegrationTest.TestConfig::class])
+@SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkasendt"])
+@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkasendt"])
 class JournalforingSendtIntegrationTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -317,7 +317,7 @@ class JournalforingSendtIntegrationTest {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"))
+                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx" ))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -328,7 +328,7 @@ class JournalforingSendtIntegrationTest {
             mockServer.`when`(
                     request()
                             .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"))
+                            .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018" ))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -406,10 +406,10 @@ class JournalforingSendtIntegrationTest {
                     )
 
             // Mocker oppdaterDistribusjonsinfo
-           mockServer.`when`(
-                   request()
-                           .withMethod(HttpMethod.PATCH.name)
-                           .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.PATCH.name)
+                            .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
@@ -418,7 +418,7 @@ class JournalforingSendtIntegrationTest {
                     )
         }
 
-        private fun randomFrom(from: Int = 1024, to: Int = 65535): Int {
+        private fun randomFrom(from : Int = 1024, to: Int = 65535): Int {
             val random = Random()
             return random.nextInt(to - from) + from
         }
@@ -518,7 +518,7 @@ class JournalforingSendtIntegrationTest {
                 request()
                         .withMethod(HttpMethod.GET.name)
                         .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast(4)
+                VerificationTimes.atLeast( 4 )
         )
 
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
