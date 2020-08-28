@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
