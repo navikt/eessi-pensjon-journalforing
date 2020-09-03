@@ -631,7 +631,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbehandler har opprettet en p2100 med et norsk fnr eller dnr for gjenlevende så skal SEDen automatisk journalføres`() {
+    fun `Gitt at saksbehandler har opprettet en p2100 med et norsk fnr eller dnr med UFØREP og sakstatus er Avsluttet så skal SEDen journalføres med oppgave ikke ferdigstille`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -644,9 +644,13 @@ class JournalforingServiceTest {
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
-        val saksInfo = SakInformasjon("111222", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val saksInfo = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.GJENLEV, 0, saksInfo)
+        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
+                .`when`(oppgaveRoutingService)
+                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
+
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, saksInfo)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -657,13 +661,13 @@ class JournalforingServiceTest {
                 sedHendelseType = eq("SENDT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("9999"),
+                journalfoerendeEnhet = eq("4303"),
                 arkivsaksnummer = eq("111222"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(true),
+                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(YtelseType.GJENLEV)
+                ytelseType = eq(YtelseType.UFOREP)
         )
 
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde

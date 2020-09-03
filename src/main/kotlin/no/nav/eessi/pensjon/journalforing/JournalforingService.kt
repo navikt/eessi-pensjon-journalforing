@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
+import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -115,9 +116,9 @@ class JournalforingService(private val euxKlient: EuxKlient,
         return tildeltEnhet == OppgaveRoutingModel.Enhet.UKJENT
     }
 
-    private fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
+    fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
         val tildeltEnhet =
-                if (sakInformasjon == null || sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.MOTTATT) {
+                if (tildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType)) {
                     oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                             fdato,
                             identifisertPerson?.diskresjonskode,
@@ -133,6 +134,15 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     OppgaveRoutingModel.Enhet.UKJENT
                 }
         return tildeltEnhet
+    }
+
+    fun tildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType): Boolean {
+        return when {
+            sakInformasjon == null -> true
+            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.MOTTATT -> true
+            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            else -> false
+        }
     }
 
     private fun publishOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
