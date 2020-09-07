@@ -140,7 +140,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
         return when {
             sakInformasjon == null -> true
             sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.MOTTATT -> true
-            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             else -> false
         }
     }
