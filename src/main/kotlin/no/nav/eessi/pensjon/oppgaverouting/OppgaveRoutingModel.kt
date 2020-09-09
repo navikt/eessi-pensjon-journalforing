@@ -28,7 +28,7 @@ class OppgaveRoutingModel(
         ID_OG_FORDELING("4303"),
         DISKRESJONSKODE("2103"),
         OKONOMI_PENSJON("4819"),
-        UKJENT("9999");
+        AUTOMATISK_JOURNALFORING("9999");
 
         companion object {
             fun getEnhet(enhetsNr: String): Enhet? = values().find { it.enhetsNr == enhetsNr }

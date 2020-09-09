@@ -12,6 +12,9 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -94,7 +97,9 @@ class OppgaveRoutingServiceTest {
                 geografiskTilknytning = dummyTilknytning,
                 bucType = R_BUC_02,
                 hendelseType = HendelseType.MOTTATT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
     }
 
     @Test
@@ -107,7 +112,9 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 ytelseType = YtelseType.ALDER,
                 hendelseType = HendelseType.MOTTATT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
     }
 
     @Test
@@ -120,11 +127,13 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 ytelseType = YtelseType.UFOREP,
                 hendelseType = HendelseType.MOTTATT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
     }
 
     @Test
-    fun `Routing av mottatte sed R004 på R_BUC_02`() {
+    fun `Routing av mottatte sed R004 på R_BUC_02 skal gi en routing til UFORE_UTLAND`() {
         assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
                 fnr = "01010101010",
                 fdato = irrelevantDato(),
@@ -134,7 +143,9 @@ class OppgaveRoutingServiceTest {
                 ytelseType = YtelseType.UFOREP,
                 sedType = SedType.R004,
                 hendelseType = HendelseType.MOTTATT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
     }
 
     @Test
@@ -151,6 +162,34 @@ class OppgaveRoutingServiceTest {
                 sakStatus = null)))
     }
 
+    @Test
+    fun `Routing av mottatte sed R_BUC_02 med mer enn én person routes til ID_OG_FORDELING`() {
+        val person = IdentifisertPerson(
+                "123",
+                "Testern",
+                null,
+                "NO",
+                "010",
+                PersonRelasjon("12345678910", Relasjon.FORSIKRET))
+
+        person.personListe = listOf(person, person)
+
+        val enhetresult = routingService.route(OppgaveRoutingRequest(
+                fnr = "123123123",
+                fdato = irrelevantDato(),
+                landkode = UTLAND,
+                geografiskTilknytning = dummyTilknytning,
+                bucType = R_BUC_02,
+                ytelseType = YtelseType.UFOREP,
+                sedType = SedType.R005,
+                hendelseType = HendelseType.MOTTATT,
+                sakStatus = null,
+                identifisertPerson = person))
+
+        assertEquals(ID_OG_FORDELING, enhetresult)
+
+    }
+
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
     @Test
@@ -163,7 +202,9 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 sedType = SedType.R005,
                 hendelseType = HendelseType.SENDT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
 
         assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
                 fnr = "01010101010",
@@ -173,7 +214,9 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 sedType = SedType.R004,
                 hendelseType = HendelseType.SENDT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
 
         assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
                 fnr = "01010101010",
@@ -183,7 +226,9 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 sedType = SedType.R004,
                 hendelseType = HendelseType.SENDT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
 
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(
                 fnr = "01010101010",
@@ -193,7 +238,9 @@ class OppgaveRoutingServiceTest {
                 bucType = R_BUC_02,
                 sedType = SedType.R005,
                 hendelseType = HendelseType.SENDT,
-                sakStatus = null)))
+                sakStatus = null,
+                identifisertPerson = mockerEnPerson()
+        )))
 
     }
 
@@ -315,10 +362,10 @@ class OppgaveRoutingServiceTest {
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(landkode = "SVE"),P_BUC_01)
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(landkode = "SVE"), P_BUC_01)
         val expected = PENSJON_UTLAND
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -331,7 +378,7 @@ class OppgaveRoutingServiceTest {
             P_BUC_01)
         val expected = NFP_UTLAND_OSLO
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -344,7 +391,7 @@ class OppgaveRoutingServiceTest {
             P_BUC_01)
         val expected = NFP_UTLAND_AALESUND
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -357,19 +404,19 @@ class OppgaveRoutingServiceTest {
                 geografiskTilknytning = "1102",
                 landkode = "NOR",
                 diskresjonskode = "SPSF"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = DISKRESJONSKODE
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
-       val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-            P_BUC_03)
-       val expected = null
+        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
+                P_BUC_03)
+        val expected = null
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -381,7 +428,7 @@ class OppgaveRoutingServiceTest {
             P_BUC_01)
         val expected = null
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -393,7 +440,7 @@ class OppgaveRoutingServiceTest {
             P_BUC_01)
         val expected = null
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -406,10 +453,10 @@ class OppgaveRoutingServiceTest {
                 geografiskTilknytning = "0322",
                 landkode = "NOR",
                 diskresjonskode = "SPSF"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = DISKRESJONSKODE
 
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -426,5 +473,13 @@ class OppgaveRoutingServiceTest {
     private fun getJsonFileFromResource(filename: String): String {
         return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
+
+    private fun mockerEnPerson() = IdentifisertPerson(
+            "123",
+            "Testern",
+            null,
+            "NO",
+            "010",
+            PersonRelasjon("12345678910", Relasjon.FORSIKRET))
 
 }

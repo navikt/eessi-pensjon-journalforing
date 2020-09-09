@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.NORGE
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -42,7 +43,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     private fun bestemEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         return when {
-            routingRequest.fnr == null -> ID_OG_FORDELING
+
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
 
             routingRequest.bucType == R_BUC_02 -> bestemRbucEnhet(routingRequest)
@@ -113,20 +114,24 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private fun bestemRbucEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         val ytelseType = routingRequest.ytelseType
 
+        if (routingRequest.identifisertPerson != null && routingRequest.identifisertPerson.flereEnnEnPerson()) {
+            return ID_OG_FORDELING
+        }
+
         if (routingRequest.sedType == SedType.R004) {
             return OKONOMI_PENSJON
         }
 
-        return if (HendelseType.MOTTATT == routingRequest.hendelseType) {
-
-            when (ytelseType) {
+        if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+            return when (ytelseType) {
                 YtelseType.ALDER -> PENSJON_UTLAND
                 YtelseType.UFOREP -> UFORE_UTLAND
                 else -> ID_OG_FORDELING
             }
-        } else {
-            ID_OG_FORDELING
         }
+
+
+        return ID_OG_FORDELING
     }
 
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
@@ -169,4 +174,6 @@ class OppgaveRoutingRequest(
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
         val hendelseType: HendelseType? = null,
-        val sakStatus: SakStatus? = null)
+        val sakStatus: SakStatus? = null,
+        val identifisertPerson: IdentifisertPerson? = null
+)

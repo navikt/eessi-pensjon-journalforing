@@ -287,7 +287,24 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
-    fun `Gitt en liste med to hovedpersoner så kast RuntimeException`(){
+    fun `Gitt en R_BUC_02 med kun en person når personer identifiseres så returneres første person`(){
+        val gjenlevende = IdentifisertPerson(
+                "123",
+                "Testern",
+                null,
+                "NO",
+                "010",
+                PersonRelasjon("12345678910", Relasjon.GJENLEVENDE))
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(gjenlevende), BucType.R_BUC_02)
+
+        assertEquals(gjenlevende, result)
+        assertEquals(1, result?.personListe?.size)
+        assertEquals(false , result?.flereEnnEnPerson())
+    }
+
+    @Test
+    fun `Gitt en R_BUC_02 med to hovedpersoner når personer identifiseres så returneres første person`(){
         val avdod = IdentifisertPerson(
                 "123",
                 "Testern",
@@ -303,19 +320,13 @@ class PersonidentifiseringServiceTest {
                 "NO",
                 "010",
                 PersonRelasjon("12345678910", Relasjon.GJENLEVENDE))
-        assertThrows<RuntimeException>{personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02)}
-    }
 
-    @Test
-    fun `Gitt en liste med flere avdøde på R_BUC_02 så vreturnerer vi RuntimeException`(){
-        val avdod = IdentifisertPerson(
-                "123",
-                "Testern",
-                null,
-                "NO",
-                "010",
-                PersonRelasjon("12345678910", Relasjon.AVDOD))
-        assertThrows<RuntimeException>{personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, avdod, avdod, avdod, avdod), BucType.R_BUC_02)}
+        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02)
+
+        assertEquals(avdod, result)
+        assertEquals(2, result?.personListe?.size)
+        assertEquals(true , result?.flereEnnEnPerson())
+
     }
 
     @Test
@@ -374,10 +385,27 @@ class PersonidentifiseringServiceTest {
         assertThrows<RuntimeException> {
             personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03)
         }
-        assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, BucType.R_BUC_02)
-        }
+
     }
+
+    @Test
+//    Scenario 1 - inngående SED, Scenario 2 - utgående SED, Scenario 3 - ingen saksnummer/feil saksnummer
+    fun `Gitt det kommer inn SED på R_BUC_02 med flere enn en person Når personer identifiseres Så skal første person returneres`() {
+        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+
+        val list = listOf(person1, person2, person3)
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(list, BucType.R_BUC_02)
+
+        assertEquals(person1, result)
+        assertEquals(3, result?.personListe?.size)
+        assertEquals(true , result?.flereEnnEnPerson())
+
+    }
+
+
 
 
     @Test
@@ -424,13 +452,11 @@ class PersonidentifiseringServiceTest {
         val avdod = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("5678", Relasjon.FORSIKRET))
 
         val list = listOf<IdentifisertPerson>(gjenlevende, avdod)
-
-
-
-
         val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
 
         assertEquals(gjenlevende, actual)
+        assertEquals(false, actual?.flereEnnEnPerson())
+
     }
 
 

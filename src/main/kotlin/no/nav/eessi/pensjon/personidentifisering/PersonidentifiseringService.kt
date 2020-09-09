@@ -96,7 +96,13 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
         return when {
             identifisertePersoner.isEmpty() -> null
-            identifisertePersoner.size == 1 -> identifisertePersoner.first()
+            bucType == BucType.R_BUC_02 -> {
+                return run {
+                    val forstPersonIdent = identifisertePersoner.first()
+                    forstPersonIdent.personListe = identifisertePersoner
+                    forstPersonIdent
+                }
+            }
             bucType == BucType.P_BUC_02 -> {
                 val identer = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
                 if (identer.isEmpty()) {
@@ -105,6 +111,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     identer.first()
                 }
             }
+            identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
                 logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
                 throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
@@ -154,8 +161,16 @@ data class IdentifisertPerson(
         val diskresjonskode: String? = null,
         val landkode: String?,
         val geografiskTilknytning: String?,
-        val personRelasjon: PersonRelasjon
-)
+        val personRelasjon: PersonRelasjon,
+        var personListe: List<IdentifisertPerson>? = null
+) {
+    override fun toString(): String {
+        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, diskresjonskode=$diskresjonskode, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
+    }
+
+    fun flereEnnEnPerson() = personListe != null && personListe!!.size > 1
+}
+
 
 data class PersonRelasjon(
         val fnr: String,

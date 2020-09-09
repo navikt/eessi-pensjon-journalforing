@@ -10,8 +10,11 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
 import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.BucType.P_BUC_02
+import no.nav.eessi.pensjon.models.BucType.R_BUC_02
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
@@ -113,12 +116,12 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet): Boolean {
-        return tildeltEnhet == OppgaveRoutingModel.Enhet.UKJENT
+        return tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
     }
 
     fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
         val tildeltEnhet =
-                if (tildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType)) {
+                if (tildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
                     oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                             fdato,
                             identifisertPerson?.diskresjonskode,
@@ -131,17 +134,21 @@ class JournalforingService(private val euxKlient: EuxKlient,
                             sakInformasjon?.sakStatus)
                     )
                 } else {
-                    OppgaveRoutingModel.Enhet.UKJENT
+                    OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
                 }
         return tildeltEnhet
     }
 
-    fun tildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType): Boolean {
+
+    fun tildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
+        if (sakInformasjon == null) return true
+
         return when {
-            sakInformasjon == null -> true
-            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.MOTTATT -> true
-            sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelse.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
+            sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelse.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
             else -> false
+
         }
     }
 
