@@ -75,7 +75,6 @@ dependencies {
 
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
 	implementation("commons-io:commons-io:2.6")
-	implementation("org.hibernate:hibernate-validator:6.1.5.Final")
 
 	implementation("org.apache.httpcomponents:httpclient:4.5.12")
 
