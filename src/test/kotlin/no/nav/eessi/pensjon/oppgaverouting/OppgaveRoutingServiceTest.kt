@@ -164,27 +164,33 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing av mottatte sed R_BUC_02 med mer enn én person routes til ID_OG_FORDELING`() {
-        val person = IdentifisertPerson(
+        val forsikret = IdentifisertPerson(
                 "123",
                 "Testern",
                 null,
-                "NO",
+                null,
                 "010",
                 PersonRelasjon("12345678910", Relasjon.FORSIKRET))
-
-        person.personListe = listOf(person, person)
+        val avod = IdentifisertPerson(
+                "234",
+                "Avdod",
+                null,
+                null,
+                "010",
+                PersonRelasjon("22345678910", Relasjon.AVDOD))
+        forsikret.personListe = listOf(forsikret, avod)
 
         val enhetresult = routingService.route(OppgaveRoutingRequest(
                 fnr = "123123123",
                 fdato = irrelevantDato(),
-                landkode = UTLAND,
+                landkode = null,
                 geografiskTilknytning = dummyTilknytning,
                 bucType = R_BUC_02,
-                ytelseType = YtelseType.UFOREP,
+                ytelseType = YtelseType.ALDER,
                 sedType = SedType.R005,
                 hendelseType = HendelseType.MOTTATT,
                 sakStatus = null,
-                identifisertPerson = person))
+                identifisertPerson = forsikret))
 
         assertEquals(ID_OG_FORDELING, enhetresult)
 

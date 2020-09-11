@@ -1,6 +1,6 @@
 {
   "id": 1869,
-  "sedId": "P2000_b12e06dda2c7474b9998c7139c841646_2",
+  "sedId": "P150000_b12e06dda2c7474b9998c7139c841646_2",
   "sektorKode": "P",
   "bucType": "P_BUC_10",
   "rinaSakId": "147729",
@@ -12,6 +12,6 @@
   "mottakerLand": "NO",
   "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
   "rinaDokumentVersjon": "2",
-  "sedType": "P2000",
+  "sedType": "P15000",
   "navBruker": "12078945602"
 }

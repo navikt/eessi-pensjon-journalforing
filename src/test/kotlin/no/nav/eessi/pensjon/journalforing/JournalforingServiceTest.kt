@@ -8,11 +8,10 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
 import no.nav.eessi.pensjon.klienter.pesys.SakStatus
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
+import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -45,8 +44,9 @@ class JournalforingServiceTest {
     @Mock
     private lateinit var fagmodulKlient: FagmodulKlient
 
+
     @Mock
-    private lateinit var oppgaveRoutingService: OppgaveRoutingService
+    private lateinit var norg2Klient: Norg2Klient
 
     @Mock
     private lateinit var pdfService: PDFService
@@ -58,9 +58,13 @@ class JournalforingServiceTest {
 
     private lateinit var fdato: LocalDate
 
+    private lateinit var oppgaveRoutingService: OppgaveRoutingService
+
     @BeforeEach
     fun setup() {
         fdato = LocalDate.now()
+
+        oppgaveRoutingService = OppgaveRoutingService(norg2Klient)
 
         journalforingService = JournalforingService(euxKlient,
                 journalpostKlient,
@@ -108,6 +112,11 @@ class JournalforingServiceTest {
                 .parseJsonDocuments(any(), eq(SedType.R005))
 
 
+        doReturn(Pair<String, List<EuxDokument>>("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList()))
+                .`when`(pdfService)
+                .parseJsonDocuments(any(), eq(SedType.P15000))
+
+
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostKlient)
@@ -128,39 +137,6 @@ class JournalforingServiceTest {
                     avsenderNavn = anyOrNull(),
                     ytelseType = anyOrNull()
                 )
-
-        //OPPGAVEROUTING ROUTE
-        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_01 && arg.ytelseType == null })
-
-        doReturn(OppgaveRoutingModel.Enhet.OKONOMI_PENSJON)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R004 })
-
-        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.sedType == SedType.R005 })
-
-        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == null })
-
-        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_03 && arg.ytelseType == null })
-
-        doReturn(OppgaveRoutingModel.Enhet.UFORE_UTLAND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_10 && arg.ytelseType == null })
-
-        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_10 && arg.ytelseType == null })
-
-        doReturn(OppgaveRoutingModel.Enhet.DISKRESJONSKODE)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_05 && arg.ytelseType == null })
     }
 
     @Test
@@ -210,6 +186,7 @@ class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
+
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
@@ -219,7 +196,7 @@ class JournalforingServiceTest {
                 sedHendelseType = eq("SENDT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                journalfoerendeEnhet = eq("4303"),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -242,10 +219,6 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
-        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.R_BUC_02 && arg.ytelseType == YtelseType.UFOREP})
-
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
         verify(journalpostKlient).opprettJournalpost(
@@ -266,6 +239,49 @@ class JournalforingServiceTest {
                 ytelseType = eq(YtelseType.UFOREP)
         )
     }
+
+    @Test
+    fun `Gitt en R_BUC_02 og sed med flere personer MOTTATT Så skal det opprettes Oppgave og enhet 4303`() {
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val identifisertPerson = IdentifisertPerson(
+                "12078945602",
+                "Test Testesen",
+                "",
+                "",
+                "3811",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
+        val dodPerson = IdentifisertPerson(
+                "22078945602",
+                "Dod Begravet",
+                "",
+                "",
+                "3811",
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.AVDOD))
+
+        identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
+
+      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
+
+        verify(journalpostKlient).opprettJournalpost(
+                rinaSakId = eq("2536475861"),
+                fnr = eq("12078945602"),
+                personNavn = eq("Test Testesen"),
+                bucType = eq("R_BUC_02"),
+                sedType = eq(SedType.R005.name),
+                sedHendelseType = eq("MOTTATT"),
+                eksternReferanseId = eq(null),
+                kanal = eq("EESSI"),
+                journalfoerendeEnhet = eq("4303"),
+                arkivsaksnummer = eq(null),
+                dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
+                forsokFerdigstill = eq(false),
+                avsenderLand = anyOrNull(),
+                avsenderNavn = anyOrNull(),
+                ytelseType = eq(YtelseType.ALDER)
+        )
+    }
+
 
     @Test
     fun `Sendt gyldig Sed P2000`(){
@@ -313,7 +329,7 @@ class JournalforingServiceTest {
                 "12078945602",
                 "Test Testesen",
                 "",
-                "",
+                "NOR",
                 "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
@@ -329,7 +345,7 @@ class JournalforingServiceTest {
                 sedHendelseType = eq("SENDT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                journalfoerendeEnhet = eq("4476"),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -341,7 +357,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
@@ -359,13 +375,13 @@ class JournalforingServiceTest {
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
                 bucType = eq("P_BUC_10"),
-                sedType = eq(SedType.P2000.name),
+                sedType = eq(SedType.P15000.name),
                 sedHendelseType = eq("SENDT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4862"),
+                journalfoerendeEnhet = eq("0001"),
                 arkivsaksnummer = eq(null),
-                dokumenter = eq("P2000 Supported Documents"),
+                dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
@@ -455,16 +471,12 @@ class JournalforingServiceTest {
                 "12078945602",
                 "Test Testesen",
                 "",
-                "",
+                "NOR",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        doReturn(OppgaveRoutingModel.Enhet.NFP_UTLAND_AALESUND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 && arg.ytelseType == YtelseType.UFOREP })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -481,7 +493,7 @@ class JournalforingServiceTest {
                 forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
+                ytelseType = eq(YtelseType.ALDER)
         )
     }
 
@@ -513,7 +525,7 @@ class JournalforingServiceTest {
                 sedHendelseType = eq("MOTTATT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                journalfoerendeEnhet = eq("4475"),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -525,7 +537,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat Sed i P_BUC_10`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P2000.json")))
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
@@ -544,13 +556,13 @@ class JournalforingServiceTest {
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
                 bucType = eq("P_BUC_10"),
-                sedType = eq(SedType.P2000.name),
+                sedType = eq(SedType.P15000.name),
                 sedHendelseType = eq("MOTTATT"),
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4862"),
+                journalfoerendeEnhet = eq("0001"),
                 arkivsaksnummer = eq(null),
-                dokumenter = eq("P2000 Supported Documents"),
+                dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
@@ -574,12 +586,7 @@ class JournalforingServiceTest {
         )
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        doReturn(OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0,saksInfo)
-
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0,saksInfo)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -598,7 +605,6 @@ class JournalforingServiceTest {
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
         )
-
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
     }
@@ -639,12 +645,7 @@ class JournalforingServiceTest {
         )
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        doReturn(OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, saksInfo )
-
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, saksInfo )
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("1033470"),
@@ -684,11 +685,7 @@ class JournalforingServiceTest {
         )
         val saksInfo = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
-        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, saksInfo)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, saksInfo)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -727,11 +724,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null )
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null )
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -767,11 +760,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        doReturn(OppgaveRoutingModel.Enhet.ID_OG_FORDELING)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -816,11 +805,6 @@ class JournalforingServiceTest {
             }
         """.trimIndent()
 
-        doReturn(OppgaveRoutingModel.Enhet.PENSJON_UTLAND)
-                .`when`(oppgaveRoutingService)
-                .route(argWhere { arg -> arg.bucType == BucType.P_BUC_02 })
-
-
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertGjenlevendePerson = IdentifisertPerson(
@@ -834,7 +818,6 @@ class JournalforingServiceTest {
         val saksInfo = SakInformasjon("111111", YtelseType.BARNEP, SakStatus.LOPENDE, "4862", false)
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, saksInfo)
-
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("1033470"),
