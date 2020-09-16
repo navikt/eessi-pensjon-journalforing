@@ -670,7 +670,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbehandler har opprettet en p2100 med et norsk fnr eller dnr med UFØREP og sakstatus er Avsluttet så skal SEDen journalføres med oppgave ikke ferdigstille`() {
+    fun `Gitt at saksbehandler har opprettet en P2100 med et norsk fnr eller dnr med UFØREP og sakstatus er Avsluttet så skal SED journalføres med oppgave ikke ferdigstille`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -681,11 +681,11 @@ class JournalforingServiceTest {
                 "",
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET, YtelseType.GJENLEV)
         )
-        val saksInfo = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
+        val sakInformasjon = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, saksInfo)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,  null, 0,  sakInformasjon)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -697,15 +697,15 @@ class JournalforingServiceTest {
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
                 journalfoerendeEnhet = eq("4303"),
-                arkivsaksnummer = eq("111222"),
+                arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(YtelseType.UFOREP)
+                ytelseType = eq(null)
         )
 
-        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+       //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
     }
 

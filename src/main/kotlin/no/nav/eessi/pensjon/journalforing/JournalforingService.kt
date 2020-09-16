@@ -81,7 +81,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
                     journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                    arkivsaksnummer = sakInformasjon?.sakId,
+                    arkivsaksnummer = sakIdVelger(sakInformasjon, sedHendelse, hendelseType),
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelse.avsenderLand,
@@ -115,9 +115,14 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet): Boolean {
-        return tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
+    private fun sakIdVelger(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType): String? {
+        if (sakInformasjon != null && sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+            return null
+        }
+        return sakInformasjon?.sakId
     }
+
+    private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet) = tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
 
     fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
         val tildeltEnhet =
@@ -139,7 +144,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 }
         return tildeltEnhet
     }
-
 
     fun tildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
         if (sakInformasjon == null) return true

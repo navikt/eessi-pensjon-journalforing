@@ -5,8 +5,10 @@ import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.SakInformasjon
+import no.nav.eessi.pensjon.klienter.pesys.SakStatus
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.YtelseType
@@ -71,7 +73,7 @@ class SedListener(
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
                         val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                         val sakInformasjon = sakInformasjonSendt(identifisertPerson, sedHendelse, ytelseTypeFraSED)
-                        val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon)
+                        val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, SENDT)
 
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset, sakInformasjon )
                     }
@@ -116,7 +118,7 @@ class SedListener(
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
                             val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                             val sakInformasjon = sakInformasjonMottatt(identifisertPerson, sedHendelse)
-                            val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon)
+                            val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, MOTTATT)
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
 
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset, sakInformasjon )
@@ -149,20 +151,22 @@ class SedListener(
     }
     private fun sakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelseModel, ytelsestypeFraSed: YtelseType?): SakInformasjon? {
         return if (identifisertPerson?.aktoerId != null) {
-            bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, populerYtelsestypeSendt(ytelsestypeFraSed, identifisertPerson))
+            bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
         } else {
             null
         }
     }
 
-    private fun populerYtelsestypeSendt(ytelsestypeFraSed: YtelseType?,identifisertPerson: IdentifisertPerson?) : YtelseType? {
+    private fun populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed: YtelseType?, identifisertPerson: IdentifisertPerson?) : YtelseType? {
         if (ytelsestypeFraSed != null)
             return ytelsestypeFraSed
         return identifisertPerson?.personRelasjon?.ytelseType
     }
 
-    private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, sakInformasjon: SakInformasjon?) : YtelseType? {
-        if(ytelseTypeFraSED != null)
+    private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType) : YtelseType? {
+        if (sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == SENDT && sakInformasjon!= null && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+            return null
+        } else if(ytelseTypeFraSED != null)
             return ytelseTypeFraSED
         return sakInformasjon?.sakType
     }

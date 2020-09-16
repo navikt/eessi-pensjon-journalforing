@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doThrow
 import no.nav.eessi.pensjon.json.toJson
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,6 +19,7 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.*
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
@@ -142,7 +144,7 @@ class JournalpostKlientTest {
     }
 
     @Test
-    fun `gittEnUKJournalpostSåByttTilGBFordiPesysKunStøtterGB`() {
+    fun `gitt En UK Journalpost Så Bytt Til GB Fordi Pesys Kun Støtter GB`() {
 
         val journalpostCaptor = argumentCaptor<HttpEntity<Any>>()
 
@@ -203,7 +205,76 @@ class JournalpostKlientTest {
     }
 
     @Test
-    fun `gittJournalpostIdNårOppdaterDistribusjonsinfoSåOppdaterJournalpostMedEESSI`() {
+    fun `Gitt en P2100 med UFØREP Når den er AVSLUTTET Så opprettes en Journalpost uten saknr og til enhet 4303 og tema Pensjon`() {
+        ReflectionTestUtils.setField(journalpostKlient, "navOrgnummer", "NAV ORG" )
+
+        val journalpostCaptor = argumentCaptor<HttpEntity<Any>>()
+        val mapper = jacksonObjectMapper()
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
+        val requestBody = """
+            {
+              "avsenderMottaker" : {
+                "id" : "NAV ORG",
+                "idType" : "ORGNR",
+                "navn" : "NAV",
+                "land" : "NO"
+              },
+              "behandlingstema" : "ab0011",
+              "bruker" : {
+                "id" : "12078945602",
+                "idType" : "FNR"
+              },
+              "dokumenter" : ["P2100"],
+              "journalfoerendeEnhet" : "4303",
+              "journalpostType" : "UTGAAENDE",
+              "kanal" : "EESSI",
+              "tema" : "PEN",
+              "tilleggsopplysninger" : [ {
+                "nokkel" : "eessi_pensjon_bucid",
+                "verdi" : "147730"
+              } ],
+              "tittel" : "Utgående P2100"
+            }
+        """.trimIndent()
+
+
+        doReturn(
+                ResponseEntity.ok(responseBody))
+                .`when`(mockrestTemplate).exchange(
+                        contains("/journalpost?forsoekFerdigstill=false"),
+                        any(),
+                        journalpostCaptor.capture(),
+                        eq(String::class.java))
+
+        val journalpostResponse = journalpostKlient.opprettJournalpost(
+            rinaSakId = "147730",
+            fnr = "12078945602",
+            personNavn = "Test Testesen",
+            bucType = "P_BUC_02",
+            sedType = SedType.P2100.name,
+            sedHendelseType = "SENDT",
+            eksternReferanseId = null,
+            kanal = "EESSI",
+            journalfoerendeEnhet = "4303",
+            arkivsaksnummer = null,
+            dokumenter = "[\"P2100\"]",
+            forsokFerdigstill = false,
+            avsenderLand = "NO",
+            avsenderNavn = "NAVT003",
+            ytelseType = null
+        )
+        assertEquals(mapper.readTree(requestBody), mapper.readTree(journalpostCaptor.lastValue.body.toString()))
+        assertEquals(responseBody, journalpostResponse.toString())
+
+    }
+
+
+    @Test
+    fun `Gitt JournalpostId Når Oppdater Distribusjonsinfo Så OppdaterJournalpost Med EESSI`() {
 
         val journalpostCaptor = argumentCaptor<HttpEntity<Any>>()
 

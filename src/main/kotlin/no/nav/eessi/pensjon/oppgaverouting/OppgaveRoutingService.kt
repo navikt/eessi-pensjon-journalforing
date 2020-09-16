@@ -23,7 +23,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        logger.debug("person: $routingRequest,  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
+        logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
 
         if (routingRequest.fnr == null) return ID_OG_FORDELING
         val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
@@ -56,8 +56,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         logger.info("Bestemmer tildelt enhet")
         val bosatt = bosatt(routingRequest.landkode)
 
-        return when (NORGE) {
-            bosatt -> {
+        return when (bosatt) {
+            NORGE -> {
                 when (routingRequest.bucType) {
                     P_BUC_01, P_BUC_04 -> NFP_UTLAND_AALESUND
                     P_BUC_02 -> bestemPBuc02Enhet(routingRequest, bosatt)
@@ -90,8 +90,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     private fun bestemPBuc02Enhet(routingRequest: OppgaveRoutingRequest, bosatt: Bosatt): Enhet =
 
-            when (NORGE) {
-                bosatt -> {
+            when (bosatt) {
+                NORGE -> {
                     when (routingRequest.ytelseType) {
                         YtelseType.UFOREP -> if (routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
                         YtelseType.ALDER -> NFP_UTLAND_AALESUND
