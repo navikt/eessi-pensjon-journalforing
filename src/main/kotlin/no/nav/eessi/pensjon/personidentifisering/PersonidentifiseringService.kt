@@ -54,7 +54,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             return listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
 
         } else {
-            //Prøve fnr
+            // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC")
             val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
             try {

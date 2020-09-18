@@ -46,16 +46,22 @@ class FnrHelper {
                         SedType.R005 -> {
                             fnrListe.addAll(filterPinPersonR005(sedRootNode))
                         }
+                        SedType.P5000, SedType.P6000 -> {
+                            // Prøver å hente ut gjenlevende på andre seder enn P2100
+                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
+
+                        }
                         else -> {
-                            // P10000, P9000
+                            // P10000, P9000 og P8000
                             leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                             //P2000 - P2200 -- andre..  (H070)
                             leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
+
                         }
                     }
                 }
             } catch (ex: Exception) {
-                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex.message)
+                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
             }
         }
 
@@ -156,10 +162,12 @@ class FnrHelper {
     }
 
     private fun finnPin(pinNode: JsonNode): String? {
-        return pinNode.findValue("pin")
-                .filter { pin -> pin.get("land").textValue() == "NO" }
-                .map { pin -> pin.get("identifikator").textValue() }
-                .filter { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
-                .lastOrNull()
+        val subPinNode = pinNode.findValue("pin") ?: return null
+         return subPinNode
+            .filter { pin -> pin.get("land").textValue() == "NO" }
+            .map { pin -> pin.get("identifikator").textValue() }
+            .filter { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
+            .lastOrNull()
     }
+
 }
