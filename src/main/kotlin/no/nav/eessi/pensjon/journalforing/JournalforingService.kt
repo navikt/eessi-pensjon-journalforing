@@ -81,7 +81,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
                     journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                    arkivsaksnummer = sakIdVelger(sakInformasjon, sedHendelse, hendelseType),
+                    arkivsaksnummer = populerSakIdVedFerdigStill(sakInformasjon, forsokFerdigstill),
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelse.avsenderLand,
@@ -115,18 +115,18 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun sakIdVelger(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType): String? {
-        if (sakInformasjon != null && sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
-            return null
+    private fun populerSakIdVedFerdigStill(sakInformasjon: SakInformasjon?, forsokFerdigstill: Boolean): String? {
+        return when(forsokFerdigstill) {
+            true -> sakInformasjon?.sakId
+            false -> null
         }
-        return sakInformasjon?.sakId
     }
 
     private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet) = tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
 
     fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
         val tildeltEnhet =
-                if (tildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
+                if (manueltTildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
                     oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                             fdato,
                             identifisertPerson?.diskresjonskode,
@@ -145,7 +145,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
         return tildeltEnhet
     }
 
-    fun tildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
+    fun manueltTildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
         if (sakInformasjon == null) return true
 
         return when {

@@ -782,7 +782,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid der det finnes kun en sakstype så skal SEDen automatisk journalføres`() {
+    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid Når det finnes kun en sakstype fra bestemsak Så skal det manuelt journalføres og det skal opprettes en oppgave`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """
@@ -829,7 +829,7 @@ class JournalforingServiceTest {
                 eksternReferanseId = eq(null),
                 kanal = eq("EESSI"),
                 journalfoerendeEnhet = eq("0001"),
-                arkivsaksnummer = eq("111111"),
+                arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
                 avsenderLand = eq("PL"),
