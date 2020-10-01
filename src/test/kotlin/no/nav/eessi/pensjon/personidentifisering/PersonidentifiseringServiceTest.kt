@@ -226,6 +226,15 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Gitt forskjellige typer ugyldig fnr så svar med valid fnr`(){
+        assertFalse(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("520154aieygr")))
+        assertTrue(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("5201541-224-3")))
+        assertTrue(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("52 01 541 0191- ")))
+        assertTrue(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("3520&&&1/ 22-43-23-")))
+        assertTrue(PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("551073 49331")))
+    }
+
+    @Test
     fun `Gitt manglende fnr og en liste med sed som inneholder fdato som gir en gyldig fdato`(){
         val fdatoHelper2 = FdatoHelper()
 

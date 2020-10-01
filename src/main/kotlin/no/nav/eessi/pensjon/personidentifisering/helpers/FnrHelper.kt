@@ -165,7 +165,7 @@ class FnrHelper {
         val subPinNode = pinNode.findValue("pin") ?: return null
          return subPinNode
             .filter { pin -> pin.get("land").textValue() == "NO" }
-            .map { pin -> pin.get("identifikator").textValue() }
+            .map { pin -> PersonidentifiseringService.trimFnrString(pin.get("identifikator").textValue()) }
             .filter { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
             .lastOrNull()
     }

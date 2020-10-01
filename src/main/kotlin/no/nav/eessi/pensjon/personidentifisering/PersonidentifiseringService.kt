@@ -61,7 +61,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
                 logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
-                    val personen = personV3Service.hentPerson(trimFnrString(personRelasjon.fnr))
+                    val personen = personV3Service.hentPerson(personRelasjon.fnr)
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(
                                 personen,

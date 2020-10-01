@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.validateJson
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -392,8 +392,6 @@ class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100,mockP5000, mockP8000))
 
-        println(actual.toJson())
-
         val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null)
         val expectedPersonRelasjon = PersonRelasjon("48035849680", Relasjon.GJENLEVENDE, null)
 
@@ -405,6 +403,88 @@ class FnrHelperTest {
         assertEquals(expectedAvdodPersonRelasjon, actualAvdodPerson)
 
     }
+
+    @Test
+    fun `Gitt at vi har en P2100 med gjenlevende og avdød så skal det returneres to personrelasjoner`() {
+        val mockP2100 = """
+            {
+              "pensjon": {
+                "gjenlevende": {
+                  "person": {
+                    "pin": [
+                      {
+                        "identifikator": "430-035 849 68",
+                        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+                        "land": "NO",
+                        "institusjonsid": "NO:NAVAT07"
+                      }
+                    ],
+                    "foedselsdato": "1958-03-08",
+                    "relasjontilavdod": {
+                      "relasjon": "03"
+                    },
+                    "etternavn": "KONSOLL",
+                    "fornavn": "LEALAUS",
+                    "kjoenn": "K",
+                    "statsborgerskap": [
+                      {
+                        "land": "DE"
+                      }
+                    ]
+                  }
+                }
+              },
+              "sedGVer": "4",
+              "nav": {
+                "bruker": {
+                  "person": {
+                    "fornavn": "ÅPENHJERTIG",
+                    "pin": [
+                      {
+                        "land": "NO",
+                        "institusjonsid": "NO:NAVAT07",
+                        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+                        "identifikator": "25/10-5424 704"
+                      }
+                    ],
+                    "kjoenn": "M",
+                    "etternavn": "KAFFI",
+                    "foedselsdato": "1954-10-25",
+                    "statsborgerskap": [
+                      {
+                        "land": "DE"
+                      }
+                    ]
+                  }
+                },
+                "eessisak": [
+                  {
+                    "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+                    "saksnummer": "22916371",
+                    "institusjonsid": "NO:NAVAT07",
+                    "land": "NO"
+                  }
+                ]
+              },
+              "sedVer": "2",
+              "sed": "P2100"
+            }
+        """.trimIndent()
+
+        val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100))
+
+        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null)
+        val expectedPersonRelasjon = PersonRelasjon("43003584968", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
+
+        assertEquals(2,actual.size)
+
+        val actualAvdodPerson = actual.first()
+        val actualPersonRelasjon = actual.last()
+        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
+        assertEquals(expectedAvdodPersonRelasjon, actualAvdodPerson)
+
+    }
+
 
     private fun getSedTestJsonFile(filename: String): String {
         val filepath = "src/test/resources/sed/${filename}"
