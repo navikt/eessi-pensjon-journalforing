@@ -42,11 +42,11 @@ class SedListenerTest {
     lateinit var sedListener: SedListener
 
     val gyldigeHendelser: GyldigeHendelser = GyldigeHendelserProd()
-
+    val gyldigFunksjoner: GyldigFunksjoner = GyldigeFunksjonerToggleProd()
 
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient)
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient, gyldigFunksjoner)
         sedListener.initMetrics()
     }
 
@@ -71,10 +71,7 @@ class SedListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelserNonProd(), bestemSakKlient)
-        sedListener.initMetrics()
-
-        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient)
+        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakKlient, gyldigFunksjoner)
         sedListener2.initMetrics()
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
 

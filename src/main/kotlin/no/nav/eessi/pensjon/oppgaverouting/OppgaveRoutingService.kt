@@ -1,11 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.klienter.pesys.SakStatus
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.BucType.*
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.NORGE
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.UTLAND

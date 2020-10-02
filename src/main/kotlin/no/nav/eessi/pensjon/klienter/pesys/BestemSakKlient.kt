@@ -7,6 +7,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -101,15 +102,3 @@ class BestemSakResponse ( val feil: BestemSakFeil?,
 
 class BestemSakFeil( val feilKode: String,  val feilmelding: String)
 
-class SakInformasjon( val sakId: String,
-                           val sakType: YtelseType,
-                           val sakStatus: SakStatus,
-                           val saksbehandlendeEnhetId: String,
-                           val nyopprettet: Boolean)
-
-enum class SakStatus {
-    OPPRETTET,
-    TIL_BEHANDLING,
-    AVSLUTTET,
-    LOPENDE
-}
