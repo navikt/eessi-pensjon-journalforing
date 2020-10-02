@@ -49,20 +49,18 @@ class JournalforingService(private val euxKlient: EuxKlient,
                    fdato: LocalDate,
                    ytelseType: YtelseType?,
                    offset: Long = 0,
-                   sakInformasjon: SakInformasjon?) {
+                   pensjonSakInformasjon: PensjonSakInformasjon) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-                if (sakInformasjon != null) {
-                    logger.info("kafka offset: $offset, hentSak PESYS saknr: $sakInformasjon på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
-                }
+                logger.info("kafka offset: $offset, hentSak PESYS saknr: ${pensjonSakInformasjon.getSakId()} på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
 
-                val tildeltEnhet =  tildeltEnhet(sakInformasjon, sedHendelse, hendelseType, identifisertPerson, fdato, ytelseType)
+                val tildeltEnhet =  tildeltEnhet(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson, fdato, ytelseType)
 
                 val forsokFerdigstill = forsokFerdigstill(tildeltEnhet)
 
@@ -77,7 +75,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
                     journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                    arkivsaksnummer = populerSakIdVedFerdigStill(sakInformasjon, forsokFerdigstill),
+                    arkivsaksnummer = populerSakIdVedFerdigStill(pensjonSakInformasjon, forsokFerdigstill),
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelse.avsenderLand,
@@ -111,18 +109,18 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun populerSakIdVedFerdigStill(sakInformasjon: SakInformasjon?, forsokFerdigstill: Boolean): String? {
+    private fun populerSakIdVedFerdigStill(pensjonSakInformasjon: PensjonSakInformasjon, forsokFerdigstill: Boolean): String? {
         return when(forsokFerdigstill) {
-            true -> sakInformasjon?.sakId
+            true -> pensjonSakInformasjon.getSakId()
             false -> null
         }
     }
 
     private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet) = tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
 
-    fun tildeltEnhet(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
+    fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
         val tildeltEnhet =
-                if (manueltTildeltEnhetRegel(sakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
+                if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
                     oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
                             fdato,
                             identifisertPerson?.diskresjonskode,
@@ -132,7 +130,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                             ytelseType,
                             sedHendelse.sedType,
                             hendelseType,
-                            sakInformasjon?.sakStatus,
+                            pensjonSakInformasjon.sakInformasjon?.sakStatus,
                             identifisertPerson)
                     )
                 } else {
@@ -141,12 +139,12 @@ class JournalforingService(private val euxKlient: EuxKlient,
         return tildeltEnhet
     }
 
-    fun manueltTildeltEnhetRegel(sakInformasjon: SakInformasjon?, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
-        if (sakInformasjon == null) return true
+    fun manueltTildeltEnhetRegel(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
+        val sakinformasjon = pensjonSakInformasjon.sakInformasjon ?: return true
 
         return when {
             sedHendelse.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
-            sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakinformasjon.sakType == YtelseType.UFOREP && sakinformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelse.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
             else -> false
 

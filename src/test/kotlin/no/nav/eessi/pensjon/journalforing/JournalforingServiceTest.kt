@@ -148,7 +148,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
@@ -181,7 +181,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
@@ -216,7 +216,7 @@ class JournalforingServiceTest {
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, PensjonSakInformasjon())
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
@@ -257,7 +257,7 @@ class JournalforingServiceTest {
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
+      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
@@ -292,7 +292,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
@@ -330,7 +330,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -364,7 +364,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -399,7 +399,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -437,7 +437,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyString(),
@@ -472,7 +472,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
+      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -510,7 +510,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = anyOrNull(),
@@ -545,7 +545,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147729"),
@@ -581,8 +581,9 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val pensjonSakInformasjon = PensjonSakInformasjon(saksInfo)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0,saksInfo)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, pensjonSakInformasjon)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -640,8 +641,9 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
         )
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val pensjonSakInformasjon = PensjonSakInformasjon(saksInfo)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, saksInfo )
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, pensjonSakInformasjon )
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("1033470"),
@@ -680,8 +682,9 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET, YtelseType.GJENLEV)
         )
         val sakInformasjon = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
+        val pensjonSakInformasjon = PensjonSakInformasjon(sakInformasjon)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,  null, 0,  sakInformasjon)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,  null, 0,  pensjonSakInformasjon)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -720,7 +723,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null )
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon() )
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -756,7 +759,7 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -812,8 +815,9 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12071245602", Relasjon.GJENLEVENDE, YtelseType.BARNEP)
         )
         val saksInfo = SakInformasjon("111111", YtelseType.BARNEP, SakStatus.LOPENDE, "4862", false)
+        val pensjonSakInformasjon = PensjonSakInformasjon(saksInfo)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, saksInfo)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, pensjonSakInformasjon)
 
         verify(journalpostKlient).opprettJournalpost(
                 rinaSakId = eq("1033470"),
