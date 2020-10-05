@@ -18,7 +18,7 @@ import org.junit.jupiter.api.assertThrows
 
 class PDFServiceTest {
 
-    val pdfService = PDFService()
+    private val pdfService = PDFService()
 
     @BeforeEach
     fun init() {

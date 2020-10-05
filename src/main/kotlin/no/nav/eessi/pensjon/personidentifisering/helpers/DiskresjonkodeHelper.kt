@@ -45,7 +45,7 @@ class DiskresjonkodeHelper(private val personV3Service: PersonV3Service,
     }
 }
 
-enum class Diskresjonskode(val term: String) {
-    SPFO("Sperret adresse, fortrolig"),
-    SPSF("Sperret adresse, strengt fortrolig"),
+enum class Diskresjonskode {
+    SPFO, //Sperret adresse, fortrolig
+    SPSF //Sperret adresse, strengt fortrolig
 }

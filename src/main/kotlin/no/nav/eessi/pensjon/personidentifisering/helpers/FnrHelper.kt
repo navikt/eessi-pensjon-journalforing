@@ -164,10 +164,9 @@ class FnrHelper {
     private fun finnPin(pinNode: JsonNode): String? {
         val subPinNode = pinNode.findValue("pin") ?: return null
          return subPinNode
-            .filter { pin -> pin.get("land").textValue() == "NO" }
-            .map { pin -> PersonidentifiseringService.trimFnrString(pin.get("identifikator").textValue()) }
-            .filter { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
-            .lastOrNull()
+                 .filter { pin -> pin.get("land").textValue() == "NO" }
+                 .map { pin -> PersonidentifiseringService.trimFnrString(pin.get("identifikator").textValue()) }
+                 .lastOrNull { pin -> PersonidentifiseringService.erFnrDnrFormat(pin) }
     }
 
 }

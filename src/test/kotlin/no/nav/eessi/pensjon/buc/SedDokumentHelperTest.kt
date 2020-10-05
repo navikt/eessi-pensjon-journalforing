@@ -32,7 +32,7 @@ class SedDokumentHelperTest {
     @Mock
     private lateinit var fagmodulKlient: FagmodulKlient
 
-    lateinit var helper: SedDokumentHelper
+    private lateinit var helper: SedDokumentHelper
 
 
     @BeforeEach
@@ -87,7 +87,7 @@ class SedDokumentHelperTest {
 
         val actual = helper.hentAlleSedIBuc("123123")
         assertEquals(1, actual.size)
-        assertEquals(SedType.P2000.name, actual.keys.toList().get(0))
+        assertEquals(SedType.P2000.name, actual.keys.toList()[0])
         assertEquals(sedP2000, actual[SedType.P2000.name])
         assertEquals(sedP2000, helper.hentAlleSeds(actual)[0])
     }

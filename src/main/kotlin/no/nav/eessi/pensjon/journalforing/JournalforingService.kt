@@ -119,24 +119,22 @@ class JournalforingService(private val euxKlient: EuxKlient,
     private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet) = tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
 
     fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
-        val tildeltEnhet =
-                if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
-                    oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
-                            fdato,
-                            identifisertPerson?.diskresjonskode,
-                            identifisertPerson?.landkode,
-                            identifisertPerson?.geografiskTilknytning,
-                            sedHendelse.bucType,
-                            ytelseType,
-                            sedHendelse.sedType,
-                            hendelseType,
-                            pensjonSakInformasjon.sakInformasjon?.sakStatus,
-                            identifisertPerson)
-                    )
-                } else {
-                    OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
-                }
-        return tildeltEnhet
+        return if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
+            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
+                    fdato,
+                    identifisertPerson?.diskresjonskode,
+                    identifisertPerson?.landkode,
+                    identifisertPerson?.geografiskTilknytning,
+                    sedHendelse.bucType,
+                    ytelseType,
+                    sedHendelse.sedType,
+                    hendelseType,
+                    pensjonSakInformasjon.sakInformasjon?.sakStatus,
+                    identifisertPerson)
+            )
+        } else {
+            OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
+        }
     }
 
     fun manueltTildeltEnhetRegel(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {

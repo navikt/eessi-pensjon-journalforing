@@ -50,9 +50,8 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
 
     private fun bestemTildeltEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         logger.info("Bestemmer tildelt enhet")
-        val bosatt = bosatt(routingRequest.landkode)
 
-        return when (bosatt) {
+        return when (val bosatt = bosatt(routingRequest.landkode)) {
             NORGE -> {
                 when (routingRequest.bucType) {
                     P_BUC_01, P_BUC_04 -> NFP_UTLAND_AALESUND

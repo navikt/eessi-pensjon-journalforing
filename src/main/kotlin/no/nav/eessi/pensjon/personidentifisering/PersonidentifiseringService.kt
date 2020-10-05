@@ -179,7 +179,6 @@ data class PersonRelasjon(
 )
 
 enum class Relasjon {
-    BARN,
     FORSIKRET,
     GJENLEVENDE,
     AVDOD,

@@ -21,7 +21,7 @@ class NavFodselsnummer(private val fodselsnummer: String) {
         return fodselsnummer
     }
 
-    fun validate(): Boolean {
+    private fun validate(): Boolean {
         val pnr = Integer.parseInt(getIndividnummer())
         val fnr = Integer.parseInt(getFnr())
         return fnr > 0 && pnr > 0
@@ -44,7 +44,7 @@ class NavFodselsnummer(private val fodselsnummer: String) {
         return fodselsnummer.substring(4, 6)
     }
 
-    fun get4DigitBirthYear(): String {
+    private fun get4DigitBirthYear(): String {
         return getCentury() + get2DigitBirthYear()
     }
 
@@ -90,7 +90,7 @@ class NavFodselsnummer(private val fodselsnummer: String) {
         return false
     }
 
-    fun getFirstDigit(): Int {
+    private fun getFirstDigit(): Int {
         return Integer.parseInt(fodselsnummer.substring(0, 1))
     }
 }

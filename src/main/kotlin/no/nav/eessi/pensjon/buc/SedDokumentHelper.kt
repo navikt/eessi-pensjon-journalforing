@@ -54,8 +54,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             val sed = alleSedIBuc[SedType.P15000.name]
             if (sed != null) {
                 val sedRootNode = mapper.readTree(sed)
-                val krav = sedRootNode.get("nav").get("krav").get("type").textValue()
-                return when (krav) {
+                return when (sedRootNode.get("nav").get("krav").get("type").textValue()) {
                     "02" -> YtelseType.GJENLEV
                     "03" -> YtelseType.UFOREP
                     else -> YtelseType.ALDER
@@ -85,7 +84,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     private fun hentSakIdFraSED(alleSedIBuc: Map<String, String?>): List<String> {
         val list = mutableListOf<String>()
 
-        alleSedIBuc.forEach { (type, sed) ->
+        alleSedIBuc.forEach { (_, sed) ->
             val sedRootNode = mapper.readTree(sed)
             val eessi = filterEESSIsak(sedRootNode.get("nav"))
             logger.debug("eessi saknummer: $eessi")
@@ -112,7 +111,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private fun validerSakIdFraSEDogReturnerEnValid(aktoerId: String, list: List<String>): PensjonSak? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        return saklist.filter { sak -> list.contains(sak.sakid.toString()) }.lastOrNull().also {
+        return saklist.lastOrNull { sak -> list.contains(sak.sakid.toString()) }.also {
             logger.debug("Funnet og validert sak: $it")
         }
     }

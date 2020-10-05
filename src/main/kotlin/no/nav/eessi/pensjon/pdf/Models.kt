@@ -68,9 +68,7 @@ class Dokumentvarianter(
 )
 
 enum class Variantformat {
-    ARKIV,
-    ORIGINAL,
-    PRODUKSJON
+    ARKIV
 }
 
 interface Code {
