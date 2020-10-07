@@ -125,12 +125,13 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     identifisertPerson?.diskresjonskode,
                     identifisertPerson?.landkode,
                     identifisertPerson?.geografiskTilknytning,
-                    sedHendelse.bucType,
+                    sedHendelse.bucType.buc,
                     ytelseType,
                     sedHendelse.sedType,
                     hendelseType,
                     pensjonSakInformasjon.sakInformasjon?.sakStatus,
-                    identifisertPerson)
+                    identifisertPerson,
+                    null)
             )
         } else {
             OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING

@@ -32,19 +32,19 @@ enum class Tema : Code {
     }
 }
 
-enum class BucType (val BEHANDLINGSTEMA: String, val TEMA: String){
-    P_BUC_01(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_03(Behandlingstema.UFOREPENSJON.toString(), Tema.UFORETRYGD.toString()),
-    P_BUC_04(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_05(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_06(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_08(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString())
+enum class BucType (val BEHANDLINGSTEMA: String, val TEMA: String, val buc : Buc){
+    P_BUC_01(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc01()),
+    P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON.toString(), Tema.PENSJON.toString(), Pbuc02()),
+    P_BUC_03(Behandlingstema.UFOREPENSJON.toString(), Tema.UFORETRYGD.toString(), Pbuc03()),
+    P_BUC_04(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc04()),
+    P_BUC_05(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc05()),
+    P_BUC_06(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc06()),
+    P_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc07()),
+    P_BUC_08(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc08()),
+    P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc09()),
+    P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Pbuc10()),
+    H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString(), Hbuc07()),
+    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString(), Rbuc02())
 
 }
 
