@@ -2,30 +2,29 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 
-class Pbuc02 : OppgaveRouting {
-    override fun route(routingRequest: OppgaveRoutingRequest): Enhet =
-            when (routingRequest.bosatt) {
-                NORGE -> {
-                    when (routingRequest.ytelseType) {
-                        YtelseType.UFOREP -> if (routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
-                        YtelseType.ALDER -> NFP_UTLAND_AALESUND
-                        YtelseType.BARNEP -> NFP_UTLAND_AALESUND
-                        YtelseType.GJENLEV -> NFP_UTLAND_AALESUND
-                        else -> ID_OG_FORDELING
-                    }
-                }
-                else -> {
-                    when (routingRequest.ytelseType) {
-                        YtelseType.UFOREP -> if (routingRequest.sakStatus != SakStatus.AVSLUTTET) UFORE_UTLAND else ID_OG_FORDELING
-                        YtelseType.ALDER -> PENSJON_UTLAND
-                        YtelseType.BARNEP -> PENSJON_UTLAND
-                        YtelseType.GJENLEV -> PENSJON_UTLAND
-                        else -> ID_OG_FORDELING
-                    }
-                }
+class Pbuc02 : BucTilEnhetHandler {
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet =
+            if (request.bosatt == Bosatt.NORGE)
+                handleNorge(request)
+            else
+                handleUtland(request)
+
+    private fun handleNorge(request: OppgaveRoutingRequest): Enhet =
+            when (request.ytelseType) {
+                YtelseType.UFOREP -> if (request.sakStatus != SakStatus.AVSLUTTET) Enhet.UFORE_UTLANDSTILSNITT else Enhet.ID_OG_FORDELING
+                YtelseType.ALDER -> Enhet.NFP_UTLAND_AALESUND
+                YtelseType.BARNEP -> Enhet.NFP_UTLAND_AALESUND
+                YtelseType.GJENLEV -> Enhet.NFP_UTLAND_AALESUND
+                else -> Enhet.ID_OG_FORDELING
+            }
+
+    private fun handleUtland(request: OppgaveRoutingRequest): Enhet =
+            when (request.ytelseType) {
+                YtelseType.UFOREP -> if (request.sakStatus != SakStatus.AVSLUTTET) Enhet.UFORE_UTLAND else Enhet.ID_OG_FORDELING
+                YtelseType.ALDER -> Enhet.PENSJON_UTLAND
+                YtelseType.BARNEP -> Enhet.PENSJON_UTLAND
+                YtelseType.GJENLEV -> Enhet.PENSJON_UTLAND
+                else -> Enhet.ID_OG_FORDELING
             }
 }

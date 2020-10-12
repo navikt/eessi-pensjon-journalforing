@@ -14,7 +14,7 @@ import no.nav.eessi.pensjon.models.BucType.R_BUC_02
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
@@ -64,6 +64,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 val tildeltEnhet =  tildeltEnhet(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
 
                 val forsokFerdigstill = forsokFerdigstill(tildeltEnhet)
+                val arkivsaksnummer = if (forsokFerdigstill) pensjonSakInformasjon.getSakId() else null
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
@@ -76,7 +77,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
                     journalfoerendeEnhet = tildeltEnhet.enhetsNr,
-                    arkivsaksnummer = populerSakIdVedFerdigStill(pensjonSakInformasjon, forsokFerdigstill),
+                    arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelseModel.avsenderLand,
@@ -110,16 +111,15 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun populerSakIdVedFerdigStill(pensjonSakInformasjon: PensjonSakInformasjon, forsokFerdigstill: Boolean): String? {
-        return when(forsokFerdigstill) {
-            true -> pensjonSakInformasjon.getSakId()
-            false -> null
-        }
-    }
-
     private fun forsokFerdigstill(tildeltEnhet: Enhet) = tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
-    fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): Enhet {
+    fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon,
+                     sedHendelseModel: SedHendelseModel,
+                     hendelseType: HendelseType,
+                     identifisertPerson: IdentifisertPerson?,
+                     fdato: LocalDate,
+                     ytelseType: YtelseType?
+    ): Enhet {
         return if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson)) {
             oppgaveRoutingService.route(
                     OppgaveRoutingRequest(identifisertPerson?.aktoerId,
@@ -132,7 +132,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                             hendelseType,
                             pensjonSakInformasjon.sakInformasjon?.sakStatus,
                             identifisertPerson,
-                            null,
                             sedHendelseModel.bucType)
             )
         } else {
@@ -148,7 +147,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakinformasjon.sakType == YtelseType.UFOREP && sakinformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
             else -> false
-
         }
     }
 

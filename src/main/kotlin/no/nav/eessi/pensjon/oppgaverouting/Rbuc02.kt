@@ -3,28 +3,26 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
 
-class Rbuc02 : OppgaveRouting, RoutingHelper() {
-    override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        val ytelseType = routingRequest.ytelseType
+class Rbuc02 : BucTilEnhetHandler {
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        val ytelseType = request.ytelseType
 
-        if (routingRequest.identifisertPerson != null && routingRequest.identifisertPerson.flereEnnEnPerson()) {
-            return ID_OG_FORDELING
+        if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
+            return Enhet.ID_OG_FORDELING
         }
 
-        if (routingRequest.sedType == SedType.R004) {
-            return OKONOMI_PENSJON
+        if (request.sedType == SedType.R004) {
+            return Enhet.OKONOMI_PENSJON
         }
 
-        if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+        if (HendelseType.MOTTATT == request.hendelseType) {
             return when (ytelseType) {
-                YtelseType.ALDER -> PENSJON_UTLAND
-                YtelseType.UFOREP -> UFORE_UTLAND
-                else -> ID_OG_FORDELING
+                YtelseType.ALDER -> Enhet.PENSJON_UTLAND
+                YtelseType.UFOREP -> Enhet.UFORE_UTLAND
+                else -> Enhet.ID_OG_FORDELING
             }
         }
-        return ID_OG_FORDELING
+        return Enhet.ID_OG_FORDELING
     }
 }

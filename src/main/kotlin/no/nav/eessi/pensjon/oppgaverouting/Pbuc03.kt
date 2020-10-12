@@ -1,16 +1,8 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-
-class Pbuc03 : OppgaveRouting {
-    override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        return if(routingRequest.bosatt == NORGE) {
-            UFORE_UTLANDSTILSNITT
-        }
-        else {
-            UFORE_UTLAND
-        }
+class Pbuc03 : BucTilEnhetHandler {
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return if(request.bosatt == Bosatt.NORGE) Enhet.UFORE_UTLANDSTILSNITT
+        else Enhet.UFORE_UTLAND
     }
 }

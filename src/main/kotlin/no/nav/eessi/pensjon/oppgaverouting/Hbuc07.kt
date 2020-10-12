@@ -1,17 +1,15 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
+class Hbuc07 : BucTilEnhetHandler {
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
 
-class Hbuc07 : OppgaveRouting, RoutingHelper() {
-    override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        return if (routingRequest.bosatt == NORGE) {
-            if (isBetween18and60(routingRequest.fdato)) UFORE_UTLANDSTILSNITT
-            else NFP_UTLAND_OSLO
+        return if (request.bosatt == Bosatt.NORGE) {
+            if (ageIsBetween18and60) Enhet.UFORE_UTLANDSTILSNITT
+            else Enhet.NFP_UTLAND_OSLO
         } else {
-            if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND
-            else PENSJON_UTLAND
+            if (ageIsBetween18and60) Enhet.UFORE_UTLAND
+            else Enhet.PENSJON_UTLAND
         }
     }
 }

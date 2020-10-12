@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.models
 
+import no.nav.eessi.pensjon.oppgaverouting.*
+
 
 // https://confluence.adeo.no/display/BOA/Behandlingstema
 enum class Behandlingstema : Code {
@@ -33,7 +35,7 @@ enum class Tema : Code {
     }
 }
 
-enum class BucType(val BEHANDLINGSTEMA: String, val TEMA: String){
+enum class BucType(val BEHANDLINGSTEMA: String, val TEMA: String) {
     P_BUC_01(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_03(Behandlingstema.UFOREPENSJON.toString(), Tema.UFORETRYGD.toString()),
@@ -45,8 +47,7 @@ enum class BucType(val BEHANDLINGSTEMA: String, val TEMA: String){
     P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString())
-
+    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString());
 }
 
 interface Code {
