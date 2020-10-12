@@ -1,11 +1,12 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 
-class Pbuc02 : Buc {
+class Pbuc02 : OppgaveRouting {
     override fun route(routingRequest: OppgaveRoutingRequest): Enhet =
             when (routingRequest.bosatt) {
                 NORGE -> {

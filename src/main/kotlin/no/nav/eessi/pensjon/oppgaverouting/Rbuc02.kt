@@ -1,10 +1,12 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 
-class Rbuc02 : Buc, RoutingHelper() {
+class Rbuc02 : OppgaveRouting, RoutingHelper() {
     override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
         val ytelseType = routingRequest.ytelseType
 

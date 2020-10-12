@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.BucType.*
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.NORGE
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.UTLAND
@@ -11,7 +11,6 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.Period
 
 @Service
 class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
@@ -19,16 +18,16 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.buc}, ytelseType: ${routingRequest.ytelseType}")
+        logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
 
         if (routingRequest.fnr == null) return ID_OG_FORDELING
         val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
-        val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.buc)
+        val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
                 ?: bestemEnhet(routingRequest)
 
         logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
-                "Buc: ${routingRequest.buc}, " +
+                "Buc: ${routingRequest.bucType}, " +
                 "Landkode: ${routingRequest.landkode}, " +
                 "Fødselsdato: ${routingRequest.fdato}, " +
                 "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
@@ -38,18 +37,21 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun bestemEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
+        //------------------
+
+        routingRequest.bosatt = bosatt(routingRequest.landkode)
+
         return when {
-
             routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF" -> DISKRESJONSKODE
-
-            else -> routingRequest.buc.route(routingRequest)
+            routingRequest.bucType == null -> PENSJON_UTLAND
+            else -> routingRequest.route(routingRequest)
         }
     }
 
-    fun hentNorg2Enhet(person: NorgKlientRequest, buc: Buc?): Enhet? {
+    fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
 
-        return when (buc) {
-            is Pbuc01 -> {
+        return when (bucType) {
+            BucType.P_BUC_01 -> {
                 try {
                     val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
                     logger.info("Norg2tildeltEnhet: $enhetVerdi")
@@ -62,6 +64,13 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             else -> null
         }
     }
+
+    private fun bosatt(landkode: String?): Bosatt =
+            when {
+                landkode.isNullOrEmpty() -> Bosatt.UKJENT
+                landkode == "NOR" -> NORGE
+                else -> UTLAND
+            }
 }
 
 class OppgaveRoutingRequest(
@@ -70,10 +79,11 @@ class OppgaveRoutingRequest(
         val diskresjonskode: String? = null,
         val landkode: String? = null,
         val geografiskTilknytning: String? = null,
-        val buc: Buc,
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
         val hendelseType: HendelseType? = null,
         val sakStatus: SakStatus? = null,
         val identifisertPerson: IdentifisertPerson? = null,
-        val bosatt: Bosatt? = null)
+        var bosatt: Bosatt? = null,
+        val bucType: BucType? = null)
+

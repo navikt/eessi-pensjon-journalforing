@@ -1,22 +1,11 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.models.BucType
-
-class OppgaveRoutingModel(
-        var bucType: BucType,
-        var tildeltEnhet: Enhet
-) {
+class OppgaveRoutingModel(var tildeltEnhet: Enhet) {
 
     enum class Bosatt {
         NORGE,
         UTLAND,
         UKJENT
-    }
-
-    enum class YtelseType {
-        AP,
-        GP,
-        UT
     }
 
     enum class Enhet(val enhetsNr : String) {

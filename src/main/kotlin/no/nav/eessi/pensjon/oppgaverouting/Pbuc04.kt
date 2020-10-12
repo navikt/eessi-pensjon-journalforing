@@ -1,17 +1,16 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 
-class Pbuc03 : Buc {
+class Pbuc04 : OppgaveRouting {
     override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
         return if(routingRequest.bosatt == NORGE) {
-            UFORE_UTLANDSTILSNITT
+            NFP_UTLAND_AALESUND
         }
         else {
-            UFORE_UTLAND
+            PENSJON_UTLAND
         }
     }
 }

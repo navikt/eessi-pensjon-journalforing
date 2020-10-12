@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.nhaarman.mockitokotlin2.*
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient

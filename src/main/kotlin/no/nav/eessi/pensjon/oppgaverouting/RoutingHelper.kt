@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.oppgaverouting
 
 import java.time.LocalDate
 import java.time.Period

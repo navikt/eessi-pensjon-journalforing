@@ -1,13 +1,16 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Bosatt.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 
-class Hbuc07 : Buc, RoutingHelper() {
+class Pbuc03 : OppgaveRouting {
     override fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        return if (isBetween18and60(routingRequest.fdato)) UFORE_UTLAND
-        else PENSJON_UTLAND
+        return if(routingRequest.bosatt == NORGE) {
+            UFORE_UTLANDSTILSNITT
+        }
+        else {
+            UFORE_UTLAND
+        }
     }
 }

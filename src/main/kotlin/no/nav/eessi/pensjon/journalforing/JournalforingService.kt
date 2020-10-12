@@ -11,9 +11,10 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
 import no.nav.eessi.pensjon.models.BucType.R_BUC_02
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
@@ -43,7 +44,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
     }
 
-    fun journalfor(sedHendelse: SedHendelseModel,
+    fun journalfor(sedHendelseModel: SedHendelseModel,
                    hendelseType: HendelseType,
                    identifisertPerson: IdentifisertPerson?,
                    fdato: LocalDate,
@@ -52,25 +53,25 @@ class JournalforingService(private val euxKlient: EuxKlient,
                    pensjonSakInformasjon: PensjonSakInformasjon) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
-                logger.info("rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId}")
-                logger.info("kafka offset: $offset, hentSak PESYS saknr: ${pensjonSakInformasjon.getSakId()} på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelse.rinaSakId}")
+                logger.info("rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId}")
+                logger.info("kafka offset: $offset, hentSak PESYS saknr: ${pensjonSakInformasjon.getSakId()} på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelseModel.rinaSakId}")
 
                 // Henter dokumenter
-                val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
-                        ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
-                val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelse.sedType!!)
+                val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelseModel.rinaSakId, sedHendelseModel.rinaDokumentId)
+                        ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelseModel.rinaSakId}, ${sedHendelseModel.rinaDokumentId}")
+                val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelseModel.sedType!!)
 
-                val tildeltEnhet =  tildeltEnhet(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson, fdato, ytelseType)
+                val tildeltEnhet =  tildeltEnhet(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
 
                 val forsokFerdigstill = forsokFerdigstill(tildeltEnhet)
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostKlient.opprettJournalpost(
-                    rinaSakId = sedHendelse.rinaSakId,
+                    rinaSakId = sedHendelseModel.rinaSakId,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     personNavn = identifisertPerson?.personNavn,
-                    bucType = sedHendelse.bucType.name,
-                    sedType = sedHendelse.sedType.name,
+                    bucType = sedHendelseModel.bucType.name,
+                    sedType = sedHendelseModel.sedType.name,
                     sedHendelseType = hendelseType.name,
                     eksternReferanseId = null,// TODO what value to put here?,
                     kanal = "EESSI",
@@ -78,8 +79,8 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     arkivsaksnummer = populerSakIdVedFerdigStill(pensjonSakInformasjon, forsokFerdigstill),
                     dokumenter = documents,
                     forsokFerdigstill = forsokFerdigstill,
-                    avsenderLand = sedHendelse.avsenderLand,
-                    avsenderNavn = sedHendelse.avsenderNavn,
+                    avsenderLand = sedHendelseModel.avsenderLand,
+                    avsenderNavn = sedHendelseModel.avsenderNavn,
                     ytelseType = ytelseType
                 )
 
@@ -89,11 +90,11 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 }
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson?.aktoerId, "JOURNALFORING", sedHendelse, hendelseType)
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelseModel.sedType, journalPostResponse.journalpostId, tildeltEnhet, identifisertPerson?.aktoerId, "JOURNALFORING", sedHendelseModel, hendelseType)
                 }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    publishOppgavemeldingPaaKafkaTopic(sedHendelse.sedType, null, tildeltEnhet, identifisertPerson?.aktoerId, "BEHANDLE_SED", sedHendelse, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
+                    publishOppgavemeldingPaaKafkaTopic(sedHendelseModel.sedType, null, tildeltEnhet, identifisertPerson?.aktoerId, "BEHANDLE_SED", sedHendelseModel, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
                 }
 
             } catch (ex: MismatchedInputException) {
@@ -116,48 +117,49 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun forsokFerdigstill(tildeltEnhet: OppgaveRoutingModel.Enhet) = tildeltEnhet == OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
+    private fun forsokFerdigstill(tildeltEnhet: Enhet) = tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
-    fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): OppgaveRoutingModel.Enhet {
-        return if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelse, hendelseType, identifisertPerson)) {
-            oppgaveRoutingService.route(OppgaveRoutingRequest(identifisertPerson?.aktoerId,
-                    fdato,
-                    identifisertPerson?.diskresjonskode,
-                    identifisertPerson?.landkode,
-                    identifisertPerson?.geografiskTilknytning,
-                    sedHendelse.bucType.buc,
-                    ytelseType,
-                    sedHendelse.sedType,
-                    hendelseType,
-                    pensjonSakInformasjon.sakInformasjon?.sakStatus,
-                    identifisertPerson,
-                    null)
+    fun tildeltEnhet(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?, fdato: LocalDate, ytelseType: YtelseType?): Enhet {
+        return if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson)) {
+            oppgaveRoutingService.route(
+                    OppgaveRoutingRequest(identifisertPerson?.aktoerId,
+                            fdato,
+                            identifisertPerson?.diskresjonskode,
+                            identifisertPerson?.landkode,
+                            identifisertPerson?.geografiskTilknytning,
+                            ytelseType,
+                            sedHendelseModel.sedType,
+                            hendelseType,
+                            pensjonSakInformasjon.sakInformasjon?.sakStatus,
+                            identifisertPerson,
+                            null,
+                            sedHendelseModel.bucType)
             )
         } else {
-            OppgaveRoutingModel.Enhet.AUTOMATISK_JOURNALFORING
+            Enhet.AUTOMATISK_JOURNALFORING
         }
     }
 
-    fun manueltTildeltEnhetRegel(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
+    fun manueltTildeltEnhetRegel(pensjonSakInformasjon: PensjonSakInformasjon, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType, identifisertPerson: IdentifisertPerson?): Boolean {
         val sakinformasjon = pensjonSakInformasjon.sakInformasjon ?: return true
 
         return when {
-            sedHendelse.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
-            sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT && sakinformasjon.sakType == YtelseType.UFOREP && sakinformasjon.sakStatus == SakStatus.AVSLUTTET -> true
-            sedHendelse.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
+            sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
+            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakinformasjon.sakType == YtelseType.UFOREP && sakinformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
             else -> false
 
         }
     }
 
-    private fun publishOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: OppgaveRoutingModel.Enhet, aktoerId: String?, oppgaveType: String, sedHendelse: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
+    private fun publishOppgavemeldingPaaKafkaTopic(sedType: SedType, journalpostId: String?, tildeltEnhet: Enhet, aktoerId: String?, oppgaveType: String, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType, filnavn: String? = null) {
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(OppgaveMelding(
                 sedType = sedType.name,
                 journalpostId = journalpostId,
                 tildeltEnhetsnr = tildeltEnhet.enhetsNr,
                 aktoerId = aktoerId,
                 oppgaveType = oppgaveType,
-                rinaSakId = sedHendelse.rinaSakId,
+                rinaSakId = sedHendelseModel.rinaSakId,
                 hendelseType = hendelseType.name,
                 filnavn = filnavn
         ))
