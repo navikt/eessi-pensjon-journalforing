@@ -45,7 +45,7 @@ class Norg2KlientTest {
         )
 
         val expected = "0001"
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -60,7 +60,7 @@ class Norg2KlientTest {
         )
 
         val expected = null
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -75,7 +75,7 @@ class Norg2KlientTest {
         )
 
         val expected = "4803"
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -90,7 +90,7 @@ class Norg2KlientTest {
         )
 
         val expected = "4862"
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = enheter)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = enheter)
 
         assertEquals(expected, actual)
     }
@@ -113,7 +113,7 @@ class Norg2KlientTest {
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(4, result?.size)
 
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("4803", actual)
     }
 
@@ -133,7 +133,7 @@ class Norg2KlientTest {
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(2, result?.size)
 
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("0001", actual)
     }
 
@@ -155,7 +155,7 @@ class Norg2KlientTest {
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(3, result?.size)
 
-        val actual = norg2Klient.finnKorrektArbeidsfordelingEnheter(request, list = result)
+        val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("2103", actual)
     }
 

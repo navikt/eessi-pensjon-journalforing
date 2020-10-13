@@ -3,7 +3,11 @@ package no.nav.eessi.pensjon.klienter.journalpost
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.YtelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

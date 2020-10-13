@@ -7,7 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import org.junit.jupiter.api.Assertions.assertEquals
 
-class SedHendelseModelTest {
+class SedHendelseTest {
 
     @Test
     fun `Gitt en gyldig SEDSendt json når mapping så skal alle felter mappes`() {

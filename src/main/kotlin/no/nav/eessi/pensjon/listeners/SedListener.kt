@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -138,11 +139,11 @@ class SedListener(
         }
     }
 
-    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelseModel): PensjonSakInformasjon {
+    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel): PensjonSakInformasjon {
         if (identifisertPerson?.aktoerId == null) return PensjonSakInformasjon()
 
-        return if (sedHendelse.bucType == BucType.P_BUC_02) {
-            val sakInformasjon = bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelse.bucType, identifisertPerson.personRelasjon.ytelseType)
+        return if (sedHendelseModel.bucType == BucType.P_BUC_02) {
+            val sakInformasjon = bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.ytelseType)
             PensjonSakInformasjon(sakInformasjon)
         } else {
             PensjonSakInformasjon()
@@ -150,11 +151,11 @@ class SedListener(
 
     }
 
-    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelseModel, ytelsestypeFraSed: YtelseType?, alleSedIBuc: Map<String, String?>): PensjonSakInformasjon {
+    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel, ytelsestypeFraSed: YtelseType?, alleSedIBuc: Map<String, String?>): PensjonSakInformasjon {
         if (identifisertPerson?.aktoerId == null) return PensjonSakInformasjon()
 
         val aktoerId = identifisertPerson.aktoerId
-        val sakInformasjon = bestemSakKlient.hentSakInformasjon(aktoerId, sedHendelse.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
+        val sakInformasjon = bestemSakKlient.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
 
         val pensjonSak = when (gyldigeFunksjoner.togglePensjonSak()) {
             true -> {
@@ -176,9 +177,9 @@ class SedListener(
         return identifisertPerson?.personRelasjon?.ytelseType
     }
 
-    private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, pensjonSakInformasjon: PensjonSakInformasjon, sedHendelse: SedHendelseModel, hendelseType: HendelseType): YtelseType? {
+    private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, pensjonSakInformasjon: PensjonSakInformasjon, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): YtelseType? {
         val sakInformasjon = pensjonSakInformasjon.sakInformasjon
-        if (sedHendelse.bucType == BucType.P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+        if (sedHendelseModel.bucType == BucType.P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
         } else if (ytelseTypeFraSED != null)
             return ytelseTypeFraSED

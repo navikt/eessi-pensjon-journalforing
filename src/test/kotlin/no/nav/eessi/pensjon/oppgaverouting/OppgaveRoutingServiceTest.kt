@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingModel.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -381,7 +381,7 @@ class OppgaveRoutingServiceTest {
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = NFP_UTLAND_OSLO
 
         assertEquals(expected, actual)
@@ -394,7 +394,7 @@ class OppgaveRoutingServiceTest {
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = NFP_UTLAND_AALESUND
 
         assertEquals(expected, actual)
@@ -431,7 +431,7 @@ class OppgaveRoutingServiceTest {
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = null
 
         assertEquals(expected, actual)
@@ -443,7 +443,7 @@ class OppgaveRoutingServiceTest {
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-            P_BUC_01)
+                P_BUC_01)
         val expected = null
 
         assertEquals(expected, actual)
@@ -468,11 +468,11 @@ class OppgaveRoutingServiceTest {
     @Test
     fun testEnumEnhets() {
 
-        assertEquals(PENSJON_UTLAND, OppgaveRoutingModel.Enhet.getEnhet("0001"))
+        assertEquals(PENSJON_UTLAND, Enhet.getEnhet("0001"))
 
-        assertEquals(NFP_UTLAND_OSLO, OppgaveRoutingModel.Enhet.getEnhet("4803"))
+        assertEquals(NFP_UTLAND_OSLO, Enhet.getEnhet("4803"))
 
-        assertEquals(DISKRESJONSKODE, OppgaveRoutingModel.Enhet.getEnhet("2103"))
+        assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
 
     }
 
