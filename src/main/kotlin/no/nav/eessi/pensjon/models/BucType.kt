@@ -1,7 +1,5 @@
 package no.nav.eessi.pensjon.models
 
-import no.nav.eessi.pensjon.oppgaverouting.*
-
 
 // https://confluence.adeo.no/display/BOA/Behandlingstema
 enum class Behandlingstema : Code {
