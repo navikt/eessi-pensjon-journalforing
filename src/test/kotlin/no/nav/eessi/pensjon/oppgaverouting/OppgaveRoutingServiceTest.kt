@@ -460,7 +460,7 @@ class OppgaveRoutingServiceTest {
                 landkode = "NOR",
                 diskresjonskode = "SPSF"),
                 P_BUC_01)
-        val expected = Enhet.DISKRESJONSKODE
+        val expected = DISKRESJONSKODE
 
         assertEquals(expected, actual)
     }
