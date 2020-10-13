@@ -45,7 +45,7 @@ enum class BucType(val BEHANDLINGSTEMA: String, val TEMA: String) {
     P_BUC_09(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     P_BUC_10(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
     H_BUC_07(Behandlingstema.ALDERSPENSJON.toString(), Tema.PENSJON.toString()),
-    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString());
+    R_BUC_02(Behandlingstema.TILBAKEBETALING.toString(), Tema.PENSJON.toString())
 }
 
 interface Code {
