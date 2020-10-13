@@ -30,8 +30,6 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun bestemEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        routingRequest.bosatt = Bosatt.fraLandkode(routingRequest.landkode)
-
         return if (routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF")
             Enhet.DISKRESJONSKODE
         else

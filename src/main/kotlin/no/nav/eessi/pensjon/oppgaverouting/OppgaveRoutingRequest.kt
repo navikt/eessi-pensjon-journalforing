@@ -15,6 +15,7 @@ class OppgaveRoutingRequest(
         val hendelseType: HendelseType? = null,
         val sakStatus: SakStatus? = null,
         val identifisertPerson: IdentifisertPerson? = null,
-        var bosatt: Bosatt? = null,
         val bucType: BucType? = null
-)
+) {
+    val bosatt = Bosatt.fraLandkode(landkode)
+}

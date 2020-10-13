@@ -132,7 +132,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                             hendelseType,
                             pensjonSakInformasjon.sakInformasjon?.sakStatus,
                             identifisertPerson,
-                            null,
                             sedHendelseModel.bucType)
             )
         } else {

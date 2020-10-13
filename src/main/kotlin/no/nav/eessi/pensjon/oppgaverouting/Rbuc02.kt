@@ -5,18 +5,18 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Rbuc02 : BucTilEnhetHandler {
-    override fun hentEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        val ytelseType = routingRequest.ytelseType
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        val ytelseType = request.ytelseType
 
-        if (routingRequest.identifisertPerson != null && routingRequest.identifisertPerson.flereEnnEnPerson()) {
+        if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
             return Enhet.ID_OG_FORDELING
         }
 
-        if (routingRequest.sedType == SedType.R004) {
+        if (request.sedType == SedType.R004) {
             return Enhet.OKONOMI_PENSJON
         }
 
-        if (HendelseType.MOTTATT == routingRequest.hendelseType) {
+        if (HendelseType.MOTTATT == request.hendelseType) {
             return when (ytelseType) {
                 YtelseType.ALDER -> Enhet.PENSJON_UTLAND
                 YtelseType.UFOREP -> Enhet.UFORE_UTLAND

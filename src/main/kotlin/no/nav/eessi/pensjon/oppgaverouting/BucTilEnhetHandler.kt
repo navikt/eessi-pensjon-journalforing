@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.Period
 
 interface BucTilEnhetHandler {
-    fun hentEnhet(routingRequest: OppgaveRoutingRequest): Enhet
+    fun hentEnhet(request: OppgaveRoutingRequest): Enhet
 }
 
 class BucTilEnhetHandlerCreator {
