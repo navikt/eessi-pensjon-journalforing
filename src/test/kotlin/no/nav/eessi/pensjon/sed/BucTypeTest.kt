@@ -1,6 +1,6 @@
-package no.nav.eessi.pensjon.models
+package no.nav.eessi.pensjon.sed
 
-import no.nav.eessi.pensjon.sed.SedHendelseModel
+import no.nav.eessi.pensjon.models.BucType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
