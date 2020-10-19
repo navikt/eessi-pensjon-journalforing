@@ -1,18 +1,15 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.BucType
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class BucHandlerTest {
 
     @Test
     fun `Verifiser at riktig handler blir valgt`() {
-        // null
-        val resultat_null = BucTilEnhetHandlerCreator.getHandler(null)
-        assertTrue(resultat_null is DefaultBucTilEnhetHandler)
+        val resultatNull = BucTilEnhetHandlerCreator.getHandler(null)
+        assertTrue(resultatNull is DefaultBucTilEnhetHandler)
 
         // P_PUC_*
         val pbuc01 = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_01)
