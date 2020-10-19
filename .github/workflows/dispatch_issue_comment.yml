@@ -11,3 +11,4 @@ jobs:
         with:
           token: ${{ secrets.DISPATCH_TOKEN }}
           commands: prodsett
+          reactions: false
