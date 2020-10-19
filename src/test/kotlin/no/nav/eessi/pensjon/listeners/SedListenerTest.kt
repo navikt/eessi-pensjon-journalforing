@@ -41,7 +41,7 @@ class SedListenerTest {
 
     lateinit var sedListener: SedListener
 
-    val gyldigeHendelser: GyldigeHendelser = GyldigeHendelserProd()
+    val gyldigeHendelser: GyldigeHendelser = GyldigeHendelser()
     val gyldigFunksjoner: GyldigFunksjoner = GyldigeFunksjonerToggleProd()
 
     @BeforeEach

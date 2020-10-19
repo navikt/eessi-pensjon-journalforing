@@ -5,10 +5,13 @@ import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.PensjonSakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -63,8 +66,8 @@ class SedListener(
                 try {
                     val offset = cr.offset()
 
-                    if (gyldigeHendelser.sendtHendelse(hendelse)) {
-                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    if (gyldigeHendelser.sendtHendelse(sedHendelse)) {
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
@@ -108,8 +111,8 @@ class SedListener(
                     } else {
 
                         logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
-                        if (gyldigeHendelser.mottattHendelse(hendelse)) {
-                            val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        if (gyldigeHendelser.mottattHendelse(sedHendelse)) {
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
