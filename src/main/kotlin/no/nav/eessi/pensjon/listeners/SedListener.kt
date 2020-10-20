@@ -80,12 +80,8 @@ class SedListener(
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
-                    logger.error(
-                            "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
-                                    "${ex.message}",
-                            ex
-                    )
-                    throw RuntimeException(ex.message)
+                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)
+                    throw JournalforingException(ex)
                 }
                 sendtLatch.countDown()
             }
@@ -123,19 +119,14 @@ class SedListener(
 
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset, pensjonSakInformasjon)
                         }
-
                     }
 
                     acknowledgment.acknowledge()
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
                 } catch (ex: Exception) {
-                    logger.error(
-                            "Noe gikk galt under behandling av SED-hendelse:\n $hendelse \n" +
-                                    "${ex.message}",
-                            ex
-                    )
-                    throw RuntimeException(ex.message)
+                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n $hendelse \n", ex)
+                    throw JournalforingException(ex)
                 }
                 mottattLatch.countDown()
             }
@@ -213,3 +204,5 @@ class SedListener(
 //        }
 //    }
 }
+
+internal class JournalforingException(cause: Throwable) : RuntimeException(cause)

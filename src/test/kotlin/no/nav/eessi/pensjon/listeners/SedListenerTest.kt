@@ -97,11 +97,16 @@ class SedListenerTest {
     }
 
     @Test
-    fun `Mottat Sed med ugyldige verdier`(){
+    fun `Mottat og sendt Sed med ugyldige verdier kaster exception`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
-        sedListener.consumeSedMottatt( hendelse, cr, acknowledgment)
         //denne inneholder da ikke guldig P eller H_BUC_07
-        verify(acknowledgment).acknowledge()
+        assertThrows<JournalforingException> {
+            sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
+        }
+
+        assertThrows<JournalforingException> {
+            sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
+        }
     }
 
     @Test
