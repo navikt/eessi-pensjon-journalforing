@@ -8,12 +8,15 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
 import no.nav.eessi.pensjon.models.BucType.R_BUC_02
-import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.PensjonSakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -164,8 +167,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {
-        var filnavn = ""
-        uSupporterteVedlegg.forEach { vedlegg -> filnavn += vedlegg.filnavn + " " }
-        return filnavn
+        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
     }
 }

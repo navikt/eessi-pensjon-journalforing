@@ -82,16 +82,17 @@ dependencies {
 	implementation("net.jodah:expiringmap:0.5.9")
 
 	//mock - test
-	implementation("org.mockito:mockito-core:3.3.3")
-	testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
-	testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.2")
-	testImplementation('org.mockito:mockito-junit-jupiter:3.3.3')
+	testImplementation("org.mockito:mockito-core:3.3.3")
 	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+	testImplementation("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}") {
+		exclude module: 'kotlin-test-js'
+		exclude module: 'kotlin-test-testng'
+	}
 	testImplementation("org.mock-server:mockserver-netty:5.10") {
 		exclude module: 'junit'
 	}
 	testImplementation("org.mock-server:mockserver-client-java:5.10")
-	testImplementation "io.mockk:mockk:1.10.0"
+	testImplementation("io.mockk:mockk:1.10.2")
 
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:0.13.1'

@@ -142,7 +142,6 @@ class SedListener(
         } else {
             PensjonSakInformasjon()
         }
-
     }
 
     private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel, ytelsestypeFraSed: YtelseType?, alleSedIBuc: Map<String, String?>): PensjonSakInformasjon {
@@ -151,24 +150,18 @@ class SedListener(
         val aktoerId = identifisertPerson.aktoerId
         val sakInformasjon = bestemSakKlient.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
 
-        val pensjonSak = when (gyldigeFunksjoner.togglePensjonSak()) {
-            true -> {
-                logger.debug("skal hente pensjonSak for sed kap.1 og validere mot pesys")
-                if (sakInformasjon == null) {
-                    sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
-                } else {
-                    null
-                }
-            }
-            false -> null
-        }
+        val pensjonSak = if (gyldigeFunksjoner.togglePensjonSak()) {
+            logger.debug("skal hente pensjonSak for sed kap.1 og validere mot pesys")
+
+            if (sakInformasjon == null) sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+            else null
+        } else null
+
         return PensjonSakInformasjon(sakInformasjon, pensjonSak)
     }
 
     private fun populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed: YtelseType?, identifisertPerson: IdentifisertPerson?): YtelseType? {
-        if (ytelsestypeFraSed != null)
-            return ytelsestypeFraSed
-        return identifisertPerson?.personRelasjon?.ytelseType
+        return ytelsestypeFraSed ?: identifisertPerson?.personRelasjon?.ytelseType
     }
 
     private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, pensjonSakInformasjon: PensjonSakInformasjon, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): YtelseType? {
@@ -180,29 +173,6 @@ class SedListener(
         return sakInformasjon?.sakType
     }
 
-//    @KafkaListener(groupId = "\${kafka.sedSendt.groupid}-recovery",
-//            topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
-//                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "25196")])])
-//    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-//        if(cr.offset() == 25196L) {
-//            logger.info("Behandler sedSendt offset: ${cr.offset()}")
-//            consumeSedSendt(hendelse, cr, acknowledgment)
-//        } else {
-//            acknowledgment.acknowledge()
-//        }
-//    }
-
-//    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
-//            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-//                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "38518")])])
-//    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-//        if(cr.offset() == 38518L) {
-//            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
-//            consumeSedSendt(hendelse, cr, acknowledgment)
-//        } else {
-//            acknowledgment.acknowledge()
-//        }
-//    }
 }
 
 internal class JournalforingException(cause: Throwable) : RuntimeException(cause)

@@ -86,7 +86,7 @@ class PDFServiceTest {
         val fileContent = SedDokumenter(EuxDokument("P2000",MimeType.PDF, "dokInnhold"),
                 listOf(EuxDokument("filnavn", null, "dokInnhold"))).toJson()
 
-        val (supportereVedlegg, usupportertVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
+        val (_, usupportertVedlegg) = pdfService.parseJsonDocuments(fileContent, SedType.P2000)
 
         assertEquals(1, usupportertVedlegg.size)
         assertEquals("filnavn", usupportertVedlegg[0].filnavn)
