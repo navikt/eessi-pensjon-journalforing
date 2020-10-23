@@ -83,12 +83,7 @@ class SedFnrSøk {
      */
     private fun erPinNorsk(jsonNode: JsonNode) : Boolean {
         val land = jsonNode.get("land")
-        if (land == null) {
-            return true
-        } else if (land.textValue() == "NO") {
-            return true
-        }
-        return false
+        return land == null || land.textValue() == "NO"
     }
 
     /**

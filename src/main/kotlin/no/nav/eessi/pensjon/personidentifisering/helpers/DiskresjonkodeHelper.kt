@@ -11,15 +11,7 @@ class DiskresjonkodeHelper(private val personV3Service: PersonV3Service,
     private val logger = LoggerFactory.getLogger(DiskresjonkodeHelper::class.java)
 
     fun hentDiskresjonskode(alleSediBuc: List<String?>): Diskresjonskode? {
-        var diskresjonskode : Diskresjonskode? = null
-
-        alleSediBuc.forEach { sed ->
-            diskresjonskode = finnDiskresjonkode(sed!!)
-            if(diskresjonskode != null) {
-                return diskresjonskode
-            }
-        }
-        return diskresjonskode
+        return alleSediBuc.map { finnDiskresjonkode(it!!) }.firstOrNull()
     }
 
     private fun finnDiskresjonkode(sed: String): Diskresjonskode? {

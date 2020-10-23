@@ -104,12 +104,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 }
             }
             bucType == BucType.P_BUC_02 -> {
-                val identer = identifisertePersoner.filter { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
-                if (identer.isEmpty()) {
-                    null
-                } else {
-                    identer.first()
-                }
+                return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             }
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {

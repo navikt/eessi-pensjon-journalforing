@@ -70,10 +70,7 @@ class JournalpostKlient(
                 avsenderLand
         )
         val behandlingstema = hentBehandlingsTema(bucType, ytelseType)
-        val bruker = when (fnr){
-            null -> null
-            else -> Bruker(id = fnr)
-        }
+        val bruker = fnr?.let { Bruker(id = it) }
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer)
         val tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType)
@@ -198,26 +195,14 @@ class JournalpostKlient(
     /**
      * PESYS støtter kun GB
      */
-    private fun justerAvsenderLand(avsenderLand: String?): String? {
-        if (avsenderLand == "UK") {
-            return  "GB"
-        }
-        return avsenderLand
-    }
+    private fun justerAvsenderLand(avsenderLand: String?): String? =
+            if (avsenderLand == "UK") "GB"
+            else avsenderLand
 
-    private fun populerJournalpostType(sedHendelseType: String): JournalpostType {
-        return if(sedHendelseType == "SENDT") {
-            JournalpostType.UTGAAENDE
-        } else {
-            JournalpostType.INNGAAENDE
-        }
-    }
+    private fun populerJournalpostType(sedHendelseType: String): JournalpostType =
+            if (sedHendelseType == "SENDT") JournalpostType.UTGAAENDE
+            else JournalpostType.INNGAAENDE
 
-    private fun populerSak(arkivsaksnummer: String?): Sak? {
-        return if(arkivsaksnummer == null){
-            null
-        } else {
-            Sak(arkivsaksnummer, "PSAK")
-        }
-    }
+    private fun populerSak(arkivsaksnummer: String?): Sak? =
+            arkivsaksnummer?.let { Sak(it, "PSAK") }
 }
