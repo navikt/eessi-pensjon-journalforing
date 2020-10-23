@@ -13,7 +13,7 @@ class GyldigeHendelser {
     fun mottattHendelse(hendelse: SedHendelseModel) =
             when {
                 hendelse.bucType == BucType.UKJENT -> false
-                gyldigeInnkommendeBucTyper.contains(hendelse.bucType) || gyldigSektorKode == hendelse.sektorKode -> true
+                hendelse.bucType in gyldigeInnkommendeBucTyper || gyldigSektorKode == hendelse.sektorKode -> true
                 else -> false
             }
 

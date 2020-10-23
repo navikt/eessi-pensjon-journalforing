@@ -1,12 +1,19 @@
 package no.nav.eessi.pensjon.architecture.saksflyt
 
-import io.mockk.*
+import io.mockk.CapturingSlot
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.spyk
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.listeners.GyldigFunksjoner
 import no.nav.eessi.pensjon.listeners.GyldigeHendelser
@@ -43,7 +50,7 @@ internal open class JournalforingTestBase {
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
     private val pdfService: PDFService = PDFService()
 
-    private val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
+    protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
@@ -92,14 +99,17 @@ internal open class JournalforingTestBase {
         bestemSakKlient.initMetrics()
     }
 
-    protected fun initJournalPostRequestSlot(): CapturingSlot<HttpEntity<String>> {
-        val journalpost = slot<HttpEntity<String>>()
+    protected fun initJournalPostRequestSlot(): Pair<CapturingSlot<HttpEntity<String>>, OpprettJournalPostResponse> {
+        val request = slot<HttpEntity<String>>()
 
+        val responseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
         every {
-            journalpostRestTemplate.exchange(any<String>(), any<HttpMethod>(), capture(journalpost), any<Class<String>>())
-        } returns ResponseEntity.ok().body(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
+            journalpostRestTemplate.exchange(any<String>(), any<HttpMethod>(), capture(request), any<Class<String>>())
+        } returns ResponseEntity.ok().body(responseJson)
 
-        return journalpost
+        val journalpostResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>(), true)
+
+        return request to journalpostResponse
     }
 
     protected fun createSedJson(sedType: SedType, fnr: String? = null, medAnnenPerson: Boolean = false): String {
