@@ -49,10 +49,12 @@ class FnrHelper {
                         SedType.P5000, SedType.P6000 -> {
                             // Prøver å hente ut gjenlevende på andre seder enn P2100
                             leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
-
+                        }
+                        SedType.P8000 -> {
+                            leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sedRootNode, fnrListe)
                         }
                         else -> {
-                            // P10000, P9000 og P8000
+                            // P10000, P9000
                             leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                             //P2000 - P2200 -- andre..  (H070)
                             leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
@@ -102,6 +104,26 @@ class FnrHelper {
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
             }
         }
+    }
+
+
+    private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+        logger.debug("Leter i P8000")
+
+        val personPin = filterPersonPinNode(sedRootNode)
+        //kun gjenlevende / rolle
+        val annenPersonPin = filterAnnenpersonPinNode(sedRootNode)
+
+        personPin?.let {
+            fnrListe.add( PersonRelasjon(it, Relasjon.FORSIKRET))
+            logger.debug("Legger til person ${Relasjon.FORSIKRET } relasjon")
+        }
+
+        annenPersonPin?.let {
+            fnrListe.add( PersonRelasjon( it, Relasjon.GJENLEVENDE))
+            logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
+        }
+
     }
 
     /***
