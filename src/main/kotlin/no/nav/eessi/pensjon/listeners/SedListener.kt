@@ -173,6 +173,38 @@ class SedListener(
         return sakInformasjon?.sakType
     }
 
+
+    /**
+     * Ikke slett funksjonene under før vi har et bedre opplegg for tilbakestilling av topic.
+     * Se jira-sak: EP-968
+     **/
+
+    /*
+    @KafkaListener(groupId = "\${kafka.sedSendt.groupid}-recovery",
+            topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "25196")])])
+    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() == 25196L) {
+            logger.info("Behandler sedSendt offset: ${cr.offset()}")
+            consumeSedSendt(hendelse, cr, acknowledgment)
+        } else {
+            acknowledgment.acknowledge()
+        }
+    }
+
+    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
+            topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "38518")])])
+    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() == 38518L) {
+            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
+            consumeSedSendt(hendelse, cr, acknowledgment)
+        } else {
+            acknowledgment.acknowledge()
+        }
+    }
+    */
+
 }
 
 internal class JournalforingException(cause: Throwable) : RuntimeException(cause)
