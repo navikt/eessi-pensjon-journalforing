@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc10 : BucTilEnhetHandler {
