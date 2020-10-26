@@ -1,50 +1,37 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.verify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpStatus
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.client.HttpServerErrorException
-import kotlin.test.assertNotNull
 
-@ExtendWith(MockitoExtension::class)
 internal class JournalpostServiceTest {
 
-    @Mock
-    private lateinit var journalpostKlient: JournalpostKlient
+    private val mockKlient: JournalpostKlient = mockk(relaxed = true)
 
-    private lateinit var journalpostService: JournalpostService
-
-    @BeforeEach
-    fun setup() {
-        journalpostService = JournalpostService(journalpostKlient)
-    }
+    private val journalpostService = JournalpostService(mockKlient)
 
     @Test
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter`() {
 
-        val journalpostCaptor = argumentCaptor<OpprettJournalpostRequest>()
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
 
         val responseBody = getResource("journalpost/opprettJournalpostResponse.json")
-        val response = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
+        val expectedResponse = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
 
-        doReturn(response).`when`(journalpostKlient).opprettJournalpost(journalpostCaptor.capture(), anyBoolean())
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
@@ -77,8 +64,11 @@ internal class JournalpostServiceTest {
                 ytelseType = null
         )
 
+        // RESPONSE
+        assertEqualResponse(expectedResponse, actualResponse!!)
+
         // REQUEST
-        val actualRequest = journalpostCaptor.firstValue
+        val actualRequest = journalpostSlot.captured
 
         assertEquals("NO", actualRequest.avsenderMottaker.land)
         assertNull(actualRequest.avsenderMottaker.id)
@@ -96,17 +86,14 @@ internal class JournalpostServiceTest {
         assertEquals("PSAK", actualRequest.sak!!.arkivsaksystem)
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
-        // RESPONSE
-        assertEquals(response.journalpostId, actualResponse!!.journalpostId)
-        assertEquals(response.journalstatus, actualResponse.journalstatus)
-        assertEquals(response.melding, actualResponse.melding)
-        assertEquals(response.journalpostferdigstilt, actualResponse.journalpostferdigstilt)
+        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any()) }
     }
 
     @Test
     fun `Gitt ugyldig request når forsøker oprette journalpost så kast exception`() {
-        doThrow(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-                .`when`(journalpostKlient).opprettJournalpost(any(), any())
+        every {
+            mockKlient.opprettJournalpost(any(), any())
+        } throws HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
 
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
@@ -144,16 +131,15 @@ internal class JournalpostServiceTest {
 
     @Test
     fun `gitt En UK Journalpost Så Bytt Til GB Fordi Pesys Kun Støtter GB`() {
-        val journalpostCaptor = argumentCaptor<OpprettJournalpostRequest>()
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
 
         val responseJson = getResource("journalpost/opprettJournalpostResponse.json")
-        val response = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>())
+        val expectedResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>())
 
         val requestJson = getResource("journalpost/opprettJournalpostRequestGB.json")
         val request = mapJsonToAny(requestJson, typeRefs<OpprettJournalpostRequest>())
 
-        doReturn(response)
-                .`when`(journalpostKlient).opprettJournalpost(journalpostCaptor.capture(), any())
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
@@ -174,9 +160,9 @@ internal class JournalpostServiceTest {
                 ytelseType = null
         )
 
-        assertEquals(response, actualResponse)
+        assertEqualResponse(expectedResponse, actualResponse!!)
 
-        val actualRequest = journalpostCaptor.lastValue
+        val actualRequest = journalpostSlot.captured
 
         assertEquals(request.behandlingstema, actualRequest.behandlingstema)
         assertEquals(request.dokumenter, actualRequest.dokumenter)
@@ -193,13 +179,15 @@ internal class JournalpostServiceTest {
 
         assertEquals(request.bruker!!.id, actualRequest.bruker!!.id)
         assertEquals("GB", actualRequest.avsenderMottaker.land)
+
+        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any()) }
     }
 
     @Test
     fun `Gitt en P2100 med UFØREP Når den er AVSLUTTET Så opprettes en Journalpost uten saknr og til enhet 4303 og tema Pensjon`() {
-        ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "NAV ORG" )
+        ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "NAV ORG")
 
-        val journalpostCaptor = argumentCaptor<OpprettJournalpostRequest>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
 
         val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
         val expectedResponse = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
@@ -231,28 +219,30 @@ internal class JournalpostServiceTest {
         """.trimIndent()
         val expectedRequest = mapJsonToAny(requestBody, typeRefs<OpprettJournalpostRequest>())
 
-        doReturn(expectedResponse).`when`(journalpostKlient).opprettJournalpost(journalpostCaptor.capture(), any())
+        every { mockKlient.opprettJournalpost(capture(requestSlot), any()) } returns expectedResponse
 
         val forsokFerdigstill = false
         val actualResponse = journalpostService.opprettJournalpost(
-            rinaSakId = "147730",
-            fnr = "12078945602",
-            personNavn = "Test Testesen",
-            bucType = "P_BUC_02",
-            sedType = SedType.P2100.name,
-            sedHendelseType = "SENDT",
-            eksternReferanseId = null,
-            kanal = "EESSI",
-            journalfoerendeEnhet = "4303",
-            arkivsaksnummer = null,
-            dokumenter = "[\"P2100\"]",
-            forsokFerdigstill = forsokFerdigstill,
-            avsenderLand = "NO",
-            avsenderNavn = "NAVT003",
-            ytelseType = null
+                rinaSakId = "147730",
+                fnr = "12078945602",
+                personNavn = "Test Testesen",
+                bucType = "P_BUC_02",
+                sedType = SedType.P2100.name,
+                sedHendelseType = "SENDT",
+                eksternReferanseId = null,
+                kanal = "EESSI",
+                journalfoerendeEnhet = "4303",
+                arkivsaksnummer = null,
+                dokumenter = "[\"P2100\"]",
+                forsokFerdigstill = forsokFerdigstill,
+                avsenderLand = "NO",
+                avsenderNavn = "NAVT003",
+                ytelseType = null
         )
 
-        val actualRequest = journalpostCaptor.lastValue
+        assertEqualResponse(expectedResponse, actualResponse!!)
+
+        val actualRequest = requestSlot.captured
 
         assertEquals(expectedRequest.behandlingstema, actualRequest.behandlingstema)
         assertEquals(expectedRequest.dokumenter, actualRequest.dokumenter)
@@ -269,7 +259,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
         assertEquals("NO", actualRequest.avsenderMottaker.land)
 
-        verify(journalpostKlient).opprettJournalpost(actualRequest, forsokFerdigstill)
+        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, forsokFerdigstill) }
     }
 
     @Test
@@ -278,7 +268,7 @@ internal class JournalpostServiceTest {
 
         journalpostService.oppdaterDistribusjonsinfo(journalpostId)
 
-        verify(journalpostKlient).oppdaterDistribusjonsinfo(journalpostId)
+        verify(exactly = 1) { mockKlient.oppdaterDistribusjonsinfo(journalpostId) }
     }
 
     @Test
@@ -323,6 +313,12 @@ internal class JournalpostServiceTest {
         assertEquals("PEN", result)
     }
 
+    private fun assertEqualResponse(expected: OpprettJournalPostResponse, actual: OpprettJournalPostResponse) {
+        assertEquals(expected.journalpostId, actual.journalpostId)
+        assertEquals(expected.journalstatus, actual.journalstatus)
+        assertEquals(expected.melding, actual.melding)
+        assertEquals(expected.journalpostferdigstilt, actual.journalpostferdigstilt)
+    }
 
     private fun getResource(path: String): String =
             javaClass.classLoader.getResource(path)!!.readText()
