@@ -1,52 +1,14 @@
 package no.nav.eessi.pensjon.architecture.saksflyt
 
-import io.mockk.CapturingSlot
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
-import no.nav.eessi.pensjon.buc.SedDokumentHelper
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.listeners.GyldigFunksjoner
-import no.nav.eessi.pensjon.listeners.GyldigeHendelser
-import no.nav.eessi.pensjon.listeners.SedListener
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.pdf.PDFService
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import org.junit.jupiter.api.BeforeEach
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
-import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.test.util.ReflectionTestUtils
-import org.springframework.web.client.RestTemplate
-import java.nio.file.Files
-import java.nio.file.Paths
-
+/*
 internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlient = mockk()
     private val norg2Klient: Norg2Klient = mockk(relaxed = true)
 
-    private val journalpostRestTemplate: RestTemplate = mockk(relaxed = true)
+    private val journalpostKlient: JournalpostKlient = mockk()
 
-    private val journalpostKlient: JournalpostKlient = JournalpostKlient(journalpostOidcRestTemplate = journalpostRestTemplate)
+    private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
     private val pdfService: PDFService = PDFService()
 
@@ -57,7 +19,7 @@ internal open class JournalforingTestBase {
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
             euxKlient = euxKlient,
-            journalpostKlient = journalpostKlient,
+            journalpostService = journalpostService,
             oppgaveRoutingService = oppgaveRoutingService,
             pdfService = pdfService,
             oppgaveHandler = oppgaveHandler
@@ -88,26 +50,23 @@ internal open class JournalforingTestBase {
 
     @BeforeEach
     fun setup() {
-        ReflectionTestUtils.setField(journalpostKlient, "navOrgnummer", "999999999")
+        ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
         ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
 
         listener.initMetrics()
         journalforingService.initMetrics()
         pdfService.initMetrics()
-        journalpostKlient.initMetrics()
         oppgaveHandler.initMetrics()
         bestemSakKlient.initMetrics()
     }
 
-    protected fun initJournalPostRequestSlot(): Pair<CapturingSlot<HttpEntity<String>>, OpprettJournalPostResponse> {
-        val request = slot<HttpEntity<String>>()
+    protected fun initJournalPostRequestSlot(): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
+        val request = slot<OpprettJournalpostRequest>()
 
         val responseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
-        every {
-            journalpostRestTemplate.exchange(any<String>(), any<HttpMethod>(), capture(request), any<Class<String>>())
-        } returns ResponseEntity.ok().body(responseJson)
-
         val journalpostResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>(), true)
+
+        every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
     }
@@ -177,4 +136,4 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
-}
+}*/

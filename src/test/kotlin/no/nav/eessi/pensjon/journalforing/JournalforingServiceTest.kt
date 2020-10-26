@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
@@ -36,7 +36,7 @@ class JournalforingServiceTest {
     private lateinit var euxKlient: EuxKlient
 
     @Mock
-    private lateinit var journalpostKlient: JournalpostKlient
+    private lateinit var journalpostService: JournalpostService
 
     @Mock
     private lateinit var fagmodulKlient: FagmodulKlient
@@ -64,7 +64,7 @@ class JournalforingServiceTest {
         oppgaveRoutingService = OppgaveRoutingService(norg2Klient)
 
         journalforingService = JournalforingService(euxKlient,
-                journalpostKlient,
+                journalpostService,
                 oppgaveRoutingService,
                 pdfService,
                 oppgaveHandler
@@ -116,7 +116,7 @@ class JournalforingServiceTest {
 
         //JOURNALPOST OPPRETT JOURNALPOST
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
-                .`when`(journalpostKlient)
+                .`when`(journalpostService)
                 .opprettJournalpost(
                     rinaSakId = anyOrNull(),
                     fnr = anyOrNull(),
@@ -150,7 +150,7 @@ class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -184,7 +184,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -218,7 +218,7 @@ class JournalforingServiceTest {
 
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, PensjonSakInformasjon())
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -260,7 +260,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -294,7 +294,7 @@ class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -333,7 +333,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
@@ -367,7 +367,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -402,7 +402,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -440,7 +440,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyString(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
@@ -475,7 +475,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -513,7 +513,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
@@ -548,7 +548,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -586,7 +586,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, pensjonSakInformasjon)
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -646,7 +646,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, pensjonSakInformasjon )
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("1033470"),
                 fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
                 personNavn = eq("Test Testesen"),
@@ -687,7 +687,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,  null, 0,  pensjonSakInformasjon)
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -726,7 +726,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon() )
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq(null),
@@ -762,7 +762,7 @@ class JournalforingServiceTest {
 
       journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
@@ -820,7 +820,7 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, pensjonSakInformasjon)
 
-        verify(journalpostKlient).opprettJournalpost(
+        verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("1033470"),
                 fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
                 personNavn = eq("Test Testesen"),

@@ -6,7 +6,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
 import no.nav.eessi.pensjon.models.BucType.R_BUC_02
@@ -31,7 +31,7 @@ import javax.annotation.PostConstruct
 
 @Service
 class JournalforingService(private val euxKlient: EuxKlient,
-                           private val journalpostKlient: JournalpostKlient,
+                           private val journalpostService: JournalpostService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
@@ -69,7 +69,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 val arkivsaksnummer = if (forsokFerdigstill) pensjonSakInformasjon.getSakId() else null
 
                 // Oppretter journalpost
-                val journalPostResponse = journalpostKlient.opprettJournalpost(
+                val journalPostResponse = journalpostService.opprettJournalpost(
                     rinaSakId = sedHendelseModel.rinaSakId,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     personNavn = identifisertPerson?.personNavn,
@@ -89,7 +89,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 // Oppdaterer distribusjonsinfo
                 if (forsokFerdigstill) {
-                    journalpostKlient.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
+                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 
                 val sedType = sedHendelseModel.sedType

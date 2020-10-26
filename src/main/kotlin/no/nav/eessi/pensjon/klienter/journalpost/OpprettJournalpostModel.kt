@@ -3,13 +3,13 @@ package no.nav.eessi.pensjon.klienter.journalpost
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonRawValue
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.json.mapAnyToJson
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.json.mapAnyToJson
 import java.io.IOException
 
 /**
