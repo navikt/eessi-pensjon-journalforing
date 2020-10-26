@@ -111,7 +111,7 @@ class Norg2KlientTest {
                 geografiskTilknytning = "0422"))
 
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
-        assertEquals(4, result?.size)
+        assertEquals(4, result.size)
 
         val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("4803", actual)
@@ -131,7 +131,7 @@ class Norg2KlientTest {
         val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest())
 
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
-        assertEquals(2, result?.size)
+        assertEquals(2, result.size)
 
         val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("0001", actual)
@@ -153,7 +153,7 @@ class Norg2KlientTest {
                 diskresjonskode = "SPSF"))
 
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
-        assertEquals(3, result?.size)
+        assertEquals(3, result.size)
 
         val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = result)
         assertEquals("2103", actual)

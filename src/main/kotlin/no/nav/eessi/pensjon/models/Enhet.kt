@@ -1,21 +1,10 @@
-package no.nav.eessi.pensjon.oppgaverouting
+package no.nav.eessi.pensjon.models
 
-enum class Bosatt {
-    NORGE,
-    UTLAND,
-    UKJENT;
+import com.fasterxml.jackson.annotation.JsonValue
 
-    companion object {
-        fun fraLandkode(landkode: String?) =
-                when {
-                    landkode.isNullOrEmpty() -> UKJENT
-                    landkode == "NOR" -> NORGE
-                    else -> UTLAND
-                }
-    }
-}
-
-enum class Enhet(val enhetsNr: String) {
+enum class Enhet(
+        @JsonValue val enhetsNr: String
+) {
     PENSJON_UTLAND("0001"),
     UFORE_UTLANDSTILSNITT("4476"),
     UFORE_UTLAND("4475"),
