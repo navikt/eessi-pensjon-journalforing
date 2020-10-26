@@ -16,6 +16,7 @@ class BucTilEnhetHandlerCreator {
                 BucType.P_BUC_02 -> Pbuc02()
                 BucType.P_BUC_03 -> Pbuc03()
                 BucType.P_BUC_04 -> Pbuc04()
+                BucType.P_BUC_05 -> Pbuc05()
                 BucType.P_BUC_10 -> Pbuc10()
                 BucType.H_BUC_07 -> Hbuc07()
                 BucType.R_BUC_02 -> Rbuc02()
