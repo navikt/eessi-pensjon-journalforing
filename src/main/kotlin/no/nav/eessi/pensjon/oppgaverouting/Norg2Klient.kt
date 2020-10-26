@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import com.google.common.annotations.VisibleForTesting
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
@@ -42,7 +43,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         logger.debug("følgende request til Norg2 : $request")
         val enheter = hentArbeidsfordelingEnheter(request)
 
-        return finnArbeidsfordelingEnheter(request, enheter)
+        return enheter?.let { finnArbeidsfordelingEnheter(request, it) }
     }
 
     fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
@@ -64,7 +65,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         }
     }
 
-    fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem>? {
+    fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem> {
         return hentArbeidsfordeling.measure {
 
             try {
@@ -93,14 +94,14 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         }
     }
 
-    fun finnArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>?): String? {
-        return list
-                ?.asSequence()
-                ?.filter { it.diskresjonskode == request.diskresjonskode }
-                ?.filter { it.behandlingstype == request.behandlingstype }
-                ?.filter { it.tema == request.tema }
-                ?.map { it.enhetNr }
-                ?.lastOrNull()
+    @VisibleForTesting
+    fun finnArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>): String? {
+        return list.asSequence()
+                .filter { it.diskresjonskode == request.diskresjonskode }
+                .filter { it.behandlingstype == request.behandlingstype }
+                .filter { it.tema == request.tema }
+                .map { it.enhetNr }
+                .lastOrNull()
     }
 }
 
