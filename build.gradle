@@ -106,7 +106,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
 
 	// Personoppslag
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.0.4")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.0.6")
 	implementation("no.nav.tjenestespesifikasjoner:person-v3-tjenestespesifikasjon:1+")
 	implementation("com.sun.xml.ws:jaxws-ri:2.3.3")
 
