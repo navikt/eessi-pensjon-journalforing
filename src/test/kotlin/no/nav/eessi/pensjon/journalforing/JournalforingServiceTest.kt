@@ -1,13 +1,24 @@
 package no.nav.eessi.pensjon.journalforing
 
-import com.nhaarman.mockitokotlin2.*
-import no.nav.eessi.pensjon.models.SedType
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.PensjonSakInformasjon
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
@@ -68,7 +79,7 @@ class JournalforingServiceTest {
                 oppgaveRoutingService,
                 pdfService,
                 oppgaveHandler
-            )
+        )
         journalforingService.initMetrics()
 
         //MOCK RESPONSES
@@ -118,21 +129,19 @@ class JournalforingServiceTest {
         doReturn(OpprettJournalPostResponse("123", "null", null, false))
                 .`when`(journalpostService)
                 .opprettJournalpost(
-                    rinaSakId = anyOrNull(),
-                    fnr = anyOrNull(),
-                    personNavn = anyOrNull(),
-                    bucType = anyOrNull(),
-                    sedType = anyOrNull(),
-                    sedHendelseType = anyOrNull(),
-                    eksternReferanseId = anyOrNull(),
-                    kanal = anyOrNull(),
-                    journalfoerendeEnhet = anyOrNull(),
-                    arkivsaksnummer = anyOrNull(),
-                    dokumenter = anyOrNull(),
-                    forsokFerdigstill = anyOrNull(),
-                    avsenderLand = anyOrNull(),
-                    avsenderNavn = anyOrNull(),
-                    ytelseType = anyOrNull()
+                        rinaSakId = anyOrNull(),
+                        fnr = anyOrNull(),
+                        personNavn = anyOrNull(),
+                        bucType = anyOrNull(),
+                        sedType = anyOrNull(),
+                        sedHendelseType = anyOrNull(),
+                        journalfoerendeEnhet = anyOrNull(),
+                        arkivsaksnummer = anyOrNull(),
+                        dokumenter = anyOrNull(),
+                        forsokFerdigstill = anyOrNull(),
+                        avsenderLand = anyOrNull(),
+                        avsenderNavn = anyOrNull(),
+                        ytelseType = anyOrNull()
                 )
     }
 
@@ -154,12 +163,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("R_BUC_02"),
-                sedType = eq(SedType.R004.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4819"),
+                bucType = eq(BucType.R_BUC_02),
+                sedType = eq(SedType.R004),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.OKONOMI_PENSJON),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R004 - Melding om utbetaling"),
                 forsokFerdigstill = eq(false),
@@ -188,12 +195,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("R_BUC_02"),
-                sedType = eq(SedType.R005.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.R_BUC_02),
+                sedType = eq(SedType.R005),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -222,12 +227,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("R_BUC_02"),
-                sedType = eq(SedType.R005.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.R_BUC_02),
+                sedType = eq(SedType.R005),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -258,18 +261,16 @@ class JournalforingServiceTest {
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("R_BUC_02"),
-                sedType = eq(SedType.R005.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.R_BUC_02),
+                sedType = eq(SedType.R005),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -281,7 +282,7 @@ class JournalforingServiceTest {
 
 
     @Test
-    fun `Sendt gyldig Sed P2000`(){
+    fun `Sendt gyldig Sed P2000`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
@@ -298,12 +299,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_01"),
-                sedType = eq(SedType.P2000.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_01),
+                sedType = eq(SedType.P2000),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -314,7 +313,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Sendt gyldig Sed P2200`(){
+    fun `Sendt gyldig Sed P2200`() {
         //FAGMODUL HENT ALLE DOKUMENTER
         doReturn(String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json"))))
                 .`when`(fagmodulKlient)
@@ -337,12 +336,10 @@ class JournalforingServiceTest {
                 rinaSakId = anyOrNull(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_03"),
-                sedType = eq(SedType.P2200.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4476"),
+                bucType = eq(BucType.P_BUC_03),
+                sedType = eq(SedType.P2200),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.UFORE_UTLANDSTILSNITT),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -353,7 +350,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Sendt Sed i P_BUC_10`(){
+    fun `Sendt Sed i P_BUC_10`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
@@ -371,12 +368,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_10"),
-                sedType = eq(SedType.P15000.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_10),
+                sedType = eq(SedType.P15000),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -387,7 +382,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat gyldig Sed P2000`(){
+    fun `Mottat gyldig Sed P2000`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
@@ -406,12 +401,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_01"),
-                sedType = eq(SedType.P2000.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_01),
+                sedType = eq(SedType.P2000),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -422,7 +415,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`(){
+    fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`() {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
@@ -444,12 +437,10 @@ class JournalforingServiceTest {
                 rinaSakId = anyString(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_01"),
-                sedType = eq(SedType.P2000.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_01),
+                sedType = eq(SedType.P2000),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -460,7 +451,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat gyldig Sed P2100`(){
+    fun `Mottat gyldig Sed P2100`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
@@ -473,18 +464,16 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, PensjonSakInformasjon())
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4862"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.NFP_UTLAND_AALESUND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
@@ -495,7 +484,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat gyldig Sed P2200`(){
+    fun `Mottat gyldig Sed P2200`() {
         val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
@@ -517,12 +506,10 @@ class JournalforingServiceTest {
                 rinaSakId = anyOrNull(),
                 fnr = eq("01055012345"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_03"),
-                sedType = eq(SedType.P2200.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4475"),
+                bucType = eq(BucType.P_BUC_03),
+                sedType = eq(SedType.P2200),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.UFORE_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
                 forsokFerdigstill = eq(false),
@@ -533,7 +520,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottat Sed i P_BUC_10`(){
+    fun `Mottat Sed i P_BUC_10`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
@@ -552,12 +539,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("147729"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_10"),
-                sedType = eq(SedType.P15000.name),
-                sedHendelseType = eq("MOTTATT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_10),
+                sedType = eq(SedType.P15000),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
                 forsokFerdigstill = eq(false),
@@ -584,18 +569,16 @@ class JournalforingServiceTest {
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
         val pensjonSakInformasjon = PensjonSakInformasjon(saksInfo)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, pensjonSakInformasjon)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, pensjonSakInformasjon)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("9999"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
                 arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(true),
@@ -644,18 +627,16 @@ class JournalforingServiceTest {
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
         val pensjonSakInformasjon = PensjonSakInformasjon(saksInfo)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, pensjonSakInformasjon )
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, pensjonSakInformasjon)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("1033470"),
                 fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("9999"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
                 arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(true),
@@ -685,18 +666,16 @@ class JournalforingServiceTest {
         val sakInformasjon = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
         val pensjonSakInformasjon = PensjonSakInformasjon(sakInformasjon)
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato,  null, 0,  pensjonSakInformasjon)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, pensjonSakInformasjon)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
@@ -705,7 +684,7 @@ class JournalforingServiceTest {
                 ytelseType = eq(null)
         )
 
-       //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+        // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
     }
 
@@ -724,18 +703,16 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon() )
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq(null),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
@@ -760,18 +737,16 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
         )
 
-      journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, PensjonSakInformasjon())
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
                 fnr = eq("12078945602"),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq("SENDT"),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("4303"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.SENDT),
+                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),
@@ -824,12 +799,10 @@ class JournalforingServiceTest {
                 rinaSakId = eq("1033470"),
                 fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
                 personNavn = eq("Test Testesen"),
-                bucType = eq("P_BUC_02"),
-                sedType = eq(SedType.P2100.name),
-                sedHendelseType = eq(HendelseType.MOTTATT.name),
-                eksternReferanseId = eq(null),
-                kanal = eq("EESSI"),
-                journalfoerendeEnhet = eq("0001"),
+                bucType = eq(BucType.P_BUC_02),
+                sedType = eq(SedType.P2100),
+                sedHendelseType = eq(HendelseType.MOTTATT),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 forsokFerdigstill = eq(false),

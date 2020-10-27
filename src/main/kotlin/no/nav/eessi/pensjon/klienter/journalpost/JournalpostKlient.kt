@@ -37,8 +37,15 @@ class JournalpostKlient(
     }
 
     /**
-     * TODO:
-     **/
+     * Sender et POST request til Joark for opprettelse av JournalPost.
+     *
+     * @param request: Request-objektet som skal sendes til joark.
+     * @param forsokFerdigstill: Hvis true vil Joark forsøke å ferdigstille journalposten.
+     *
+     * @return {@link OpprettJournalPostResponse}
+     *         Respons fra Joark. Inneholder journalposten sin ID, status, melding, og en boolean-verdi
+     *         som indikerer om posten ble ferdigstilt.
+     */
     fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean): OpprettJournalPostResponse? {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
 
@@ -54,19 +61,21 @@ class JournalpostKlient(
                         HttpEntity(request.toString(), headers),
                         String::class.java)
                 mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
-            } catch(ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under opprettelse av journalpost ex: $ex body: ${ex.responseBodyAsString}")
+            } catch (ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")
-            } catch(ex: Exception) {
-                logger.error("En feil oppstod under opprettelse av journalpost ex: $ex")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
         }
     }
 
     /**
-     *  Oppdaterer journaposten. Kanal og ekspedertstatus settes med {@code OppdaterDistribusjonsinfoRequest}
-     *  @param journalpostId: Journalposten sin ID
+     *  Oppdaterer journaposten. Kanal og ekspedertstatus settes med {@code OppdaterDistribusjonsinfoRequest}.
+     *  Dette låser og ferdigstiller journalposten!
+     *
+     *  @param journalpostId: Journalposten som skal oppdateres.
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) {
         val path = "/journalpost/$journalpostId/oppdaterDistribusjonsinfo"
@@ -84,10 +93,10 @@ class JournalpostKlient(
                         String::class.java)
 
             } catch (ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: $ex body: ${ex.responseBodyAsString}")
+                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
                 throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: $ex")
+                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
                 throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message}")
             }
         }

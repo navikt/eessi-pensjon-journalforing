@@ -47,7 +47,7 @@ enum class JournalpostType: Code {
     }
 }
 
-class Sak(
+data class Sak(
     val arkivsaksnummer: String, //REQUIRED
     val arkivsaksystem: String //REQUIRED
 )
@@ -57,11 +57,11 @@ class Sak(
  *
  * https://confluence.adeo.no/display/BOA/Type%3A+AvsenderMottaker
  */
-class AvsenderMottaker(
-    val id: String?,
-    val idType: IdType?,
-    val navn: String?,
-    val land: String?
+data class AvsenderMottaker(
+    val id: String? = null,
+    val idType: IdType? = null,
+    val navn: String? = null,
+    val land: String? = null
 )
 
 enum class IdType {
@@ -69,12 +69,12 @@ enum class IdType {
     ORGNR
 }
 
-class Bruker(
+data class Bruker(
     val id: String, //REQUIRED
     val idType: String = "FNR" //REQUIRED
 )
 
-class Tilleggsopplysning(
+data class Tilleggsopplysning(
         val nokkel: String, //REQUIRED
         val verdi: String //REQUIRED
 )
