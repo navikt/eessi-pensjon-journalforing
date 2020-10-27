@@ -76,11 +76,6 @@ dependencies {
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
 	implementation("commons-io:commons-io:2.6")
 
-	implementation("org.apache.httpcomponents:httpclient:4.5.12")
-
-	// Allows for variable expiration-date of each cache-entry
-	implementation("net.jodah:expiringmap:0.5.9")
-
 	//mock - test
 	testImplementation("org.mockito:mockito-core:3.3.3")
 	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
