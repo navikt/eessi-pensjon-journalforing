@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.PensjonSakInformasjon
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
@@ -32,7 +32,7 @@ class OppgaveRoutingRequest(
                 ytelseType: YtelseType?,
                 sedHendelseModel: SedHendelseModel,
                 hendelseType: HendelseType,
-                pensjonSakInformasjon: PensjonSakInformasjon
+                sakInformasjon: SakInformasjon?
         ): OppgaveRoutingRequest {
             return OppgaveRoutingRequest(
                     identifisertPerson?.aktoerId,
@@ -43,7 +43,7 @@ class OppgaveRoutingRequest(
                     ytelseType,
                     sedHendelseModel.sedType,
                     hendelseType,
-                    pensjonSakInformasjon.sakInformasjon?.sakStatus,
+                    sakInformasjon?.sakStatus,
                     identifisertPerson,
                     sedHendelseModel.bucType
             )

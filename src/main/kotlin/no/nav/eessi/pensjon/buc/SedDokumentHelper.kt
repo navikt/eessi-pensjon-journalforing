@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.PensjonSak
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -72,10 +72,10 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .textValue()
     }
 
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: Map<String, String?>): PensjonSak? {
+    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: Map<String, String?>): SakInformasjon? {
         val list = hentSakIdFraSED(alleSedIBuc)
         return if (list.isNotEmpty()) {
-            validerSakIdFraSEDogReturnerEnValid(aktoerId, list)
+            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, list)
         } else {
             null
         }
@@ -109,11 +109,11 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
-    private fun validerSakIdFraSEDogReturnerEnValid(aktoerId: String, list: List<String>): PensjonSak? {
+    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, list: List<String>): SakInformasjon? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        return saklist.lastOrNull { sak -> list.contains(sak.sakid.toString()) }.also {
-            logger.debug("Funnet og validert sak: $it")
-        }
+        return saklist.filter { sak -> list.contains( sak.sakId ) }
+//                .map { sak ->  SakInformasjon(sakId = sak.sakid, sakStatus = sak.status, sakType = sak.sakType, saksbehandlendeEnhetId = "", nyopprettet = false) }
+                .firstOrNull()
     }
 
 }

@@ -14,7 +14,7 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.PensjonSakInformasjon
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
@@ -52,21 +52,25 @@ class JournalforingService(private val euxKlient: EuxKlient,
                    fdato: LocalDate,
                    ytelseType: YtelseType?,
                    offset: Long = 0,
-                   pensjonSakInformasjon: PensjonSakInformasjon) {
+                   sakInformasjon: SakInformasjon?) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
-                logger.info("rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId}")
-                logger.info("kafka offset: $offset, hentSak PESYS saknr: ${pensjonSakInformasjon.getSakId()} på aktoerid: ${identifisertPerson?.aktoerId} og rinaid: ${sedHendelseModel.rinaSakId}")
+                logger.info(
+                    """
+                    rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId}
+                    kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId}
+                    """.trimIndent()
+                )
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelseModel.rinaSakId, sedHendelseModel.rinaDokumentId)
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelseModel.rinaSakId}, ${sedHendelseModel.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelseModel.sedType!!)
 
-                val tildeltEnhet =  tildeltEnhet(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
+                val tildeltEnhet =  tildeltEnhet(sakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
 
                 val forsokFerdigstill = tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
-                val arkivsaksnummer = if (forsokFerdigstill) pensjonSakInformasjon.getSakId() else null
+                val arkivsaksnummer = if (forsokFerdigstill) sakInformasjon?.sakId else null
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
@@ -117,16 +121,16 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     private fun tildeltEnhet(
-            pensjonSakInformasjon: PensjonSakInformasjon,
+            sakInformasjon: SakInformasjon?,
             sedHendelseModel: SedHendelseModel,
             hendelseType: HendelseType,
             identifisertPerson: IdentifisertPerson?,
             fdato: LocalDate,
             ytelseType: YtelseType?
     ): Enhet {
-        return if (manueltTildeltEnhetRegel(pensjonSakInformasjon, sedHendelseModel, hendelseType, identifisertPerson)) {
+        return if (manueltTildeltEnhetRegel(sakInformasjon, sedHendelseModel, hendelseType, identifisertPerson)) {
             oppgaveRoutingService.route(
-                    OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, pensjonSakInformasjon)
+                    OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon)
             )
         } else {
             Enhet.AUTOMATISK_JOURNALFORING
@@ -134,16 +138,16 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     private fun manueltTildeltEnhetRegel(
-            pensjonSakInformasjon: PensjonSakInformasjon,
+            sakInformasjon: SakInformasjon?,
             sedHendelseModel: SedHendelseModel,
             hendelseType: HendelseType,
             identifisertPerson: IdentifisertPerson?
     ): Boolean {
-        val sakinformasjon = pensjonSakInformasjon.sakInformasjon ?: return true
+        sakInformasjon ?: return true
 
         return when {
             sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
-            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakinformasjon.sakType == YtelseType.UFOREP && sakinformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
             else -> false
         }

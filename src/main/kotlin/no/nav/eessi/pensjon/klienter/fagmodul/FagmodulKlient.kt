@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.PensjonSak
+import no.nav.eessi.pensjon.models.SakInformasjon
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -57,7 +57,7 @@ class FagmodulKlient(
         }
     }
 
-    fun hentPensjonSaklist(aktoerId: String): List<PensjonSak> {
+    fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
 
         val path = "/pensjon/sakliste/$aktoerId"
 
@@ -68,7 +68,7 @@ class FagmodulKlient(
                 null,
                 String::class.java).body
             val json = responsebody.orEmpty()
-            return mapJsonToAny(json, typeRefs<List<PensjonSak>>())
+            return mapJsonToAny(json, typeRefs<List<SakInformasjon>>())
         } catch(ex: HttpStatusCodeException) {
             logger.error("En feil oppstod under henting av pensjonsakliste ex: $ex body: ${ex.responseBodyAsString}", ex)
             throw RuntimeException("En feil oppstod under henting av pensjonsakliste ex: ${ex.message} body: ${ex.responseBodyAsString}")
