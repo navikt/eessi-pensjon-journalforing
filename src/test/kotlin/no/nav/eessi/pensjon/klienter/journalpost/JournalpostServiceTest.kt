@@ -310,6 +310,29 @@ internal class JournalpostServiceTest {
         val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
         assertEquals(Tema.PENSJON, result)
     }
+
+    @Test
+    fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
+        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.GENRL)
+        assertEquals(Tema.PENSJON, resultatGENRL)
+
+        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.OMSORG)
+        assertEquals(Tema.PENSJON, resultatOMSORG)
+
+        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
+        assertEquals(Tema.PENSJON, resultatALDER)
+
+        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.GJENLEV)
+        assertEquals(Tema.PENSJON, resultatGJENLEV)
+
+        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.BARNEP)
+        assertEquals(Tema.PENSJON, resultatBARNEP)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
+        val result = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.UFOREP)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     private fun assertEqualResponse(expected: OpprettJournalPostResponse, actual: OpprettJournalPostResponse) {

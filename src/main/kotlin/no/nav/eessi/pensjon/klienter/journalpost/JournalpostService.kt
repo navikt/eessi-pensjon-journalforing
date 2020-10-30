@@ -85,6 +85,11 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
     @VisibleForTesting
     fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
+        if (bucType == BucType.P_BUC_05) {
+            return if (ytelseType == YtelseType.UFOREP) Tema.UFORETRYGD
+            else Tema.PENSJON
+        }
+
         if (bucType == BucType.R_BUC_02) {
             if (sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON) {
                 return Tema.PENSJON
