@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.mapAnyToJson
+import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.Tema
 import java.io.IOException
 
 /**
@@ -19,20 +22,21 @@ import java.io.IOException
  */
 class OpprettJournalpostRequest(
         val avsenderMottaker: AvsenderMottaker,
-        val behandlingstema: String? = null,
+        val behandlingstema: Behandlingstema? = null,
         val bruker: Bruker? = null,
         @JsonDeserialize(using = JsonAsStringDeserializer::class)
         @JsonRawValue
-        val dokumenter: String, //REQUIRED
-        val eksternReferanseId: String? = null,
-        val journalfoerendeEnhet: String? = null,
-        val journalpostType: JournalpostType, //REQUIRED
-        val kanal: String? = "EESSI",
+        val dokumenter: String,
+        val journalfoerendeEnhet: Enhet? = null,
+        val journalpostType: JournalpostType,
         val sak: Sak? = null,
-        val tema: String = "PEN", //REQUIRED
+        val tema: Tema = Tema.PENSJON,
         val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
-        val tittel: String //REQUIRED
+        val tittel: String
 ){
+    val kanal: String = "EESSI"
+    val eksternReferanseId: String? = null
+
     override fun toString(): String {
         return mapAnyToJson(this,true)
     }
@@ -48,8 +52,8 @@ enum class JournalpostType: Code {
 }
 
 data class Sak(
-    val arkivsaksnummer: String, //REQUIRED
-    val arkivsaksystem: String //REQUIRED
+    val arkivsaksnummer: String,
+    val arkivsaksystem: String
 )
 
 /**
@@ -70,13 +74,13 @@ enum class IdType {
 }
 
 data class Bruker(
-    val id: String, //REQUIRED
-    val idType: String = "FNR" //REQUIRED
+    val id: String,
+    val idType: String = "FNR"
 )
 
 data class Tilleggsopplysning(
-        val nokkel: String, //REQUIRED
-        val verdi: String //REQUIRED
+        val nokkel: String,
+        val verdi: String
 )
 
 interface Code {

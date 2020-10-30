@@ -11,7 +11,9 @@ import no.nav.eessi.pensjon.models.PensjonSak
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -96,8 +98,8 @@ class SedDokumentHelperTest {
     @Test
     fun `Gitt det finnes aktierid og det finnes en eller flere pensjonsak Så skal det sakid fra sed valideres og sakid returneres`() {
 
-        val expected = PensjonSak(sakid = 22874955, sakType = "ALDER",status = "INNV")
-        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = "UFOREP" ,status = "AVSL"))
+        val expected = PensjonSak(sakid = 22874955, sakType = YtelseType.ALDER, status = "INNV")
+        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = YtelseType.UFOREP , status = "AVSL"))
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
@@ -199,10 +201,10 @@ class SedDokumentHelperTest {
             }
         """.trimIndent()
 
-        val expected = PensjonSak(sakid = 22874955, sakType = "ALDER",status = "INNV")
-        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = "UFOREP" ,status = "AVSL"),
-                PensjonSak(sakid = 22874123, sakType = "GJENLEV" ,status = "AVSL"),
-                PensjonSak(sakid = 22874456, sakType = "BARNEP" ,status = "AVSL"))
+        val expected = PensjonSak(sakid = 22874955, sakType = YtelseType.ALDER, status = "INNV")
+        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = YtelseType.UFOREP , status = "AVSL"),
+                PensjonSak(sakid = 22874123, sakType = YtelseType.GJENLEV , status = "AVSL"),
+                PensjonSak(sakid = 22874456, sakType = YtelseType.BARNEP , status = "AVSL"))
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 

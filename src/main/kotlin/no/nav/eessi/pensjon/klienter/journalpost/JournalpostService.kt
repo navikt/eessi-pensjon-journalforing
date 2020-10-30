@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.google.common.annotations.VisibleForTesting
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
@@ -55,10 +56,8 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 behandlingstema,
                 bruker,
                 dokumenter,
-                null,
-                journalfoerendeEnhet.enhetsNr,
+                journalfoerendeEnhet,
                 journalpostType,
-                "EESSI",
                 sak,
                 tema,
                 tilleggsopplysninger,
@@ -74,30 +73,30 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    private fun hentBehandlingsTema(bucType: BucType, ytelseType: YtelseType?): String {
+    private fun hentBehandlingsTema(bucType: BucType, ytelseType: YtelseType?): Behandlingstema {
         return if (bucType == BucType.R_BUC_02) {
             return when (ytelseType) {
-                YtelseType.UFOREP -> Behandlingstema.UFOREPENSJON.toString()
-                YtelseType.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON.toString()
-                else -> Behandlingstema.ALDERSPENSJON.toString()
+                YtelseType.UFOREP -> Behandlingstema.UFOREPENSJON
+                YtelseType.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
+                else -> Behandlingstema.ALDERSPENSJON
             }
-        } else bucType.BEHANDLINGSTEMA
+        } else bucType.behandlingstema
     }
 
     @VisibleForTesting
-    fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): String {
-        return if (bucType == BucType.R_BUC_02) {
+    fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
+        if (bucType == BucType.R_BUC_02) {
             if (sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON) {
-                return Tema.PENSJON.toString()
+                return Tema.PENSJON
             }
             return when (ytelseType) {
-                YtelseType.UFOREP -> Tema.UFORETRYGD.toString()
-                else -> Tema.PENSJON.toString()
+                YtelseType.UFOREP -> Tema.UFORETRYGD
+                else -> Tema.PENSJON
             }
         } else if (bucType == BucType.P_BUC_02 && ytelseType == YtelseType.UFOREP) {
-            Tema.UFORETRYGD.toString()
+            return Tema.UFORETRYGD
         } else {
-            bucType.TEMA
+            return bucType.tema
         }
     }
 

@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.models
 
 
-class PensjonSak (
+class PensjonSak(
         val sakid: Long,
-        val sakType: String,
+        val sakType: YtelseType,
         val status: String
 ) {
     override fun toString(): String {

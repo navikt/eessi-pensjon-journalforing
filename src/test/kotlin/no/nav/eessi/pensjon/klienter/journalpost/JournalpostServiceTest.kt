@@ -6,10 +6,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -77,11 +79,11 @@ internal class JournalpostServiceTest {
         assertNull(actualRequest.avsenderMottaker.idType)
         assertNull(actualRequest.avsenderMottaker.navn)
 
-        assertEquals("ab0254", actualRequest.behandlingstema)
+        assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
         assertEquals("12345678912", actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNull(actualRequest.eksternReferanseId)
-        assertEquals("9999", actualRequest.journalfoerendeEnhet)
+        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
         assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
         assertEquals("string", actualRequest.sak!!.arkivsaksnummer)
@@ -270,43 +272,44 @@ internal class JournalpostServiceTest {
     @Test
     fun `gitt det er en P_BUC_02 med ytelsetype BARNEP så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.BARNEP)
-        assertEquals("PEN", result)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med ytelsetype UFOREP så skal det settes teama UFO`() {
         val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.UFOREP)
-        assertEquals("UFO", result)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med ytelsetype GJENLEVENDE så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.GJENLEV)
-        assertEquals("PEN", result)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_01 med ytelsetype ALDER så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.P_BUC_01, SedType.P6000, Enhet.PENSJON_UTLAND, null)
-        assertEquals("PEN", result)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R004, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
-        assertEquals("PEN", result)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
         val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.UFOREP)
-        assertEquals("UFO", result)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
-        assertEquals("PEN", result)
+        assertEquals(Tema.PENSJON, result)
+    }
     }
 
     private fun assertEqualResponse(expected: OpprettJournalPostResponse, actual: OpprettJournalPostResponse) {
