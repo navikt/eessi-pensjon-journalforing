@@ -56,19 +56,18 @@ internal class OpprettJournalpostModelTest {
         val opprettJournalpostRequestJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostRequest.json")))
 
         val opprettJournalpostRequest = mapJsonToAny(opprettJournalpostRequestJson, typeRefs<OpprettJournalpostRequest>())
-        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequest.behandlingstema)
-        assertEquals("12345678912", opprettJournalpostRequest.bruker?.id)
-        assertEquals("FNR", opprettJournalpostRequest.bruker?.idType)
-        val dokumenter = """[{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]"""
-        assertEquals(dokumenter, opprettJournalpostRequest.dokumenter)
-        assertEquals("string", opprettJournalpostRequest.eksternReferanseId)
-        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, opprettJournalpostRequest.journalfoerendeEnhet)
-        assertEquals(JournalpostType.INNGAAENDE, opprettJournalpostRequest.journalpostType)
-        assertEquals("NAV_NO", opprettJournalpostRequest.kanal)
-        assertEquals("string", opprettJournalpostRequest.sak?.arkivsaksnummer)
-        assertEquals("PSAK", opprettJournalpostRequest.sak?.arkivsaksystem)
-        assertEquals(Tema.PENSJON, opprettJournalpostRequest.tema)
-        assertEquals("Inngående P2000 - Krav om alderspensjon", opprettJournalpostRequest.tittel)
+        assertEquals(opprettJournalpostRequest.behandlingstema, Behandlingstema.ALDERSPENSJON)
+        assertEquals(opprettJournalpostRequest.bruker?.id, "12345678912")
+        assertEquals(opprettJournalpostRequest.bruker?.idType, "FNR")
+        assertEquals(opprettJournalpostRequest.dokumenter, """[{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""")
+        assertEquals(opprettJournalpostRequest.eksternReferanseId, "string")
+        assertEquals(opprettJournalpostRequest.journalfoerendeEnhet, Enhet.AUTOMATISK_JOURNALFORING)
+        assertEquals(opprettJournalpostRequest.journalpostType, JournalpostType.INNGAAENDE)
+        assertEquals(opprettJournalpostRequest.kanal, "NAV_NO")
+        assertEquals(opprettJournalpostRequest.sak?.arkivsaksnummer, "string")
+        assertEquals(opprettJournalpostRequest.sak?.arkivsaksystem, "PSAK")
+        assertEquals(opprettJournalpostRequest.tema, Tema.PENSJON)
+        assertEquals(opprettJournalpostRequest.tittel, "Inngående P2000 - Krav om alderspensjon")
     }
 
     @Test
