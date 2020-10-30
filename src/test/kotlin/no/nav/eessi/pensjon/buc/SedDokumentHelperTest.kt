@@ -7,7 +7,8 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.PensjonSak
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -96,10 +97,10 @@ class SedDokumentHelperTest {
 
 
     @Test
-    fun `Gitt det finnes aktierid og det finnes en eller flere pensjonsak Så skal det sakid fra sed valideres og sakid returneres`() {
+    fun `Gitt det finnes aktoerid og det finnes en eller flere pensjonsak Så skal det sakid fra sed valideres og sakid returneres`() {
 
-        val expected = PensjonSak(sakid = 22874955, sakType = YtelseType.ALDER, status = "INNV")
-        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = YtelseType.UFOREP , status = "AVSL"))
+        val expected = SakInformasjon(sakId = "22874955", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP ,sakStatus = SakStatus.AVSLUTTET ))
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
@@ -110,7 +111,6 @@ class SedDokumentHelperTest {
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
 
         assertNotNull(result)
-        assertEquals(expected, result)
         assertEquals(expected.toJson(), result?.toJson())
 
     }
@@ -201,10 +201,11 @@ class SedDokumentHelperTest {
             }
         """.trimIndent()
 
-        val expected = PensjonSak(sakid = 22874955, sakType = YtelseType.ALDER, status = "INNV")
-        val mockPensjonSaklist = listOf(expected, PensjonSak(sakid = 22874901, sakType = YtelseType.UFOREP , status = "AVSL"),
-                PensjonSak(sakid = 22874123, sakType = YtelseType.GJENLEV , status = "AVSL"),
-                PensjonSak(sakid = 22874456, sakType = YtelseType.BARNEP , status = "AVSL"))
+        val expected = SakInformasjon(sakId = "22874955", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
+
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP , sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874123", sakType = YtelseType.GJENLEV ,sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874456", sakType = YtelseType.BARNEP ,sakStatus = SakStatus.AVSLUTTET))
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
@@ -213,7 +214,8 @@ class SedDokumentHelperTest {
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
 
         assertNotNull(result)
-        assertEquals(expected, result)
+
+        assertEquals(YtelseType.ALDER, result?.sakType)
         assertEquals(expected.toJson(), result?.toJson())
 
     }

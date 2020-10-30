@@ -78,7 +78,7 @@ class BestemSakKlientTest {
                   "sakType": "BARNEP",
                   "sakStatus": "LOPENDE",
                   "saksbehandlendeEnhetId": "4808",
-                  "nyopprettet": false
+                  "nyopprettet": true
                 }
               ]
             }
@@ -92,7 +92,9 @@ class BestemSakKlientTest {
                         any(),
                         eq(String::class.java))
 
-        assertEquals("2345678975414", bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.BARNEP)?.sakId)
+        val result = bestemSakKlient.hentSakInformasjon("12345678901", BucType.P_BUC_02, YtelseType.BARNEP)
+        assertEquals("2345678975414", result?.sakId)
+        assertEquals(true, result?.nyopprettet)
     }
 
     @Test
