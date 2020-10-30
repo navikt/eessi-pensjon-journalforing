@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "annenperson": {
+      "person": {
+        "pin": [
+          {
+            "institusjonsid": "NO:NAVAT07",
+            "identifikator": "08075327030",
+            "land": "NO",
+            "institusjonsnavn": "NAV ACCEPTANCE TEST 07"
+          }
+        ],
+        "rolle": "01",
+        "kjoenn": "K",
+        "etternavn": "TRANE",
+        "fornavn": "NATURLIG",
+        "statsborgerskap": [
+          {
+            "land": "NO"
+          }
+        ],
+        "foedselsdato": "1953-07-08"
+      },
+      "adresse": {
+        "land": "NO",
+        "by": "SANDNESSJØEN",
+        "postnummer": "8803",
+        "gate": "HÅRUNDVEGEN 8"
+      }
+    },
+    "bruker": {
+      "person": {
+        "fornavn": "GOD",
+        "pin": [
+          {
+            "land": "NO",
+            "identifikator": "22115224755"
+          }
+        ],
+        "kjoenn": "M",
+        "etternavn": "GASELLE",
+        "foedselsdato": "1952-11-22"
+      }
+    },
+    "eessisak": [
+      {
+        "saksnummer": "22920765",
+        "land": "NO"
+      }
+    ]
+  },
+  "Sector Components/Pensions/P8000": "Sector Components/Pensions/P8000",
+  "sedGVer": "4",
+  "sedVer": "2",
+  "sed": "P8000",
+  "pensjon": {
+    "anmodning": {
+      "referanseTilPerson": "01"
+    }
+  }
+}
