@@ -85,7 +85,7 @@ class ArchitectureTest {
                 Personidentifisering to "$root.personidentifisering",
                 Personoppslag to "$root.personoppslag..",
                 PersonidentifiseringHelpers to "$root.personidentifisering.helpers",
-                Integrasjonstest to "$root.integrasjonstest"
+                Integrasjonstest to "$root.integrasjonstest.."
         )
 
         /*
@@ -119,16 +119,16 @@ class ArchitectureTest {
                 .whereLayer(Config).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Health).mayNotBeAccessedByAnyLayer()
                 .whereLayer(BUC).mayOnlyBeAccessedByLayers(Listeners, Journalforing, Integrasjonstest)
-                .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
+                .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners, Integrasjonstest)
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT, Integrasjonstest)
                 .whereLayer(Logging).mayOnlyBeAccessedByLayers(Config, STS, Personoppslag)
-                .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
+                .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing, Integrasjonstest)
+                .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing, Integrasjonstest)
                 .whereLayer(STS).mayOnlyBeAccessedByLayers(Config, Personoppslag, Integrasjonstest)
                 .whereLayer(EuxKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, Integrasjonstest)
-                .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers) // TODO PersonidentifiseringHelpers må vekk
-                .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing, Listeners, OppgaveRouting)
+                .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, BUC, PersonidentifiseringHelpers, Integrasjonstest) // TODO PersonidentifiseringHelpers må vekk
+                .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing, Integrasjonstest)
+                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing, Listeners, OppgaveRouting, Integrasjonstest)
                 //.whereLayer(PersonidentifiseringKlienter).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //.whereLayer(PersonidentifiseringHelpers).mayOnlyBeAccessedByLayers(Personidentifisering, Integrasjonstest) // TODO Denne må skrus på når TODOene over er fikset
                 //Verify rules

@@ -81,9 +81,9 @@ class FdatoHelper {
      */
     private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {
         val subNode = sedRootNode.at("/nav/annenperson") ?: return null
-        if (subNode.at("/person/rolle").textValue() == "01") {
-            return subNode.get("person")
-                    .get("foedselsdato").textValue()
+        val subRolle = subNode.at("/person/rolle") ?: return null
+        if (subRolle.textValue() == "01") {
+            return subNode.get("person").get("foedselsdato").textValue()
         }
         return null
     }

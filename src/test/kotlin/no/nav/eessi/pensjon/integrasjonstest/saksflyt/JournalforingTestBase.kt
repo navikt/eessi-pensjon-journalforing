@@ -1,6 +1,44 @@
-package no.nav.eessi.pensjon.architecture.saksflyt
+package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-/*
+
+import io.mockk.CapturingSlot
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.spyk
+import no.nav.eessi.pensjon.buc.SedDokumentHelper
+import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.listeners.GyldigFunksjoner
+import no.nav.eessi.pensjon.listeners.GyldigeHendelser
+import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.pdf.PDFService
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.test.util.ReflectionTestUtils
+import org.springframework.web.client.RestTemplate
+import java.nio.file.Files
+import java.nio.file.Paths
+
 internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlient = mockk()
@@ -71,10 +109,11 @@ internal open class JournalforingTestBase {
         return request to journalpostResponse
     }
 
-    protected fun createSedJson(sedType: SedType, fnr: String? = null, medAnnenPerson: Boolean = false): String {
-        val annenpersonJson = """
+    protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
+        return """
             {
                 "person": {
+                      ${if (rolle != null)  "\"rolle\" : \"$rolle\"," else ""}
                     "fornavn": "Annen",
                     "etternavn": "Person",
                     "kjoenn": "U",
@@ -82,7 +121,8 @@ internal open class JournalforingTestBase {
                 }
             }
         """.trimIndent()
-
+    }
+    protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null): String {
         return """
             {
               "nav": {
@@ -105,7 +145,7 @@ internal open class JournalforingTestBase {
                     ]
                   }
                 },
-                "annenperson": ${if (medAnnenPerson) annenpersonJson else null}
+                "annenperson": $annenPerson
               },
               "Sector Components/Pensions/P8000": "Sector Components/Pensions/P8000",
               "sedGVer": "4",
@@ -136,4 +176,4 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
-}*/
+}
