@@ -2,24 +2,6 @@ package no.nav.eessi.pensjon.models
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
-//class PensjonSakInformasjon(
-//        private val sakInformasjon: SakInformasjon? = null
-//) {
-//    fun getSakId() = sakInformasjon?.sakId
-//
-//    fun getSakType() = sakInformasjon?.sakType
-//
-//    fun getSakStatus() = sakInformasjon?.sakStatus
-//
-//    fun isNotNull() = sakInformasjon != null
-//
-//    companion object {
-//        fun from (bestemSak: SakInformasjon?, pensjonSed: SakInformasjon?) :PensjonSakInformasjon {
-//            return PensjonSakInformasjon(bestemSak ?: pensjonSed)
-//        }
-//    }
-//}
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 class SakInformasjon(
         val sakId: String,

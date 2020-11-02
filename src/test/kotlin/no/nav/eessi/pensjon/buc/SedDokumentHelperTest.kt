@@ -214,7 +214,6 @@ class SedDokumentHelperTest {
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
 
         assertNotNull(result)
-
         assertEquals(YtelseType.ALDER, result?.sakType)
         assertEquals(expected.toJson(), result?.toJson())
 
