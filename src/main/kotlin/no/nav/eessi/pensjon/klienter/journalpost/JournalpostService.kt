@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.google.common.annotations.VisibleForTesting
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
