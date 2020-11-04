@@ -17,12 +17,12 @@ jobs:
       - name: 'Setter dato og commit variabel'
         run: |
           export TZ=CET
-          echo "::set-env name=DATE::$(date "+%Y-%m-%d--%H-%M-%S")"
-          echo "::set-env name=COMMIT_HASH::$(git rev-parse HEAD)"
+          echo "DATE=$(date "+%Y-%m-%d--%H-%M-%S")" >> $GITHUB_ENV
+          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       # SETTER IMAGE VARIABEL
       - name: 'Setter Image'
-        run: echo "::set-env name=IMAGE::docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}"
+        run: echo "IMAGE=docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
       # JAVA 11
       - name: 'Java 11'
