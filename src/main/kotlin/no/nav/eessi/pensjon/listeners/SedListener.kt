@@ -62,6 +62,7 @@ class SedListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+                throw RuntimeException("Stopper prosessering for sikkerhets skyld")
                 logger.debug(hendelse)
                 try {
                     val offset = cr.offset()
@@ -98,6 +99,7 @@ class SedListener(
             consumeIncomingSed.measure {
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
+                throw RuntimeException("Stopper prosessering for sikkerhets skyld")
                 logger.debug(hendelse)
 
                 try {
