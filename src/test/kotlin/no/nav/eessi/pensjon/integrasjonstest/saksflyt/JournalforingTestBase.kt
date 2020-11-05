@@ -83,7 +83,8 @@ internal open class JournalforingTestBase {
             sedDokumentHelper = sedDokumentHelper,
             gyldigeHendelser = GyldigeHendelser(),
             bestemSakKlient = bestemSakKlient,
-            gyldigeFunksjoner = gyldigeFunksjoner
+            gyldigeFunksjoner = gyldigeFunksjoner,
+            profile = "test"
     )
 
     @BeforeEach

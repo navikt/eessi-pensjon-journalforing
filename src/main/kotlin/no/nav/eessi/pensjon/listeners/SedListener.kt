@@ -19,6 +19,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
@@ -34,6 +35,7 @@ class SedListener(
         private val gyldigeHendelser: GyldigeHendelser,
         private val bestemSakKlient: BestemSakKlient,
         private val gyldigeFunksjoner: GyldigFunksjoner,
+        @Value("\${SPRING.PROFILES.ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -62,7 +64,10 @@ class SedListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                throw RuntimeException("Stopper prosessering for sikkerhets skyld")
+                if(cr.offset() == 0L && profile == "prod") {
+                    logger.error("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
+                    throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
+                }
                 logger.debug(hendelse)
                 try {
                     val offset = cr.offset()
@@ -99,7 +104,10 @@ class SedListener(
             consumeIncomingSed.measure {
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                throw RuntimeException("Stopper prosessering for sikkerhets skyld")
+                if(cr.offset() == 0L && profile == "prod") {
+                    logger.error("Applikasjonen har forsøkt å prosessere sedMottatt meldinger fra offset 0, stopper prosessering")
+                    throw RuntimeException("Applikasjonen har forsøkt å prosessere sedMottatt meldinger fra offset 0, stopper prosessering")
+                }
                 logger.debug(hendelse)
 
                 try {
