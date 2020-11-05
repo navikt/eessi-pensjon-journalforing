@@ -35,7 +35,7 @@ class SedListener(
         private val gyldigeHendelser: GyldigeHendelser,
         private val bestemSakKlient: BestemSakKlient,
         private val gyldigeFunksjoner: GyldigFunksjoner,
-        @Value("\${SPRING.PROFILES.ACTIVE}") private val profile: String,
+        @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
