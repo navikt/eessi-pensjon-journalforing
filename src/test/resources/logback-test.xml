@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug="true">
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%magenta(%d{dd-MM-yyyy HH:mm:ss.SSS}) %highlight(%-5level) %logger{25} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io" level="INFO"/>
+    <logger name="org" level="INFO"/>
+    <logger name="com" level="INFO"/>
+    <logger name="no.nav" level="DEBUG"/>
+    <logger name="no.nav.security" level="INFO"/>
+    <logger name="no.nav.eessi" level="DEBUG"/>
+    <root level="DEBUG">
+        <appender-ref ref="stdout" />
+    </root>
+
+</configuration>

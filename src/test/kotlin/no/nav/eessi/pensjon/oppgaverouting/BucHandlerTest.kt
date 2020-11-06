@@ -25,7 +25,7 @@ internal class BucHandlerTest {
         assertTrue(pbuc04 is Pbuc04)
 
         val pbuc05 = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_05)
-        assertTrue(pbuc05 is DefaultBucTilEnhetHandler)
+        assertTrue(pbuc05 is Pbuc05)
 
         val pbuc06 = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_06)
         assertTrue(pbuc06 is DefaultBucTilEnhetHandler)

@@ -46,6 +46,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
+            bucType == BucType.P_BUC_05 -> null
             erFnrDnrFormat(trimmetNavBruker) -> personV3Service.hentPerson(trimmetNavBruker!!)
             else -> null
         }
@@ -77,8 +78,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
-//    fun hentGjenlevende()
-
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
@@ -105,6 +104,29 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             }
             bucType == BucType.P_BUC_02 -> {
                 return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+            }
+            bucType == BucType.P_BUC_05 -> {
+                logger.debug("identifisertePersoner P_BUC_05")
+                identifisertePersoner.forEach {
+                    logger.debug(it.toJson())
+                }
+                //kun 1 person
+                if (
+                        identifisertePersoner.size == 1) identifisertePersoner.first()
+                else {
+                    //flere ?
+                    val pers = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
+                    val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                    if (gjenlev != null) {
+                        //gjenlev finnes
+                        gjenlev
+
+                    } else {
+                        //barn eller forsorger rskal leggesd til på person/forsikret
+                        pers?.personListe = identifisertePersoner
+                        pers
+                    }
+                }
             }
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
@@ -177,7 +199,9 @@ enum class Relasjon {
     FORSIKRET,
     GJENLEVENDE,
     AVDOD,
-    ANNET
+    ANNET,
+    BARN,
+    FORSORGER
 }
 
 fun hentLandkode(person: Person) =

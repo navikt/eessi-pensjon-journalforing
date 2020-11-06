@@ -58,9 +58,7 @@ class FagmodulKlient(
     }
 
     fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
-
         val path = "/pensjon/sakliste/$aktoerId"
-
         try {
             val responsebody = fagmodulOidcRestTemplate.exchange(
                 path,

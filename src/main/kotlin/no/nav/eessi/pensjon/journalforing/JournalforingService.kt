@@ -57,8 +57,10 @@ class JournalforingService(private val euxKlient: EuxKlient,
             try {
                 logger.info(
                     """
+                    **********
                     rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId}
                     kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId}
+                    **********
                     """.trimIndent()
                 )
 

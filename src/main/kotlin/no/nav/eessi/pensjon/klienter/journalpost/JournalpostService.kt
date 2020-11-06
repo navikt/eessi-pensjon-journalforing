@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -16,6 +17,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
     @Value("\${no.nav.orgnummer}")
     private lateinit var navOrgnummer: String
+
+    private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
+
 
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
@@ -84,11 +88,11 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
     @VisibleForTesting
     fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
+        logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $ytelseType")
         if (bucType == BucType.P_BUC_05) {
             return if (ytelseType == YtelseType.UFOREP) Tema.UFORETRYGD
             else Tema.PENSJON
         }
-
         if (bucType == BucType.R_BUC_02) {
             if (sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON) {
                 return Tema.PENSJON

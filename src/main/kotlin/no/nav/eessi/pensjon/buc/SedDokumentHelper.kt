@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -111,9 +112,9 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, list: List<String>): SakInformasjon? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        return saklist.filter { sak -> list.contains( sak.sakId ) }
-//                .map { sak ->  SakInformasjon(sakId = sak.sakid, sakStatus = sak.status, sakType = sak.sakType, saksbehandlendeEnhetId = "", nyopprettet = false) }
-                .firstOrNull()
+        logger.debug("aktoerid: $aktoerId sedSak: $list penSak: ${saklist.toJson()}")
+        return if (saklist.size == 1) saklist.firstOrNull{ it.sakId in list }
+        else saklist.firstOrNull {  it.sakId in list && it.sakType != YtelseType.GENRL }
     }
 
 }

@@ -106,39 +106,69 @@ class FnrHelper {
         }
     }
 
-
+    /**
+     * P8000 - [01] Søker til etterlattepensjon
+     * P8000 - [02] Forsørget/familiemedlem
+     * P8000 - [03] Barn
+     */
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
         val personPin = filterPersonPinNode(sedRootNode)
-        //kun gjenlevende / rolle
-        val annenPersonPin = filterAnnenpersonPinNode(sedRootNode)
+        val annenPersonPin = filterAnnenpersonPinNodeUtenRolle(sedRootNode)
+        val rolle = filterAnnenpersonRolle(sedRootNode)
 
-        personPin?.let {
-            fnrListe.add( PersonRelasjon(it, Relasjon.FORSIKRET))
-            logger.debug("Legger til person ${Relasjon.FORSIKRET } relasjon")
+        //hvis to personer ingen rolle return uten pin..
+        if (personPin != null && annenPersonPin != null && rolle == null) {
+            return
+        }
+        logger.debug("Personpin: ${personPin != null} AnnenPersonpin ${annenPersonPin != null}  Annenperson rolle : $rolle")
+
+        personPin?.run {
+            fnrListe.add(PersonRelasjon(this, Relasjon.FORSIKRET))
+            logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
         }
 
-        annenPersonPin?.let {
-            fnrListe.add( PersonRelasjon( it, Relasjon.GJENLEVENDE))
-            logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
+        annenPersonPin?.run {
+            val annenPersonRelasjon = when (rolle) {
+                "01" -> PersonRelasjon(this, Relasjon.GJENLEVENDE)
+                "02" -> PersonRelasjon(this, Relasjon.FORSORGER)
+                "03" -> PersonRelasjon(this, Relasjon.BARN)
+                else -> PersonRelasjon(this, Relasjon.ANNET)
+            }
+            fnrListe.add(annenPersonRelasjon)
+            logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
         }
 
     }
 
-    /***
-     * /person/rolle 01 : forsikret person
+    /**
+     * P8000-P10000 - [01] Søker til etterlattepensjon
+     * P8000-P10000 - [02] Forsørget/familiemedlem
+     * P8000-P10000 - [03] Barn
      */
     fun filterAnnenpersonPinNode(node: JsonNode): String? {
         val subNode = node.at("/nav/annenperson") ?: return null
-        if (subNode.at("/person/rolle").textValue() == "01") {
-            return subNode.get("person")
-                    .findValue("pin")
-                    .filter { it.get("land").textValue() == "NO" }
-                    .map { it.get("identifikator").textValue() }
-                    .lastOrNull()
+        val rolleNode = subNode.at("/person/rolle") ?: return null
+        if (rolleNode.textValue() == "01") {
+        return subNode.get("person")
+                .findValue("pin")
+                .filter { it.get("land").textValue() == "NO" }
+                .map { it.get("identifikator").textValue() }
+                .lastOrNull()
         }
         return null
+    }
+
+    fun filterAnnenpersonRolle(node: JsonNode): String? {
+        val subNode = node.at("/nav/annenperson") ?: return null
+        val rolleNode = subNode.at("/person/rolle") ?: return null
+        return rolleNode.textValue()
+    }
+
+    fun filterAnnenpersonPinNodeUtenRolle(node: JsonNode): String? {
+        val subNode = node.at("/nav/annenperson") ?: return null
+        return finnPin(subNode.at("/person"))
     }
 
     private fun finnGjenlevendeRelasjontilavdod(sedRootNode: JsonNode): String? {
