@@ -1,9 +1,5 @@
 package no.nav.eessi.pensjon.klienter.eux
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
@@ -28,7 +24,6 @@ class EuxKlient(
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(EuxKlient::class.java) }
-    private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
     private lateinit var hentpdf: MetricsHelper.Metric
     private lateinit var hentSed: MetricsHelper.Metric
@@ -85,21 +80,5 @@ class EuxKlient(
                 throw ex
             }
         }
-    }
-
-    /**
-     * Henter den forsikredes fødselsdato i en konkret SED
-     *
-     * @param rinaNr BUC-id
-     * @param dokumentId SED-id
-     */
-    fun hentFodselsDatoFraSed(rinaNr: String, dokumentId: String): String? {
-        val sed = hentSed(rinaNr, dokumentId)
-        val rootNode = mapper.readValue(sed, JsonNode::class.java)
-        val foedselsdatoNode = rootNode.path("nav")
-                .path("bruker")
-                .path("person")
-                .path("foedselsdato")
-        return foedselsdatoNode.textValue()
     }
 }

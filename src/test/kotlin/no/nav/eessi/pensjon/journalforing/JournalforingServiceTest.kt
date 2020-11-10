@@ -83,11 +83,6 @@ class JournalforingServiceTest {
 
         //MOCK RESPONSES
 
-        //EUX - HENT FODSELSDATO
-        doReturn("1964-04-19")
-                .`when`(euxKlient)
-                .hentFodselsDatoFraSed(anyString(), anyString())
-
         //EUX - HENT SED DOKUMENT
         doReturn("MOCK DOCUMENTS")
                 .`when`(euxKlient)

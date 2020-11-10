@@ -5,28 +5,27 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.doThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.*
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.doReturn
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Paths
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.assertThrows
-import org.springframework.web.client.HttpClientErrorException
 
 @ExtendWith(MockitoExtension::class)
 class EuxKlientTest {
-
 
     @Mock
     private lateinit var mockrestTemplate: RestTemplate
@@ -75,20 +74,4 @@ class EuxKlientTest {
         }
     }
 
-    @Test
-    fun `Gitt gyldig request når etterspør fødselsdato for SED så motta fødselsdato`() {
-        val rinaNr = "123"
-        val dokumentId = "456"
-        doReturn(
-                ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))), HttpStatus.OK))
-                .`when`(mockrestTemplate).exchange(
-                        eq("/buc/$rinaNr/sed/$dokumentId"),
-                        any(HttpMethod::class.java),
-                        any(HttpEntity::class.java),
-                        eq(String::class.java))
-
-
-        val resp = euxKlient.hentFodselsDatoFraSed(rinaNr, dokumentId)
-        assertEquals("1980-01-01", resp)
-    }
 }
