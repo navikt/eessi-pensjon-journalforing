@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -33,7 +33,7 @@ class SedListener(
         private val personidentifiseringService: PersonidentifiseringService,
         private val sedDokumentHelper: SedDokumentHelper,
         private val gyldigeHendelser: GyldigeHendelser,
-        private val bestemSakKlient: BestemSakKlient,
+        private val bestemSakService: BestemSakService,
         private val gyldigeFunksjoner: GyldigFunksjoner,
         @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
@@ -147,7 +147,7 @@ class SedListener(
         if (identifisertPerson?.aktoerId == null) return null
 
         return if (sedHendelseModel.bucType == BucType.P_BUC_02) {
-           bestemSakKlient.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.ytelseType)
+           bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.ytelseType)
         } else {
             null
         }
@@ -157,7 +157,7 @@ class SedListener(
         if (identifisertPerson?.aktoerId == null) return null
 
         val aktoerId = identifisertPerson.aktoerId
-        val sakInformasjonFraBestemSak = bestemSakKlient.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
+        val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
 
         val sakInformasjonFraSED = if (gyldigeFunksjoner.togglePensjonSak()) {
             logger.debug("skal hente pensjonSak for sed kap.1 og validere mot pesys")

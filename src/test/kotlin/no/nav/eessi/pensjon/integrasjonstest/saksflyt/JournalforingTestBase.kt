@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.GyldigeFunksjonerToggleNonProd
 import no.nav.eessi.pensjon.listeners.GyldigeHendelser
 import no.nav.eessi.pensjon.listeners.SedListener
@@ -82,8 +83,8 @@ internal open class JournalforingTestBase {
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
-    protected val bestemSakOidcRestTemplate: RestTemplate = mockk()
-    private val bestemSakKlient = BestemSakKlient(bestemSakOidcRestTemplate = bestemSakOidcRestTemplate)
+    protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
+    private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
 
     protected val listener: SedListener = SedListener(
@@ -91,7 +92,7 @@ internal open class JournalforingTestBase {
             personidentifiseringService = personidentifiseringService,
             sedDokumentHelper = sedDokumentHelper,
             gyldigeHendelser = GyldigeHendelser(),
-            bestemSakKlient = bestemSakKlient,
+            bestemSakService = bestemSakService,
             gyldigeFunksjoner = gyldigeFunksjoner,
             profile = "test"
     )
@@ -150,11 +151,11 @@ internal open class JournalforingTestBase {
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPersonJson(fnr: String? = null, fdato: String = "1985-05-07" , rolle: String? = "01"): String {
+    protected fun createAnnenPersonJson(fnr: String? = null, fdato: String = "1985-05-07", rolle: String? = "01"): String {
         return """
             {
                 "person": {
-                      ${if (rolle != null)  "\"rolle\" : \"$rolle\"," else ""}
+                      ${if (rolle != null) "\"rolle\" : \"$rolle\"," else ""}
                     "fornavn": "Annen",
                     "etternavn": "Person",
                     "kjoenn": "U",

@@ -450,9 +450,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         initCommonMocks(createSedJson(SedType.P8000))
 
         every { personV3Service.hentPerson(any()) } returns Bruker()
-        every {
-            bestemSakOidcRestTemplate.exchange("/", HttpMethod.POST, any<HttpEntity<String>>(), any<Class<String>>())
-        } returns ResponseEntity.ok().body(BestemSakResponse(null, sakInformasjonListe = emptyList()).toJson())
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, emptyList())
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
