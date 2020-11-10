@@ -28,5 +28,6 @@ enum class SakStatus {
     OPPRETTET,
     TIL_BEHANDLING,
     AVSLUTTET,
-    LOPENDE
+    LOPENDE,
+    OPPHOR
 }
