@@ -6,7 +6,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import org.slf4j.Logger
@@ -26,8 +25,8 @@ import javax.annotation.PostConstruct
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
-    val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
-    val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+    private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
+    private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
     private lateinit var hentPesysSaker: MetricsHelper.Metric
 
@@ -41,64 +40,38 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
      *
      * Foreløbig er alder, uføre og gjenlevende støttet i her men tjenesten støtter alle typer
      */
-    fun hentSakInformasjon(aktoerId: String, bucType: BucType, ytelsesType: YtelseType? = null) : SakInformasjon? {
-
-        val ytelseType = when(bucType) {
-            BucType.P_BUC_01 -> YtelseType.ALDER
-            BucType.P_BUC_02 -> ytelsesType ?: return null
-            BucType.P_BUC_03 -> YtelseType.UFOREP
-            BucType.R_BUC_02 -> ytelsesType!!
-            else -> return null
-        }
-
-        logger.info("kallBestemSak aktoer: $aktoerId ytelseType: $ytelseType bucType: $bucType")
-        val resp = kallBestemSak(aktoerId, ytelseType)
-        if(resp != null && resp.sakInformasjonListe.size == 1) {
-
-            val sakInformasjon = resp.sakInformasjonListe
-            logger.info("resultat en sakInformasjon: ${sakInformasjon.toJson()}")
-            return sakInformasjon.first()
-
-        } else {
-            val sakInformasjon = resp?.sakInformasjonListe
-            logger.info("resultat flere sakInformasjon: ${sakInformasjon?.toJson()}")
-        }
-        return null
-    }
-
-     fun kallBestemSak(aktoerId: String, ytelseType: YtelseType): BestemSakResponse? {
-        val randomId = UUID.randomUUID().toString()
-        val requestBody = BestemSakRequest(aktoerId, ytelseType, randomId, randomId)
-
+    fun kallBestemSak(requestBody: BestemSakRequest): BestemSakResponse? {
         return hentPesysSaker.measure {
             return@measure try {
                 logger.info("Kaller bestemSak i PESYS")
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
+
                 val response = bestemSakOidcRestTemplate.exchange(
                         "/",
                         HttpMethod.POST,
                         HttpEntity(requestBody.toJson(), headers),
                         String::class.java)
+
                 mapper.readValue(response.body, BestemSakResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: $ex body: ${ex.responseBodyAsString}")
-                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message} body: ${ex.responseBodyAsString}")
+                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
+                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: $ex")
-                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ${ex.message}")
+                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
+                throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
             }
         }
     }
 }
 
-class BestemSakRequest ( val aktoerId: String,
-                         val ytelseType: YtelseType,
-                         val callId: String,
-                         val consumerId: String)
+data class BestemSakRequest(val aktoerId: String,
+                            val ytelseType: YtelseType,
+                            val callId: UUID,
+                            val consumerId: UUID)
 
-class BestemSakResponse ( val feil: BestemSakFeil?,
-                          val sakInformasjonListe: List<SakInformasjon>)
+class BestemSakResponse(val feil: BestemSakFeil? = null,
+                        val sakInformasjonListe: List<SakInformasjon>)
 
-class BestemSakFeil( val feilKode: String,  val feilmelding: String)
+class BestemSakFeil(val feilKode: String, val feilmelding: String)
 

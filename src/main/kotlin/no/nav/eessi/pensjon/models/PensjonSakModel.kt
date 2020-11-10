@@ -6,23 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 class SakInformasjon(
         val sakId: String,
         val sakType: YtelseType,
-        val sakStatus: SakStatus) {
-
-    var saksbehandlendeEnhetId = ""
-    var nyopprettet = false
-
-   constructor(
-            sakId: String,
-            sakType: YtelseType,
-            sakStatus: SakStatus,
-            saksbehandlendeEnhetId: String,
-            nyopprettet: Boolean): this(sakId, sakType, sakStatus) {
-
-       this.saksbehandlendeEnhetId = saksbehandlendeEnhetId
-       this.nyopprettet = nyopprettet
-   }
-}
-
+        val sakStatus: SakStatus,
+        val saksbehandlendeEnhetId: String = "",
+        val nyopprettet: Boolean = false
+)
 
 enum class SakStatus {
     OPPRETTET,
