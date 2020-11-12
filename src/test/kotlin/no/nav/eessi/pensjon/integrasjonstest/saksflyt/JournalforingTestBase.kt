@@ -34,6 +34,7 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.GeografiskTilknytning
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn
@@ -47,7 +48,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
-import org.springframework.web.client.RestTemplate
 
 internal open class JournalforingTestBase {
 
@@ -109,7 +109,7 @@ internal open class JournalforingTestBase {
         bestemSakKlient.initMetrics()
     }
 
-    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234"): Bruker {
+    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
         return Bruker()
                 .withPersonnavn(
                         Personnavn()
@@ -122,6 +122,8 @@ internal open class JournalforingTestBase {
                 .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
                 .withStatsborgerskap(Statsborgerskap().withLand(Landkoder().withValue(land)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
+                .withDiskresjonskode(Diskresjonskoder().withValue("$diskresjonskode"))
+                //brukerSF?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
     }
 
     private fun journalpostResponseJson(ferdigstilt: Boolean? = false): String {

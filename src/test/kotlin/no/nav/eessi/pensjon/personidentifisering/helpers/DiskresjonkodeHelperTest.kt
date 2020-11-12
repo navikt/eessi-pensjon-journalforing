@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
@@ -13,7 +17,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import java.nio.file.Files
 import java.nio.file.Paths
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
 
 @ExtendWith(MockitoExtension::class)
 class DiskresjonkodeHelperTest {
@@ -82,7 +85,7 @@ class DiskresjonkodeHelperTest {
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
-        Assertions.assertEquals(SPSF, actual)
+        Assertions.assertEquals(Diskresjonskode.SPFO, actual)
     }
 
     @Test

@@ -148,6 +148,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
         sakInformasjon ?: return true
 
         return when {
+            identifisertPerson?.diskresjonskode != null -> true
             sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true

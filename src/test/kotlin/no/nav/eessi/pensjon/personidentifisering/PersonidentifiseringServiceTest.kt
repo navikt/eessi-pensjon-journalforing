@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
@@ -11,7 +15,10 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -356,9 +363,9 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt at det finnes tre personer når en er gjenlevende så skal kun gjenlevende returneres`() {
 
-        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
-        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
-        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.GJENLEVENDE))
+        val person1 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("4567", Relasjon.GJENLEVENDE))
 
         val list = listOf(person1, person2, person3)
 
@@ -369,9 +376,9 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt at det finnes tre personer når ingen personer er gjenlevende så skal returneres null`() {
 
-        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
-        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
-        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+        val person1 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("4567", Relasjon.ANNET))
 
         val list = listOf(person1, person2, person3)
 
@@ -382,9 +389,9 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt at det finnes tre personer når det er en buc så skal det kastes en runtimeexception`() {
 
-        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
-        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
-        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+        val person1 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("4567", Relasjon.ANNET))
 
         val list = listOf(person1, person2, person3)
 
@@ -400,9 +407,9 @@ class PersonidentifiseringServiceTest {
     @Test
 //    Scenario 1 - inngående SED, Scenario 2 - utgående SED, Scenario 3 - ingen saksnummer/feil saksnummer
     fun `Gitt det kommer inn SED på R_BUC_02 med flere enn en person Når personer identifiseres Så skal første person returneres`() {
-        val person1 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
-        val person2 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
-        val person3 = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("4567", Relasjon.ANNET))
+        val person1 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
+        val person2 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
+        val person3 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("4567", Relasjon.ANNET))
 
         val list = listOf(person1, person2, person3)
 
@@ -457,8 +464,8 @@ class PersonidentifiseringServiceTest {
     fun `hent ut gjenlevende`(){
 
 
-        val gjenlevende = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("1234", Relasjon.GJENLEVENDE))
-        val avdod = IdentifisertPerson("","Dummy", "","NO", "", PersonRelasjon("5678", Relasjon.FORSIKRET))
+        val gjenlevende = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.GJENLEVENDE))
+        val avdod = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("5678", Relasjon.FORSIKRET))
 
         val list = listOf<IdentifisertPerson>(gjenlevende, avdod)
         val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)

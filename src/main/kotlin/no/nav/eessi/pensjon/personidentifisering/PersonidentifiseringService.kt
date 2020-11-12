@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
@@ -81,7 +82,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)?.name
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
@@ -175,7 +176,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 data class IdentifisertPerson(
         val aktoerId: String,
         val personNavn: String?,
-        val diskresjonskode: String? = null,
+        val diskresjonskode: Diskresjonskode? = null,
         val landkode: String?,
         val geografiskTilknytning: String?,
         val personRelasjon: PersonRelasjon,

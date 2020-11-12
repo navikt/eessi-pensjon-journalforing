@@ -9,11 +9,13 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
 import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
@@ -27,9 +29,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 
 internal class PBuc05Test : JournalforingTestBase() {
 
@@ -112,7 +111,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 4 - 2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på teama PENSJON og ehent NFP_UTLAND_AALESUND`() {
+    fun `Scenario 4 - 2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
         val fnr = "07055045600"
         val afnr = "22078945600"
         val aktoer = "${fnr}1111"
@@ -670,10 +669,111 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    @Test
+    fun `Scenario 9 - 2 personer i SED fnr finnes, barn med kode6 opprettes en journalføringsoppgave på tema PEN og enhet 2103 Vikafossen`() {
+        val mammaFnr = "07055045600"
+        val barneFnr = "22071045600"
+        val aktoer = "${mammaFnr}1111"
+        val barnaktoer = "${barneFnr}0000"
+        val saknr = "1223123123"
+
+        val sed = createSedJson(SedType.P8000, mammaFnr,createAnnenPersonJson(fnr = barneFnr, fdato =  "1950-05-07", rolle =  "03") , saknr)
+        initCommonMocks(sed)
+
+        every { personV3Service.hentPerson(mammaFnr)} returns createBrukerWith(mammaFnr, "Mamma forsørger", "Etternavn", "NOR")
+
+        val barn = createBrukerWith(barneFnr, "Barn", "Diskret", "NOR", "1213",  "SPSF")
+        every { personV3Service.hentPerson(barneFnr)} returns barn
+
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(mammaFnr)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(barneFnr)) } returns AktoerId(barnaktoer)
+
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)
+        )
+        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        // forvent tema == PEN og enhet 2103
+        assertEquals(UFORETRYGD, request.tema)
+        assertEquals(Enhet.DISKRESJONSKODE, request.journalfoerendeEnhet)
+
+        assertEquals(Enhet.DISKRESJONSKODE, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(HendelseType.SENDT, oppgaveMelding.hendelseType)
+        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
+    @Test
+    fun `Scenario 10 - 2 personer i SED fnr finnes, barn med kode6 opprettes en journalføringsoppgave på tema PEN og enhet 4303 NAV ID og Fordeling`() {
+        val mammaFnr = "07055045600"
+        val barneFnr = "22071045600"
+        val aktoer = "${mammaFnr}1111"
+        val barnaktoer = "${barneFnr}0000"
+        val saknr = "1223123123"
+
+        val sed = createSedJson(SedType.P8000, mammaFnr,createAnnenPersonJson(fnr = barneFnr, fdato =  "1950-05-07", rolle =  "03") , saknr)
+        initCommonMocks(sed)
+
+        every { personV3Service.hentPerson(mammaFnr)} returns createBrukerWith(mammaFnr, "Mamma forsørger", "Etternavn", "NOR")
+
+        val barn = createBrukerWith(barneFnr, "Barn", "Diskret", "NOR", "1213",  "SPFO")
+        every { personV3Service.hentPerson(barneFnr)} returns barn
+
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(mammaFnr)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(barneFnr)) } returns AktoerId(barnaktoer)
+
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = saknr, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)
+        )
+        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        // forvent tema == PEN og enhet 2103
+        assertEquals(PENSJON, request.tema)
+        assertEquals(Enhet.ID_OG_FORDELING, request.journalfoerendeEnhet)
+
+        assertEquals(Enhet.ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(HendelseType.SENDT, oppgaveMelding.hendelseType)
+        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
     private fun initCommonMocks(sed: String) {
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns getResource("fagmodul/alldocumentsids.json")
         every { euxKlient.hentSed(any(), any()) } returns sed
-        every { diskresjonService.hentDiskresjonskode(any()) } returns null
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
     }
 

@@ -146,7 +146,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -177,7 +177,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -209,7 +209,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
@@ -241,14 +241,14 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "3811",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
         val dodPerson = IdentifisertPerson(
                 "22078945602",
                 "Dod Begravet",
-                "",
+                null,
                 "",
                 "3811",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.AVDOD))
@@ -282,7 +282,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -318,7 +318,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "NOR",
                 "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
@@ -350,7 +350,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -383,7 +383,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -419,7 +419,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
@@ -452,7 +452,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "NOR",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -488,7 +488,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
@@ -521,7 +521,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -555,7 +555,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -612,7 +612,7 @@ class JournalforingServiceTest {
         val identifisertGjenlevendePerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
@@ -650,7 +650,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET, YtelseType.GJENLEV)
@@ -688,7 +688,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "",
                 null,
-                "",
+                null,
                 "NO",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -722,7 +722,7 @@ class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
@@ -776,7 +776,7 @@ class JournalforingServiceTest {
         val identifisertGjenlevendePerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                "",
+                null,
                 "",
                 "",
                 personRelasjon = PersonRelasjon("12071245602", Relasjon.GJENLEVENDE, YtelseType.BARNEP)
