@@ -112,16 +112,15 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     logger.debug(it.toJson())
                 }
                 //kun 1 person
-                if (
-                        identifisertePersoner.size == 1) identifisertePersoner.first()
+                if (identifisertePersoner.size == 1) identifisertePersoner.first()
                 else {
                     //flere ?
                     val pers = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
                     val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+
                     if (gjenlev != null) {
                         //gjenlev finnes
                         gjenlev
-
                     } else {
                         //barn eller forsorger rskal leggesd til på person/forsikret
                         pers?.personListe = identifisertePersoner

@@ -8,8 +8,6 @@ import io.mockk.spyk
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
@@ -29,6 +27,7 @@ import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
@@ -54,7 +53,7 @@ internal open class JournalforingTestBase {
     protected val euxKlient: EuxKlient = mockk()
     private val norg2Klient: Norg2Klient = mockk(relaxed = true)
 
-    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true)
+    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
@@ -126,34 +125,27 @@ internal open class JournalforingTestBase {
                 //brukerSF?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
     }
 
-    private fun journalpostResponseJson(ferdigstilt: Boolean? = false): String {
-        return """
-            {
-              "journalpostId": "429434378",
-              "journalstatus": "M",
-              "melding": "null",
-              "journalpostferdigstilt": $ferdigstilt,
-              "dokumenter": [
-                {
-                  "dokumentInfoId": "453867272"
-                }
-              ]
-            }
-        """.trimIndent()
-
+    private fun journalpostResponse(ferdigstilt: Boolean = false): OpprettJournalPostResponse {
+        return OpprettJournalPostResponse(
+                "429434378",
+                "M",
+                null,
+                ferdigstilt
+        )
     }
 
-    protected fun initJournalPostRequestSlot(ferdigstilt: Boolean? = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
+    protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
-        val responseJson = journalpostResponseJson(ferdigstilt)
-        val journalpostResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>(), true)
+        val journalpostResponse = journalpostResponse(ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPersonJson(fnr: String? = null, fdato: String = "1985-05-07", rolle: String? = "01"): String {
+    protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
+        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() }
+
         return """
             {
                 "person": {
