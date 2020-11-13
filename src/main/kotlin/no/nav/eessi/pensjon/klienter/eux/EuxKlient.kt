@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.klienter.eux
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,11 +29,15 @@ class EuxKlient(
 
     private lateinit var hentpdf: MetricsHelper.Metric
     private lateinit var hentSed: MetricsHelper.Metric
+    private lateinit var hentBuc: MetricsHelper.Metric
+
 
     @PostConstruct
     fun initMetrics() {
         hentpdf = metricsHelper.init("hentpdf", alert = MetricsHelper.Toggle.OFF)
         hentSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
+        hentBuc = metricsHelper.init("hentBuc", alert = MetricsHelper.Toggle.OFF)
+
     }
 
     /**
@@ -77,6 +83,28 @@ class EuxKlient(
                         String::class.java).body
           } catch(ex: Exception) {
                 logger.warn("En feil oppstod under henting av SED ex: $path", ex)
+                throw ex
+            }
+        }
+    }
+
+    @Retryable(include = [HttpStatusCodeException::class]
+            , backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
+    fun hentInstitusjonerIBuc(bucId: String): List<Participant> {
+        return hentBuc.measure {
+            return@measure try {
+                logger.info("Henter buc for rinaSakId: $bucId")
+
+                val buc = euxOidcRestTemplate.exchange(
+                        "/buc/$bucId",
+                        HttpMethod.GET,
+                        null,
+                        String::class.java).body
+
+                mapJsonToAny(buc!!, typeRefs<ParticipantHolder>()).participants
+
+            } catch(ex: Exception) {
+                logger.warn("En feil oppstod under henting av BUC", ex)
                 throw ex
             }
         }
