@@ -1,0 +1,425 @@
+{
+  "id": "1183063",
+  "hashCode": 0,
+  "startDate": "2020-11-13T08:46:33.678+0000",
+  "lastUpdate": "2020-11-13T09:00:18.000+0000",
+  "status": "open",
+  "subject": null,
+  "sensitive": false,
+  "sensitiveCommitted": false,
+  "creator": {
+    "id": "AWjw_fuQSVr4y0o3ykOQ",
+    "address": null,
+    "contactMethods": null,
+    "type": "User",
+    "name": "Z991281",
+    "organisation": {
+      "id": "NO:NAVAT07",
+      "address": {
+        "street": null,
+        "town": null,
+        "postalCode": null,
+        "region": null,
+        "country": "NO"
+      },
+      "contactMethods": null,
+      "registryNumber": null,
+      "name": "NAV ACCEPTANCE TEST 07",
+      "acronym": "NAV ACCT 07",
+      "countryCode": "NO",
+      "activeSince": "2018-08-26T22:00:00.000+0000",
+      "accessPoint": null,
+      "location": null,
+      "assignedBUCs": null
+    }
+  },
+  "actions": [
+    {
+      "id": "1183063_87bff380cf9547149e4676c744f5f43d",
+      "name": "Create",
+      "displayName": "Create P8000",
+      "type": "new.regular",
+      "template": "P8000",
+      "typeVersion": "4.2",
+      "documentType": "P8000",
+      "isCaseRelated": true,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": true,
+      "isDocumentRelated": false,
+      "documentId": "21ac8d3ff8814f338f93397f170185ff",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": "7f8a341bf8dd4530851ad99786881720",
+      "actor": "Authorized",
+      "caseId": "1183063",
+      "operation": "Create",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "1183066",
+        "DocumentId": "21ac8d3ff8814f338f93397f170185ff",
+        "Operation": "Create",
+        "ParentDocId": null,
+        "ParentType": "P8000",
+        "Type": "P8000"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "1183066",
+        "DocumentId": "21ac8d3ff8814f338f93397f170185ff",
+        "Operation": "Create",
+        "ParentDocId": null,
+        "ParentType": "P8000",
+        "Type": "P8000"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Documents",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": false,
+      "bulk": false,
+      "caseRelated": true
+    },
+    {
+      "id": "1183063_4be672c9d48c455e9239865886ec4930",
+      "name": "Participants",
+      "displayName": "Update Participants",
+      "type": "popup",
+      "template": "Create_Participants",
+      "typeVersion": "1.0",
+      "documentType": null,
+      "isCaseRelated": true,
+      "hasBusinessValidation": true,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": true,
+      "isDocumentRelated": false,
+      "documentId": "21ac8d3ff8814f338f93397f170185ff",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": "ccfed131f2c44e4f97f33fc7633ca2c5",
+      "actor": "Authorized",
+      "caseId": "1183063",
+      "operation": "UpdateParticipants",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "1183066",
+        "DocumentId": "21ac8d3ff8814f338f93397f170185ff",
+        "Operation": "UpdateParticipants",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "P8000"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "1183066",
+        "DocumentId": "21ac8d3ff8814f338f93397f170185ff",
+        "Operation": "UpdateParticipants",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "P8000"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Participants",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": false,
+      "bulk": false,
+      "caseRelated": true
+    },
+    {
+      "id": "1183063_2625c3e144c04fb5bb209e9959cb23d9",
+      "name": "DeleteCase",
+      "displayName": "Delete Case",
+      "type": "popup",
+      "template": "Delete_Case",
+      "typeVersion": "1.0",
+      "documentType": null,
+      "isCaseRelated": true,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": true,
+      "isDocumentRelated": false,
+      "documentId": null,
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": "451618a93a8b4020b905ad28d3758664",
+      "actor": "Authorized",
+      "caseId": "1183063",
+      "operation": "DeleteCase",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": "13588692",
+        "hasLocalClose": true,
+        "DMProcessId": "1183063",
+        "DocumentId": null,
+        "Operation": "DeleteCase",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": null
+      },
+      "poolGroup": {
+        "activityInstanceId": "13588692",
+        "hasLocalClose": true,
+        "DMProcessId": "1183063",
+        "DocumentId": null,
+        "Operation": "DeleteCase",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": null
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Case Actions",
+        "type": "admin",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": false,
+      "bulk": false,
+      "caseRelated": true
+    }
+  ],
+  "documents": [
+    {
+      "id": "21ac8d3ff8814f338f93397f170185ff",
+      "name": null,
+      "mimeType": "json",
+      "lastUpdate": "2020-11-13T08:46:34.000+0000",
+      "creationDate": "2020-11-13T08:46:34.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "Z991281",
+        "organisation": {
+          "id": "NO:NAVAT07",
+          "address": {
+            "street": null,
+            "town": null,
+            "postalCode": null,
+            "region": null,
+            "country": "NO"
+          },
+          "contactMethods": null,
+          "registryNumber": null,
+          "name": "NAV ACCEPTANCE TEST 07",
+          "acronym": "NAV ACCT 07",
+          "countryCode": "NO",
+          "activeSince": "2018-08-26T22:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": true,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-11-13T08:46:34.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "Z991281",
+            "organisation": {
+              "id": "NO:NAVAT07",
+              "address": {
+                "street": null,
+                "town": null,
+                "postalCode": null,
+                "region": null,
+                "country": "NO"
+              },
+              "contactMethods": null,
+              "registryNumber": null,
+              "name": "NAV ACCEPTANCE TEST 07",
+              "acronym": "NAV ACCT 07",
+              "countryCode": "NO",
+              "activeSince": "2018-08-26T22:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": true,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": true,
+      "type": "P8000",
+      "typeVersion": "4.2",
+      "displayName": "Request for additional information",
+      "parendDocumentId": null,
+      "starter": true,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 1183066,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": null,
+      "conversations": [
+        {
+          "id": "5775f4d461a04877a33af796321dc770",
+          "versionId": null,
+          "participants": [
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:NAVAT07",
+                "address": {
+                  "street": null,
+                  "town": null,
+                  "postalCode": null,
+                  "region": null,
+                  "country": "NO"
+                },
+                "contactMethods": null,
+                "registryNumber": null,
+                "name": "NAV ACCEPTANCE TEST 07",
+                "acronym": "NAV ACCT 07",
+                "countryCode": "NO",
+                "activeSince": "2018-08-26T22:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "BG:BGALLACC",
+                "address": {
+                  "street": null,
+                  "town": null,
+                  "postalCode": null,
+                  "region": null,
+                  "country": "BG"
+                },
+                "contactMethods": null,
+                "registryNumber": null,
+                "name": "ACC_Allianz Bulgaria Pension Company AD",
+                "acronym": "PODALLIANZBGAD",
+                "countryCode": "BG",
+                "activeSince": "2013-07-10T22:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": null,
+      "hasBusinessValidation": false,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 0,
+      "receiveDate": null,
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": "P8000"
+    }
+  ],
+  "attachments": [],
+  "participants": [
+    {
+      "role": "CaseOwner",
+      "organisation": {
+        "id": "NO:NAVAT07",
+        "address": {
+          "street": null,
+          "town": null,
+          "postalCode": null,
+          "region": null,
+          "country": "NO"
+        },
+        "contactMethods": null,
+        "registryNumber": null,
+        "name": "NAV ACCEPTANCE TEST 07",
+        "acronym": "NAV ACCT 07",
+        "countryCode": "NO",
+        "activeSince": "2018-08-26T22:00:00.000+0000",
+        "accessPoint": null,
+        "location": null,
+        "assignedBUCs": null
+      },
+      "selected": false
+    },
+    {
+      "role": "CounterParty",
+      "organisation": {
+        "id": "BG:BGALLACC",
+        "address": {
+          "street": null,
+          "town": null,
+          "postalCode": null,
+          "region": null,
+          "country": "BG"
+        },
+        "contactMethods": null,
+        "registryNumber": null,
+        "name": "ACC_Allianz Bulgaria Pension Company AD",
+        "acronym": "PODALLIANZBGAD",
+        "countryCode": "BG",
+        "activeSince": "2013-07-10T22:00:00.000+0000",
+        "accessPoint": null,
+        "location": null,
+        "assignedBUCs": null
+      },
+      "selected": false
+    }
+  ],
+  "processDefinitionName": "P_BUC_05",
+  "processDefinitionVersion": "v4.2",
+  "applicationRoleId": "PO",
+  "comments": [],
+  "initialVariables": null,
+  "businessId": "1183063",
+  "internationalId": "1e2994cee66340ff8d95fdfc8d3e9bef",
+  "properties": {
+    "importance": "1",
+    "criticality": "1"
+  }
+}
