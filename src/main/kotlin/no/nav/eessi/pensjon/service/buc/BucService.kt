@@ -1,0 +1,17 @@
+package no.nav.eessi.pensjon.service.buc
+
+import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import org.springframework.stereotype.Service
+
+@Service
+class BucService (private val euxKlient: EuxKlient) {
+
+    /**
+     * Sjekker om
+     */
+    fun isCaseOwner(bucId: String) : Boolean {
+        return euxKlient.hentInstitusjonerIBuc(bucId)
+                .any { it.organisation.address.country == "NO" && it.role == Role.CASEOWNER }
+    }
+
+}

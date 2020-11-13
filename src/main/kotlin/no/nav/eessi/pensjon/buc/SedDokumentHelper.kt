@@ -28,7 +28,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
         val alleDokumenter = fagmodulKlient.hentAlleDokumenter(rinaSakId)
         val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
 
-        val gyldigeSeds = BucHelper.filterUtGyldigSedId(alleDokumenterJsonNode)
+        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
 
         return gyldigeSeds.map { pair ->
             val sedDocumentId = pair.first
@@ -65,6 +65,15 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
         return null
     }
 
+    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: Map<String, String?>): SakInformasjon? {
+        val list = hentSakIdFraSED(alleSedIBuc)
+        return if (list.isNotEmpty()) {
+            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, list)
+        } else {
+            null
+        }
+    }
+
     private fun filterYtelseTypeR005(sedRootNode: JsonNode): String? {
         return sedRootNode
                 .at("/tilbakekreving")
@@ -73,13 +82,18 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .textValue()
     }
 
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: Map<String, String?>): SakInformasjon? {
-        val list = hentSakIdFraSED(alleSedIBuc)
-        return if (list.isNotEmpty()) {
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, list)
-        } else {
-            null
-        }
+    private fun filterUtGyldigSedId(alleDokumenterJsonNode: JsonNode): List<Pair<String, String>> {
+        val validSedtype = listOf("P2000","P2100","P2200","P1000",
+                "P5000","P6000","P7000", "P8000",
+                "P10000","P1100","P11000","P12000","P14000","P15000", "H070", "R005")
+
+        return alleDokumenterJsonNode
+                .asSequence()
+                .filterNot { rootNode -> rootNode.get("status").textValue() =="empty" }
+                .filter { rootNode ->  validSedtype.contains(rootNode.get("type").textValue()) }
+                .map { validSeds -> Pair(validSeds.get("id").textValue(), validSeds.get("type").textValue()) }
+                .sortedBy { (_, sorting) -> sorting }
+                .toList()
     }
 
     private fun hentSakIdFraSED(alleSedIBuc: Map<String, String?>): List<String> {

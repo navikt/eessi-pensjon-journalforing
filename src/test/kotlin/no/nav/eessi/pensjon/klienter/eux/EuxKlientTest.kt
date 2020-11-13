@@ -48,10 +48,10 @@ class EuxKlientTest {
         doReturn(
                 ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), HttpStatus.OK))
                 .`when`(mockrestTemplate).exchange(
-                    eq("/buc/$rinaNr/sed/$dokumentId/filer"),
-                    any(HttpMethod::class.java),
-                    any(HttpEntity::class.java),
-                    eq(String::class.java))
+                        eq("/buc/$rinaNr/sed/$dokumentId/filer"),
+                        any(HttpMethod::class.java),
+                        any(HttpEntity::class.java),
+                        eq(String::class.java))
 
         val resp = euxKlient.hentSedDokumenter(rinaNr, dokumentId)
         val innhold = mapper.readValue(resp, JsonNode::class.java).path("sed").path("innhold").textValue()
@@ -74,4 +74,20 @@ class EuxKlientTest {
         }
     }
 
+    @Test
+    fun `Gitt et kall til get buc med to participants så returner en mappet liste av to participants`() {
+        val buc = javaClass.classLoader.getResource("eux/buc/bucNorskCaseOwner.json")!!.readText()
+
+        doReturn(
+                ResponseEntity(buc, HttpStatus.OK))
+                .`when`(mockrestTemplate).exchange(
+                        eq("/buc/1234"),
+                        any(HttpMethod::class.java),
+                        eq(null),
+                        eq(String::class.java))
+
+        val institusjonerIBuc = euxKlient.hentInstitusjonerIBuc("1234")
+
+        assertEquals(2, institusjonerIBuc.size)
+    }
 }
