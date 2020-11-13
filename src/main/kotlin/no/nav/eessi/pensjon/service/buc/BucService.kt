@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.service.buc
 
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.klienter.eux.Role
 import org.springframework.stereotype.Service
 
 @Service

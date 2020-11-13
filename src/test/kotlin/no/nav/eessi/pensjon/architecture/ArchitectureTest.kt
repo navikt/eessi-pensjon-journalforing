@@ -88,7 +88,7 @@ class ArchitectureTest {
                 Personoppslag to "$root.personoppslag..",
                 PersonidentifiseringHelpers to "$root.personidentifisering.helpers",
                 Integrasjonstest to "$root.integrasjonstest..",
-                BucService to "$root.servicer.buc.."
+                BucService to "$root.service.buc.."
 
         )
 

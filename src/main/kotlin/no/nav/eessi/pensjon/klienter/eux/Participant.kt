@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.service.buc
+package no.nav.eessi.pensjon.klienter.eux
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
