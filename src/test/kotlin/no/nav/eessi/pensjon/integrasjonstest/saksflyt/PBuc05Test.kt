@@ -37,6 +37,11 @@ internal class PBuc05Test : JournalforingTestBase() {
         private const val FNR_VOKSEN = "01119043352"
         private const val FNR_VOKSEN_2 = "01118543352"
         private const val FNR_BARN = "01110854352"
+
+        private const val AKTOER_ID = "0123456789000"
+        private const val AKTOER_ID_2 = "0009876543210"
+
+        private const val SAK_ID = "12345"
     }
 
     /**
@@ -45,17 +50,14 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 3 - 1 person i SED fnr finnes og bestemsak finner sak GENRL Så journalføres automatisk og tema på PENSJON`() {
-        val aktoer = "${FNR_OVER_60}1111"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Etternavn", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
 
-        val saker = listOf(SakInformasjon(sakId = saknr, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -80,21 +82,18 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 4 - 1 person i SED fnr finnes og bestemsak finner flere sak Så journalføres manuelt på teama PENSJON og enhet UFORE_UTLANDSTILSNITT`() {
-        val aktoer = "${FNR_VOKSEN}1111"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_VOKSEN, null, saknr)
+        val sed = createSedJson(SedType.P8000, FNR_VOKSEN, null, SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Etternavn", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                SakInformasjon(sakId = saknr, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = "34234123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -119,21 +118,18 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 4 - 2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
-        val aktoer = "${FNR_OVER_60}1111"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn forsørger", "Etternavn", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                SakInformasjon(sakId = saknr, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = "34234123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
@@ -157,17 +153,14 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 - 1 person i SED fnr finnes og bestemsak finner sak UFORE Så journalføres automatisk på tema UFORETRYGD`() {
-        val aktoer = "${FNR_OVER_60}1111"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Etternavn", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
 
-        val saker = listOf(SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING))
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING))
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -192,20 +185,17 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 - 1 person i SED fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
-        val aktoer = "${FNR_OVER_60}1111"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, null, SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Etternavn", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
 
         val saker = listOf(
-                SakInformasjon(sakId = saknr, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = "2131123123", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -355,25 +345,21 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes og bestemsak finner sak UFØRE Så journalføres automatisk på tema UFORETRYGD`() {
-        val aktoera = "${FNR_VOKSEN}1111"
-        val aktoerf = "${FNR_OVER_60}0000"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Lever", "Helt i live", "NOR")
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Død", "Helt Død", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(aktoera)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoerf)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
                 SakInformasjon(sakId = "34234123", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoera) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -462,25 +448,21 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak UFØRE Så journalføres automatisk på tema UFORETRYGD`() {
-        val aktoera = "${FNR_VOKSEN}1111"
-        val aktoerf = "${FNR_OVER_60}0000"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_VOKSEN, "Hovedpersonen", "forsikret", "NOR")
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_OVER_60, "Ikke hovedperson", "familiemedlem", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(aktoera)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoerf)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
                 SakInformasjon(sakId = "34234123", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoerf) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -508,25 +490,21 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
-        val aktoera = "${FNR_VOKSEN}1111"
-        val aktoerf = "${FNR_OVER_60}0000"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_VOKSEN, "Hovedpersonen", "forsikret", "NOR")
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_OVER_60, "Ikke hovedperson", "familiemedlem", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(aktoera)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoerf)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
         val saker = listOf(
-                SakInformasjon(sakId = saknr, sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
                 SakInformasjon(sakId = "123123123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
                 SakInformasjon(sakId = "34234123", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoerf) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -539,8 +517,6 @@ internal class PBuc05Test : JournalforingTestBase() {
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         val request = journalpost.captured
-
-        println(request.toJson())
 
         // forvent tema == PEN og enhet 9999
         assertEquals(PENSJON, request.tema)
@@ -603,23 +579,19 @@ internal class PBuc05Test : JournalforingTestBase() {
     @Test
     @Disabled
     fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner ingen sak Så journalføres manuelt på tema PENSJON og enhet ID_OG_FORDELING`() {
-        val aktoera = "${FNR_VOKSEN}1111"
-        val aktoerf = "${FNR_OVER_60}0000"
-        val saknr = "122x31 231 /23q"
-
-        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), saknr)
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Hovedpersonen", "forsikret", "NOR")
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Ikke hovedperson", "familiemedlem", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(aktoera)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoerf)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
         val saker = listOf(
                 SakInformasjon(sakId = "234123123", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoerf) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
         //every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
@@ -651,21 +623,19 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og ingen skjerming`() {
-        val aktoerId = "${FNR_OVER_60}0000"
-
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "03"), "saknr")
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Hovedpersonen", "forsikret", "NOR")
         every { personV3Service.hentPerson(FNR_BARN) } returns createBrukerWith(FNR_BARN, "Ikke hovedperson", "familiemedlem", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoerId)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_BARN)) } returns AktoerId("1111")
 
         every { diskresjonService.hentDiskresjonskode(any()) } returns null // Ingen skjerming (diskresjonskode == null)
 
         every {
-            fagmodulKlient.hentPensjonSaklist(aktoerId)
+            fagmodulKlient.hentPensjonSaklist(AKTOER_ID)
         } returns listOf(SakInformasjon(sakId = "234123123", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET))
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
@@ -681,7 +651,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
         assertEquals(AUTOMATISK_JOURNALFORING, oppgaveMelding.tildeltEnhetsnr)
-        assertEquals(aktoerId, oppgaveMelding.aktoerId)
+        assertEquals(AKTOER_ID, oppgaveMelding.aktoerId)
         assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
         val request = journalpost.captured
@@ -696,7 +666,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 9 - 2 personer i SED fnr finnes, barn med kode6 opprettes en journalføringsoppgave på tema PEN og enhet 2103 Vikafossen`() {
-        val aktoer = "${FNR_OVER_60}1111"
         val barnaktoer = "${FNR_BARN}0000"
         val saknr = "1223123123"
 
@@ -708,14 +677,14 @@ internal class PBuc05Test : JournalforingTestBase() {
         val barn = createBrukerWith(FNR_BARN, "Barn", "Diskret", "NOR", "1213", "SPSF")
         every { personV3Service.hentPerson(FNR_BARN) } returns barn
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_BARN)) } returns AktoerId(barnaktoer)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
 
@@ -744,7 +713,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 10 - 2 personer i SED fnr finnes, barn med kode6 opprettes en journalføringsoppgave på tema PEN og enhet 4303 NAV ID og Fordeling`() {
-        val aktoer = "${FNR_OVER_60}1111"
         val barnaktoer = "${FNR_BARN}0000"
         val saknr = "1223123123"
 
@@ -756,14 +724,14 @@ internal class PBuc05Test : JournalforingTestBase() {
         val barn = createBrukerWith(FNR_BARN, "Barn", "Diskret", "NOR", "1213", "SPFO")
         every { personV3Service.hentPerson(FNR_BARN) } returns barn
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(aktoer)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_BARN)) } returns AktoerId(barnaktoer)
 
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = saknr, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
