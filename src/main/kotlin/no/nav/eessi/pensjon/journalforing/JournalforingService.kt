@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
 import no.nav.eessi.pensjon.models.BucType.P_BUC_05
 import no.nav.eessi.pensjon.models.BucType.R_BUC_02
