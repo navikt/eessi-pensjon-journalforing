@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -44,6 +45,7 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
@@ -106,6 +108,11 @@ internal open class JournalforingTestBase {
         pdfService.initMetrics()
         oppgaveHandler.initMetrics()
         bestemSakKlient.initMetrics()
+    }
+
+    @AfterEach
+    fun after() {
+        clearAllMocks()
     }
 
     protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {

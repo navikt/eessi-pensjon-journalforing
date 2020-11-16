@@ -7,8 +7,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
 
 class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
-
         val harBarn = request.identifisertPerson?.personListe
                 ?.any { it.personRelasjon.relasjon == Relasjon.BARN } ?: false
 
@@ -19,6 +17,8 @@ class Pbuc05 : BucTilEnhetHandler {
                 else -> Enhet.AUTOMATISK_JOURNALFORING
             }
         }
+
+        val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
 
         return if (request.bosatt == Bosatt.NORGE) {
             if (ageIsBetween18and60) Enhet.UFORE_UTLANDSTILSNITT

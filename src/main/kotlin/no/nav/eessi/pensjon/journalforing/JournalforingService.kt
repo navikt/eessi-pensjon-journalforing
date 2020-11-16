@@ -8,7 +8,9 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
+import no.nav.eessi.pensjon.models.BucType.P_BUC_05
 import no.nav.eessi.pensjon.models.BucType.R_BUC_02
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
@@ -145,13 +147,14 @@ class JournalforingService(private val euxKlient: EuxKlient,
             hendelseType: HendelseType,
             identifisertPerson: IdentifisertPerson?
     ): Boolean {
-        sakInformasjon ?: return true
+        val sakType = sakInformasjon?.sakType ?: return true
 
         return when {
             identifisertPerson?.diskresjonskode != null -> true
             sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
-            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
+            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
+            sedHendelseModel.bucType == P_BUC_05 && (sakType != YtelseType.GENRL && sakType != YtelseType.UFOREP && sakType != YtelseType.ALDER) -> true
             else -> false
         }
     }
