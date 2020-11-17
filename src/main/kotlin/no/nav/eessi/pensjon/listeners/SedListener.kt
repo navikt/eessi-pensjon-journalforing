@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.SediBuc
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -76,10 +77,11 @@ class SedListener(
                     if (gyldigeHendelser.sendtHendelse(sedHendelse)) {
                         logger.info("*** Starter utgående journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                         val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
-                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
+                        val listAlleSediBuc = SediBuc.getList(alleSedIBuc)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, listAlleSediBuc , sedHendelse.bucType)
+                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, listAlleSediBuc)
                         val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
-                        val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, sedHendelse, ytelseTypeFraSED, alleSedIBuc)
+                        val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, sedHendelse, ytelseTypeFraSED, listAlleSediBuc)
                         val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, SENDT)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset, sakInformasjon)
                     }
@@ -121,11 +123,12 @@ class SedListener(
                         if (gyldigeHendelser.mottattHendelse(sedHendelse)) {
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, sedDokumentHelper.hentAlleSeds(alleSedIBuc), sedHendelse.bucType)
+                            val listAlleSediBuc = SediBuc.getList(alleSedIBuc)
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, listAlleSediBuc, sedHendelse.bucType)
                             val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, MOTTATT)
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc.values.toList())
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, listAlleSediBuc)
 
                             journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, ytelseType, offset, sakInformasjon)
                         }
@@ -153,7 +156,7 @@ class SedListener(
         }
     }
 
-    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel, ytelsestypeFraSed: YtelseType?, alleSedIBuc: Map<String, String?>): SakInformasjon? {
+    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel, ytelsestypeFraSed: YtelseType?, alleSedIBuc: List<String?>): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
         val aktoerId = identifisertPerson.aktoerId
