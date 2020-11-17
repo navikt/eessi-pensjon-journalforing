@@ -72,8 +72,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 val tildeltEnhet =  tildeltEnhet(sakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
 
-                val forsokFerdigstill = tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
-                val arkivsaksnummer = if (forsokFerdigstill) sakInformasjon?.sakId else null
+                val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
@@ -86,14 +85,13 @@ class JournalforingService(private val euxKlient: EuxKlient,
                     journalfoerendeEnhet = tildeltEnhet,
                     arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
-                    forsokFerdigstill = forsokFerdigstill,
                     avsenderLand = sedHendelseModel.avsenderLand,
                     avsenderNavn = sedHendelseModel.avsenderNavn,
                     ytelseType = ytelseType
                 )
 
                 // Oppdaterer distribusjonsinfo
-                if (forsokFerdigstill) {
+                if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 

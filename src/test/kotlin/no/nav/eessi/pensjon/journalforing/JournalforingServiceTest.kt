@@ -132,7 +132,6 @@ class JournalforingServiceTest {
                         journalfoerendeEnhet = anyOrNull(),
                         arkivsaksnummer = anyOrNull(),
                         dokumenter = anyOrNull(),
-                        forsokFerdigstill = anyOrNull(),
                         avsenderLand = anyOrNull(),
                         avsenderNavn = anyOrNull(),
                         ytelseType = anyOrNull()
@@ -163,7 +162,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.OKONOMI_PENSJON),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R004 - Melding om utbetaling"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = eq(YtelseType.ALDER)
@@ -195,7 +193,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = eq(YtelseType.UFOREP)
@@ -227,7 +224,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = eq(YtelseType.UFOREP)
@@ -267,7 +263,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = eq(YtelseType.ALDER)
@@ -299,7 +294,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -336,7 +330,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.UFORE_UTLANDSTILSNITT),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -368,7 +361,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -401,7 +393,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -437,7 +428,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2000 Supported Documents"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -470,7 +460,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.NFP_UTLAND_AALESUND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(YtelseType.ALDER)
@@ -506,7 +495,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.UFORE_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2200 Supported Documents"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -539,7 +527,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = anyOrNull(),
                 avsenderNavn = anyOrNull(),
                 ytelseType = anyOrNull()
@@ -574,7 +561,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
                 arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(true),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
@@ -631,7 +617,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
                 arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(true),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAV ACCEPTANCE TEST 07"),
                 ytelseType = eq(YtelseType.GJENLEV)
@@ -669,7 +654,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
@@ -706,7 +690,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
@@ -740,7 +723,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
                 ytelseType = eq(null)
@@ -795,7 +777,6 @@ class JournalforingServiceTest {
                 journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
                 arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                forsokFerdigstill = eq(false),
                 avsenderLand = eq("PL"),
                 avsenderNavn = eq("POLEN"),
                 ytelseType = eq(YtelseType.BARNEP)

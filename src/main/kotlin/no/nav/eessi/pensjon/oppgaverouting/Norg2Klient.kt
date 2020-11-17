@@ -43,7 +43,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         logger.debug("følgende request til Norg2 : $request")
         val enheter = hentArbeidsfordelingEnheter(request)
 
-        return enheter?.let { finnArbeidsfordelingEnheter(request, it) }
+        return finnArbeidsfordelingEnheter(request, enheter)
     }
 
     fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
