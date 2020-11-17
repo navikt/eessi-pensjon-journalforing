@@ -27,11 +27,82 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
+import java.nio.file.Files
+import java.nio.file.Paths
 
 internal class PBuc05Test : JournalforingTestBase() {
+
+    @Test
+    fun `Hente opp korrekt fnr fra P8000 som er sendt fra oss med flere P8000 i BUC`() {
+        val sedP60000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+
+        val fnr = "28127822044"
+        val afnr = "05127921999"
+        val aktoera = "${fnr}1111"
+        val aktoerf = "${fnr}0000"
+        val saknr = "1223123123"
+
+        val sedP8000sendt = createSedJson(SedType.P8000, fnr,createAnnenPersonJson(fnr = afnr, fdato =  "1950-05-07", rolle =  "01") , saknr)
+        val sedP8000recevied = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = null, fdato =  "1950-05-07", rolle =  "01") , null)
+
+        every { fagmodulKlient.hentAlleDokumenter(any())} returns String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")))
+        every { euxKlient.hentSed(any(), any()) } returns sedP60000 andThen sedP8000recevied andThen  sedP8000sendt
+        every { diskresjonService.hentDiskresjonskode(any()) } returns null
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+        every { personV3Service.hentPerson(afnr) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR")
+        every { personV3Service.hentPerson(fnr)} returns createBrukerWith(fnr, "Død", "Helt Død", "NOR")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(afnr)) } returns AktoerId(aktoera)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(aktoerf)
+
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = saknr, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = "34234123", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET)
+        )
+        every { fagmodulKlient.hentPensjonSaklist(aktoera) } returns saker
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+
+        val (journalpost, _) = initJournalPostRequestSlot(true)
+
+        val hendelse = """
+            {
+              "id": 1869,
+              "sedId": "P6000_40000000004_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_05",
+              "rinaSakId": "147729",
+              "avsenderId": "NO:NAVT003",
+              "avsenderNavn": "NAVT003",
+              "avsenderLand": "NO",
+              "mottakerId": "NO:NAVT007",
+              "mottakerNavn": "NAV Test 07",
+              "mottakerLand": "NO",
+              "rinaDokumentId": "40000000004",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P6000",
+              "navBruker": null
+            }
+        """.trimIndent()
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+
+        // forvent tema == PEN og enhet 9999
+        assertEquals(UFORETRYGD, request.tema)
+        assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
+        assertEquals(afnr, request.bruker?.id)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 3) { euxKlient.hentSed(any(), any()) }
+
+    }
+
+
 
     @Test
     fun `Scenario 3 - 1 person i SED fnr finnes og bestemsak finner sak GENRL Så journalføres automatisk og tema på PENSJON`() {
