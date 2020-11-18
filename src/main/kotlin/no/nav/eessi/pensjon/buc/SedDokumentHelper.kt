@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.SediBuc
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -20,27 +21,25 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun hentAlleSeds(seds: Map<String, String?>): List<String?> {
-        return seds.map { it.value }.toList()
-    }
-
-    fun hentAlleSedIBuc(rinaSakId: String): Map<String, String?> {
+    fun hentAlleSedIBuc(rinaSakId: String): List<SediBuc> {
         val alleDokumenter = fagmodulKlient.hentAlleDokumenter(rinaSakId)
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
 
-        val gyldigeSeds = filterUtGyldigSedId(alleDokumenterJsonNode)
+        val gyldigeSeds = filterUtGyldigSedId(alleDokumenter)
 
-        return gyldigeSeds.map { pair ->
-            val sedDocumentId = pair.first
-            val sedType = pair.second
-            sedType to euxKlient.hentSed(rinaSakId, sedDocumentId)
-        }.toMap()
+        gyldigeSeds.forEach {
+            logger.debug("id: ${it.id} status: ${it.status} type: ${it.type}")
+            it.sedjson = euxKlient.hentSed(rinaSakId, it.id)
+        }
+
+        return gyldigeSeds
     }
 
-    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: Map<String, String?>): YtelseType? {
+
+    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SediBuc>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == BucType.R_BUC_02) {
-            val r005Sed = alleSedIBuc[SedType.R005.name]
+            val r005Sed = SediBuc.getValuesOf(SedType.R005, alleSedIBuc)
+            //val r005Sed = alleSedIBuc[SedType.R005.name]
             if (r005Sed != null) {
                 val sedRootNode = mapper.readTree(r005Sed)
                 return when (filterYtelseTypeR005(sedRootNode)) {
@@ -52,7 +51,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             }
             //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
         } else if (sedHendelse.sedType == SedType.P15000) {
-            val sed = alleSedIBuc[SedType.P15000.name]
+            val sed = SediBuc.getValuesOf(SedType.P15000, alleSedIBuc)
+            //val sed = alleSedIBuc[SedType.P15000.name]
             if (sed != null) {
                 val sedRootNode = mapper.readTree(sed)
                 return when (sedRootNode.get("nav").get("krav").get("type").textValue()) {
@@ -65,7 +65,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
         return null
     }
 
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: Map<String, String?>): SakInformasjon? {
+    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<String?>): SakInformasjon? {
         val list = hentSakIdFraSED(alleSedIBuc)
         return if (list.isNotEmpty()) {
             validerSakIdFraSEDogReturnerPensjonSak(aktoerId, list)
@@ -82,24 +82,26 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .textValue()
     }
 
-    private fun filterUtGyldigSedId(alleDokumenterJsonNode: JsonNode): List<Pair<String, String>> {
+    private fun filterUtGyldigSedId(alleDokumenter: String?): List<SediBuc> {
+        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
         val validSedtype = listOf("P2000","P2100","P2200","P1000",
-                "P5000","P6000","P7000", "P8000",
+                "P5000","P6000","P7000", "P8000", "P9000",
                 "P10000","P1100","P11000","P12000","P14000","P15000", "H070", "R005")
 
         return alleDokumenterJsonNode
                 .asSequence()
                 .filterNot { rootNode -> rootNode.get("status").textValue() =="empty" }
+//                .filter { rootNode-> rootNode.get("status").textValue() == "received" || rootNode.get("status").textValue() == "sent" }
                 .filter { rootNode ->  validSedtype.contains(rootNode.get("type").textValue()) }
-                .map { validSeds -> Pair(validSeds.get("id").textValue(), validSeds.get("type").textValue()) }
-                .sortedBy { (_, sorting) -> sorting }
+                .map { validSeds -> SediBuc(id = validSeds.get("id").textValue(),type = SedType.valueOf(validSeds.get("type").textValue()), status = validSeds.get("status").textValue()) }
+                .sortedBy { it.type }
                 .toList()
     }
 
-    private fun hentSakIdFraSED(alleSedIBuc: Map<String, String?>): List<String> {
+    private fun hentSakIdFraSED(alleSedIBuc: List<String?>): List<String> {
         val list = mutableListOf<String>()
 
-        alleSedIBuc.forEach { (_, sed) ->
+        alleSedIBuc.forEach { sed ->
             val sedRootNode = mapper.readTree(sed)
             val eessi = filterEESSIsak(sedRootNode.get("nav"))
             logger.debug("eessi saknummer: $eessi")

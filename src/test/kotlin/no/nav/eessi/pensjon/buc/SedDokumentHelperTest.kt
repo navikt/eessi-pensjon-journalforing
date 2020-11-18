@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.SediBuc
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,7 +51,8 @@ class SedDokumentHelperTest {
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         BucType.R_BUC_02)
 
-        val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
+//        val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
+        val seds = listOf<SediBuc>(SediBuc(id = "23123", status = "sent", type = SedType.R005, sedjson = sedR005))
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
         assertEquals(YtelseType.ALDER ,actual)
@@ -62,7 +64,8 @@ class SedDokumentHelperTest {
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         BucType.R_BUC_02)
 
-        val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
+        //        val seds = mapOf<String,String?>(SedType.R005.name to sedR005)
+        val seds = listOf<SediBuc>(SediBuc(id = "23123", status = "sent", type = SedType.R005, sedjson = sedR005))
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
         assertEquals(YtelseType.UFOREP,actual)
@@ -74,7 +77,9 @@ class SedDokumentHelperTest {
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P15000-NAV.json")))
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = BucType.P_BUC_10, sedType = SedType.P15000)
-        val seds = mapOf<String,String?>(SedType.R005.name to sedR005, SedType.P15000.name to sed)
+        //val seds = mapOf<String,String?>(SedType.R005.name to sedR005, SedType.P15000.name to sed)
+        val seds = listOf<SediBuc>(SediBuc(id = "23123", status = "sent", type = SedType.R005, sedjson = sedR005), SediBuc(id = "123123", status = "sent", type = SedType.P15000, sedjson = sed))
+
         val actual = helper.hentYtelseType(sedHendelse, seds)
 
         assertEquals(YtelseType.ALDER ,actual)
@@ -90,9 +95,10 @@ class SedDokumentHelperTest {
 
         val actual = helper.hentAlleSedIBuc("123123")
         assertEquals(1, actual.size)
-        assertEquals(SedType.P2000.name, actual.keys.toList()[0])
-        assertEquals(sedP2000, actual[SedType.P2000.name])
-        assertEquals(sedP2000, helper.hentAlleSeds(actual)[0])
+        val sedibuc = actual.first()
+        assertEquals(SedType.P2000, sedibuc.type)
+        assertEquals("sent", sedibuc.status)
+        assertEquals(sedP2000, sedibuc.sedjson)
     }
 
 
@@ -106,9 +112,14 @@ class SedDokumentHelperTest {
 
         val sedP5000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P5000-medNorskGjenlevende-NAV.json")))
         val sedP2100 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2100-utenNorskGjenlevende-NAV.json")))
-        val mockAllSediBuc = mapOf("P2000" to sedP2100, "P5000" to sedP5000)
+//        val mockAllSediBuc = mapOf("P2000" to sedP2100, "P5000" to sedP5000)
+        val mockAllSediBuc = listOf<SediBuc>(
+                SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2100),
+                SediBuc(id = "231223", status = "sent", type = SedType.P5000, sedjson = sedP5000)
+        )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
+
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
 
         assertNotNull(result)
         assertEquals(expected.toJson(), result?.toJson())
@@ -119,9 +130,12 @@ class SedDokumentHelperTest {
     fun `Gitt at det finnes eessisak der land ikke er Norge så returneres null`() {
 
         val sedP2000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-ugyldigFNR-NAV.json")))
-        val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
+//        val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
+        val mockAllSediBuc = listOf<SediBuc>(
+                SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2000)
+        )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc)
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
 
        assertNull(result)
 
@@ -142,8 +156,13 @@ class SedDokumentHelperTest {
               "sedVer": "1"
             }
         """.trimIndent()
-        val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
-        val result = helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc)
+//        val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
+        val mockAlleSedIBuc = listOf<SediBuc>(
+                SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2000)
+        )
+
+
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAlleSedIBuc))
         assertNull(result)
     }
 
@@ -165,9 +184,13 @@ class SedDokumentHelperTest {
 
         doThrow(RuntimeException()).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
-        val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
+        //val mockAlleSedIBuc = mapOf("P2000" to sedP2000)
+        val mockAlleSedIBuc = listOf<SediBuc>(
+                SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2000)
+        )
+
         assertThrows<RuntimeException>{
-            helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc)
+            helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAlleSedIBuc))
         }
     }
 
@@ -209,9 +232,17 @@ class SedDokumentHelperTest {
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
-        val mockAllSediBuc = mapOf("P2000" to sedP2000, "P4000" to sedP2000, "P5000" to sedP5000, "P6000" to sedP2000)
+//        val mockAllSediBuc = mapOf("P2000" to sedP2000, "P4000" to sedP2000, "P5000" to sedP5000, "P6000" to sedP2000)
+        val mockAllSediBuc = listOf<SediBuc>(
+                SediBuc(id = "231231", status = "sent", type = SedType.P2000, sedjson = sedP2000),
+                SediBuc(id = "231232", status = "sent", type = SedType.P4000, sedjson = sedP2000),
+                SediBuc(id = "231233", status = "sent", type = SedType.P5000, sedjson = sedP5000),
+                SediBuc(id = "231234", status = "sent", type = SedType.P6000, sedjson = sedP2000)
+        )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
+
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
+
 
         assertNotNull(result)
         assertEquals(YtelseType.ALDER, result?.sakType)
