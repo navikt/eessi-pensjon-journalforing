@@ -62,7 +62,6 @@ internal class JournalpostServiceTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                forsokFerdigstill = false,
                 avsenderLand = "NO",
                 avsenderNavn = null,
                 ytelseType = null
@@ -90,7 +89,7 @@ internal class JournalpostServiceTest {
         assertEquals("PSAK", actualRequest.sak!!.arkivsaksystem)
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any()) }
+        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true) }
     }
 
     @Test
@@ -123,7 +122,6 @@ internal class JournalpostServiceTest {
                             "tittel": "Søknad om foreldrepenger ved fødsel"
                     }]
                 """.trimIndent(),
-                    forsokFerdigstill = false,
                     avsenderLand = "NO",
                     avsenderNavn = null,
                     ytelseType = null
@@ -154,7 +152,6 @@ internal class JournalpostServiceTest {
                 arkivsaksnummer = "string",
                 dokumenter = """
                      [{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""".trimIndent(),
-                forsokFerdigstill = false,
                 avsenderLand = "UK",
                 avsenderNavn = null,
                 ytelseType = null
@@ -180,7 +177,7 @@ internal class JournalpostServiceTest {
         assertEquals(request.bruker!!.id, actualRequest.bruker!!.id)
         assertEquals("GB", actualRequest.avsenderMottaker.land)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any()) }
+        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true) }
     }
 
     @Test
@@ -221,7 +218,6 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(requestSlot), any()) } returns expectedResponse
 
-        val forsokFerdigstill = false
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = "12078945602",
@@ -232,7 +228,6 @@ internal class JournalpostServiceTest {
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "[\"P2100\"]",
-                forsokFerdigstill = forsokFerdigstill,
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 ytelseType = null
@@ -257,7 +252,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
         assertEquals("NO", actualRequest.avsenderMottaker.land)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, forsokFerdigstill) }
+        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false) }
     }
 
     @Test
