@@ -1,23 +1,68 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPFO
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode.SPSF
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 
 class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        val harBarn = request.identifisertPerson?.personListe
-                ?.any { it.personRelasjon.relasjon == Relasjon.BARN } ?: false
-
-        if (harBarn) {
-            return when (request.diskresjonskode) {
-                SPFO -> Enhet.ID_OG_FORDELING
-                SPSF -> Enhet.DISKRESJONSKODE
-                else -> Enhet.AUTOMATISK_JOURNALFORING
-            }
+        return when {
+            flerePersoner(request) -> hentEnhetForRelasjon(request)
+            kanJournalforesAutomatisk(request.ytelseType) -> Enhet.AUTOMATISK_JOURNALFORING
+            else -> enhetFraAlderOgLand(request)
         }
+    }
 
+    /**
+     * Sjekker om saken inneholder mer enn 1 person.
+     */
+    private fun flerePersoner(request: OppgaveRoutingRequest): Boolean {
+        val personer = request.identifisertPerson?.personListe ?: emptyList()
+
+        return personer.size > 1
+    }
+
+    /**
+     * Henter ut enhet basert på [Diskresjonskode].
+     * Skal kun brukes dersom det finnes en [IdentifisertPerson] med [Relasjon.BARN]
+     */
+    private fun hentEnhetForRelasjon(request: OppgaveRoutingRequest): Enhet {
+        val personer = request.identifisertPerson?.personListe ?: emptyList()
+
+        return when {
+            personer.any { it.personRelasjon.relasjon == Relasjon.BARN } -> enhetForRelasjonBarn(request)
+            personer.any { it.personRelasjon.relasjon == Relasjon.FORSORGER } -> enhetForRelasjonForsorger(request)
+            else -> enhetFraAlderOgLand(request)
+        }
+    }
+
+    private fun enhetForRelasjonBarn(request: OppgaveRoutingRequest): Enhet {
+        val ytelseType = request.ytelseType
+
+        return if (ytelseType == YtelseType.GJENLEV || ytelseType == YtelseType.BARNEP) enhetFraAlderOgLand(request)
+        else Enhet.AUTOMATISK_JOURNALFORING
+    }
+
+    private fun enhetForRelasjonForsorger(request: OppgaveRoutingRequest): Enhet {
+        return when (request.ytelseType) {
+            null, YtelseType.GENRL -> enhetFraAlderOgLand(request)
+            else -> Enhet.AUTOMATISK_JOURNALFORING
+        }
+    }
+
+    /**
+     * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
+     */
+    private fun kanJournalforesAutomatisk(type: YtelseType?): Boolean {
+        return type == YtelseType.GENRL || type == YtelseType.UFOREP || type == YtelseType.ALDER
+    }
+
+    /**
+     * Henter ut [Enhet] basert på den forsikrede sin [Bosatt] og alder.
+     */
+    private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
         val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
 
         return if (request.bosatt == Bosatt.NORGE) {

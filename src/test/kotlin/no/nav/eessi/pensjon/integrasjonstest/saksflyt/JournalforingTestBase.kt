@@ -75,7 +75,7 @@ internal open class JournalforingTestBase {
     )
 
     protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
-    protected val personV3Service: PersonV3Service = mockk()
+    protected val personV3Service: PersonV3Service = mockk(relaxed = true)
     protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
 
     private val personidentifiseringService = PersonidentifiseringService(
@@ -128,8 +128,7 @@ internal open class JournalforingTestBase {
                 .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
                 .withStatsborgerskap(Statsborgerskap().withLand(Landkoder().withValue(land)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
-                .withDiskresjonskode(Diskresjonskoder().withValue("$diskresjonskode"))
-                //brukerSF?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
+                .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
     }
 
     private fun journalpostResponse(ferdigstilt: Boolean = false): OpprettJournalPostResponse {

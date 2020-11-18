@@ -147,11 +147,10 @@ class JournalforingService(private val euxKlient: EuxKlient,
         val sakType = sakInformasjon?.sakType ?: return true
 
         return when {
-            identifisertPerson?.diskresjonskode != null -> true
             sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
             sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
-            sedHendelseModel.bucType == P_BUC_05 && (sakType != YtelseType.GENRL && sakType != YtelseType.UFOREP && sakType != YtelseType.ALDER) -> true
+            sedHendelseModel.bucType == P_BUC_05 -> true
             else -> false
         }
     }
