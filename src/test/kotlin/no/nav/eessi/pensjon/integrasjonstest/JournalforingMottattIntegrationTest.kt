@@ -292,6 +292,18 @@ class JournalforingMottattIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
                     )
 
+
+            //Mock eux hent av sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET.name)
+                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777"))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_R004.json"))))
+                    )
+
             //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
             mockServer.`when`(
                     request()
@@ -582,7 +594,7 @@ class JournalforingMottattIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 25) { personV3Service.hentPerson(any()) }
+        verify(atLeast = 25) { personV3Service.hentPerson(any()) }
 
         assertEquals(0, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
     }
