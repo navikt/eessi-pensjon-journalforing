@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service
 class BucService (private val euxKlient: EuxKlient) {
 
     /**
-     * Sjekker om
+     * Sjekker om Norge er caseowner i BUC
      */
-    fun isCaseOwner(bucId: String) : Boolean {
+    fun isNorgeCaseOwner(bucId: String) : Boolean {
         return euxKlient.hentInstitusjonerIBuc(bucId)
                 .any { it.organisation.address.country == "NO" && it.role == Role.CASEOWNER }
     }

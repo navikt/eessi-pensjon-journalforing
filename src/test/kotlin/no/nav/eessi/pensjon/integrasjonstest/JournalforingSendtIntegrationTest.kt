@@ -336,6 +336,17 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json"))))
                     )
 
+            //Mock eux hent av sed
+            mockServer.`when`(
+                    request()
+                            .withMethod(HttpMethod.GET.name)
+                            .withPath("/buc/.*" ))
+                    .respond(HttpResponse.response()
+                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                            .withStatusCode(HttpStatusCode.OK_200.code())
+                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/buc/bucNorskCaseOwner.json"))))
+                    )
+
             // Mocker journalføringstjeneste
             mockServer.`when`(
                     request()

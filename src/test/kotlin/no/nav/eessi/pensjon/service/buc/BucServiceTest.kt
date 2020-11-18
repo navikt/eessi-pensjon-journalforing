@@ -22,7 +22,7 @@ internal class BucServiceTest {
 
         every { euxKlient.hentInstitusjonerIBuc(any()) } returns institusjonerIBuc
 
-        assertTrue(bucService.isCaseOwner("1234"))
+        assertTrue(bucService.isNorgeCaseOwner("1234"))
     }
 
     @Test
@@ -32,6 +32,6 @@ internal class BucServiceTest {
 
         every { euxKlient.hentInstitusjonerIBuc(any()) } returns institusjonerIBuc
 
-        assertFalse(bucService.isCaseOwner("1234"))
+        assertFalse(bucService.isNorgeCaseOwner("1234"))
     }
 }
