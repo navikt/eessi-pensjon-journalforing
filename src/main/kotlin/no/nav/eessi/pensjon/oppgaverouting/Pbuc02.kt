@@ -1,15 +1,18 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc02 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet =
-            if (request.bosatt == Bosatt.NORGE)
-                handleNorge(request)
-            else
-                handleUtland(request)
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return when {
+            kanAutomatiskJournalfores(request.hendelseType, request.ytelseType, request.sakStatus) -> Enhet.AUTOMATISK_JOURNALFORING
+            request.bosatt == Bosatt.NORGE -> handleNorge(request)
+            else -> handleUtland(request)
+        }
+    }
 
     private fun handleNorge(request: OppgaveRoutingRequest): Enhet =
             when (request.ytelseType) {
@@ -28,4 +31,13 @@ class Pbuc02 : BucTilEnhetHandler {
                 YtelseType.GJENLEV -> Enhet.PENSJON_UTLAND
                 else -> Enhet.ID_OG_FORDELING
             }
+
+    private fun kanAutomatiskJournalfores(
+            hendelseType: HendelseType?,
+            ytelseType: YtelseType?,
+            sakStatus: SakStatus?
+    ): Boolean {
+        return !((hendelseType == HendelseType.SENDT && ytelseType == YtelseType.UFOREP && sakStatus == SakStatus.AVSLUTTET)
+                || (hendelseType == HendelseType.MOTTATT))
+    }
 }

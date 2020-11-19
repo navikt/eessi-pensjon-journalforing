@@ -4,9 +4,13 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        if (kanAutomatiskBehandles(request.hendelseType, request.identifisertPerson)) {
+            return Enhet.AUTOMATISK_JOURNALFORING
+        }
         val ytelseType = request.ytelseType
 
         if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
@@ -25,5 +29,9 @@ class Rbuc02 : BucTilEnhetHandler {
             }
         }
         return Enhet.ID_OG_FORDELING
+    }
+
+    private fun kanAutomatiskBehandles(hendelseType: HendelseType?, identifisertPerson: IdentifisertPerson?): Boolean {
+        return !(hendelseType == HendelseType.SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson())
     }
 }

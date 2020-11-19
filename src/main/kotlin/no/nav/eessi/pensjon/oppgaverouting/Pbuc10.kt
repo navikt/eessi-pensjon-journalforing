@@ -5,7 +5,9 @@ import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc10 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        return if (request.bosatt == Bosatt.NORGE) {
+        return if (request.ytelseType != null) {
+            Enhet.AUTOMATISK_JOURNALFORING
+        } else if (request.bosatt == Bosatt.NORGE) {
             if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLANDSTILSNITT
             else Enhet.NFP_UTLAND_AALESUND
         } else {

@@ -70,7 +70,9 @@ class JournalforingService(private val euxKlient: EuxKlient,
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelseModel.rinaSakId}, ${sedHendelseModel.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelseModel.sedType!!)
 
-                val tildeltEnhet =  tildeltEnhet(sakInformasjon, sedHendelseModel, hendelseType, identifisertPerson, fdato, ytelseType)
+                val tildeltEnhet = oppgaveRoutingService.route(
+                        OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon)
+                )
 
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
 
@@ -118,40 +120,6 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
-        }
-    }
-
-    private fun tildeltEnhet(
-            sakInformasjon: SakInformasjon?,
-            sedHendelseModel: SedHendelseModel,
-            hendelseType: HendelseType,
-            identifisertPerson: IdentifisertPerson?,
-            fdato: LocalDate,
-            ytelseType: YtelseType?
-    ): Enhet {
-        return if (manueltTildeltEnhetRegel(sakInformasjon, sedHendelseModel, hendelseType, identifisertPerson)) {
-            oppgaveRoutingService.route(
-                    OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon)
-            )
-        } else {
-            Enhet.AUTOMATISK_JOURNALFORING
-        }
-    }
-
-    private fun manueltTildeltEnhetRegel(
-            sakInformasjon: SakInformasjon?,
-            sedHendelseModel: SedHendelseModel,
-            hendelseType: HendelseType,
-            identifisertPerson: IdentifisertPerson?
-    ): Boolean {
-        val sakType = sakInformasjon?.sakType ?: return true
-
-        return when {
-            sedHendelseModel.bucType == R_BUC_02 && hendelseType == SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson() -> true
-            sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET -> true
-            sedHendelseModel.bucType == P_BUC_02 && hendelseType == MOTTATT -> true
-            sedHendelseModel.bucType == P_BUC_05 -> true
-            else -> false
         }
     }
 
