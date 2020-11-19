@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.buc
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -111,18 +110,14 @@ class SedDokumentHelperTest {
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
 
         val sedP5000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P5000-medNorskGjenlevende-NAV.json")))
-        val sedP2100 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2100-utenNorskGjenlevende-NAV.json")))
-//        val mockAllSediBuc = mapOf("P2000" to sedP2100, "P5000" to sedP5000)
         val mockAllSediBuc = listOf<SediBuc>(
-                SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2100),
                 SediBuc(id = "231223", status = "sent", type = SedType.P5000, sedjson = sedP5000)
         )
-
 
         val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
 
         assertNotNull(result)
-        assertEquals(expected.toJson(), result?.toJson())
+        assertEquals(expected.sakId, result?.sakId)
 
     }
 
@@ -195,7 +190,7 @@ class SedDokumentHelperTest {
     }
 
     @Test
-    fun `Temp pensjonsaktest`() {
+    fun `Gitt flere sed i buc har saknr hents kun et it for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
         val sedP2000 = """
             {
               "nav": {
@@ -215,7 +210,7 @@ class SedDokumentHelperTest {
               "nav": {
                 "eessisak" : [ {
                   "land" : "NO",
-                  "saksnummer" : "22874900"
+                  "saksnummer" : "22874955"
                 } ]
                },
               "sed": "PX000",
@@ -231,8 +226,6 @@ class SedDokumentHelperTest {
                 SakInformasjon(sakId = "22874456", sakType = YtelseType.BARNEP ,sakStatus = SakStatus.AVSLUTTET))
 
         doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
-
-//        val mockAllSediBuc = mapOf("P2000" to sedP2000, "P4000" to sedP2000, "P5000" to sedP5000, "P6000" to sedP2000)
         val mockAllSediBuc = listOf<SediBuc>(
                 SediBuc(id = "231231", status = "sent", type = SedType.P2000, sedjson = sedP2000),
                 SediBuc(id = "231232", status = "sent", type = SedType.P4000, sedjson = sedP2000),
@@ -240,14 +233,57 @@ class SedDokumentHelperTest {
                 SediBuc(id = "231234", status = "sent", type = SedType.P6000, sedjson = sedP2000)
         )
 
-
         val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
-
-
         assertNotNull(result)
         assertEquals(YtelseType.ALDER, result?.sakType)
-        assertEquals(expected.toJson(), result?.toJson())
+        assertEquals(4, result?.tilknyttetSaker?.size)
+    }
 
+    @Test
+    fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {
+        val sedP2000 = """
+            {
+              "nav": {
+                "eessisak" : [ {
+                  "land" : "NO",
+                  "saksnummer" : "122874955"
+                } ]
+               },
+              "sed": "P2000",
+              "sedGVer": "4",
+              "sedVer": "1"
+            }
+        """.trimIndent()
+
+        val sedP5000 = """
+            {
+              "nav": {
+                "eessisak" : [ {
+                  "land" : "NO",
+                  "saksnummer" : "228744955"
+                } ]
+               },
+              "sed": "PX000",
+              "sedGVer": "4",
+              "sedVer": "1"
+            }
+        """.trimIndent()
+
+        val expected = SakInformasjon(sakId = "22874955", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
+
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP , sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874123", sakType = YtelseType.GJENLEV ,sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874456", sakType = YtelseType.BARNEP ,sakStatus = SakStatus.AVSLUTTET))
+
+        doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
+        val mockAllSediBuc = listOf<SediBuc>(
+                SediBuc(id = "231231", status = "sent", type = SedType.P2000, sedjson = sedP2000),
+                SediBuc(id = "231232", status = "sent", type = SedType.P4000, sedjson = sedP2000),
+                SediBuc(id = "231234", status = "sent", type = SedType.P6000, sedjson = sedP2000)
+        )
+
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))
+        assertNull(result)
     }
 
 }
