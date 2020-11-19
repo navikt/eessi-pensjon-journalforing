@@ -4,8 +4,9 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
-class Rbuc02 : BucTilEnhetHandler() {
+class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         if (automatiskBehandles(request)) {
             return Enhet.AUTOMATISK_JOURNALFORING
@@ -31,6 +32,7 @@ class Rbuc02 : BucTilEnhetHandler() {
     }
 
     private fun automatiskBehandles(request: OppgaveRoutingRequest): Boolean {
-        return  (kanAutomatiskJournalfores(request)) && (request.hendelseType == HendelseType.SENDT && request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()).not()
+        val identifisertPerson = request.identifisertPerson
+        return  (kanAutomatiskJournalfores(request)) && (request.hendelseType == HendelseType.SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson()).not()
     }
 }

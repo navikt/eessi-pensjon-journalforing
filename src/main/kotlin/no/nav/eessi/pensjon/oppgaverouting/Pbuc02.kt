@@ -12,7 +12,7 @@ class Pbuc02 : BucTilEnhetHandler {
                 request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
                 else ->  handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
             }
-
+    }
 
     private fun handleNorge(ytelseType: YtelseType?, sakStatus: SakStatus?): Enhet =
             when (ytelseType) {
