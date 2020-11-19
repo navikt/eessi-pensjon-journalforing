@@ -24,6 +24,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.test.assertTrue
 
 
 @ExtendWith(MockitoExtension::class)
@@ -190,7 +191,7 @@ class SedDokumentHelperTest {
     }
 
     @Test
-    fun `Gitt flere sed i buc har saknr hents kun et it for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
+    fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
         val sedP2000 = """
             {
               "nav": {
@@ -238,6 +239,58 @@ class SedDokumentHelperTest {
         assertEquals(YtelseType.ALDER, result?.sakType)
         assertEquals(4, result?.tilknyttetSaker?.size)
     }
+
+    @Test
+    fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag, hvis sak er GENERELL kan sjekkes om har tilknytteteSaker`() {
+        val sedP2000 = """
+            {
+              "nav": {
+                "eessisak" : [ {
+                  "land" : "NO",
+                  "saksnummer" : "22874456"
+                } ]
+               },
+              "sed": "P2000",
+              "sedGVer": "4",
+              "sedVer": "1"
+            }
+        """.trimIndent()
+
+        val sedP5000 = """
+            {
+              "nav": {
+                "eessisak" : [ {
+                  "land" : "NO",
+                  "saksnummer" : "22874456"
+                } ]
+               },
+              "sed": "PX000",
+              "sedGVer": "4",
+              "sedVer": "1"
+            }
+        """.trimIndent()
+
+        val expected = SakInformasjon(sakId = "22874456", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP , sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874123", sakType = YtelseType.GJENLEV ,sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874456", sakType = YtelseType.ALDER ,sakStatus = SakStatus.LOPENDE))
+
+        doReturn(mockPensjonSaklist).whenever(fagmodulKlient).hentPensjonSaklist(ArgumentMatchers.anyString())
+        val mockAllSediBuc = listOf<SediBuc>(
+                SediBuc(id = "231231", status = "sent", type = SedType.P2000, sedjson = sedP2000),
+                SediBuc(id = "231232", status = "sent", type = SedType.P4000, sedjson = sedP2000),
+                SediBuc(id = "231233", status = "sent", type = SedType.P5000, sedjson = sedP5000),
+                SediBuc(id = "231234", status = "sent", type = SedType.P6000, sedjson = sedP2000)
+        )
+
+        val result = helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAllSediBuc))!!
+        assertNotNull(result)
+        assertEquals(YtelseType.GENRL, result?.sakType)
+        assertTrue( result.harGenerellSakTypeMedTilknyttetSaker() ,"")
+        assertEquals(4, result?.tilknyttetSaker?.size)
+    }
+
 
     @Test
     fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {

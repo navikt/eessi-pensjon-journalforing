@@ -10,15 +10,13 @@ class SakInformasjon(
         val saksbehandlendeEnhetId: String = "",
         val nyopprettet: Boolean = false,
 
-        val tilknyttetSaker: MutableSet<SakInformasjon> = mutableSetOf<SakInformasjon>()
+        val tilknyttetSaker: List<SakInformasjon> = listOf()
 ) {
     fun harGenerellSakTypeMedTilknyttetSaker() : Boolean {
         return sakType == YtelseType.GENRL && tilknyttetSaker.isNotEmpty()
     }
 
 }
-
-
 
 enum class SakStatus {
     OPPRETTET,

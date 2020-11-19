@@ -100,18 +100,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     }
 
     private fun hentSakIdFraSED(alleSedIBuc: List<String?>): String? {
-        val set = mutableSetOf<String>()
-        alleSedIBuc.forEach { sed ->
-            val sedRootNode = mapper.readTree(sed)
-            val eessi = filterEESSIsak(sedRootNode.get("nav"))
+        val saknrfrased = alleSedIBuc.mapNotNull { sed ->
+            val eessi = filterEESSIsak( mapper.readTree(sed).get("nav"))
             val sakid = eessi?.let { trimSakidString(it) }
-            if (sakid != null && sakid.isNotBlank()) {
-                logger.debug("legger sakid: $sakid til set")
-                set.add(sakid)
-            }
-        }
-        val saknrfrased = set.singleOrNull()
-        logger.debug("funnet saknrfrased: $saknrfrased")
+            logger.debug("sakid fra SED: $sakid")
+            sakid
+        }.toSet().singleOrNull()
+        logger.debug("funnet saknr fra SED: $saknrfrased")
         return saknrfrased
     }
 
@@ -127,25 +122,23 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, saknrSed: String): SakInformasjon? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        logger.debug("aktoerid: $aktoerId sedSak: $saknrSed penSak: ${saklist.toJson()}")
+        logger.debug("aktoerid: $aktoerId sedSak: $saknrSed Pensjoninformasjon: ${saklist.toJson()}")
 
         val sakInformasjon = if ((saklist.size == 1)) {
             saklist.firstOrNull { it.sakId == saknrSed }
         } else {
-            val sakentemp = saklist.firstOrNull { it.sakId == saknrSed }
-            val saken = sakentemp?.let {
+            return saklist.firstOrNull { it.sakId == saknrSed }?.let {
                 SakInformasjon(
                         sakId = it.sakId,
                         sakType = it.sakType,
                         sakStatus = it.sakStatus,
                         nyopprettet = it.nyopprettet,
-                        saksbehandlendeEnhetId = it.saksbehandlendeEnhetId
+                        saksbehandlendeEnhetId = it.saksbehandlendeEnhetId,
+                        tilknyttetSaker = saklist
                 )
             }
-            saken?.let { it.tilknyttetSaker.addAll( saklist ) }
-            saken
         }
-        logger.debug("sakInformasjon fra pensjoninformasjon (fagmodul): ${sakInformasjon?.toJson()}")
+        logger.debug("sakInformasjon: ${sakInformasjon?.toJson()}")
         return sakInformasjon
     }
 

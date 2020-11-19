@@ -34,7 +34,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Hente opp korrekt fnr fra P8000 som er sendt fra oss med flere P8000 i BUC`() {
-        val sedP60000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+        //val sedP60000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
 
         val fnr = "28127822044"
         val afnr = "05127921999"
@@ -42,11 +42,12 @@ internal class PBuc05Test : JournalforingTestBase() {
         val aktoerf = "${fnr}0000"
         val saknr = "1223123123"
 
+        val sedP8000_2 = createSedJson(SedType.P8000, fnr,createAnnenPersonJson(fnr = afnr, fdato =  "1950-05-07", rolle =  "01") , saknr)
         val sedP8000sendt = createSedJson(SedType.P8000, fnr,createAnnenPersonJson(fnr = afnr, fdato =  "1950-05-07", rolle =  "01") , saknr)
         val sedP8000recevied = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = null, fdato =  "1950-05-07", rolle =  "01") , null)
 
         every { fagmodulKlient.hentAlleDokumenter(any())} returns String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")))
-        every { euxKlient.hentSed(any(), any()) } returns sedP60000 andThen sedP8000recevied andThen  sedP8000sendt
+        every { euxKlient.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen  sedP8000sendt
         every { diskresjonService.hentDiskresjonskode(any()) } returns null
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(afnr) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR")
