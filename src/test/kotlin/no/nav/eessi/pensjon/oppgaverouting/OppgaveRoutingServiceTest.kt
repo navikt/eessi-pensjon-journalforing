@@ -154,6 +154,18 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing av mottatte sed R004 på R_BUC_02 skal gi en routing til UFORE_UTLAND`() {
+        val andreIdentifisertePesoner = mutableListOf<IdentifisertPerson>()
+
+        val annenperson = IdentifisertPerson("1234567891011",
+        "",
+        null,
+        "",
+        null,
+        PersonRelasjon("12345678911", Relasjon.ANNET),null)
+
+        andreIdentifisertePesoner.add(annenperson)
+        andreIdentifisertePesoner.add(annenperson)
+
         assertEquals(OKONOMI_PENSJON, routingService.route(OppgaveRoutingRequest(
                 fnr = "01010101010",
                 fdato = irrelevantDato(),
@@ -164,7 +176,7 @@ class OppgaveRoutingServiceTest {
                 sedType = SedType.R004,
                 hendelseType = HendelseType.MOTTATT,
                 sakStatus = null,
-                identifisertPerson = mockerEnPerson()
+                identifisertPerson = mockerEnPerson(andreIdentifisertePesoner)
         )))
     }
 
@@ -500,12 +512,14 @@ class OppgaveRoutingServiceTest {
         return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 
-    private fun mockerEnPerson() = IdentifisertPerson(
+    private fun mockerEnPerson(identifisertPerson: List<IdentifisertPerson>? = null) = IdentifisertPerson(
             "123",
             "Testern",
             null,
             "NO",
             "010",
-            PersonRelasjon("12345678910", Relasjon.FORSIKRET))
+            PersonRelasjon("12345678910", Relasjon.FORSIKRET),
+            identifisertPerson
+    )
 
 }
