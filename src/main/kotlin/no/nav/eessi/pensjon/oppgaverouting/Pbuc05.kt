@@ -11,7 +11,7 @@ class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             flerePersoner(request) -> hentEnhetForRelasjon(request)
-            kanJournalforesAutomatisk(request.sakInformasjon) -> Enhet.AUTOMATISK_JOURNALFORING
+            journalforesAutomatisk(request)-> Enhet.AUTOMATISK_JOURNALFORING
             else -> enhetFraAlderOgLand(request)
         }
     }
@@ -56,10 +56,12 @@ class Pbuc05 : BucTilEnhetHandler {
     /**
      * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
      */
-    private fun kanJournalforesAutomatisk(sakInfo: SakInformasjon?): Boolean {
+
+    private fun journalforesAutomatisk(request: OppgaveRoutingRequest): Boolean {
         // TODO: Ingen sak skal gi [Enhet.ID_OG_FORDELING]
-        return sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not()
-    }
+        val sakInfo = request.sakInformasjon
+        return (kanAutomatiskJournalfores(request) && sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not())
+
 
     /**
      * Henter ut [Enhet] basert på den forsikrede sin [Bosatt] og alder.

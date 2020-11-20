@@ -549,7 +549,7 @@ class JournalforingServiceTest {
         )
         val sakInformasjon = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, sakInformasjon)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.GJENLEV, 0, sakInformasjon)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
@@ -563,7 +563,7 @@ class JournalforingServiceTest {
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 avsenderLand = eq("NO"),
                 avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
+                ytelseType = eq(YtelseType.GJENLEV)
         )
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
@@ -730,7 +730,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid Når det finnes kun en sakstype fra bestemsak Så skal det manuelt journalføres og det skal opprettes en oppgave`() {
+    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid Når det finnes kun en sakstype fra bestemsak Så skal det automatisk journalføres`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """
@@ -774,8 +774,8 @@ class JournalforingServiceTest {
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
                 sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
+                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
+                arkivsaksnummer = eq("111111"),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 avsenderLand = eq("PL"),
                 avsenderNavn = eq("POLEN"),

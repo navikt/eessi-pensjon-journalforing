@@ -12,13 +12,11 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.models.Enhet.DISKRESJONSKODE
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
 import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
@@ -653,7 +651,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         )
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
 
-        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+        val (journalpost, _) = initJournalPostRequestSlot()
 
         val hendelse = createHendelseJson(SedType.P8000)
 
@@ -663,15 +661,10 @@ internal class PBuc05Test : JournalforingTestBase() {
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         val request = journalpost.captured
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
         // forvent tema == PEN og enhet 2103
         assertEquals(UFORETRYGD, request.tema)
-        assertEquals(DISKRESJONSKODE, request.journalfoerendeEnhet)
-
-        assertEquals(DISKRESJONSKODE, oppgaveMelding.tildeltEnhetsnr)
-        assertEquals(SENDT, oppgaveMelding.hendelseType)
-        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+        assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }

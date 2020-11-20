@@ -11,14 +11,14 @@ import no.nav.eessi.pensjon.sed.SedHendelseModel
 import java.time.LocalDate
 
 class OppgaveRoutingRequest(
-        val fnr: String? = null,
+        val aktorId: String? = null,
         val fdato: LocalDate,
         val diskresjonskode: Diskresjonskode? = null,
         val landkode: String? = null,
         val geografiskTilknytning: String? = null,
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
-        val hendelseType: HendelseType? = null,
+        val hendelseType: HendelseType,
         val sakInformasjon: SakInformasjon? = null,
         val identifisertPerson: IdentifisertPerson? = null,
         val bucType: BucType? = null

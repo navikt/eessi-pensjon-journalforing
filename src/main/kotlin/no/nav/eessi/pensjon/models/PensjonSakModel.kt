@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SakInformasjon(
-        val sakId: String,
+        val sakId: String?,
         val sakType: YtelseType,
         val sakStatus: SakStatus,
         val saksbehandlendeEnhetId: String = "",

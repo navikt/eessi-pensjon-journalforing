@@ -7,6 +7,9 @@ import no.nav.eessi.pensjon.models.YtelseType
 
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        if (automatiskBehandles(request)) {
+            return Enhet.AUTOMATISK_JOURNALFORING
+        }
         val ytelseType = request.ytelseType
 
         if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
@@ -25,5 +28,10 @@ class Rbuc02 : BucTilEnhetHandler {
             }
         }
         return Enhet.ID_OG_FORDELING
+    }
+
+    private fun automatiskBehandles(request: OppgaveRoutingRequest): Boolean {
+        val identifisertPerson = request.identifisertPerson
+        return  (kanAutomatiskJournalfores(request)) && (request.hendelseType == HendelseType.SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson()).not()
     }
 }

@@ -1,15 +1,19 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc02 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet =
-            if (request.bosatt == Bosatt.NORGE)
-                handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
-            else
-                handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
+
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return when {
+            automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
+            request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
+            else ->  handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
+        }
+    }
 
     private fun handleNorge(ytelseType: YtelseType?, sakStatus: SakStatus?): Enhet =
             when (ytelseType) {
@@ -28,4 +32,10 @@ class Pbuc02 : BucTilEnhetHandler {
                 YtelseType.GJENLEV -> Enhet.PENSJON_UTLAND
                 else -> Enhet.ID_OG_FORDELING
             }
+
+    private fun automatiskJournalfores(request: OppgaveRoutingRequest
+    ): Boolean {
+        return (kanAutomatiskJournalfores(request) && (request.hendelseType == HendelseType.MOTTATT && (request.ytelseType == YtelseType.UFOREP && request.sakInformasjon?.sakStatus == SakStatus.AVSLUTTET).not()
+                || ( request.hendelseType == HendelseType.SENDT)))
+    }
 }

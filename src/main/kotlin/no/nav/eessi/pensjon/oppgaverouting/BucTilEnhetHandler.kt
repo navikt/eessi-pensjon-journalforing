@@ -7,6 +7,10 @@ import java.time.Period
 
 interface BucTilEnhetHandler {
     fun hentEnhet(request: OppgaveRoutingRequest): Enhet
+
+    fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
+        return (request.ytelseType != null && request.aktorId != null && request.sakInformasjon?.sakId != null)
+    }
 }
 
 class BucTilEnhetHandlerCreator {
@@ -26,6 +30,7 @@ class BucTilEnhetHandlerCreator {
         }
     }
 }
+
 
 fun LocalDate.ageIsBetween18and60(): Boolean {
     val age = Period.between(this, LocalDate.now())
