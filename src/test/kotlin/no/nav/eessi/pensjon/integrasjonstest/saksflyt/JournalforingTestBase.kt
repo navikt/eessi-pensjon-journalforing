@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -8,8 +9,6 @@ import io.mockk.spyk
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
@@ -29,11 +28,14 @@ import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
+import no.nav.eessi.pensjon.service.buc.BucService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.GeografiskTilknytning
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn
@@ -44,17 +46,17 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
-import org.springframework.web.client.RestTemplate
 
 internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlient = mockk()
     private val norg2Klient: Norg2Klient = mockk(relaxed = true)
 
-    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true)
+    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
@@ -74,7 +76,7 @@ internal open class JournalforingTestBase {
     )
 
     protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
-    protected val personV3Service: PersonV3Service = mockk()
+    protected val personV3Service: PersonV3Service = mockk(relaxed = true)
     protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
 
     private val personidentifiseringService = PersonidentifiseringService(
@@ -86,6 +88,8 @@ internal open class JournalforingTestBase {
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
+    protected val bucService: BucService = mockk(relaxed = true)
+
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
@@ -94,7 +98,8 @@ internal open class JournalforingTestBase {
             gyldigeHendelser = GyldigeHendelser(),
             bestemSakService = bestemSakService,
             gyldigeFunksjoner = gyldigeFunksjoner,
-            profile = "test"
+            profile = "test",
+            bucService = bucService
     )
 
     @BeforeEach
@@ -109,7 +114,12 @@ internal open class JournalforingTestBase {
         bestemSakKlient.initMetrics()
     }
 
-    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234"): Bruker {
+    @AfterEach
+    fun after() {
+        clearAllMocks()
+    }
+
+    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
         return Bruker()
                 .withPersonnavn(
                         Personnavn()
@@ -122,36 +132,30 @@ internal open class JournalforingTestBase {
                 .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
                 .withStatsborgerskap(Statsborgerskap().withLand(Landkoder().withValue(land)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
+                .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
     }
 
-    private fun journalpostResponseJson(ferdigstilt: Boolean? = false): String {
-        return """
-            {
-              "journalpostId": "429434378",
-              "journalstatus": "M",
-              "melding": "null",
-              "journalpostferdigstilt": $ferdigstilt,
-              "dokumenter": [
-                {
-                  "dokumentInfoId": "453867272"
-                }
-              ]
-            }
-        """.trimIndent()
-
+    private fun journalpostResponse(ferdigstilt: Boolean = false): OpprettJournalPostResponse {
+        return OpprettJournalPostResponse(
+                "429434378",
+                "M",
+                null,
+                ferdigstilt
+        )
     }
 
-    protected fun initJournalPostRequestSlot(ferdigstilt: Boolean? = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
+    protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
-        val responseJson = journalpostResponseJson(ferdigstilt)
-        val journalpostResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>(), true)
+        val journalpostResponse = journalpostResponse(ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPersonJson(fnr: String? = null, fdato: String = "1985-05-07", rolle: String? = "01"): String {
+    protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
+        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() }
+
         return """
             {
                 "person": {

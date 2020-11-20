@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
+import no.nav.eessi.pensjon.service.buc.BucService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -36,6 +37,7 @@ class SedListener(
         private val gyldigeHendelser: GyldigeHendelser,
         private val bestemSakService: BestemSakService,
         private val gyldigeFunksjoner: GyldigFunksjoner,
+        private val bucService: BucService,
         @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
@@ -83,6 +85,7 @@ class SedListener(
                         val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, sedHendelse, ytelseTypeFraSED, listAlleSediBuc)
                         val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, SENDT)
+                        val isNorgeCaseOwner = bucService.isNorgeCaseOwner(sedHendelse.rinaSakId)
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, ytelseType, offset, sakInformasjon)
                     }
                     acknowledgment.acknowledge()

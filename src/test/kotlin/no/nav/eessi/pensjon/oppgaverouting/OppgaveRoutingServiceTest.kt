@@ -6,16 +6,35 @@ import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.BucType.*
+import no.nav.eessi.pensjon.models.BucType.H_BUC_07
+import no.nav.eessi.pensjon.models.BucType.P_BUC_01
+import no.nav.eessi.pensjon.models.BucType.P_BUC_02
+import no.nav.eessi.pensjon.models.BucType.P_BUC_03
+import no.nav.eessi.pensjon.models.BucType.P_BUC_04
+import no.nav.eessi.pensjon.models.BucType.P_BUC_05
+import no.nav.eessi.pensjon.models.BucType.P_BUC_06
+import no.nav.eessi.pensjon.models.BucType.P_BUC_07
+import no.nav.eessi.pensjon.models.BucType.P_BUC_08
+import no.nav.eessi.pensjon.models.BucType.P_BUC_09
+import no.nav.eessi.pensjon.models.BucType.P_BUC_10
+import no.nav.eessi.pensjon.models.BucType.R_BUC_02
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.Enhet.DISKRESJONSKODE
+import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
+import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_OSLO
+import no.nav.eessi.pensjon.models.Enhet.OKONOMI_PENSJON
+import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -356,10 +375,10 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, landkode = NORGE, bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.ALDER)))
 
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = "SPSF", geografiskTilknytning = dummyTilknytning, bucType = P_BUC_01, ytelseType = YtelseType.ALDER)))
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = "SPFO", landkode = NORGE, bucType = P_BUC_03, ytelseType = YtelseType.UFOREP)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = "SPFO", landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = "SPSF", landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, geografiskTilknytning = dummyTilknytning, bucType = P_BUC_01, ytelseType = YtelseType.ALDER)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, landkode = NORGE, bucType = P_BUC_03, ytelseType = YtelseType.UFOREP)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(fnr = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV)))
     }
 
 

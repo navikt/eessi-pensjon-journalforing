@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import com.google.common.annotations.VisibleForTesting
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -14,7 +16,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
 
         if (routingRequest.fnr == null) return Enhet.ID_OG_FORDELING
-        val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode, routingRequest.landkode, routingRequest.geografiskTilknytning)
+        val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode?.name, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
         val tildeltEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
                 ?: bestemEnhet(routingRequest)
@@ -30,11 +32,12 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun bestemEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        return if (routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == "SPSF")
+        return if (routingRequest.diskresjonskode != null && routingRequest.diskresjonskode == Diskresjonskode.SPSF)
             Enhet.DISKRESJONSKODE
         else
             BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
     }
+
 
     @VisibleForTesting
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {

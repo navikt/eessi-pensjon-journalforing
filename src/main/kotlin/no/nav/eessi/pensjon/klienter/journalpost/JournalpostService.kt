@@ -40,7 +40,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             journalfoerendeEnhet: Enhet,
             arkivsaksnummer: String?,
             dokumenter: String,
-            forsokFerdigstill: Boolean = false,
             avsenderLand: String?,
             avsenderNavn: String?,
             ytelseType: YtelseType?): OpprettJournalPostResponse? {
@@ -65,6 +64,8 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 tema,
                 tilleggsopplysninger,
                 tittel)
+
+        val forsokFerdigstill: Boolean = journalfoerendeEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
         return journalpostKlient.opprettJournalpost(request, forsokFerdigstill)
     }
