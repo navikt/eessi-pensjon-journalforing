@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -20,7 +19,7 @@ class OppgaveRoutingRequest(
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null,
         val hendelseType: HendelseType? = null,
-        val sakStatus: SakStatus? = null,
+        val sakInformasjon: SakInformasjon? = null,
         val identifisertPerson: IdentifisertPerson? = null,
         val bucType: BucType? = null
 ) {
@@ -44,7 +43,7 @@ class OppgaveRoutingRequest(
                     ytelseType,
                     sedHendelseModel.sedType,
                     hendelseType,
-                    sakInformasjon?.sakStatus,
+                    sakInformasjon,
                     identifisertPerson,
                     sedHendelseModel.bucType
             )
