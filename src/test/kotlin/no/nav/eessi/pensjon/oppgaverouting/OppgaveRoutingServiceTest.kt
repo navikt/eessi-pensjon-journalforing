@@ -427,7 +427,7 @@ class OppgaveRoutingServiceTest {
     }
 
     private fun opprettSakInfo(sakStatus: SakStatus) : SakInformasjon {
-        return SakInformasjon("", YtelseType.UFOREP, sakStatus)
+        return SakInformasjon(null, YtelseType.UFOREP, sakStatus)
     }
 
 

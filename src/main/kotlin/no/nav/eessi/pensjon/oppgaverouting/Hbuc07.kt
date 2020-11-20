@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
 
-class Hbuc07 : BucTilEnhetHandler() {
+class Hbuc07 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
 

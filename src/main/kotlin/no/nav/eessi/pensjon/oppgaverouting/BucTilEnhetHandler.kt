@@ -5,14 +5,11 @@ import no.nav.eessi.pensjon.models.Enhet
 import java.time.LocalDate
 import java.time.Period
 
-abstract class BucTilEnhetHandler {
-    abstract fun hentEnhet(request: OppgaveRoutingRequest): Enhet
+interface BucTilEnhetHandler {
+    fun hentEnhet(request: OppgaveRoutingRequest): Enhet
 
     fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
-        if (request.ytelseType != null && request.aktorId != null && request.sakId != null) {
-            return true
-        }
-        return false
+        return (request.ytelseType != null && request.aktorId != null && request.sakInformasjon?.sakId != null)
     }
 }
 
