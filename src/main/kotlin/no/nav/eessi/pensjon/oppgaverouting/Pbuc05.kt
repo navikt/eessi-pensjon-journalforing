@@ -11,6 +11,7 @@ class Pbuc05 : BucTilEnhetHandler {
         return when {
             flerePersoner(request) -> hentEnhetForRelasjon(request)
             journalforesAutomatisk(request) -> Enhet.AUTOMATISK_JOURNALFORING
+            request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
             else -> enhetFraAlderOgLand(request)
         }
     }
@@ -39,10 +40,15 @@ class Pbuc05 : BucTilEnhetHandler {
     }
 
     private fun enhetForRelasjonBarn(request: OppgaveRoutingRequest): Enhet {
-        val ytelseType = request.ytelseType
+        val ytelseType = request.sakInformasjon?.sakType ?: request.ytelseType
 
-        return if (ytelseType == YtelseType.GJENLEV || ytelseType == YtelseType.BARNEP) enhetFraAlderOgLand(request)
-        else Enhet.AUTOMATISK_JOURNALFORING
+        // I tilfeller hvor sakInformasjon er null
+        return when (ytelseType) {
+            YtelseType.ALDER,
+            YtelseType.UFOREP,
+            YtelseType.OMSORG -> Enhet.AUTOMATISK_JOURNALFORING
+            else -> if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND else Enhet.PENSJON_UTLAND
+        }
     }
 
     private fun enhetForRelasjonForsorger(request: OppgaveRoutingRequest): Enhet {
@@ -55,12 +61,10 @@ class Pbuc05 : BucTilEnhetHandler {
     /**
      * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
      */
-
     private fun journalforesAutomatisk(request: OppgaveRoutingRequest): Boolean {
         // TODO: Ingen sak skal gi [Enhet.ID_OG_FORDELING]
         val sakInfo = request.sakInformasjon
         return (kanAutomatiskJournalfores(request) && sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not())
-
     }
 
     /**
