@@ -121,8 +121,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     }
 
-
-
     @Test
     fun `Scenario 3 - 1 person i SED fnr finnes, saktype er GENRL`() {
         val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
@@ -147,7 +145,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     fun `Scenario 4 - 1 person i SED fnr finnes og saktype er GENRL, med flere sakstyper, person bosatt Norge`() {
         val saker = listOf(
                 SakInformasjon(SAK_ID, YtelseType.GENRL, SakStatus.TIL_BEHANDLING),
-                SakInformasjon(SAK_ID, YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
+                SakInformasjon("1240128", YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
         )
 
         testRunner(FNR_VOKSEN, saker) {
@@ -170,7 +168,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     fun `Scenario 4 - 1 person i SED fnr finnes, saktype er GENRL, med flere sakstyper, person bosatt utland`() {
         val saker = listOf(
                 SakInformasjon(SAK_ID, YtelseType.GENRL, SakStatus.TIL_BEHANDLING),
-                SakInformasjon(SAK_ID, YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
+                SakInformasjon("124123", YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
         )
 
         testRunner(FNR_VOKSEN, saker, land = "SWE") {

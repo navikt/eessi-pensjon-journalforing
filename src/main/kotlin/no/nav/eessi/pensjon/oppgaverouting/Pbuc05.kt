@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -10,7 +11,7 @@ class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             flerePersoner(request) -> hentEnhetForRelasjon(request)
-            kanJournalforesAutomatisk(request.ytelseType) -> Enhet.AUTOMATISK_JOURNALFORING
+            kanJournalforesAutomatisk(request.sakInformasjon) -> Enhet.AUTOMATISK_JOURNALFORING
             else -> enhetFraAlderOgLand(request)
         }
     }
@@ -55,8 +56,9 @@ class Pbuc05 : BucTilEnhetHandler {
     /**
      * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
      */
-    private fun kanJournalforesAutomatisk(type: YtelseType?): Boolean {
-        return type == YtelseType.GENRL || type == YtelseType.UFOREP || type == YtelseType.ALDER
+    private fun kanJournalforesAutomatisk(sakInfo: SakInformasjon?): Boolean {
+        // TODO: Ingen sak skal gi [Enhet.ID_OG_FORDELING]
+        return sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not()
     }
 
     /**
