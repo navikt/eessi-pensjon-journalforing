@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
 
-class Pbuc01 : BucTilEnhetHandler {
+class Pbuc01 : BucTilEnhetHandler() {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING

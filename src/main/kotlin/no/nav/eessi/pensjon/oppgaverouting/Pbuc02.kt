@@ -6,12 +6,13 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc02 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet =
-            when {
-                automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
-                request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
-                else ->  handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
-            }
+    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        when {
+            automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
+            request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
+            else ->  handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
+        }
+
     }
 
     private fun handleNorge(ytelseType: YtelseType?, sakStatus: SakStatus?): Enhet =
