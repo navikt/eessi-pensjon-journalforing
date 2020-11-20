@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 
-class Pbuc05 : BucTilEnhetHandler() {
+class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             flerePersoner(request) -> hentEnhetForRelasjon(request)
@@ -56,7 +56,9 @@ class Pbuc05 : BucTilEnhetHandler() {
      * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
      */
     private fun journalforesAutomatisk(request: OppgaveRoutingRequest): Boolean {
-        return (kanAutomatiskJournalfores(request) && (request.ytelseType == YtelseType.GENRL || request.ytelseType == YtelseType.UFOREP || request.ytelseType == YtelseType.ALDER))
+        // TODO: Ingen sak skal gi [Enhet.ID_OG_FORDELING]
+        val sakInfo = request.sakInformasjon
+        return (kanAutomatiskJournalfores(request) && sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not())
     }
 
     /**

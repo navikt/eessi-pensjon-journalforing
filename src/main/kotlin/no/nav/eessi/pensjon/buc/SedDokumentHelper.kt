@@ -26,14 +26,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
         val gyldigeSeds = filterUtGyldigSedId(alleDokumenter)
 
-        gyldigeSeds.forEach {
-            logger.debug("id: ${it.id} status: ${it.status} type: ${it.type}")
-            it.sedjson = euxKlient.hentSed(rinaSakId, it.id)
+        logger.debug("henter sed fra eux")
+        return gyldigeSeds.map { sed ->
+            logger.debug("id: ${sed.id} status: ${sed.status} type: ${sed.type}")
+
+            sed.copy(sedjson = euxKlient.hentSed(rinaSakId, sed.id))
         }
-
-        return gyldigeSeds
     }
-
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SediBuc>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
@@ -66,12 +65,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     }
 
     fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<String?>): SakInformasjon? {
-        val list = hentSakIdFraSED(alleSedIBuc)
-        return if (list.isNotEmpty()) {
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, list)
-        } else {
-            null
-        }
+        return hentSakIdFraSED(alleSedIBuc)
+                ?.let { validerSakIdFraSEDogReturnerPensjonSak(aktoerId, it) }
     }
 
     private fun filterYtelseTypeR005(sedRootNode: JsonNode): String? {
@@ -98,22 +93,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .toList()
     }
 
-    private fun hentSakIdFraSED(alleSedIBuc: List<String?>): List<String> {
-        val list = mutableListOf<String>()
-
-        alleSedIBuc.forEach { sed ->
-            val sedRootNode = mapper.readTree(sed)
-            val eessi = filterEESSIsak(sedRootNode.get("nav"))
-            logger.debug("eessi saknummer: $eessi")
-            val sakid = eessi?.let { trimSakidString(it) }
-            logger.debug("trimmet saknummer: $sakid")
-            if (sakid != null && sakid.isNotBlank()) {
-                list.add(sakid)
-                logger.debug("legger sakid til liste...")
-            }
-        }
-
-        return list.distinct()
+    private fun hentSakIdFraSED(alleSedIBuc: List<String?>): String? {
+        return alleSedIBuc
+                .mapNotNull { sed -> filterEESSIsak(mapper.readTree(sed).get("nav")) }
+                .map { eessiSak -> trimSakidString(eessiSak) }
+                .distinct()
+                .singleOrNull()
+                .also { sakId -> logger.debug("Fant sakId i SED: $sakId") }
     }
 
     private fun filterEESSIsak(navNode: JsonNode): String? {
@@ -124,13 +110,18 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .lastOrNull()
     }
 
-    fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
+    private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, list: List<String>): SakInformasjon? {
+    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String?): SakInformasjon? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        logger.debug("aktoerid: $aktoerId sedSak: $list penSak: ${saklist.toJson()}")
-        return if (saklist.size == 1) saklist.firstOrNull{ it.sakId in list }
-        else saklist.firstOrNull {  it.sakId in list && it.sakType != YtelseType.GENRL }
+        logger.debug("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
+
+        val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
+
+        return if (saklist.size > 1)
+            gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+        else
+            gyldigSak
     }
 
 }

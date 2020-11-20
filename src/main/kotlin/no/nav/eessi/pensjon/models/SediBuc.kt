@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.models
 
-class SediBuc(
+data class SediBuc(
     val id: String,
     val type: SedType,
     val status: String,
-    var sedjson: String? = null
+    val sedjson: String? = null
 ){
     companion object {
         fun getList(list: List<SediBuc>): List<String?> {
-            return list.map { it.sedjson }.toList()
+            return list.map { it.sedjson }
         }
 
         fun getValuesOf(type: SedType, list: List<SediBuc>): String? {

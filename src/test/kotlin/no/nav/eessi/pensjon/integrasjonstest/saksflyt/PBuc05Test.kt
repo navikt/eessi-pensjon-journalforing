@@ -52,19 +52,18 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Hente opp korrekt fnr fra P8000 som er sendt fra oss med flere P8000 i BUC`() {
-        val sedP60000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
-
         val fnr = "28127822044"
         val afnr = "05127921999"
         val aktoera = "${fnr}1111"
         val aktoerf = "${fnr}0000"
         val saknr = "1223123123"
 
-        val sedP8000sendt = createSedJson(SedType.P8000, fnr, createAnnenPersonJson(fnr = afnr, rolle = "01"), saknr)
-        val sedP8000recevied = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = null, rolle = "01"), null)
+        val sedP8000_2 = createSedJson(SedType.P8000, fnr,createAnnenPersonJson(fnr = afnr, rolle =  "01") , saknr)
+        val sedP8000sendt = createSedJson(SedType.P8000, fnr,createAnnenPersonJson(fnr = afnr, rolle =  "01") , saknr)
+        val sedP8000recevied = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = null, rolle =  "01") , null)
 
         every { fagmodulKlient.hentAlleDokumenter(any())} returns String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")))
-        every { euxKlient.hentSed(any(), any()) } returns sedP60000 andThen sedP8000recevied andThen  sedP8000sendt
+        every { euxKlient.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen  sedP8000sendt
         every { diskresjonService.hentDiskresjonskode(any()) } returns null
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(afnr) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR")
@@ -120,8 +119,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     }
 
-
-
     @Test
     fun `Scenario 3 - 1 person i SED fnr finnes, saktype er GENRL`() {
         val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
@@ -146,7 +143,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     fun `Scenario 4 - 1 person i SED fnr finnes og saktype er GENRL, med flere sakstyper, person bosatt Norge`() {
         val saker = listOf(
                 SakInformasjon(SAK_ID, YtelseType.GENRL, SakStatus.TIL_BEHANDLING),
-                SakInformasjon(SAK_ID, YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
+                SakInformasjon("1240128", YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
         )
 
         testRunner(FNR_VOKSEN, saker) {
@@ -169,7 +166,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     fun `Scenario 4 - 1 person i SED fnr finnes, saktype er GENRL, med flere sakstyper, person bosatt utland`() {
         val saker = listOf(
                 SakInformasjon(SAK_ID, YtelseType.GENRL, SakStatus.TIL_BEHANDLING),
-                SakInformasjon(SAK_ID, YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
+                SakInformasjon("124123", YtelseType.BARNEP, SakStatus.TIL_BEHANDLING)
         )
 
         testRunner(FNR_VOKSEN, saker, land = "SWE") {
