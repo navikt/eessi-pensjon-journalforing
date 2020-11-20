@@ -26,17 +26,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
         val gyldigeSeds = filterUtGyldigSedId(alleDokumenter)
 
-        gyldigeSeds.forEach {
-            logger.debug("id: ${it.id} status: ${it.status} type: ${it.type}")
-        }
         logger.debug("henter sed fra eux")
-        gyldigeSeds.forEach {
-            it.sedjson = euxKlient.hentSed(rinaSakId, it.id)
+        return gyldigeSeds.map { sed ->
+            logger.debug("id: ${sed.id} status: ${sed.status} type: ${sed.type}")
+
+            sed.copy(sedjson = euxKlient.hentSed(rinaSakId, sed.id))
         }
-
-        return gyldigeSeds
     }
-
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SediBuc>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
@@ -69,10 +65,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     }
 
     fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<String?>): SakInformasjon? {
-        val saknrfrased = hentSakIdFraSED(alleSedIBuc)
-        return saknrfrased?.let {
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, it)
-        }
+        return hentSakIdFraSED(alleSedIBuc)
+                ?.let { validerSakIdFraSEDogReturnerPensjonSak(aktoerId, it) }
     }
 
     private fun filterYtelseTypeR005(sedRootNode: JsonNode): String? {
@@ -100,14 +94,12 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     }
 
     private fun hentSakIdFraSED(alleSedIBuc: List<String?>): String? {
-        val saknrfrased = alleSedIBuc.mapNotNull { sed ->
-            val eessi = filterEESSIsak( mapper.readTree(sed).get("nav"))
-            val sakid = eessi?.let { trimSakidString(it) }
-            logger.debug("sakid fra SED: $sakid")
-            sakid
-        }.toSet().singleOrNull()
-        logger.debug("funnet saknr fra SED: $saknrfrased")
-        return saknrfrased
+        return alleSedIBuc
+                .mapNotNull { sed -> filterEESSIsak(mapper.readTree(sed).get("nav")) }
+                .map { eessiSak -> trimSakidString(eessiSak) }
+                .distinct()
+                .singleOrNull()
+                .also { sakId -> logger.debug("Fant sakId i SED: $sakId") }
     }
 
     private fun filterEESSIsak(navNode: JsonNode): String? {
@@ -118,28 +110,18 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 .lastOrNull()
     }
 
-    fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
+    private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, saknrSed: String): SakInformasjon? {
+    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String?): SakInformasjon? {
         val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
-        logger.debug("aktoerid: $aktoerId sedSak: $saknrSed Pensjoninformasjon: ${saklist.toJson()}")
+        logger.debug("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        val sakInformasjon = if ((saklist.size == 1)) {
-            saklist.firstOrNull { it.sakId == saknrSed }
-        } else {
-            return saklist.firstOrNull { it.sakId == saknrSed }?.let {
-                SakInformasjon(
-                        sakId = it.sakId,
-                        sakType = it.sakType,
-                        sakStatus = it.sakStatus,
-                        nyopprettet = it.nyopprettet,
-                        saksbehandlendeEnhetId = it.saksbehandlendeEnhetId,
-                        tilknyttetSaker = saklist
-                )
-            }
-        }
-        logger.debug("sakInformasjon: ${sakInformasjon?.toJson()}")
-        return sakInformasjon
+        val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
+
+        return if (saklist.size > 1)
+            gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+        else
+            gyldigSak
     }
 
 }
