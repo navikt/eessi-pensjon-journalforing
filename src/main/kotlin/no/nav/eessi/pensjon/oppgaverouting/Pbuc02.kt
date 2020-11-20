@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc02 : BucTilEnhetHandler {
+
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
