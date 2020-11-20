@@ -14,7 +14,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
         logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
 
-        if (routingRequest.fnr == null) return Enhet.ID_OG_FORDELING
+        if (routingRequest.aktorId == null) return Enhet.ID_OG_FORDELING
 
         val tildeltEnhet = tildelEnhet(routingRequest)
 

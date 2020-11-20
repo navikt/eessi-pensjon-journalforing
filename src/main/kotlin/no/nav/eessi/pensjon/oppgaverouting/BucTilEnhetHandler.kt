@@ -5,8 +5,15 @@ import no.nav.eessi.pensjon.models.Enhet
 import java.time.LocalDate
 import java.time.Period
 
-interface BucTilEnhetHandler {
-    fun hentEnhet(request: OppgaveRoutingRequest): Enhet
+abstract class BucTilEnhetHandler {
+    abstract fun hentEnhet(request: OppgaveRoutingRequest): Enhet
+
+    fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
+        if (request.ytelseType != null && request.aktorId != null && request.sakId != null) {
+            return true
+        }
+        return false
+    }
 }
 
 class BucTilEnhetHandlerCreator {
@@ -26,6 +33,7 @@ class BucTilEnhetHandlerCreator {
         }
     }
 }
+
 
 fun LocalDate.ageIsBetween18and60(): Boolean {
     val age = Period.between(this, LocalDate.now())

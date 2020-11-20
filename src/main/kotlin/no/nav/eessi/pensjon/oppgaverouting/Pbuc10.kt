@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.YtelseType
 
-class Pbuc10 : BucTilEnhetHandler {
+class Pbuc10 : BucTilEnhetHandler() {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        return if (request.ytelseType != null) {
+        return if(kanAutomatiskJournalfores(request)){
             Enhet.AUTOMATISK_JOURNALFORING
         } else if (request.bosatt == Bosatt.NORGE) {
             if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLANDSTILSNITT

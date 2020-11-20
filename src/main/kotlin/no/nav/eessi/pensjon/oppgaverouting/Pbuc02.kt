@@ -5,10 +5,11 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
-class Pbuc02 : BucTilEnhetHandler {
+class Pbuc02 : BucTilEnhetHandler() {
+
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            kanAutomatiskJournalfores(request.hendelseType, request.ytelseType, request.sakStatus) -> Enhet.AUTOMATISK_JOURNALFORING
+            automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
             request.bosatt == Bosatt.NORGE -> handleNorge(request)
             else -> handleUtland(request)
         }
@@ -32,12 +33,9 @@ class Pbuc02 : BucTilEnhetHandler {
                 else -> Enhet.ID_OG_FORDELING
             }
 
-    private fun kanAutomatiskJournalfores(
-            hendelseType: HendelseType?,
-            ytelseType: YtelseType?,
-            sakStatus: SakStatus?
+    private fun automatiskJournalfores(request: OppgaveRoutingRequest
     ): Boolean {
-        return !((hendelseType == HendelseType.SENDT && ytelseType == YtelseType.UFOREP && sakStatus == SakStatus.AVSLUTTET)
-                || (hendelseType == HendelseType.MOTTATT))
+        return (kanAutomatiskJournalfores(request) && (request.hendelseType == HendelseType.MOTTATT && (request.ytelseType == YtelseType.UFOREP && request.sakStatus == SakStatus.AVSLUTTET).not()
+                || ( request.hendelseType == HendelseType.SENDT)))
     }
 }
