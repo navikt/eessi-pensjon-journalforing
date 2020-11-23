@@ -7,7 +7,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
@@ -409,8 +408,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         val request = journalpost.captured
 
-        println(request.toJson())
-
         // forvent tema == PEN og enhet 9999
         assertEquals(UFORETRYGD, request.tema)
         assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
@@ -490,8 +487,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         val request = journalpost.captured
 
-        println(request.toJson())
-
         // forvent tema == PEN og enhet 9999
         assertEquals(UFORETRYGD, request.tema)
         assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
@@ -543,28 +538,22 @@ internal class PBuc05Test : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak GENEREL Så journalføres manuelt på tema PENSJON og enhet UFORE_UTLANDSTILSNITT`() {
-        val fnr = "12058005602"
-        val afnr = "12078945600"
-        val aktoera = "${fnr}1111"
-        val aktoerf = "${fnr}0000"
-        val saknr = "1223123123"
-
-        val sed = createSedJson(SedType.P8000, fnr, createAnnenPersonJson(fnr = afnr, rolle = "02"), saknr)
+    fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak GENRL Så journalføres manuelt på tema PENSJON og enhet UFORE_UTLANDSTILSNITT`() {
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
-        every { personV3Service.hentPerson(fnr) } returns createBrukerWith(afnr, "Hovedpersonen", "forsikret", "NOR")
-        every { personV3Service.hentPerson(afnr) } returns createBrukerWith(fnr, "Ikke hovedperson", "familiemedlem", "NOR")
+        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_VOKSEN, "Hovedpersonen", "forsikret", "NOR")
+        every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_OVER_60, "Ikke hovedperson", "familiemedlem", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(afnr)) } returns AktoerId(aktoera)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(aktoerf)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
         val saker = listOf(
                 SakInformasjon(sakId = "234123123", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
                 SakInformasjon(sakId = "123123123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = saknr, sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
         )
-        every { fagmodulKlient.hentPensjonSaklist(aktoerf) } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
@@ -578,12 +567,10 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         val request = journalpost.captured
 
-        println(request.toJson())
-
         // forvent tema == PEN og enhet 9999
         assertEquals(PENSJON, request.tema)
         assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
-        assertEquals(fnr, request.bruker?.id)
+        assertEquals(FNR_OVER_60, request.bruker?.id)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }

@@ -88,8 +88,7 @@ internal open class JournalforingTestBase {
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
-    protected val bucService: BucService = mockk(relaxed = true)
-
+    private val bucService: BucService = mockk(relaxed = true)
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
