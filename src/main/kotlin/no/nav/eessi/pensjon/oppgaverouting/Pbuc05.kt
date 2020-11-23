@@ -32,8 +32,11 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return Skal returnere [Enhet.AUTOMATISK_JOURNALFORING] dersom det finnes [SakInformasjon]
      */
     private fun hentEnhetForGjenlevende(request: OppgaveRoutingRequest): Enhet {
-        return if (request.sakInformasjon != null) Enhet.AUTOMATISK_JOURNALFORING
-        else enhetFraAlderOgLand(request)
+        return when {
+            request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
+            request.sakInformasjon.sakType == YtelseType.GENRL -> enhetFraAlderOgLand(request)
+            else -> Enhet.AUTOMATISK_JOURNALFORING
+        }
     }
 
     /**
@@ -70,10 +73,10 @@ class Pbuc05 : BucTilEnhetHandler {
      *  [YtelseType.UFOREP], eller [YtelseType.OMSORG]. Hvis ikke skal forenklet rutingregel følges.
      */
     private fun enhetForRelasjonBarn(request: OppgaveRoutingRequest): Enhet {
-        val ytelseType = request.sakInformasjon?.sakType ?: request.ytelseType
+        if (request.sakInformasjon?.sakId == null) return Enhet.ID_OG_FORDELING
 
         // I tilfeller hvor sakInformasjon er null
-        return when (ytelseType) {
+        return when (request.sakInformasjon.sakType) {
             YtelseType.ALDER,
             YtelseType.UFOREP,
             YtelseType.OMSORG -> Enhet.AUTOMATISK_JOURNALFORING

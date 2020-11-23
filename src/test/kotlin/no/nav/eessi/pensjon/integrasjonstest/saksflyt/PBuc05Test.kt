@@ -293,8 +293,6 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         val request = journalpost.captured
 
-        println(request)
-
         // forvent tema == PEN og enhet 9999
         assertEquals(PENSJON, request.tema)
         assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
@@ -443,8 +441,9 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
-    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes og ingen bestemsak Så journalføres manuelt, tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
+    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes, mangler sakInformasjon`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "01"), null)
         initCommonMocks(sed)
 
@@ -467,19 +466,20 @@ internal class PBuc05Test : JournalforingTestBase() {
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
         assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
-        assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
         assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
         // forvent tema == PEN og enhet 4303
         assertEquals(PENSJON, request.tema)
-        assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
-    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes og UTLAND og ingen bestemsak`() {
+    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes, bosatt i utland, mangler sakInformasjon`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "01"), null)
         initCommonMocks(sed)
 
@@ -502,29 +502,38 @@ internal class PBuc05Test : JournalforingTestBase() {
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
         assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
-        assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
         assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
         // forvent tema == PEN og enhet 4303
         assertEquals(PENSJON, request.tema)
-        assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
-    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes, men har ingen bestemsak`() {
-        val sed = createSedJson(SedType.P8000, FNR_VOKSEN, createAnnenPersonJson(fnr = FNR_VOKSEN_2, rolle = "01"), null)
+    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes, og bestemsak finner sak ALDER`() {
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Lever", "Helt i live", "NOR")
-        every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns createBrukerWith(FNR_VOKSEN_2, "Død", "Helt Død", "NOR")
+        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Død", "Helt Død", "NOR")
 
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "00000")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN_2)) } returns AktoerId(FNR_VOKSEN_2 + "11111")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(AKTOER_ID)
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID_2)
 
-        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+        val saker = listOf(
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = "34234123", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET)
+        )
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+
+        val (journalpost, _) = initJournalPostRequestSlot(true)
 
         val hendelse = createHendelseJson(SedType.P8000)
 
@@ -534,21 +543,20 @@ internal class PBuc05Test : JournalforingTestBase() {
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         val request = journalpost.captured
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
-        assertEquals(UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
-        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
-
+        // forvent tema == PEN og enhet 9999
         assertEquals(PENSJON, request.tema)
-        assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
+        assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
+        assertEquals(FNR_VOKSEN, request.bruker?.id)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
-    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes og bestemsak finner sak UFØRE Så journalføres automatisk på tema UFORETRYGD`() {
+    fun `Scenario 6 - 2 personer i SED, har rolle GJENLEV, fnr finnes, og bestemsak finner sak UFØRE`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
@@ -634,6 +642,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
     fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak UFØRE Så journalføres automatisk på tema UFORETRYGD`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
@@ -674,6 +683,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
     fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
@@ -714,8 +724,9 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
-    fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak GENRL Så journalføres manuelt på tema PENSJON og enhet UFORE_UTLANDSTILSNITT`() {
+    fun `Scenario 7 - 2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak GENRL`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
@@ -746,7 +757,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
         // forvent tema == PEN og enhet 9999
         assertEquals(PENSJON, request.tema)
-        assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
+        assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
         assertEquals(FNR_OVER_60, request.bruker?.id)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
@@ -754,6 +765,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
     @Test
     fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og sak er ALDER`() {
         val saker = listOf(
@@ -772,19 +784,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
-    @Test
-    fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og sak mangler`() {
-        testRunnerBarn(FNR_OVER_60, FNR_BARN) {
-            assertEquals(PENSJON, it.tema)
-            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-        }
-
-        testRunnerBarn(FNR_OVER_60, FNR_BARN, land = "SWE") {
-            assertEquals(PENSJON, it.tema)
-            assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
-        }
-    }
-
+    // OK
     @Test
     fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og sak er UFORE`() {
         val saker = listOf(
@@ -803,7 +803,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
-
+    // OK
     @Test
     fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og sak er OMSORG`() {
         val saker = listOf(
@@ -822,6 +822,26 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
+    @Test
+    fun `Scenario 8 - 2 personer i SED, har rolle barn 03 og sak er OMSORG, ignorerer diskresjonskode`() {
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.OMSORG, sakStatus = SakStatus.TIL_BEHANDLING)
+        )
+
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, diskresjonkode = Diskresjonskode.SPSF) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, land = "SWE", diskresjonkode = Diskresjonskode.SPSF) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+        }
+    }
+
+    // OK
     @Test
     fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype er BARNEP`() {
         val saker = listOf(
@@ -834,12 +854,23 @@ internal class PBuc05Test : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
+        testRunnerBarn(FNR_OVER_60, FNR_BARN, saker) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+        }
+
         testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, land = "SWE") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_OVER_60, FNR_BARN, saker, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
     }
 
+    // OK
     @Test
     fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype er GJENLEV`() {
         val saker = listOf(
@@ -852,12 +883,23 @@ internal class PBuc05Test : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
+        testRunnerBarn(FNR_OVER_60, FNR_BARN, saker) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+        }
+
         testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, land = "SWE") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_OVER_60, FNR_BARN, saker, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
     }
 
+    // OK
     @Test
     fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype er GJENLEV, ignorerer Diskresjonskode 6`() {
         val saker = listOf(
@@ -876,8 +918,9 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
     @Test
-    fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype er GJENLEV, ignorerer Diskresjonskode 7`() {
+    fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype er GJENLEV, ignorerer Diskresjonskode`() {
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
                 SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
@@ -892,18 +935,39 @@ internal class PBuc05Test : JournalforingTestBase() {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
-    }
 
-    @Test
-    fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype mangler`() {
-        testRunnerBarn(FNR_VOKSEN, FNR_BARN) {
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, diskresjonkode = Diskresjonskode.SPSF) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
-        testRunnerBarn(FNR_VOKSEN, FNR_BARN, land = "SWE") {
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN, saker, land = "SWE", diskresjonkode = Diskresjonskode.SPSF) {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+        }
+    }
+
+    // OK
+    @Test
+    fun `Scenario 9 - 2 personer i SED fnr finnes og rolle er barn, og saktype mangler`() {
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_OVER_60, FNR_BARN) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_VOKSEN, FNR_BARN, land = "SWE") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+        }
+
+        testRunnerBarn(FNR_OVER_60, FNR_BARN, land = "SWE") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
     }
 
