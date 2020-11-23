@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -11,7 +10,7 @@ class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             flerePersoner(request) -> hentEnhetForRelasjon(request)
-            journalforesAutomatisk(request)-> Enhet.AUTOMATISK_JOURNALFORING
+            journalforesAutomatisk(request) -> Enhet.AUTOMATISK_JOURNALFORING
             else -> enhetFraAlderOgLand(request)
         }
     }
@@ -62,6 +61,7 @@ class Pbuc05 : BucTilEnhetHandler {
         val sakInfo = request.sakInformasjon
         return (kanAutomatiskJournalfores(request) && sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not())
 
+    }
 
     /**
      * Henter ut [Enhet] basert på den forsikrede sin [Bosatt] og alder.
