@@ -118,6 +118,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     }
 
+    // OK
     @Test
     fun `Scenario 3 - 1 person i SED fnr finnes, saktype er GENRL`() {
         val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
@@ -138,6 +139,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
     @Test
     fun `Scenario 4 - 1 person i SED fnr finnes og saktype er GENRL, med flere sakstyper, person bosatt Norge`() {
         val saker = listOf(
@@ -161,6 +163,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
     @Test
     fun `Scenario 4 - 1 person i SED fnr finnes, saktype er GENRL, med flere sakstyper, person bosatt utland`() {
         val saker = listOf(
@@ -184,6 +187,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
     @Test
     fun `Scenario 4 - 2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
         val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
@@ -220,6 +224,45 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
+    // OK
+    @Test
+    fun `Scenario 4 - 2 personer i SED der fnr finnes, rolle er 02, land er Sverige og bestemsak finner flere saker Så journalføres det manuelt på tema PENSJON og enhet PENSJON_UTLAND`() {
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_VOKSEN_2, rolle = "02"), SAK_ID)
+        initCommonMocks(sed)
+
+        every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns createBrukerWith(FNR_VOKSEN_2, "Fornavn Barn", "Etternavn barn", "SWE")
+        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "familiemedlem", "Etternavn", "SWE")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
+
+        val saker = listOf(
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = "34234123", sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)
+        )
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+
+        val (journalpost, _) = initJournalPostRequestSlot(true)
+
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+
+        println(request)
+
+        // forvent tema == PEN og enhet 9999
+        assertEquals(PENSJON, request.tema)
+        assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
+    // OK
     @Test
     fun `Scenario 5 - 1 person i SED fnr finnes og bestemsak finner sak UFORE Så journalføres automatisk på tema UFORETRYGD`() {
         val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING))
@@ -240,6 +283,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // OK
     @Test
     fun `Scenario 5 - 1 person i SED fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
         val saker = listOf(
@@ -253,8 +297,9 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
+    // Rolle = 0 fnr = 0 saksnr = 0 -> OK
     @Test
-    fun `Scenario 2 - 2 personer i SED og mangler rolle ingen fnr Så journalføres manuelt og tema på PENSJON enhet på ID_OG_FORDELING`() {
+    fun `Scenario 2 - 2 personer i SED, mangler rolle og fnr men har ikke saksnummer Så lages det journalføringsoppgave med tema PENSJON og enhet ID_OG_FORDELING`() {
         val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(rolle = null), null)
 
         initCommonMocks(sed)
@@ -267,6 +312,88 @@ internal class PBuc05Test : JournalforingTestBase() {
         val request = journalpostSlot.captured
 
         // forvent tema == PEN og enhet 4303
+        assertEquals(PENSJON, request.tema)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
+    // Rolle = 0 fnr = finnes  saksnr = null -> OK
+    @Test
+    fun `Scenario 2 - 2 personer i SED, har fnr, mangler rolle og saksnummer, får journalføringsoppgave som får tema PENSJON og enhet ID_OG_FORDELING`() {
+        val sed = createSedJson(SedType.P8000, FNR_VOKSEN, createAnnenPersonJson(rolle = null), null)
+
+        initCommonMocks(sed)
+
+        every { personV3Service.hentPerson(any()) } returns createBrukerWith(FNR_VOKSEN, "Hovedpersonen", "forsikret", "NOR")
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, emptyList())
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns emptyList()
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpostSlot, _) = initJournalPostRequestSlot()
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpostSlot.captured
+
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        // forvent tema == PEN og enhet 4303
+        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+        assertEquals(PENSJON, request.tema)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
+    // Rolle = finnes fnr = 0 saksnr = 0 -> OK
+    @Test
+    fun `Scenario 2 - 2 personer i SED, mangler fnr og saksnummer, journalføringsoppgave opprettes med tema PENSJON og enhet ID_OG_FORDELING`() {
+        val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(rolle = "01"), null)
+
+        initCommonMocks(sed)
+
+        val (journalpostSlot, _) = initJournalPostRequestSlot()
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpostSlot.captured
+
+        // forvent tema == PEN og enhet 4303
+        assertEquals(PENSJON, request.tema)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
+
+    // Rolle = 0 fnr = 0 saksnr = finnes -> OK
+    @Test
+    fun `Scenario 2 - 2 personer i SED, fnr og rolle mangler medn saksnummer finnes, oppretter journalføringsoppgave med tema PENSJON og enhet ID_OG_FORDELING`() {
+        val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(rolle = null), SAK_ID)
+
+        initCommonMocks(sed)
+
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, emptyList())
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpostSlot, _) = initJournalPostRequestSlot()
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpostSlot.captured
+
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        // forvent tema == PEN og enhet 4303
+        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
@@ -418,7 +545,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
-    @Test
+    @Test //OK
     fun `Scenario 1 - 1 person i SED, men fnr mangler`() {
         testRunner(fnr1 = null) {
             assertEquals(PENSJON, it.tema)
@@ -426,7 +553,15 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
     }
 
-    @Test // TODO: Fungerer ikke. Må finne ut hvor vi skal håndtere manglende sakinfo
+    @Test //OK
+    fun `Scenario 1 - 1 person i SED, men fnr er feil`() {
+        testRunner(fnr1 = "123456789102356878546525468432") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+        }
+    }
+
+    @Test //OK
     fun `Scenario 1 - 1 person i SED fnr finnes men ingen bestemsak Så journalføres på ID_OG_FORDELING`() {
         initCommonMocks(createSedJson(SedType.P8000, FNR_OVER_60, SAK_ID))
 
