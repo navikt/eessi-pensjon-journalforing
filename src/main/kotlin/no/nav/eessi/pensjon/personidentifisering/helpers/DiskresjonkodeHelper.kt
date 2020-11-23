@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -17,24 +18,20 @@ class DiskresjonkodeHelper(private val personV3Service: PersonV3Service,
     private fun finnDiskresjonkode(sed: String): Diskresjonskode? {
         logger.debug("Henter Sed dokument for å lete igjennom FNR for diskresjonkode")
 
-        val fnre = sedFnrSøk.finnAlleFnrDnrISed(sed)
-//    TODO: sjekke for kode 6 eller 7 og route deretter
-        fnre.forEach { fnr ->
-            try {
-                val person = personV3Service.hentPerson(fnr)
-                person?.diskresjonskode?.value?.let { kode ->
-                    logger.debug("Diskresjonskode: $kode")
-                    val diskresjonskode = Diskresjonskode.valueOf(kode)
-                    if (diskresjonskode == Diskresjonskode.SPSF || diskresjonskode == Diskresjonskode.SPFO) {
-                        logger.debug("Personen har diskret adresse")
-                        return diskresjonskode
-                    }
-                }
-            } catch (ex: Exception) {
-                logger.info("forsetter videre: ${ex.message}")
-            }
+        return sedFnrSøk.finnAlleFnrDnrISed(sed)
+                .mapNotNull { hentPerson(it) }
+                .mapNotNull { person -> person.diskresjonskode?.value }
+                .map { Diskresjonskode.valueOf(it)}
+                .firstOrNull { it == Diskresjonskode.SPSF }
+    }
+
+    private fun hentPerson(fnr: String): Bruker? {
+        return try {
+            personV3Service.hentPerson(fnr)
+        } catch (ex: Exception) {
+            logger.info("forsetter videre: ${ex.message}")
+            null
         }
-        return null
     }
 }
 

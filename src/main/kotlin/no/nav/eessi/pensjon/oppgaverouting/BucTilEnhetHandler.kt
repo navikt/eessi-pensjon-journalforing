@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import java.time.LocalDate
 import java.time.Period
 
@@ -11,6 +12,8 @@ interface BucTilEnhetHandler {
     fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
         return (request.ytelseType != null && request.aktorId != null && request.sakInformasjon?.sakId != null)
     }
+
+    fun erStrengtFortrolig(diskresjonskode: Diskresjonskode?): Boolean = diskresjonskode == Diskresjonskode.SPSF
 }
 
 class BucTilEnhetHandlerCreator {

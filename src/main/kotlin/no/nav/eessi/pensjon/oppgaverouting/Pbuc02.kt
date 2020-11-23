@@ -9,6 +9,7 @@ class Pbuc02 : BucTilEnhetHandler {
 
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
+            erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
             automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
             request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType, request.sakInformasjon?.sakStatus)
             else ->  handleUtland(request.ytelseType, request.sakInformasjon?.sakStatus)
@@ -33,8 +34,7 @@ class Pbuc02 : BucTilEnhetHandler {
                 else -> Enhet.ID_OG_FORDELING
             }
 
-    private fun automatiskJournalfores(request: OppgaveRoutingRequest
-    ): Boolean {
+    private fun automatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
         return (kanAutomatiskJournalfores(request) && (request.hendelseType == HendelseType.MOTTATT && (request.ytelseType == YtelseType.UFOREP && request.sakInformasjon?.sakStatus == SakStatus.AVSLUTTET).not()
                 || ( request.hendelseType == HendelseType.SENDT)))
     }

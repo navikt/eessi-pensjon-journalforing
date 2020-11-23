@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -86,7 +87,6 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return Følger rutingregler i [enhetFraAlderOgLand] dersom sakinfo mangler eller sakstype er [YtelseType.GENRL],
      *  hvis ikke regnes saken som gyldig for [Enhet.AUTOMATISK_JOURNALFORING]
      */
-    // TODO: Sjekke om GENRL gjelder uavhengig av antall saker, ref. request.sakInformasjon.tilknyttedeSaker
     private fun enhetForRelasjonForsorger(request: OppgaveRoutingRequest): Enhet {
         return when (request.ytelseType) {
             null, YtelseType.GENRL -> enhetFraAlderOgLand(request)
@@ -100,7 +100,6 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return Boolean-verdi som indikerer om saken kan journalføres automatisk.
      */
     private fun journalforesAutomatisk(request: OppgaveRoutingRequest): Boolean {
-        // TODO: Ingen sak skal gi [Enhet.ID_OG_FORDELING]
         val sakInfo = request.sakInformasjon
         return (kanAutomatiskJournalfores(request) && sakInfo != null && sakInfo.harGenerellSakTypeMedTilknyttetSaker().not())
     }
