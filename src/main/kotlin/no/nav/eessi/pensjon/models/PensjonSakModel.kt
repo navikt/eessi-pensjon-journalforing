@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -9,6 +10,8 @@ data class SakInformasjon(
         val sakStatus: SakStatus,
         val saksbehandlendeEnhetId: String = "",
         val nyopprettet: Boolean = false,
+
+        @JsonIgnore
         val tilknyttedeSaker: List<SakInformasjon> = emptyList()
 ) {
     fun harGenerellSakTypeMedTilknyttetSaker() : Boolean {

@@ -88,8 +88,7 @@ internal open class JournalforingTestBase {
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
-    protected val bucService: BucService = mockk(relaxed = true)
-
+    private val bucService: BucService = mockk(relaxed = true)
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
@@ -154,7 +153,7 @@ internal open class JournalforingTestBase {
     }
 
     protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
-        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() }
+        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() } ?: "1962-07-18"
 
         return """
             {

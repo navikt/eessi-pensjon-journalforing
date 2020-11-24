@@ -85,7 +85,7 @@ class DiskresjonkodeHelperTest {
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
-        Assertions.assertEquals(Diskresjonskode.SPFO, actual)
+        Assertions.assertEquals(SPSF, actual)
     }
 
     @Test

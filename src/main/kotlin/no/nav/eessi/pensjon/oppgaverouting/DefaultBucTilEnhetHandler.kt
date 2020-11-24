@@ -4,6 +4,13 @@ import no.nav.eessi.pensjon.models.Enhet
 
 class DefaultBucTilEnhetHandler : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return if (erStrengtFortrolig(request.diskresjonskode))
+            Enhet.DISKRESJONSKODE
+        else
+            enhetFraAlderOgLand(request)
+    }
+
+    private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
         val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
 
         return if (request.bosatt == Bosatt.NORGE) {

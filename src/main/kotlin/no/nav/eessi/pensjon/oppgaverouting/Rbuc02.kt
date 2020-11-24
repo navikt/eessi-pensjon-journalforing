@@ -7,10 +7,10 @@ import no.nav.eessi.pensjon.models.YtelseType
 
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        if (automatiskBehandles(request)) {
+        if (erStrengtFortrolig(request.diskresjonskode))
+            return Enhet.DISKRESJONSKODE
+        else if (automatiskBehandles(request))
             return Enhet.AUTOMATISK_JOURNALFORING
-        }
-        val ytelseType = request.ytelseType
 
         if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
             return Enhet.ID_OG_FORDELING
@@ -21,7 +21,7 @@ class Rbuc02 : BucTilEnhetHandler {
         }
 
         if (HendelseType.MOTTATT == request.hendelseType) {
-            return when (ytelseType) {
+            return when (request.ytelseType) {
                 YtelseType.ALDER -> Enhet.PENSJON_UTLAND
                 YtelseType.UFOREP -> Enhet.UFORE_UTLAND
                 else -> Enhet.ID_OG_FORDELING
