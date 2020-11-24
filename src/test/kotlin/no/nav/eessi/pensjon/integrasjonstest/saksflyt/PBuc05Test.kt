@@ -28,6 +28,7 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -908,9 +909,9 @@ internal class PBuc05Test : JournalforingTestBase() {
     }
 
     @Test
+    @Disabled
     fun `Scenario 13 - 0 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
         val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")
-        //val sedP5000sent = createSedJson(SedType.P5000, null, fdato = "1955-07-11")
         val sedP5000sent = createSedP5000(FNR_OVER_60, FNR_BARN)
 
         val alleDocumenter = mockAllDocumentsBuc( listOf(
