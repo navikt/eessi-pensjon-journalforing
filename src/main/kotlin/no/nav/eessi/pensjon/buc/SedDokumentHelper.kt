@@ -117,7 +117,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             fagmodulKlient.hentPensjonSaklist(aktoerId)
         } catch (e: Exception) {
             logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
-            emptyList()
+            return null
         }
 
         logger.debug("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
