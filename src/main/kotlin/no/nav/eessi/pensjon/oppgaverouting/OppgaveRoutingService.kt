@@ -29,23 +29,32 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun tildelEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode?.name, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
-        return hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
-                ?: BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
+        if(routingRequest.bucType == BucType.P_BUC_01){
+            val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode?.name, routingRequest.landkode, routingRequest.geografiskTilknytning)
+            val norgEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
+            val egenDefinertEnhet = BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
+
+            if(egenDefinertEnhet == Enhet.AUTOMATISK_JOURNALFORING){
+                return Enhet.AUTOMATISK_JOURNALFORING
+            }
+            else if(norgEnhet != null) {
+                return norgEnhet
+            }
+            return egenDefinertEnhet
+        }
+        return BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
     }
 
     @VisibleForTesting
     fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
-        return if (bucType == BucType.P_BUC_01)
-            try {
-                val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
-                logger.info("Norg2tildeltEnhet: $enhetVerdi")
-                enhetVerdi?.let { Enhet.getEnhet(it) }
-            } catch (ex: Exception) {
-                logger.error("Ukjent feil oppstod; ${ex.message}")
-                null
-            }
-        else null
+        return try {
+            val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
+            logger.info("Norg2tildeltEnhet: $enhetVerdi")
+            enhetVerdi?.let { Enhet.getEnhet(it) }
+        } catch (ex: Exception) {
+            logger.error("Ukjent feil oppstod; ${ex.message}")
+            null
+        }
     }
 }
