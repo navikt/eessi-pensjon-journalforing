@@ -113,7 +113,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String?): SakInformasjon? {
-        val saklist = fagmodulKlient.hentPensjonSaklist(aktoerId)
+        val saklist: List<SakInformasjon> = try {
+            fagmodulKlient.hentPensjonSaklist(aktoerId)
+        } catch (e: Exception) {
+            logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
+            return null
+        }
+
         logger.debug("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
 
         val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
