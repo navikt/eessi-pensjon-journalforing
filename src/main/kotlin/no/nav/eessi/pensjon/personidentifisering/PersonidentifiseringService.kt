@@ -128,6 +128,22 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     }
                 }
             }
+            bucType == BucType.P_BUC_10 -> {
+                logger.debug("identifiserte personer P_BUC_10: ")
+                identifisertePersoner.forEach {
+                    logger.debug(it.toJson())
+                }
+                val person = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
+                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+
+                if (gjenlev != null) {
+                    gjenlev
+                } else if(person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
+                    person
+                } else {
+                    gjenlev
+                }
+            }
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
                 logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")

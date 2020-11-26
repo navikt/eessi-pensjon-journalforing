@@ -58,13 +58,11 @@ class FnrHelperTest {
     fun `leter igjennom beste Sed på valgt buc etter norsk personnr`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 getTestJsonFile("P2100-PinDK-NAV.json"),
-                getTestJsonFile("P2000-NAV.json"),
-                getTestJsonFile("P15000-NAV.json")))
+                getTestJsonFile("P2000-NAV.json")))
 
-        val expected = setOf(PersonRelasjon(fnr="67097097000", relasjon= Relasjon.FORSIKRET),
-                PersonRelasjon(fnr="21712000000", relasjon= Relasjon.FORSIKRET))
+        val expected = setOf(PersonRelasjon(fnr="67097097000", relasjon= Relasjon.FORSIKRET))
 
-        assertEquals(2,actual.size)
+        assertEquals(1,actual.size)
         assertTrue(actual.containsAll(expected))
     }
 
@@ -76,7 +74,7 @@ class FnrHelperTest {
 
         val expectedFnr = "21712000000"
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.ALDER), actual.first())
     }
 
     @Test
@@ -87,7 +85,7 @@ class FnrHelperTest {
         ))
         val expectedFnr = "97097097000"
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.GJENLEV), actual.first())
     }
 
     @Test

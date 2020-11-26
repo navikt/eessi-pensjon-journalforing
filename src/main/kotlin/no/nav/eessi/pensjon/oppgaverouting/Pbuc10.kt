@@ -15,7 +15,7 @@ class Pbuc10 : BucTilEnhetHandler {
     private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
         return if (request.bosatt == Bosatt.NORGE) {
             if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLANDSTILSNITT
-            else Enhet.NFP_UTLAND_AALESUND
+            else Enhet.ID_OG_FORDELING
         } else {
             if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLAND
             else Enhet.PENSJON_UTLAND

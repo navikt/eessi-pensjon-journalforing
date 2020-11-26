@@ -244,7 +244,7 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
-    private fun createGjenlevende(fnr: String?): String {
+    private fun createGjenlevende(fnr: String?, relasjon: String? = null): String {
         return """
           ,
           "pensjon" : {
@@ -256,7 +256,10 @@ internal open class JournalforingTestBase {
                 "etternavn" : "Gjenlev",
                 "fornavn" : "Lever",
                 "kjoenn" : "M",
-                "foedselsdato" : "1988-07-12"
+                "foedselsdato" : "1988-07-12",
+                "relasjontilavdod" : {
+                    "relasjon" : "$relasjon"
+                }
                 ${if (fnr != null) createPinJson(fnr) else ""}
               }
             }
@@ -317,7 +320,7 @@ internal open class JournalforingTestBase {
     }
 
     //krav 01 alder, 02 gjenlevende, 03 uføre
-    protected fun createP15000(fnr: String?, eessiSaknr: String? = null, gfn: String? = null, krav: String) : String {
+    protected fun createP15000(fnr: String?, eessiSaknr: String? = null, gfn: String? = null, krav: String, relasjon: String? = null) : String {
         return """
     {
       "sed" : "P15000",
@@ -340,7 +343,7 @@ internal open class JournalforingTestBase {
             "type" : "$krav"
         }
       }
-    ${if (gfn != null) createGjenlevende(gfn) else ""}
+    ${if (gfn != null) createGjenlevende(gfn, relasjon) else ""}
     }
     """.trimIndent()
     }
