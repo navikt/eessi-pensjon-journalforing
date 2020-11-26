@@ -191,7 +191,7 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
-    protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null, eessiSaknr: String? = null): String {
+    protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): String {
 
         return """
             {
@@ -207,7 +207,7 @@ internal open class JournalforingTestBase {
                     "kjoenn": "M",
                     "etternavn": "Død",
                     "fornavn": "Avdød",
-                    "foedselsdato": "1988-07-12"
+                    "foedselsdato": "$fdato"
                     ${if (fnr != null) createPinJson(fnr) else ""}
                   }
                 },
@@ -242,4 +242,128 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
+
+    private fun createGjenlevende(fnr: String?): String {
+        return """
+          ,
+          "pensjon" : {
+            "gjenlevende" : {
+              "person" : {
+                "statsborgerskap" : [ {
+                  "land" : "DE"
+                } ],
+                "etternavn" : "Gjenlev",
+                "fornavn" : "Lever",
+                "kjoenn" : "M",
+                "foedselsdato" : "1988-07-12"
+                ${if (fnr != null) createPinJson(fnr) else ""}
+              }
+            }
+          }
+        """.trimIndent()
+    }
+
+    protected fun createSedP5000(fnr: String?, gfn: String? = null, eessiSaknr: String? = null): String {
+        return """
+    {
+      "sed" : "P5000",
+      "sedGVer" : "4",
+      "sedVer" : "1",
+      "nav" : {
+        ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
+        "bruker" : {
+          "person" : {
+            "statsborgerskap" : [ {
+              "land" : "NO"
+            } ],
+            "etternavn" : "Død",
+            "fornavn" : "Avdød",
+            "kjoenn" : "M",
+            "foedselsdato" : "1988-07-12"
+            ${if (fnr != null) createPinJson(fnr) else ""}
+          }
+        }
+      }
+    ${if (gfn != null) createGjenlevende(gfn) else ""}
+    }
+    """.trimIndent()
+    }
+
+    protected fun mockAllDocumentsBuc(document: List<Triple<String, String, String>>): String {
+        val sb = StringBuilder()
+        sb.append("[").appendln()
+        document.forEach {
+            sb.append( singleActionDocument(it.first, it.second, it.third) )
+                    .append(",")
+        }
+        val st = sb.toString()
+        val s = st.substring(0, st.length - 1)
+        return "$s \n]"
+    }
+
+    private fun singleActionDocument(documentid: String, documentType: String, status: String): String {
+        return """{
+        "id": "$documentid",
+        "parentDocumentId": null,
+        "type": "$documentType",
+        "status": "$status",
+        "creationDate": 1572005370040,
+        "lastUpdate": 1572005370040,
+        "displayName": "Forespørsel om informasjon",
+        "participants": [
+          {
+            "role": "Sender",
+            "organisation": {
+              "address": {
+                "country": "NO",
+                "town": null,
+                "street": null,
+                "postalCode": null,
+                "region": null
+              },
+              "activeSince": "2018-08-26T22:00:00.000+0000",
+              "registryNumber": null,
+              "acronym": "NAV ACCT 07",
+              "countryCode": "NO",
+              "contactMethods": null,
+              "name": "NAV ACCEPTANCE TEST 07",
+              "location": null,
+              "assignedBUCs": null,
+              "id": "NO:NAVAT07",
+              "accessPoint": null
+            },
+            "selected": true
+          },
+          {
+            "role": "Receiver",
+            "organisation": {
+              "address": {
+                "country": "NO",
+                "town": null,
+                "street": null,
+                "postalCode": null,
+                "region": null
+              },
+              "activeSince": "2018-08-26T22:00:00.000+0000",
+              "registryNumber": null,
+              "acronym": "NAV ACCT 08",
+              "countryCode": "NO",
+              "contactMethods": null,
+              "name": "NAV ACCEPTANCE TEST 08",
+              "location": null,
+              "assignedBUCs": null,
+              "id": "NO:NAVAT08",
+              "accessPoint": null
+            },
+            "selected": false
+          }
+        ],
+        "attachments": [],
+        "version": "1"
+      }""".trimIndent()
+    }
+
+
+
+
 }

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -157,9 +156,7 @@ class SedDokumentHelperTest {
                 SediBuc(id = "23123", status = "sent", type = SedType.P2000, sedjson = sedP2000)
         )
 
-        assertThrows<RuntimeException>{
-            helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAlleSedIBuc))
-        }
+        assertNull(helper.hentPensjonSakFraSED("123123", SediBuc.getList(mockAlleSedIBuc)))
     }
 
     @Test
