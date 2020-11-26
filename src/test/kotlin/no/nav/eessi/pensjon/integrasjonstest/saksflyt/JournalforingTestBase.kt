@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.GyldigeFunksjonerToggleNonProd
 import no.nav.eessi.pensjon.listeners.GyldigeHendelser
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -221,13 +222,13 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
-    protected fun createHendelseJson(sedType: SedType): String {
+    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05): String {
         return """
             {
               "id": 1869,
-              "sedId": "P8000_b12e06dda2c7474b9998c7139c841646_2",
+              "sedId": "${sedType.name}_b12e06dda2c7474b9998c7139c841646_2",
               "sektorKode": "P",
-              "bucType": "P_BUC_05",
+              "bucType": "${bucType.name}",
               "rinaSakId": "147729",
               "avsenderId": "NO:NAVT003",
               "avsenderNavn": "NAVT003",
@@ -310,60 +311,38 @@ internal open class JournalforingTestBase {
         "creationDate": 1572005370040,
         "lastUpdate": 1572005370040,
         "displayName": "Forespørsel om informasjon",
-        "participants": [
-          {
-            "role": "Sender",
-            "organisation": {
-              "address": {
-                "country": "NO",
-                "town": null,
-                "street": null,
-                "postalCode": null,
-                "region": null
-              },
-              "activeSince": "2018-08-26T22:00:00.000+0000",
-              "registryNumber": null,
-              "acronym": "NAV ACCT 07",
-              "countryCode": "NO",
-              "contactMethods": null,
-              "name": "NAV ACCEPTANCE TEST 07",
-              "location": null,
-              "assignedBUCs": null,
-              "id": "NO:NAVAT07",
-              "accessPoint": null
-            },
-            "selected": true
-          },
-          {
-            "role": "Receiver",
-            "organisation": {
-              "address": {
-                "country": "NO",
-                "town": null,
-                "street": null,
-                "postalCode": null,
-                "region": null
-              },
-              "activeSince": "2018-08-26T22:00:00.000+0000",
-              "registryNumber": null,
-              "acronym": "NAV ACCT 08",
-              "countryCode": "NO",
-              "contactMethods": null,
-              "name": "NAV ACCEPTANCE TEST 08",
-              "location": null,
-              "assignedBUCs": null,
-              "id": "NO:NAVAT08",
-              "accessPoint": null
-            },
-            "selected": false
-          }
-        ],
         "attachments": [],
         "version": "1"
       }""".trimIndent()
     }
 
-
-
+    //krav 01 alder, 02 gjenlevende, 03 uføre
+    protected fun createP15000(fnr: String?, eessiSaknr: String? = null, gfn: String? = null, krav: String) : String {
+        return """
+    {
+      "sed" : "P15000",
+      "nav" : {
+        ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
+        "bruker" : {
+          "person" : {
+            "statsborgerskap" : [ {
+              "land" : "NO"
+            } ],
+            "etternavn" : "Forsikret",
+            "fornavn" : "Person",
+            "kjoenn" : "M",
+            "foedselsdato" : "1988-07-12"
+            ${if (fnr != null) createPinJson(fnr) else ""}
+          }
+          },
+          "krav" : {
+            "dato" : "2019-02-01",
+            "type" : "$krav"
+        }
+      }
+    ${if (gfn != null) createGjenlevende(gfn) else ""}
+    }
+    """.trimIndent()
+    }
 
 }

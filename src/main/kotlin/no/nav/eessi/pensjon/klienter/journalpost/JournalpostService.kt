@@ -90,22 +90,15 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     @VisibleForTesting
     fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
         logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $ytelseType")
-        if (bucType == BucType.P_BUC_05) {
-            return if (ytelseType == YtelseType.UFOREP) Tema.UFORETRYGD
-            else Tema.PENSJON
-        }
-        if (bucType == BucType.R_BUC_02) {
-            if (sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON) {
-                return Tema.PENSJON
+        if (ytelseType == YtelseType.UFOREP) return Tema.UFORETRYGD
+        return when(bucType) {
+            BucType.R_BUC_02 -> {
+                when {
+                    sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON -> Tema.PENSJON
+                    else -> Tema.PENSJON
+               }
             }
-            return when (ytelseType) {
-                YtelseType.UFOREP -> Tema.UFORETRYGD
-                else -> Tema.PENSJON
-            }
-        } else if (bucType == BucType.P_BUC_02 && ytelseType == YtelseType.UFOREP) {
-            return Tema.UFORETRYGD
-        } else {
-            return bucType.tema
+            else -> bucType.tema
         }
     }
 
