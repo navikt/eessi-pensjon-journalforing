@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -9,6 +10,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 
 class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return if (request.hendelseType == HendelseType.SENDT) enhetForSendt(request)
+        else enhetForMottatt(request)
+    }
+
+    private fun enhetForSendt(request: OppgaveRoutingRequest): Enhet {
         return when {
             erGjenlevende(request.identifisertPerson) -> hentEnhetForGjenlevende(request)
             flerePersoner(request) -> hentEnhetForRelasjon(request)
@@ -16,6 +22,16 @@ class Pbuc05 : BucTilEnhetHandler {
             request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
             else -> enhetFraAlderOgLand(request)
         }
+    }
+
+    private fun enhetForMottatt(request: OppgaveRoutingRequest): Enhet {
+        return if (request.identifisertPerson == null)
+            Enhet.ID_OG_FORDELING
+        else if (erGjenlevende(request.identifisertPerson)) {
+            if (request.bosatt == Bosatt.NORGE)
+                Enhet.NFP_UTLAND_AALESUND
+            else Enhet.PENSJON_UTLAND
+        } else enhetFraAlderOgLand(request)
     }
 
     /**
@@ -38,6 +54,9 @@ class Pbuc05 : BucTilEnhetHandler {
             else -> Enhet.AUTOMATISK_JOURNALFORING
         }
     }
+
+    private fun erUgyldigSakInformasjon(request: OppgaveRoutingRequest) =
+            request.hendelseType == HendelseType.SENDT && request.sakInformasjon == null
 
     /**
      * Sjekker om saken inneholder flere identifiserte personer.
