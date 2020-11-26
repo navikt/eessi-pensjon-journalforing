@@ -18,11 +18,11 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
-import org.junit.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Ignore
+@Disabled
 internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     companion object {
@@ -38,7 +38,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
     }
 
     /**
-     * P_BUC_05 INNGÅENDE DEL 1
+     * P_BUC_05 INNGÅENDE
      */
 
 
