@@ -4,18 +4,15 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class YtelseTypeTest {
 
-    @Test
-    fun `Verifiser serde fungerer som forventet`() {
-        Assertions.assertEquals(YtelseType.OMSORG, serde(YtelseType.OMSORG))
-        Assertions.assertEquals(YtelseType.ALDER, serde(YtelseType.ALDER))
-        Assertions.assertEquals(YtelseType.GJENLEV, serde(YtelseType.GJENLEV))
-        Assertions.assertEquals(YtelseType.BARNEP, serde(YtelseType.BARNEP))
-        Assertions.assertEquals(YtelseType.UFOREP, serde(YtelseType.UFOREP))
-        Assertions.assertEquals(YtelseType.GENRL, serde(YtelseType.GENRL))
+    @ParameterizedTest
+    @EnumSource(YtelseType::class)
+    fun `Verifiser serde fungerer som forventet`(type: YtelseType) {
+        Assertions.assertEquals(type, serde(type))
     }
 
     private fun serde(ytelseType: YtelseType): YtelseType {

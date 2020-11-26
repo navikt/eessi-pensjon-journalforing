@@ -27,11 +27,19 @@ class Pbuc05 : BucTilEnhetHandler {
     private fun enhetForMottatt(request: OppgaveRoutingRequest): Enhet {
         val personListe = request.identifisertPerson?.personListe ?: emptyList()
 
-        return if (erGjenlevende(request.identifisertPerson)) {
-            if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND
-            else Enhet.PENSJON_UTLAND
-        } else if (personListe.any { it.personRelasjon.relasjon == Relasjon.FORSORGER }) enhetFraAlderOgLand(request)
-        else if (personListe.any { it.personRelasjon.relasjon == Relasjon.BARN }) enhetFraAlderOgLand(request)
+        return if (request.identifisertPerson != null && personListe.isEmpty()) {
+            if (request.identifisertPerson.personRelasjon.fnr.isBlank()) Enhet.ID_OG_FORDELING
+            else if (erGjenlevende(request.identifisertPerson)) {
+                if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND
+                else Enhet.PENSJON_UTLAND
+            } else enhetFraAlderOgLand(request)
+        } else if (personListe.isNotEmpty() && request.identifisertPerson?.personRelasjon?.fnr?.isNotBlank()) {
+            when {
+                personListe.any { it.personRelasjon.relasjon == Relasjon.FORSORGER } -> enhetFraAlderOgLand(request)
+                personListe.any { it.personRelasjon.relasjon == Relasjon.BARN } -> enhetFraAlderOgLand(request)
+                else -> Enhet.ID_OG_FORDELING
+            }
+        }
         else Enhet.ID_OG_FORDELING
     }
 

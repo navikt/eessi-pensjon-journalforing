@@ -19,10 +19,9 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled
+//@Disabled
 internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     companion object {
@@ -43,13 +42,20 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
 
     @Test
-    fun `Scenario 1 manglende eller feil FNR, DNR - kun én person`(){
+    fun `Scenario 1 - Kun én person, mangler FNR`() {
         testRunner(fnr1 = null) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
     }
 
+    @Test
+    fun `Scenario 1 - Kun én person, ugyldig FNR`() {
+        testRunner(fnr1 = "1244091349018340918341029") {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+        }
+    }
 
     @Test
     fun `Scenario 2 manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 03`(){
