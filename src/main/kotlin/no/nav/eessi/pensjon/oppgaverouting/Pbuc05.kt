@@ -25,14 +25,17 @@ class Pbuc05 : BucTilEnhetHandler {
     }
 
     private fun enhetForMottatt(request: OppgaveRoutingRequest): Enhet {
-        return if (request.identifisertPerson == null)
-            Enhet.ID_OG_FORDELING
-        else if (erGjenlevende(request.identifisertPerson)) {
-            if (request.bosatt == Bosatt.NORGE)
-                Enhet.NFP_UTLAND_AALESUND
+        val personListe = request.identifisertPerson?.personListe ?: emptyList()
+
+        return if (erGjenlevende(request.identifisertPerson)) {
+            if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND
             else Enhet.PENSJON_UTLAND
-        } else enhetFraAlderOgLand(request)
+        } else if (personListe.any { it.personRelasjon.relasjon == Relasjon.FORSORGER }) enhetFraAlderOgLand(request)
+        else if (personListe.any { it.personRelasjon.relasjon == Relasjon.BARN }) enhetFraAlderOgLand(request)
+        else Enhet.ID_OG_FORDELING
     }
+
+
 
     /**
      * Sjekker om det finnes en identifisert person og om denne personen er [Relasjon.GJENLEVENDE]
@@ -55,18 +58,13 @@ class Pbuc05 : BucTilEnhetHandler {
         }
     }
 
-    private fun erUgyldigSakInformasjon(request: OppgaveRoutingRequest) =
-            request.hendelseType == HendelseType.SENDT && request.sakInformasjon == null
-
     /**
      * Sjekker om saken inneholder flere identifiserte personer.
      *
      * @return true dersom det finnes mer enn én person.
      */
     private fun flerePersoner(request: OppgaveRoutingRequest): Boolean {
-        val personer = request.identifisertPerson?.personListe ?: emptyList()
-
-        return personer.size > 1
+      return request.identifisertPerson?.personListe?.isNotEmpty() ?: false
     }
 
     /**
