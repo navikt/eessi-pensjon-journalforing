@@ -153,8 +153,8 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         val sed = createSedJson(SedType.P8000, FNR_VOKSEN_2, createAnnenPersonJson(fnr = null, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
-        val voksen = createBrukerWith(FNR_VOKSEN, "Voksen", "Vanlig", "NOR", "1213", null)
-        every { personV3Service.hentPerson(FNR_VOKSEN) } returns voksen
+        val voksen = createBrukerWith(FNR_VOKSEN_2, "Voksen", "Vanlig", "NOR", "1213", null)
+        every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns voksen
 
         val hendelse = createHendelseJson(SedType.P8000)
 

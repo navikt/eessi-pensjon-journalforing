@@ -33,8 +33,9 @@ class Pbuc05 : BucTilEnhetHandler {
                 if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND
                 else Enhet.PENSJON_UTLAND
             } else enhetFraAlderOgLand(request)
-        } else if (personListe.isNotEmpty() && request.identifisertPerson?.personRelasjon?.fnr?.isNotBlank()) {
+        } else if (personListe.isNotEmpty()) {
             when {
+                request.identifisertPerson?.personRelasjon?.fnr?.isBlank() == true -> Enhet.ID_OG_FORDELING
                 personListe.any { it.personRelasjon.relasjon == Relasjon.FORSORGER } -> enhetFraAlderOgLand(request)
                 personListe.any { it.personRelasjon.relasjon == Relasjon.BARN } -> enhetFraAlderOgLand(request)
                 else -> Enhet.ID_OG_FORDELING
