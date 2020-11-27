@@ -28,6 +28,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
             BucType.P_BUC_02 -> ytelsesType ?: return null
             BucType.P_BUC_03 -> YtelseType.UFOREP
             BucType.R_BUC_02 -> ytelsesType!!
+            BucType.P_BUC_10 -> ytelsesType ?: return null
             else -> return null
         }
 

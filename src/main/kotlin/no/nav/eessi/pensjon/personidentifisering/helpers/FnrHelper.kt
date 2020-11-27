@@ -30,17 +30,24 @@ class FnrHelper {
                 sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
 
                 if (sedType.kanInneholdeFnrEllerFdato) {
-                    logger.debug("SED: $sedType")
+                    logger.info("SED: $sedType")
                     when (sedType) {
                         SedType.P2100 -> {
                             leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
                         }
                         SedType.P15000 -> {
-                            val krav = sedRootNode.get("nav").get("krav").textValue()
+                            val krav = try {
+                                sedRootNode.get("nav").get("krav").get("type").textValue()
+                            } catch (ex: Exception) {
+                                logger.warn("krav ikke satt")
+                                null
+                            }
+                            val ytelseType =  ytelseTypefraKravSed(krav)
+                            logger.debug("P15000 krav: $krav")
                             if (krav == "02") {
-                                leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
+                                leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
                             } else {
-                                leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
+                                leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
                             }
                         }
                         SedType.R005 -> {
@@ -76,15 +83,24 @@ class FnrHelper {
         }
     }
 
-    private fun leggTilForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+    private fun leggTilForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType?= null) {
         filterPersonPinNode(sedRootNode)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType))
         }
     }
 
-    private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+    private fun ytelseTypefraKravSed(krav: String?): YtelseType? {
+        return when (krav) {
+            "01" -> YtelseType.ALDER
+            "02" -> YtelseType.GJENLEV
+            "03" -> YtelseType.UFOREP
+            else -> null
+        }
+    }
+
+    private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
         filterPersonPinNode(sedRootNode)?.let{
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType))
             logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
 
         }
