@@ -132,9 +132,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 val person = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
 
-                if (gjenlev != null) {
-                    gjenlev
-                } else if(person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
+                if (person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
                     person
                 } else {
                     gjenlev
