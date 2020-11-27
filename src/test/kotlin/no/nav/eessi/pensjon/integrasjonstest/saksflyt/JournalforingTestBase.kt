@@ -32,7 +32,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import no.nav.eessi.pensjon.service.buc.BucService
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
@@ -88,7 +87,6 @@ internal open class JournalforingTestBase {
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
-    private val bucService: BucService = mockk(relaxed = true)
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
@@ -97,8 +95,7 @@ internal open class JournalforingTestBase {
             gyldigeHendelser = GyldigeHendelser(),
             bestemSakService = bestemSakService,
             gyldigeFunksjoner = gyldigeFunksjoner,
-            profile = "test",
-            bucService = bucService
+            profile = "test"
     )
 
     @BeforeEach

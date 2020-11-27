@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.service.buc.BucService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,9 +39,6 @@ class SedListenerTest {
     @Mock
     lateinit var bestemSakService: BestemSakService
 
-    @Mock
-    lateinit var bucService: BucService
-
     lateinit var sedListener: SedListener
 
     val gyldigeHendelser: GyldigeHendelser = GyldigeHendelser()
@@ -50,7 +46,7 @@ class SedListenerTest {
 
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner, bucService,"test")
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner,"test")
         sedListener.initMetrics()
     }
 
@@ -75,7 +71,7 @@ class SedListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
-        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner, bucService,"test")
+        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner,"test")
         sedListener2.initMetrics()
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
 
