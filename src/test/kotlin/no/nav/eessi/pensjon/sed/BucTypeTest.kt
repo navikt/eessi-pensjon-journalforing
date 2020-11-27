@@ -6,6 +6,8 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class BucTypeTest {
 
@@ -25,20 +27,10 @@ internal class BucTypeTest {
         assertEquals(BucType.UKJENT, ukjentBucType)
     }
 
-    @Test
-    fun `Verifiser serde av BucType fungerer`() {
-        assertEquals(BucType.P_BUC_01, serde(BucType.P_BUC_01))
-        assertEquals(BucType.P_BUC_02, serde(BucType.P_BUC_02))
-        assertEquals(BucType.P_BUC_03, serde(BucType.P_BUC_03))
-        assertEquals(BucType.P_BUC_04, serde(BucType.P_BUC_04))
-        assertEquals(BucType.P_BUC_05, serde(BucType.P_BUC_05))
-        assertEquals(BucType.P_BUC_06, serde(BucType.P_BUC_06))
-        assertEquals(BucType.P_BUC_07, serde(BucType.P_BUC_07))
-        assertEquals(BucType.P_BUC_08, serde(BucType.P_BUC_08))
-        assertEquals(BucType.P_BUC_09, serde(BucType.P_BUC_09))
-        assertEquals(BucType.P_BUC_10, serde(BucType.P_BUC_10))
-        assertEquals(BucType.H_BUC_07, serde(BucType.H_BUC_07))
-        assertEquals(BucType.R_BUC_02, serde(BucType.R_BUC_02))
+    @ParameterizedTest
+    @EnumSource(BucType::class)
+    fun `Verifiser serde av BucType fungerer`(type: BucType) {
+        assertEquals(type, serde(type))
     }
 
     private fun serde(bucType: BucType): BucType {
