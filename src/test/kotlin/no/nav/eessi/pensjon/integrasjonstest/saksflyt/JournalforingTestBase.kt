@@ -109,7 +109,7 @@ internal open class JournalforingTestBase {
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
-    private val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
+    protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
 
