@@ -119,10 +119,10 @@ class FnrHelper {
         val rolle = filterAnnenpersonRolle(sedRootNode)
 
         //hvis to personer ingen rolle return uten pin..
-        if (personPin != null && annenPersonPin != null && rolle == null) {
-            return
-        }
-        logger.debug("Personpin: ${personPin != null} AnnenPersonpin ${annenPersonPin != null}  Annenperson rolle : $rolle")
+        if (personPin != null && annenPersonPin != null && rolle == null) return
+        else if (annenPersonPin == null && rolle != null) return
+
+        logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
         personPin?.run {
             fnrListe.add(PersonRelasjon(this, Relasjon.FORSIKRET))

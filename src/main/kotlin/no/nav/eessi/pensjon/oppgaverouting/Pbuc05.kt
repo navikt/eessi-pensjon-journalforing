@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -9,6 +10,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 
 class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+        return if (request.hendelseType == HendelseType.SENDT) enhetForSendt(request)
+        else enhetForMottatt(request)
+    }
+
+    private fun enhetForSendt(request: OppgaveRoutingRequest): Enhet {
         return when {
             erGjenlevende(request.identifisertPerson) -> hentEnhetForGjenlevende(request)
             flerePersoner(request) -> hentEnhetForRelasjon(request)
@@ -17,6 +23,28 @@ class Pbuc05 : BucTilEnhetHandler {
             else -> enhetFraAlderOgLand(request)
         }
     }
+
+    private fun enhetForMottatt(request: OppgaveRoutingRequest): Enhet {
+        val personListe = request.identifisertPerson?.personListe ?: emptyList()
+
+        return if (request.identifisertPerson != null && personListe.isEmpty()) {
+            if (request.identifisertPerson.personRelasjon.fnr.isBlank()) Enhet.ID_OG_FORDELING
+            else if (erGjenlevende(request.identifisertPerson)) {
+                if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND
+                else Enhet.PENSJON_UTLAND
+            } else enhetFraAlderOgLand(request)
+        } else if (personListe.isNotEmpty()) {
+            when {
+                request.identifisertPerson?.personRelasjon?.fnr?.isBlank() == true -> Enhet.ID_OG_FORDELING
+                personListe.any { it.personRelasjon.relasjon == Relasjon.FORSORGER } -> enhetFraAlderOgLand(request)
+                personListe.any { it.personRelasjon.relasjon == Relasjon.BARN } -> enhetFraAlderOgLand(request)
+                else -> Enhet.ID_OG_FORDELING
+            }
+        }
+        else Enhet.ID_OG_FORDELING
+    }
+
+
 
     /**
      * Sjekker om det finnes en identifisert person og om denne personen er [Relasjon.GJENLEVENDE]
@@ -45,9 +73,7 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return true dersom det finnes mer enn én person.
      */
     private fun flerePersoner(request: OppgaveRoutingRequest): Boolean {
-        val personer = request.identifisertPerson?.personListe ?: emptyList()
-
-        return personer.size > 1
+      return request.identifisertPerson?.personListe?.isNotEmpty() ?: false
     }
 
     /**
