@@ -66,6 +66,8 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         val barn = createBrukerWith(FNR_BARN, "Barn", "Vanlig", "NOR", "1213", null)
         every { personV3Service.hentPerson(FNR_BARN) } returns barn
 
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_BARN)) } returns AktoerId(AKTOER_ID)
+
         val hendelse = createHendelseJson(SedType.P8000)
 
         val meldingSlot = slot<String>()
