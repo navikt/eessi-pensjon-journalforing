@@ -163,7 +163,7 @@ class SedListener(
         if (identifisertPerson?.aktoerId == null) return null
 
         val aktoerId = identifisertPerson.aktoerId
-        val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson))
+        val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson, sedHendelseModel.bucType))
 
         val sakInformasjonFraSED = if (gyldigeFunksjoner.togglePensjonSak()) {
             logger.debug("skal hente pensjonSak for sed kap.1 og validere mot pesys")
@@ -174,15 +174,23 @@ class SedListener(
         return sakInformasjonFraBestemSak ?: sakInformasjonFraSED
     }
 
-    private fun populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed: YtelseType?, identifisertPerson: IdentifisertPerson?): YtelseType? {
-        return ytelsestypeFraSed ?: identifisertPerson?.personRelasjon?.ytelseType
+    private fun populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed: YtelseType?, identifisertPerson: IdentifisertPerson?, bucType: BucType): YtelseType? {
+        val personYtelse = identifisertPerson?.personRelasjon?.ytelseType
+        logger.debug("populerYtelsestypeSakInformasjonSendt: fraSED $ytelsestypeFraSed  identPersonYtelse: $personYtelse")
+        if (bucType == BucType.P_BUC_10 && ytelsestypeFraSed == YtelseType.GJENLEV) {
+            return personYtelse
+        }
+        return ytelsestypeFraSed ?: personYtelse
     }
 
     private fun populerYtelseType(ytelseTypeFraSED: YtelseType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): YtelseType? {
         if (sedHendelseModel.bucType == BucType.P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
-        } else if (ytelseTypeFraSED != null)
+        } else if (sedHendelseModel.bucType == BucType.P_BUC_10 && ytelseTypeFraSED == YtelseType.GJENLEV) {
+            return sakInformasjon?.sakType
+        } else if (ytelseTypeFraSED != null) {
             return ytelseTypeFraSED
+        }
         return sakInformasjon?.sakType
     }
 

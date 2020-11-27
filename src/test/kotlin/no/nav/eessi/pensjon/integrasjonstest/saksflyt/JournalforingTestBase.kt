@@ -258,7 +258,7 @@ internal open class JournalforingTestBase {
                 "kjoenn" : "M",
                 "foedselsdato" : "1988-07-12",
                 "relasjontilavdod" : {
-                    "relasjon" : "$relasjon"
+                ${if (relasjon != null) "\"relasjon\" : \"$relasjon\"" else ""}
                 }
                 ${if (fnr != null) createPinJson(fnr) else ""}
               }

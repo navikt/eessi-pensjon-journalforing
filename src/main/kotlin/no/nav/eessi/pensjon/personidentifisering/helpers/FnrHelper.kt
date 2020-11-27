@@ -30,7 +30,7 @@ class FnrHelper {
                 sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
 
                 if (sedType.kanInneholdeFnrEllerFdato) {
-                    logger.debug("SED: $sedType")
+                    logger.info("SED: $sedType")
                     when (sedType) {
                         SedType.P2100 -> {
                             leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
