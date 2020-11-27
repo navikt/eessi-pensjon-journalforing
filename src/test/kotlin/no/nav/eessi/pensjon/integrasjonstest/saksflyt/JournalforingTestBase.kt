@@ -41,6 +41,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
@@ -51,10 +52,10 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoennstyper
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Land
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Landkoder
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent as PersonV3NorskIdent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -167,12 +168,12 @@ internal open class JournalforingTestBase {
 
         if (fnr != null) {
             every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
         }
 
         if (fnrAnnenPerson != null) {
             every { personV3Service.hentPerson(fnrAnnenPerson) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", diskresjonkode?.name)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
         }
 
         if (rolle == "01")
@@ -208,7 +209,7 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-        verify(exactly = antallPersoner) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent>()) }
+        verify(exactly = antallPersoner) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
 
         val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
         verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
@@ -242,7 +243,7 @@ internal open class JournalforingTestBase {
 
         if (fnr != null) {
             every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
         }
 
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
@@ -292,7 +293,7 @@ internal open class JournalforingTestBase {
                 )
                 .withGeografiskTilknytning(Land().withGeografiskTilknytning(geo) as GeografiskTilknytning)
                 .withKjoenn(Kjoenn().withKjoenn(Kjoennstyper().withValue("M")))
-                .withAktoer(PersonIdent().withIdent(NorskIdent().withIdent(fnr)))
+                .withAktoer(PersonIdent().withIdent(PersonV3NorskIdent().withIdent(fnr)))
                 .withStatsborgerskap(Statsborgerskap().withLand(Landkoder().withValue(land)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
                 .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
