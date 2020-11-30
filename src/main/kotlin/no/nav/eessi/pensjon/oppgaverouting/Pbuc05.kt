@@ -16,10 +16,10 @@ class Pbuc05 : BucTilEnhetHandler {
 
     private fun enhetForSendt(request: OppgaveRoutingRequest): Enhet {
         return when {
+            request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
             erGjenlevende(request.identifisertPerson) -> hentEnhetForGjenlevende(request)
             flerePersoner(request) -> hentEnhetForRelasjon(request)
             journalforesAutomatisk(request) -> Enhet.AUTOMATISK_JOURNALFORING
-            request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
             else -> enhetFraAlderOgLand(request)
         }
     }

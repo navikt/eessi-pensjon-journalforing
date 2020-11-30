@@ -441,17 +441,18 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val saker = listOf(
                     SakInformasjon(sakId = "234123123", sakType = YtelseType.ALDER, sakStatus = SakStatus.AVSLUTTET),
                     SakInformasjon(sakId = "123123123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = "98989898", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
             )
 
             val forsikredeFnr = FNR_OVER_60
 
             testRunnerFlerePersoner(forsikredeFnr, FNR_VOKSEN, rolle = "02", sakId = SAK_ID, saker = saker) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
                 assertEquals(forsikredeFnr, it.bruker?.id)
             }
         }
+
     }
 
 
