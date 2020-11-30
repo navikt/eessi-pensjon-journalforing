@@ -77,6 +77,16 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Gitt en Sed som inneholder gjenlevende som ikke er en del av samlingen av Seds som er forsikret, dette er feks H070, H120, H121 så identifiseres en gjenlevende`() {
+        whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
+
+        val p6000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+        val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(p6000), BucType.P_BUC_05, SedType.P6000 )
+        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, null)
+        assertEquals(expected, actual?.personRelasjon)
+    }
+
+    @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
 

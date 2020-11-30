@@ -96,17 +96,14 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
      */
     fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
+
+        val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
+        if (forsikretPerson != null)
+            return forsikretPerson
+
         return when {
             identifisertePersoner.isEmpty() -> null
 
-
-            if (sedType !in brukForikretPersonISed) {
-                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
-
-                if (gjenlev != null) {
-                    return gjenlev
-                }
-            }
 
             bucType == BucType.R_BUC_02 -> {
                 return run {
@@ -124,11 +121,17 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     logger.debug(it.toJson())
                 }
 
-                val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
 
-                //barn eller forsorger rskal leggesd til på person/forsikret
-                pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                pers
+                if (gjenlev != null) {
+                    gjenlev
+                } else {
+                    val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+
+                    //barn eller forsorger rskal leggesd til på person/forsikret
+                    pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                    pers
+                }
             }
 
             bucType == BucType.P_BUC_10 -> {
@@ -151,6 +154,15 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
             }
         }
+    }
+    /**
+     * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
+     */
+    private fun brukForsikretPerson(sedType: SedType?, identifisertePersoner: List<IdentifisertPerson>): IdentifisertPerson? {
+        if (sedType in brukForikretPersonISed) {
+            return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+        }
+        return null
     }
 
     /**
