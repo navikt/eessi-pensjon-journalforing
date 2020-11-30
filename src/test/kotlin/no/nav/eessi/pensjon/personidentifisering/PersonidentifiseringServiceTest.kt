@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
@@ -64,11 +65,23 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {
+        whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        whenever(personV3Service.hentPerson(eq("12078945602"))).thenReturn(BrukerMock.createWith(landkoder = true))
+
+        val p6000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
+        val h070 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json")))
+        val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(p6000, h070), BucType.P_BUC_05, SedType.H070 )
+        val expected = PersonRelasjon("12078945602", Relasjon.FORSIKRET, null)
+        assertEquals(expected, actual?.personRelasjon)
+    }
+
+    @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
-        val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(sed), BucType.P_BUC_02 )
+        val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(sed), BucType.P_BUC_02, SedType.H070)
         val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, YtelseType.GJENLEV )
         assertEquals(expected, actual?.personRelasjon)
     }
@@ -132,7 +145,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_06 )
+        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_06, SedType.H070)
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed))
         assertEquals("1958-07-11", fdato.toString())
     }
@@ -147,7 +160,7 @@ class PersonidentifiseringServiceTest {
 
         val sed1 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-enkel.json")))
         val sed2 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P10000-superenkel.json")))
-        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed2, sed1), BucType.P_BUC_06)
+        val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed2, sed1), BucType.P_BUC_06, SedType.H070)
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed2, sed1))
 
         assertEquals("1948-06-28", fdato.toString())
@@ -177,7 +190,7 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed1, sed2), bucType)
         assertEquals(2, actual.size)
 
-        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType)
+        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P6000)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)
         assertEquals(Relasjon.GJENLEVENDE, gjenlevActual?.personRelasjon?.relasjon)
 
@@ -206,7 +219,7 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, listOf(sed3, sed1, sed2), bucType)
         assertEquals(2, actual.size)
 
-        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType)
+        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)
         assertEquals(Relasjon.GJENLEVENDE, gjenlevActual?.personRelasjon?.relasjon)
 
@@ -287,7 +300,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en tom liste av identifiserte personer når velger person så returner null`(){
-       assertNull(personidentifiseringService.identifisertPersonUtvelger(emptyList(), BucType.H_BUC_07))
+       assertNull(personidentifiseringService.identifisertPersonUtvelger(emptyList(), BucType.H_BUC_07, null))
     }
 
     @Test
@@ -299,7 +312,7 @@ class PersonidentifiseringServiceTest {
                 "NO",
                 "010",
                 PersonRelasjon("12345678910", Relasjon.FORSIKRET))
-        assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf(identifisertPerson), BucType.H_BUC_07), identifisertPerson)
+        assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf(identifisertPerson), BucType.H_BUC_07, SedType.H001), identifisertPerson)
     }
 
     @Test
@@ -312,7 +325,7 @@ class PersonidentifiseringServiceTest {
                 "010",
                 PersonRelasjon("12345678910", Relasjon.GJENLEVENDE))
 
-        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(gjenlevende), BucType.R_BUC_02)
+        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(gjenlevende), BucType.R_BUC_02, SedType.R004)
 
         assertEquals(gjenlevende, result)
         assertEquals(1, result?.personListe?.size)
@@ -337,7 +350,7 @@ class PersonidentifiseringServiceTest {
                 "010",
                 PersonRelasjon("12345678910", Relasjon.GJENLEVENDE))
 
-        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02)
+        val result = personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02, SedType.R004)
 
         assertEquals(avdod, result)
         assertEquals(2, result?.personListe?.size)
@@ -356,7 +369,7 @@ class PersonidentifiseringServiceTest {
                 PersonRelasjon("12345678910", Relasjon.FORSIKRET))
 
         assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01)
+            personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01, SedType.P2000)
         }
     }
 
@@ -369,7 +382,7 @@ class PersonidentifiseringServiceTest {
 
         val list = listOf(person1, person2, person3)
 
-        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02, SedType.P2100)
         assertEquals(Relasjon.GJENLEVENDE, actual?.personRelasjon?.relasjon)
     }
 
@@ -382,12 +395,12 @@ class PersonidentifiseringServiceTest {
 
         val list = listOf(person1, person2, person3)
 
-        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02, SedType.P2100)
         assertEquals(null, actual)
     }
 
     @Test
-    fun `Gitt at det finnes tre personer når det er en buc så skal det kastes en runtimeexception`() {
+    fun `Gitt personidentifisering identifisere mer enn en person så kastes en runtimeexception`() {
 
         val person1 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("1234", Relasjon.FORSIKRET))
         val person2 = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("2344", Relasjon.FORSIKRET))
@@ -396,10 +409,10 @@ class PersonidentifiseringServiceTest {
         val list = listOf(person1, person2, person3)
 
         assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01)
+            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01, SedType.P2100)
         }
         assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03)
+            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03, SedType.P2100)
         }
 
     }
@@ -413,7 +426,7 @@ class PersonidentifiseringServiceTest {
 
         val list = listOf(person1, person2, person3)
 
-        val result = personidentifiseringService.identifisertPersonUtvelger(list, BucType.R_BUC_02)
+        val result = personidentifiseringService.identifisertPersonUtvelger(list, BucType.R_BUC_02, SedType.P2100)
 
         assertEquals(person1, result)
         assertEquals(3, result?.personListe?.size)
@@ -428,7 +441,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt at det ikke finnes personer på en buc så skal kun null returneres`() {
 
         val list = listOf<IdentifisertPerson>()
-        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02, SedType.P2100)
         assertEquals(null, actual)
     }
 
@@ -468,7 +481,7 @@ class PersonidentifiseringServiceTest {
         val avdod = IdentifisertPerson("","Dummy", null,"NO", "", PersonRelasjon("5678", Relasjon.FORSIKRET))
 
         val list = listOf<IdentifisertPerson>(gjenlevende, avdod)
-        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02)
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02, SedType.P2100)
 
         assertEquals(gjenlevende, actual)
         assertEquals(false, actual?.flereEnnEnPerson())

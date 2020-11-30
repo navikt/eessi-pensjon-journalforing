@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
@@ -27,6 +28,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                                   private val fdatoHelper: FdatoHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
+    private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
 
     companion object {
         fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
@@ -36,9 +38,9 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
-    fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType): IdentifisertPerson? {
+    fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
         val identifisertePersoner = hentIdentifisertePersoner(navBruker, alleSediBuc, bucType)
-        return identifisertPersonUtvelger(identifisertePersoner, bucType)
+        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType)
     }
 
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
@@ -92,10 +94,20 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     /**
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
-    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType): IdentifisertPerson? {
+    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
         return when {
             identifisertePersoner.isEmpty() -> null
+
+
+            if (sedType !in brukForikretPersonISed) {
+                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+
+                if (gjenlev != null) {
+                    return gjenlev
+                }
+            }
+
             bucType == BucType.R_BUC_02 -> {
                 return run {
                     val forstPersonIdent = identifisertePersoner.first()
@@ -104,7 +116,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 }
             }
             bucType == BucType.P_BUC_02 -> {
-                return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             }
             bucType == BucType.P_BUC_05 -> {
                 logger.debug("identifisertePersoner P_BUC_05")
@@ -112,24 +124,19 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     logger.debug(it.toJson())
                 }
 
-                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
 
-                if (gjenlev != null) {
-                    gjenlev
-                } else {
-                    val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-
-                    //barn eller forsorger rskal leggesd til på person/forsikret
-                    pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                    pers
-                }
+                //barn eller forsorger rskal leggesd til på person/forsikret
+                pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                pers
             }
+
             bucType == BucType.P_BUC_10 -> {
                 logger.debug("identifiserte personer P_BUC_10: ")
                 identifisertePersoner.forEach {
                     logger.debug(it.toJson())
                 }
-                val person = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
+                val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
 
                 if (person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
