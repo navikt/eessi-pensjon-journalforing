@@ -272,6 +272,9 @@ internal open class JournalforingTestBase {
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
         verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
 
+        val antallKallAktoerreg = if (gyldigFnr) 1 else 0
+        verify(exactly = antallKallAktoerreg) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+
         clearAllMocks()
     }
 

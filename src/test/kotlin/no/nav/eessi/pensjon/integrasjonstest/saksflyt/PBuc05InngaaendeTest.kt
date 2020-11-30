@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
@@ -40,7 +41,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 1 - Kun én person, mangler FNR`() {
-        testRunner(fnr = null) {
+        testRunner(fnr = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
@@ -48,7 +49,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 1 - Kun én person, ugyldig FNR`() {
-        testRunner(fnr = "1244091349018340918341029") {
+        testRunner(fnr = "1244091349018340918341029", hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
