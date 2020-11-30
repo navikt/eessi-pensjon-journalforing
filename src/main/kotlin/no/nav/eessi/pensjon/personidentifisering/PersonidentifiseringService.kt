@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
@@ -28,7 +27,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                                   private val fdatoHelper: FdatoHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
-    private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
 
     companion object {
         fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
@@ -38,9 +36,9 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
-    fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
+    fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType): IdentifisertPerson? {
         val identifisertePersoner = hentIdentifisertePersoner(navBruker, alleSediBuc, bucType)
-        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType)
+        return identifisertPersonUtvelger(identifisertePersoner, bucType)
     }
 
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
@@ -94,17 +92,10 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     /**
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
-    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
+    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType): IdentifisertPerson? {
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
-
-        val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
-        if (forsikretPerson != null)
-            return forsikretPerson
-
         return when {
             identifisertePersoner.isEmpty() -> null
-
-
             bucType == BucType.R_BUC_02 -> {
                 return run {
                     val forstPersonIdent = identifisertePersoner.first()
@@ -113,7 +104,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 }
             }
             bucType == BucType.P_BUC_02 -> {
-                identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             }
             bucType == BucType.P_BUC_05 -> {
                 logger.debug("identifisertePersoner P_BUC_05")
@@ -133,13 +124,12 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     pers
                 }
             }
-
             bucType == BucType.P_BUC_10 -> {
                 logger.debug("identifiserte personer P_BUC_10: ")
                 identifisertePersoner.forEach {
                     logger.debug(it.toJson())
                 }
-                val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                val person = identifisertePersoner.firstOrNull {it.personRelasjon.relasjon == Relasjon.FORSIKRET}
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
 
                 if (person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
@@ -154,15 +144,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
             }
         }
-    }
-    /**
-     * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
-     */
-    private fun brukForsikretPerson(sedType: SedType?, identifisertePersoner: List<IdentifisertPerson>): IdentifisertPerson? {
-        if (sedType in brukForikretPersonISed) {
-            return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-        }
-        return null
     }
 
     /**
