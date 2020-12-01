@@ -73,8 +73,8 @@ internal open class JournalforingTestBase {
         const val FNR_VOKSEN_2 = "01118543352"
         const val FNR_BARN = "01110854352"
 
-        private const val AKTOER_ID = "0123456789000"
-        private const val AKTOER_ID_2 = "0009876543210"
+        const val AKTOER_ID = "0123456789000"
+        const val AKTOER_ID_2 = "0009876543210"
     }
 
     protected val euxKlient: EuxKlient = mockk()
@@ -199,10 +199,6 @@ internal open class JournalforingTestBase {
         assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         val request = journalpost.captured
-        if (hendelseType == HendelseType.SENDT)
-            assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
-        else
-            assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
 
         assertBlock(request)
 
@@ -215,8 +211,16 @@ internal open class JournalforingTestBase {
         val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
         verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
 
-        val antallKallTilPensjonSaklist = if (antallPersoner > 0 && sakId != null) 1 else 0
-        verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
+        if (hendelseType == HendelseType.SENDT) {
+            assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
+
+            val antallKallTilPensjonSaklist = if (antallPersoner > 0 && sakId != null) 1 else 0
+            verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
+        } else {
+            assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
+
+            verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
+        }
 
         clearAllMocks()
     }
@@ -268,7 +272,7 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
-        val gyldigFnr: Boolean = sakId != null && fnr != null && fnr.length == 11
+        val gyldigFnr: Boolean = fnr != null && fnr.length == 11
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
         verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
 
@@ -461,17 +465,10 @@ internal open class JournalforingTestBase {
     """.trimIndent()
     }
 
-    protected fun mockAllDocumentsBuc(document: List<Triple<String, String, String>>): String {
-        val sb = StringBuilder()
-        sb.append("[").appendln()
-        document.forEach {
-            sb.append( singleActionDocument(it.first, it.second, it.third) )
-                    .append(",")
-        }
-        val st = sb.toString()
-        val s = st.substring(0, st.length - 1)
-        return "$s \n]"
-    }
+    protected fun mockAllDocumentsBuc(document: List<Triple<String, String, String>>): String =
+            document.joinToString(prefix = "[", postfix = "]") {
+                singleActionDocument(it.first, it.second, it.third)
+            }
 
     private fun singleActionDocument(documentid: String, documentType: String, status: String): String {
         return """{

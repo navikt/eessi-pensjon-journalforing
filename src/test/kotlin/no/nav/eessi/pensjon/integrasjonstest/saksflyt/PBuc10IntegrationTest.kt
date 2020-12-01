@@ -33,20 +33,9 @@ import org.junit.jupiter.api.Test
 internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     companion object {
-        private const val FNR_OVER_60 = "01115043352"
-        private const val FNR_VOKSEN = "01119043352"
-        private const val FNR_VOKSEN_2 = "01118543352"
-        private const val FNR_BARN = "01110854352"
-
-        private const val AKTOER_ID = "0123456789000"
-        private const val AKTOER_ID_2 = "0009876543210"
-
-        private const val SAK_ID = "12345"
-
         private const val KRAV_ALDER = "01"
         private const val KRAV_UFORE = "03"
         private const val KRAV_GJENLEV = "02"
-
     }
 
     @Nested
