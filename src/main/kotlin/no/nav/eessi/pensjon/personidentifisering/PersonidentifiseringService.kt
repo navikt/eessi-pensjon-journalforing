@@ -39,11 +39,12 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     }
 
     fun hentIdentifisertPerson(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
-        val identifisertePersoner = hentIdentifisertePersoner(navBruker, alleSediBuc, bucType)
-        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType)
+        val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(alleSediBuc)
+        val identifisertePersoner = hentIdentifisertePersoner(navBruker, alleSediBuc, bucType, potensiellePersonRelasjoner)
+        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
 
-    fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?): List<IdentifisertPerson> {
+    fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
 
@@ -62,7 +63,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC")
             val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
             try {
-                val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
+                //val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(alleSediBuc)
                 logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
                     val personen = personV3Service.hentPerson(personRelasjon.fnr)
@@ -81,6 +82,10 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
+    fun potensiellePersonRelasjonfraSed(alleSediBuc: List<String?>): List<PersonRelasjon> {
+        return fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
+    }
+
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
@@ -94,7 +99,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     /**
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
-    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
+    fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?, potensiellePersonRelasjoner: List<PersonRelasjon>): IdentifisertPerson? {
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
 
         val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
@@ -122,15 +127,22 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 }
 
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                val relasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE || it.relasjon == Relasjon.ANNET }?.relasjon
+                logger.info("personrelasjon: $relasjon")
 
                 if (gjenlev != null) {
+                    logger.debug("gjenlevende")
                     gjenlev
-                } else {
+                } else if (relasjon == null) {
+                    logger.debug("forsikret")
                     val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
 
-                    //barn eller forsorger rskal leggesd til på person/forsikret
+                    //barn eller forsorger skal legges til på person/forsikret
                     pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                     pers
+                } else {
+                    logger.debug("annet relasjon")
+                    null
                 }
             }
 
