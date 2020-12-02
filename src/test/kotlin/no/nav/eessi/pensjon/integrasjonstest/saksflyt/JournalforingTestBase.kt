@@ -37,7 +37,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
@@ -327,10 +327,11 @@ internal open class JournalforingTestBase {
 
     protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
         val fdato = try {
-            fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() } ?: "1962-07-18"
-        } catch (ex: Exception) {
+            Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1962-07-18"
+        } catch (e: IllegalArgumentException) {
             "1962-07-18"
         }
+
         return """
             {
                 "person": {
