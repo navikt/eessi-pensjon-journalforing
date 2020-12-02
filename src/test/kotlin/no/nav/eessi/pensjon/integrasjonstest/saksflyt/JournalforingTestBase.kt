@@ -326,8 +326,11 @@ internal open class JournalforingTestBase {
     }
 
     protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
-        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() } ?: "1962-07-18"
-
+        val fdato = try {
+            fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() } ?: "1962-07-18"
+        } catch (ex: Exception) {
+            "1962-07-18"
+        }
         return """
             {
                 "person": {

@@ -70,11 +70,13 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     logger.debug("Relasjon fnr : $fnr")
                     val trimmetfnr = fnr.let { trimFnrString(it) }
                     val personen = if (erFnrDnrFormat(trimmetfnr)) {
+                            logger.debug("henter Person med fnr fra SED")
                             personV3Service.hentPerson(trimmetfnr)
                         } else {
+                            logger.warn("ingen gyldig fnr fra SED")
                             null
                         }
-                    logger.debug("PersonV3 person: ${personen != null}")
+                    logger.debug("PersonV3 person: $personen")
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(
                                 personen,
@@ -133,25 +135,24 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 identifisertePersoner.forEach {
                     logger.debug(it.toJson())
                 }
-
+                val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
                 val relasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE || it.relasjon == Relasjon.ANNET }?.relasjon
                 logger.info("personrelasjon: $relasjon")
 
                 if (gjenlev != null) {
-                    logger.debug("gjenlevende")
+                    logger.debug("gjenlevende:  (relasjon: $relasjon) ")
                     gjenlev
                 } else if (relasjon == Relasjon.GJENLEVENDE) {
-                    gjenlev
+                    logger.debug("gjenlevende null:  (relasjon: $relasjon) ")
+                    null
                 } else if (relasjon != Relasjon.GJENLEVENDE) {
-                    logger.debug("forsikret")
-                    val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-
+                    logger.debug("forsikret:")
                     //barn eller forsorger skal legges til på person/forsikret
-                    pers?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                    pers
+                    person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                    person
                 } else {
-                    logger.debug("annet relasjon")
+                    logger.debug("ukjent relasjon (relasjon: $relasjon) ")
                     null
                 }
             }

@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_05 - Inngående Journalføring - IntegrationTest")
@@ -174,15 +175,15 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
-//        testRunner(FNR_VOKSEN, sakId = null, hendelseType = HendelseType.MOTTATT) {
-//            assertEquals(PENSJON, it.tema)
-//            assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
-//        }
-//
-//        testRunner(FNR_BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
-//            assertEquals(PENSJON, it.tema)
-//            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-//        }
+        testRunner(FNR_VOKSEN, sakId = null, hendelseType = HendelseType.MOTTATT) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+        }
+
+        testRunner(FNR_BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
+            assertEquals(PENSJON, it.tema)
+            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+        }
     }
 
     @Test
@@ -262,6 +263,157 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(FNR_VOKSEN, it.bruker!!.id)
         }
     }
+
+    @Nested
+    inner class Scenario5 {
+        @Test
+        fun `2 personer angitt, gyldig fnr og ugyldig annenperson, rolle er 02, bosatt utland del 1`() {
+            val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            initCommonMocks(sed)
+
+            val voksen = createBrukerWith(FNR_OVER_60, "Voksen", "Vanlig", "SWE", "1213", null)
+            every { personV3Service.hentPerson(FNR_OVER_60) } returns voksen
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
+            every { personV3Service.hentPerson(FNR_BARN) } returns null
+
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(FNR_OVER_60, request.bruker!!.id)
+
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        }
+
+        @Test
+        fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt utland del 2`() {
+            val valgtFNR = FNR_VOKSEN
+            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            initCommonMocks(sed)
+
+            val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "SWE", "1213", null)
+            every { personV3Service.hentPerson(valgtFNR) } returns voksen
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(valgtFNR)) } returns AktoerId(AKTOER_ID)
+            every { personV3Service.hentPerson(FNR_BARN) } returns null
+
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORE_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(valgtFNR, request.bruker!!.id)
+
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        }
+
+        @Test
+        fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 3`() {
+            val valgtFNR = FNR_VOKSEN
+            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            initCommonMocks(sed)
+
+            val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
+            every { personV3Service.hentPerson(valgtFNR) } returns voksen
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(valgtFNR)) } returns AktoerId(AKTOER_ID)
+            every { personV3Service.hentPerson(FNR_BARN) } returns null
+
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
+            assertEquals(valgtFNR, request.bruker!!.id)
+
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        }
+
+        @Test
+        fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 4`() {
+            val valgtFNR = FNR_OVER_60
+            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            initCommonMocks(sed)
+
+            val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
+            every { personV3Service.hentPerson(valgtFNR) } returns voksen
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(valgtFNR)) } returns AktoerId(AKTOER_ID)
+            every { personV3Service.hentPerson(FNR_BARN) } returns null
+
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+            assertEquals(valgtFNR, request.bruker!!.id)
+
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        }
+
+    }
+
+//    @Test
+//    fun `Scenario 5 to personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge`() {
+//        testRunnerFlerePersoner(FNR_OVER_60, "231231", rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "NOR") {
+//            assertEquals(PENSJON, it.tema)
+//            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+//            assertEquals(FNR_OVER_60, it.bruker!!.id)
+//        }
+//
+//        testRunnerFlerePersoner(FNR_VOKSEN, "231231", rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "NOR") {
+//            assertEquals(PENSJON, it.tema)
+//            assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+//            assertEquals(FNR_VOKSEN, it.bruker!!.id)
+//        }
+//
+//    }
 
     @Test
     fun `Scenario 6 - To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt norge`() {
