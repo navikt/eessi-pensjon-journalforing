@@ -66,7 +66,15 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 //val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(alleSediBuc)
                 logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
-                    val personen = personV3Service.hentPerson(personRelasjon.fnr)
+                    val fnr = personRelasjon.fnr
+                    logger.debug("Relasjon fnr : $fnr")
+                    val trimmetfnr = fnr.let { trimFnrString(it) }
+                    val personen = if (erFnrDnrFormat(trimmetfnr)) {
+                            personV3Service.hentPerson(trimmetfnr)
+                        } else {
+                            null
+                        }
+                    logger.debug("PersonV3 person: ${personen != null}")
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(
                                 personen,
@@ -133,7 +141,9 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 if (gjenlev != null) {
                     logger.debug("gjenlevende")
                     gjenlev
-                } else if (relasjon == null) {
+                } else if (relasjon == Relasjon.GJENLEVENDE) {
+                    gjenlev
+                } else if (relasjon != Relasjon.GJENLEVENDE) {
                     logger.debug("forsikret")
                     val pers = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
 

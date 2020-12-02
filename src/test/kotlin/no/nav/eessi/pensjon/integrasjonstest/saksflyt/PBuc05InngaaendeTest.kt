@@ -147,7 +147,6 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns voksen
 
         val hendelse = createHendelseJson(SedType.P8000)
-
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
@@ -175,15 +174,15 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
-        testRunner(FNR_VOKSEN, sakId = null, hendelseType = HendelseType.MOTTATT) {
-            assertEquals(PENSJON, it.tema)
-            assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
-        }
-
-        testRunner(FNR_BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
-            assertEquals(PENSJON, it.tema)
-            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-        }
+//        testRunner(FNR_VOKSEN, sakId = null, hendelseType = HendelseType.MOTTATT) {
+//            assertEquals(PENSJON, it.tema)
+//            assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+//        }
+//
+//        testRunner(FNR_BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
+//            assertEquals(PENSJON, it.tema)
+//            assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+//        }
     }
 
     @Test
