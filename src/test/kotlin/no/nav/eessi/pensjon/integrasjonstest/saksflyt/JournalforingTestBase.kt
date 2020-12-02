@@ -37,7 +37,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
@@ -68,10 +68,10 @@ internal open class JournalforingTestBase {
     companion object {
         const val SAK_ID = "12345"
 
-        const val FNR_OVER_60 = "01115043352"
-        const val FNR_VOKSEN = "01119043352"
-        const val FNR_VOKSEN_2 = "01118543352"
-        const val FNR_BARN = "01110854352"
+        const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
+        const val FNR_VOKSEN = "11067122781"    // KRAFTIG VEGGPRYD
+        const val FNR_VOKSEN_2 = "22117320034"  // LEALAUS KAKE
+        const val FNR_BARN = "12011577847"      // STERK BUSK
 
         const val AKTOER_ID = "0123456789000"
         const val AKTOER_ID_2 = "0009876543210"
@@ -326,7 +326,11 @@ internal open class JournalforingTestBase {
     }
 
     protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
-        val fdato = fnr?.let { NavFodselsnummer(it).getBirthDateAsISO() } ?: "1962-07-18"
+        val fdato = try {
+            Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1962-07-18"
+        } catch (e: IllegalArgumentException) {
+            "1962-07-18"
+        }
 
         return """
             {

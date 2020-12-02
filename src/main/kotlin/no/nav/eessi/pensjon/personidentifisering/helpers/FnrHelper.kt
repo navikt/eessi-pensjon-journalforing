@@ -133,28 +133,27 @@ class FnrHelper {
         val personPin = filterPersonPinNode(sedRootNode)
         val annenPersonPin = filterAnnenpersonPinNodeUtenRolle(sedRootNode)
         val rolle = filterAnnenpersonRolle(sedRootNode)
+        logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
         //hvis to personer ingen rolle return uten pin..
         if (personPin != null && annenPersonPin != null && rolle == null) return
-        else if (annenPersonPin == null && rolle != null) return
-
-        logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
+        //else if (annenPersonPin == null && rolle != null) return
 
         personPin?.run {
             fnrListe.add(PersonRelasjon(this, Relasjon.FORSIKRET))
             logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
         }
 
-        annenPersonPin?.run {
+ //       annenPersonPin?.run {
             val annenPersonRelasjon = when (rolle) {
-                "01" -> PersonRelasjon(this, Relasjon.GJENLEVENDE)
-                "02" -> PersonRelasjon(this, Relasjon.FORSORGER)
-                "03" -> PersonRelasjon(this, Relasjon.BARN)
-                else -> PersonRelasjon(this, Relasjon.ANNET)
+                "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE)
+                "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER)
+                "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN)
+                else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET)
             }
             fnrListe.add(annenPersonRelasjon)
             logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
-        }
+   //     }
 
     }
 

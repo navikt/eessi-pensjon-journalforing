@@ -11,7 +11,6 @@ import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.SediBuc
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -125,7 +124,7 @@ class SedListener(
                             logger.info("*** Starter innkommende journalføring for SED ${sedHendelse.sedType} BUCtype: ${sedHendelse.bucType} bucid: ${sedHendelse.rinaSakId} ***")
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                             val listAlleSediBuc = SediBuc.getList(alleSedIBuc)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, listAlleSediBuc, sedHendelse.bucType, sedHendelse.sedType )
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, listAlleSediBuc, sedHendelse.bucType, sedHendelse.sedType)
                             val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val ytelseType = populerYtelseType(ytelseTypeFraSED, sakInformasjon, sedHendelse, MOTTATT)
