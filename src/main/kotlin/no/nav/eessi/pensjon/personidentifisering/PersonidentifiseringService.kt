@@ -67,7 +67,8 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 potensiellePersonRelasjoner.forEach { personRelasjon ->
                     val fnr = personRelasjon.fnr
                     logger.debug("Relasjon fnr : $fnr")
-                    val trimmetfnr = fnr.let { trimFnrString(it) }
+
+                    val trimmetfnr = trimFnrString(fnr)
                     val personen = if (erFnrDnrFormat(trimmetfnr)) {
                             logger.debug("henter Person med fnr fra SED")
                             personV3Service.hentPerson(trimmetfnr)
@@ -75,6 +76,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                             logger.warn("ingen gyldig fnr fra SED")
                             null
                         }
+
                     logger.debug("PersonV3 person: $personen")
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(

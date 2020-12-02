@@ -21,6 +21,7 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class PBuc05Test : JournalforingTestBase() {
@@ -33,6 +34,41 @@ internal class PBuc05Test : JournalforingTestBase() {
     /**
      * P_BUC_05 DEL 1
      */
+
+    @Test
+    fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
+        val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "01"), null)
+        every { euxKlient.hentSed(any(), any()) } returns sed
+
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns getResource("fagmodul/alldocumentsids.json")
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+
+        val voksen = createBrukerWith(FNR_OVER_60, "Voksen", "Vanlig", "NOR", "1213", null)
+        every { personV3Service.hentPerson(FNR_OVER_60) } returns voksen
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(AKTOER_ID)
+        every { personV3Service.hentPerson(JournalforingTestBase.FNR_BARN) } returns null
+
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val (journalpost, _) = initJournalPostRequestSlot()
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+        val request = journalpost.captured
+        assertEquals(PENSJON, request.tema)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+        assertNull(request.bruker)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+    }
 
     @Test
     fun `Hente opp korrekt fnr fra P8000 som er sendt fra oss med flere P8000 i BUC`() {

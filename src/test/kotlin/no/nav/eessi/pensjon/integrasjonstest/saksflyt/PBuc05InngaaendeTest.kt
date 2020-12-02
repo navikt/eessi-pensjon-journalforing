@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -391,6 +392,39 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(PENSJON, request.tema)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
+
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        }
+
+        @Test
+        fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
+            val valgtFNR = FNR_OVER_60
+            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "01"), null)
+            initCommonMocks(sed)
+
+            val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
+            every { personV3Service.hentPerson(valgtFNR) } returns voksen
+            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(valgtFNR)) } returns AktoerId(AKTOER_ID)
+            every { personV3Service.hentPerson(FNR_BARN) } returns null
+
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, _) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+            assertNull(request.bruker)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
