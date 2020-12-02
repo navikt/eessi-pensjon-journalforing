@@ -49,9 +49,6 @@ class FnrHelperTest {
         val expectedFnr = "67097097000"
         assertEquals(1,actual.size)
         assertTrue(actual.contains(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET)))
-        val nav = NavFodselsnummer(expectedFnr)
-        assertEquals(nav.isDNumber(), true)
-        assertEquals(nav.getBirthDateAsISO(), "1970-09-27")
     }
 
     @Test

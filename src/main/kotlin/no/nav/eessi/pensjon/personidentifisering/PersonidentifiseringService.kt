@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.NavFodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -18,7 +18,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Component
 class PersonidentifiseringService(private val aktoerregisterService: AktoerregisterService,
@@ -204,10 +203,10 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         throw RuntimeException("Kunne ikke finne fdato i listen over SEDer")
     }
 
-    private fun fodselsDatoFra(fnr: String) =
+    private fun fodselsDatoFra(fnr: String): LocalDate? =
             try {
                 val trimmedFnr = trimFnrString(fnr)
-                LocalDate.parse(NavFodselsnummer(trimmedFnr).getBirthDateAsISO(), DateTimeFormatter.ISO_DATE)
+                Fodselsnummer.fra(trimmedFnr)?.getBirthDate()
             } catch (ex: Exception) {
                 logger.error("navBruker ikke gyldig for fdato", ex)
                 null

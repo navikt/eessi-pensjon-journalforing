@@ -108,7 +108,6 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
-
     @Test
     fun `Scenario 3 manglende eller feil FNR-DNR - to personer angitt - etterlatte`() {
         val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)

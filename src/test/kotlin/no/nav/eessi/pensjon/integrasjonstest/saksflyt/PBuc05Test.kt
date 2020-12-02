@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test
 internal class PBuc05Test : JournalforingTestBase() {
 
     companion object {
-        private const val FNR_OVER_60 = "01115043352"
-        private const val FNR_BARN = "01110854352"
+        private const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
+        private const val FNR_BARN = "12011577847"      // STERK BUSK
     }
 
     /**
