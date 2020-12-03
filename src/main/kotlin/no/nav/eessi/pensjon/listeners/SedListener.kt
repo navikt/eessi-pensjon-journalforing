@@ -162,13 +162,11 @@ class SedListener(
         val aktoerId = identifisertPerson.aktoerId
         val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, sedHendelseModel.bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson, sedHendelseModel.bucType))
 
-        val sakInformasjonFraSED = if (gyldigeFunksjoner.togglePensjonSak()) {
-            logger.debug("skal hente pensjonSak for sed kap.1 og validere mot pesys")
-            if (sakInformasjonFraBestemSak == null) sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
-            else null
-        } else null
-
-        return sakInformasjonFraBestemSak ?: sakInformasjonFraSED
+        return if (sakInformasjonFraBestemSak == null && sedHendelseModel.bucType == BucType.P_BUC_05) {
+            logger.info("skal hente pensjonSak for sed kap.1 og validere mot pesys")
+            sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+        } else
+            sakInformasjonFraBestemSak
     }
 
     private fun populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed: YtelseType?, identifisertPerson: IdentifisertPerson?, bucType: BucType): YtelseType? {

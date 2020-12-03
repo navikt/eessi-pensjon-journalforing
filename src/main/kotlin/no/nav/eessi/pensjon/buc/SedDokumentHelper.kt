@@ -65,8 +65,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     }
 
     fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<String?>): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc)
-                ?.let { validerSakIdFraSEDogReturnerPensjonSak(aktoerId, it) }
+        return hentSakIdFraSED(alleSedIBuc)?.let { validerSakIdFraSEDogReturnerPensjonSak(aktoerId, it) }
     }
 
     private fun filterYtelseTypeR005(sedRootNode: JsonNode): String? {
@@ -119,11 +118,9 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
             return null
         }
-
-        logger.debug("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
+        logger.info("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
 
         val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
-
         return if (saklist.size > 1)
             gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
         else

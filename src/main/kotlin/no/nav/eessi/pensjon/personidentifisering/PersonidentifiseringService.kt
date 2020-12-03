@@ -111,7 +111,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
     fun identifisertPersonUtvelger(identifisertePersoner: List<IdentifisertPerson>, bucType: BucType, sedType: SedType?, potensiellePersonRelasjoner: List<PersonRelasjon>): IdentifisertPerson? {
-        logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}")
+        logger.info("IdentifisertePersoner $bucType, SedType: ${sedType?.name}, antall identifisertePersoner : ${identifisertePersoner.size} ")
 
         val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
         if (forsikretPerson != null)
@@ -119,8 +119,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
         return when {
             identifisertePersoner.isEmpty() -> null
-
-
             bucType == BucType.R_BUC_02 -> {
                 return run {
                     val forstPersonIdent = identifisertePersoner.first()
@@ -132,34 +130,25 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             }
             bucType == BucType.P_BUC_05 -> {
-                logger.debug("identifisertePersoner P_BUC_05")
                 identifisertePersoner.forEach {
                     logger.debug(it.toJson())
                 }
                 val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
-                val relasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE || it.relasjon == Relasjon.ANNET }?.relasjon
-                logger.info("personrelasjon: $relasjon")
+                val erGjenlevendeRelasjon = potensiellePersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
+                logger.info("personAktoerid: ${person?.aktoerId}, gjenlevAktoerid: ${gjenlev?.aktoerId} harGjenlvrelasjon: $erGjenlevendeRelasjon")
 
-                if (gjenlev != null) {
-                    logger.debug("gjenlevende:  (relasjon: $relasjon) ")
-                    gjenlev
-                } else if (relasjon == Relasjon.GJENLEVENDE) {
-                    logger.debug("gjenlevende null:  (relasjon: $relasjon) ")
-                    null
-                } else if (relasjon != Relasjon.GJENLEVENDE) {
-                    logger.debug("forsikret:")
-                    //barn eller forsorger skal legges til på person/forsikret
-                    person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                    person
-                } else {
-                    logger.debug("ukjent relasjon (relasjon: $relasjon) ")
-                    null
+                when {
+                    gjenlev != null -> gjenlev
+                    erGjenlevendeRelasjon ->  null
+                    else -> {
+                        person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                        person
+                    }
                 }
             }
 
             bucType == BucType.P_BUC_10 -> {
-                logger.debug("identifiserte personer P_BUC_10: ")
                 identifisertePersoner.forEach {
                     logger.debug(it.toJson())
                 }
