@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions
@@ -18,8 +19,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
-import java.nio.file.Files
-import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
 class Norg2KlientTest {
@@ -37,7 +36,7 @@ class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for utland`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -67,7 +66,7 @@ class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for Oslo`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -82,7 +81,7 @@ class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for Aalesund`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -97,7 +96,7 @@ class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter fra Norg2 avd Oslo`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"))
+        val response = ResponseEntity.ok().body(TestUtils.getResource("norg2/norg2arbeidsfordelig4803result.json"))
         doReturn(response)
                 .whenever(mockrestTemplate).exchange(
                         contains("/api/v1/arbeidsfordeling"),
@@ -119,7 +118,7 @@ class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter fra Utland`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"))
+        val response = ResponseEntity.ok().body(TestUtils.getResource("norg2/norg2arbeidsfordelig0001result.json"))
         doReturn(response)
                 .whenever(mockrestTemplate).exchange(
                         contains("/api/v1/arbeidsfordeling"),
@@ -139,7 +138,7 @@ class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter ved diskresjon`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"))
+        val response = ResponseEntity.ok().body(TestUtils.getResource("norg2/norg2arbeidsfordeling2103result.json"))
         doReturn(response)
                 .whenever(mockrestTemplate).exchange(
                         contains("/api/v1/arbeidsfordeling"),
@@ -166,10 +165,6 @@ class Norg2KlientTest {
                     landkode = "BOGUS",
                     diskresjonskode = "SPFO"))
         }
-    }
-
-    fun getJsonFileFromResource(filename: String): String {
-        return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 }
 

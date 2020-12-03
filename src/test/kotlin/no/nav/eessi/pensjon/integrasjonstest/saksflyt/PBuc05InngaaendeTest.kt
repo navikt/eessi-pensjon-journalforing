@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
@@ -475,11 +476,8 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
     }
 
     private fun initCommonMocks(sed: String) {
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns getResource("fagmodul/alldocumentsids.json")
         every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns TestUtils.getResource("fagmodul/alldocumentsids.json")
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json")
     }
-
-    private fun getResource(resourcePath: String): String? =
-            javaClass.classLoader.getResource(resourcePath)!!.readText()
 }

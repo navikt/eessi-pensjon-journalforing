@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType.H_BUC_07
@@ -41,8 +42,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -429,7 +428,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt utland`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enhetlist = mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
@@ -441,7 +440,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enhetlist = mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
@@ -454,7 +453,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt nord-Norge`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enhetlist = mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
@@ -467,7 +466,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for diskresjonkode`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enhetlist = mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
@@ -516,7 +515,7 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enhetlist = mapJsonToAny(TestUtils.getResource("norg2/norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
         doReturn(enhetlist)
                 .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
 
@@ -539,10 +538,6 @@ class OppgaveRoutingServiceTest {
 
         assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
 
-    }
-
-    private fun getJsonFileFromResource(filename: String): String {
-        return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 
     private fun mockerEnPerson() = IdentifisertPerson(

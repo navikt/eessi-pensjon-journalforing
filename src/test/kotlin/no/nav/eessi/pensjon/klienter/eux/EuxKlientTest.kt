@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.doThrow
+import no.nav.eessi.pensjon.TestUtils
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,8 +22,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import java.nio.file.Files
-import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
 class EuxKlientTest {
@@ -46,7 +45,7 @@ class EuxKlientTest {
         val rinaNr = "123"
         val dokumentId = "456"
         doReturn(
-                ResponseEntity(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))), HttpStatus.OK))
+                ResponseEntity(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"), HttpStatus.OK))
                 .`when`(mockrestTemplate).exchange(
                         eq("/buc/$rinaNr/sed/$dokumentId/filer"),
                         any(HttpMethod::class.java),

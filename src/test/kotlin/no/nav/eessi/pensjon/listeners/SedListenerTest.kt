@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
@@ -15,8 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.kafka.support.Acknowledgment
-import java.nio.file.Files
-import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
 class SedListenerTest {
@@ -52,19 +51,19 @@ class SedListenerTest {
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr,  acknowledgment)
+        sedListener.consumeSedSendt(TestUtils.getResource("eux/hendelser/P_BUC_01_P2000.json"), cr,  acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))),cr, acknowledgment)
+        sedListener.consumeSedMottatt(TestUtils.getResource("eux/hendelser/P_BUC_01_P2000.json"),cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/R_BUC_02_R005.json")
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }
@@ -73,7 +72,7 @@ class SedListenerTest {
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
         val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner,"test")
         sedListener2.initMetrics()
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/R_BUC_02_R005.json")
 
         sedListener2.consumeSedMottatt(hendelse, cr, acknowledgment)
         verify(acknowledgment).acknowledge()
@@ -98,7 +97,7 @@ class SedListenerTest {
 
     @Test
     fun `Mottat og sendt Sed med ugyldige verdier kaster exception`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/BAD_BUC_01.json")
         //denne inneholder da ikke guldig P eller H_BUC_07
         assertThrows<JournalforingException> {
             sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
@@ -111,21 +110,21 @@ class SedListenerTest {
 
     @Test
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/FB_BUC_01_F001.json")
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
         verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/FB_BUC_01_F001.json")
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
         verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
     }
 
     @Test
     fun `gitt en mottatt hendelse inneholder H_BUC_07 skal behandlsens og resultat blie true`()  {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json")))
+        val hendelse = TestUtils.getResource("eux/hendelser/H_BUC_07_H070.json")
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }

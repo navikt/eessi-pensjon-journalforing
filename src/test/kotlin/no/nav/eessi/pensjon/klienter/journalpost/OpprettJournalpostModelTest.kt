@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
@@ -9,8 +10,6 @@ import no.nav.eessi.pensjon.models.Tema
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.nio.file.Files
-import java.nio.file.Paths
 
 internal class OpprettJournalpostModelTest {
     @Test
@@ -53,7 +52,7 @@ internal class OpprettJournalpostModelTest {
     @Test
     fun `Gitt en gyldig journalpostRequest json når mapping så skal alle felter mappes`() {
 
-        val opprettJournalpostRequestJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostRequest.json")))
+        val opprettJournalpostRequestJson = TestUtils.getResource("journalpost/opprettJournalpostRequest.json")
 
         val opprettJournalpostRequest = mapJsonToAny(opprettJournalpostRequestJson, typeRefs<OpprettJournalpostRequest>())
         assertEquals(opprettJournalpostRequest.behandlingstema, Behandlingstema.ALDERSPENSJON)
@@ -72,7 +71,7 @@ internal class OpprettJournalpostModelTest {
 
     @Test
     fun `Gitt en gyldig journalpostResponse json når mapping så skal alle felter mappes`() {
-        val opprettjournalpostResponseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
+        val opprettjournalpostResponseJson: String = TestUtils.getResource("journalpost/opprettJournalpostResponse.json")
         val opprettJournalpostResponse = mapJsonToAny(opprettjournalpostResponseJson, typeRefs<OpprettJournalPostResponse>())
         assertEquals(opprettJournalpostResponse.journalpostId, "429434378")
         assertEquals(opprettJournalpostResponse.journalstatus, "M")

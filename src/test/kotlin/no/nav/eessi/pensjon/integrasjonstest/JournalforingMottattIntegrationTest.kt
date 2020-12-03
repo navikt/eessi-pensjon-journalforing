@@ -1,6 +1,11 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.spyk
+import io.mockk.verify
+import no.nav.eessi.pensjon.TestUtils
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
@@ -33,8 +38,6 @@ import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -93,21 +96,21 @@ class JournalforingMottattIntegrationTest {
 
     private fun produserSedHendelser(sedMottattProducerTemplate: KafkaTemplate<Int, String>) {
         // Sender 1 Foreldre SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json"))))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/FB_BUC_01_F001.json"))
 
         // Seder 1 i H_BUC_07 SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json"))))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/H_BUC_07_H070.json"))
 
         // Sender Pensjon SED til Kafka
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_05_X008.json"))))
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json"))))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/P_BUC_01_P2000.json"))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/P_BUC_03_P2200.json"))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/P_BUC_05_X008.json"))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json"))
 
         // Sender Sed med ugyldig FNR
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json"))))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json"))
 
-        sedMottattProducerTemplate.sendDefault(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json"))))
+        sedMottattProducerTemplate.sendDefault(TestUtils.getResource("eux/hendelser/R_BUC_02_R005.json"))
 
     }
 
@@ -162,7 +165,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
+                            .withBody(TestUtils.getResource("sed/STStoken.json"))
                     )
 
             // Mocker Eux PDF generator
@@ -173,7 +176,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
             mockServer.`when`(
                     request()
@@ -182,7 +185,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
             mockServer.`when`(
                     request()
@@ -191,7 +194,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
             mockServer.`when`(
                     request()
@@ -200,7 +203,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
             mockServer.`when`(
                     request()
@@ -209,7 +212,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
 
             mockServer.`when`(
@@ -219,7 +222,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseMedUgyldigMimeType.json"))
                     )
 
             mockServer.`when`(
@@ -229,7 +232,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
+                            .withBody(TestUtils.getResource("pdf/pdfResponseUtenVedlegg.json"))
                     )
 
             //Mock eux hent sed R_BUC_02 -- R005 sed
@@ -240,7 +243,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R005-alderpensjon-NAV.json"))))
+                            .withBody(TestUtils.getResource("sed/R005-alderpensjon-NAV.json"))
                     )
 
             //Mock eux hent sed R_BUC_02 -- H070 sed
@@ -251,7 +254,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02_H070-NAV.json"))))
+                            .withBody(TestUtils.getResource("sed/R_BUC_02_H070-NAV.json"))
                     )
 
 
@@ -262,7 +265,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
+                            .withBody(TestUtils.getResource("eux/SedResponseP2000.json"))
                     )
             mockServer.`when`(
                     request()
@@ -271,7 +274,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
+                            .withBody(TestUtils.getResource("eux/SedResponseP2000.json"))
                     )
             mockServer.`when`(
                     request()
@@ -280,7 +283,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
+                            .withBody(TestUtils.getResource("eux/SedResponseP2000.json"))
                     )
             mockServer.`when`(
                     request()
@@ -289,7 +292,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
+                            .withBody(TestUtils.getResource("eux/SedResponseP2000.json"))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
@@ -300,7 +303,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsR_BUC_02.json"))))
+                            .withBody(TestUtils.getResource("fagmodul/alldocumentsidsR_BUC_02.json"))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
@@ -311,7 +314,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
+                            .withBody(TestUtils.getResource("fagmodul/alldocuments_ugyldigFNR_ids.json"))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments -
@@ -322,7 +325,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsH_BUC_07.json"))))
+                            .withBody(TestUtils.getResource("fagmodul/alldocumentsidsH_BUC_07.json"))
                     )
 
             //Mock fagmodul /buc/{rinanr}/allDocuments
@@ -333,7 +336,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
+                            .withBody(TestUtils.getResource("fagmodul/alldocumentsids.json"))
                     )
 
             //Mock eux hent av sed - ugyldig FNR
@@ -344,7 +347,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-ugyldigFNR-NAV.json"))))
+                            .withBody(TestUtils.getResource("sed/P2000-ugyldigFNR-NAV.json"))
                     )
 
             //Mock eux hent av sed
@@ -355,7 +358,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json"))))
+                            .withBody(TestUtils.getResource("sed/P2000-NAV.json"))
                     )
 
             //Mock eux hent av sed
@@ -366,7 +369,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
+                            .withBody(TestUtils.getResource("buc/H070-NAV.json"))
                     )
 
             // Mocker journalføringstjeneste
@@ -377,7 +380,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
+                            .withBody(TestUtils.getResource("journalpost/opprettJournalpostResponse.json"))
                     )
 
             //Mock norg2tjeneste
@@ -385,11 +388,11 @@ class JournalforingMottattIntegrationTest {
                     request()
                             .withMethod(HttpMethod.POST.name)
                             .withPath("/api/v1/arbeidsfordeling")
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordeling4803request.json")))))
+                            .withBody(TestUtils.getResource("norg2/norg2arbeidsfordeling4803request.json")))
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
+                            .withBody(TestUtils.getResource("norg2/norg2arbeidsfordelig4803result.json"))
                     )
 
             // Mocker aktørregisteret
@@ -404,7 +407,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
+                            .withBody(TestUtils.getResource("aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))
                     )
             // Mocker STS service discovery
             mockServer.`when`(
@@ -433,7 +436,7 @@ class JournalforingMottattIntegrationTest {
                     .respond(HttpResponse.response()
                             .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                             .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
+                            .withBody(TestUtils.getResource("pen/bestemSakResponse.json"))
                     )
 
             // Mocker oppdaterDistribusjonsinfo
