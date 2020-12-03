@@ -369,7 +369,6 @@ internal open class JournalforingTestBase {
     }
 
     protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): String {
-
         return """
             {
               "nav": {
@@ -517,4 +516,31 @@ internal open class JournalforingTestBase {
     """.trimIndent()
     }
 
+    protected fun createP9000(fnr: String, eessiSaknr: String? = null): String {
+        return """
+            {
+              "nav": {
+                  ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
+                 "bruker": {
+                  "person": {
+                    "kjoenn": "M",
+                    "etternavn": "KRAFTIG",
+                    "fornavn": "VEGGPRYD",
+                    "pin": [
+                      {
+                        "identifikator": "$fnr",
+                        "land": "NO"
+                      }
+                    ],
+                    "foedselsdato": "2000-01-01"
+                  }
+                }
+              },
+              "sed": "P9000",
+              "sedGVer": "4",
+              "sedVer": "2"
+            }
+        """.trimIndent()
+
+    }
 }

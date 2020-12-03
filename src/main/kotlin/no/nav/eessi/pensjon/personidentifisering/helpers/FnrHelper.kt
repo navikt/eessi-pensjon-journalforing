@@ -43,10 +43,12 @@ class FnrHelper {
                                 null
                             }
                             val ytelseType =  ytelseTypefraKravSed(krav)
-                            logger.debug("P15000 krav: $krav")
+                            logger.info("P15000 krav: $krav  ytelsetype: $ytelseType")
                             if (krav == "02") {
+                                logger.debug("legger til gjenlevende: ($ytelseType)")
                                 leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
                             } else {
+                                logger.debug("legger til forsikret: ($ytelseType)")
                                 leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
                             }
                         }

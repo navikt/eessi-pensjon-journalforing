@@ -43,6 +43,10 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
 
+    fun potensiellePersonRelasjonfraSed(alleSediBuc: List<String?>): List<PersonRelasjon> {
+        return fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
+    }
+
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<String?>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
         val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
@@ -68,15 +72,15 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                     val fnr = personRelasjon.fnr
                     logger.debug("Relasjon fnr : $fnr")
 
+//                    val personen = Fodselsnummer.fra(fnr)?.let { personV3Service.hentPerson(it.value) }
                     val trimmetfnr = trimFnrString(fnr)
                     val personen = if (erFnrDnrFormat(trimmetfnr)) {
-                            logger.debug("henter Person med fnr fra SED")
-                            personV3Service.hentPerson(trimmetfnr)
-                        } else {
-                            logger.warn("ingen gyldig fnr fra SED")
-                            null
-                        }
-
+                        logger.debug("henter Person med fnr fra SED")
+                        personV3Service.hentPerson(trimmetfnr)
+                    } else {
+                        logger.warn("ingen gyldig fnr fra SED")
+                        null
+                    }
                     logger.debug("PersonV3 person: $personen")
                     if (personen != null) {
                         val identifisertPerson = populerIdentifisertPerson(
@@ -91,10 +95,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             }
             return identifisertePersonRelasjoner
         }
-    }
-
-    fun potensiellePersonRelasjonfraSed(alleSediBuc: List<String?>): List<PersonRelasjon> {
-        return fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
     }
 
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
@@ -138,14 +138,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 val erGjenlevendeRelasjon = potensiellePersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
                 logger.info("personAktoerid: ${person?.aktoerId}, gjenlevAktoerid: ${gjenlev?.aktoerId} harGjenlvrelasjon: $erGjenlevendeRelasjon")
 
-                when {
-                    gjenlev != null -> gjenlev
-                    erGjenlevendeRelasjon ->  null
-                    else -> {
-                        person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                        person
-                    }
-                }
+                utvelgerPersonOgGjenlev(gjenlev, erGjenlevendeRelasjon, person, identifisertePersoner)
             }
 
             bucType == BucType.P_BUC_10 -> {
@@ -154,12 +147,10 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
                 }
                 val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                 val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+                val erGjenlevendeYtelse = potensiellePersonRelasjoner.any { it.ytelseType == YtelseType.GJENLEV }
+                logger.info("personAktoerid: ${person?.aktoerId}, gjenlevAktoerid: ${gjenlev?.aktoerId}, harGjenlevYtelse: $erGjenlevendeYtelse")
 
-                if (person?.personRelasjon?.ytelseType != YtelseType.GJENLEV) {
-                    person
-                } else {
-                    gjenlev
-                }
+                utvelgerPersonOgGjenlev(gjenlev, erGjenlevendeYtelse, person, identifisertePersoner)
             }
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
@@ -168,6 +159,19 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             }
         }
     }
+
+    //felles for P_BUC_05 og P_BUC_10
+    private fun utvelgerPersonOgGjenlev(gjenlev: IdentifisertPerson?, erGjenlevendeYtelse: Boolean, person: IdentifisertPerson?, identifisertePersoner: List<IdentifisertPerson>) =
+            when {
+                gjenlev != null -> gjenlev
+                erGjenlevendeYtelse -> null
+                else -> {
+                    person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+                    person
+                }
+            }
+
+
     /**
      * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
      */
@@ -253,3 +257,4 @@ fun hentPersonNavn(person: Person) =
         person.personnavn?.sammensattNavn
 
 fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
+

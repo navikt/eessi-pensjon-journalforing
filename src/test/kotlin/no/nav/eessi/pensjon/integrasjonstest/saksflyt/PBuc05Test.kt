@@ -7,10 +7,9 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
@@ -28,7 +27,10 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     companion object {
         private const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
+        private const val FNR_VOKSEN = "11067122781"    // KRAFTIG VEGGPRYD
+        private const val FNR_VOKSEN_2 = "22117320034"  // LEALAUS KAKE
         private const val FNR_BARN = "12011577847"      // STERK BUSK
+
     }
 
     /**
@@ -316,8 +318,113 @@ internal class PBuc05Test : JournalforingTestBase() {
     }
 
     @Test
+    fun `Scenario 13 - 2 Sed sendes som svar med fnr pa tidligere mottatt P8000 ingen ident, svar sed med fnr og sakid i sed journalføres automatisk `() {
+        val fnr = FNR_VOKSEN
+        val aktoer = "${fnr}111"
+        val sakid = SAK_ID
+        val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")
+        val sedP9000sent = createP9000(fnr, sakid)
+
+        val alleDocumenter = mockAllDocumentsBuc( listOf(
+                Triple("10001", "P8000", "received"),
+                Triple("30002", "P9000", "sent")
+        ))
+
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.OMSORG, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = sakid, sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE)
+        )
+
+        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+
+        every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(aktoer)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+        val hendelse = createHendelseJson(SedType.P9000, BucType.P_BUC_05)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+        assertEquals(AUTOMATISK_JOURNALFORING, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+        assertEquals("P9000", oppgaveMelding.sedType?.name)
+
+        assertEquals("UTGAAENDE", request.journalpostType.name)
+        assertEquals(UFORETRYGD, request.tema)
+        assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
+        assertEquals(fnr, request.bruker?.id!!)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+    }
+
+    @Test
+    fun `Scenario 13 - 2 Sed sendes som svar med fnr pa tidligere mottatt P8000 ingen ident, svar sed med fnr og ingen sakid i sed journalføres UFO `() {
+        val fnr = FNR_VOKSEN
+        val aktoer = "${fnr}111"
+        val sakid = SAK_ID
+        val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")
+        val sedP9000sent = createP9000(fnr, sakid)
+
+        val alleDocumenter = mockAllDocumentsBuc( listOf(
+                Triple("10001", "P8000", "received"),
+                Triple("30002", "P9000", "sent")
+        ))
+
+        val saker = listOf(
+                SakInformasjon(sakId = "34234234", sakType = YtelseType.OMSORG, sakStatus = SakStatus.LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = YtelseType.GENRL, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "123123123123123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.LOPENDE)
+        )
+
+        every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+
+        every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(aktoer)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+
+        val hendelse = createHendelseJson(SedType.P9000, BucType.P_BUC_05)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+        assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+        assertEquals("P9000", oppgaveMelding.sedType?.name)
+
+        assertEquals("UTGAAENDE", request.journalpostType.name)
+        assertEquals(PENSJON, request.tema)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+        assertEquals(fnr, request.bruker?.id!!)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+
+    }
+
+    @Test
     fun `Scenario 13 - 3 Sed sendes som svar med fnr og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema NFP UTLAND AALESUND`() {
-        val fnr = "07115521999"
+        val fnr = FNR_VOKSEN
         val sakid = "1231232323"
         val aktoer = "${fnr}111"
         val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")
@@ -337,7 +444,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE),
                 SakInformasjon(sakId = "23232312", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = sakid, sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234234234", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
         )
         every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
 
@@ -370,12 +477,12 @@ internal class PBuc05Test : JournalforingTestBase() {
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
         assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
-        assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
         assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
         assertEquals("UTGAAENDE", request.journalpostType.name)
         assertEquals(PENSJON, request.tema)
-        assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -385,7 +492,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 13 - 4 Sed sendes som svar med fnr utland og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PENSJON UTLAND`() {
-        val fnr = "07115521999"
+        val fnr = FNR_VOKSEN
         val sakid = "1231232323"
         val aktoer = "${fnr}111"
         val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")
@@ -405,7 +512,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE),
                 SakInformasjon(sakId = "23232312", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = sakid, sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "123123123123123123", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
         )
         every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
 
@@ -438,12 +545,12 @@ internal class PBuc05Test : JournalforingTestBase() {
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
         assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
-        assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+        assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
         assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
         assertEquals("UTGAAENDE", request.journalpostType.name)
         assertEquals(PENSJON, request.tema)
-        assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+        assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -453,7 +560,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `Scenario 13 - 5 Sed sendes som svar med fnr og sak finnes og er UFOREP pa tidligere mottatt P8000, journalføres automatisk`() {
-        val fnr = "07115521999"
+        val fnr = FNR_VOKSEN
         val sakid = "1231232323"
         val aktoer = "${fnr}111"
         val sedP8000recevied = createSedJson(SedType.P8000, null, fdato = "1955-07-11")

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.test.assertNull
 
 @DisplayName("P_BUC_10 - Utgående journalføring - IntegrationTest")
 internal class PBuc10IntegrationTest : JournalforingTestBase() {
@@ -91,9 +92,32 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+                assertEquals(FNR_BARN, it.bruker?.id!!)
+            }
+        }
+
+        @Test
+        fun `Krav om barnepensjon ingen sak - id og fordeling`() {
+            val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
+
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(FNR_BARN, it.bruker?.id!!)
+            }
+        }
+
+        @Test
+        fun `Krav om barnepensjon - barn ukjent ident - id og fordeling`() {
+            val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
+
+            testRunnerBarn(FNR_VOKSEN, null, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertNull(it.bruker)
             }
         }
 
@@ -101,11 +125,26 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om barnepensjon - relasjon mangler - id og fordeling`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(FNR_BARN, it.bruker?.id!!)
             }
         }
+
+        @Test
+        fun `Test med Sed fra Rina BARNEP og bestemsak - automatisk`() {
+            val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = "22919587", sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
+            val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
+
+            val valgtbarnfnr = "05020876176"
+            testRunnerBarn("13017123321", "05020876176", bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = mockSED()) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+                assertEquals(valgtbarnfnr, it.bruker?.id!!)
+            }
+        }
+
     }
 
     @Nested
@@ -190,7 +229,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     Triple("10001212", "P15000", "sent")
             ))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -226,12 +265,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     Triple("10001212", "P15000", "sent")
             ))
 
-            testRunnerBarn(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
+            testRunnerBarn(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -248,6 +287,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
     }
 
+
+    private fun mockSED() : String {
+        return """
+            {"pensjon":{"gjenlevende":{"person":{"pin":[{"identifikator":"05020876176","land":"NO"}],"foedselsdato":"2008-02-05","etternavn":"TRANFLASKE","fornavn":"TYKKMAGET","kjoenn":"M","relasjontilavdod":{"relasjon":"06"}}}},"sedGVer":"4","nav":{"bruker":{"adresse":{"land":"NO","gate":"BEISKKÁNGEAIDNU 7","postnummer":"8803","by":"SANDNESSJØEN"},"person":{"fornavn":"BLÅ","pin":[{"land":"NO","institusjonsid":"NO:NAVAT07","institusjonsnavn":"NAV ACCEPTANCE TEST 07","identifikator":"13017123321"}],"kjoenn":"M","etternavn":"SKILPADDE","foedselsdato":"1971-01-13","statsborgerskap":[{"land":"NO"}]}},"eessisak":[{"institusjonsnavn":"NAV ACCEPTANCE TEST 07","saksnummer":"22919587","institusjonsid":"NO:NAVAT07","land":"NO"}],"krav":{"dato":"2020-10-01","type":"02"}},"sedVer":"2","sed":"P15000"}            
+        """.trimIndent()
+    }
+
+
+
     private fun testRunnerBarn(fnrVoksen: String,
                                fnrBarn: String?,
                                bestemSak: BestemSakResponse? = null,
@@ -257,10 +305,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                krav: String = KRAV_ALDER,
                                alleDocs: String,
                                relasjonAvod: String? = "06",
+                               sedJson: String? = null,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
 
-        val sed = createP15000(fnrVoksen, eessiSaknr = sakId, krav = krav, gfn = fnrBarn, relasjon = relasjonAvod)
+        val sed = sedJson ?: createP15000(fnrVoksen, eessiSaknr = sakId, krav = krav, gfn = fnrBarn, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
