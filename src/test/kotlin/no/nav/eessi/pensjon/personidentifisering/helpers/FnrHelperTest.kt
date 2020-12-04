@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.validateJson
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -48,7 +49,7 @@ class FnrHelperTest {
 
         val expectedFnr = "67097097000"
         assertEquals(1,actual.size)
-        assertTrue(actual.contains(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET)))
+        assertTrue(actual.contains(PersonRelasjon(expectedFnr,Relasjon.FORSIKRET, sedType = SedType.P2000)))
     }
 
     @Test
@@ -57,7 +58,7 @@ class FnrHelperTest {
                 getTestJsonFile("P2100-PinDK-NAV.json"),
                 getTestJsonFile("P2000-NAV.json")))
 
-        val expected = setOf(PersonRelasjon(fnr="67097097000", relasjon= Relasjon.FORSIKRET))
+        val expected = setOf(PersonRelasjon(fnr="67097097000", relasjon= Relasjon.FORSIKRET, sedType = SedType.P2000))
 
         assertEquals(1,actual.size)
         assertTrue(actual.containsAll(expected))
@@ -71,7 +72,7 @@ class FnrHelperTest {
 
         val expectedFnr = "21712000000"
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.ALDER), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.ALDER, SedType.P15000), actual.first())
     }
 
     @Test
@@ -82,7 +83,7 @@ class FnrHelperTest {
         ))
         val expectedFnr = "97097097000"
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.GJENLEV), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.GJENLEV, SedType.P15000), actual.first())
     }
 
     @Test
@@ -91,8 +92,8 @@ class FnrHelperTest {
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 getSedTestJsonFile("R005-avdod-enke-NAV.json")))
 
-        val enke = PersonRelasjon("28125518943", Relasjon.GJENLEVENDE)
-        val avdod = PersonRelasjon("28115518943", Relasjon.AVDOD)
+        val enke = PersonRelasjon("28125518943", Relasjon.GJENLEVENDE, sedType = SedType.R005)
+        val avdod = PersonRelasjon("28115518943", Relasjon.AVDOD, sedType = SedType.R005)
 
         assertEquals(2,actual.size)
         assertTrue(actual.contains(enke))
@@ -105,7 +106,7 @@ class FnrHelperTest {
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 getSedTestJsonFile("R_BUC_02-R005-AP.json")))
         assertEquals(1,actual.size)
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, sedType = SedType.R005), actual.first())
     }
 
     @Test
@@ -117,8 +118,8 @@ class FnrHelperTest {
     @Test
     fun `Gitt en R_BUC og sed R005 med flere flere personer så returner det en liste med Relasjon`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-personer-debitor-alderpensjon-NAV.json")))
-        val forste = PersonRelasjon("02087922262", Relasjon.ANNET)
-        val andre = PersonRelasjon("04117922400", Relasjon.ANNET)
+        val forste = PersonRelasjon("02087922262", Relasjon.ANNET, sedType = SedType.R005)
+        val andre = PersonRelasjon("04117922400", Relasjon.ANNET, sedType = SedType.R005)
 
         assertEquals(2,actual.size)
         assertTrue(actual.contains(forste))
@@ -132,7 +133,7 @@ class FnrHelperTest {
                         getSedTestJsonFile("R005-alderpensjon-NAV.json"),
                         getSedTestJsonFile("R_BUC_02_H070-NAV.json")
                 ))
-        val forste = PersonRelasjon("04117922400", Relasjon.ANNET)
+        val forste = PersonRelasjon("04117922400", Relasjon.ANNET, sedType = SedType.R005)
 
         assertEquals(1,actual.size)
         assertTrue(actual.contains(forste))
@@ -141,8 +142,8 @@ class FnrHelperTest {
     @Test
     fun `leter igjennom R_BUC_02 og R005 med flere person ikke avdød`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-enke-ikkeavdod-NAV.json")))
-        val enke = PersonRelasjon("28125518943", Relasjon.GJENLEVENDE)
-        val annen = PersonRelasjon("28115518943", Relasjon.ANNET)
+        val enke = PersonRelasjon("28125518943", Relasjon.GJENLEVENDE, sedType = SedType.R005)
+        val annen = PersonRelasjon("28115518943", Relasjon.ANNET, sedType = SedType.R005)
 
         assertEquals(2,actual.size)
         assertTrue(actual.contains(enke))
@@ -152,7 +153,7 @@ class FnrHelperTest {
     @Test
     fun `leter igjennom R_BUC_02 og R005 med kun en person debitor alderpensjon returnerer liste med en Relasjon`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(getSedTestJsonFile("R005-alderpensjon-NAV.json")))
-        val annen = PersonRelasjon("04117922400", Relasjon.ANNET)
+        val annen = PersonRelasjon("04117922400", Relasjon.ANNET, sedType = SedType.R005)
 
         assertEquals(1,actual.size)
         assertTrue(actual.contains(annen))
@@ -164,7 +165,7 @@ class FnrHelperTest {
                 getSedTestJsonFile("P5000-medNorskGjenlevende-NAV.json"),
                 getSedTestJsonFile("P2100-utenNorskGjenlevende-NAV.json")))
 
-        val expectedPersonRelasjon = PersonRelasjon("12312312312", Relasjon.GJENLEVENDE, null)
+        val expectedPersonRelasjon = PersonRelasjon("12312312312", Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
 
         assertEquals(1,actual.size)
 
@@ -387,8 +388,8 @@ class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100,mockP5000, mockP8000))
 
-        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null)
-        val expectedPersonRelasjon = PersonRelasjon("48035849680", Relasjon.GJENLEVENDE, null)
+        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null, sedType = SedType.P5000)
+        val expectedPersonRelasjon = PersonRelasjon("48035849680", Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
 
         assertEquals(2,actual.size)
 
@@ -468,8 +469,8 @@ class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100))
 
-        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null)
-        val expectedPersonRelasjon = PersonRelasjon("43003584968", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
+        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null, sedType = SedType.P2100)
+        val expectedPersonRelasjon = PersonRelasjon("43003584968", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P2100)
 
         assertEquals(2,actual.size)
 

@@ -397,7 +397,7 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
-    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05): String {
+    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
         return """
             {
               "id": 1869,
@@ -414,7 +414,7 @@ internal open class JournalforingTestBase {
               "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
               "rinaDokumentVersjon": "2",
               "sedType": "${sedType.name}",
-              "navBruker": null
+              "navBruker": ${forsikretFnr?.let { "\"$it\"" }}
             }
         """.trimIndent()
     }

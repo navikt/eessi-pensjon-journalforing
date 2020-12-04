@@ -54,46 +54,40 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
+            bucType == BucType.P_BUC_10 -> null
             erFnrDnrFormat(trimmetNavBruker) -> personV3Service.hentPerson(trimmetNavBruker!!)
             else -> null
         }
 
-        if (personForNavBruker != null) {
-            return listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
-
+        return if (personForNavBruker != null) {
+            listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
         } else {
             // Leser inn fnr fra utvalgte seder
-            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC")
-            val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
-            try {
-                //val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(alleSediBuc)
-                logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
-                potensiellePersonRelasjoner.forEach { personRelasjon ->
-                    val fnr = personRelasjon.fnr
-                    logger.debug("Relasjon fnr : $fnr")
+            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
+            potensiellePersonRelasjoner.mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc) }
+        }
+    }
 
-//                    val personen = Fodselsnummer.fra(fnr)?.let { personV3Service.hentPerson(it.value) }
-                    val trimmetfnr = trimFnrString(fnr)
-                    val personen = if (erFnrDnrFormat(trimmetfnr)) {
-                        logger.debug("henter Person med fnr fra SED")
-                        personV3Service.hentPerson(trimmetfnr)
-                    } else {
-                        logger.warn("ingen gyldig fnr fra SED")
-                        null
+    private fun hentIdentifisertPerson(relasjon: PersonRelasjon, alleSediBuc: List<String?>): IdentifisertPerson? {
+        logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
+
+        val fnr = trimFnrString(relasjon.fnr)
+
+        if (!erFnrDnrFormat(fnr)) {
+            logger.warn("Ingen gyldig Fnr/Dnr for personV3")
+            return null
+        }
+
+        return try {
+            personV3Service.hentPerson(fnr)
+                    ?.let { bruker -> populerIdentifisertPerson(bruker, alleSediBuc, relasjon) }
+                    ?.also {
+                        logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
+                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name}""".trimIndent())
                     }
-                    logger.debug("PersonV3 person: $personen")
-                    if (personen != null) {
-                        val identifisertPerson = populerIdentifisertPerson(
-                                personen,
-                                alleSediBuc,
-                                personRelasjon)
-                        identifisertePersonRelasjoner.add(identifisertPerson)
-                    }
-                }
-            } catch (ex: Exception) {
-                logger.warn("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten", ex)
-            }
-            return identifisertePersonRelasjoner
+        } catch (ex: Exception) {
+            logger.warn("Feil ved henting av person fra personV3Service, fortsetter uten", ex)
+            null
         }
     }
 
@@ -119,38 +113,17 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
         return when {
             identifisertePersoner.isEmpty() -> null
-            bucType == BucType.R_BUC_02 -> {
-                return run {
-                    val forstPersonIdent = identifisertePersoner.first()
-                    forstPersonIdent.personListe = identifisertePersoner
-                    forstPersonIdent
-                }
-            }
-            bucType == BucType.P_BUC_02 -> {
-                identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
-            }
+            bucType == BucType.R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
+            bucType == BucType.P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             bucType == BucType.P_BUC_05 -> {
-                identifisertePersoner.forEach {
-                    logger.debug(it.toJson())
-                }
-                val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
                 val erGjenlevendeRelasjon = potensiellePersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
-                logger.info("personAktoerid: ${person?.aktoerId}, gjenlevAktoerid: ${gjenlev?.aktoerId} harGjenlvrelasjon: $erGjenlevendeRelasjon")
 
-                utvelgerPersonOgGjenlev(gjenlev, erGjenlevendeRelasjon, person, identifisertePersoner)
+                utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
-
             bucType == BucType.P_BUC_10 -> {
-                identifisertePersoner.forEach {
-                    logger.debug(it.toJson())
-                }
-                val person = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                val gjenlev = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
                 val erGjenlevendeYtelse = potensiellePersonRelasjoner.any { it.ytelseType == YtelseType.GJENLEV }
-                logger.info("personAktoerid: ${person?.aktoerId}, gjenlevAktoerid: ${gjenlev?.aktoerId}, harGjenlevYtelse: $erGjenlevendeYtelse")
 
-                utvelgerPersonOgGjenlev(gjenlev, erGjenlevendeYtelse, person, identifisertePersoner)
+                utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
@@ -161,16 +134,24 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     }
 
     //felles for P_BUC_05 og P_BUC_10
-    private fun utvelgerPersonOgGjenlev(gjenlev: IdentifisertPerson?, erGjenlevendeYtelse: Boolean, person: IdentifisertPerson?, identifisertePersoner: List<IdentifisertPerson>) =
-            when {
-                gjenlev != null -> gjenlev
-                erGjenlevendeYtelse -> null
-                else -> {
-                    person?.personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
-                    person
+    private fun utvelgerPersonOgGjenlev(identifisertePersoner: List<IdentifisertPerson>, erGjenlevende: Boolean): IdentifisertPerson? {
+        identifisertePersoner.forEach {
+            logger.debug(it.toJson())
+        }
+        val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
+        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+        logger.info("personAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
+
+        return when {
+            gjenlevendePerson != null -> gjenlevendePerson
+            erGjenlevende -> null
+            else -> {
+                forsikretPerson?.apply {
+                    personListe = identifisertePersoner.filterNot { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
                 }
             }
-
+        }
+    }
 
     /**
      * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
@@ -238,7 +219,8 @@ data class IdentifisertPerson(
 data class PersonRelasjon(
         val fnr: String,
         val relasjon: Relasjon,
-        val ytelseType: YtelseType? = null
+        val ytelseType: YtelseType? = null,
+        val sedType: SedType? = null
 )
 
 enum class Relasjon {
