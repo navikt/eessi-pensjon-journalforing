@@ -33,7 +33,7 @@ class FnrHelper {
                     logger.info("SED: $sedType")
                     when (sedType) {
                         SedType.P2100 -> {
-                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
+                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, sedType = sedType)
                         }
                         SedType.P15000 -> {
                             val krav = try {
@@ -43,13 +43,13 @@ class FnrHelper {
                                 null
                             }
                             val ytelseType =  ytelseTypefraKravSed(krav)
-                            logger.info("P15000 krav: $krav  ytelsetype: $ytelseType")
+                            logger.info("${sedType.name}, krav: $krav,  ytelsetype: $ytelseType")
                             if (krav == "02") {
                                 logger.debug("legger til gjenlevende: ($ytelseType)")
-                                leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
+                                leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, ytelseType, sedType)
                             } else {
                                 logger.debug("legger til forsikret: ($ytelseType)")
-                                leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe, ytelseType)
+                                leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe, ytelseType, sedType)
                             }
                         }
                         SedType.R005 -> {
@@ -57,16 +57,16 @@ class FnrHelper {
                         }
                         SedType.P5000, SedType.P6000 -> {
                             // Prøver å hente ut gjenlevende på andre seder enn P2100
-                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
+                            leggTilGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, sedType = sedType)
                         }
                         SedType.P8000 -> {
                             leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sedRootNode, fnrListe)
                         }
                         else -> {
                             // P10000, P9000
-                            leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe)
+                            leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode, fnrListe, sedType = sedType)
                             //P2000 - P2200 -- andre..  (H070)
-                            leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe)
+                            leggTilForsikretFnrHvisFinnes(sedRootNode, fnrListe, sedType = sedType)
 
                         }
                     }
@@ -79,15 +79,15 @@ class FnrHelper {
         return fnrListe.distinctBy { it.fnr }
     }
 
-    private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
+    private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, sedType: SedType) {
         filterAnnenpersonPinNode(sedRootNode)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
+            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sedType))
         }
     }
 
-    private fun leggTilForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType?= null) {
+    private fun leggTilForsikretFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType?= null, sedType: SedType) {
         filterPersonPinNode(sedRootNode)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sedType = sedType))
         }
     }
 
@@ -100,25 +100,25 @@ class FnrHelper {
         }
     }
 
-    private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
+    private fun leggTilGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null, sedType: SedType) {
         filterPersonPinNode(sedRootNode)?.let{
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sedType = sedType))
             logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
 
         }
         filterGjenlevendePinNode(sedRootNode)?.let {
             val gjenlevendeRelasjon = finnGjenlevendeRelasjontilavdod(sedRootNode)
             if (gjenlevendeRelasjon == null) {
-                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE))
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sedType))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
                 return
             }
             val gyldigeBarn = listOf("06","07","08","09")
             if ( gyldigeBarn.contains(gjenlevendeRelasjon) ) {
-                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.BARNEP))
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.BARNEP, sedType = sedType))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
             } else {
-                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.GJENLEV))
+                fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = sedType))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
             }
         }
@@ -132,6 +132,7 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
+        val sedType = SedType.P8000
         val personPin = filterPersonPinNode(sedRootNode)
         val annenPersonPin = filterAnnenpersonPinNodeUtenRolle(sedRootNode)
         val rolle = filterAnnenpersonRolle(sedRootNode)
@@ -142,16 +143,16 @@ class FnrHelper {
         //else if (annenPersonPin == null && rolle != null) return
 
         personPin?.run {
-            fnrListe.add(PersonRelasjon(this, Relasjon.FORSIKRET))
+            fnrListe.add(PersonRelasjon(this, Relasjon.FORSIKRET, sedType = sedType))
             logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
         }
 
  //       annenPersonPin?.run {
             val annenPersonRelasjon = when (rolle) {
-                "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE)
-                "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER)
-                "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN)
-                else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET)
+                "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE, sedType = sedType)
+                "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER, sedType = sedType)
+                "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN, sedType = sedType)
+                else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET, sedType = sedType)
             }
             fnrListe.add(annenPersonRelasjon)
             logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
@@ -215,7 +216,7 @@ class FnrHelper {
             val enkelNode = it.get("person")
             val pin = finnPin(enkelNode)
             val type = getType(it)
-            personRelasjoner.add(PersonRelasjon(pin!!, type))
+            personRelasjoner.add(PersonRelasjon(pin!!, type, sedType = SedType.R005))
         }
         return personRelasjoner
     }

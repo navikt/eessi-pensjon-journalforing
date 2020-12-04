@@ -20,7 +20,9 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -89,6 +91,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om barnepensjon - automatisk`() {
+            val fnr = Fodselsnummer.fra("05020876176")
+            val validfnr = fnr?.getBirthDate()
+            val fnr2 = PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("05020876176"))
+            println("fnr $fnr, validfnr $validfnr, fnr2: $fnr2")
+
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
 
@@ -136,6 +143,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Test med Sed fra Rina BARNEP og bestemsak - automatisk`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = "22919587", sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = mockAllDocumentsBuc( listOf(Triple("10001212", "P15000", "sent")))
+            val fnr = Fodselsnummer.fra("05020876176")
+            println("fnr: $fnr")
 
             val valgtbarnfnr = "05020876176"
             testRunnerBarn("13017123321", "05020876176", bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = mockSED()) {
@@ -323,7 +332,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P15000, BucType.P_BUC_10)
+        val forsikretfnr = if (krav == KRAV_GJENLEV) fnrVoksen else null
+        val hendelse = createHendelseJson(SedType.P15000, BucType.P_BUC_10, forsikretfnr)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

@@ -72,7 +72,7 @@ class PersonidentifiseringServiceTest {
         val p6000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
         val h070 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json")))
         val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(p6000, h070), BucType.P_BUC_05, SedType.H070 )
-        val expected = PersonRelasjon("12078945602", Relasjon.FORSIKRET, null)
+        val expected = PersonRelasjon("12078945602", Relasjon.FORSIKRET, null, sedType = SedType.H070)
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -82,7 +82,7 @@ class PersonidentifiseringServiceTest {
 
         val p6000 = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P6000-gjenlevende-NAV.json")))
         val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(p6000), BucType.P_BUC_05, SedType.P6000 )
-        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, null)
+        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, null, SedType.P6000)
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -92,7 +92,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2100-PinNO.json")))
         val actual = personidentifiseringService.hentIdentifisertPerson (null, listOf(sed), BucType.P_BUC_02, SedType.H070 )
-        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, YtelseType.GJENLEV )
+        val expected = PersonRelasjon("05127921999", Relasjon.GJENLEVENDE, YtelseType.GJENLEV , sedType = SedType.P2100)
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -104,7 +104,7 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(sed)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
         val actual = personidentifiseringService.hentIdentifisertePersoner(null, listOf(sed), BucType.R_BUC_02, potensiellePerson)
-        val expected = PersonRelasjon("28115518943", Relasjon.AVDOD)
+        val expected = PersonRelasjon("28115518943", Relasjon.AVDOD, sedType = SedType.R005)
 
         val actutalRelasjon = actual.map { it.personRelasjon }.toList()
         assertTrue(actutalRelasjon.contains(expected))
@@ -119,7 +119,7 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(sed)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
         val actual = personidentifiseringService.hentIdentifisertePersoner(null, alleSediBuc, BucType.P_BUC_01, potensiellePerson )
-        val expected = PersonRelasjon("67097097000", Relasjon.FORSIKRET)
+        val expected = PersonRelasjon("67097097000", Relasjon.FORSIKRET, sedType = SedType.P2000)
         assertEquals(expected, actual.first().personRelasjon)
     }
 
@@ -500,8 +500,8 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = "02116921297"
         val gjenlevendeFnr = "28116925275"
 
-        val avdodPerson = IdentifisertPerson("","avgott Testesen", null,"NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET))
-        val gjenlevendePerson = IdentifisertPerson("","gjenlevende Testesen", null,"NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE))
+        val avdodPerson = IdentifisertPerson("","avgott Testesen", null,"NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100))
+        val gjenlevendePerson = IdentifisertPerson("","gjenlevende Testesen", null,"NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100))
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
 

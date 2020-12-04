@@ -54,6 +54,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
+            bucType == BucType.P_BUC_10 -> null
             erFnrDnrFormat(trimmetNavBruker) -> personV3Service.hentPerson(trimmetNavBruker!!)
             else -> null
         }
@@ -63,38 +64,69 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
         } else {
             // Leser inn fnr fra utvalgte seder
-            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC")
-            val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
-            try {
-                //val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(alleSediBuc)
-                logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
-                potensiellePersonRelasjoner.forEach { personRelasjon ->
-                    val fnr = personRelasjon.fnr
-                    logger.debug("Relasjon fnr : $fnr")
+            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
+            return newPersonV3hent(potensiellePersonRelasjoner, alleSediBuc)
+            //return oldPersonV3hent(potensiellePersonRelasjoner, alleSediBuc)
+        }
+    }
+
+    private fun newPersonV3hent(potensiellePersonRelasjoner: List<PersonRelasjon>, alleSediBuc: List<String?>): List<IdentifisertPerson> {
+        return potensiellePersonRelasjoner.mapNotNull { personRelasjon ->
+            logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
+            val fnr = personRelasjon.fnr
+            val erFnrDnr = erFnrDnrFormat(trimFnrString(fnr))
+            val identifisertPerson = if (erFnrDnr) {
+                try {
+                    logger.debug("henter Person med fnr fra SED")
+                    personV3Service.hentPerson(fnr)?.let { bruker ->
+                        populerIdentifisertPerson(
+                            bruker,
+                            alleSediBuc,
+                            personRelasjon)
+                    }
+                } catch (ex: Exception) {
+                    logger.warn("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten", ex)
+                    null
+                }
+            } else {
+                logger.warn("Ingen gyldig Fnr/Dnr for personV3")
+                null
+            }
+            logger.debug("IdentifisertPerson aktoerId: ${identifisertPerson?.aktoerId}, landkode: ${identifisertPerson?.landkode}, navn: ${identifisertPerson?.personNavn}, sed: ${identifisertPerson?.personRelasjon?.sedType?.name}")
+            identifisertPerson
+        }.toList()
+    }
+
+    private fun oldPersonV3hent(potensiellePersonRelasjoner: List<PersonRelasjon>, alleSediBuc: List<String?>): List<IdentifisertPerson> {
+        val identifisertePersonRelasjoner = mutableListOf<IdentifisertPerson>()
+        try {
+            logger.debug("funnet antall fnr fra SED : ${potensiellePersonRelasjoner.size}")
+            potensiellePersonRelasjoner.forEach { personRelasjon ->
+                val fnr = personRelasjon.fnr
+                logger.debug("Relasjon fnr : $fnr")
 
 //                    val personen = Fodselsnummer.fra(fnr)?.let { personV3Service.hentPerson(it.value) }
-                    val trimmetfnr = trimFnrString(fnr)
-                    val personen = if (erFnrDnrFormat(trimmetfnr)) {
-                        logger.debug("henter Person med fnr fra SED")
-                        personV3Service.hentPerson(trimmetfnr)
-                    } else {
-                        logger.warn("ingen gyldig fnr fra SED")
-                        null
-                    }
-                    logger.debug("PersonV3 person: $personen")
-                    if (personen != null) {
-                        val identifisertPerson = populerIdentifisertPerson(
-                                personen,
-                                alleSediBuc,
-                                personRelasjon)
-                        identifisertePersonRelasjoner.add(identifisertPerson)
-                    }
+                val trimmetfnr = trimFnrString(fnr)
+                val personen = if (erFnrDnrFormat(trimmetfnr)) {
+                    logger.debug("henter Person med fnr fra SED")
+                    personV3Service.hentPerson(trimmetfnr)
+                } else {
+                    logger.warn("ingen gyldig fnr fra SED")
+                    null
                 }
-            } catch (ex: Exception) {
-                logger.warn("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten", ex)
+                logger.debug("PersonV3 person: $personen")
+                if (personen != null) {
+                    val identifisertPerson = populerIdentifisertPerson(
+                            personen,
+                            alleSediBuc,
+                            personRelasjon)
+                    identifisertePersonRelasjoner.add(identifisertPerson)
+                }
             }
-            return identifisertePersonRelasjoner
+        } catch (ex: Exception) {
+            logger.warn("Feil ved henting av person / fødselsnummer fra SEDer, fortsetter uten", ex)
         }
+            return identifisertePersonRelasjoner
     }
 
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<String?>, personRelasjon: PersonRelasjon): IdentifisertPerson {
@@ -238,7 +270,8 @@ data class IdentifisertPerson(
 data class PersonRelasjon(
         val fnr: String,
         val relasjon: Relasjon,
-        val ytelseType: YtelseType? = null
+        val ytelseType: YtelseType? = null,
+        val sedType: SedType? = null
 )
 
 enum class Relasjon {
