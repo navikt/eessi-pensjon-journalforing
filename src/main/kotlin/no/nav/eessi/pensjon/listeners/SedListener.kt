@@ -182,7 +182,7 @@ class SedListener(
         if (sedHendelseModel.bucType == BucType.P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == YtelseType.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
         } else if (sedHendelseModel.bucType == BucType.P_BUC_10 && ytelseTypeFraSED == YtelseType.GJENLEV) {
-            return sakInformasjon?.sakType
+            return sakInformasjon?.sakType ?: ytelseTypeFraSED
         } else if (ytelseTypeFraSED != null) {
             return ytelseTypeFraSED
         }

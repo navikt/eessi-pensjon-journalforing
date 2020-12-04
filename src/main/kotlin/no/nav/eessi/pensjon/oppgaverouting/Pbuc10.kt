@@ -16,21 +16,52 @@ class Pbuc10 : BucTilEnhetHandler {
 
     override fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
         val sakInformasjon = request.sakInformasjon
-        if (request.ytelseType == YtelseType.UFOREP && request.hendelseType == HendelseType.SENDT && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET && sakInformasjon?.sakType == YtelseType.UFOREP) {
+        if (request.ytelseType == YtelseType.UFOREP && request.hendelseType == HendelseType.SENDT && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET && sakInformasjon.sakType == YtelseType.UFOREP) {
             return false
         }
         return super.kanAutomatiskJournalfores(request)
     }
 
     private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
-        return if (request.ytelseType == YtelseType.UFOREP && request.hendelseType == HendelseType.SENDT && request.sakInformasjon?.sakStatus == SakStatus.AVSLUTTET && request.sakInformasjon?.sakType == YtelseType.UFOREP) {
-            Enhet.ID_OG_FORDELING
-        } else if (request.bosatt == Bosatt.NORGE) {
-            if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLANDSTILSNITT
-            else Enhet.ID_OG_FORDELING
+        if (request.ytelseType == YtelseType.UFOREP && request.hendelseType == HendelseType.SENDT && request.sakInformasjon?.sakStatus == SakStatus.AVSLUTTET && request.sakInformasjon.sakType == YtelseType.UFOREP) return Enhet.ID_OG_FORDELING
+        return if (request.hendelseType == HendelseType.MOTTATT) {
+            routingMottatt(request)
         } else {
-            if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLAND
-            else Enhet.PENSJON_UTLAND
+            routingSendt(request)
         }
     }
+
+    private fun routingMottatt(request: OppgaveRoutingRequest): Enhet {
+        return when (request.bosatt) {
+            Bosatt.NORGE -> {
+                when (request.ytelseType) {
+                    YtelseType.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
+                    YtelseType.ALDER, YtelseType.GJENLEV -> Enhet.NFP_UTLAND_AALESUND
+                    else -> Enhet.ID_OG_FORDELING
+                }
+            }
+            else -> {
+                if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLAND
+                else Enhet.PENSJON_UTLAND
+            }
+        }
+
+    }
+
+    private fun routingSendt(request: OppgaveRoutingRequest): Enhet {
+        return when (request.bosatt) {
+            Bosatt.NORGE -> {
+                when (request.ytelseType) {
+                    YtelseType.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
+                    else -> Enhet.ID_OG_FORDELING
+                }
+            }
+            else -> {
+                if (request.ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLAND
+                else Enhet.PENSJON_UTLAND
+            }
+        }
+
+    }
 }
+
