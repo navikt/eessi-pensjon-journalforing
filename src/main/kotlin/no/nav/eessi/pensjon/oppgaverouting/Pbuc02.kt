@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
@@ -16,7 +15,7 @@ class Pbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
-            erUgyldig(request.sakInformasjon) -> Enhet.ID_OG_FORDELING
+            erUgyldig(request) -> Enhet.ID_OG_FORDELING
             automatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
             request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType)
             else -> handleUtland(request.ytelseType)
@@ -46,6 +45,10 @@ class Pbuc02 : BucTilEnhetHandler {
         else kanAutomatiskJournalfores(request)
     }
 
-    private fun erUgyldig(sakInfo: SakInformasjon?): Boolean =
-            sakInfo?.sakType == YtelseType.UFOREP && sakInfo.sakStatus == SakStatus.AVSLUTTET
+    private fun erUgyldig(request: OppgaveRoutingRequest): Boolean {
+        val sakInfo = request.sakInformasjon
+        val erUforepensjon = (request.ytelseType == YtelseType.UFOREP || sakInfo?.sakType == YtelseType.UFOREP)
+
+        return erUforepensjon && sakInfo?.sakStatus == SakStatus.AVSLUTTET
+    }
 }
