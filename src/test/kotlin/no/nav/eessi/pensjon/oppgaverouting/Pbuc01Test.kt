@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Test
@@ -30,6 +31,7 @@ internal class Pbuc01Test {
     @Test
     fun `Automatisk journalføring`() {
         val request = mockk<OppgaveRoutingRequest> {
+            every { hendelseType } returns HendelseType.SENDT
             every { diskresjonskode } returns null
             every { ytelseType } returns YtelseType.GENRL
             every { aktorId } returns "111"
@@ -42,6 +44,7 @@ internal class Pbuc01Test {
     @Test
     fun `Manuell behandling, bosatt norge`() {
         val request = mockk<OppgaveRoutingRequest> {
+            every { hendelseType } returns HendelseType.MOTTATT
             every { diskresjonskode } returns null
             every { ytelseType } returns null
             every { aktorId } returns null
@@ -55,6 +58,7 @@ internal class Pbuc01Test {
     @Test
     fun `Manuell behandling, bosatt utland`() {
         val request = mockk<OppgaveRoutingRequest> {
+            every { hendelseType } returns HendelseType.MOTTATT
             every { diskresjonskode } returns null
             every { ytelseType } returns null
             every { aktorId } returns null

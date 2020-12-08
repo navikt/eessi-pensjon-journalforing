@@ -4,34 +4,32 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
+/**
+ * R_BUC_02: Motregning av overskytende utbetaling i etterbetalinger
+ */
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        if (erStrengtFortrolig(request.diskresjonskode))
-            return Enhet.DISKRESJONSKODE
-        else if (automatiskBehandles(request))
-            return Enhet.AUTOMATISK_JOURNALFORING
-
-        if (request.identifisertPerson != null && request.identifisertPerson.flereEnnEnPerson()) {
-            return Enhet.ID_OG_FORDELING
+        return when {
+            erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
+            erPersonUgyldig(request.identifisertPerson) -> Enhet.ID_OG_FORDELING
+            request.sedType == SedType.R004 -> Enhet.OKONOMI_PENSJON
+            kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
+            else -> hentEnhetForYtelse(request)
         }
-
-        if (request.sedType == SedType.R004) {
-            return Enhet.OKONOMI_PENSJON
-        }
-
-        if (HendelseType.MOTTATT == request.hendelseType) {
-            return when (request.ytelseType) {
-                YtelseType.ALDER -> Enhet.PENSJON_UTLAND
-                YtelseType.UFOREP -> Enhet.UFORE_UTLAND
-                else -> Enhet.ID_OG_FORDELING
-            }
-        }
-        return Enhet.ID_OG_FORDELING
     }
 
-    private fun automatiskBehandles(request: OppgaveRoutingRequest): Boolean {
-        val identifisertPerson = request.identifisertPerson
-        return  (kanAutomatiskJournalfores(request)) && (request.hendelseType == HendelseType.SENDT && identifisertPerson != null && identifisertPerson.flereEnnEnPerson()).not()
+    private fun hentEnhetForYtelse(request: OppgaveRoutingRequest): Enhet {
+        if (request.hendelseType == HendelseType.SENDT) return Enhet.ID_OG_FORDELING
+
+        return when (request.ytelseType) {
+            YtelseType.ALDER -> Enhet.PENSJON_UTLAND
+            YtelseType.UFOREP -> Enhet.UFORE_UTLAND
+            else -> Enhet.ID_OG_FORDELING
+        }
     }
+
+    private fun erPersonUgyldig(person: IdentifisertPerson?): Boolean =
+            person == null || person.aktoerId.isBlank() || person.flereEnnEnPerson()
 }
