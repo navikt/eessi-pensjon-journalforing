@@ -730,7 +730,7 @@ class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid Når det finnes kun en sakstype fra bestemsak Så skal det automatisk journalføres`() {
+    fun `Gitt at vi mottar en P_BUC_02 med kjent aktørid Når det finnes kun en sakstype fra bestemsak`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """
@@ -774,16 +774,13 @@ class JournalforingServiceTest {
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
                 sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
-                arkivsaksnummer = eq("111111"),
+                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
+                arkivsaksnummer = eq(null),
                 dokumenter = eq("P2100 Krav om etterlattepensjon"),
                 avsenderLand = eq("PL"),
                 avsenderNavn = eq("POLEN"),
                 ytelseType = eq(YtelseType.BARNEP)
         )
-
-        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
-
     }
 
 }
