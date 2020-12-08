@@ -128,6 +128,12 @@ internal class Rbuc02Test {
 
         val forventUforeUtland = MOTTATT.mockRequest(type = YtelseType.UFOREP, person = person)
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(forventUforeUtland))
+
+        listOf(YtelseType.OMSORG, YtelseType.GJENLEV, YtelseType.BARNEP, YtelseType.GENRL)
+                .forEach { ytelseType ->
+                    val request = MOTTATT.mockRequest(type = ytelseType, person = person)
+                    assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+                }
     }
 
     private fun HendelseType.mockRequest(
