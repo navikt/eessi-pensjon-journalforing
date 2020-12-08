@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 
 /**
- * P_BUC_01:
+ * P_BUC_01: Krav om alderspensjon
  */
 class Pbuc01 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {

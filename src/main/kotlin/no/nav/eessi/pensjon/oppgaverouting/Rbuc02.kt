@@ -6,6 +6,9 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
+/**
+ * R_BUC_02: Motregning av overskytende utbetaling i etterbetalinger
+ */
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
