@@ -21,7 +21,7 @@ class OppgaveRoutingRequest(
         val hendelseType: HendelseType,
         val sakInformasjon: SakInformasjon? = null,
         val identifisertPerson: IdentifisertPerson? = null,
-        val bucType: BucType? = null
+        val bucType: BucType
 ) {
     val bosatt = Bosatt.fraLandkode(landkode)
 
