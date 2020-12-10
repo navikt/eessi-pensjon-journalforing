@@ -176,150 +176,27 @@ class FnrHelperTest {
 
     @Test
     fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres minst en gjenlevende og en avdød`() {
+        val gjenlevFnr = "48035849680"
 
-        val mockP2100 = """
-            {
-              "pensjon": {
-                "gjenlevende": {
-                  "person": {
-                    "kjoenn": "K",
-                    "foedselsdato": "1958-03-08",
-                    "relasjontilavdod": {
-                      "relasjon": "03"
-                    },
-                    "etternavn": "KONSOLL",
-                    "fornavn": "LEALAUS"
-                  }
-                }
-              },
-              "nav": {
-                "bruker": {
-                  "person": {
-                    "kjoenn": "M",
-                    "dodsDetalj": {
-                      "dato": "2020-08-15"
-                    },
-                    "etternavn": "KAFFI",
-                    "fornavn": "ÅPENHJERTIG",
-                    "foedselsdato": "1954-10-25"
-                  }
-                },
-                "eessisak": [
-                  {
-                    "institusjonsid": "NO:NAVAT08",
-                    "institusjonsnavn": "NAV ACCEPTANCE TEST 08",
-                    "saksnummer": "123456",
-                    "land": "SE"
-                  }
-                ],
-                "krav": {
-                  "dato": "2020-08-18"
-                }
-              },
-              "sedGVer": "4",
-              "sedVer": "2",
-              "sed": "P2100"
-            }
-        """.trimIndent()
+        val mockP2100 = mockP2100()
+        val mockP5000 = mockP5000("25105424704", gjenlevFnr)
+        val mockP8000 = mockP8000()
 
-        val mockP5000 = """
-            {
-              "pensjon": {
-                "medlemskapTotal": [
-                  {
-                    "type": "10",
-                    "sum": {
-                      "aar": "7",
-                      "dager": {
-                        "type": "7"
-                      }
-                    },
-                    "relevans": "111"
-                  }
-                ],
-                "gjenlevende": {
-                  "person": {
-                    "pin": [
-                      {
-                        "identifikator": "48035849680",
-                        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
-                        "land": "NO",
-                        "institusjonsid": "NO:NAVAT07"
-                      }
-                    ],
-                    "foedselsdato": "1958-03-08",
-                    "etternavn": "KONSOLL",
-                    "fornavn": "LEALAUS",
-                    "kjoenn": "K",
-                    "statsborgerskap": [
-                      {
-                        "land": "DE"
-                      }
-                    ]
-                  }
-                },
-                "medlemskap": [
-                  {
-                    "gyldigperiode": "1",
-                    "enkeltkrav": {
-                      "krav": "20"
-                    },
-                    "periode": {
-                      "tom": "2016-12-31",
-                      "fom": "2010-01-01"
-                    }
-                  }
-                ],
-                "trygdetid": [
-                  {
-                    "sum": {
-                      "dager": {
-                        "type": "7"
-                      },
-                      "aar": "7"
-                    },
-                    "type": "10"
-                  }
-                ]
-              },
-              "sedGVer": "4",
-              "nav": {
-                "bruker": {
-                  "person": {
-                    "fornavn": "ÅPENHJERTIG",
-                    "pin": [
-                      {
-                        "land": "NO",
-                        "institusjonsid": "NO:NAVAT07",
-                        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
-                        "identifikator": "25105424704"
-                      }
-                    ],
-                    "kjoenn": "M",
-                    "etternavn": "KAFFI",
-                    "foedselsdato": "1954-10-25",
-                    "statsborgerskap": [
-                      {
-                        "land": "DE"
-                      }
-                    ]
-                  }
-                },
-                "eessisak": [
-                  {
-                    "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
-                    "saksnummer": "22916371",
-                    "institusjonsid": "NO:NAVAT07",
-                    "land": "NO"
-                  }
-                ]
-              },
-              "sedVer": "2",
-              "sed": "P5000"
-            }
-        """.trimIndent()
+        val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100, mockP5000, mockP8000))
 
-        val mockP8000 = """
+        val expectedPersonRelasjon = PersonRelasjon(gjenlevFnr, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P5000)
+
+        assertEquals(1, actual.size)
+
+        val actualPersonRelasjon = actual.first()
+        assertEquals(gjenlevFnr, actualPersonRelasjon.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, actualPersonRelasjon.relasjon)
+
+        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
+    }
+
+    private fun mockP8000(): String {
+        return """
             {
               "sed" : "P8000",
               "sedGVer" : "4",
@@ -385,19 +262,212 @@ class FnrHelperTest {
               "pensjon" : null
             }
         """.trimIndent()
+    }
 
-        val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100,mockP5000, mockP8000))
+    private fun mockP2100(): String {
+        return """
+            {
+              "pensjon": {
+                "gjenlevende": {
+                  "person": {
+                    "kjoenn": "K",
+                    "foedselsdato": "1958-03-08",
+                    "relasjontilavdod": {
+                      "relasjon": "03"
+                    },
+                    "etternavn": "KONSOLL",
+                    "fornavn": "LEALAUS"
+                  }
+                }
+              },
+              "nav": {
+                "bruker": {
+                  "person": {
+                    "kjoenn": "M",
+                    "dodsDetalj": {
+                      "dato": "2020-08-15"
+                    },
+                    "etternavn": "KAFFI",
+                    "fornavn": "ÅPENHJERTIG",
+                    "foedselsdato": "1954-10-25"
+                  }
+                },
+                "eessisak": [
+                  {
+                    "institusjonsid": "NO:NAVAT08",
+                    "institusjonsnavn": "NAV ACCEPTANCE TEST 08",
+                    "saksnummer": "123456",
+                    "land": "SE"
+                  }
+                ],
+                "krav": {
+                  "dato": "2020-08-18"
+                }
+              },
+              "sedGVer": "4",
+              "sedVer": "2",
+              "sed": "P2100"
+            }
+        """.trimIndent()
+    }
 
-        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null, sedType = SedType.P5000)
-        val expectedPersonRelasjon = PersonRelasjon("48035849680", Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
+    private fun mockP5000(forsikretFnr: String?, gjenlevFnr: String?): String {
+        return """
+            {
+              "sedGVer": "4",
+              "nav": {
+                "bruker": {
+                  "person": {
+                    "fornavn": "ÅPENHJERTIG",
+                    "pin": [
+                      {
+                        "land": "NO",
+                        "institusjonsid": "NO:NAVAT07",
+                        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+                        "identifikator": "$forsikretFnr"
+                      }
+                    ],
+                    "kjoenn": "M",
+                    "etternavn": "KAFFI",
+                    "foedselsdato": "1954-10-25",
+                    "statsborgerskap": [
+                      {
+                        "land": "DE"
+                      }
+                    ]
+                  }
+                },
+                "eessisak": [
+                  {
+                    "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+                    "saksnummer": "22916371",
+                    "institusjonsid": "NO:NAVAT07",
+                    "land": "NO"
+                  }
+                ]
+              },
+              "sedVer": "2",
+              "sed": "P5000"
+              ${if (gjenlevFnr != null) createGjenlevende(gjenlevFnr, "02") else ""}
+            }
+        """.trimIndent()
+    }
 
-        assertEquals(2,actual.size)
+    private fun mockP15000(fnr: String?, gjenlevFnr: String? = null, eessiSaknr: String? = null, krav: String, relasjon: String? = null): String {
+        return """
+            {
+              "sed" : "P15000",
+              "nav" : {
+                ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
+                "bruker" : {
+                  "person" : {
+                    "statsborgerskap" : [ {
+                      "land" : "NO"
+                    } ],
+                    "etternavn" : "Forsikret",
+                    "fornavn" : "Person",
+                    "kjoenn" : "M",
+                    "foedselsdato" : "1988-07-12"
+                    ${if (fnr != null) createPinJson(fnr) else ""}
+                  }
+                  },
+                  "krav" : {
+                    "dato" : "2019-02-01",
+                    "type" : "$krav"
+                }
+              }
+            ${if (gjenlevFnr != null) createGjenlevende(gjenlevFnr, relasjon) else ""}
+            }
+        """.trimIndent()
+    }
 
-        val actualAvdodPerson = actual.first()
-        val actualPersonRelasjon = actual.last()
-        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
-        assertEquals(expectedAvdodPersonRelasjon, actualAvdodPerson)
+    private fun createPinJson(fnr: String?): String {
+        return """
+             ,"pin": [
+                      {
+                        "land": "NO",
+                        "identifikator": "$fnr"
+                      }
+                    ]
+        """.trimIndent()
+    }
 
+    private fun createEESSIsakJson(saknr: String?): String {
+        return """
+            "eessisak": [
+              {
+                "saksnummer": "$saknr",
+                "land": "NO"
+              }
+            ],            
+        """.trimIndent()
+    }
+
+    private fun createGjenlevende(fnr: String?, relasjon: String? = null): String {
+        return """
+          ,
+          "pensjon" : {
+            "gjenlevende" : {
+              "person" : {
+                "statsborgerskap" : [ {
+                  "land" : "DE"
+                } ],
+                "etternavn" : "Gjenlev",
+                "fornavn" : "Lever",
+                "kjoenn" : "M",
+                "foedselsdato" : "1988-07-12",
+                "relasjontilavdod" : {
+                ${if (relasjon != null) "\"relasjon\" : \"$relasjon\"" else ""}
+                }
+                ${if (fnr != null) createPinJson(fnr) else ""}
+              }
+            }
+          }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `To personer, to SED P5000 og P15000, med GJENLEV, skal hente gyldige relasjoner fra P15000`() {
+        val forsikretFnr = "97097097000"
+        val gjenlevFnr = "48035849680"
+
+        val mockP15000 = mockP15000(
+                fnr = forsikretFnr,
+                gjenlevFnr = gjenlevFnr,
+                krav = "02",
+                eessiSaknr = "12345",
+                relasjon = "01"
+        )
+        val mockP5000 = mockP5000(forsikretFnr, gjenlevFnr)
+
+        val actual = helper.getPotensielleFnrFraSeder(listOf(mockP15000, mockP5000))
+
+        val expectedForsikret = PersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, YtelseType.GJENLEV, sedType = SedType.P15000)
+        val expectedGjenlev = PersonRelasjon(gjenlevFnr, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P15000)
+
+        assertEquals(2, actual.size)
+
+        assertEquals(expectedGjenlev, actual.last())
+        assertEquals(expectedForsikret, actual.first())
+    }
+
+    @Test
+    fun `En person, to SED P5000 og P15000, med ALDER, skal hente gyldige relasjoner fra P15000`() {
+        val forsikretFnr = "97097097000"
+
+        val mockP15000 = mockP15000(
+                fnr = forsikretFnr,
+                krav = "01",
+                eessiSaknr = "12345"
+        )
+        val mockP5000 = mockP5000(forsikretFnr, gjenlevFnr = null)
+
+        val actual = helper.getPotensielleFnrFraSeder(listOf(mockP15000, mockP5000))
+
+        val expectedPerson = PersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, YtelseType.ALDER, sedType = SedType.P15000)
+
+        assertEquals(1, actual.size)
+        assertEquals(expectedPerson, actual.first())
     }
 
     @Test
@@ -469,15 +539,15 @@ class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(mockP2100))
 
-        val expectedAvdodPersonRelasjon = PersonRelasjon("25105424704", Relasjon.FORSIKRET, null, sedType = SedType.P2100)
         val expectedPersonRelasjon = PersonRelasjon("43003584968", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P2100)
 
-        assertEquals(2,actual.size)
+        assertEquals(1, actual.size)
 
-        val actualAvdodPerson = actual.first()
-        val actualPersonRelasjon = actual.last()
-        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
-        assertEquals(expectedAvdodPersonRelasjon, actualAvdodPerson)
+        val personRelasjon = actual.first()
+        assertEquals("43003584968", personRelasjon.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, personRelasjon.relasjon)
+
+        assertEquals(expectedPersonRelasjon, personRelasjon)
 
     }
 

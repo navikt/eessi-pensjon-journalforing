@@ -221,7 +221,9 @@ data class PersonRelasjon(
         val relasjon: Relasjon,
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null
-)
+) {
+    fun erGyldig(): Boolean = ytelseType != null && sedType != null
+}
 
 enum class Relasjon {
     FORSIKRET,

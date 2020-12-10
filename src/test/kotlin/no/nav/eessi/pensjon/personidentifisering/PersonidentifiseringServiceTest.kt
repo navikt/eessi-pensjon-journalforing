@@ -205,8 +205,10 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(sed1, sed2)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, alleSediBuc, bucType,potensiellePerson )
-        assertEquals(2, actual.size)
+        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, alleSediBuc, bucType, potensiellePerson)
+        assertEquals(1, actual.size)
+        assertEquals(gjenlevende, actual.first().personRelasjon.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
 
         val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P6000, potensiellePerson)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)
@@ -236,8 +238,10 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(sed1, sed2, sed3)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker,alleSediBuc, bucType, potensiellePerson)
-        assertEquals(2, actual.size)
+        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, alleSediBuc, bucType, potensiellePerson)
+        assertEquals(1, actual.size)
+        assertEquals(gjenlevende, actual.first().personRelasjon.fnr)
+        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
 
         val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000, potensiellePerson)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr)

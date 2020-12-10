@@ -76,7 +76,12 @@ class FnrHelper {
             }
         }
 
-        return fnrListe.distinctBy { it.fnr }
+        val resultat = fnrListe
+                .filter { it.erGyldig() }
+                .distinctBy { it.fnr }
+
+        return if (resultat.isEmpty()) fnrListe.distinctBy { it.fnr }
+        else resultat
     }
 
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sedRootNode: JsonNode, fnrListe: MutableSet<PersonRelasjon>, sedType: SedType) {

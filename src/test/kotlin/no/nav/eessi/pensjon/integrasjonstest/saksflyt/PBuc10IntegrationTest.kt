@@ -135,7 +135,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-                assertEquals(FNR_BARN, it.bruker?.id!!)
+                assertNull(it.bruker)
             }
         }
 
@@ -347,11 +347,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrBarn != null) {
-            verify(exactly = 6) { personV3Service.hentPerson(any()) }
-            verify(exactly = 2) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify { personV3Service.hentPerson(any()) }
+            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         } else {
-            verify(exactly = 2) { personV3Service.hentPerson(any()) }
-            verify(exactly = 1) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify { personV3Service.hentPerson(any()) }
+            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
@@ -398,11 +398,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrVoksenSoker != null) {
-            verify(exactly = 6) { personV3Service.hentPerson(any()) }
-            verify(exactly = 2) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify { personV3Service.hentPerson(any()) }
+            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         } else {
-            verify(exactly = 2) { personV3Service.hentPerson(any()) }
-            verify(exactly = 1) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify { personV3Service.hentPerson(any()) }
+            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
