@@ -84,12 +84,6 @@ class OppgaveRoutingServiceTest {
     }
 
     @Test
-    fun `Gitt manglende buc-type saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(OppgaveRoutingRequest(aktorId = "010101010101", fdato = irrelevantDato(), landkode = MANGLER_LAND, hendelseType = HendelseType.SENDT))
-        assertEquals(enhet, PENSJON_UTLAND)
-    }
-
-    @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
         val enhet = routingService.route(OppgaveRoutingRequest(aktorId = "010101010101", fdato = irrelevantDato(), landkode = MANGLER_LAND, bucType = P_BUC_10, hendelseType = HendelseType.SENDT))
         assertEquals(enhet, PENSJON_UTLAND)
@@ -423,7 +417,7 @@ class OppgaveRoutingServiceTest {
         assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV, hendelseType = HendelseType.SENDT)))
     }
 
-    private fun opprettSakInfo(sakStatus: SakStatus) : SakInformasjon {
+    private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
         return SakInformasjon(null, YtelseType.UFOREP, sakStatus)
     }
 

@@ -24,17 +24,20 @@ interface BucTilEnhetHandler {
 
 class BucTilEnhetHandlerCreator {
     companion object {
-        fun getHandler(type: BucType?): BucTilEnhetHandler {
+        fun getHandler(type: BucType): BucTilEnhetHandler {
             return when (type) {
                 BucType.P_BUC_01 -> Pbuc01()
                 BucType.P_BUC_02 -> Pbuc02()
                 BucType.P_BUC_03 -> Pbuc03()
                 BucType.P_BUC_04 -> Pbuc04()
                 BucType.P_BUC_05 -> Pbuc05()
+                BucType.P_BUC_06,
+                BucType.P_BUC_07,
+                BucType.P_BUC_08,
+                BucType.P_BUC_09 -> DefaultBucTilEnhetHandler()
                 BucType.P_BUC_10 -> Pbuc10()
                 BucType.H_BUC_07 -> Hbuc07()
                 BucType.R_BUC_02 -> Rbuc02()
-                else -> DefaultBucTilEnhetHandler() // Felles for P_BUC_05, 06, 07, 08, 09
             }
         }
     }

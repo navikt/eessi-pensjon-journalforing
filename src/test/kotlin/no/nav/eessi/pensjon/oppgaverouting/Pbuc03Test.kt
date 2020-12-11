@@ -13,9 +13,9 @@ import org.junit.jupiter.params.provider.EnumSource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-internal class Pbuc01Test {
+internal class Pbuc03Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_01) as Pbuc01
+    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_03) as Pbuc03
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -55,7 +55,7 @@ internal class Pbuc01Test {
             every { bosatt } returns Bosatt.NORGE
         }
 
-        assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
     }
 
     @Test
@@ -69,6 +69,6 @@ internal class Pbuc01Test {
             every { bosatt } returns Bosatt.UTLAND
         }
 
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
     }
 }

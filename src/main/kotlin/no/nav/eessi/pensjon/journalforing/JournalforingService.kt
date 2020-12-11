@@ -72,18 +72,18 @@ class JournalforingService(private val euxKlient: EuxKlient,
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
-                    rinaSakId = sedHendelseModel.rinaSakId,
-                    fnr = identifisertPerson?.personRelasjon?.fnr,
-                    personNavn = identifisertPerson?.personNavn,
-                    bucType = sedHendelseModel.bucType,
-                    sedType = sedHendelseModel.sedType,
-                    sedHendelseType = hendelseType,
-                    journalfoerendeEnhet = tildeltEnhet,
-                    arkivsaksnummer = arkivsaksnummer,
-                    dokumenter = documents,
-                    avsenderLand = sedHendelseModel.avsenderLand,
-                    avsenderNavn = sedHendelseModel.avsenderNavn,
-                    ytelseType = ytelseType
+                        rinaSakId = sedHendelseModel.rinaSakId,
+                        fnr = identifisertPerson?.personRelasjon?.fnr,
+                        personNavn = identifisertPerson?.personNavn,
+                        bucType = sedHendelseModel.bucType!!,
+                        sedType = sedHendelseModel.sedType,
+                        sedHendelseType = hendelseType,
+                        journalfoerendeEnhet = tildeltEnhet,
+                        arkivsaksnummer = arkivsaksnummer,
+                        dokumenter = documents,
+                        avsenderLand = sedHendelseModel.avsenderLand,
+                        avsenderNavn = sedHendelseModel.avsenderNavn,
+                        ytelseType = ytelseType
                 )
 
                 // Oppdaterer distribusjonsinfo

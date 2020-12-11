@@ -32,8 +32,8 @@ internal class GyldigeHendelserTest {
     }
 
     @Test
-    fun `Mottatt hendelse med buctype UKJENT er ugyldig`() {
-        val hendelse = createDummy("P", BucType.UKJENT)
+    fun `Mottatt hendelse som mangler BucType`() {
+        val hendelse = createDummy("", null)
 
         assertFalse(gyldigeHendelser.mottattHendelse(hendelse))
     }
@@ -57,12 +57,12 @@ internal class GyldigeHendelserTest {
     }
 
     @Test
-    fun `Sendt hendelse med buctype UKJENT er ugyldig`() {
-        val hendelse = createDummy("P", BucType.UKJENT)
+    fun `Sendt hendelse som mangler BucType`() {
+        val hendelse = createDummy("", null)
 
-        assertFalse(gyldigeHendelser.sendtHendelse(hendelse))
+        assertFalse(gyldigeHendelser.mottattHendelse(hendelse))
     }
 
-    private fun createDummy(sektor: String, bucType: BucType) =
+    private fun createDummy(sektor: String, bucType: BucType?) =
             SedHendelseModel(sektorKode = sektor, bucType = bucType, rinaSakId = "12345", rinaDokumentId = "654634")
 }

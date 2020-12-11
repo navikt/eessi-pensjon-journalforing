@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.models
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 
 // https://confluence.adeo.no/display/BOA/Behandlingstema
@@ -17,6 +16,7 @@ enum class Tema(@JsonValue val kode: String) {
     UFORETRYGD("UFO")
 }
 
+// https://confluence.adeo.no/display/EP/Oversikt+BUC+og+SED
 enum class BucType(val behandlingstema: Behandlingstema, val tema: Tema) {
     P_BUC_01(Behandlingstema.ALDERSPENSJON, Tema.PENSJON),
     P_BUC_02(Behandlingstema.GJENLEVENDEPENSJON, Tema.PENSJON),
@@ -29,16 +29,5 @@ enum class BucType(val behandlingstema: Behandlingstema, val tema: Tema) {
     P_BUC_09(Behandlingstema.ALDERSPENSJON, Tema.PENSJON),
     P_BUC_10(Behandlingstema.ALDERSPENSJON, Tema.PENSJON),
     H_BUC_07(Behandlingstema.ALDERSPENSJON, Tema.PENSJON),
-    R_BUC_02(Behandlingstema.TILBAKEBETALING, Tema.PENSJON),
-    UKJENT;
-
-    constructor()
-
-    companion object {
-        @JvmStatic
-        @JsonCreator
-        fun from(s: String?): BucType {
-            return values().firstOrNull { it.name == s } ?: UKJENT
-        }
-    }
+    R_BUC_02(Behandlingstema.TILBAKEBETALING, Tema.PENSJON)
 }

@@ -12,14 +12,14 @@ class GyldigeHendelser {
 
     fun mottattHendelse(hendelse: SedHendelseModel) =
             when {
-                hendelse.bucType == BucType.UKJENT -> false
+                hendelse.bucType == null -> false
                 hendelse.bucType in gyldigeInnkommendeBucTyper || gyldigSektorKode == hendelse.sektorKode -> true
                 else -> false
             }
 
     fun sendtHendelse(hendelse: SedHendelseModel) =
             when {
-                hendelse.bucType == BucType.UKJENT -> false
+                hendelse.bucType == null -> false
                 gyldigUtgaaendeBucType == hendelse.bucType || gyldigSektorKode == hendelse.sektorKode -> true
                 else -> false
             }

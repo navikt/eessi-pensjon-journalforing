@@ -45,6 +45,7 @@ internal class Pbuc10Test {
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
     }
+
     @Test
     fun `Kan automatisk journalføres`() {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {

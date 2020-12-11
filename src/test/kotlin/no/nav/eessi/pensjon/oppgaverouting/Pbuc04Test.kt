@@ -13,9 +13,9 @@ import org.junit.jupiter.params.provider.EnumSource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-internal class Pbuc01Test {
+internal class Pbuc04Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_01) as Pbuc01
+    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_04) as Pbuc04
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -44,10 +44,26 @@ internal class Pbuc01Test {
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
     }
 
-    @Test
-    fun `Manuell behandling, bosatt norge`() {
+    @ParameterizedTest
+    @EnumSource(YtelseType::class)
+    fun `Mottatt hendelse skal aldri journalføres automatisk`(type: YtelseType) {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.MOTTATT
+            every { diskresjonskode } returns null
+            every { ytelseType } returns type
+            every { aktorId } returns "111"
+            every { sakInformasjon?.sakId } returns "555"
+            every { bosatt } returns Bosatt.NORGE
+        }
+
+        assertNotEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
+    }
+
+    @ParameterizedTest
+    @EnumSource(HendelseType::class)
+    fun `Manuell behandling, bosatt norge`(hendelse: HendelseType) {
+        val request = mockk<OppgaveRoutingRequest> {
+            every { hendelseType } returns hendelse
             every { diskresjonskode } returns null
             every { ytelseType } returns null
             every { aktorId } returns null
@@ -58,10 +74,11 @@ internal class Pbuc01Test {
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
     }
 
-    @Test
-    fun `Manuell behandling, bosatt utland`() {
+    @ParameterizedTest
+    @EnumSource(HendelseType::class)
+    fun `Manuell behandling, bosatt utland`(hendelse: HendelseType) {
         val request = mockk<OppgaveRoutingRequest> {
-            every { hendelseType } returns HendelseType.MOTTATT
+            every { hendelseType } returns hendelse
             every { diskresjonskode } returns null
             every { ytelseType } returns null
             every { aktorId } returns null
