@@ -1,3 +1,4 @@
+/*
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -566,4 +567,4 @@ class FnrHelperTest {
         return json
     }
 
-}
+}*/

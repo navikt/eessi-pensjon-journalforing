@@ -1,8 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.sed.SED
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -12,37 +11,32 @@ import java.time.format.DateTimeFormatter
 class FdatoHelper {
 
     private val logger = LoggerFactory.getLogger(FdatoHelper::class.java)
-    private val mapper = jacksonObjectMapper()
 
-    fun finnEnFdatoFraSEDer(seder: List<String?>): LocalDate {
+    fun finnEnFdatoFraSEDer(seder: List<SED>): LocalDate {
         var fdato: String?
 
         seder.forEach { sed ->
             try {
-                val sedRootNode = mapper.readTree(sed)
-                val sedType = SedType.valueOf(sedRootNode.get("sed").textValue())
-
-                if(sedType.kanInneholdeFnrEllerFdato) {
-                    when (sedType) {
+                if (sed.type.kanInneholdeFnrEllerFdato) {
+                    when (sed.type) {
                         SedType.P2100 -> {
-                            fdato = filterGjenlevendeFDatoNode(sedRootNode)
+                            fdato = filterGjenlevendeFDatoNode(sed)
                         }
                         SedType.P15000 -> {
-                            val krav = sedRootNode.get("nav").get("krav").textValue()
-                            fdato = if (krav == "02") {
-                                filterGjenlevendeFDatoNode(sedRootNode)
+                            fdato = if (sed.nav?.krav?.type == "02") {
+                                filterGjenlevendeFDatoNode(sed)
                             } else {
-                                filterPersonFDatoNode(sedRootNode)
+                                filterPersonFDatoNode(sed)
                             }
                         }
                         SedType.R005 -> {
-                            fdato = filterPersonR005DatoNode(sedRootNode)
+                            fdato = filterPersonR005DatoNode(sed)
                         }
                         else -> {
-                            fdato = filterAnnenPersonFDatoNode(sedRootNode)
+                            fdato = filterAnnenPersonFDatoNode(sed)
                             if (fdato == null) {
                                 //P2000 - P2200 -- andre..
-                                fdato = filterPersonFDatoNode(sedRootNode)
+                                fdato = filterPersonFDatoNode(sed)
                             }
                         }
                     }
@@ -66,36 +60,24 @@ class FdatoHelper {
      *
      * * hvis ingen intreffer returnerer vi null
      */
-    private fun filterPersonR005DatoNode(sedRootNode: JsonNode): String? {
-        val subnode = sedRootNode.at("/nav/bruker").toList()
-        return subnode.first()
-                .get("person")
-                .get("foedselsdato").textValue()
-
-    }
+    private fun filterPersonR005DatoNode(sed: SED): String? =
+            sed.nav?.bruker?.first()?.person?.foedselsdato
 
     /**
      * P10000 - [01] Søker til etterlattepensjon
      * P10000 - [02] Forsørget/familiemedlem
      * P10000 - [03] Barn
      */
-    private fun filterAnnenPersonFDatoNode(sedRootNode: JsonNode): String? {
-        val subNode = sedRootNode.at("/nav/annenperson") ?: return null
-        val subRolle = subNode.at("/person/rolle") ?: return null
-        if (subRolle.textValue() == "01") {
-            return subNode.get("person").get("foedselsdato").textValue()
-        }
-        return null
+    private fun filterAnnenPersonFDatoNode(sed: SED): String? {
+        val annenPerson = sed.nav?.annenperson ?: return null
+        if (annenPerson.person?.rolle != "01") return null
+
+        return annenPerson.person.foedselsdato
     }
 
-    private fun filterGjenlevendeFDatoNode(sedRootNode: JsonNode): String? {
-        return sedRootNode
-                .at("/pensjon/gjenlevende/person")
-                .get("foedselsdato").textValue()
-    }
+    private fun filterGjenlevendeFDatoNode(sedRootNode: SED): String? =
+            sedRootNode.pensjon?.gjenlevende?.person?.foedselsdato
 
-    private fun filterPersonFDatoNode(sedRootNode: JsonNode): String? {
-        return sedRootNode.at("/nav/bruker/person")
-                .get("foedselsdato").textValue()
-    }
+    private fun filterPersonFDatoNode(sed: SED): String? =
+            sed.nav?.bruker?.firstOrNull()?.person?.foedselsdato
 }

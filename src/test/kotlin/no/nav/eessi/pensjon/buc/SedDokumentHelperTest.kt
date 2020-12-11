@@ -1,3 +1,4 @@
+/*
 package no.nav.eessi.pensjon.buc
 
 import com.nhaarman.mockitokotlin2.doReturn
@@ -254,3 +255,4 @@ class SedDokumentHelperTest {
     }
 
 }
+*/

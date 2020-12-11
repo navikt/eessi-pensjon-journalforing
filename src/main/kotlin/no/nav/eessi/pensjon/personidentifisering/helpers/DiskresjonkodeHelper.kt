@@ -6,13 +6,20 @@ import org.springframework.stereotype.Service
 
 @Service
 class DiskresjonkodeHelper(private val personV3Service: PersonV3Service,
-                           private val sedFnrSøk: SedFnrSøk)  {
+                           private val sedFnrSøk: SedFnrSøk) {
 
     private val logger = LoggerFactory.getLogger(DiskresjonkodeHelper::class.java)
 
     fun hentDiskresjonskode(alleSediBuc: List<String?>): Diskresjonskode? {
         return alleSediBuc.map { finnDiskresjonkode(it!!) }.firstOrNull()
     }
+
+//    fun hentDiskresjonskode(sedListe: List<SED>): Diskresjonskode? {
+//        return sedListe
+//                .map {  }
+//                .firstOrNull()
+//        return null
+//    }
 
     private fun finnDiskresjonkode(sed: String): Diskresjonskode? {
         logger.debug("Henter Sed dokument for å lete igjennom FNR for diskresjonkode")

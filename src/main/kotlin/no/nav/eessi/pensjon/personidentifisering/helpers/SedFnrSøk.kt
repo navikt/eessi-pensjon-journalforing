@@ -26,6 +26,7 @@ class SedFnrSøk {
      * @param sed SED i json format
      * @return distinkt set av fnr
      */
+    // TODO: Hente ut ALLE fnr fra SED... hvordan...?
     fun finnAlleFnrDnrISed(sed: String) : Set<String> {
         logger.info("Søker etter fnr i SED")
         try {
