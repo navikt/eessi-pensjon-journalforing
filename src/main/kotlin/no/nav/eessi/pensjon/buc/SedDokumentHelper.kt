@@ -49,9 +49,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                 }
             }
             //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
-        } else if (sedHendelse.sedType == SedType.P15000) {
+        } else if (sedHendelse.bucType == BucType.P_BUC_10) {
             val sed = SediBuc.getValuesOf(SedType.P15000, alleSedIBuc)
-            //val sed = alleSedIBuc[SedType.P15000.name]
             if (sed != null) {
                 val sedRootNode = mapper.readTree(sed)
                 return when (sedRootNode.get("nav").get("krav").get("type").textValue()) {
