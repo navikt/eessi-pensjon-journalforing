@@ -116,8 +116,7 @@ internal class BestemSakServiceTest {
                 { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.P_BUC_08)) },
                 { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.P_BUC_09)) },
                 { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.P_BUC_10)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.H_BUC_07)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.UKJENT)) }
+                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.H_BUC_07)) }
         )
     }
 

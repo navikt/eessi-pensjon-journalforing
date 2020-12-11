@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.BucType
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
@@ -44,13 +43,6 @@ internal class BucHandlerTest {
     fun `P_BUC_06, 07, 08, og 09 skal brukes default handler`(bucType: BucType) {
         val handler = BucTilEnhetHandlerCreator.getHandler(bucType)
         assertTrue(handler is DefaultBucTilEnhetHandler)
-    }
-
-    @Test
-    fun `Ukjent BucType skal kaste exception`() {
-        assertThrows<RuntimeException> {
-            BucTilEnhetHandlerCreator.getHandler(null)
-        }
     }
 
 }

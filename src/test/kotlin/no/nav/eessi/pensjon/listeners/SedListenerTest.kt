@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.listeners
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
@@ -19,40 +19,37 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 @ExtendWith(MockitoExtension::class)
-class SedListenerTest {
+internal class SedListenerTest {
 
     @Mock
-    lateinit var acknowledgment: Acknowledgment
+    private lateinit var acknowledgment: Acknowledgment
 
     @Mock
-    lateinit var cr: ConsumerRecord<String, String>
+    private lateinit var cr: ConsumerRecord<String, String>
 
     @Mock
-    lateinit var jouralforingService: JournalforingService
+    private lateinit var jouralforingService: JournalforingService
 
     @Mock
-    lateinit var personidentifiseringService: PersonidentifiseringService
+    private lateinit var personidentifiseringService: PersonidentifiseringService
 
     @Mock
-    lateinit var sedDokumentHelper: SedDokumentHelper
+    private lateinit var sedDokumentHelper: SedDokumentHelper
 
     @Mock
-    lateinit var bestemSakService: BestemSakService
+    private lateinit var bestemSakService: BestemSakService
 
-    lateinit var sedListener: SedListener
-
-    val gyldigeHendelser: GyldigeHendelser = GyldigeHendelser()
-    val gyldigFunksjoner: GyldigFunksjoner = GyldigeFunksjonerToggleProd()
+    private lateinit var sedListener: SedListener
 
     @BeforeEach
     fun setup() {
-        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner,"test")
+        sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelser(), bestemSakService, "test")
         sedListener.initMetrics()
     }
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr,  acknowledgment)
+        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
         verify(acknowledgment).acknowledge()
     }
 
@@ -71,7 +68,7 @@ class SedListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres så ack melding`() {
-        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, gyldigeHendelser, bestemSakService, gyldigFunksjoner,"test")
+        val sedListener2 = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, GyldigeHendelser(), bestemSakService, "test")
         sedListener2.initMetrics()
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
 
@@ -113,20 +110,16 @@ class SedListenerTest {
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
+        verify(acknowledgment).acknowledge()
+        verifyZeroInteractions(jouralforingService)
     }
 
     @Test
     fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        verify(jouralforingService, times(0)).journalfor(any(), any(), any(), any(), any(), any(), any())
+        verify(acknowledgment).acknowledge()
+        verifyZeroInteractions(jouralforingService)
     }
 
-    @Test
-    fun `gitt en mottatt hendelse inneholder H_BUC_07 skal behandlsens og resultat blie true`()  {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json")))
-        sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        verify(acknowledgment).acknowledge()
-    }
 }

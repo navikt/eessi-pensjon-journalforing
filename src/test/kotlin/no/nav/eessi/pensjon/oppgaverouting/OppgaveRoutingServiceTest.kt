@@ -4,11 +4,8 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.whenever
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.H_BUC_07
 import no.nav.eessi.pensjon.models.BucType.P_BUC_01
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
@@ -41,7 +38,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Spy
 import org.mockito.junit.jupiter.MockitoExtension
@@ -85,21 +81,6 @@ class OppgaveRoutingServiceTest {
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
         val enhet = routingService.route(OppgaveRoutingRequest(fdato = irrelevantDato(), landkode = MANGLER_LAND, geografiskTilknytning = dummyTilknytning, bucType = P_BUC_01, hendelseType = HendelseType.SENDT))
         assertEquals(enhet, ID_OG_FORDELING)
-    }
-
-    @Test
-    fun `Gitt ukjent BucType skal routing kaste exception`() {
-        val request = mockk<OppgaveRoutingRequest> {
-            every { aktorId } returns "010101010101"
-            every { fdato } returns irrelevantDato()
-            every { landkode } returns MANGLER_LAND
-            every { bucType } returns BucType.UKJENT
-            every { hendelseType } returns HendelseType.SENDT
-        }
-
-        assertThrows<RuntimeException> {
-            routingService.route(request)
-        }
     }
 
     @Test

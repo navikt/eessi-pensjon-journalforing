@@ -1,16 +1,17 @@
 package no.nav.eessi.pensjon.sed
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 
-data class SedHendelseModel (
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class SedHendelseModel(
         val id: Long? = 0,
         val sedId: String? = null,
         val sektorKode: String,
-        val bucType: BucType,
+        val bucType: BucType?,
         val rinaSakId: String,
         val avsenderId: String? = null,
         val avsenderNavn: String? = null,
@@ -24,12 +25,6 @@ data class SedHendelseModel (
         val navBruker: String? = null
 ) {
     companion object {
-        private val sedMapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
-
-        fun fromJson(json: String): SedHendelseModel = sedMapper.readValue(json, SedHendelseModel::class.java)
+        fun fromJson(json: String): SedHendelseModel = mapJsonToAny(json, typeRefs())
     }
 }
-
-
-
-

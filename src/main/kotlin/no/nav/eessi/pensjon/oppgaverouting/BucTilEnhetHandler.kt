@@ -24,7 +24,7 @@ interface BucTilEnhetHandler {
 
 class BucTilEnhetHandlerCreator {
     companion object {
-        fun getHandler(type: BucType?): BucTilEnhetHandler {
+        fun getHandler(type: BucType): BucTilEnhetHandler {
             return when (type) {
                 BucType.P_BUC_01 -> Pbuc01()
                 BucType.P_BUC_02 -> Pbuc02()
@@ -38,7 +38,6 @@ class BucTilEnhetHandlerCreator {
                 BucType.P_BUC_10 -> Pbuc10()
                 BucType.H_BUC_07 -> Hbuc07()
                 BucType.R_BUC_02 -> Rbuc02()
-                else -> throw RuntimeException("BucType $type er ukjent/ugyldig")
             }
         }
     }

@@ -45,7 +45,7 @@ class OppgaveRoutingRequest(
                     hendelseType,
                     sakInformasjon,
                     identifisertPerson,
-                    sedHendelseModel.bucType
+                    sedHendelseModel.bucType!!
             )
         }
     }

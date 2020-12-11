@@ -22,7 +22,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
-import no.nav.eessi.pensjon.listeners.GyldigeFunksjonerToggleNonProd
 import no.nav.eessi.pensjon.listeners.GyldigeHendelser
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
@@ -111,7 +110,6 @@ internal open class JournalforingTestBase {
     private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
-    private val gyldigeFunksjoner = GyldigeFunksjonerToggleNonProd()
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
@@ -119,7 +117,6 @@ internal open class JournalforingTestBase {
             sedDokumentHelper = sedDokumentHelper,
             gyldigeHendelser = GyldigeHendelser(),
             bestemSakService = bestemSakService,
-            gyldigeFunksjoner = gyldigeFunksjoner,
             profile = "test"
     )
 

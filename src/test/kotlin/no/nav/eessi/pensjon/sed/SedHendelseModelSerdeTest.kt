@@ -3,12 +3,12 @@ package no.nav.eessi.pensjon.sed
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
 internal class SedHendelseModelSerdeTest {
-
 
     @Test
     fun `Sjekk at serialisering virker`() {
@@ -43,6 +43,32 @@ internal class SedHendelseModelSerdeTest {
         val model = SedHendelseModel.fromJson(json)
 
         val result = model.toJson()
-        JSONAssert.assertEquals(json, result,JSONCompareMode.LENIENT)
+        JSONAssert.assertEquals(json, result, JSONCompareMode.LENIENT)
+    }
+
+    @Test
+    fun `Deserialisering med ugyldig bucType skal gi bucType null`() {
+        val json = """{
+            "id" : 0,
+            "sedId" : null,
+            "sektorKode" : "R",
+            "bucType" : "FB_BUC_01",
+            "rinaSakId" : "123456",
+            "avsenderId" : null,
+            "avsenderNavn" : null,
+            "avsenderLand" : null,
+            "mottakerId" : null,
+            "mottakerNavn" : null,
+            "mottakerLand" : null,
+            "rinaDokumentId" : "1234",
+            "rinaDokumentVersjon" : null,
+            "sedType" : null,
+            "navBruker" : null
+        }""".trimMargin()
+
+        val model = SedHendelseModel.fromJson(json)
+
+        assertEquals("R", model.sektorKode)
+        assertNull(model.bucType)
     }
 }
