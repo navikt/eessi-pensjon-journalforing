@@ -6,34 +6,38 @@
           "fornavn": "Developer",
           "foedselsdato": "1980-10-22",
           "pin": [
-
-            { "sektor": "pensjoner", "identifikator": "28115518943", "land": "NO" }
+            {
+              "sektor": "pensjoner",
+              "identifikator": "28115518943",
+              "land": "NO"
+            }
           ],
           "etternavn": "Angry",
           "kjoenn": "M"
         },
         "tilbakekreving": {
-          "status":
-
-          { "type": "forsikret_person" }
+          "status": {
+            "type": "forsikret_person"
+          }
         }
       }
     ],
     "eessisak": [
-
-      { "saksnummer": "1234", "land": "BE" }
+      {
+        "saksnummer": "1234",
+        "land": "BE"
+      }
     ]
   },
   "sedGVer": "4",
   "tilbakekreving": {
-    "anmodning":
-
-    { "type": "foreløpig" }
-  ,
+    "anmodning": {
+      "type": "foreløpig"
+    },
     "feilutbetaling": {
-      "ytelse":
-
-      { "type": "alderspensjon" }
+      "ytelse": {
+        "type": "alderspensjon"
+      }
     }
   },
   "sedVer": "1",

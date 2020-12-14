@@ -100,7 +100,6 @@ data class OpenPeriodeItem(
 
 data class Krav(
         val dato: String? = null,
-        //P15000
         val type: String? = null
 )
 
@@ -117,22 +116,10 @@ data class Bruker(
         //H070
         val doedsfall: Doedsfall? = null,
 
-        //P2200 - uførhet
-        val uforhet: Uforhet? = null,
-
         //P14000
         val endringer: Personendringer? = null,
 
-        val tilbakekreving: Tilbakekreving?
-)
-
-data class Uforhet(
-        val startdatoLege: String? = null,
-        val startDatoPensjon: String? = null,
-        val arbeidsUlykke: String? = null,
-        val militartjenesteUlykke: String? = null,
-        val bevisstforsaketSoker: String? = null,
-        val ansvarligTredjepart: String? = null
+        val tilbakekreving: Tilbakekreving? = null
 )
 
 //P14000
@@ -245,7 +232,9 @@ data class EmailItem(
 )
 
 data class Person(
+        @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
         val pin: List<PinItem>? = null,
+
         val pinland: PinLandItem? = null, //for H020 og H021
         val pinannen: PinItem? = null, //kan fjernes hvis ikke i bruk
         val statsborgerskap: List<StatsborgerskapItem>? = null, //nasjonalitet
@@ -331,8 +320,8 @@ data class PinItem(
         //P2000, P2100, P2200
         val institusjon: Institusjon? = null,
 
-        val oppholdsland: String?,
-        val kompetenteuland: String?
+        val oppholdsland: String? = null,
+        val kompetenteuland: String? = null
 )
 
 data class Adresse(

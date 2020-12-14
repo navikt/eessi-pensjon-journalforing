@@ -42,7 +42,6 @@ class FnrHelper {
                             }
                         }
                         SedType.R005 -> {
-                            // TODO
                             fnrListe.addAll(filterPinPersonR005(sed))
                         }
                         SedType.P5000, SedType.P6000 -> {

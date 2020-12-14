@@ -90,7 +90,7 @@ dependencies {
 	testImplementation("io.mockk:mockk:1.10.2")
 
 	// Architecture tests
-	testImplementation 'com.tngtech.archunit:archunit:0.13.1'
+	testImplementation 'com.tngtech.archunit:archunit:0.14.1'
 
 	// Micrometer
 	implementation("io.micrometer:micrometer-registry-prometheus")

@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.sed.Document
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,7 +39,30 @@ class FagmodulKlient(
         hentFnrFraBUC = metricsHelper.init("hentFnrFraBUC")
     }
 
-    fun hentAlleDokumenter(rinaNr: String): String? {
+    fun hentAlleDokumenter2(rinaNr: String): List<Document> {
+        return hentSeds.measure {
+            val path = "/buc/$rinaNr/allDocuments"
+            return@measure try {
+                logger.info("Henter jsondata for alle sed for rinaNr: $rinaNr")
+                val response = fagmodulOidcRestTemplate.exchange(path,
+                        HttpMethod.GET,
+                        null,
+                        String::class.java)
+
+                response.body
+                        ?.let { mapJsonToAny(it, typeRefs<List<Document>>()) }
+                        ?: emptyList()
+            } catch (ex: HttpStatusCodeException) {
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}", ex)
+                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under henting av alledokumenter ex: $ex", ex)
+                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message}")
+            }
+        }
+    }
+
+    /*fun hentAlleDokumenter(rinaNr: String): String? {
         return hentSeds.measure {
             val path = "/buc/$rinaNr/allDocuments"
             return@measure try {
@@ -47,15 +71,15 @@ class FagmodulKlient(
                         HttpMethod.GET,
                         null,
                         String::class.java).body
-            } catch(ex: HttpStatusCodeException) {
+            } catch (ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}", ex)
                 throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message} body: ${ex.responseBodyAsString}")
-            } catch(ex: Exception) {
+            } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av alledokumenter ex: $ex", ex)
                 throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message}")
             }
         }
-    }
+    }*/
 
     fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
         val path = "/pensjon/sakliste/$aktoerId"

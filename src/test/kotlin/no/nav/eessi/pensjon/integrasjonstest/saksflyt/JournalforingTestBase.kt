@@ -28,13 +28,18 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.EessisakItem
+import no.nav.eessi.pensjon.models.sed.Nav
+import no.nav.eessi.pensjon.models.sed.Person
+import no.nav.eessi.pensjon.models.sed.PinItem
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
-import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
@@ -60,6 +65,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
+import no.nav.eessi.pensjon.models.sed.Bruker as SedBruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent as PersonV3NorskIdent
 
 internal open class JournalforingTestBase {
@@ -103,7 +109,7 @@ internal open class JournalforingTestBase {
     protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
 
     private val personidentifiseringService = PersonidentifiseringService(
-            aktoerregisterService, personV3Service, diskresjonService, FnrHelper(), FdatoHelper()
+            aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
     )
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
@@ -161,7 +167,7 @@ internal open class JournalforingTestBase {
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedJson(SedType.P8000, fnr, createAnnenPersonJson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
+        val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
         initCommonMocks(sed)
 
         if (fnr != null) {
@@ -199,7 +205,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(request)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
@@ -240,7 +246,7 @@ internal open class JournalforingTestBase {
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedJson(SedType.P8000, fnr, null, sakId)
+        val sed = createSed(SedType.P8000, fnr, null, sakId)
         initCommonMocks(sed)
 
         if (fnr != null) {
@@ -265,7 +271,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
@@ -279,14 +285,16 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: String) {
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns getResource("fagmodul/alldocumentsids.json")
+    private fun initCommonMocks(sed: SED) {
+        val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
+
+        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns documents
         every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
     }
 
-    private fun getResource(resourcePath: String): String? =
-            javaClass.classLoader.getResource(resourcePath)!!.readText()
+    private fun getResource(resourcePath: String): String =
+            javaClass.getResource(resourcePath).readText()
 
     protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
         return Bruker()
@@ -320,6 +328,23 @@ internal open class JournalforingTestBase {
         every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
+    }
+
+    protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01"): Person {
+        val fdato = try {
+            Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1962-07-18"
+        } catch (e: IllegalArgumentException) {
+            "1962-07-18"
+        }
+
+        return Person(
+                fnr?.let { listOf(PinItem(land = "NO", identifikator = fnr)) },
+                fornavn = "Annen",
+                etternavn = "Person",
+                kjoenn = "U",
+                foedselsdato = fdato,
+                rolle = rolle
+        )
     }
 
     protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
@@ -363,6 +388,30 @@ internal open class JournalforingTestBase {
               }
             ],            
         """.trimIndent()
+    }
+
+    protected fun createSed(sedType: SedType, fnr: String? = null, annenPerson: Person? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): SED {
+        return SED(
+                sedType,
+                sedGVer = "4",
+                sedVer = "2",
+                nav = Nav(
+                        eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
+                        bruker = listOf(
+                                SedBruker(
+                                        person = Person(
+                                                pin = fnr?.let { listOf(PinItem(identifikator = fnr, land = "NO")) },
+                                                kjoenn = "M",
+                                                etternavn = "Forsikret",
+                                                fornavn = "Person",
+                                                foedselsdato = fdato
+                                        )
+                                )
+                        ),
+                        annenperson = annenPerson?.let { SedBruker(person = it) }
+
+                )
+        )
     }
 
     protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): String {
@@ -508,7 +557,7 @@ internal open class JournalforingTestBase {
             "type" : "$krav"
         }
       }
-    ${if (gfn != null) createGjenlevende(gfn, relasjon) else ""}
+      ${createGjenlevende(gfn, relasjon)}
     }
     """.trimIndent()
     }

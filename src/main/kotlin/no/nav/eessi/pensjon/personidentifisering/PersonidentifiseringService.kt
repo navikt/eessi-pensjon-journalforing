@@ -7,8 +7,8 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
-import no.nav.eessi.pensjon.personidentifisering.helpers.FdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -24,8 +24,7 @@ import java.time.LocalDate
 class PersonidentifiseringService(private val aktoerregisterService: AktoerregisterService,
                                   private val personV3Service: PersonV3Service,
                                   private val diskresjonService: DiskresjonkodeHelper,
-                                  private val fnrHelper: FnrHelper,
-                                  private val fdatoHelper: FdatoHelper) {
+                                  private val fnrHelper: FnrHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
@@ -95,9 +94,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<SED>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
-        // TODO: Fikse diskresjonskode
-//        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
-        val diskresjonskode = null
+        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
@@ -175,11 +172,8 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         if (fdatoFraFnr != null) {
             return fdatoFraFnr
         }
-        if (!seder.isNullOrEmpty()) {
-            logger.info("Henter fdato fra SEDer")
-            return fdatoHelper.finnEnFdatoFraSEDer(seder)
-        }
-        throw RuntimeException("Kunne ikke finne fdato i listen over SEDer")
+
+        return FodselsdatoHelper.fraSedListe(seder)
     }
 
     private fun fodselsDatoFra(fnr: String): LocalDate? =

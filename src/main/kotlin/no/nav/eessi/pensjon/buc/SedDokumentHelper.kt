@@ -1,15 +1,12 @@
 package no.nav.eessi.pensjon.buc
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.models.SediBuc
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -23,20 +20,23 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
     private val mapper = jacksonObjectMapper()
 
-    fun hentAlleSedIBuc(rinaSakId: String): List<SED> {
-        val alleDokumenter = fagmodulKlient.hentAlleDokumenter(rinaSakId)
+    private val validSedtype = listOf("P2000", "P2100", "P2200", "P1000",
+            "P5000", "P6000", "P7000", "P8000", "P9000",
+            "P10000", "P1100", "P11000", "P12000", "P14000", "P15000", "H070", "R005")
 
-        return filterUtGyldigSedId(alleDokumenter)
+    fun hentAlleSedIBuc(rinaSakId: String): List<SED> {
+        return fagmodulKlient.hentAlleDokumenter2(rinaSakId)
+                .filterNot { doc -> doc.status == "empty" }
+                .filter { doc -> doc.type.name in validSedtype }
                 .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
-                .map { sedJson -> mapJsonToAny(sedJson, typeRefs<SED>()) }
     }
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == BucType.R_BUC_02) {
-            val sed = alleSedIBuc.firstOrNull { it.type == SedType.R005 }
-
-            if (sed != null) filterYtelseTypeR005(sed)
+            return alleSedIBuc
+                    .firstOrNull { it.type == SedType.R005 }
+                    ?.let { filterYtelseTypeR005(it) }
 
         } else if (sedHendelse.bucType == BucType.P_BUC_10) {
             //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
@@ -67,22 +67,6 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> YtelseType.GJENLEV
             else -> throw RuntimeException("Klarte ikke å finne ytelsetype for R_BUC_02")
         }
-    }
-
-    private fun filterUtGyldigSedId(alleDokumenter: String?): List<SediBuc> {
-        val alleDokumenterJsonNode = mapper.readTree(alleDokumenter)
-        val validSedtype = listOf("P2000", "P2100", "P2200", "P1000",
-                "P5000", "P6000", "P7000", "P8000", "P9000",
-                "P10000", "P1100", "P11000", "P12000", "P14000", "P15000", "H070", "R005")
-
-        return alleDokumenterJsonNode
-                .asSequence()
-                .filterNot { rootNode -> rootNode.get("status").textValue() == "empty" }
-//                .filter { rootNode-> rootNode.get("status").textValue() == "received" || rootNode.get("status").textValue() == "sent" }
-                .filter { rootNode -> validSedtype.contains(rootNode.get("type").textValue()) }
-                .map { validSeds -> SediBuc(id = validSeds.get("id").textValue(), type = SedType.valueOf(validSeds.get("type").textValue()), status = validSeds.get("status").textValue()) }
-                .sortedBy { it.type }
-                .toList()
     }
 
     private fun hentSakIdFraSED(sedListe: List<SED>): String? {

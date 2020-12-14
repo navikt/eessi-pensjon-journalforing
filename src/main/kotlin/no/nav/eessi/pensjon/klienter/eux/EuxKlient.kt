@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.klienter.eux
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.sed.SED
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,9 +69,8 @@ class EuxKlient(
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */
-    @Retryable(include = [HttpStatusCodeException::class]
-        , backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
-    fun hentSed(rinaNr: String, dokumentId: String) : String? {
+    /*@Retryable(include = [HttpStatusCodeException::class], backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
+    fun hentSed(rinaNr: String, dokumentId: String): String? {
         return hentSed.measure {
             val path = "/buc/$rinaNr/sed/$dokumentId"
             return@measure try {
@@ -79,7 +79,28 @@ class EuxKlient(
                         HttpMethod.GET,
                         HttpEntity(""),
                         String::class.java).body
-          } catch(ex: Exception) {
+            } catch (ex: Exception) {
+                logger.warn("En feil oppstod under henting av SED ex: $path", ex)
+                throw ex
+            }
+        }
+    }*/
+
+    /**
+     * Henter SED i json format
+     *
+     * @param rinaNr BUC-id
+     * @param dokumentId SED-id
+     */
+    @Retryable(include = [HttpStatusCodeException::class], backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
+    fun hentSed(rinaNr: String, dokumentId: String): SED? {
+        return hentSed.measure {
+            val path = "/buc/$rinaNr/sed/$dokumentId"
+            return@measure try {
+                logger.info("Henter SED for rinaNr: $rinaNr , dokumentId: $dokumentId")
+
+                euxOidcRestTemplate.getForObject(path, SED::class.java)
+            } catch (ex: Exception) {
                 logger.warn("En feil oppstod under henting av SED ex: $path", ex)
                 throw ex
             }

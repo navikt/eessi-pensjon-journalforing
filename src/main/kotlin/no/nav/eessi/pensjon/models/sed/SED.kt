@@ -12,11 +12,11 @@ data class SED(
         @JsonProperty("sed")
         val type: SedType,
 
-        val sedGVer: String?,
-        val sedVer: String?,
-        val nav: Nav?,
-        val pensjon: Pensjon?,
-        val tilbakekreving: Tilbakekreving?
+        val sedGVer: String? = null,
+        val sedVer: String? = null,
+        val nav: Nav? = null,
+        val pensjon: Pensjon? = null,
+        val tilbakekreving: Tilbakekreving? = null
 ) {
     companion object {
         fun fromJson(sed: String): SED = mapJsonToAny(sed, typeRefs(), true)

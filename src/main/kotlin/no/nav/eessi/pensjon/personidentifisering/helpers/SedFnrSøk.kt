@@ -2,6 +2,8 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.json.toJson
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.erFnrDnrFormat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,9 +17,9 @@ import org.springframework.stereotype.Component
  *
  */
 @Component
+// TODO: Hele klassen må ryddes i. Er det også mulig å traversere SED-objektet? Eller er det best å gjøre det på JSON?
 class SedFnrSøk {
 
-    private val mapper = jacksonObjectMapper()
     private val logger = LoggerFactory.getLogger(SedFnrSøk::class.java)
 
     /**
@@ -26,16 +28,17 @@ class SedFnrSøk {
      * @param sed SED i json format
      * @return distinkt set av fnr
      */
-    // TODO: Hente ut ALLE fnr fra SED... hvordan...?
-    fun finnAlleFnrDnrISed(sed: String) : Set<String> {
+    fun finnAlleFnrDnrISed(sed: SED): Set<String> {
         logger.info("Søker etter fnr i SED")
         try {
-            val sedRootNode = mapper.readTree(sed)
+            val sedJson = sed.toJson()
+
+            val sedRootNode = jacksonObjectMapper().readTree(sedJson)
             val funnedeFnr = mutableSetOf<String>()
 
             traverserNode(sedRootNode, funnedeFnr)
             return funnedeFnr.toSet()
-        } catch ( ex : Exception) {
+        } catch (ex: Exception) {
             logger.info("En feil oppstod under søk av fødselsnummer i SED", ex)
             throw ex
         }
@@ -118,12 +121,12 @@ class SedFnrSøk {
 
             val fnre = mutableListOf<String>()
 
-            val kompetenteulandNode = pin.get("kompetenteuland")
+            val kompetenteulandNode = pin.findValue("kompetenteuland")
             if (kompetenteulandNode != null && erFnrDnrFormat(kompetenteulandNode.asText())) {
                 fnre.add(kompetenteulandNode.textValue())
             }
 
-            val oppholdslandNode = pin.get("oppholdsland")
+            val oppholdslandNode = pin.findValue("oppholdsland")
             if (oppholdslandNode != null && erFnrDnrFormat(oppholdslandNode.asText())) {
                 fnre.add(oppholdslandNode.textValue())
             }
