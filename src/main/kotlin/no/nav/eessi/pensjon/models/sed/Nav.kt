@@ -32,12 +32,6 @@ data class Nav(
                 bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
 
         /**
-         * Forenklet uthenting forsikret (hovedperson) sin rolle
-         */
-        fun forsikretRolle(): String? =
-                bruker?.firstOrNull()?.person?.rolle
-
-        /**
          * Forenklet uthenting av annen person
          */
         fun annenPerson(): Person? = annenperson?.person
@@ -47,11 +41,6 @@ data class Nav(
          */
         fun annenPersonIdent(): String? =
                 annenperson?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
-
-        /**
-         * Forenklet uthenting forsikret (hovedperson) sin rolle
-         */
-        fun annenPersonRolle(): String? = annenperson?.person?.rolle
 }
 
 data class Bruker(
@@ -139,11 +128,8 @@ data class PinLandItem(
 )
 
 data class RelasjonAvdodItem(
+        // TODO: Create enum values?
         val relasjon: String? = null
-)
-
-data class StatsborgerskapItem(
-        val land: String? = null
 )
 
 data class PinItem(

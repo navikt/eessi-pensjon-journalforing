@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.buc
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
@@ -18,14 +17,13 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
                         private val euxKlient: EuxKlient) {
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
-    private val mapper = jacksonObjectMapper()
 
     private val validSedtype = listOf("P2000", "P2100", "P2200", "P1000",
             "P5000", "P6000", "P7000", "P8000", "P9000",
             "P10000", "P1100", "P11000", "P12000", "P14000", "P15000", "H070", "R005")
 
     fun hentAlleSedIBuc(rinaSakId: String): List<SED> {
-        return fagmodulKlient.hentAlleDokumenter2(rinaSakId)
+        return fagmodulKlient.hentAlleDokumenter(rinaSakId)
                 .filterNot { doc -> doc.status == "empty" }
                 .filter { doc -> doc.type.name in validSedtype }
                 .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
@@ -88,7 +86,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String?): SakInformasjon? {
+    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String): SakInformasjon? {
         val saklist: List<SakInformasjon> = try {
             fagmodulKlient.hentPensjonSaklist(aktoerId)
         } catch (e: Exception) {

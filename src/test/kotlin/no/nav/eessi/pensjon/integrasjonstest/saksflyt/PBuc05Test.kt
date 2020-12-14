@@ -43,7 +43,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = "01"), null)
         every { euxKlient.hentSed(any(), any()) } returns sed
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs())
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns getMockDocuments()
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
         val voksen = createBrukerWith(FNR_OVER_60, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -69,7 +69,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
         assertNull(request.bruker)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -86,7 +86,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP8000recevied = createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = "01"), null)
 
         val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<Document>>())
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns dokumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns dokumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen sedP8000sendt
         every { diskresjonService.hentDiskresjonskode(any()) } returns null
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
@@ -118,7 +118,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
         assertEquals(afnr, request.bruker?.id)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 3) { euxKlient.hentSed(any(), any()) }
 
@@ -139,7 +139,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_BARN)) } returns AktoerId(FNR_BARN + "00000")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
@@ -162,7 +162,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -176,7 +176,7 @@ internal class PBuc05Test : JournalforingTestBase() {
                 Document("30002", SedType.P5000, "sent")
         )
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
@@ -199,7 +199,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -215,7 +215,7 @@ internal class PBuc05Test : JournalforingTestBase() {
                 Document("30002", SedType.P5000, "sent")
         )
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
@@ -241,7 +241,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
 
     }
@@ -266,7 +266,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         )
 
         every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
@@ -294,7 +294,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
         assertEquals(fnr, request.bruker?.id!!)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -318,7 +318,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         )
 
         every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
 
@@ -346,7 +346,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
         assertEquals(fnr, request.bruker?.id!!)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
 
     }
@@ -364,7 +364,7 @@ internal class PBuc05Test : JournalforingTestBase() {
                 Document("30002", SedType.P5000, "sent")
         )
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR")
@@ -395,7 +395,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
 
@@ -414,7 +414,7 @@ internal class PBuc05Test : JournalforingTestBase() {
                 Document("30002", SedType.P5000, "sent")
         )
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Lever", "Helt i live", "SWE")
@@ -445,7 +445,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
 
@@ -464,7 +464,7 @@ internal class PBuc05Test : JournalforingTestBase() {
                 Document("30002", SedType.P5000, "sent")
         )
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR")
@@ -489,7 +489,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         assertEquals(UFORETRYGD, request.tema)
         assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
 

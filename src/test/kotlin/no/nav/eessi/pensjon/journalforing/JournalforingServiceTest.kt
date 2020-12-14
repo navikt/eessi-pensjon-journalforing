@@ -310,7 +310,7 @@ class JournalforingServiceTest {
 
         doReturn(documents)
                 .`when`(fagmodulKlient)
-                .hentAlleDokumenter2(anyString())
+                .hentAlleDokumenter(anyString())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -409,7 +409,7 @@ class JournalforingServiceTest {
         val json = javaClass.getResource("/fagmodul/allDocumentsBuc01.json").readText()
         val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
 
-        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter2(any())
+        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -478,7 +478,7 @@ class JournalforingServiceTest {
         val json = javaClass.getResource("/buc/P2200-NAV.json").readText()
         val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
 
-        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter2(any())
+        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)

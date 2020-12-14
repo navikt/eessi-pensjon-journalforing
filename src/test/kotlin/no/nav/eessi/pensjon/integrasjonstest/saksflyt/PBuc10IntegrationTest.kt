@@ -338,7 +338,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrBarn != null) {
             verify { personV3Service.hentPerson(any()) }
             verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
@@ -387,7 +387,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrVoksenSoker != null) {
             verify { personV3Service.hentPerson(any()) }
             verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
@@ -431,7 +431,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         if (bestemSak == null)
@@ -443,7 +443,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     }
 
     private fun initCommonMocks(sed: SED, alleDocs: List<Document>) {
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocs
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocs
         every { euxKlient.hentSed(any(), any()) } returns sed
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
     }

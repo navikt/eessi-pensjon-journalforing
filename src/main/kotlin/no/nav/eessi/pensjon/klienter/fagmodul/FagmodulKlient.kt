@@ -39,7 +39,7 @@ class FagmodulKlient(
         hentFnrFraBUC = metricsHelper.init("hentFnrFraBUC")
     }
 
-    fun hentAlleDokumenter2(rinaNr: String): List<Document> {
+    fun hentAlleDokumenter(rinaNr: String): List<Document> {
         return hentSeds.measure {
             val path = "/buc/$rinaNr/allDocuments"
             return@measure try {
@@ -61,25 +61,6 @@ class FagmodulKlient(
             }
         }
     }
-
-    /*fun hentAlleDokumenter(rinaNr: String): String? {
-        return hentSeds.measure {
-            val path = "/buc/$rinaNr/allDocuments"
-            return@measure try {
-                logger.info("Henter jsondata for alle sed for rinaNr: $rinaNr")
-                fagmodulOidcRestTemplate.exchange(path,
-                        HttpMethod.GET,
-                        null,
-                        String::class.java).body
-            } catch (ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under henting av alledokumenter ex: $ex body: ${ex.responseBodyAsString}", ex)
-                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message} body: ${ex.responseBodyAsString}")
-            } catch (ex: Exception) {
-                logger.error("En feil oppstod under henting av alledokumenter ex: $ex", ex)
-                throw RuntimeException("En feil oppstod under henting av alledokumenter ex: ${ex.message}")
-            }
-        }
-    }*/
 
     fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
         val path = "/pensjon/sakliste/$aktoerId"

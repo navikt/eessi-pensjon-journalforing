@@ -205,7 +205,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(request)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
@@ -246,7 +246,7 @@ internal open class JournalforingTestBase {
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSed(SedType.P8000, fnr, null, sakId)
+        val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
         initCommonMocks(sed)
 
         if (fnr != null) {
@@ -271,7 +271,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
@@ -288,7 +288,7 @@ internal open class JournalforingTestBase {
     private fun initCommonMocks(sed: SED) {
         val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns documents
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
         every { euxKlient.hentSed(any(), any()) } returns sed
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
     }
@@ -397,6 +397,14 @@ internal open class JournalforingTestBase {
               "navBruker": ${forsikretFnr?.let { "\"$it\"" }}
             }
         """.trimIndent()
+    }
+
+    protected fun getMockDocuments(): List<Document> {
+        return listOf(
+                Document("44cb68f89a2f4e748934fb4722721018", SedType.P2000, "sent"),
+                Document("3009f65dd2ac4948944c6b7cfa4f179d", SedType.H121, "empty"),
+                Document("9498fc46933548518712e4a1d5133113", SedType.H070, "empty")
+        )
     }
 
 }

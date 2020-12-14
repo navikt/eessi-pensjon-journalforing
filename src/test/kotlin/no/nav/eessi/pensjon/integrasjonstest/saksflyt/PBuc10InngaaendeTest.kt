@@ -116,7 +116,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
@@ -139,7 +139,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         Assertions.assertEquals(Tema.PENSJON, request.tema)
         Assertions.assertEquals(Enhet.NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -156,7 +156,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
@@ -179,7 +179,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         Assertions.assertEquals(Tema.PENSJON, request.tema)
         Assertions.assertEquals(Enhet.PENSJON_UTLAND, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -196,7 +196,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
@@ -219,7 +219,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         Assertions.assertEquals(Tema.UFORETRYGD, request.tema)
         Assertions.assertEquals(Enhet.UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -236,7 +236,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
@@ -259,7 +259,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         Assertions.assertEquals(Tema.UFORETRYGD, request.tema)
         Assertions.assertEquals(Enhet.UFORE_UTLAND, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -299,7 +299,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrBarn != null) {
             verify(exactly = 6) { personV3Service.hentPerson(any()) }
             verify(exactly = 2) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
@@ -343,7 +343,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         if (bestemSak == null)
@@ -355,7 +355,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     private fun initCommonMocks(sed: SED, alleDocs: List<Document>) {
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns alleDocs
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocs
         every { euxKlient.hentSed(any(), any()) } returns sed
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
     }

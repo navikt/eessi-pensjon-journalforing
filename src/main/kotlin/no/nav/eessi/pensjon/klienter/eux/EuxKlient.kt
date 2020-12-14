@@ -64,31 +64,7 @@ class EuxKlient(
     }
 
     /**
-     * Henter SED i json format
-     *
-     * @param rinaNr BUC-id
-     * @param dokumentId SED-id
-     */
-    /*@Retryable(include = [HttpStatusCodeException::class], backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0))
-    fun hentSed(rinaNr: String, dokumentId: String): String? {
-        return hentSed.measure {
-            val path = "/buc/$rinaNr/sed/$dokumentId"
-            return@measure try {
-                logger.info("Henter SED for rinaNr: $rinaNr , dokumentId: $dokumentId")
-                euxOidcRestTemplate.exchange(path,
-                        HttpMethod.GET,
-                        HttpEntity(""),
-                        String::class.java).body
-            } catch (ex: Exception) {
-                logger.warn("En feil oppstod under henting av SED ex: $path", ex)
-                throw ex
-            }
-        }
-    }*/
-
-    /**
-     * Henter SED i json format
-     *
+     * Henter SED
      * @param rinaNr BUC-id
      * @param dokumentId SED-id
      */

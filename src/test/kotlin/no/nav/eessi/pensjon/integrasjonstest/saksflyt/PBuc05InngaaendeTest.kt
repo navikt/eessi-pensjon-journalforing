@@ -78,7 +78,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -107,7 +107,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -137,7 +137,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -166,7 +166,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         assertEquals(PENSJON, request.tema)
         assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
@@ -296,7 +296,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
             assertEquals(FNR_OVER_60, request.bruker!!.id)
 
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         }
 
@@ -329,7 +329,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(UFORE_UTLAND, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
 
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         }
 
@@ -362,7 +362,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
 
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         }
 
@@ -395,7 +395,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
 
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         }
 
@@ -428,7 +428,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
             assertNull(request.bruker)
 
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter2(any()) }
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
         }
 
@@ -479,7 +479,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
     private fun initCommonMocks(sed: SED) {
         val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
 
-        every { fagmodulKlient.hentAlleDokumenter2(any()) } returns documents
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
         every { euxKlient.hentSed(any(), any()) } returns sed
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
     }

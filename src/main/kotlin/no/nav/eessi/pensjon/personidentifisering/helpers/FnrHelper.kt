@@ -74,14 +74,17 @@ class FnrHelper {
     }
 
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
-        filterAnnenpersonPinNode(sed)?.let {
+        val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == "01" }
+
+        gjenlevende?.ident()?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
         }
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        sed.nav?.forsikretIdent()
-                ?.let { fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type)) }
+        sed.nav?.forsikretIdent()?.let {
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
+        }
     }
 
     private fun ytelseTypefraKravSed(krav: String?): YtelseType? {
@@ -132,7 +135,7 @@ class FnrHelper {
 
         val personPin = sed.nav?.forsikretIdent()
         val annenPersonPin = sed.nav?.annenPersonIdent()
-        val rolle = sed.nav?.annenPersonRolle()
+        val rolle = sed.nav?.annenPerson()?.rolle
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
         //hvis to personer ingen rolle return uten pin..
