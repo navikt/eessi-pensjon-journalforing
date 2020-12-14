@@ -8,7 +8,11 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -36,6 +40,7 @@ internal class Pbuc10Test {
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
+            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon("12321331", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
             every { diskresjonskode } returns null
             every { ytelseType } returns YtelseType.UFOREP
             every { hendelseType } returns SENDT
@@ -149,6 +154,7 @@ internal class Pbuc10Test {
             land: Bosatt
     ): OppgaveRoutingRequest {
         return mockk {
+            if (hendelse == SENDT) every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon("12321331", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
             every { diskresjonskode } returns null
             every { hendelseType } returns hendelse
             every { ytelseType } returns ytelse
