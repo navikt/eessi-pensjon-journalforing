@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
 
 class Pbuc10 : BucTilEnhetHandler {
+
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
@@ -36,12 +37,15 @@ class Pbuc10 : BucTilEnhetHandler {
     }
 
     private fun erSakUgyldig(request: OppgaveRoutingRequest): Boolean {
-        return request.run {
-            ytelseType == YtelseType.UFOREP
-                    && hendelseType == HendelseType.SENDT
-                    && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET
-                    && sakInformasjon.sakType == YtelseType.UFOREP
+        if (request.hendelseType ==  HendelseType.SENDT) {
+            return request.run {
+                identifisertPerson?.personRelasjon?.ytelseType == YtelseType.GJENLEV
+                        && ytelseType == YtelseType.UFOREP
+                        && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET
+                        && sakInformasjon.sakType == YtelseType.UFOREP
+            }
         }
+        return false
     }
 
     private fun erMottattAlderEllerGjenlev(request: OppgaveRoutingRequest): Boolean {

@@ -83,6 +83,26 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
         }
+
+        @Test
+        fun `Krav om uføretrygd - sakstatus AVSLUTTET - AUTOMATISK_JOURNALFORING`() {
+            val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)))
+            val allDocuemtActions = mockAllDocumentsBuc( listOf(
+                    Triple("10001212", "P15000", "sent")
+            ))
+
+            testRunner(FNR_VOKSEN, bestemsak, krav = KRAV_UFORE, alleDocs = allDocuemtActions) {
+                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+            }
+
+            testRunner(FNR_VOKSEN_2, bestemsak, krav = KRAV_UFORE, alleDocs = allDocuemtActions) {
+                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+            }
+        }
+
+
     }
 
 
@@ -221,6 +241,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
+
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(FNR_VOKSEN, it.bruker?.id!!)
+            }
+
 
         }
     }

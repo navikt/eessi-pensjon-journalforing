@@ -13,11 +13,8 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -106,7 +103,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
         val sed15000sent = createP15000(FNR_OVER_60, krav = KRAV_ALDER)
         println(sed15000sent)
         val sedP5000mottatt = createSedP5000(FNR_OVER_60)
@@ -165,7 +162,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
         val sed15000sent = createP15000(FNR_OVER_60, krav = KRAV_ALDER)
         println(sed15000sent)
         val sedP5000mottatt = createSedP5000(FNR_OVER_60)
@@ -224,7 +221,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
         val sed15000sent = createP15000(FNR_VOKSEN, krav = KRAV_UFORE)
         println(sed15000sent)
         val sedP5000mottatt = createSedP5000(FNR_VOKSEN)
@@ -283,7 +280,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
         val sed15000sent = createP15000(FNR_VOKSEN, krav = KRAV_UFORE)
         println(sed15000sent)
         val sedP5000mottatt = createSedP5000(FNR_VOKSEN)
