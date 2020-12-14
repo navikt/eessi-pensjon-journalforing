@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -79,8 +80,7 @@ class FnrHelper {
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        sed.nav?.bruker?.firstOrNull()?.person?.pin
-                ?.firstOrNull { it.land == "NO" }?.identifikator
+        sed.nav?.forsikretIdent()
                 ?.let { fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type)) }
     }
 
@@ -94,15 +94,15 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        sed.nav?.bruker?.firstOrNull()?.person?.hentNorskFnr()?.let {
-            fnrListe.add(PersonRelasjon(it.value, Relasjon.FORSIKRET, ytelseType, sed.type))
+        sed.nav?.forsikretIdent()?.let {
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
             logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
         }
 
         val gjenlevendePerson = sed.pensjon?.gjenlevende?.person
 
         gjenlevendePerson?.let {
-            val gjenlevendePin = it.pin?.firstOrNull { pin -> pin.land == "NO" }?.identifikator ?: return
+            val gjenlevendePin = it.ident() ?: return
 
             val gjenlevendeRelasjon = it.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
@@ -130,25 +130,24 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
-        val sedType = SedType.P8000
-        val personPin = sed.nav?.bruker?.firstOrNull()?.person?.hentNorskFnr()
-        val annenPersonPin = sed.nav?.annenperson?.person?.hentNorskFnr()?.value
-        val rolle = sed.nav?.annenperson?.person?.rolle
+        val personPin = sed.nav?.forsikretIdent()
+        val annenPersonPin = sed.nav?.annenPersonIdent()
+        val rolle = sed.nav?.annenPersonRolle()
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
         //hvis to personer ingen rolle return uten pin..
         if (personPin != null && annenPersonPin != null && rolle == null) return
 
         personPin?.let {
-            fnrListe.add(PersonRelasjon(it.value, Relasjon.FORSIKRET, sedType = sedType))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, sedType = sed.type))
             logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
         }
 
         val annenPersonRelasjon = when (rolle) {
-            "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE, sedType = sedType)
-            "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER, sedType = sedType)
-            "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN, sedType = sedType)
-            else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET, sedType = sedType)
+            "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE, sedType = sed.type)
+            "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER, sedType = sed.type)
+            "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN, sedType = sed.type)
+            else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET, sedType = sed.type)
         }
         fnrListe.add(annenPersonRelasjon)
         logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
@@ -163,7 +162,7 @@ class FnrHelper {
         val annenPerson = sed.nav?.annenperson ?: return null
         if (annenPerson.person?.rolle != "01") return null
 
-        return annenPerson.person.hentNorskFnr()?.value
+        return annenPerson.ident()
     }
 
 
@@ -177,7 +176,7 @@ class FnrHelper {
     private fun filterPinPersonR005(sed: SED): List<PersonRelasjon> {
         return sed.nav?.bruker
                 ?.mapNotNull { bruker ->
-                    val fnr = bruker.person?.hentNorskFnr()
+                    val fnr = hentNorskFnr(bruker.person)
                     val relasjon = getType(bruker.tilbakekreving?.status?.type)
 
                     fnr?.let { PersonRelasjon(it.value, relasjon, sedType = sed.type) }
@@ -194,4 +193,8 @@ class FnrHelper {
         }
     }
 
+    private fun hentNorskFnr(person: Person?): Fodselsnummer? {
+        val fnr = person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
+        return Fodselsnummer.fra(fnr)
+    }
 }

@@ -23,7 +23,6 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -236,7 +235,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -271,12 +270,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     Document("10001212", SedType.P15000, "sent")
             )
 
-            testRunnerBarn(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
+            testRunnerBarn(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
+            testRunnerBarn(FNR_VOKSEN, FNR_BARN, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -300,13 +299,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         """.trimIndent()
     }
 
-
-
     private fun testRunnerBarn(fnrVoksen: String,
                                fnrBarn: String?,
                                bestemSak: BestemSakResponse? = null,
                                sakId: String? = SAK_ID,
-                               diskresjonkode: Diskresjonskode? = null,
                                land: String = "NOR",
                                krav: String = KRAV_ALDER,
                                alleDocs: List<Document>,
@@ -314,10 +310,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                sedJson: String? = null,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
-
-        val json = sedJson
-                ?: createP15000(fnrVoksen, eessiSaknr = sakId, krav = krav, gfn = fnrBarn, relasjon = relasjonAvod)
-        val sed = mapJsonToAny(json, typeRefs<SED>())
+        val sed = sedJson?.let { mapJsonToAny(it, typeRefs<SED>()) }
+                ?: createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
@@ -361,16 +355,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                  fnrVoksenSoker: String?,
                                  bestemSak: BestemSakResponse? = null,
                                  sakId: String? = SAK_ID,
-                                 diskresjonkode: Diskresjonskode? = null,
                                  land: String = "NOR",
                                  krav: String = KRAV_ALDER,
                                  alleDocs: List<Document>,
                                  relasjonAvod: String? = "06",
                                  block: (OpprettJournalpostRequest) -> Unit
     ) {
-
-        val json = createP15000(fnrVoksen, eessiSaknr = sakId, krav = krav, gfn = fnrVoksenSoker, relasjon = relasjonAvod)
-        val sed = mapJsonToAny(json, typeRefs<SED>())
+        val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrVoksenSoker, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land)
@@ -418,8 +409,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                            block: (OpprettJournalpostRequest) -> Unit
     ) {
 
-        val json = createP15000(fnr1, eessiSaknr = sakId, krav = krav)
-        val sed = mapJsonToAny(json, typeRefs<SED>())
+        val sed = createSedPensjon(SedType.P15000, fnr1, eessiSaknr = sakId, krav = krav)
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {

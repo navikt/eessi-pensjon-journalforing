@@ -44,8 +44,6 @@ class Pbuc05 : BucTilEnhetHandler {
         else Enhet.ID_OG_FORDELING
     }
 
-
-
     /**
      * Sjekker om det finnes en identifisert person og om denne personen er [Relasjon.GJENLEVENDE]
      *

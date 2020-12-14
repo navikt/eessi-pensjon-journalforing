@@ -32,7 +32,7 @@ internal class ArchitectureTest {
     fun beforeAll() {
         // Validate number of classes to analyze
         assertTrue(classesToAnalyze.size > 150, "Sanity check on no. of classes to analyze")
-        assertTrue(classesToAnalyze.size < 350, "Sanity check on no. of classes to analyze")
+        assertTrue(classesToAnalyze.size < 300, "Sanity check on no. of classes to analyze")
     }
 
     @Test

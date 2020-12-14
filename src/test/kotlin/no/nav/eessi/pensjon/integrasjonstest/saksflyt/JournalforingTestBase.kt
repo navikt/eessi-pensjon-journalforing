@@ -30,9 +30,12 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
+import no.nav.eessi.pensjon.models.sed.Krav
 import no.nav.eessi.pensjon.models.sed.Nav
+import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.PinItem
+import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -53,13 +56,10 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.GeografiskTilknytning
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoennstyper
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Land
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Landkoder
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -298,149 +298,83 @@ internal open class JournalforingTestBase {
 
     protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
         return Bruker()
-                .withPersonnavn(
-                        Personnavn()
-                                .withEtternavn(etternavn)
-                                .withFornavn(fornavn)
-                                .withSammensattNavn("$fornavn $etternavn")
-                )
+                .withPersonnavn(Personnavn().withSammensattNavn("$fornavn $etternavn"))
                 .withGeografiskTilknytning(Land().withGeografiskTilknytning(geo) as GeografiskTilknytning)
-                .withKjoenn(Kjoenn().withKjoenn(Kjoennstyper().withValue("M")))
                 .withAktoer(PersonIdent().withIdent(PersonV3NorskIdent().withIdent(fnr)))
-                .withStatsborgerskap(Statsborgerskap().withLand(Landkoder().withValue(land)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
                 .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
     }
 
-    private fun journalpostResponse(ferdigstilt: Boolean = false): OpprettJournalPostResponse {
-        return OpprettJournalPostResponse(
-                "429434378",
-                "M",
-                null,
-                ferdigstilt
-        )
-    }
-
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
-        val journalpostResponse = journalpostResponse(ferdigstilt)
+        val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01"): Person {
-        val fdato = try {
-            Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1962-07-18"
-        } catch (e: IllegalArgumentException) {
-            "1962-07-18"
-        }
+    protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01", relasjon: String? = null): Person {
+        val validFnr = Fodselsnummer.fra(fnr)
 
         return Person(
-                fnr?.let { listOf(PinItem(land = "NO", identifikator = fnr)) },
-                fornavn = "Annen",
-                etternavn = "Person",
-                kjoenn = "U",
-                foedselsdato = fdato,
-                rolle = rolle
+                validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
+                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
+                rolle = rolle,
+                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
         )
     }
 
-    protected fun createAnnenPersonJson(fnr: String? = null, rolle: String? = "01"): String {
-        val fdato = try {
-            Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1962-07-18"
-        } catch (e: IllegalArgumentException) {
-            "1962-07-18"
-        }
-
-        return """
-            {
-                "person": {
-                      ${if (rolle != null) "\"rolle\" : \"$rolle\"," else ""}
-                    "fornavn": "Annen",
-                    "etternavn": "Person",
-                    "kjoenn": "U",
-                    "foedselsdato": "$fdato"
-                    ${if (fnr != null) createPinJson(fnr) else ""}
-                }
-            }
-        """.trimIndent()
-    }
-
-    private fun createPinJson(fnr: String?): String {
-        return """
-             ,"pin": [
-                      {
-                        "land": "NO",
-                        "identifikator": "$fnr"
-                      }
-                    ]
-        """.trimIndent()
-    }
-
-    private fun createEESSIsakJson(saknr: String?): String {
-        return """
-            "eessisak": [
-              {
-                "saksnummer": "$saknr",
-                "land": "NO"
-              }
-            ],            
-        """.trimIndent()
-    }
-
     protected fun createSed(sedType: SedType, fnr: String? = null, annenPerson: Person? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): SED {
+        val validFnr = Fodselsnummer.fra(fnr)
+
+        val forsikretBruker = SedBruker(
+                person = Person(
+                        pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
+                        foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato
+                )
+        )
+
         return SED(
                 sedType,
                 sedGVer = "4",
                 sedVer = "2",
                 nav = Nav(
                         eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-                        bruker = listOf(
-                                SedBruker(
-                                        person = Person(
-                                                pin = fnr?.let { listOf(PinItem(identifikator = fnr, land = "NO")) },
-                                                kjoenn = "M",
-                                                etternavn = "Forsikret",
-                                                fornavn = "Person",
-                                                foedselsdato = fdato
-                                        )
-                                )
-                        ),
+                        bruker = listOf(forsikretBruker),
                         annenperson = annenPerson?.let { SedBruker(person = it) }
-
                 )
         )
     }
 
-    protected fun createSedJson(sedType: SedType, fnr: String? = null, annenPerson: String? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): String {
-        return """
-            {
-              "nav": {
-                ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
-                "bruker": {
-                  "adresse": {
-                    "gate": "Oppoverbakken 66",
-                    "land": "NO",
-                    "by": "SØRUMSAND"
-                  },
-                  "person": {
-                    "kjoenn": "M",
-                    "etternavn": "Død",
-                    "fornavn": "Avdød",
-                    "foedselsdato": "$fdato"
-                    ${if (fnr != null) createPinJson(fnr) else ""}
-                  }
-                },
-                "annenperson": $annenPerson
-              },
-              "Sector Components/Pensions/P8000": "Sector Components/Pensions/P8000",
-              "sedGVer": "4",
-              "sedVer": "2",
-              "sed": "${sedType.name}"
-            }
-        """.trimIndent()
+    protected fun createSedPensjon(sedType: SedType,
+                                   fnr: String?,
+                                   eessiSaknr: String? = null,
+                                   gjenlevendeFnr: String? = null,
+                                   krav: String? = null,
+                                   relasjon: String? = null): SED {
+        val validFnr = Fodselsnummer.fra(fnr)
+
+        val forsikretBruker = SedBruker(
+                person = Person(
+                        pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
+                        foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12"
+                )
+        )
+
+        val annenPerson = SedBruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon))
+
+        return SED(
+                sedType,
+                sedGVer = "4",
+                sedVer = "2",
+                nav = Nav(
+                        eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
+                        bruker = listOf(forsikretBruker),
+                        krav = Krav("2019-02-01", krav)
+                ),
+                pensjon = Pensjon(gjenlevende = annenPerson)
+        )
     }
 
     protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
@@ -465,128 +399,4 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
-    private fun createGjenlevende(fnr: String?, relasjon: String? = null): String {
-        return """
-          ,
-          "pensjon" : {
-            "gjenlevende" : {
-              "person" : {
-                "statsborgerskap" : [ {
-                  "land" : "DE"
-                } ],
-                "etternavn" : "Gjenlev",
-                "fornavn" : "Lever",
-                "kjoenn" : "M",
-                "foedselsdato" : "1988-07-12",
-                "relasjontilavdod" : {
-                ${if (relasjon != null) "\"relasjon\" : \"$relasjon\"" else ""}
-                }
-                ${if (fnr != null) createPinJson(fnr) else ""}
-              }
-            }
-          }
-        """.trimIndent()
-    }
-
-    protected fun createSedP5000(fnr: String?, gfn: String? = null, eessiSaknr: String? = null): String {
-        return """
-    {
-      "sed" : "P5000",
-      "sedGVer" : "4",
-      "sedVer" : "1",
-      "nav" : {
-        ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
-        "bruker" : {
-          "person" : {
-            "statsborgerskap" : [ {
-              "land" : "NO"
-            } ],
-            "etternavn" : "Død",
-            "fornavn" : "Avdød",
-            "kjoenn" : "M",
-            "foedselsdato" : "1988-07-12"
-            ${if (fnr != null) createPinJson(fnr) else ""}
-          }
-        }
-      }
-    ${if (gfn != null) createGjenlevende(gfn) else ""}
-    }
-    """.trimIndent()
-    }
-
-    protected fun mockAllDocumentsBuc(document: List<Triple<String, String, String>>): String =
-            document.joinToString(prefix = "[", postfix = "]") {
-                singleActionDocument(it.first, it.second, it.third)
-            }
-
-    private fun singleActionDocument(documentid: String, documentType: String, status: String): String {
-        return """{
-        "id": "$documentid",
-        "parentDocumentId": null,
-        "type": "$documentType",
-        "status": "$status",
-        "creationDate": 1572005370040,
-        "lastUpdate": 1572005370040,
-        "displayName": "Forespørsel om informasjon",
-        "attachments": [],
-        "version": "1"
-      }""".trimIndent()
-    }
-
-    //krav 01 alder, 02 gjenlevende, 03 uføre
-    protected fun createP15000(fnr: String?, eessiSaknr: String? = null, gfn: String? = null, krav: String, relasjon: String? = null) : String {
-        return """
-    {
-      "sed" : "P15000",
-      "nav" : {
-        ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
-        "bruker" : {
-          "person" : {
-            "statsborgerskap" : [ {
-              "land" : "NO"
-            } ],
-            "etternavn" : "Forsikret",
-            "fornavn" : "Person",
-            "kjoenn" : "M",
-            "foedselsdato" : "1988-07-12"
-            ${if (fnr != null) createPinJson(fnr) else ""}
-          }
-          },
-          "krav" : {
-            "dato" : "2019-02-01",
-            "type" : "$krav"
-        }
-      }
-      ${createGjenlevende(gfn, relasjon)}
-    }
-    """.trimIndent()
-    }
-
-    protected fun createP9000(fnr: String, eessiSaknr: String? = null): String {
-        return """
-            {
-              "nav": {
-                  ${if (eessiSaknr != null) createEESSIsakJson(eessiSaknr) else ""}
-                 "bruker": {
-                  "person": {
-                    "kjoenn": "M",
-                    "etternavn": "KRAFTIG",
-                    "fornavn": "VEGGPRYD",
-                    "pin": [
-                      {
-                        "identifikator": "$fnr",
-                        "land": "NO"
-                      }
-                    ],
-                    "foedselsdato": "2000-01-01"
-                  }
-                }
-              },
-              "sed": "P9000",
-              "sedGVer": "4",
-              "sedVer": "2"
-            }
-        """.trimIndent()
-
-    }
 }

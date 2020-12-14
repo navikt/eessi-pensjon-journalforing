@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Document
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -105,26 +104,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
-
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P6000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -147,7 +127,7 @@ internal class PBuc05Test : JournalforingTestBase() {
     @Test
     fun `Scenario 13 - 0 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
         val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-        val sedP5000sent = mapJsonToAny(createSedP5000(FNR_OVER_60, FNR_BARN), typeRefs<SED>())
+        val sedP5000sent = createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_BARN)
 
         val alleDocumenter = listOf(
                 Document("10001", SedType.P8000, "received"),
@@ -166,25 +146,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -221,25 +183,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -281,25 +225,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -326,7 +252,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val aktoer = "${fnr}111"
         val sakid = SAK_ID
         val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-        val sedP9000sent = mapJsonToAny(createP9000(fnr, sakid), typeRefs<SED>())
+        val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
                 Document("10001", SedType.P8000, "received"),
@@ -378,7 +304,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val aktoer = "${fnr}111"
         val sakid = SAK_ID
         val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-        val sedP9000sent = mapJsonToAny(createP9000(fnr, sakid), typeRefs<SED>())
+        val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
                 Document("10001", SedType.P8000, "received"),
@@ -454,25 +380,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -522,25 +430,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -589,25 +479,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P6000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_05",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 

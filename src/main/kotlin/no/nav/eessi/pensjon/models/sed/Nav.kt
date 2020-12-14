@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.models.sed
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 
 data class Nav(
         @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
@@ -19,12 +18,70 @@ data class Nav(
         val annenperson: Bruker? = null,
 
         //H120
-        val endredeforhold: Endredeforhold? = null,
-        val ytterligereinformasjon: String? = null,
+        val endredeforhold: Endredeforhold? = null
+) {
+        /**
+         * Forenklet uthenting forsikret (hovedperson)
+         */
+        fun forsikret(): Person? = bruker?.firstOrNull()?.person
 
-        //P1000
-        val barnoppdragelse: Barnoppdragelse? = null
-)
+        /**
+         * Forenklet uthenting forsikret (hovedperson) sin identifikator (fnr)
+         */
+        fun forsikretIdent(): String? =
+                bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
+
+        /**
+         * Forenklet uthenting forsikret (hovedperson) sin rolle
+         */
+        fun forsikretRolle(): String? =
+                bruker?.firstOrNull()?.person?.rolle
+
+        /**
+         * Forenklet uthenting av annen person
+         */
+        fun annenPerson(): Person? = annenperson?.person
+
+        /**
+         * Forenklet uthenting annen person sin identifikator (fnr)
+         */
+        fun annenPersonIdent(): String? =
+                annenperson?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
+
+        /**
+         * Forenklet uthenting forsikret (hovedperson) sin rolle
+         */
+        fun annenPersonRolle(): String? = annenperson?.person?.rolle
+}
+
+data class Bruker(
+        val mor: Foreldre? = null,
+        val far: Foreldre? = null,
+        val person: Person? = null,
+
+        //H120?
+        val bostedsadresse: Adresse? = null,
+        val status: BrukerStatus? = null,
+        val tilbakekreving: Tilbakekreving? = null
+) {
+        fun ident(): String? = person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
+}
+
+data class Person(
+        @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
+        val pin: List<PinItem>? = null,
+
+        val pinland: PinLandItem? = null, //for H020 og H021
+        val pinannen: PinItem? = null,
+        val foedselsdato: String? = null,
+
+        val relasjontilavdod: RelasjonAvdodItem? = null, //5.2.5 P2100
+
+        // TODO: Could be enum ?
+        val rolle: String? = null  //3.1 i P10000
+) {
+        fun ident(): String? = pin?.firstOrNull { it.land == "NO" }?.identifikator
+}
 
 //H121
 data class Endredeforhold(
@@ -33,8 +90,7 @@ data class Endredeforhold(
 
 //X005
 data class Navsak(
-        val kontekst: Kontekst? = null,
-        val leggtilinstitusjon: Leggtilinstitusjon? = null
+        val kontekst: Kontekst? = null
 )
 
 //X005
@@ -42,141 +98,14 @@ data class Kontekst(
         val bruker: Bruker? = null
 )
 
-//X005
-data class Leggtilinstitusjon(
-        val institusjon: InstitusjonX005? = null,
-        val grunn: LeggtilinstitusjonGrunn? = null
-
-)
-
-data class LeggtilinstitusjonGrunn(
-        val type: String? = null,
-        val annet: String? = null
-)
-
-//X005
-data class InstitusjonX005(
-        val id: String,
-        val navn: String
-)
-
-//P1000
-data class Barnoppdragelse(
-        val art442ECverdi: String? = null,
-        val relasjonperson: Relasjonperson? = null,
-        val merknakder: String? = null,
-        val periode: List<PeriodeItem?>? = null,
-        val openperiode: List<OpenPeriodeItem>? = null,
-        val svar: BarnoppdragelseSvar? = null,
-        val doedsdato: String? = null
-)
-
-data class BarnoppdragelseSvar(
-        val nasjonalverdi: String? = null,
-        val aktivitetverdi: String? = null,
-        val fradato: String? = null,
-        val merknader: String? = null
-)
-
-//P1000
-data class Relasjonperson(
-        val verdi: String? = null,
-        val merknad: String? = null
-)
-
-//P1000
-data class PeriodeItem(
-        val startdato: String? = null,
-        val land: String? = null,
-        val sluttdato: String? = null
-)
-
-//P1000
-data class OpenPeriodeItem(
-        val startdato: String? = null,
-        val type: String? = null
-)
-
-
 data class Krav(
         val dato: String? = null,
         val type: String? = null
 )
 
-data class Bruker(
-        val mor: Foreldre? = null,
-        val far: Foreldre? = null,
-        val person: Person? = null,
-        @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
-        val adresse: List<Adresse>? = emptyList(),
-
-        //H120?
-        val bostedsadresse: Adresse? = null,
-        val status: BrukerStatus? = null,
-        //H070
-        val doedsfall: Doedsfall? = null,
-
-        //P14000
-        val endringer: Personendringer? = null,
-
-        val tilbakekreving: Tilbakekreving? = null
-)
-
-//P14000
-data class Personendringer(
-        val personpinendringer: PersonpinEndringer? = null,
-        val livsforhold: EndretLivsforhold? = null,
-        val adresse: Adresse? = null,
-        val sivilstand: EndretSivilstand? = null,
-        val kjoenn: EndretKjoenn? = null,
-        val gammeltetternavn: String? = null,
-        val gammeltfornavn: String? = null,
-        val utvandret: String? = null,
-        val doedsdato: String? = null,
-        val statsborgerskap: String? = null,
-        val startdato: String? = null
-)
-
-//P14000
-data class EndretLivsforhold(
-        val verdi: String? = null,
-        val startdato: String? = null
-)
-
-//P14000 endret kjønn
-data class EndretKjoenn(
-        val verdi: String? = null,
-        val startdato: String? = null
-)
-
-//P14000 endret sivilstand
-data class EndretSivilstand(
-        val verdi: String? = null,
-        val startdato: String? = null
-)
-
-//P14000 personpin endringer
-data class PersonpinEndringer(
-        val gammelt: String? = null,
-        val nytt: String? = null
-)
-
-//H070
-data class Doedsfall(
-        val sted: Sted? = null,
-        val doedsdato: String? = null,
-        val dokumentervedlagt: Dokumentervedlagt? = null
-)
-
 //H070
 data class Sted(
         val adresse: Adresse? = null
-)
-
-//H070
-data class Dokumentervedlagt(
-        val annet: List<String?>? = null,
-        val type: List<String?>? = null
 )
 
 data class BrukerStatus(
@@ -190,9 +119,7 @@ data class Foreldre(
 data class BarnItem(
         val mor: Foreldre? = null,
         val person: Person? = null,
-        val far: Foreldre? = null,
-        val opplysningeromannetbarn: String? = null,
-        val relasjontilbruker: String? = null
+        val far: Foreldre? = null
 )
 
 data class Ektefelle(
@@ -203,108 +130,16 @@ data class Ektefelle(
 )
 
 data class Verge(
-        val person: Person? = null,
-        val adresse: Adresse? = null,
-        val vergemaal: Vergemaal? = null,
-        val vergenavn: String? = null
+        val person: Person? = null
 )
-
-data class Vergemaal(
-        val mandat: String? = null
-)
-
-data class Kontakt(
-        val telefon: List<TelefonItem>? = null,
-        val email: List<EmailItem>? = null,
-
-        //direkte uten bruk av list?
-        val telefonnr: String? = null,
-        val emailadr: String? = null
-)
-
-data class TelefonItem(
-        val type: String? = null,
-        val nummer: String? = null
-)
-
-data class EmailItem(
-        val adresse: String? = null
-)
-
-data class Person(
-        @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
-        val pin: List<PinItem>? = null,
-
-        val pinland: PinLandItem? = null, //for H020 og H021
-        val pinannen: PinItem? = null, //kan fjernes hvis ikke i bruk
-        val statsborgerskap: List<StatsborgerskapItem>? = null, //nasjonalitet
-        val etternavn: String? = null,
-        val fornavn: String? = null,
-        val kjoenn: String? = null,
-        val foedested: Foedested? = null,
-        val tidligerefornavn: String? = null,
-        val tidligereetternavn: String? = null,
-        val fornavnvedfoedsel: String? = null,
-        val etternavnvedfoedsel: String? = null,
-        val foedselsdato: String? = null,
-
-        val doedsdato: String? = null,
-        val dodsDetalj: DodsDetalj? = null, //4 P2100
-
-        val kontakt: Kontakt? = null,
-        val sivilstand: List<SivilstandItem>? = null,   //familiestatus
-        val relasjontilavdod: RelasjonAvdodItem? = null, //5.2.5 P2100
-        val nyttEkteskapPartnerskapEtterForsikredeDod: NyttEkteskapPartnerskap? = null, //5.3.4 P2100
-        //noe enkel måte å få denne til å forbli val?
-        val rolle: String? = null  //3.1 i P10000
-) {
-        fun hentNorskFnr(): Fodselsnummer? = Fodselsnummer.fra(pin?.firstOrNull { it.land == "NO" }?.identifikator)
-}
 
 data class PinLandItem(
         val oppholdsland: String? = null,
         val kompetenteuland: String? = null
 )
 
-data class DodsDetalj(
-        val sted: String? = null, //4.1
-        val dato: String? = null, //4.2
-        val arsaker: List<DodsDetaljOrsakItem>? = null // 4.3
-)
-
-data class DodsDetaljOrsakItem(
-        val arsak: String? = null, //4.3.1 P2100
-        val annenArsak: String? = null //4.3.2.1
-)
-
-data class NyttEkteskapPartnerskap(
-        val fraDato: String? = null,   //5.3.4. P2100
-        val etternavn: String? = null, //5.3.4.2.1
-        val fornavn: String? = null,   //5.3.4.2.2
-        val borsammen: String? = null  //5.3
-)
-
 data class RelasjonAvdodItem(
-        val pensjondetalj: List<AvdodPensjonItem>? = null, //3
-        val relasjon: String? = null,  //5.2.5  P2100
-        val sammehusholdning: String? = null,    //5.2.6  P2100
-        val sammehusholdningfradato: String? = null, //5.2.7.1 P2100
-        val harfellesbarn: String? = null, //5.3.2.1 P2100
-        val forventetTerim: String? = null, //5.3.2.2
-        val sperasjonType: String? = null, //5.3.3
-        val giftParnerDato: String? = null // 5.3.1
-)
-
-data class AvdodPensjonItem(
-        val mottattPensjonvedDod: String? = null, //3.2 P2100
-        val mottattPensjonType: String? = null, //3.2.1
-        val startDatoPensjonrettighet: String? = null, //3.2.3
-        val institusjon: EessisakItem? = null // 3.2.2.1
-)
-
-data class SivilstandItem(
-        val fradato: String? = null,
-        val status: String? = null
+        val relasjon: String? = null
 )
 
 data class StatsborgerskapItem(

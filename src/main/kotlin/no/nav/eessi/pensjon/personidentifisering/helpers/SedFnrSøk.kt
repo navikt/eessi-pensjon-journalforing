@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component
  *
  */
 @Component
-// TODO: Hele klassen må ryddes i. Er det også mulig å traversere SED-objektet? Eller er det best å gjøre det på JSON?
 class SedFnrSøk {
 
     private val logger = LoggerFactory.getLogger(SedFnrSøk::class.java)
