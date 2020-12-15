@@ -73,7 +73,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
                         rinaSakId = sedHendelseModel.rinaSakId,
-                        fnr = identifisertPerson?.personRelasjon?.fnr,
+                        fnr = identifisertPerson?.personRelasjon?.trimFnr(),
                         personNavn = identifisertPerson?.personNavn,
                         bucType = sedHendelseModel.bucType!!,
                         sedType = sedHendelseModel.sedType,

@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -93,7 +94,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<SED>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
-        val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
+        val aktoerId = hentAktoerId(personRelasjon.trimFnr()) ?: ""
         val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
@@ -135,6 +136,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     //felles for P_BUC_05 og P_BUC_10
     private fun utvelgerPersonOgGjenlev(identifisertePersoner: List<IdentifisertPerson>, erGjenlevende: Boolean): IdentifisertPerson? {
+        logger.info("Antall identifiserte personer: ${identifisertePersoner.size}")
         identifisertePersoner.forEach {
             logger.debug(it.toJson())
         }
@@ -220,6 +222,7 @@ data class PersonRelasjon(
         val sedType: SedType? = null
 ) {
     fun erGyldig(): Boolean = ytelseType != null && sedType != null
+    fun trimFnr() = trimFnrString(fnr)
 }
 
 enum class Relasjon {
