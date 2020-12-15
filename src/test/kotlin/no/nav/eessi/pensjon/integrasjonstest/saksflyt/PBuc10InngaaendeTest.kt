@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
@@ -42,7 +43,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         fun `Krav om alderspensjon`() {
 
             val allDocuemtActions = listOf(
-                    Document("10001212", SedType.P15000, "received")
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
             )
 
             testRunner(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE") {
@@ -61,7 +62,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         fun `Krav om etterlatteytelser`() {
 
             val allDocuemtActions = listOf(
-                    Document("10001212", SedType.P15000, "received")
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
             )
 
             testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_GJENLEV) {
@@ -91,7 +92,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         fun `Krav om uføretrygd`() {
 
             val allDocuemtActions = listOf(
-                    Document("10001212", SedType.P15000, "received")
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
             )
 
             testRunner(FNR_VOKSEN, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_UFORE) {
@@ -109,8 +110,8 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P15000, "sent"),
-                Document("30002", SedType.P5000, "received")
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
@@ -149,8 +150,8 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P15000, "sent"),
-                Document("30002", SedType.P5000, "received")
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
@@ -189,8 +190,8 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P15000, "sent"),
-                Document("30002", SedType.P5000, "received")
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
@@ -229,8 +230,8 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P15000, "sent"),
-                Document("30002", SedType.P5000, "received")
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")

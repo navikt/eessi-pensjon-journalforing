@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -130,8 +131,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_BARN)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { personV3Service.hentPerson(FNR_BARN) } returns createBrukerWith(FNR_BARN, "Lever", "Helt i live", "NOR")
@@ -172,8 +173,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSed(SedType.P5000, null, fdato = "1955-07-11")
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
@@ -211,8 +212,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSed(SedType.P5000, fnr)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
@@ -255,8 +256,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P9000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P9000, DocStatus.SENT)
         )
 
         val saker = listOf(
@@ -307,8 +308,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P9000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P9000, DocStatus.SENT)
         )
 
         val saker = listOf(
@@ -360,8 +361,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
@@ -410,8 +411,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
@@ -460,8 +461,8 @@ internal class PBuc05Test : JournalforingTestBase() {
         val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
 
         val alleDocumenter = listOf(
-                Document("10001", SedType.P8000, "received"),
-                Document("30002", SedType.P5000, "sent")
+                Document("10001", SedType.P8000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter

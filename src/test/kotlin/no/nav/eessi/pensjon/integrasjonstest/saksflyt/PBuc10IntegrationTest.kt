@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -48,7 +49,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
          @Test
         fun `Krav om alderspensjon`() {
              val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)))
-             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
              testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions) {
                  assertEquals(PENSJON, it.tema)
@@ -68,7 +69,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om uføretrygd`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunner(FNR_VOKSEN, bestemsak, krav = KRAV_UFORE, alleDocs = allDocuemtActions) {
                 assertEquals(UFORETRYGD, it.tema)
@@ -85,7 +86,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om uføretrygd - sakstatus AVSLUTTET - AUTOMATISK_JOURNALFORING`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)))
             val allDocuemtActions = listOf(
-                    Document("10001212", SedType.P15000, "sent")
+                    Document("10001212", SedType.P15000, DocStatus.SENT)
             )
 
             testRunner(FNR_VOKSEN, bestemsak, krav = KRAV_UFORE, alleDocs = allDocuemtActions) {
@@ -114,7 +115,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             println("fnr $fnr, validfnr $validfnr, fnr2: $fnr2")
 
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
@@ -125,7 +126,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om barnepensjon ingen sak - id og fordeling`() {
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
@@ -136,7 +137,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om barnepensjon - barn ukjent ident - id og fordeling`() {
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerBarn(FNR_VOKSEN, null, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
@@ -148,7 +149,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om barnepensjon - relasjon mangler - id og fordeling`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
@@ -159,7 +160,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Test med Sed fra Rina BARNEP og bestemsak - automatisk`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = "22919587", sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
             val fnr = Fodselsnummer.fra("05020876176")
             println("fnr: $fnr")
 
@@ -179,7 +180,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - GP eller AP - ALDER - automatisk`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
                 assertEquals(PENSJON, it.tema)
@@ -190,7 +191,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - GP eller AP - GJENLEV - automatisk`() {
             val bestemsak2 = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak2, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "03") {
                 assertEquals(PENSJON, it.tema)
@@ -201,7 +202,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - GP eller AP - mangler relasjon - id og fordeling`() {
             val bestemsak2 = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak2, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null) {
                 assertEquals(PENSJON, it.tema)
@@ -217,7 +218,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - Uføretrygd automatisk`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
                 assertEquals(UFORETRYGD, it.tema)
@@ -234,7 +235,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - Uføretrygd manuelt - id og fordeling`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)))
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
                 assertEquals(UFORETRYGD, it.tema)
@@ -260,7 +261,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                             SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
                             SakInformasjon(sakId = "123456", sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)))
 
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {
                 assertEquals(PENSJON, it.tema)
@@ -279,7 +280,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `manuell oppgave det mangler er mangelfullt fnr dnr - kun en person - id og fordeling`() {
-            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, "sent"))
+            val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
             testRunner(null, krav = KRAV_ALDER, alleDocs = allDocuemtActions) {
                 assertEquals(PENSJON, it.tema)
@@ -294,7 +295,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `mangler som fører til manuell oppgave - etterlatteytelser`() {
             val allDocuemtActions = listOf(
-                    Document("10001212", SedType.P15000, "sent")
+                    Document("10001212", SedType.P15000, DocStatus.SENT)
             )
 
             testRunnerBarn(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions) {

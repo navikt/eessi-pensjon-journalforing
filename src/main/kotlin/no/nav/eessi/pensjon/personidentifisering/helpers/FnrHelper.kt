@@ -73,6 +73,11 @@ class FnrHelper {
         else resultat
     }
 
+    /**
+     * P8000-P10000 - [01] Søker til etterlattepensjon
+     * P8000-P10000 - [02] Forsørget/familiemedlem
+     * P8000-P10000 - [03] Barn
+     */
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == "01" }
 
@@ -155,19 +160,6 @@ class FnrHelper {
         fnrListe.add(annenPersonRelasjon)
         logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
     }
-
-    /**
-     * P8000-P10000 - [01] Søker til etterlattepensjon
-     * P8000-P10000 - [02] Forsørget/familiemedlem
-     * P8000-P10000 - [03] Barn
-     */
-    private fun filterAnnenpersonPinNode(sed: SED): String? {
-        val annenPerson = sed.nav?.annenperson ?: return null
-        if (annenPerson.person?.rolle != "01") return null
-
-        return annenPerson.ident()
-    }
-
 
     /**
      * R005 har mulighet for flere personer.

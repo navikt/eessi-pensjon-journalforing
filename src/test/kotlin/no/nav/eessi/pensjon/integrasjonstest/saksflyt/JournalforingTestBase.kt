@@ -28,6 +28,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Krav
@@ -401,9 +402,9 @@ internal open class JournalforingTestBase {
 
     protected fun getMockDocuments(): List<Document> {
         return listOf(
-                Document("44cb68f89a2f4e748934fb4722721018", SedType.P2000, "sent"),
-                Document("3009f65dd2ac4948944c6b7cfa4f179d", SedType.H121, "empty"),
-                Document("9498fc46933548518712e4a1d5133113", SedType.H070, "empty")
+                Document("44cb68f89a2f4e748934fb4722721018", SedType.P2000, DocStatus.SENT),
+                Document("3009f65dd2ac4948944c6b7cfa4f179d", SedType.H121, null),
+                Document("9498fc46933548518712e4a1d5133113", SedType.H070, null)
         )
     }
 

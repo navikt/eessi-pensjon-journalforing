@@ -44,13 +44,10 @@ data class Nav(
 }
 
 data class Bruker(
-        val mor: Foreldre? = null,
-        val far: Foreldre? = null,
+        val mor: Person? = null,
+        val far: Person? = null,
         val person: Person? = null,
 
-        //H120?
-        val bostedsadresse: Adresse? = null,
-        val status: BrukerStatus? = null,
         val tilbakekreving: Tilbakekreving? = null
 ) {
         fun ident(): String? = person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
@@ -66,7 +63,6 @@ data class Person(
 
         val relasjontilavdod: RelasjonAvdodItem? = null, //5.2.5 P2100
 
-        // TODO: Could be enum ?
         val rolle: String? = null  //3.1 i P10000
 ) {
         fun ident(): String? = pin?.firstOrNull { it.land == "NO" }?.identifikator
@@ -92,29 +88,16 @@ data class Krav(
         val type: String? = null
 )
 
-//H070
-data class Sted(
-        val adresse: Adresse? = null
-)
-
-data class BrukerStatus(
-        val id: String? = null
-)
-
-data class Foreldre(
-        val person: Person
-)
-
 data class BarnItem(
-        val mor: Foreldre? = null,
+        val mor: Person? = null,
         val person: Person? = null,
-        val far: Foreldre? = null
+        val far: Person? = null
 )
 
 data class Ektefelle(
-        val mor: Foreldre? = null,
+        val mor: Person? = null,
         val person: Person? = null,
-        val far: Foreldre? = null,
+        val far: Person? = null,
         val type: String? = null
 )
 
@@ -145,25 +128,6 @@ data class PinItem(
         val kompetenteuland: String? = null
 )
 
-data class Adresse(
-        val gate: String? = null,
-        val bygning: String? = null,
-        val by: String? = null,
-        val postnummer: String? = null,
-        val region: String? = null,
-        val land: String? = null,
-        val kontaktpersonadresse: String? = null,
-        val datoforadresseendring: String? = null,
-        val postadresse: String? = null,
-        val startdato: String? = null
-)
-
-data class Foedested(
-        val by: String? = null,
-        val land: String? = null,
-        val region: String? = null
-)
-
 data class EessisakItem(
         val institusjonsid: String? = null,
         val institusjonsnavn: String? = null,
@@ -172,14 +136,11 @@ data class EessisakItem(
 )
 
 data class Tilbakekreving(
-        val anmodning: Anmodning?,
         val feilutbetaling: Feilutbetaling?,
         val status: Status?
-) {
-        class Status(val type: String?)
-}
+)
 
-data class Anmodning(val type: String?)
-data class Feilutbetaling(val ytelse: Ytelse?) {
-        class Ytelse(val type: String?)
-}
+data class Feilutbetaling(val ytelse: Ytelse?)
+
+data class Ytelse(val type: String?)
+data class Status(val type: String?)
