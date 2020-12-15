@@ -32,7 +32,6 @@ class SedListener(
         private val journalforingService: JournalforingService,
         private val personidentifiseringService: PersonidentifiseringService,
         private val sedDokumentHelper: SedDokumentHelper,
-        private val gyldigeHendelser: GyldigeHendelser,
         private val bestemSakService: BestemSakService,
         @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
@@ -72,7 +71,7 @@ class SedListener(
                     val offset = cr.offset()
 
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                    if (gyldigeHendelser.sendtHendelse(sedHendelse)) {
+                    if (GyldigeHendelser.sendt(sedHendelse)) {
                         val bucType = sedHendelse.bucType!!
 
                         logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
@@ -119,7 +118,7 @@ class SedListener(
                     } else {
                         logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                        if (gyldigeHendelser.mottattHendelse(sedHendelse)) {
+                        if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
 
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
