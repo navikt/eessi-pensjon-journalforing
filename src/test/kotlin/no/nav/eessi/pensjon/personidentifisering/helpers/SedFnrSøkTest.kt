@@ -1,9 +1,11 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import org.junit.jupiter.api.Assertions.*
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.models.sed.SED
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.nio.file.Files
-import java.nio.file.Paths
 
 internal class SedFnrSøkTest {
 
@@ -12,7 +14,8 @@ internal class SedFnrSøkTest {
     @Test
     fun `Gitt en SED med flere norske fnr i Pin-identifikator feltet når det søkes etter fnr i SED så returner alle norske fnr`() {
         // Gitt
-        val sed = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json")))
+        val sedJson = javaClass.getResource("/sed/P2000-NAV.json").readText()
+        val sed = mapJsonToAny(sedJson, typeRefs<SED>())
 
         // Når
         val funnedeFnr = sedFnrSøk.finnAlleFnrDnrISed(sed)
@@ -25,7 +28,8 @@ internal class SedFnrSøkTest {
     @Test
     fun `Gitt en SED med flere norske fnr i Pin-kompetenteuland feltet når det søkes etter fnr i SED så returner alle norske fnr`() {
         // Gitt
-        val sed = String(Files.readAllBytes(Paths.get("src/test/resources/sed/H021-NAV.json")))
+        val sedJson = javaClass.getResource("/sed/H021-NAV.json").readText()
+        val sed = mapJsonToAny(sedJson, typeRefs<SED>())
 
         // Når
         val funnedeFnr = sedFnrSøk.finnAlleFnrDnrISed(sed)

@@ -7,6 +7,8 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
@@ -18,6 +20,7 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
@@ -303,7 +306,9 @@ class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed P2200`() {
         //FAGMODUL HENT ALLE DOKUMENTER
-        doReturn(String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json"))))
+        val documents = mapJsonToAny(javaClass.getResource("/buc/P2200-NAV.json").readText(), typeRefs<List<Document>>())
+
+        doReturn(documents)
                 .`when`(fagmodulKlient)
                 .hentAlleDokumenter(anyString())
 
@@ -401,7 +406,9 @@ class JournalforingServiceTest {
 
     @Test
     fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`() {
-        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/allDocumentsBuc01.json")))
+        val json = javaClass.getResource("/fagmodul/allDocumentsBuc01.json").readText()
+        val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
+
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
@@ -468,7 +475,9 @@ class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2200`() {
-        val allDocuments = String(Files.readAllBytes(Paths.get("src/test/resources/buc/P2200-NAV.json")))
+        val json = javaClass.getResource("/buc/P2200-NAV.json").readText()
+        val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
+
         doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))

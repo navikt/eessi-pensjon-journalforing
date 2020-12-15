@@ -15,6 +15,8 @@ import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -50,7 +52,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 2 manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 03`() {
-        val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = FNR_BARN, rolle = "03"), SAK_ID)
+        val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_BARN, rolle = "03"), SAK_ID)
         initCommonMocks(sed)
 
         val barn = createBrukerWith(FNR_BARN, "Barn", "Vanlig", "NOR", "1213", null)
@@ -82,7 +84,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 2 manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 02`() {
-        val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
+        val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_VOKSEN, rolle = "02"), SAK_ID)
         initCommonMocks(sed)
 
         val voksen = createBrukerWith(FNR_VOKSEN, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -111,7 +113,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 3 manglende eller feil FNR-DNR - to personer angitt - etterlatte`() {
-        val sed = createSedJson(SedType.P8000, null, createAnnenPersonJson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)
+        val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_VOKSEN, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
         val voksen = createBrukerWith(FNR_VOKSEN, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -141,7 +143,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 3 manglende eller feil FNR-DNR - to personer angitt - etterlatte med feil FNR for annen person, eller soker`() {
-        val sed = createSedJson(SedType.P8000, FNR_VOKSEN_2, createAnnenPersonJson(fnr = null, rolle = "01"), SAK_ID)
+        val sed = createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = "01"), SAK_ID)
         initCommonMocks(sed)
 
         val voksen = createBrukerWith(FNR_VOKSEN_2, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -268,7 +270,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
     inner class Scenario5 {
         @Test
         fun `2 personer angitt, gyldig fnr og ugyldig annenperson, rolle er 02, bosatt utland del 1`() {
-            val sed = createSedJson(SedType.P8000, FNR_OVER_60, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(FNR_OVER_60, "Voksen", "Vanlig", "SWE", "1213", null)
@@ -301,7 +303,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt utland del 2`() {
             val valgtFNR = FNR_VOKSEN
-            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "SWE", "1213", null)
@@ -334,7 +336,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 3`() {
             val valgtFNR = FNR_VOKSEN
-            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -367,7 +369,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "02"), null)
+            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -400,7 +402,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            val sed = createSedJson(SedType.P8000, valgtFNR, createAnnenPersonJson(fnr = FNR_BARN, rolle = "01"), null)
+            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "01"), null)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213", null)
@@ -474,12 +476,14 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         }
     }
 
-    private fun initCommonMocks(sed: String) {
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns getResource("fagmodul/alldocumentsids.json")
+    private fun initCommonMocks(sed: SED) {
+        val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
+
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
         every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
     }
 
-    private fun getResource(resourcePath: String): String? =
-            javaClass.classLoader.getResource(resourcePath)!!.readText()
+    private fun getResource(resourcePath: String): String =
+            javaClass.getResource(resourcePath).readText()
 }

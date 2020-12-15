@@ -15,7 +15,9 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.models.sed.DocStatus
+import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -40,9 +42,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `Krav om alderspensjon`() {
 
-            val allDocuemtActions = mockAllDocumentsBuc( listOf(
-                    Triple("10001212", "P15000", "received")
-            ))
+            val allDocuemtActions = listOf(
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
+            )
 
             testRunner(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE") {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
@@ -59,9 +61,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `Krav om etterlatteytelser`() {
 
-            val allDocuemtActions = mockAllDocumentsBuc( listOf(
-                    Triple("10001212", "P15000", "received")
-            ))
+            val allDocuemtActions = listOf(
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
+            )
 
             testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_GJENLEV) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
@@ -89,9 +91,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `Krav om uføretrygd`() {
 
-            val allDocuemtActions = mockAllDocumentsBuc( listOf(
-                    Triple("10001212", "P15000", "received")
-            ))
+            val allDocuemtActions = listOf(
+                    Document("10001212", SedType.P15000, DocStatus.RECEIVED)
+            )
 
             testRunner(FNR_VOKSEN, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_UFORE) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
@@ -103,45 +105,26 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
-        val sed15000sent = createP15000(FNR_OVER_60, krav = KRAV_ALDER)
-        println(sed15000sent)
-        val sedP5000mottatt = createSedP5000(FNR_OVER_60)
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KRAV_ALDER)
+        val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60)
 
-        val alleDocumenter = mockAllDocumentsBuc( listOf(
-                Triple("10001", "P15000", "sent"),
-                Triple("30002", "P5000", "received")
-        ))
+        val alleDocumenter = listOf(
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
+        )
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P5000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_10",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
         listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -162,45 +145,26 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
-        val sed15000sent = createP15000(FNR_OVER_60, krav = KRAV_ALDER)
-        println(sed15000sent)
-        val sedP5000mottatt = createSedP5000(FNR_OVER_60)
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KRAV_ALDER)
+        val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60)
 
-        val alleDocumenter = mockAllDocumentsBuc( listOf(
-                Triple("10001", "P15000", "sent"),
-                Triple("30002", "P5000", "received")
-        ))
+        val alleDocumenter = listOf(
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
+        )
 
         every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P5000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_10",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
         listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -221,45 +185,26 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
-        val sed15000sent = createP15000(FNR_VOKSEN, krav = KRAV_UFORE)
-        println(sed15000sent)
-        val sedP5000mottatt = createSedP5000(FNR_VOKSEN)
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KRAV_UFORE)
+        val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
 
-        val alleDocumenter = mockAllDocumentsBuc( listOf(
-                Triple("10001", "P15000", "sent"),
-                Triple("30002", "P5000", "received")
-        ))
+        val alleDocumenter = listOf(
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
+        )
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P5000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_10",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
         listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -280,45 +225,26 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     }
 
     @Test
-    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere sendt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
-        val sed15000sent = createP15000(FNR_VOKSEN, krav = KRAV_UFORE)
-        println(sed15000sent)
-        val sedP5000mottatt = createSedP5000(FNR_VOKSEN)
+    fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KRAV_UFORE)
+        val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
 
-        val alleDocumenter = mockAllDocumentsBuc( listOf(
-                Triple("10001", "P15000", "sent"),
-                Triple("30002", "P5000", "received")
-        ))
+        val alleDocumenter = listOf(
+                Document("10001", SedType.P15000, DocStatus.SENT),
+                Document("30002", SedType.P5000, DocStatus.RECEIVED)
+        )
 
         every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")
         every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
 
-        every { fagmodulKlient.hentAlleDokumenter(any())} returns alleDocumenter
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P5000_40000000004_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_10",
-              "rinaSakId": "147729",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "SWE",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "40000000004",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P5000",
-              "navBruker": null
-            }
-        """.trimIndent()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
         listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -342,16 +268,13 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                                fnrBarn: String?,
                                bestemSak: BestemSakResponse? = null,
                                sakId: String? = SAK_ID,
-                               diskresjonkode: Diskresjonskode? = null,
                                land: String = "NOR",
                                krav: String = KRAV_ALDER,
-                               alleDocs: String,
+                               alleDocs: List<Document>,
                                relasjonAvod: String? = "06",
-                               sedJson: String? = null,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
-
-        val sed = sedJson ?: createP15000(fnrVoksen, eessiSaknr = sakId, krav = krav, gfn = fnrBarn, relasjon = relasjonAvod)
+        val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
@@ -361,7 +284,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
             every { personV3Service.hentPerson(fnrBarn) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land)
             every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrBarn)) } returns AktoerId(AKTOER_ID_2)
         }
-        every { bestemSakKlient.kallBestemSak( any()) } returns bestemSak
+        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
@@ -395,11 +318,11 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                            sakId: String? = SAK_ID,
                            land: String = "NOR",
                            krav: String = KRAV_ALDER,
-                           alleDocs: String,
+                           alleDocs: List<Document>,
                            block: (OpprettJournalpostRequest) -> Unit
     ) {
 
-        val sed = createP15000(fnr1, eessiSaknr = sakId, krav = krav)
+        val sed = createSedPensjon(SedType.P15000, fnr1, eessiSaknr = sakId, krav = krav)
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {
@@ -432,11 +355,12 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: String, alleDocs: String) {
+    private fun initCommonMocks(sed: SED, alleDocs: List<Document>) {
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocs
         every { euxKlient.hentSed(any(), any()) } returns sed
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
     }
 
-    private fun getResource(resourcePath: String): String? = javaClass.classLoader.getResource(resourcePath)!!.readText()
+    private fun getResource(resourcePath: String): String =
+            javaClass.classLoader.getResource(resourcePath)!!.readText()
 }

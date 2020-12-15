@@ -1,20 +1,23 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class DiskresjonkodeHelper(private val personV3Service: PersonV3Service,
-                           private val sedFnrSøk: SedFnrSøk)  {
+                           private val sedFnrSøk: SedFnrSøk) {
 
     private val logger = LoggerFactory.getLogger(DiskresjonkodeHelper::class.java)
 
-    fun hentDiskresjonskode(alleSediBuc: List<String?>): Diskresjonskode? {
-        return alleSediBuc.map { finnDiskresjonkode(it!!) }.firstOrNull()
+    fun hentDiskresjonskode(alleSediBuc: List<SED>): Diskresjonskode? {
+        return alleSediBuc
+                .map { finnDiskresjonkode(it) }
+                .firstOrNull()
     }
 
-    private fun finnDiskresjonkode(sed: String): Diskresjonskode? {
+    private fun finnDiskresjonkode(sed: SED): Diskresjonskode? {
         logger.debug("Henter Sed dokument for å lete igjennom FNR for diskresjonkode")
 
         return sedFnrSøk.finnAlleFnrDnrISed(sed)
