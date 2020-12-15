@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.models.SedType
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Document(
         val id: String,
-        val type: SedType,
+        val type: SedType?,
         val status: DocStatus?
 ) {
     fun validStatus(): Boolean = (status == DocStatus.SENT || status == DocStatus.RECEIVED)

@@ -4,8 +4,11 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.SedType
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -61,11 +64,42 @@ internal class DocumentTest {
         assertFalse(doc.validStatus())
     }
 
-    private fun deserializeDoc(id: String, type: String, status: String?): Document {
+    @Test
+    fun `Document deserialized OK with SedType null`() {
+        val doc = deserializeDoc("1", null, "received")
+
+        assertEquals("1", doc.id)
+        assertNull(doc.type)
+        assertNotNull(doc.status)
+        assertTrue(doc.validStatus())
+    }
+
+    @Test
+    fun `Document deserialized OK with invalid SedType`() {
+        val doc = deserializeDoc("1", "XXX12345", "received")
+
+        assertEquals("1", doc.id)
+        assertNull(doc.type)
+        assertNotNull(doc.status)
+        assertTrue(doc.validStatus())
+    }
+
+    @ParameterizedTest
+    @EnumSource(SedType::class)
+    fun `Test with all SedTypes`(sedType: SedType) {
+        val doc = deserializeDoc("4", sedType.name, null)
+
+        assertEquals("4", doc.id)
+        assertEquals(sedType, doc.type)
+        assertNull(doc.status)
+        assertFalse(doc.validStatus())
+    }
+
+    private fun deserializeDoc(id: String, type: String?, status: String?): Document {
         val json = """
             {
                 "id":"$id",
-                "type":"$type",
+                "type": ${type?.let { "\"$it\"" }},
                 "status": ${status?.let { "\"$it\"" }}
             }
         """.trimIndent()

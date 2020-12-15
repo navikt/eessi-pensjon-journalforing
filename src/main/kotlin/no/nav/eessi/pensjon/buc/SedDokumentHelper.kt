@@ -25,7 +25,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     fun hentAlleSedIBuc(rinaSakId: String): List<SED> {
         return fagmodulKlient.hentAlleDokumenter(rinaSakId)
                 .filter { it.validStatus() }
-                .filter { doc -> doc.type.name in validSedtype }
+                .filter { doc -> doc.type?.name in validSedtype }
                 .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
     }
 
