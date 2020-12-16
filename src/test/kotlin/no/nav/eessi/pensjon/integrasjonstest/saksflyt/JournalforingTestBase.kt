@@ -208,10 +208,13 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-        verify(exactly = antallPersoner) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+        val antallKallIdent = if (antallPersoner == 0) 0
+        else antallPersoner - (1.takeIf { rolle == "01" } ?: 0)
+        verify(exactly = antallKallIdent) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
 
-        val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
-        verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
+
+//        val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
+//        verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
 
         if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
@@ -314,6 +317,13 @@ internal open class JournalforingTestBase {
     }
 
     protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01", relasjon: String? = null): Person {
+        if (fnr != null && fnr.isBlank()) {
+            return Person(
+                    foedselsdato = "1962-07-18",
+                    rolle = rolle,
+                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+            )
+        }
         val validFnr = Fodselsnummer.fra(fnr)
 
         return Person(

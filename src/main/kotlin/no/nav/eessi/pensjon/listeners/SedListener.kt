@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -162,7 +162,7 @@ class SedListener(
         val aktoerId = identifisertPerson.aktoerId
         val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, bucType, populerYtelsestypeSakInformasjonSendt(ytelsestypeFraSed, identifisertPerson, bucType))
 
-        return if (sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_05) {
+        return if (sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_05 || sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_10) {
             logger.info("skal hente pensjonSak for sed kap.1 og validere mot pesys")
             sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
         } else

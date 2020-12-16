@@ -153,7 +153,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-                assertNull(it.bruker)
+                assertEquals(FNR_BARN,it.bruker?.id)
             }
         }
 

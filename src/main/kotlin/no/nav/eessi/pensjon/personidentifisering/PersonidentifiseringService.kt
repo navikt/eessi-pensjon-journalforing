@@ -136,7 +136,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     //felles for P_BUC_05 og P_BUC_10
     private fun utvelgerPersonOgGjenlev(identifisertePersoner: List<IdentifisertPerson>, erGjenlevende: Boolean): IdentifisertPerson? {
-        logger.info("Antall identifiserte personer: ${identifisertePersoner.size}")
         identifisertePersoner.forEach {
             logger.debug(it.toJson())
         }
@@ -221,8 +220,8 @@ data class PersonRelasjon(
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null
 ) {
-    fun erGyldig(): Boolean = ytelseType != null && sedType != null
     fun trimFnr() = trimFnrString(fnr)
+    fun erGyldig(): Boolean = sedType != null && (ytelseType != null || relasjon == Relasjon.GJENLEVENDE)
 }
 
 enum class Relasjon {

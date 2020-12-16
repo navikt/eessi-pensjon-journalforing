@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Person
@@ -64,6 +65,8 @@ class FnrHelper {
                 logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
             }
         }
+
+        logger.debug("===> ${fnrListe.toJson()} <===")
 
         val resultat = fnrListe
                 .filter { it.erGyldig() }

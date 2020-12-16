@@ -13,8 +13,11 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
@@ -259,6 +262,50 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         Assertions.assertEquals("INNGAAENDE", request.journalpostType.name)
         Assertions.assertEquals(Tema.UFORETRYGD, request.tema)
         Assertions.assertEquals(Enhet.UFORE_UTLAND, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+    }
+
+    @Test
+    fun `Scenario 4  - Flere sed i buc, mottar en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KRAV_GJENLEV, relasjon = "01")
+        val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_VOKSEN_2, eessiSaknr = SAK_ID)
+
+        val saker = listOf(
+                SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
+                SakInformasjon(sakId = "34234123", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)
+        )
+
+        val alleDocumenter = listOf(
+                Document("10001", SedType.P15000, DocStatus.RECEIVED),
+                Document("30002", SedType.P5000, DocStatus.SENT)
+        )
+
+        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Avdød", "død", "SWE")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
+
+        every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE")
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN_2)) } returns AktoerId(FNR_VOKSEN_2 + "11111")
+
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
+        every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+        every { fagmodulKlient.hentPensjonSaklist(FNR_VOKSEN_2 + "11111") } returns saker
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+        val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
+
+        listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+
+
+        Assertions.assertEquals("UTGAAENDE", request.journalpostType.name)
+        Assertions.assertEquals(Tema.PENSJON, request.tema)
+        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
