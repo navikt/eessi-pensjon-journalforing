@@ -22,7 +22,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
-import no.nav.eessi.pensjon.listeners.GyldigeHendelser
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -122,7 +121,6 @@ internal open class JournalforingTestBase {
             journalforingService = journalforingService,
             personidentifiseringService = personidentifiseringService,
             sedDokumentHelper = sedDokumentHelper,
-            gyldigeHendelser = GyldigeHendelser(),
             bestemSakService = bestemSakService,
             profile = "test"
     )
