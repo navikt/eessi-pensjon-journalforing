@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -75,6 +75,7 @@ class SedListener(
                         val bucType = sedHendelse.bucType!!
 
                         logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+                        //sedDokumentHelper.validatHendelseDocument(sedHendelse)
                         val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                         val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType)
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc)
@@ -123,6 +124,7 @@ class SedListener(
 
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
+                            //sedDokumentHelper.validatHendelseDocument(sedHendelse)
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId)
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType)
                             val ytelseTypeFraSED = sedDokumentHelper.hentYtelseType(sedHendelse, alleSedIBuc)
