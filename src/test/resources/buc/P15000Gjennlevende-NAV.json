@@ -27,11 +27,11 @@
           "land" : "NO"
         } ],
         "pin" : [ {
-          "institusjonsnavn" : "12347, NAVT002, NO",
-          "identifikator" : "97097097000",
-          "sektor" : "pensjoner",
-          "land" : "NO",
-          "institusjonsid" : "NO:NAVT002"
+          "institusjonsnavn": "12347, NAVT002, NO",
+          "identifikator": "11067122781",
+          "sektor": "pensjoner",
+          "land": "NO",
+          "institusjonsid": "NO:NAVT002"
         } ],
         "foedested" : {
           "region" : "21812",

@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -21,6 +22,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 internal class Pbuc10Test {
+
+    companion object {
+        private val DUMMY_FNR = Fodselsnummer.fra("09035225916") // Testbruker SLAPP SKILPADDE
+    }
 
     private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_10) as Pbuc10
 
@@ -40,7 +45,7 @@ internal class Pbuc10Test {
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
-            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon("12321331", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
+            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
             every { diskresjonskode } returns null
             every { ytelseType } returns YtelseType.UFOREP
             every { hendelseType } returns SENDT
@@ -154,7 +159,9 @@ internal class Pbuc10Test {
             land: Bosatt
     ): OppgaveRoutingRequest {
         return mockk {
-            if (hendelse == SENDT) every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon("12321331", Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
+            if (hendelse == SENDT)
+                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
+
             every { diskresjonskode } returns null
             every { hendelseType } returns hendelse
             every { ytelseType } returns ytelse

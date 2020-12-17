@@ -49,6 +49,12 @@ internal class DummySed {
             )
         }
 
+        fun createP2000(forsikretFnr: String?): SED =
+                generateSED(
+                        SedType.P2000,
+                        forsikretFnr = forsikretFnr
+                )
+
         fun createP2100(forsikretFnr: String?,
                         gjenlevFnr: String?,
                         relasjon: String?): SED =

@@ -35,6 +35,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -59,6 +60,8 @@ class OppgaveRoutingServiceTest {
     }
 
     companion object {
+        private const val DUMMY_FNR = "09035225916" // Testbruker SLAPP SKILPADDE
+
         const val dummyTilknytning = "032342"
         val MANGLER_LAND = null as String?
         const val NORGE: String = "NOR"
@@ -184,14 +187,14 @@ class OppgaveRoutingServiceTest {
                 null,
                 null,
                 "010",
-                PersonRelasjon("12345678910", Relasjon.FORSIKRET))
+                PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET))
         val avod = IdentifisertPerson(
                 "234",
                 "Avdod",
                 null,
                 null,
                 "010",
-                PersonRelasjon("22345678910", Relasjon.AVDOD))
+                PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD))
         forsikret.personListe = listOf(forsikret, avod)
 
         val enhetresult = routingService.route(OppgaveRoutingRequest(
@@ -545,6 +548,6 @@ class OppgaveRoutingServiceTest {
             null,
             "NO",
             "010",
-            PersonRelasjon("12345678910", Relasjon.FORSIKRET))
+            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET))
 
 }
