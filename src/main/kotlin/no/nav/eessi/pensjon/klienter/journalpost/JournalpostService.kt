@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -32,7 +33,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun opprettJournalpost(
             rinaSakId: String,
-            fnr: String?,
+            fnr: Fodselsnummer?,
             personNavn: String?,
             bucType: BucType,
             sedType: SedType,
@@ -46,7 +47,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
         val avsenderMottaker = populerAvsenderMottaker(avsenderNavn, sedHendelseType, avsenderLand)
         val behandlingstema = hentBehandlingsTema(bucType, ytelseType)
-        val bruker = fnr?.let { Bruker(id = it) }
+        val bruker = fnr?.let { Bruker(id = it.value) }
         val journalpostType = populerJournalpostType(sedHendelseType)
         val sak = populerSak(arkivsaksnummer)
         val tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType)

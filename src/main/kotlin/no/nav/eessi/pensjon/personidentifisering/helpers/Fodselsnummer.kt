@@ -22,9 +22,12 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
     }
 
     companion object {
-        fun fra(s: String?): Fodselsnummer? {
+        fun fra(fnr: String?): Fodselsnummer? {
             return try {
-                s?.let { Fodselsnummer(s) }
+                fnr?.replace(Regex("[^0-9]"), "")
+                        ?.let {
+                            Fodselsnummer(it)
+                        }
             } catch (e: Exception) {
                 null
             }

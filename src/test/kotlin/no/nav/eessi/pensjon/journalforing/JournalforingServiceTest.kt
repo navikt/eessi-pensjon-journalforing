@@ -143,7 +143,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json")))
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",

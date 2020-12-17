@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -50,18 +49,18 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<SED>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
-        val trimmetNavBruker = navBruker?.let { trimFnrString(it) }
+        val fnr = navBruker?.let { Fodselsnummer.fra(it) }
 
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
             bucType == BucType.P_BUC_10 -> null
-            erFnrDnrFormat(trimmetNavBruker) -> personV3Service.hentPerson(trimmetNavBruker!!)
+            fnr != null -> personV3Service.hentPerson(fnr.value)
             else -> null
         }
 
         return if (personForNavBruker != null) {
-            listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(trimmetNavBruker!!, Relasjon.FORSIKRET)))
+            listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(fnr!!, Relasjon.FORSIKRET)))
         } else {
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
@@ -72,15 +71,15 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private fun hentIdentifisertPerson(relasjon: PersonRelasjon, alleSediBuc: List<SED>): IdentifisertPerson? {
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
-        val fnr = trimFnrString(relasjon.fnr)
+        val fnr = relasjon.fnr
 
-        if (!erFnrDnrFormat(fnr)) {
+        if (fnr == null) {
             logger.warn("Ingen gyldig Fnr/Dnr for personV3")
             return null
         }
 
         return try {
-            personV3Service.hentPerson(fnr)
+            personV3Service.hentPerson(fnr.value)
                     ?.let { bruker -> populerIdentifisertPerson(bruker, alleSediBuc, relasjon) }
                     ?.also {
                         logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
@@ -94,7 +93,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<SED>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
-        val aktoerId = hentAktoerId(personRelasjon.trimFnr()) ?: ""
+        val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
         val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
@@ -168,29 +167,16 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
      * Henter første treff på dato fra listen av SEDer
      */
     fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>): LocalDate {
-        val fnr = identifisertPerson?.personRelasjon?.fnr
-        val fdatoFraFnr = if (!erFnrDnrFormat(fnr)) null else fodselsDatoFra(fnr!!)
-        if (fdatoFraFnr != null) {
-            return fdatoFraFnr
-        }
-
-        return FodselsdatoHelper.fraSedListe(seder)
+        return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
+                ?: FodselsdatoHelper.fraSedListe(seder)
     }
 
-    private fun fodselsDatoFra(fnr: String): LocalDate? =
-            try {
-                val trimmedFnr = trimFnrString(fnr)
-                Fodselsnummer.fra(trimmedFnr)?.getBirthDate()
-            } catch (ex: Exception) {
-                logger.error("navBruker ikke gyldig for fdato", ex)
-                null
-            }
+    private fun hentAktoerId(fnr: Fodselsnummer?): String? {
+        if (fnr == null) return null
 
-    private fun hentAktoerId(navBruker: String): String? {
-        if (!erFnrDnrFormat(navBruker)) return null
         return try {
-            aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(navBruker))?.id
-        } catch(e: Exception) {
+            aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr.value))?.id
+        } catch (e: Exception) {
             logger.warn("Det oppstod en feil ved henting av aktørid: ${e.cause}", e)
             null
         }
@@ -215,12 +201,11 @@ data class IdentifisertPerson(
 
 
 data class PersonRelasjon(
-        val fnr: String,
+        val fnr: Fodselsnummer?,
         val relasjon: Relasjon,
         val ytelseType: YtelseType? = null,
         val sedType: SedType? = null
 ) {
-    fun trimFnr() = trimFnrString(fnr)
     fun erGyldig(): Boolean = sedType != null && (ytelseType != null || relasjon == Relasjon.GJENLEVENDE)
 }
 
