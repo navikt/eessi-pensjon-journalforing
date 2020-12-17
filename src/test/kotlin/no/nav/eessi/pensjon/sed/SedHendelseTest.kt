@@ -22,6 +22,6 @@ class SedHendelseTest {
         assertEquals(sedHendelse.rinaDokumentId, "b12e06dda2c7474b9998c7139c841646")
         assertEquals(sedHendelse.rinaDokumentVersjon, "2")
         assertEquals(sedHendelse.sedType, SedType.P2000)
-        assertEquals(sedHendelse.navBruker, "09035225916")
+        assertEquals("09035225916", sedHendelse.navBruker!!.value)
     }
 }

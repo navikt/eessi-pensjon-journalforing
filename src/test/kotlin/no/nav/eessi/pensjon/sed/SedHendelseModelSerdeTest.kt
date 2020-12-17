@@ -71,4 +71,54 @@ internal class SedHendelseModelSerdeTest {
         assertEquals("R", model.sektorKode)
         assertNull(model.bucType)
     }
+
+    @Test
+    fun `Deserialisering med gyldig fnr`() {
+        val json = """{
+            "id" : 0,
+            "sedId" : null,
+            "sektorKode" : "R",
+            "bucType" : "FB_BUC_01",
+            "rinaSakId" : "123456",
+            "avsenderId" : null,
+            "avsenderNavn" : null,
+            "avsenderLand" : null,
+            "mottakerId" : null,
+            "mottakerNavn" : null,
+            "mottakerLand" : null,
+            "rinaDokumentId" : "1234",
+            "rinaDokumentVersjon" : null,
+            "sedType" : null,
+            "navBruker" : "22117320034"
+        }""".trimMargin()
+
+        val model = SedHendelseModel.fromJson(json)
+
+        assertEquals("22117320034", model.navBruker!!.value)
+    }
+
+    @Test
+    fun `Deserialisering med ugyldig fnr`() {
+        val json = """{
+            "id" : 0,
+            "sedId" : null,
+            "sektorKode" : "R",
+            "bucType" : "FB_BUC_01",
+            "rinaSakId" : "123456",
+            "avsenderId" : null,
+            "avsenderNavn" : null,
+            "avsenderLand" : null,
+            "mottakerId" : null,
+            "mottakerNavn" : null,
+            "mottakerLand" : null,
+            "rinaDokumentId" : "1234",
+            "rinaDokumentVersjon" : null,
+            "sedType" : null,
+            "navBruker" : "1234"
+        }""".trimMargin()
+
+        val model = SedHendelseModel.fromJson(json)
+
+        assertNull(model.navBruker)
+    }
 }

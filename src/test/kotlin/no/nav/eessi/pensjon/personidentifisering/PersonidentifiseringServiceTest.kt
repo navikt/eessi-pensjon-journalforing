@@ -144,7 +144,7 @@ class PersonidentifiseringServiceTest {
                 .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
 
-        val navBruker = "1201 1577847"
+        val navBruker = Fodselsnummer.fra("1201 1577847")
         personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_01, emptyList())
         verify(personV3Service).hentPerson(eq("12011577847"))
     }
@@ -154,7 +154,7 @@ class PersonidentifiseringServiceTest {
         doReturn(BrukerMock.createWith(landkoder = true))
                 .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
-        val navBruker = "1201-1577847"
+        val navBruker = Fodselsnummer.fra("1201-1577847")
         personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_01, emptyList())
         verify(personV3Service).hentPerson(eq("12011577847"))
     }
@@ -164,7 +164,7 @@ class PersonidentifiseringServiceTest {
         doReturn(BrukerMock.createWith(landkoder = true))
                 .`when`(personV3Service)
                 .hentPerson(ArgumentMatchers.anyString())
-        val navBruker = "1201/1577847"
+        val navBruker = Fodselsnummer.fra("1201/1577847")
         personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_03, emptyList())
         verify(personV3Service).hentPerson(eq("12011577847"))
     }
@@ -219,7 +219,10 @@ class PersonidentifiseringServiceTest {
         )
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(sedListe)
 
-        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePerson)
+        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(
+                Fodselsnummer.fra(navBruker), sedListe, bucType, potensiellePerson
+        )
+
         assertEquals(1, identifisertePersoner.size)
 
         val identifisertRelasjon = identifisertePersoner.single().personRelasjon
@@ -256,7 +259,10 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(sed1, sed2, sed3)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(navBruker, alleSediBuc, bucType, potensiellePerson)
+        val actual = personidentifiseringService.hentIdentifisertePersoner(
+                Fodselsnummer.fra(navBruker), alleSediBuc, bucType, potensiellePerson
+        )
+
         assertEquals(1, actual.size)
         assertEquals(gjenlevende, actual.first().personRelasjon.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
@@ -502,7 +508,7 @@ class PersonidentifiseringServiceTest {
                 .`when`(personV3Service)
                 .hentPerson(eq(avdodBrukerFnr!!.value))
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(avdodBrukerFnr.value, sedListFraBuc, BucType.P_BUC_02, potensiellePerson)
+        val actual = personidentifiseringService.hentIdentifisertePersoner(avdodBrukerFnr, sedListFraBuc, BucType.P_BUC_02, potensiellePerson)
 
         assertEquals(identifisertePersoner[1], actual.single())
     }

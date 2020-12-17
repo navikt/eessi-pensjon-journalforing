@@ -205,7 +205,7 @@ internal class JournalpostServiceTest {
               },
               "behandlingstema" : "ab0011",
               "bruker" : {
-                "id" : ${LEALAUS_KAKE.toString()},
+                "id" : $LEALAUS_KAKE,
                 "idType" : "FNR"
               },
               "dokumenter" : ["P2100"],

@@ -35,7 +35,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         }
     }
 
-    fun hentIdentifisertPerson(navBruker: String?, sedListe: List<SED>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
+    fun hentIdentifisertPerson(navBruker: Fodselsnummer?, sedListe: List<SED>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
         val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(sedListe)
         val identifisertePersoner = hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePersonRelasjoner)
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
@@ -45,39 +45,33 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         return fnrHelper.getPotensielleFnrFraSeder(sedListe)
     }
 
-    fun hentIdentifisertePersoner(navBruker: String?, alleSediBuc: List<SED>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
+    fun hentIdentifisertePersoner(navBruker: Fodselsnummer?, alleSediBuc: List<SED>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
-        val fnr = navBruker?.let { Fodselsnummer.fra(it) }
 
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
             bucType == BucType.P_BUC_10 -> null
-            fnr != null -> personV3Service.hentPerson(fnr.value)
+            navBruker != null -> personV3Service.hentPerson(navBruker.value)
             else -> null
         }
 
         return if (personForNavBruker != null) {
-            listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(fnr!!, Relasjon.FORSIKRET)))
+            listOf(populerIdentifisertPerson(personForNavBruker, alleSediBuc, PersonRelasjon(navBruker!!, Relasjon.FORSIKRET)))
         } else {
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
-            potensiellePersonRelasjoner.mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc) }
+            potensiellePersonRelasjoner
+                    .filterNot { it.fnr == null }
+                    .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc) }
         }
     }
 
     private fun hentIdentifisertPerson(relasjon: PersonRelasjon, alleSediBuc: List<SED>): IdentifisertPerson? {
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
-        val fnr = relasjon.fnr
-
-        if (fnr == null) {
-            logger.warn("Ingen gyldig Fnr/Dnr for personV3")
-            return null
-        }
-
         return try {
-            personV3Service.hentPerson(fnr.value)
+            personV3Service.hentPerson(relasjon.fnr!!.value)
                     ?.let { bruker -> populerIdentifisertPerson(bruker, alleSediBuc, relasjon) }
                     ?.also {
                         logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
