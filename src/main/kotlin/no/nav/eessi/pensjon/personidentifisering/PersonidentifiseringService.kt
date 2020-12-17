@@ -30,8 +30,6 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
 
     companion object {
-        fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
-
         fun erFnrDnrFormat(id: String?): Boolean {
             return id != null && id.length == 11 && id.isNotBlank()
         }

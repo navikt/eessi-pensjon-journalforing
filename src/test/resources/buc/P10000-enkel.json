@@ -7,11 +7,11 @@
         "fornavn": "Raus",
         "foedselsdato": "1948-06-28",
         "pin" : [ {
-          "sektor" : "alle",
-          "institusjonsnavn" : "NOINST002, NO INST002, NO",
-          "identifikator" : "28064843062",
-          "land" : "NO",
-          "institusjonsid" : "NO:noinst002"
+          "sektor": "alle",
+          "institusjonsnavn": "NOINST002, NO INST002, NO",
+          "identifikator": "22117320034",
+          "land": "NO",
+          "institusjonsid": "NO:noinst002"
         } ]
       }
     }

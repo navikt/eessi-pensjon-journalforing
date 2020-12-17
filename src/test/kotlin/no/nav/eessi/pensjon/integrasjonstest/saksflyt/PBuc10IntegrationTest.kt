@@ -23,7 +23,6 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -111,7 +110,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om barnepensjon - automatisk`() {
             val fnr = Fodselsnummer.fra("05020876176")
             val validfnr = fnr?.getBirthDate()
-            val fnr2 = PersonidentifiseringService.erFnrDnrFormat(PersonidentifiseringService.trimFnrString("05020876176"))
+            val fnr2 = Fodselsnummer.fra("09035225916")
             println("fnr $fnr, validfnr $validfnr, fnr2: $fnr2")
 
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))

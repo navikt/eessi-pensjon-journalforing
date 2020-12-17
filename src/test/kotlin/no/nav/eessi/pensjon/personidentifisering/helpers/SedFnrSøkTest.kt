@@ -21,7 +21,7 @@ internal class SedFnrSøkTest {
         val funnedeFnr = sedFnrSøk.finnAlleFnrDnrISed(sed)
 
         // Så
-        assertTrue(funnedeFnr.containsAll(listOf("09097097341", "97097097001", "97097097002", "97097097003")))
+        assertTrue(funnedeFnr.containsAll(listOf("22117320034", "09035225916", "11067122781", "12011577847")))
         assertEquals(funnedeFnr.size, 4)
     }
 
@@ -35,7 +35,7 @@ internal class SedFnrSøkTest {
         val funnedeFnr = sedFnrSøk.finnAlleFnrDnrISed(sed)
 
         // SÅ
-        assertTrue(funnedeFnr.containsAll(listOf("12345678910", "12345678990")))
+        assertTrue(funnedeFnr.containsAll(listOf("22117320034", "12011577847")))
         assertEquals(funnedeFnr.size, 2)
     }
 }
