@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import java.time.LocalDate
 
@@ -22,9 +23,14 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
     }
 
     companion object {
-        fun fra(s: String?): Fodselsnummer? {
+        @JvmStatic
+        @JsonCreator
+        fun fra(fnr: String?): Fodselsnummer? {
             return try {
-                s?.let { Fodselsnummer(s) }
+                fnr?.replace(Regex("[^0-9]"), "")
+                        ?.let {
+                            Fodselsnummer(it)
+                        }
             } catch (e: Exception) {
                 null
             }

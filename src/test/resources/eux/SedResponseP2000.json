@@ -38,9 +38,9 @@
           "identifikator" : "09809809809",
           "land" : "BE"
         }, {
-          "land" : "NO",
-          "identifikator" : "01018097025",
-          "sektor" : "sykdom"
+          "land": "NO",
+          "identifikator": "09035225916",
+          "sektor": "sykdom"
         } ],
         "foedselsdato" : "1980-01-01",
         "statsborgerskap" : [ {

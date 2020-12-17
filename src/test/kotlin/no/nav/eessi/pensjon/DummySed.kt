@@ -15,14 +15,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 
 internal class DummySed {
     companion object {
-        fun createH070(forsikretFnr: String?): SED {
-            return SED(
-                    type = SedType.H070,
-                    nav = Nav(bruker = listOfNotNull(
-                            Bruker(person = createPerson(forsikretFnr))
-                    ))
-            )
-        }
+        fun createH070(forsikretFnr: String?): SED =
+                generateSED(
+                        SedType.H070,
+                        forsikretFnr = forsikretFnr
+                )
 
         fun createR005(forsikretFnr: String?,
                        forsikretTilbakekreving: String?,
@@ -52,62 +49,89 @@ internal class DummySed {
             )
         }
 
-        fun createP2100(forsikretFnr: String?, gjenlevFnr: String?, relasjon: String?): SED {
-            return SED(
-                    type = SedType.P2100,
-                    nav = Nav(bruker = listOf(Bruker(createPerson(forsikretFnr)))),
-                    pensjon = createPensjon(gjenlevFnr, relasjon)
-            )
-        }
+        fun createP2000(forsikretFnr: String?): SED =
+                generateSED(
+                        SedType.P2000,
+                        forsikretFnr = forsikretFnr
+                )
+
+        fun createP2100(forsikretFnr: String?,
+                        gjenlevFnr: String?,
+                        relasjon: String?): SED =
+                generateSED(
+                        SedType.P2100,
+                        forsikretFnr = forsikretFnr,
+                        gjenlevFnr = gjenlevFnr,
+                        gjenlevRelasjon = relasjon
+                )
 
         fun createP15000(forsikretFnr: String?,
                          gjenlevFnr: String?,
                          krav: String?,
-                         relasjon: String?
-        ): SED {
-            return SED(
-                    type = SedType.P15000,
-                    nav = Nav(
-                            bruker = listOf(Bruker(createPerson(forsikretFnr))),
-                            krav = krav?.let { Krav(type = it) }
-                    ),
-                    pensjon = gjenlevFnr?.let { createPensjon(it, relasjon = relasjon) }
-            )
-        }
+                         relasjon: String?): SED =
+                generateSED(
+                        SedType.P15000,
+                        forsikretFnr = forsikretFnr,
+                        navKrav = krav,
+                        gjenlevFnr = gjenlevFnr,
+                        gjenlevRelasjon = relasjon
+                )
 
         fun createP5000(forsikretFnr: String?,
                         gjenlevFnr: String?,
                         relasjon: String? = null,
                         gjenlevRolle: String? = null): SED {
-            return SED(
-                    type = SedType.P5000,
-                    nav = Nav(
-                            bruker = listOf(Bruker(createPerson(forsikretFnr)))
-                    ),
-                    pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, relasjon, gjenlevRolle) }
+            return generateSED(
+                    SedType.P5000,
+                    forsikretFnr = forsikretFnr,
+                    gjenlevFnr = gjenlevFnr,
+                    gjenlevRelasjon = relasjon,
+                    gjenlevRolle = gjenlevRolle
             )
         }
 
         fun createP6000(forsikretFnr: String?,
                         gjenlevFnr: String?,
-                        relasjon: String? = null,
-                        gjenlevRolle: String? = null): SED {
-            return SED(
-                    type = SedType.P6000,
-                    nav = Nav(
-                            bruker = listOf(Bruker(createPerson(forsikretFnr)))
-                    ),
-                    pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, relasjon, gjenlevRolle) }
-            )
-        }
+                        gjenlevRelasjon: String? = null,
+                        gjenlevRolle: String? = null): SED =
+                generateSED(
+                        SedType.P6000,
+                        forsikretFnr = forsikretFnr,
+                        gjenlevFnr = gjenlevFnr,
+                        gjenlevRelasjon = gjenlevRelasjon,
+                        gjenlevRolle = gjenlevRolle
+                )
 
-        fun createP8000(forsikretFnr: String?, annenPersonFnr: String?, rolle: String?): SED {
+        fun createP8000(forsikretFnr: String?,
+                        annenPersonFnr: String?,
+                        rolle: String?): SED =
+                generateSED(
+                        SedType.P8000,
+                        forsikretFnr = forsikretFnr,
+                        forsikretRolle = rolle,
+                        annenPersonFnr = annenPersonFnr
+                )
+
+        private fun generateSED(
+                sedType: SedType,
+                forsikretFnr: String? = null,
+                forsikretRolle: String? = null,
+                annenPersonFnr: String? = null,
+                annenPersonRolle: String? = null,
+                navKrav: String? = null,
+                // Gjenlevende (IKKE annenPerson)
+                gjenlevFnr: String? = null,
+                gjenlevRolle: String? = null,
+                gjenlevRelasjon: String? = null
+        ): SED {
             return SED(
-                    type = SedType.P8000,
+                    type = sedType,
                     nav = Nav(
-                            bruker = listOf(Bruker(createPerson(forsikretFnr, rolle))),
-                            annenperson = Bruker(person = createPerson(annenPersonFnr))
-                    )
+                            bruker = listOf(Bruker(createPerson(forsikretFnr, forsikretRolle))),
+                            annenperson = Bruker(person = createPerson(annenPersonFnr)),
+                            krav = navKrav?.let { Krav(type = it) }
+                    ),
+                    pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
             )
         }
 

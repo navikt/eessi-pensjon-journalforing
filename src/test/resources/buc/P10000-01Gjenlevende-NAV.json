@@ -167,11 +167,11 @@
           "land" : "BE"
         } ],
         "pin" : [ {
-          "sektor" : "familieytelser",
-          "institusjonsnavn" : "NOINST002, NO INST002, NO",
-          "identifikator" : "28064843062",
-          "land" : "NO",
-          "institusjonsid" : "NO:noinst002"
+          "sektor": "familieytelser",
+          "institusjonsnavn": "NOINST002, NO INST002, NO",
+          "identifikator": "11067122781",
+          "land": "NO",
+          "institusjonsid": "NO:noinst002"
         } ],
         "foedested" : {
           "region" : "Region",

@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -26,6 +27,15 @@ internal class FodselsnummerTest {
         assertNull(Fodselsnummer.fra("11111111111"))
         assertNull(Fodselsnummer.fra("22222222222"))
         assertNull(Fodselsnummer.fra("19191919191"))
+    }
+
+    @Test
+    fun `Should remove everything that isnt a digit`() {
+        assertNotNull(Fodselsnummer.fra("     22117320034"))            // LEALAUS_KAKE
+        assertNotNull(Fodselsnummer.fra("  12011577847     "))          // STERK_BUSK
+        assertNotNull(Fodselsnummer.fra("asdf 11067122781 jqwroij"))    // KRAFTIG_VEGGPRYD
+        assertNotNull(Fodselsnummer.fra("j-asjd09-035-225916 "))        // SLAPP_SKILPADDE
+        assertNotNull(Fodselsnummer.fra("081155 25221"))                // GOD_BOLLE
     }
 
     @Test

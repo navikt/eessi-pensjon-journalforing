@@ -28,6 +28,7 @@ import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -69,6 +70,12 @@ class JournalforingServiceTest {
     private lateinit var fdato: LocalDate
 
     private lateinit var oppgaveRoutingService: OppgaveRoutingService
+
+    companion object {
+        private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
+        private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
+        private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
+    }
 
     @BeforeEach
     fun setup() {
@@ -143,7 +150,7 @@ class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R004.json")))
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
@@ -151,13 +158,13 @@ class JournalforingServiceTest {
                 null,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.R_BUC_02),
                 sedType = eq(SedType.R004),
@@ -181,14 +188,14 @@ class JournalforingServiceTest {
                 null,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.R_BUC_02),
                 sedType = eq(SedType.R005),
@@ -212,14 +219,14 @@ class JournalforingServiceTest {
                 null,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.R_BUC_02),
                 sedType = eq(SedType.R005),
@@ -243,14 +250,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "3811",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET))
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         val dodPerson = IdentifisertPerson(
                 "22078945602",
                 "Dod Begravet",
                 null,
                 "",
                 "3811",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.AVDOD))
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD))
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
@@ -258,7 +265,7 @@ class JournalforingServiceTest {
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("2536475861"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.R_BUC_02),
                 sedType = eq(SedType.R005),
@@ -283,13 +290,13 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_01),
                 sedType = eq(SedType.P2000),
@@ -320,14 +327,14 @@ class JournalforingServiceTest {
                 null,
                 "NOR",
                 "",
-                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                fnr = eq("01055012345"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_03),
                 sedType = eq(SedType.P2200),
@@ -351,14 +358,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_10),
                 sedType = eq(SedType.P15000),
@@ -383,14 +390,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_01),
                 sedType = eq(SedType.P2000),
@@ -420,14 +427,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyString(),
-                fnr = eq("01055012345"),
+                fnr = eq(SLAPP_SKILPADDE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_01),
                 sedType = eq(SedType.P2000),
@@ -452,14 +459,14 @@ class JournalforingServiceTest {
                 null,
                 "NOR",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
@@ -489,14 +496,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("01055012345", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = anyOrNull(),
-                fnr = eq("01055012345"),
+                fnr = eq(SLAPP_SKILPADDE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_03),
                 sedType = eq(SedType.P2200),
@@ -521,14 +528,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147729"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_10),
                 sedType = eq(SedType.P15000),
@@ -554,7 +561,7 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
         val sakInformasjon = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -562,7 +569,7 @@ class JournalforingServiceTest {
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
@@ -610,7 +617,7 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
         )
         val saksInfo = SakInformasjon("111111", YtelseType.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -647,7 +654,7 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET, YtelseType.GJENLEV)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, YtelseType.GJENLEV)
         )
         val sakInformasjon = SakInformasjon("111222", YtelseType.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
@@ -655,7 +662,7 @@ class JournalforingServiceTest {
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
@@ -684,14 +691,14 @@ class JournalforingServiceTest {
                 null,
                 "NO",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq(null),
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
@@ -717,14 +724,14 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12078945602", Relasjon.FORSIKRET)
+                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
         verify(journalpostService).opprettJournalpost(
                 rinaSakId = eq("147730"),
-                fnr = eq("12078945602"),
+                fnr = eq(LEALAUS_KAKE),
                 personNavn = eq("Test Testesen"),
                 bucType = eq(BucType.P_BUC_02),
                 sedType = eq(SedType.P2100),
@@ -770,7 +777,7 @@ class JournalforingServiceTest {
                 null,
                 "",
                 "",
-                personRelasjon = PersonRelasjon("12071245602", Relasjon.GJENLEVENDE, YtelseType.BARNEP)
+                personRelasjon = PersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, YtelseType.BARNEP)
         )
         val saksInfo = SakInformasjon("111111", YtelseType.BARNEP, SakStatus.LOPENDE, "4862", false)
 

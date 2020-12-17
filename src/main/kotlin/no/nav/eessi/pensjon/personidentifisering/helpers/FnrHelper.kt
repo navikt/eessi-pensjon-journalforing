@@ -5,8 +5,6 @@ import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.erFnrDnrFormat
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -85,13 +83,13 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == "01" }
 
-        gyldigFnr(gjenlevende?.ident())?.let {
+        Fodselsnummer.fra(gjenlevende?.ident())?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
         }
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        gyldigFnr(sed.nav?.forsikretIdent())?.let {
+        Fodselsnummer.fra(sed.nav?.forsikretIdent())?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
         }
     }
@@ -106,7 +104,7 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        gyldigFnr(sed.nav?.forsikretIdent())
+        Fodselsnummer.fra(sed.nav?.forsikretIdent())
                 ?.let {
                     fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
                     logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
@@ -115,7 +113,7 @@ class FnrHelper {
         val gjenlevendePerson = sed.pensjon?.gjenlevende?.person
 
         gjenlevendePerson?.let { person ->
-            val gjenlevendePin = gyldigFnr(person.ident()) ?: return
+            val gjenlevendePin = Fodselsnummer.fra(person.ident()) ?: return
 
             val gjenlevendeRelasjon = person.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
@@ -143,8 +141,8 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
-        val personPin = gyldigFnr(sed.nav?.forsikretIdent())
-        val annenPersonPin = gyldigFnr(sed.nav?.annenPersonIdent())
+        val personPin = Fodselsnummer.fra(sed.nav?.forsikretIdent())
+        val annenPersonPin = Fodselsnummer.fra(sed.nav?.annenPersonIdent())
         val rolle = sed.nav?.annenPerson()?.rolle
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
@@ -157,10 +155,10 @@ class FnrHelper {
         }
 
         val annenPersonRelasjon = when (rolle) {
-            "01" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.GJENLEVENDE, sedType = sed.type)
-            "02" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.FORSORGER, sedType = sed.type)
-            "03" -> PersonRelasjon(annenPersonPin ?: "", Relasjon.BARN, sedType = sed.type)
-            else -> PersonRelasjon(annenPersonPin ?: "", Relasjon.ANNET, sedType = sed.type)
+            "01" -> PersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type)
+            "02" -> PersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type)
+            "03" -> PersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type)
+            else -> PersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sed.type)
         }
         fnrListe.add(annenPersonRelasjon)
         logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}")
@@ -178,7 +176,7 @@ class FnrHelper {
                 ?.mapNotNull { bruker ->
                     val relasjon = getType(bruker.tilbakekreving?.status?.type)
 
-                    gyldigFnr(bruker.person?.ident())
+                    Fodselsnummer.fra(bruker.person?.ident())
                             ?.let { PersonRelasjon(it, relasjon, sedType = sed.type) }
                 } ?: emptyList()
     }
@@ -191,11 +189,6 @@ class FnrHelper {
             "avdød_mottaker_av_ytelser" -> Relasjon.AVDOD
             else -> Relasjon.ANNET
         }
-    }
-
-    private fun gyldigFnr(fnr: String?): String? {
-        return fnr?.let { trimFnrString(it) }
-                ?.takeIf { erFnrDnrFormat(it) }
     }
 
 }
