@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -29,6 +30,11 @@ internal class JournalpostServiceTest {
 
     private val journalpostService = JournalpostService(mockKlient)
 
+    companion object {
+        private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
+        private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
+    }
+
     @Test
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter`() {
 
@@ -41,7 +47,7 @@ internal class JournalpostServiceTest {
 
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
-                fnr = "12345678912",
+                fnr = SLAPP_SKILPADDE,
                 personNavn = "navn navnesen",
                 bucType = BucType.P_BUC_01,
                 sedType = SedType.P2000,
@@ -79,7 +85,7 @@ internal class JournalpostServiceTest {
         assertNull(actualRequest.avsenderMottaker.navn)
 
         assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
-        assertEquals("12345678912", actualRequest.bruker!!.id)
+        assertEquals(SLAPP_SKILPADDE, actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNull(actualRequest.eksternReferanseId)
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
@@ -101,7 +107,7 @@ internal class JournalpostServiceTest {
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
                     rinaSakId = "1111",
-                    fnr = "12345678912",
+                    fnr = SLAPP_SKILPADDE,
                     personNavn = "navn navnesen",
                     bucType = BucType.P_BUC_01,
                     sedType = SedType.P2000,
@@ -143,7 +149,7 @@ internal class JournalpostServiceTest {
 
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
-                fnr = "12345678912",
+                fnr = SLAPP_SKILPADDE,
                 personNavn = "navn navnesen",
                 bucType = BucType.P_BUC_01,
                 sedType = SedType.P2000,
@@ -199,7 +205,7 @@ internal class JournalpostServiceTest {
               },
               "behandlingstema" : "ab0011",
               "bruker" : {
-                "id" : "12078945602",
+                "id" : $LEALAUS_KAKE,
                 "idType" : "FNR"
               },
               "dokumenter" : ["P2100"],
@@ -220,7 +226,7 @@ internal class JournalpostServiceTest {
 
         val actualResponse = journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
-                fnr = "12078945602",
+                fnr = LEALAUS_KAKE,
                 personNavn = "Test Testesen",
                 bucType = BucType.P_BUC_02,
                 sedType = SedType.P2100,
