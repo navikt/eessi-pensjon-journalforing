@@ -3,9 +3,10 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.erFnrDnrFormat
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.trimFnrString
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component
 class FnrHelper {
 
     private val logger = LoggerFactory.getLogger(FnrHelper::class.java)
+
+    private val sedMedForsikretPrioritet = listOf(SedType.H121, SedType.H120, SedType.H070)
 
     /**
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
@@ -28,9 +31,7 @@ class FnrHelper {
                     logger.info("SED: ${sed.type}")
 
                     when (sed.type) {
-                        SedType.P2100 -> {
-                            leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe)
-                        }
+                        SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe)
                         SedType.P15000 -> {
                             val krav = sed.nav?.krav?.type
                             val ytelseType = ytelseTypefraKravSed(krav)
@@ -69,7 +70,7 @@ class FnrHelper {
         logger.debug("===> ${fnrListe.toJson()} <===")
 
         val resultat = fnrListe
-                .filter { it.erGyldig() }
+                .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
                 .distinctBy { it.fnr }
 
         return if (resultat.isEmpty()) fnrListe.distinctBy { it.fnr }
@@ -84,13 +85,13 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == "01" }
 
-        gjenlevende?.ident()?.let {
+        gyldigFnr(gjenlevende?.ident())?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
         }
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        sed.nav?.forsikretIdent()?.let {
+        gyldigFnr(sed.nav?.forsikretIdent())?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
         }
     }
@@ -105,17 +106,18 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
-        sed.nav?.forsikretIdent()?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
-            logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
-        }
+        gyldigFnr(sed.nav?.forsikretIdent())
+                ?.let {
+                    fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
+                    logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
+                }
 
         val gjenlevendePerson = sed.pensjon?.gjenlevende?.person
 
-        gjenlevendePerson?.let {
-            val gjenlevendePin = it.ident() ?: return
+        gjenlevendePerson?.let { person ->
+            val gjenlevendePin = gyldigFnr(person.ident()) ?: return
 
-            val gjenlevendeRelasjon = it.relasjontilavdod?.relasjon
+            val gjenlevendeRelasjon = person.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
                 fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sed.type))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
@@ -141,8 +143,8 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
-        val personPin = sed.nav?.forsikretIdent()
-        val annenPersonPin = sed.nav?.annenPersonIdent()
+        val personPin = gyldigFnr(sed.nav?.forsikretIdent())
+        val annenPersonPin = gyldigFnr(sed.nav?.annenPersonIdent())
         val rolle = sed.nav?.annenPerson()?.rolle
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
@@ -169,15 +171,15 @@ class FnrHelper {
      * har sed kun en person retureres dette fnr/dnr
      * har sed flere personer leter vi etter status 07/avdød_mottaker_av_ytelser og returnerer dette fnr/dnr
      *
-     * * hvis ingen intreffer returnerer vi null
+     * Hvis ingen intreffer returnerer vi tom liste
      */
     private fun filterPinPersonR005(sed: SED): List<PersonRelasjon> {
         return sed.nav?.bruker
                 ?.mapNotNull { bruker ->
-                    val fnr = hentNorskFnr(bruker.person)
                     val relasjon = getType(bruker.tilbakekreving?.status?.type)
 
-                    fnr?.let { PersonRelasjon(it.value, relasjon, sedType = sed.type) }
+                    gyldigFnr(bruker.person?.ident())
+                            ?.let { PersonRelasjon(it, relasjon, sedType = sed.type) }
                 } ?: emptyList()
     }
 
@@ -191,8 +193,9 @@ class FnrHelper {
         }
     }
 
-    private fun hentNorskFnr(person: Person?): Fodselsnummer? {
-        val fnr = person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
-        return Fodselsnummer.fra(fnr)
+    private fun gyldigFnr(fnr: String?): String? {
+        return fnr?.let { trimFnrString(it) }
+                ?.takeIf { erFnrDnrFormat(it) }
     }
+
 }

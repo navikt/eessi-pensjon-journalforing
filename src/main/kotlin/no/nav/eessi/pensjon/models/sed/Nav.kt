@@ -44,9 +44,9 @@ data class Nav(
 }
 
 data class Bruker(
+        val person: Person? = null,
         val mor: Person? = null,
         val far: Person? = null,
-        val person: Person? = null,
 
         val tilbakekreving: Tilbakekreving? = null
 ) {
@@ -136,8 +136,8 @@ data class EessisakItem(
 )
 
 data class Tilbakekreving(
-        val feilutbetaling: Feilutbetaling?,
-        val status: Status?
+        val feilutbetaling: Feilutbetaling? = null,
+        val status: Status? = null
 )
 
 data class Feilutbetaling(val ytelse: Ytelse?)
