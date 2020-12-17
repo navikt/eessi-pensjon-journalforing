@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.CapturingSlot
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -17,10 +16,10 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
@@ -61,7 +60,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Landkoder
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
@@ -85,7 +83,7 @@ internal open class JournalforingTestBase {
     protected val euxKlient: EuxKlient = mockk()
     private val norg2Klient: Norg2Klient = mockk(relaxed = true)
 
-    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
+    private val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
@@ -105,8 +103,8 @@ internal open class JournalforingTestBase {
     )
 
     protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
-    protected val personV3Service: PersonV3Service = mockk(relaxed = true)
-    protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
+    protected val personV3Service: PersonV3Service = mockk()
+    private val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
 
     private val personidentifiseringService = PersonidentifiseringService(
             aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
@@ -166,57 +164,35 @@ internal open class JournalforingTestBase {
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
-        initCommonMocks(sed)
+        initSed(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId))
+        initDokumenter(getMockDocuments())
 
-        if (fnr != null) {
-            every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+        if (fnr != null)
+            initMockPerson(fnr, aktoerId = AKTOER_ID, land = land)
+
+        if (fnrAnnenPerson != null)
+            initMockPerson(fnrAnnenPerson, aktoerId = AKTOER_ID_2, land = land, diskresjonskode = diskresjonkode)
+
+        if (rolle == "01") initSaker(AKTOER_ID_2, saker)
+        else initSaker(AKTOER_ID, saker)
+
+        consumeAndAssert(hendelseType, SedType.P8000, bucType = BucType.P_BUC_05) {
+            assertBlock(it.request)
         }
-
-        if (fnrAnnenPerson != null) {
-            every { personV3Service.hentPerson(fnrAnnenPerson) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", diskresjonkode?.name)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
-        }
-
-        if (rolle == "01")
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
-        else
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
-
-        val (journalpost, _) = initJournalPostRequestSlot()
-
-        val hendelse = createHendelseJson(SedType.P8000)
-
-        val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        if (hendelseType == HendelseType.SENDT)
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
-        // forvent tema == PEN og enhet 2103
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
-        assertEquals(hendelseType, oppgaveMelding.hendelseType)
-
-        val request = journalpost.captured
-
-        assertBlock(request)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
-        val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-        val antallKallIdent = if (antallPersoner == 0) 0
-        else antallPersoner - (1.takeIf { rolle == "01" } ?: 0)
-        verify(exactly = antallKallIdent) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+//        val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
+//        val antallKallIdent = if (antallPersoner == 0) 0
+//        else antallPersoner - (1.takeIf { rolle == "01" } ?: 0)
+//        verify(exactly = antallKallIdent) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
 
 
 //        val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
 //        verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
 
-        if (hendelseType == HendelseType.SENDT) {
+        /*if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
 
             val antallKallTilPensjonSaklist = if (antallPersoner > 0 && sakId != null) 1 else 0
@@ -225,7 +201,7 @@ internal open class JournalforingTestBase {
             assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
 
             verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
-        }
+        }*/
 
         clearAllMocks()
     }
@@ -248,34 +224,32 @@ internal open class JournalforingTestBase {
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
-        initCommonMocks(sed)
+        initSed(createSed(SedType.P8000, fnr, eessiSaknr = sakId))
+        initDokumenter(getMockDocuments())
 
-        if (fnr != null) {
-            every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+        if (fnr != null) initMockPerson(fnr, aktoerId = AKTOER_ID, land = land)
+
+        initSaker(AKTOER_ID, saker)
+
+//        val (journalpost, _) = initJournalPostRequestSlot(true)
+//
+//        val hendelse = createHendelseJson(SedType.P8000)
+//
+//        val meldingSlot = slot<String>()
+//        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+//
+//        if (hendelseType == HendelseType.SENDT)
+//            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+//        else
+//            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+//
+//        assertBlock(journalpost.captured)
+//
+        consumeAndAssert(hendelseType, SedType.P8000, BucType.P_BUC_05) {
+            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
         }
-
-        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
-        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
-
-        val (journalpost, _) = initJournalPostRequestSlot(true)
-
-        val hendelse = createHendelseJson(SedType.P8000)
-
-        val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        if (hendelseType == HendelseType.SENDT)
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
-        assertBlock(journalpost.captured)
-
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
-        verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
@@ -287,33 +261,13 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: SED) {
-        val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
-
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
-        every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
-    }
-
-    private fun getResource(resourcePath: String): String =
-            javaClass.getResource(resourcePath).readText()
-
-    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
+    private fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
         return Bruker()
                 .withPersonnavn(Personnavn().withSammensattNavn("$fornavn $etternavn"))
                 .withGeografiskTilknytning(Land().withGeografiskTilknytning(geo) as GeografiskTilknytning)
                 .withAktoer(PersonIdent().withIdent(PersonV3NorskIdent().withIdent(fnr)))
                 .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
                 .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
-    }
-
-    protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
-        val request = slot<OpprettJournalpostRequest>()
-        val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
-
-        every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
-
-        return request to journalpostResponse
     }
 
     protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01", relasjon: String? = null): Person {
@@ -334,7 +288,11 @@ internal open class JournalforingTestBase {
         )
     }
 
-    protected fun createSed(sedType: SedType, fnr: String? = null, annenPerson: Person? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): SED {
+    protected fun createSed(sedType: SedType,
+                            fnr: String? = null,
+                            annenPerson: Person? = null,
+                            eessiSaknr: String? = null,
+                            fdato: String? = "1988-07-12"): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = SedBruker(
@@ -386,7 +344,7 @@ internal open class JournalforingTestBase {
         )
     }
 
-    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
+    private fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
         return """
             {
               "id": 1869,
@@ -416,4 +374,94 @@ internal open class JournalforingTestBase {
         )
     }
 
+
+    /*
+    * TODO: Finish new variant of simplification
+    */
+
+    protected fun consumeAndAssert(hendelseType: HendelseType,
+                                   sedType: SedType,
+                                   bucType: BucType,
+                                   hendelseFnr: String? = null,
+                                   ferdigstilt: Boolean = false,
+                                   assertBlock: (TestScope) -> Unit
+    ) {
+        // SLOTS
+        val meldingSlot = slot<String>()
+        val request = slot<OpprettJournalpostRequest>()
+
+        // RESPONSE
+        val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
+
+        // MISC MOCK RETURNS
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
+
+        // SED HENDELSE
+        val hendelseJson = createHendelseJson(sedType, bucType, forsikretFnr = hendelseFnr)
+        if (hendelseType == HendelseType.SENDT) {
+            listener.consumeSedSendt(hendelseJson, mockk(relaxed = true), mockk(relaxed = true))
+        } else {
+            listener.consumeSedMottatt(hendelseJson, mockk(relaxed = true), mockk(relaxed = true))
+        }
+
+        // TODO: Verify
+        val oppgaveMelding = if (ferdigstilt) {
+//            verify(exactly = 1) { journalpostService.oppdaterDistribusjonsinfo(any()) }
+            null
+        } else {
+//            verify(exactly = 0) { journalpostService.oppdaterDistribusjonsinfo(any()) }
+            mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        }
+
+        // Lagre Request, Response, og OppgaveMelding i et objekt for validering
+        assertBlock(TestScope(request.captured, journalpostResponse, oppgaveMelding))
+    }
+
+    protected fun initSaker(aktoerId: String, saker: List<SakInformasjon>) {
+        every { fagmodulKlient.hentPensjonSaklist(aktoerId) } returns saker
+    }
+
+    protected fun initSaker(aktoerId: String, vararg sak: SakInformasjon) {
+        every { fagmodulKlient.hentPensjonSaklist(aktoerId) } returns sak.asList()
+    }
+
+    protected fun initBestemSak(vararg sak: SakInformasjon) {
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, sak.asList())
+    }
+
+    protected fun initMockPerson(fnr: String,
+                                 aktoerId: String?,
+                                 land: String = "NOR",
+                                 diskresjonskode: Diskresjonskode? = null) {
+
+        every { personV3Service.hentPerson(fnr) } returns aktoerId?.run { createBrukerWith(fnr, "Fornavn", "Etternavnsen", land) }
+        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns aktoerId?.let { AktoerId(it) }
+        every { diskresjonService.hentDiskresjonskode(any()) } returns diskresjonskode
+    }
+
+    protected fun initSed(sed: SED, vararg andreSeds: SED) {
+        every { euxKlient.hentSed(any(), any()) }
+                .returns(sed)
+                .run { andreSeds.forEach { andThen(it) } }
+    }
+
+    protected fun initDokumenter(vararg dokument: Document) {
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns dokument.toList()
+    }
+
+    protected fun initDokumenter(dokumenter: List<Document>) {
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns dokumenter
+    }
+
+    protected fun getResource(resourcePath: String): String =
+            javaClass.getResource(resourcePath).readText()
+
+    protected inner class TestScope(
+            val request: OpprettJournalpostRequest,
+            val response: OpprettJournalPostResponse, // TODO: remove?
+            val melding: OppgaveMelding?
+    )
 }

@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.models.sed
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonValue
 
 data class Nav(
         @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
@@ -66,6 +68,19 @@ data class Person(
         val rolle: String? = null  //3.1 i P10000
 ) {
         fun ident(): String? = pin?.firstOrNull { it.land == "NO" }?.identifikator
+}
+
+enum class Rolle(@JsonValue val kode: String) {
+        GJENLEVENDE("01"),
+        FORSORGER("02"),
+        BARN("04"),
+        ANNET("");
+
+        companion object {
+                @JvmStatic
+                @JsonCreator
+                fun fra(kode: String?): Rolle = values().firstOrNull { kode == it.kode } ?: ANNET
+        }
 }
 
 //H121
