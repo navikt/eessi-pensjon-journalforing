@@ -85,7 +85,7 @@ internal class JournalpostServiceTest {
         assertNull(actualRequest.avsenderMottaker.navn)
 
         assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
-        assertEquals(SLAPP_SKILPADDE, actualRequest.bruker!!.id)
+        assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNull(actualRequest.eksternReferanseId)
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
@@ -205,7 +205,7 @@ internal class JournalpostServiceTest {
               },
               "behandlingstema" : "ab0011",
               "bruker" : {
-                "id" : $LEALAUS_KAKE,
+                "id" : ${LEALAUS_KAKE.toString()},
                 "idType" : "FNR"
               },
               "dokumenter" : ["P2100"],
