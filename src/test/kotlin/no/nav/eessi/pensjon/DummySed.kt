@@ -3,11 +3,13 @@ package no.nav.eessi.pensjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Krav
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.PinItem
-import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.Status
 import no.nav.eessi.pensjon.models.sed.Tilbakekreving
@@ -67,7 +69,7 @@ internal class DummySed {
 
         fun createP15000(forsikretFnr: String?,
                          gjenlevFnr: String?,
-                         krav: String?,
+                         krav: KravType?,
                          relasjon: String?): SED =
                 generateSED(
                         SedType.P15000,
@@ -80,7 +82,7 @@ internal class DummySed {
         fun createP5000(forsikretFnr: String?,
                         gjenlevFnr: String?,
                         relasjon: String? = null,
-                        gjenlevRolle: String? = null): SED {
+                        gjenlevRolle: Rolle? = null): SED {
             return generateSED(
                     SedType.P5000,
                     forsikretFnr = forsikretFnr,
@@ -93,7 +95,7 @@ internal class DummySed {
         fun createP6000(forsikretFnr: String?,
                         gjenlevFnr: String?,
                         gjenlevRelasjon: String? = null,
-                        gjenlevRolle: String? = null): SED =
+                        gjenlevRolle: Rolle? = null): SED =
                 generateSED(
                         SedType.P6000,
                         forsikretFnr = forsikretFnr,
@@ -104,7 +106,7 @@ internal class DummySed {
 
         fun createP8000(forsikretFnr: String?,
                         annenPersonFnr: String?,
-                        rolle: String?): SED =
+                        rolle: Rolle?): SED =
                 generateSED(
                         SedType.P8000,
                         forsikretFnr = forsikretFnr,
@@ -115,27 +117,27 @@ internal class DummySed {
         private fun generateSED(
                 sedType: SedType,
                 forsikretFnr: String? = null,
-                forsikretRolle: String? = null,
+                forsikretRolle: Rolle? = null,
                 annenPersonFnr: String? = null,
-                annenPersonRolle: String? = null,
-                navKrav: String? = null,
+                annenPersonRolle: Rolle? = null,
+                navKrav: KravType? = null,
                 // Gjenlevende (IKKE annenPerson)
                 gjenlevFnr: String? = null,
-                gjenlevRolle: String? = null,
+                gjenlevRolle: Rolle? = null,
                 gjenlevRelasjon: String? = null
         ): SED {
             return SED(
                     type = sedType,
                     nav = Nav(
                             bruker = listOf(Bruker(createPerson(forsikretFnr, forsikretRolle))),
-                            annenperson = Bruker(person = createPerson(annenPersonFnr)),
+                            annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
                             krav = navKrav?.let { Krav(type = it) }
                     ),
                     pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
             )
         }
 
-        private fun createPerson(fnr: String?, rolle: String? = null): Person {
+        private fun createPerson(fnr: String?, rolle: Rolle? = null): Person {
             return Person(
                     rolle = rolle,
                     foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
@@ -146,12 +148,12 @@ internal class DummySed {
             )
         }
 
-        private fun createPensjon(gjenlevFnr: String?, relasjon: String?, rolle: String? = null): Pensjon =
+        private fun createPensjon(gjenlevFnr: String?, relasjon: String?, rolle: Rolle? = null): Pensjon =
                 Pensjon(
                         gjenlevende = Bruker(
                                 Person(
                                         pin = listOf(PinItem(land = "NO", identifikator = gjenlevFnr)),
-                                        relasjontilavdod = RelasjonAvdodItem(relasjon),
+                                        relasjontilavdod = RelasjonTilAvdod(relasjon),
                                         rolle = rolle
                                 )
                         )

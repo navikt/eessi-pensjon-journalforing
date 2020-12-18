@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.Rolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
-        initSed(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = "01"), null))
+        initSed(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
         initDokumenter(getMockDocuments())
         initMockPerson(FNR_OVER_60, aktoerId = AKTOER_ID)
 
@@ -51,9 +52,9 @@ internal class PBuc05Test : JournalforingTestBase() {
     @Test
     fun `Hente opp korrekt fnr fra P8000 som er sendt fra oss med flere P8000 i BUC`() {
         initSed(
-                createSed(SedType.P8000, FNR_VOKSEN, createAnnenPerson(fnr = FNR_VOKSEN_2, rolle = "01"), SAK_ID),
-                createSed(SedType.P8000, FNR_VOKSEN, createAnnenPerson(fnr = FNR_VOKSEN_2, rolle = "01"), SAK_ID),
-                createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = "01"), null)
+                createSed(SedType.P8000, FNR_VOKSEN, createAnnenPerson(fnr = FNR_VOKSEN_2, rolle = Rolle.ETTERLATTE), SAK_ID),
+                createSed(SedType.P8000, FNR_VOKSEN, createAnnenPerson(fnr = FNR_VOKSEN_2, rolle = Rolle.ETTERLATTE), SAK_ID),
+                createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null)
         )
 
         initDokumenter(

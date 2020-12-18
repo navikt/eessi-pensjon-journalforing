@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.DummySed.Companion.createP8000
 import no.nav.eessi.pensjon.DummySed.Companion.createR005
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,7 +68,7 @@ internal class FnrHelperTest {
                 // P2100 som mangler norsk fnr
                 createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "01"),
                 // P15000 som mangler gyldig gjenlevende fnr, med krav = ALDER
-                createP15000(forsikretFnr = forventetFnr, gjenlevFnr = "1234", krav = "01", relasjon = "01")
+                createP15000(forsikretFnr = forventetFnr, gjenlevFnr = "1234", krav = KravType.ALDER, relasjon = "01")
         ))
 
         assertEquals(1, actual.size)
@@ -79,7 +81,7 @@ internal class FnrHelperTest {
                 // P2100 som mangler norsk fnr
                 createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "01"),
                 // P15000 som mangler gyldig gjenlevende fnr, med krav = GJENLEV
-                createP15000(forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", krav = "02", relasjon = "01")
+                createP15000(forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", krav = KravType.ETTERLATTE, relasjon = "01")
         ))
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
@@ -185,7 +187,7 @@ internal class FnrHelperTest {
         val forventetFnr = SLAPP_SKILPADDE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-                createP5000(forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = "01"),
+                createP5000(forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE),
                 createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = null)
         ))
 
@@ -204,7 +206,7 @@ internal class FnrHelperTest {
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "03"),
                 createP5000(forsikretFnr = "25105424704", gjenlevFnr = gjenlevFnr, relasjon = "02"),
-                createP8000(forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, rolle = "01")
+                createP8000(forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, rolle = Rolle.ETTERLATTE)
         ))
 
         val expectedPersonRelasjon = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P5000)
@@ -224,7 +226,7 @@ internal class FnrHelperTest {
         val gjenlevFnr = LEALAUS_KAKE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-                createP15000(forsikretFnr, gjenlevFnr, krav = "02", relasjon = "01"),
+                createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = "01"),
                 createP5000(forsikretFnr, gjenlevFnr)
         ))
 
@@ -242,7 +244,7 @@ internal class FnrHelperTest {
         val forsikretFnr = KRAFTIG_VEGGPRYD
 
         val sedList = listOf(
-                createP15000(forsikretFnr, gjenlevFnr = null, krav = "01", relasjon = null),
+                createP15000(forsikretFnr, gjenlevFnr = null, krav = KravType.ALDER, relasjon = null),
                 createP5000(forsikretFnr, gjenlevFnr = null)
         )
 
@@ -325,7 +327,7 @@ internal class FnrHelperTest {
             val gjenlevFnr = LEALAUS_KAKE
 
             val sedList = listOf(
-                    createP15000(forsikretFnr, gjenlevFnr, krav = "02", relasjon = null)
+                    createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = null)
             )
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
@@ -352,7 +354,7 @@ internal class FnrHelperTest {
             val gjenlevFnr = LEALAUS_KAKE
 
             val sedList = listOf(
-                    createP15000(forsikretFnr, gjenlevFnr, krav = "02", relasjon = relasjon)
+                    createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = relasjon)
             )
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
@@ -380,7 +382,7 @@ internal class FnrHelperTest {
             val gjenlevFnr = LEALAUS_KAKE
 
             val sedList = listOf(
-                    createP15000(forsikretFnr, gjenlevFnr, krav = "02", relasjon = relasjon)
+                    createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = relasjon)
             )
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)

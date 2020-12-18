@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -34,7 +36,7 @@ class FnrHelper {
                             val krav = sed.nav?.krav?.type
                             val ytelseType = ytelseTypefraKravSed(krav)
                             logger.info("${sed.type.name}, krav: $krav,  ytelsetype: $ytelseType")
-                            if (krav == "02") {
+                            if (krav == KravType.ETTERLATTE) {
                                 logger.debug("legger til gjenlevende: ($ytelseType)")
                                 leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe, ytelseType)
                             } else {
@@ -81,7 +83,7 @@ class FnrHelper {
      * P8000-P10000 - [03] Barn
      */
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
-        val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == "01" }
+        val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE }
 
         Fodselsnummer.fra(gjenlevende?.ident())?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
@@ -94,11 +96,11 @@ class FnrHelper {
         }
     }
 
-    private fun ytelseTypefraKravSed(krav: String?): YtelseType? {
+    private fun ytelseTypefraKravSed(krav: KravType?): YtelseType? {
         return when (krav) {
-            "01" -> YtelseType.ALDER
-            "02" -> YtelseType.GJENLEV
-            "03" -> YtelseType.UFOREP
+            KravType.ALDER -> YtelseType.ALDER
+            KravType.ETTERLATTE -> YtelseType.GJENLEV
+            KravType.UFORE -> YtelseType.UFOREP
             else -> null
         }
     }
@@ -155,9 +157,9 @@ class FnrHelper {
         }
 
         val annenPersonRelasjon = when (rolle) {
-            "01" -> PersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type)
-            "02" -> PersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type)
-            "03" -> PersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type)
+            Rolle.ETTERLATTE -> PersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type)
+            Rolle.FORSORGER -> PersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type)
+            Rolle.BARN -> PersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type)
             else -> PersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sed.type)
         }
         fnrListe.add(annenPersonRelasjon)

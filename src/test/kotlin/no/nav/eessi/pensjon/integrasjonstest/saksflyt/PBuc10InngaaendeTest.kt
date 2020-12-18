@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.KravType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
@@ -25,12 +26,6 @@ import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_10 - Inngående journalføring - IntegrationTest")
 internal class PBuc10InngaaendeTest : JournalforingTestBase() {
-
-    companion object {
-        private const val KRAV_ALDER = "01"
-        private const val KRAV_UFORE = "03"
-        private const val KRAV_GJENLEV = "02"
-    }
 
     @Nested
     inner class Scenario1 {
@@ -61,17 +56,17 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                     Document("10001212", SedType.P15000, DocStatus.RECEIVED)
             )
 
-            testRunner(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_GJENLEV) {
+            testRunner(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = KravType.ETTERLATTE) {
                 assertEquals(Tema.PENSJON, it.tema)
                 assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = KRAV_GJENLEV) {
+            testRunner(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = KravType.ETTERLATTE) {
                 assertEquals(Tema.PENSJON, it.tema)
                 assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = KRAV_GJENLEV, land = "SWE") {
+            testRunner(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = KravType.ETTERLATTE, land = "SWE") {
                 assertEquals(Tema.PENSJON, it.tema)
                 assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
@@ -91,7 +86,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                     Document("10001212", SedType.P15000, DocStatus.RECEIVED)
             )
 
-            testRunner(FNR_VOKSEN, null, alleDocs = allDocuemtActions, land = "SWE", krav = KRAV_UFORE) {
+            testRunner(FNR_VOKSEN, null, alleDocs = allDocuemtActions, land = "SWE", krav = KravType.UFORE) {
                 assertEquals(Tema.UFORETRYGD, it.tema)
                 assertEquals(Enhet.UFORE_UTLAND, it.journalfoerendeEnhet)
             }
@@ -103,7 +98,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KRAV_ALDER),
+                createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KravType.ALDER),
                 createSedPensjon(SedType.P5000, FNR_OVER_60)
         )
         initDokumenter(
@@ -132,7 +127,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KRAV_ALDER),
+                createSedPensjon(SedType.P15000, FNR_OVER_60, krav = KravType.ALDER),
                 createSedPensjon(SedType.P5000, FNR_OVER_60)
         )
         initDokumenter(
@@ -161,7 +156,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KRAV_UFORE),
+                createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KravType.UFORE),
                 createSedPensjon(SedType.P5000, FNR_VOKSEN)
         )
         initDokumenter(
@@ -190,7 +185,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 1  - Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KRAV_UFORE),
+                createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = KravType.UFORE),
                 createSedPensjon(SedType.P5000, FNR_VOKSEN)
         )
         initDokumenter(
@@ -218,7 +213,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 4  - Flere sed i buc, mottar en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KRAV_GJENLEV, relasjon = "01"),
+                createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KravType.ETTERLATTE, relasjon = "01"),
                 createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_VOKSEN_2, eessiSaknr = SAK_ID)
         )
         initSaker(AKTOER_ID_2,
@@ -250,7 +245,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                            bestemSak: BestemSakResponse? = null,
                            sakId: String? = SAK_ID,
                            land: String = "NOR",
-                           krav: String = KRAV_ALDER,
+                           krav: KravType = KravType.ALDER,
                            alleDocs: List<Document>,
                            relasjonAvdod: String? = "06",
                            block: (OpprettJournalpostRequest) -> Unit

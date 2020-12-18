@@ -30,11 +30,13 @@ import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Krav
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.PinItem
-import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -160,7 +162,7 @@ internal open class JournalforingTestBase {
             sakId: String? = SAK_ID,
             diskresjonkode: Diskresjonskode? = null,
             land: String = "NOR",
-            rolle: String?,
+            rolle: Rolle?,
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
@@ -173,7 +175,8 @@ internal open class JournalforingTestBase {
         if (fnrAnnenPerson != null)
             initMockPerson(fnrAnnenPerson, aktoerId = AKTOER_ID_2, land = land, diskresjonskode = diskresjonkode)
 
-        if (rolle == "01") initSaker(AKTOER_ID_2, saker)
+        // returnere saker på gjenlevende/etterlatte
+        if (rolle == Rolle.ETTERLATTE) initSaker(AKTOER_ID_2, saker)
         else initSaker(AKTOER_ID, saker)
 
         consumeAndAssert(hendelseType, SedType.P8000, bucType = BucType.P_BUC_05) {
@@ -270,12 +273,14 @@ internal open class JournalforingTestBase {
                 .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
     }
 
-    protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01", relasjon: String? = null): Person {
+    protected fun createAnnenPerson(fnr: String? = null,
+                                    rolle: Rolle? = Rolle.ETTERLATTE,
+                                    relasjon: String? = null): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
                     foedselsdato = "1962-07-18",
                     rolle = rolle,
-                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+                    relasjontilavdod = relasjon?.let { RelasjonTilAvdod(it) }
             )
         }
         val validFnr = Fodselsnummer.fra(fnr)
@@ -284,7 +289,7 @@ internal open class JournalforingTestBase {
                 validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
                 rolle = rolle,
-                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+                relasjontilavdod = relasjon?.let { RelasjonTilAvdod(it) }
         )
     }
 
@@ -304,8 +309,6 @@ internal open class JournalforingTestBase {
 
         return SED(
                 sedType,
-                sedGVer = "4",
-                sedVer = "2",
                 nav = Nav(
                         eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                         bruker = listOf(forsikretBruker),
@@ -318,7 +321,7 @@ internal open class JournalforingTestBase {
                                    fnr: String?,
                                    eessiSaknr: String? = null,
                                    gjenlevendeFnr: String? = null,
-                                   krav: String? = null,
+                                   krav: KravType? = null,
                                    relasjon: String? = null): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
@@ -333,8 +336,6 @@ internal open class JournalforingTestBase {
 
         return SED(
                 sedType,
-                sedGVer = "4",
-                sedVer = "2",
                 nav = Nav(
                         eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                         bruker = listOf(forsikretBruker),

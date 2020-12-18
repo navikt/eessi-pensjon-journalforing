@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.models.sed
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonValue
 
@@ -65,22 +64,15 @@ data class Person(
 
         val relasjontilavdod: RelasjonAvdodItem? = null, //5.2.5 P2100
 
-        val rolle: String? = null  //3.1 i P10000
+        val rolle: Rolle? = null  //3.1 i P10000
 ) {
         fun ident(): String? = pin?.firstOrNull { it.land == "NO" }?.identifikator
 }
 
 enum class Rolle(@JsonValue val kode: String) {
-        GJENLEVENDE("01"),
+        ETTERLATTE("01"),
         FORSORGER("02"),
-        BARN("04"),
-        ANNET("");
-
-        companion object {
-                @JvmStatic
-                @JsonCreator
-                fun fra(kode: String?): Rolle = values().firstOrNull { kode == it.kode } ?: ANNET
-        }
+        BARN("03");
 }
 
 //H121
@@ -100,8 +92,15 @@ data class Kontekst(
 
 data class Krav(
         val dato: String? = null,
-        val type: String? = null
+        val type: KravType? = null
 )
+
+@Suppress("unused") // val kode (jsonvalue) brukes av jackson
+enum class KravType(@JsonValue private val kode: String?) {
+        ALDER("01"),
+        ETTERLATTE("02"),
+        UFORE("03")
+}
 
 data class BarnItem(
         val mor: Person? = null,

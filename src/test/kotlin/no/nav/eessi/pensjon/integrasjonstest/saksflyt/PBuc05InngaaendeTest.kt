@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.sed.Rolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
@@ -41,7 +42,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 2 manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 03`() {
-        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_BARN, rolle = "03", sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_BARN, rolle = Rolle.BARN, sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
@@ -49,7 +50,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 2 manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 02`() {
-        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_VOKSEN, rolle = "02", sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
@@ -57,7 +58,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 3 manglende eller feil FNR-DNR - to personer angitt - etterlatte`() {
-        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_VOKSEN, rolle = "01", sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = FNR_VOKSEN, rolle = Rolle.ETTERLATTE, sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
@@ -65,7 +66,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 3 manglende eller feil FNR-DNR - to personer angitt - etterlatte med feil FNR for annen person, eller soker`() {
-        testRunnerFlerePersoner(fnr = FNR_VOKSEN_2, fnrAnnenPerson = null, rolle = "01", sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(fnr = FNR_VOKSEN_2, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = SAK_ID, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
@@ -109,13 +110,13 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 to personer angitt, gyldig fnr, rolle er 03, bosatt norge`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "03", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             assertEquals(FNR_OVER_60, it.bruker!!.id)
         }
 
-        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = "03", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             assertEquals(FNR_VOKSEN, it.bruker!!.id)
@@ -124,13 +125,13 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 to personer angitt, gyldig fnr, rolle er 02, bosatt norge`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             assertEquals(FNR_OVER_60, it.bruker!!.id)
         }
 
-        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             assertEquals(FNR_VOKSEN, it.bruker!!.id)
@@ -139,13 +140,13 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 to personer angitt, gyldig fnr, rolle er 03, bosatt utland`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "03", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.BARN, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             assertEquals(FNR_OVER_60, it.bruker!!.id)
         }
 
-        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = "03", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             assertEquals(FNR_VOKSEN, it.bruker!!.id)
@@ -154,13 +155,13 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 5 to personer angitt, gyldig fnr, rolle er 02, bosatt utland`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             assertEquals(FNR_OVER_60, it.bruker!!.id)
         }
 
-        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             assertEquals(FNR_VOKSEN, it.bruker!!.id)
@@ -171,7 +172,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
     inner class Scenario5 {
         @Test
         fun `2 personer angitt, gyldig fnr og ugyldig annenperson, rolle er 02, bosatt utland del 1`() {
-            initSed(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null))
+            initSed(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initDokumenter(getMockDocuments())
 
             initMockPerson(FNR_OVER_60, aktoerId = AKTOER_ID, land = "SWE")
@@ -190,7 +191,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt utland del 2`() {
             val valgtFNR = FNR_VOKSEN
-            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null))
+            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initDokumenter(getMockDocuments())
 
             initMockPerson(valgtFNR, aktoerId = AKTOER_ID, land = "SWE")
@@ -209,7 +210,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 3`() {
             val valgtFNR = FNR_VOKSEN
-            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null))
+            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initDokumenter(getMockDocuments())
 
             initMockPerson(valgtFNR, aktoerId = AKTOER_ID)
@@ -228,7 +229,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "02"), null))
+            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initDokumenter(getMockDocuments())
 
             initMockPerson(valgtFNR, aktoerId = AKTOER_ID)
@@ -247,7 +248,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = "01"), null))
+            initSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
             initDokumenter(getMockDocuments())
 
             initMockPerson(valgtFNR, aktoerId = AKTOER_ID)
@@ -266,12 +267,12 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 6 - To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt norge`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
@@ -279,12 +280,12 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 6 - To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt utland`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
 
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = "02", sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
