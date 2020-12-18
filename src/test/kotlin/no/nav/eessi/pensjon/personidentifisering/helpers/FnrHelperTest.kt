@@ -7,9 +7,12 @@ import no.nav.eessi.pensjon.DummySed.Companion.createP2100
 import no.nav.eessi.pensjon.DummySed.Companion.createP5000
 import no.nav.eessi.pensjon.DummySed.Companion.createP8000
 import no.nav.eessi.pensjon.DummySed.Companion.createR005
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -51,7 +54,7 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 // P2100 som mangler norsk fnr
-                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "01"),
+                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 createP2000(forsikretFnr = forventetFnr)
         ))
 
@@ -66,9 +69,9 @@ internal class FnrHelperTest {
         val forventetFnr = KRAFTIG_VEGGPRYD
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 // P2100 som mangler norsk fnr
-                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "01"),
+                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 // P15000 som mangler gyldig gjenlevende fnr, med krav = ALDER
-                createP15000(forsikretFnr = forventetFnr, gjenlevFnr = "1234", krav = KravType.ALDER, relasjon = "01")
+                createP15000(forsikretFnr = forventetFnr, gjenlevFnr = "1234", krav = KravType.ALDER, relasjon = RelasjonTilAvdod.EKTEFELLE)
         ))
 
         assertEquals(1, actual.size)
@@ -79,9 +82,9 @@ internal class FnrHelperTest {
     fun `leter igjennom beste Sed paa valgt buc P15000 gjenlevende etter norsk personnr`() {
         val actual = helper.getPotensielleFnrFraSeder(listOf(
                 // P2100 som mangler norsk fnr
-                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "01"),
+                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 // P15000 som mangler gyldig gjenlevende fnr, med krav = GJENLEV
-                createP15000(forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", krav = KravType.ETTERLATTE, relasjon = "01")
+                createP15000(forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", krav = KravType.ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE)
         ))
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
@@ -204,8 +207,8 @@ internal class FnrHelperTest {
         val gjenlevFnr = LEALAUS_KAKE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = "03"),
-                createP5000(forsikretFnr = "25105424704", gjenlevFnr = gjenlevFnr, relasjon = "02"),
+                createP2100(forsikretFnr = null, gjenlevFnr = null, relasjon = RelasjonTilAvdod.SAMBOER),
+                createP5000(forsikretFnr = "25105424704", gjenlevFnr = gjenlevFnr, relasjon = RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP),
                 createP8000(forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, rolle = Rolle.ETTERLATTE)
         ))
 
@@ -226,7 +229,7 @@ internal class FnrHelperTest {
         val gjenlevFnr = LEALAUS_KAKE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-                createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = "01"),
+                createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 createP5000(forsikretFnr, gjenlevFnr)
         ))
 
@@ -280,10 +283,11 @@ internal class FnrHelperTest {
 
         @ParameterizedTest
         @ValueSource(strings = ["06", "07", "08", "09"])
-        fun `SedType P2100 henter gjenlevende relasjoner, har relasjonTilAvdod barn`(relasjon: String) {
+        fun `SedType P2100 henter gjenlevende relasjoner, har relasjonTilAvdod barn`(relasjonKode: String) {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
+            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(createP2100(forsikretFnr, gjenlevFnr, relasjon))
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
@@ -299,10 +303,11 @@ internal class FnrHelperTest {
 
         @ParameterizedTest
         @ValueSource(strings = ["01", "02", "03", "04", "05"])
-        fun `SedType P2100 henter gjenlevende relasjoner, har annen relasjonTilAvdod`(relasjon: String) {
+        fun `SedType P2100 henter gjenlevende relasjoner, har annen relasjonTilAvdod`(relasjonKode: String) {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
+            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(createP2100(forsikretFnr, gjenlevFnr, relasjon))
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
@@ -349,10 +354,11 @@ internal class FnrHelperTest {
 
         @ParameterizedTest
         @ValueSource(strings = ["06", "07", "08", "09"])
-        fun `SedType P15000 henter gjenlevende hvis krav er 02, relasjon barn`(relasjon: String) {
+        fun `SedType P15000 henter gjenlevende hvis krav er 02, relasjon barn`(relasjonKode: String) {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
+            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(
                     createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = relasjon)
             )
@@ -377,10 +383,11 @@ internal class FnrHelperTest {
 
         @ParameterizedTest
         @ValueSource(strings = ["01", "02", "03", "04", "05"])
-        fun `SedType P15000 henter gjenlevende hvis krav er 02, annen relasjon`(relasjon: String) {
+        fun `SedType P15000 henter gjenlevende hvis krav er 02, annen relasjon`(relasjonKode: String) {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
+            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(
                     createP15000(forsikretFnr, gjenlevFnr, KravType.ETTERLATTE, relasjon = relasjon)
             )

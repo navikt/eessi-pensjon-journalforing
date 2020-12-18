@@ -35,6 +35,7 @@ import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.PinItem
+import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
@@ -275,12 +276,12 @@ internal open class JournalforingTestBase {
 
     protected fun createAnnenPerson(fnr: String? = null,
                                     rolle: Rolle? = Rolle.ETTERLATTE,
-                                    relasjon: String? = null): Person {
+                                    relasjon: RelasjonTilAvdod? = null): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
                     foedselsdato = "1962-07-18",
                     rolle = rolle,
-                    relasjontilavdod = relasjon?.let { RelasjonTilAvdod(it) }
+                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
             )
         }
         val validFnr = Fodselsnummer.fra(fnr)
@@ -289,7 +290,7 @@ internal open class JournalforingTestBase {
                 validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
                 rolle = rolle,
-                relasjontilavdod = relasjon?.let { RelasjonTilAvdod(it) }
+                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
         )
     }
 
@@ -322,7 +323,7 @@ internal open class JournalforingTestBase {
                                    eessiSaknr: String? = null,
                                    gjenlevendeFnr: String? = null,
                                    krav: KravType? = null,
-                                   relasjon: String? = null): SED {
+                                   relasjon: RelasjonTilAvdod? = null): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = SedBruker(

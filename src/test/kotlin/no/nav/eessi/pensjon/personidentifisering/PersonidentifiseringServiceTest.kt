@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
@@ -99,7 +100,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
 
-        val sed = DummySed.createP2100(forsikretFnr = null, gjenlevFnr = "05127921999", relasjon = "01")
+        val sed = DummySed.createP2100(forsikretFnr = null, gjenlevFnr = "05127921999", relasjon = RelasjonTilAvdod.EKTEFELLE)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_02, SedType.H070)
         val expected = PersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P2100)
         assertEquals(expected, actual?.personRelasjon)
@@ -214,7 +215,7 @@ class PersonidentifiseringServiceTest {
                 .hentPerson(eq(navBruker))
 
         val sedListe = listOf(
-                createP2100(forsikretFnr = navBruker, gjenlevFnr = gjenlevende, relasjon = "01"),
+                createP2100(forsikretFnr = navBruker, gjenlevFnr = gjenlevende, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 createP6000(forsikretFnr = navBruker, gjenlevFnr = gjenlevende)
         )
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(sedListe)

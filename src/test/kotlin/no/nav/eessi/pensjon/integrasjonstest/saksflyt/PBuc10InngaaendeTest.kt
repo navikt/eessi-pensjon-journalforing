@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
@@ -213,7 +214,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
     @Test
     fun `Scenario 4  - Flere sed i buc, mottar en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
         initSed(
-                createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KravType.ETTERLATTE, relasjon = "01"),
+                createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KravType.ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE),
                 createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_VOKSEN_2, eessiSaknr = SAK_ID)
         )
         initSaker(AKTOER_ID_2,
@@ -247,7 +248,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                            land: String = "NOR",
                            krav: KravType = KravType.ALDER,
                            alleDocs: List<Document>,
-                           relasjonAvdod: String? = "06",
+                           relasjonAvdod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
                            block: (OpprettJournalpostRequest) -> Unit
     ) {
 

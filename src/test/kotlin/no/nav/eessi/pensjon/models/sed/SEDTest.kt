@@ -27,7 +27,7 @@ internal class SEDTest {
         assertEquals("NO", annenPerson.pin!![0].land)
 
         assertEquals("1953-07-08", annenPerson.foedselsdato)
-        assertEquals("01", annenPerson.rolle)
+        assertEquals(Rolle.ETTERLATTE, annenPerson.rolle)
         assertNull(annenPerson.relasjontilavdod)
     }
 

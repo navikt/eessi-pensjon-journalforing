@@ -124,8 +124,7 @@ class FnrHelper {
                 return
             }
 
-            val gyldigeBarn = listOf("06", "07", "08", "09")
-            if (gyldigeBarn.contains(gjenlevendeRelasjon)) {
+            if (gjenlevendeRelasjon.erGjenlevendeBarn()) {
                 fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, YtelseType.BARNEP, sedType = sed.type))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
             } else {
