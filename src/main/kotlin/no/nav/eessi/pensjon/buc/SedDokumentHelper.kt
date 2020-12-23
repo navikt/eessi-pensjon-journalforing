@@ -63,10 +63,23 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
     private fun filterYtelseTypeR005(sed: SED): YtelseType {
         val type = sed.tilbakekreving?.feilutbetaling?.ytelse?.type
 
+        /*
+        eux-acl - /codes/mapping/tilbakekrevingfeilutbetalingytelsetypekoder.properties
+        uførepensjon=01
+        alderspensjon=02
+        etterlattepensjon_enke=03
+        etterlattepensjon_enkemann=04
+        barnepensjon=05
+        andre_former_for_etterlattepensjon=99
+        */
+
+        logger.info("Henter ytelse fra R005: $type")
+
         return when (type) {
             "alderspensjon" -> YtelseType.ALDER
             "uførepensjon" -> YtelseType.UFOREP
             "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> YtelseType.GJENLEV
+            "barnepensjon" -> YtelseType.BARNEP
             else -> throw RuntimeException("Klarte ikke å finne ytelsetype for R_BUC_02")
         }
     }
