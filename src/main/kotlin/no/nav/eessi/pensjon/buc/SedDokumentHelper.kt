@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -18,20 +19,27 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
 
+
     private val validSedtype = listOf("P2000", "P2100", "P2200", "P1000", "P4000",
             "P5000", "P6000", "P7000", "P8000", "P9000",
             "P10000", "P1100", "P11000", "P12000", "P14000", "P15000", "H070", "R005")
 
-    fun hentAlleSedIBuc(rinaSakId: String): List<SED> {
+    fun hentAlleGydligeDokumenter(rinaSakId: String): List<Document> {
         return fagmodulKlient.hentAlleDokumenter(rinaSakId)
-                .filter { it.validStatus() }
-                .filter { doc -> doc.type?.name in validSedtype }
-                .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
+            .filter { doc -> doc.type?.name in validSedtype }
     }
 
-    fun validatHendelseDocument(sedHendelse: SedHendelseModel) {
-        euxKlient.hentSed(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+    fun hentAlleSedIBuc(rinaSakId: String, documents: List<Document>): List<SED> {
+        return documents
+            .filter { it.validStatus() }
+            .mapNotNull { sed -> euxKlient.hentSed(rinaSakId , sed.id) }
     }
+
+    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<Document>): List<SED?> {
+            return documents
+                .filter { it.cancelledStatus() }
+                .mapNotNull { sed -> euxKlient.hentSed(rinaSakId , sed.id) }
+        }
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed

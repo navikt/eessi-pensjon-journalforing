@@ -174,7 +174,7 @@ class PersonidentifiseringServiceTest {
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
         val alleSediBuc = listOf(sed)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, alleSediBuc, BucType.P_BUC_06, SedType.H070)
-        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed))
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed), emptyList())
         assertEquals("1958-07-11", fdato.toString())
     }
 
@@ -191,7 +191,7 @@ class PersonidentifiseringServiceTest {
         val sed2 = sedFromJsonFile("/buc/P10000-superenkel.json")
         val alleSediBuc = listOf(sed1, sed2)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, alleSediBuc, BucType.P_BUC_06, SedType.H070)
-        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed2, sed1))
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed2, sed1), emptyList())
 
         assertEquals("1973-11-22", fdato.toString())
         assertEquals(forventetFnr, actual?.personRelasjon?.fnr!!.value)
@@ -295,7 +295,7 @@ class PersonidentifiseringServiceTest {
                 FnrHelper())
 
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
-        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed))
+        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed), emptyList())
 
         assertEquals("1958-07-11", actual.toString())
     }
@@ -305,7 +305,7 @@ class PersonidentifiseringServiceTest {
         val sed1 = sedFromJsonFile("/buc/P10000-enkel.json")
         val sed2 = sedFromJsonFile("/buc/P2000-NAV.json")
 
-        val actual = personidentifiseringService.hentFodselsDato(null, listOf(sed2, sed1))
+        val actual = personidentifiseringService.hentFodselsDato(null, listOf(sed2, sed1), emptyList())
         assertEquals("1980-01-01", actual.toString())
     }
 
