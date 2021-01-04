@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.verify
+import io.mockk.verifyAll
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
@@ -23,6 +24,7 @@ import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,6 +71,17 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, it.request.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.request.journalfoerendeEnhet)
             }
+
+            verifyAll {
+                euxKlient.hentSed(any(), any())
+                euxKlient.hentSedDokumenter(any(), any())
+                personV3Service.hentPerson(FNR_OVER_60)
+                aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>())
+                bestemSakKlient.kallBestemSak(any())
+                fagmodulKlient.hentAlleDokumenter(any())
+                journalpostKlient.opprettJournalpost(any(), any())
+                journalpostKlient.oppdaterDistribusjonsinfo(any())
+            }
         }
     }
 
@@ -91,18 +104,56 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om uføretrygd - sakstatus AVSLUTTET - AUTOMATISK_JOURNALFORING`() {
-            initSed(createSedPensjon(SedType.P15000, FNR_VOKSEN_2, eessiSaknr = SAK_ID, krav = KravType.UFORE))
-            initBestemSak(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET))
-            initDokumenter(Document("10001212", SedType.P15000, DocStatus.SENT))
-            initMockPerson(FNR_VOKSEN_2, aktoerId = AKTOER_ID)
+            val sendtP15000 = TestScope(HendelseType.SENDT, SedType.P15000, BucType.P_BUC_10)
 
-            consumeAndAssert(HendelseType.SENDT, SedType.P15000, BucType.P_BUC_10, ferdigstilt = true) {
-                assertEquals(UFORETRYGD, it.request.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, it.request.journalfoerendeEnhet)
-                assertEquals(FNR_VOKSEN_2, it.request.bruker?.id)
-            }
+            val result = sendtP15000.runTest(
+                    sed = createSedPensjon(SedType.P15000, FNR_VOKSEN_2, eessiSaknr = SAK_ID, krav = KravType.UFORE),
+                    bestemSakSaker = listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)),
+                    dokumenter = listOf(Document("10001212", SedType.P15000, DocStatus.SENT)),
+                    person = TestPerson(Fodselsnummer.fra(FNR_VOKSEN_2), AktoerId(AKTOER_ID), "NOR"),
+                    ferdigstilt = true
+            )
+
+            assertNull(result.melding)
+
+            assertEquals(UFORETRYGD, result.request.tema)
+            assertEquals(AUTOMATISK_JOURNALFORING, result.request.journalfoerendeEnhet)
+            assertEquals(FNR_VOKSEN_2, result.request.bruker?.id)
         }
     }
+
+    private inner class TestScope(
+            val hendelseType: HendelseType,
+            val sedType: SedType,
+            val bucType: BucType
+    ) {
+
+        fun runTest(
+                sed: SED,
+                bestemSakSaker: List<SakInformasjon>,
+                dokumenter: List<Document>,
+                person: TestPerson?,
+                ferdigstilt: Boolean = false
+        ): TestResult {
+
+            initSed(sed)
+            initBestemSak(bestemSakSaker)
+            initDokumenter(dokumenter)
+
+            if (person?.fnr != null)
+                initMockPerson(person.fnr.value, aktoerId = person.aktoerId?.id, land = person.land)
+
+            return consume(
+                    hendelseType = this.hendelseType,
+                    sedType = this.sedType,
+                    bucType = this.bucType,
+                    hendelseFnr = person?.fnr?.value,
+                    ferdigstilt = ferdigstilt
+            )
+        }
+    }
+
+    inner class TestPerson(val fnr: Fodselsnummer?, val aktoerId: AktoerId?, val land: String)
 
 
     @Nested
@@ -287,15 +338,29 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario9 {
 
         @Test
+        fun `mangler som fører til manuell oppgave - etterlatteytelser - mangler gjenlev`() {
+            initSed(createSedPensjon(SedType.P15000, fnr = FNR_VOKSEN, krav = KravType.ETTERLATTE))
+
+            initDokumenter(Document("10001212", SedType.P15000, DocStatus.SENT))
+
+            initMockPerson(fnr = FNR_VOKSEN, aktoerId = AKTOER_ID)
+
+            consumeAndAssert(HendelseType.SENDT, SedType.P15000, BucType.P_BUC_10) {
+                assertEquals(PENSJON, it.request.tema)
+                assertEquals(ID_OG_FORDELING, it.request.journalfoerendeEnhet)
+            }
+
+            verifyAll {
+                personV3Service.hentPerson(FNR_VOKSEN)
+                aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN))
+            }
+        }
+
+        @Test
         fun `mangler som fører til manuell oppgave - etterlatteytelser`() {
             val allDocuemtActions = listOf(
                     Document("10001212", SedType.P15000, DocStatus.SENT)
             )
-
-            testRunner(FNR_VOKSEN, null, krav = KravType.ETTERLATTE, alleDocs = allDocuemtActions) {
-                assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-            }
 
             testRunner(FNR_VOKSEN, FNR_BARN, krav = KravType.ETTERLATTE, alleDocs = allDocuemtActions, relasjonAvod = null) {
                 assertEquals(PENSJON, it.tema)

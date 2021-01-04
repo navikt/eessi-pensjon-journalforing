@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -10,8 +11,6 @@ import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
@@ -64,7 +63,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
 import no.nav.eessi.pensjon.models.sed.Bruker as SedBruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent as PersonV3NorskIdent
@@ -84,39 +82,34 @@ internal open class JournalforingTestBase {
     }
 
     protected val euxKlient: EuxKlient = mockk()
+    protected val personV3Service: PersonV3Service = mockk()
+    protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
+    protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true, relaxUnitFun = true)
+    protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
+    protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
+
+    private val oppgaveHandler: OppgaveHandler = mockk(relaxed = true, relaxUnitFun = true)
     private val norg2Klient: Norg2Klient = mockk(relaxed = true)
 
-    private val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
+    private val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
 
-    private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
-    private val pdfService: PDFService = PDFService()
+    private val journalpostService = JournalpostService(journalpostKlient)
+    private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
+    private val bestemSakService = BestemSakService(bestemSakKlient)
+    private val pdfService = PDFService()
 
-    protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
-        every { sendDefault(any(), any()).get() } returns mockk()
-    }
+    private val personidentifiseringService = PersonidentifiseringService(
+            aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
+    )
 
-    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
-    private val journalforingService: JournalforingService = JournalforingService(
+    private val journalforingService = JournalforingService(
             euxKlient = euxKlient,
             journalpostService = journalpostService,
             oppgaveRoutingService = oppgaveRoutingService,
             pdfService = pdfService,
             oppgaveHandler = oppgaveHandler
     )
-
-    protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
-    protected val personV3Service: PersonV3Service = mockk()
-    private val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
-
-    private val personidentifiseringService = PersonidentifiseringService(
-            aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
-    )
-
-    protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
-    protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
-    private val bestemSakService = BestemSakService(bestemSakKlient)
 
     protected val listener: SedListener = SedListener(
             journalforingService = journalforingService,
@@ -134,12 +127,16 @@ internal open class JournalforingTestBase {
         listener.initMetrics()
         journalforingService.initMetrics()
         pdfService.initMetrics()
-        oppgaveHandler.initMetrics()
-        bestemSakKlient.initMetrics()
+//        oppgaveHandler.initMetrics()
+//        bestemSakKlient.initMetrics()
     }
 
     @AfterEach
     fun after() {
+        confirmVerified(
+                euxKlient, personV3Service, fagmodulKlient, bestemSakKlient,
+                aktoerregisterService, journalpostKlient, norg2Klient, oppgaveHandler
+        )
         clearAllMocks()
     }
 
@@ -235,25 +232,13 @@ internal open class JournalforingTestBase {
 
         initSaker(AKTOER_ID, saker)
 
-//        val (journalpost, _) = initJournalPostRequestSlot(true)
-//
-//        val hendelse = createHendelseJson(SedType.P8000)
-//
-//        val meldingSlot = slot<String>()
-//        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-//
-//        if (hendelseType == HendelseType.SENDT)
-//            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-//        else
-//            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-//
-//        assertBlock(journalpost.captured)
-//
         consumeAndAssert(hendelseType, SedType.P8000, BucType.P_BUC_05) {
-            verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
-            verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
+            assertBlock(it.request)
         }
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
@@ -346,7 +331,7 @@ internal open class JournalforingTestBase {
         )
     }
 
-    private fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
+    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
         return """
             {
               "id": 1869,
@@ -381,23 +366,22 @@ internal open class JournalforingTestBase {
     * TODO: Finish new variant of simplification
     */
 
-    protected fun consumeAndAssert(hendelseType: HendelseType,
-                                   sedType: SedType,
-                                   bucType: BucType,
-                                   hendelseFnr: String? = null,
-                                   ferdigstilt: Boolean = false,
-                                   assertBlock: (TestScope) -> Unit
-    ) {
+    protected fun consume(hendelseType: HendelseType,
+                          sedType: SedType,
+                          bucType: BucType,
+                          hendelseFnr: String? = null,
+                          ferdigstilt: Boolean = false
+    ): TestResult {
         // SLOTS
-        val meldingSlot = slot<String>()
-        val request = slot<OpprettJournalpostRequest>()
+        val meldingSlot = slot<OppgaveMelding>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
 
         // RESPONSE
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         // MISC MOCK RETURNS
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-        every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
+        every { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(meldingSlot)) } returns mockk()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns journalpostResponse
 
         // SED HENDELSE
         val hendelseJson = createHendelseJson(sedType, bucType, forsikretFnr = hendelseFnr)
@@ -413,11 +397,52 @@ internal open class JournalforingTestBase {
             null
         } else {
 //            verify(exactly = 0) { journalpostService.oppdaterDistribusjonsinfo(any()) }
-            mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            meldingSlot.captured
         }
 
         // Lagre Request, Response, og OppgaveMelding i et objekt for validering
-        assertBlock(TestScope(request.captured, journalpostResponse, oppgaveMelding))
+        return TestResult(requestSlot.captured, journalpostResponse, oppgaveMelding)
+    }
+
+    protected fun consumeAndAssert(hendelseType: HendelseType,
+                                   sedType: SedType,
+                                   bucType: BucType,
+                                   hendelseFnr: String? = null,
+                                   ferdigstilt: Boolean = false,
+                                   assertBlock: (TestResult) -> Unit
+    ) {
+        // SLOTS
+        val meldingSlot = slot<OppgaveMelding>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
+
+        // RESPONSE
+        val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
+
+        // MISC MOCK RETURNS
+        every { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(meldingSlot)) } returns mockk()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns journalpostResponse
+
+        // SED HENDELSE
+        val hendelseJson = createHendelseJson(sedType, bucType, forsikretFnr = hendelseFnr)
+        if (hendelseType == HendelseType.SENDT) {
+            listener.consumeSedSendt(hendelseJson, mockk(relaxed = true), mockk(relaxed = true))
+        } else {
+            listener.consumeSedMottatt(hendelseJson, mockk(relaxed = true), mockk(relaxed = true))
+        }
+
+        // TODO: Verify
+        val oppgaveMelding = if (ferdigstilt) {
+//            verify(exactly = 1) { journalpostService.oppdaterDistribusjonsinfo(any()) }
+            null
+        } else {
+//            verify(exactly = 0) { journalpostService.oppdaterDistribusjonsinfo(any()) }
+            meldingSlot.captured
+        }
+
+        // Lagre Request, Response, og OppgaveMelding i et objekt for validering
+        assertBlock(TestResult(requestSlot.captured, journalpostResponse, oppgaveMelding))
+
+//        confirmVerified(fagmodulKlient, personV3Service, aktoerregisterService, euxKlient, bestemSakKlient)
     }
 
     protected fun initSaker(aktoerId: String, saker: List<SakInformasjon>) {
@@ -428,8 +453,12 @@ internal open class JournalforingTestBase {
         every { fagmodulKlient.hentPensjonSaklist(aktoerId) } returns sak.asList()
     }
 
+    protected fun initBestemSak(saker: List<SakInformasjon>) {
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, saker)
+    }
+
     protected fun initBestemSak(vararg sak: SakInformasjon) {
-        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, sak.asList())
+        every { bestemSakKlient.kallBestemSak(any()) } returns BestemSakResponse(null, sak.toList())
     }
 
     protected fun initMockPerson(fnr: String,
@@ -442,10 +471,8 @@ internal open class JournalforingTestBase {
         every { diskresjonService.hentDiskresjonskode(any()) } returns diskresjonskode
     }
 
-    protected fun initSed(sed: SED, vararg andreSeds: SED) {
-        every { euxKlient.hentSed(any(), any()) }
-                .returns(sed)
-                .run { andreSeds.forEach { andThen(it) } }
+    protected fun initSed(vararg sed: SED) {
+        every { euxKlient.hentSed(any(), any()) } returnsMany sed.toList()
     }
 
     protected fun initDokumenter(vararg dokument: Document) {
@@ -461,7 +488,8 @@ internal open class JournalforingTestBase {
     protected fun getResource(resourcePath: String): String =
             javaClass.getResource(resourcePath).readText()
 
-    protected inner class TestScope(
+    // Result != Scope
+    protected inner class TestResult(
             val request: OpprettJournalpostRequest,
             val response: OpprettJournalPostResponse, // TODO: remove?
             val melding: OppgaveMelding?

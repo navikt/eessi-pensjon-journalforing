@@ -46,6 +46,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         }
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 

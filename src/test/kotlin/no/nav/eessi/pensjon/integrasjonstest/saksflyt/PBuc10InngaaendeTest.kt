@@ -255,9 +255,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         initSed(createSedPensjon(SedType.P15000, forsikretFnr, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = gjenlevFnr, relasjon = relasjonAvdod))
         initDokumenter(alleDocs)
 
-        if (forsikretFnr != null) initMockPerson(forsikretFnr, aktoerId = AKTOER_ID, land = land)
+        forsikretFnr?.let { initMockPerson(it, aktoerId = AKTOER_ID, land = land) }
 
-        if (gjenlevFnr != null) initMockPerson(gjenlevFnr, aktoerId = AKTOER_ID_2, land = land)
+        gjenlevFnr?.let { initMockPerson(it, aktoerId = AKTOER_ID_2, land = land) }
 
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 

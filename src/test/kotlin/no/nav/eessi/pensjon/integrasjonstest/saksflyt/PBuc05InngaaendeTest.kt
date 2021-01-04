@@ -186,6 +186,9 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentSedDokumenter(any(), any()) }
+            verify(exactly = 1) { personV3Service.hentPerson(FNR_OVER_60) }
+            verify(exactly = 1) { personV3Service.hentPerson(FNR_BARN) }
         }
 
         @Test
@@ -205,6 +208,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentSedDokumenter(any(), any()) }
         }
 
         @Test
@@ -224,6 +228,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentSedDokumenter(any(), any()) }
         }
 
         @Test
@@ -243,6 +248,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentSedDokumenter(any(), any()) }
         }
 
         @Test
@@ -262,6 +268,7 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
             verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentSedDokumenter(any(), any()) }
         }
     }
 
