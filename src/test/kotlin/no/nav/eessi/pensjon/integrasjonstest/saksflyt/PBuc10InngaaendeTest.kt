@@ -20,6 +20,8 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -34,9 +36,9 @@ import org.junit.jupiter.api.Test
 internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
     companion object {
-        private const val KRAV_ALDER = "01"
-        private const val KRAV_UFORE = "03"
-        private const val KRAV_GJENLEV = "02"
+        private val KRAV_ALDER = KravType.ALDER
+        private val KRAV_UFORE = KravType.UFORE
+        private val KRAV_GJENLEV = KravType.ETTERLATTE
     }
 
     @Nested
@@ -269,7 +271,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 4  - Flere sed i buc, mottar en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-        val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KRAV_GJENLEV, relasjon = "01")
+        val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = KRAV_GJENLEV, relasjon = RelasjonTilAvdod.EKTEFELLE)
         val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_VOKSEN_2, eessiSaknr = SAK_ID)
 
         val saker = listOf(
@@ -316,9 +318,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                                bestemSak: BestemSakResponse? = null,
                                sakId: String? = SAK_ID,
                                land: String = "NOR",
-                               krav: String = KRAV_ALDER,
+                               krav: KravType = KravType.ALDER,
                                alleDocs: List<Document>,
-                               relasjonAvod: String? = "06",
+                               relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
@@ -364,7 +366,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                            bestemSak: BestemSakResponse? = null,
                            sakId: String? = SAK_ID,
                            land: String = "NOR",
-                           krav: String = KRAV_ALDER,
+                           krav: KravType = KravType.ALDER,
                            alleDocs: List<Document>,
                            block: (OpprettJournalpostRequest) -> Unit
     ) {

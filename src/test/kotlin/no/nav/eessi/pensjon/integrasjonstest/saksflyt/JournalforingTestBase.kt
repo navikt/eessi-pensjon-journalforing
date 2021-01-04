@@ -31,11 +31,14 @@ import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Krav
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.Person
 import no.nav.eessi.pensjon.models.sed.PinItem
 import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -162,7 +165,7 @@ internal open class JournalforingTestBase {
             sakId: String? = SAK_ID,
             diskresjonkode: Diskresjonskode? = null,
             land: String = "NOR",
-            rolle: String?,
+            rolle: Rolle?,
             hendelseType: HendelseType = HendelseType.SENDT,
             assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
@@ -179,7 +182,7 @@ internal open class JournalforingTestBase {
             every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
         }
 
-        if (rolle == "01")
+        if (rolle == Rolle.ETTERLATTE)
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
         else
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
@@ -209,7 +212,7 @@ internal open class JournalforingTestBase {
 
         val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
         val antallKallIdent = if (antallPersoner == 0) 0
-        else antallPersoner - (1.takeIf { rolle == "01" } ?: 0)
+        else antallPersoner - (1.takeIf { rolle == Rolle.ETTERLATTE } ?: 0)
         verify(exactly = antallKallIdent) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
 
 
@@ -316,7 +319,9 @@ internal open class JournalforingTestBase {
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPerson(fnr: String? = null, rolle: String? = "01", relasjon: String? = null): Person {
+    protected fun createAnnenPerson(fnr: String? = null,
+                                    rolle: Rolle? = Rolle.ETTERLATTE,
+                                    relasjon: RelasjonTilAvdod? = null): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
                     foedselsdato = "1962-07-18",
@@ -360,8 +365,8 @@ internal open class JournalforingTestBase {
                                    fnr: String?,
                                    eessiSaknr: String? = null,
                                    gjenlevendeFnr: String? = null,
-                                   krav: String? = null,
-                                   relasjon: String? = null): SED {
+                                   krav: KravType? = null,
+                                   relasjon: RelasjonTilAvdod? = null): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = SedBruker(

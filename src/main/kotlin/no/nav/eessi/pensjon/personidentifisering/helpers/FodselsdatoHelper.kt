@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -45,7 +47,7 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: SED): String? {
-            return if (sed.nav?.krav?.type == "02") filterGjenlevendeFodselsdato(sed)
+            return if (sed.nav?.krav?.type == KravType.ETTERLATTE) filterGjenlevendeFodselsdato(sed)
             else filterPersonFodselsdato(sed)
         }
 
@@ -67,7 +69,7 @@ class FodselsdatoHelper {
          */
         private fun filterAnnenPersonFodselsdato(sed: SED): String? {
             val annenPerson = sed.nav?.annenperson ?: return null
-            if (annenPerson.person?.rolle != "01") return null
+            if (annenPerson.person?.rolle != Rolle.ETTERLATTE) return null
 
             return annenPerson.person.foedselsdato
         }

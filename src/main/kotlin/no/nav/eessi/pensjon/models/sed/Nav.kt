@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.models.sed
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonValue
 
 data class Nav(
         @JsonFormat(with = [JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
@@ -63,9 +64,15 @@ data class Person(
 
         val relasjontilavdod: RelasjonAvdodItem? = null, //5.2.5 P2100
 
-        val rolle: String? = null  //3.1 i P10000
+        val rolle: Rolle? = null  //3.1 i P10000
 ) {
         fun ident(): String? = pin?.firstOrNull { it.land == "NO" }?.identifikator
+}
+
+enum class Rolle(@JsonValue val kode: String) {
+        ETTERLATTE("01"),
+        FORSORGER("02"),
+        BARN("03");
 }
 
 //H121
@@ -85,8 +92,15 @@ data class Kontekst(
 
 data class Krav(
         val dato: String? = null,
-        val type: String? = null
+        val type: KravType? = null
 )
+
+@Suppress("unused") // val kode (jsonvalue) brukes av jackson
+enum class KravType(@JsonValue private val kode: String?) {
+        ALDER("01"),
+        ETTERLATTE("02"),
+        UFORE("03")
+}
 
 data class BarnItem(
         val mor: Person? = null,
@@ -110,10 +124,25 @@ data class PinLandItem(
         val kompetenteuland: String? = null
 )
 
-data class RelasjonAvdodItem(
-        // TODO: Create enum values?
-        val relasjon: String? = null
-)
+data class RelasjonAvdodItem(val relasjon: RelasjonTilAvdod?)
+
+@Suppress("unused")
+enum class RelasjonTilAvdod(@JsonValue private val kode: String?) {
+        EKTEFELLE("01"),
+        PART_I_ET_REGISTRERT_PARTNERSKAP("02"),
+        SAMBOER("03"),
+        TIDLIGERE_EKTEFELLE("04"),
+        TIDLIGERE_PARTNER_I_ET_REGISTRERT_PARTNERSKAP("05"),
+        EGET_BARN("06"),
+        ADOPTIVBARN("07"),
+        FOSTERBARN("08"),
+        STEBARN("09"),
+        BARNEBARN("10"),
+        SØSKEN("11"),
+        ANNEN_SLEKTNING("12");
+
+        fun erGjenlevendeBarn(): Boolean = this in listOf(EGET_BARN, ADOPTIVBARN, FOSTERBARN, STEBARN)
+}
 
 data class PinItem(
         val institusjonsnavn: String? = null,

@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
@@ -41,7 +42,7 @@ internal class PBuc05Test : JournalforingTestBase() {
 
     @Test
     fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
-        val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = "01"), null)
+        val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null)
         every { euxKlient.hentSed(any(), any()) } returns sed
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns getMockDocuments()
@@ -82,9 +83,9 @@ internal class PBuc05Test : JournalforingTestBase() {
         val aktoerf = "${fnr}0000"
         val saknr = "1223123123"
 
-        val sedP8000_2 = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = "01"), saknr)
-        val sedP8000sendt = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = "01"), saknr)
-        val sedP8000recevied = createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = "01"), null)
+        val sedP8000_2 = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr)
+        val sedP8000sendt = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr)
+        val sedP8000recevied = createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null)
 
         val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<Document>>())
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns dokumenter
