@@ -7,8 +7,8 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -36,11 +36,11 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             .mapNotNull { sed -> euxKlient.hentSed(rinaSakId , sed.id) }
     }
 
-    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<Document>): List<SED?> {
-            return documents
+    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<Document>): List<SED> {
+        return documents
                 .filter { it.cancelledStatus() }
-                .mapNotNull { sed -> euxKlient.hentSed(rinaSakId , sed.id) }
-        }
+                .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
+    }
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): YtelseType? {
         //hent ytelsetype fra R_BUC_02 - R005 sed
