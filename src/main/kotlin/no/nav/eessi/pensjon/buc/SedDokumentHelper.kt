@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -53,8 +54,8 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
             val sed = alleSedIBuc.firstOrNull { it.type == SedType.P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
-                    "02" -> YtelseType.GJENLEV
-                    "03" -> YtelseType.UFOREP
+                    KravType.ETTERLATTE -> YtelseType.GJENLEV
+                    KravType.UFORE -> YtelseType.UFOREP
                     else -> YtelseType.ALDER
                 }
             }

@@ -22,6 +22,8 @@ import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
@@ -37,9 +39,9 @@ import kotlin.test.assertNull
 internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     companion object {
-        private const val KRAV_ALDER = "01"
-        private const val KRAV_UFORE = "03"
-        private const val KRAV_GJENLEV = "02"
+        private val KRAV_ALDER = KravType.ALDER
+        private val KRAV_UFORE = KravType.UFORE
+        private val KRAV_GJENLEV = KravType.ETTERLATTE
     }
 
     @Nested
@@ -181,7 +183,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
-            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -192,7 +194,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak2 = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
-            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak2, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "03") {
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak2, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.SAMBOER) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -219,7 +221,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
-            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -236,12 +238,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET)))
             val allDocuemtActions = listOf(Document("10001212", SedType.P15000, DocStatus.SENT))
 
-            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+            testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN, it.bruker?.id!!)
@@ -312,7 +314,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerVoksen(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = "01") {
+            testRunnerVoksen(FNR_VOKSEN, null, krav = KRAV_GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -331,9 +333,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                bestemSak: BestemSakResponse? = null,
                                sakId: String? = SAK_ID,
                                land: String = "NOR",
-                               krav: String = KRAV_ALDER,
+                               krav: KravType = KRAV_ALDER,
                                alleDocs: List<Document>,
-                               relasjonAvod: String? = "06",
+                               relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
                                sedJson: String? = null,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
@@ -383,9 +385,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                  bestemSak: BestemSakResponse? = null,
                                  sakId: String? = SAK_ID,
                                  land: String = "NOR",
-                                 krav: String = KRAV_ALDER,
+                                 krav: KravType = KRAV_ALDER,
                                  alleDocs: List<Document>,
-                                 relasjonAvod: String? = "06",
+                                 relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
                                  block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrVoksenSoker, relasjon = relasjonAvod)
@@ -431,7 +433,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                            bestemSak: BestemSakResponse? = null,
                            sakId: String? = SAK_ID,
                            land: String = "NOR",
-                           krav: String = KRAV_ALDER,
+                           krav: KravType = KRAV_ALDER,
                            alleDocs: List<Document>,
                            block: (OpprettJournalpostRequest) -> Unit
     ) {
