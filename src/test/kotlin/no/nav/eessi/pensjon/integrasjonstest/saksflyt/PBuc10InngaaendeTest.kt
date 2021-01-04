@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
@@ -107,6 +108,46 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         }
 
 
+    }
+
+    @Test
+    fun `Innkommende P15000 gjenlevende mangler søker`() {
+        val sedP5000tmp = createSedPensjon(SedType.P15000, "12321", gjenlevendeFnr = null, krav = KRAV_GJENLEV)
+        val sedP15000mottatt = SED(
+            type = sedP5000tmp.type,
+            nav = sedP5000tmp.nav,
+            pensjon = Pensjon()
+        )
+
+        val alleDocumenter = listOf(
+            Document("30002", SedType.P5000, DocStatus.RECEIVED)
+        )
+
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
+        every { euxKlient.hentSed(any(), any()) } returns sedP15000mottatt
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+        val hendelse = createHendelseJson(SedType.P15000, BucType.P_BUC_10)
+
+        listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        val request = journalpost.captured
+        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+        Assertions.assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+        Assertions.assertEquals(Enhet.ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
+        Assertions.assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+        Assertions.assertEquals("P15000", oppgaveMelding.sedType?.name)
+
+        Assertions.assertEquals("INNGAAENDE", request.journalpostType.name)
+        Assertions.assertEquals(Tema.PENSJON, request.tema)
+        Assertions.assertEquals(Enhet.ID_OG_FORDELING, request.journalfoerendeEnhet)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
     }
 
     @Test

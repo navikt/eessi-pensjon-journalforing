@@ -41,13 +41,14 @@ class JournalforingService(private val euxKlient: EuxKlient,
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
     }
 
-    fun journalfor(sedHendelseModel: SedHendelseModel,
-                   hendelseType: HendelseType,
-                   identifisertPerson: IdentifisertPerson?,
-                   fdato: LocalDate,
-                   ytelseType: YtelseType?,
-                   offset: Long = 0,
-                   sakInformasjon: SakInformasjon?) {
+    fun journalfor(
+        sedHendelseModel: SedHendelseModel,
+        hendelseType: HendelseType,
+        identifisertPerson: IdentifisertPerson?,
+        fdato: LocalDate?,
+        ytelseType: YtelseType?,
+        offset: Long = 0,
+        sakInformasjon: SakInformasjon?) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info(
@@ -64,9 +65,11 @@ class JournalforingService(private val euxKlient: EuxKlient,
                         ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelseModel.rinaSakId}, ${sedHendelseModel.rinaDokumentId}")
                 val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelseModel.sedType!!)
 
-                val tildeltEnhet = oppgaveRoutingService.route(
-                        OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon)
-                )
+                val tildeltEnhet = if (fdato == null) {
+                    Enhet.ID_OG_FORDELING
+                } else {
+                   oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon) )
+                }
 
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
 
