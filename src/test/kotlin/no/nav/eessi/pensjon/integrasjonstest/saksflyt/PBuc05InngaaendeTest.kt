@@ -10,7 +10,12 @@ import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.Rolle
+import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
@@ -274,12 +279,12 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 6 - To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt norge`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
 
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT) {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = HendelseType.MOTTATT) {
             assertEquals(PENSJON, it.tema)
             assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
@@ -287,12 +292,12 @@ internal class PBuc05InngaaendeTest : JournalforingTestBase() {
 
     @Test
     fun `Scenario 6 - To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt utland`() {
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_BARN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }
 
-        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
+        testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = HendelseType.MOTTATT, land = "SWE") {
             assertEquals(PENSJON, it.tema)
             assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
         }

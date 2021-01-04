@@ -362,6 +362,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     Document("10001212", SedType.P15000, DocStatus.SENT)
             )
 
+            testRunner(FNR_VOKSEN, null, krav = KravType.ETTERLATTE, alleDocs = allDocuemtActions) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
+
             testRunner(FNR_VOKSEN, FNR_BARN, krav = KravType.ETTERLATTE, alleDocs = allDocuemtActions, relasjonAvod = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)

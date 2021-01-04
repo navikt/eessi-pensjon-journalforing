@@ -19,15 +19,34 @@ class FodselsdatoHelper {
          *
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
-        fun fraSedListe(seder: List<SED>): LocalDate {
-            if (seder.isEmpty())
+        fun fraSedListe(seder: List<SED>, kansellerteSeder: List<SED?>): LocalDate? {
+            if (seder.isEmpty() && kansellerteSeder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
-            return seder
+            val fdato = seder
                     .filter { it.type.kanInneholdeFnrEllerFdato }
                     .mapNotNull { filterFodselsdato(it) }
                     .firstOrNull()
-                    ?: throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
+
+            if (fdato !=  null) {
+                return fdato
+            }
+
+            val kansellertfdato = kansellerteSeder
+                .filter { it!!.type.kanInneholdeFnrEllerFdato }
+                .mapNotNull { filterFodselsdato(it!!) }
+                .firstOrNull()
+
+            if (kansellertfdato != null) {
+                return kansellertfdato
+            } else if (sederUtenFdato(seder)) {
+                return null
+            }
+            throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
+        }
+
+        private fun sederUtenFdato(seder: List<SED>) : Boolean {
+            return seder.firstOrNull { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE } != null
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
@@ -74,10 +93,8 @@ class FodselsdatoHelper {
             return annenPerson.person.foedselsdato
         }
 
-        private fun filterGjenlevendeFodselsdato(sed: SED): String? =
-                sed.pensjon?.gjenlevende?.person?.foedselsdato
+        private fun filterGjenlevendeFodselsdato(sed: SED): String? = sed.pensjon?.gjenlevende?.person?.foedselsdato
 
-        private fun filterPersonFodselsdato(sed: SED): String? =
-                sed.nav?.bruker?.firstOrNull()?.person?.foedselsdato
+        private fun filterPersonFodselsdato(sed: SED): String? = sed.nav?.bruker?.firstOrNull()?.person?.foedselsdato
     }
 }

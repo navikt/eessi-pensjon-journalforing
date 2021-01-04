@@ -11,11 +11,13 @@ data class Document(
         val status: DocStatus?
 ) {
     fun validStatus(): Boolean = (status == DocStatus.SENT || status == DocStatus.RECEIVED)
+    fun cancelledStatus(): Boolean = (status == DocStatus.CANCELLED)
 }
 
 @Suppress("unused")
 enum class DocStatus(@JsonValue private val value: String) {
     EMPTY("empty"),
     RECEIVED("received"),
-    SENT("sent")
+    SENT("sent"),
+    CANCELLED("cancelled")
 }
