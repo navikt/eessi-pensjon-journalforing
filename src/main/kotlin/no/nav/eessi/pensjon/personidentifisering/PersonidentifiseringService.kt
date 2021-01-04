@@ -158,7 +158,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     /**
      * Henter første treff på dato fra listen av SEDer
      */
-    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED?>): LocalDate {
+    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED?>): LocalDate? {
         return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
                 ?: FodselsdatoHelper.fraSedListe(seder,kansellerteSeder)
     }
