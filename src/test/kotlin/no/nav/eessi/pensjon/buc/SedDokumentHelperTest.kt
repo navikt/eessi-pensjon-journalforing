@@ -90,6 +90,8 @@ class SedDokumentHelperTest {
 
     @Test
     fun `henter en map av gyldige seds i buc`() {
+        val rinaSakId = "123123"
+
         val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json").readText()
         val alldocsid = mapJsonToAny(allDocsJson, typeRefs<List<Document>>())
 
@@ -99,7 +101,8 @@ class SedDokumentHelperTest {
         doReturn(alldocsid).whenever(fagmodulKlient).hentAlleDokumenter(ArgumentMatchers.anyString())
         doReturn(sedP2000).whenever(euxKlient).hentSed(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())
 
-        val actual = helper.hentAlleSedIBuc("123123")
+        val result = helper.hentAlleGydligeDokumenter(rinaSakId)
+        val actual = helper.hentAlleSedIBuc(rinaSakId, result)
         assertEquals(1, actual.size)
 
         val actualSed = actual.first()

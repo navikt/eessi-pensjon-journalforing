@@ -19,15 +19,24 @@ class FodselsdatoHelper {
          *
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
-        fun fraSedListe(seder: List<SED>): LocalDate {
-            if (seder.isEmpty())
+        fun fraSedListe(seder: List<SED>, kansellerteSeder: List<SED?>): LocalDate {
+            if (seder.isEmpty() && kansellerteSeder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
-            return seder
+            val fdato = seder
                     .filter { it.type.kanInneholdeFnrEllerFdato }
                     .mapNotNull { filterFodselsdato(it) }
                     .firstOrNull()
-                    ?: throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
+
+            if (fdato !=  null) {
+                return fdato
+            }
+
+            return kansellerteSeder
+                .filter { it!!.type.kanInneholdeFnrEllerFdato }
+                .mapNotNull { filterFodselsdato(it!!) }
+                .firstOrNull()
+                ?: throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
