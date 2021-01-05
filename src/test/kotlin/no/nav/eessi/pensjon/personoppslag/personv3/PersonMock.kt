@@ -1,7 +1,17 @@
 package no.nav.eessi.pensjon.personoppslag.personv3
 
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.*
-import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoenn
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kjoennstyper
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Kommune
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Landkoder
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Postnummer
+import no.nav.tjeneste.virksomhet.person.v3.informasjon.Statsborgerskap
 
 object BrukerMock {
     internal fun createWith(fnr: String? = null, landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
@@ -27,9 +37,3 @@ object BrukerMock {
                 else -> null
             })
 }
-
-object HentPersonResponse {
-    internal fun createWith(fnr: String? = null, landkoder: Boolean = true, fornavn: String = "Test", etternavn: String = "Testesen"):
-            HentPersonResponse = HentPersonResponse().withPerson(BrukerMock.createWith(fnr, landkoder, fornavn, etternavn))
-}
-

@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.sed.SED
@@ -13,31 +11,13 @@ import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3IkkeFunnetException
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 
-@ExtendWith(MockitoExtension::class)
-class DiskresjonkodeHelperTest {
+internal class DiskresjonkodeHelperTest {
 
-    @Mock
-    private lateinit var personV3Service: PersonV3Service
+    private val personV3Service = mockk<PersonV3Service>()
 
-    private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
-
-    private lateinit var sedFnrSøk: SedFnrSøk
-
-    @BeforeEach
-    fun setup() {
-        sedFnrSøk = SedFnrSøk()
-
-        diskresjonkodeHelper = DiskresjonkodeHelper(
-                personV3Service,
-                sedFnrSøk
-        )
-    }
+    private val diskresjonkodeHelper = DiskresjonkodeHelper(personV3Service, SedFnrSøk())
 
     @Test
     fun `Gitt ingen brukere med diskresjonskode SPSF når diskresjonskodehelper leter etter SPSF koder i alle SEDer i en BUC så returner diskresjonskode`() {
@@ -54,20 +34,19 @@ class DiskresjonkodeHelperTest {
         val json = javaClass.getResource("/sed/P2000-NAV.json").readText()
         val p2000 = mapJsonToAny(json, typeRefs<SED>())
 
-        doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doReturn(BrukerMock.createWith())
-                .doReturn(BrukerMock.createWith())
-                .whenever(personV3Service).hentPerson(any())
+        every { personV3Service.hentPerson("") }
+                .throws(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThen(BrukerMock.createWith())
+                .andThen(BrukerMock.createWith())
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
-        val expected = null
 
-        Assertions.assertEquals(expected, actual)
+        Assertions.assertNull(actual)
     }
 
     @Test
@@ -81,11 +60,11 @@ class DiskresjonkodeHelperTest {
         val brukerSF = BrukerMock.createWith()
         brukerSF?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
 
-        doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doReturn(brukerFO)
-                .doAnswer { throw PersonV3IkkeFunnetException("Person ikke funnet dummy") }
-                .doReturn(brukerSF)
-                .whenever(personV3Service).hentPerson(any())
+        every { personV3Service.hentPerson(any()) }
+                .throws(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThen(brukerFO)
+                .andThenThrows(PersonV3IkkeFunnetException("Person ikke funnet dummy"))
+                .andThen(brukerSF)
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 
@@ -100,7 +79,7 @@ class DiskresjonkodeHelperTest {
         val bruker = BrukerMock.createWith()
         bruker?.diskresjonskode = Diskresjonskoder().withValue("SPSF")
 
-        doReturn(bruker).whenever(personV3Service).hentPerson(any())
+        every { personV3Service.hentPerson(any()) } returns bruker
 
         val actual = diskresjonkodeHelper.hentDiskresjonskode(listOf(p2000))
 

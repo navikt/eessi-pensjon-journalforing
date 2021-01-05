@@ -77,8 +77,6 @@ dependencies {
 	implementation("commons-io:commons-io:2.6")
 
 	//mock - test
-	testImplementation("org.mockito:mockito-core:3.3.3")
-	testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 	testImplementation("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}") {
 		exclude module: 'kotlin-test-js'
 		exclude module: 'kotlin-test-testng'

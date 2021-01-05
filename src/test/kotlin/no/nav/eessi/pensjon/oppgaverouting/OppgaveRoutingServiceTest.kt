@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.spyk
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType.H_BUC_07
@@ -37,27 +35,15 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Spy
-import org.mockito.junit.jupiter.MockitoExtension
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
+import kotlin.test.assertNull
 
-@ExtendWith(MockitoExtension::class)
-class OppgaveRoutingServiceTest {
+internal class OppgaveRoutingServiceTest {
 
-    @Spy
-    private lateinit var norg2Klient: Norg2Klient
+    private val norg2Klient = spyk<Norg2Klient>()
 
-    private lateinit var routingService: OppgaveRoutingService
-
-    @BeforeEach
-    fun setup() {
-        routingService = OppgaveRoutingService(norg2Klient)
-    }
+    private val routingService = OppgaveRoutingService(norg2Klient)
 
     companion object {
         private const val DUMMY_FNR = "09035225916" // Testbruker SLAPP SKILPADDE
@@ -101,7 +87,6 @@ class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_OSLO, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = NORGE, bucType = H_BUC_07, hendelseType = HendelseType.SENDT)))
 
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(fdato = alder60aar, landkode = NORGE, bucType = H_BUC_07, hendelseType = HendelseType.SENDT)))
-
     }
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
@@ -426,47 +411,44 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt utland`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
-        doReturn(enhetlist)
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig0001result.json")
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(landkode = "SVE"), P_BUC_01)
-        val expected = PENSJON_UTLAND
 
-        assertEquals(expected, actual)
+        assertEquals(PENSJON_UTLAND, actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
-        doReturn(enhetlist)
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4803result.json")
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
                 P_BUC_01)
-        val expected = NFP_UTLAND_OSLO
 
-        assertEquals(expected, actual)
+        assertEquals(NFP_UTLAND_OSLO, actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt nord-Norge`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
-        doReturn(enhetlist)
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862result.json")
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR"),
                 P_BUC_01)
-        val expected = NFP_UTLAND_AALESUND
 
-        assertEquals(expected, actual)
+        assertEquals(NFP_UTLAND_AALESUND, actual)
     }
 
     @Test
     fun `hentNorg2Enhet for diskresjonkode`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
-        doReturn(enhetlist)
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordeling2103result.json")
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "1102",
@@ -482,27 +464,23 @@ class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
                 P_BUC_03)
-        val expected = null
 
-        assertEquals(expected, actual)
+        assertNull(actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2`() {
-        doReturn(listOf<Norg2ArbeidsfordelingItem>())
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns emptyList()
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
                 P_BUC_01)
-        val expected = null
 
-        assertEquals(expected, actual)
+        assertNull(actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2 error`() {
-        doThrow(RuntimeException("dummy"))
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } throws RuntimeException("dummy")
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
                 P_BUC_01)
@@ -513,33 +491,31 @@ class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
-        val enhetlist = mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
-        doReturn(enhetlist)
-                .whenever(norg2Klient).hentArbeidsfordelingEnheter(any())
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordeling2103result.json")
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "0322",
                 landkode = "NOR",
                 diskresjonskode = "SPSF"),
                 P_BUC_01)
-        val expected = DISKRESJONSKODE
 
-        assertEquals(expected, actual)
+        assertEquals(DISKRESJONSKODE, actual)
     }
 
     @Test
     fun testEnumEnhets() {
-
         assertEquals(PENSJON_UTLAND, Enhet.getEnhet("0001"))
 
         assertEquals(NFP_UTLAND_OSLO, Enhet.getEnhet("4803"))
 
         assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
-
     }
 
-    private fun getJsonFileFromResource(filename: String): String {
-        return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
+    private fun fromResource(file: String): List<Norg2ArbeidsfordelingItem> {
+        val json = javaClass.getResource(file).readText()
+
+        return mapJsonToAny(json, typeRefs())
     }
 
     private fun mockerEnPerson() = IdentifisertPerson(
