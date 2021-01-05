@@ -22,33 +22,21 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.quality.Strictness
 
-@ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 internal class FnrHelperTest {
 
-    private lateinit var helper: FnrHelper
+    private val helper: FnrHelper = FnrHelper()
 
     companion object {
         private const val SLAPP_SKILPADDE = "09035225916"
         private const val KRAFTIG_VEGGPRYD = "11067122781"
         private const val LEALAUS_KAKE = "22117320034"
         private const val STERK_BUSK = "12011577847"
-    }
-
-    @BeforeEach
-    fun setup() {
-        helper = FnrHelper()
     }
 
     @Test

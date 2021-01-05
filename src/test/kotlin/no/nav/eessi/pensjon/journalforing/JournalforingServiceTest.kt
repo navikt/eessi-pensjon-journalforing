@@ -1,11 +1,8 @@
 package no.nav.eessi.pensjon.journalforing
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
@@ -32,44 +29,29 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.quality.Strictness
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
 
-@ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class JournalforingServiceTest {
+internal class JournalforingServiceTest {
 
-    @Mock
-    private lateinit var euxKlient: EuxKlient
+    private val euxKlient = mockk<EuxKlient>()
+    private val journalpostService = mockk<JournalpostService>(relaxUnitFun = true)
+    private val fagmodulKlient = mockk<FagmodulKlient>()
+    private val norg2Klient = mockk<Norg2Klient>()
+    private val pdfService = mockk<PDFService>()
+    private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
 
-    @Mock
-    private lateinit var journalpostService: JournalpostService
+    private val oppgaveRoutingService = OppgaveRoutingService(norg2Klient)
 
-    @Mock
-    private lateinit var fagmodulKlient: FagmodulKlient
+    private val journalforingService = JournalforingService(euxKlient,
+            journalpostService,
+            oppgaveRoutingService,
+            pdfService,
+            oppgaveHandler
+    )
 
-
-    @Mock
-    private lateinit var norg2Klient: Norg2Klient
-
-    @Mock
-    private lateinit var pdfService: PDFService
-
-    @Mock
-    private lateinit var oppgaveHandler: OppgaveHandler
-
-    private lateinit var journalforingService: JournalforingService
-
-    private lateinit var fdato: LocalDate
-
-    private lateinit var oppgaveRoutingService: OppgaveRoutingService
+    private val fdato = LocalDate.now()
 
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
@@ -79,73 +61,39 @@ class JournalforingServiceTest {
 
     @BeforeEach
     fun setup() {
-        fdato = LocalDate.now()
-
-        oppgaveRoutingService = OppgaveRoutingService(norg2Klient)
-
-        journalforingService = JournalforingService(euxKlient,
-                journalpostService,
-                oppgaveRoutingService,
-                pdfService,
-                oppgaveHandler
-        )
         journalforingService.initMetrics()
 
         //MOCK RESPONSES
 
         //EUX - HENT SED DOKUMENT
-        doReturn("MOCK DOCUMENTS")
-                .`when`(euxKlient)
-                .hentSedDokumenter(anyString(), anyString())
+        every { euxKlient.hentSedDokumenter(any(), any()) } returns "MOCK DOCUMENTS"
 
         //PDF -
-        doReturn(Pair<String, List<EuxDokument>>("P2000 Supported Documents", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.P2000))
-
-        doReturn(Pair("P2100 Supported Documents", listOf(EuxDokument("usupportertVedlegg.xml", null, "bleh"))))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.P2100))
-
-        doReturn(Pair<String, List<EuxDokument>>("P2100 Krav om etterlattepensjon", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.P2100))
-
-        doReturn(Pair<String, List<EuxDokument>>("P2200 Supported Documents", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.P2200))
-
-        doReturn(Pair<String, List<EuxDokument>>("R004 - Melding om utbetaling", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.R004))
-
-        doReturn(Pair<String, List<EuxDokument>>("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.R005))
-
-
-        doReturn(Pair<String, List<EuxDokument>>("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList()))
-                .`when`(pdfService)
-                .parseJsonDocuments(any(), eq(SedType.P15000))
-
+        every { pdfService.parseJsonDocuments(any(), SedType.P2000) } returns Pair<String, List<EuxDokument>>("P2000 Supported Documents", emptyList())
+        every { pdfService.parseJsonDocuments(any(), SedType.P2100) } returns Pair("P2100 Supported Documents", listOf(EuxDokument("usupportertVedlegg.xml", null, "bleh")))
+        every { pdfService.parseJsonDocuments(any(), SedType.P2100) } returns Pair<String, List<EuxDokument>>("P2100 Krav om etterlattepensjon", emptyList())
+        every { pdfService.parseJsonDocuments(any(), SedType.P2200) } returns Pair<String, List<EuxDokument>>("P2200 Supported Documents", emptyList())
+        every { pdfService.parseJsonDocuments(any(), SedType.R004) } returns Pair<String, List<EuxDokument>>("R004 - Melding om utbetaling", emptyList())
+        every { pdfService.parseJsonDocuments(any(), SedType.R005) } returns Pair<String, List<EuxDokument>>("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
+        every { pdfService.parseJsonDocuments(any(), SedType.P15000) } returns Pair<String, List<EuxDokument>>("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
 
         //JOURNALPOST OPPRETT JOURNALPOST
-        doReturn(OpprettJournalPostResponse("123", "null", null, false))
-                .`when`(journalpostService)
-                .opprettJournalpost(
-                        rinaSakId = anyOrNull(),
-                        fnr = anyOrNull(),
-                        personNavn = anyOrNull(),
-                        bucType = anyOrNull(),
-                        sedType = anyOrNull(),
-                        sedHendelseType = anyOrNull(),
-                        journalfoerendeEnhet = anyOrNull(),
-                        arkivsaksnummer = anyOrNull(),
-                        dokumenter = anyOrNull(),
-                        avsenderLand = anyOrNull(),
-                        avsenderNavn = anyOrNull(),
-                        ytelseType = anyOrNull()
-                )
+        every {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = any(),
+                    fnr = any(),
+                    personNavn = any(),
+                    bucType = any(),
+                    sedType = any(),
+                    sedHendelseType = any(),
+                    journalfoerendeEnhet = any(),
+                    arkivsaksnummer = any(),
+                    dokumenter = any(),
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        } returns OpprettJournalPostResponse("123", "null", null, false)
     }
 
     @Test
@@ -162,20 +110,23 @@ class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("2536475861"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.R_BUC_02),
-                sedType = eq(SedType.R004),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.OKONOMI_PENSJON),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("R004 - Melding om utbetaling"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = eq(YtelseType.ALDER)
-        )
+
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "2536475861",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.R_BUC_02,
+                    sedType = SedType.R004,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.OKONOMI_PENSJON,
+                    arkivsaksnummer = null,
+                    dokumenter = "R004 - Melding om utbetaling",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = YtelseType.ALDER
+            )
+        }
     }
 
     @Test
@@ -193,20 +144,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("2536475861"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.R_BUC_02),
-                sedType = eq(SedType.R005),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = eq(YtelseType.UFOREP)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "2536475861",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.R_BUC_02,
+                    sedType = SedType.R005,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = YtelseType.UFOREP
+            )
+        }
     }
 
     @Test
@@ -222,22 +175,24 @@ class JournalforingServiceTest {
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
-
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.UFOREP, 0, null)
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("2536475861"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.R_BUC_02),
-                sedType = eq(SedType.R005),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = eq(YtelseType.UFOREP)
-        )
+
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "2536475861",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.R_BUC_02,
+                    sedType = SedType.R005,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = YtelseType.UFOREP
+            )
+        }
     }
 
     @Test
@@ -263,20 +218,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("2536475861"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.R_BUC_02),
-                sedType = eq(SedType.R005),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = eq(YtelseType.ALDER)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "2536475861",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.R_BUC_02,
+                    sedType = SedType.R005,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = YtelseType.ALDER
+            )
+        }
     }
 
 
@@ -294,20 +251,22 @@ class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147729"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_01),
-                sedType = eq(SedType.P2000),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2000 Supported Documents"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147729",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_01,
+                    sedType = SedType.P2000,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2000 Supported Documents",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -315,9 +274,7 @@ class JournalforingServiceTest {
         //FAGMODUL HENT ALLE DOKUMENTER
         val documents = mapJsonToAny(javaClass.getResource("/buc/P2200-NAV.json").readText(), typeRefs<List<Document>>())
 
-        doReturn(documents)
-                .`when`(fagmodulKlient)
-                .hentAlleDokumenter(anyString())
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -332,20 +289,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = anyOrNull(),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_03),
-                sedType = eq(SedType.P2200),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.UFORE_UTLANDSTILSNITT),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2200 Supported Documents"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = any(),
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_03,
+                    sedType = SedType.P2200,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.UFORE_UTLANDSTILSNITT,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2200 Supported Documents",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -363,20 +322,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147729"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_10),
-                sedType = eq(SedType.P15000),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147729",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_10,
+                    sedType = SedType.P15000,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -395,20 +356,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147729"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_01),
-                sedType = eq(SedType.P2000),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2000 Supported Documents"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147729",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_01,
+                    sedType = SedType.P2000,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2000 Supported Documents",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -416,7 +379,7 @@ class JournalforingServiceTest {
         val json = javaClass.getResource("/fagmodul/allDocumentsBuc01.json").readText()
         val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
 
-        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns allDocuments
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -432,20 +395,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = anyString(),
-                fnr = eq(SLAPP_SKILPADDE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_01),
-                sedType = eq(SedType.P2000),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2000 Supported Documents"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = any(),
+                    fnr = SLAPP_SKILPADDE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_01,
+                    sedType = SedType.P2000,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2000 Supported Documents",
+                    avsenderLand = "NO",
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -464,20 +429,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, YtelseType.ALDER, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147730"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.NFP_UTLAND_AALESUND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(YtelseType.ALDER)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147730",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.NFP_UTLAND_AALESUND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAVT003",
+                    ytelseType = YtelseType.ALDER
+            )
+        }
     }
 
     @Test
@@ -485,7 +452,7 @@ class JournalforingServiceTest {
         val json = javaClass.getResource("/buc/P2200-NAV.json").readText()
         val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
 
-        doReturn(allDocuments).whenever(fagmodulKlient).hentAlleDokumenter(any())
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns allDocuments
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
@@ -501,20 +468,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = anyOrNull(),
-                fnr = eq(SLAPP_SKILPADDE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_03),
-                sedType = eq(SedType.P2200),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.UFORE_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2200 Supported Documents"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = any(),
+                    fnr = SLAPP_SKILPADDE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_03,
+                    sedType = SedType.P2200,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.UFORE_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2200 Supported Documents",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -533,20 +502,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147729"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_10),
-                sedType = eq(SedType.P15000),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)"),
-                avsenderLand = anyOrNull(),
-                avsenderNavn = anyOrNull(),
-                ytelseType = anyOrNull()
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147729",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_10,
+                    sedType = SedType.P15000,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
+                    avsenderLand = any(),
+                    avsenderNavn = any(),
+                    ytelseType = any()
+            )
+        }
     }
 
     @Test
@@ -567,22 +538,23 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, YtelseType.GJENLEV, 0, sakInformasjon)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147730"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
-                arkivsaksnummer = eq("111111"),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(YtelseType.GJENLEV)
-        )
-        //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
-
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147730",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                    arkivsaksnummer = "111111",
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAVT003",
+                    ytelseType = YtelseType.GJENLEV
+            )
+            //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
+        }
     }
 
     @Test
@@ -623,23 +595,23 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, YtelseType.GJENLEV, 0, saksInfo)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("1033470"),
-                fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.AUTOMATISK_JOURNALFORING),
-                arkivsaksnummer = eq("111111"),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAV ACCEPTANCE TEST 07"),
-                ytelseType = eq(YtelseType.GJENLEV)
-        )
-
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "1033470",
+                    fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                    arkivsaksnummer = "111111",
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAV ACCEPTANCE TEST 07",
+                    ytelseType = YtelseType.GJENLEV
+            )
+        }
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
-
     }
 
     @Test
@@ -660,21 +632,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, sakInformasjon)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147730"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
-        )
-
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147730",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAVT003",
+                    ytelseType = null
+            )
+        }
         // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
     }
@@ -696,20 +669,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147730"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq(null),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147730",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = null,
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAVT003",
+                    ytelseType = null
+            )
+        }
     }
 
     @Test
@@ -729,20 +704,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("147730"),
-                fnr = eq(LEALAUS_KAKE),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.SENDT),
-                journalfoerendeEnhet = eq(Enhet.ID_OG_FORDELING),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("NO"),
-                avsenderNavn = eq("NAVT003"),
-                ytelseType = eq(null)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "147730",
+                    fnr = LEALAUS_KAKE,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.SENDT,
+                    journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "NO",
+                    avsenderNavn = "NAVT003",
+                    ytelseType = null
+            )
+        }
     }
 
     @Test
@@ -783,20 +760,22 @@ class JournalforingServiceTest {
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, YtelseType.BARNEP, 0, saksInfo)
 
-        verify(journalpostService).opprettJournalpost(
-                rinaSakId = eq("1033470"),
-                fnr = eq(identifisertGjenlevendePerson.personRelasjon.fnr),
-                personNavn = eq("Test Testesen"),
-                bucType = eq(BucType.P_BUC_02),
-                sedType = eq(SedType.P2100),
-                sedHendelseType = eq(HendelseType.MOTTATT),
-                journalfoerendeEnhet = eq(Enhet.PENSJON_UTLAND),
-                arkivsaksnummer = eq(null),
-                dokumenter = eq("P2100 Krav om etterlattepensjon"),
-                avsenderLand = eq("PL"),
-                avsenderNavn = eq("POLEN"),
-                ytelseType = eq(YtelseType.BARNEP)
-        )
+        verify {
+            journalpostService.opprettJournalpost(
+                    rinaSakId = "1033470",
+                    fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
+                    personNavn = "Test Testesen",
+                    bucType = BucType.P_BUC_02,
+                    sedType = SedType.P2100,
+                    sedHendelseType = HendelseType.MOTTATT,
+                    journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                    arkivsaksnummer = null,
+                    dokumenter = "P2100 Krav om etterlattepensjon",
+                    avsenderLand = "PL",
+                    avsenderNavn = "POLEN",
+                    ytelseType = YtelseType.BARNEP
+            )
+        }
     }
 
 }

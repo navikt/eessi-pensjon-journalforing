@@ -1,10 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -27,26 +25,15 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.quality.Strictness
 
-@ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class PersonidentifiseringServiceTest {
 
     companion object {
@@ -55,34 +42,23 @@ class PersonidentifiseringServiceTest {
         private const val STERK_BUSK = "12011577847"
     }
 
-    @Mock
-    private lateinit var aktoerregisterService: AktoerregisterService
-
-    @Mock
-    private lateinit var personV3Service: PersonV3Service
-
-    @Mock
-    private lateinit var diskresjonkodeHelper: DiskresjonkodeHelper
-
-    private lateinit var personidentifiseringService: PersonidentifiseringService
-
-    @BeforeEach
-    fun setup() {
-        whenever(aktoerregisterService.hentGjeldendeIdent(eq(IdentGruppe.AktoerId), any<NorskIdent>()))
-                .thenReturn(null)
-
-        personidentifiseringService = PersonidentifiseringService(aktoerregisterService,
-                personV3Service,
-                diskresjonkodeHelper,
-                FnrHelper())
+    private val aktoerregisterService = mockk<AktoerregisterService>(relaxed = true)
+    private val personV3Service = mockk<PersonV3Service>()
+    private val diskresjonkodeHelper = mockk<DiskresjonkodeHelper> {
+        every { hentDiskresjonskode(any()) } returns null
     }
+
+    private val personidentifiseringService = PersonidentifiseringService(
+            aktoerregisterService, personV3Service, diskresjonkodeHelper, FnrHelper())
+
 
     @Test
     fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = STERK_BUSK
-        whenever(personV3Service.hentPerson(eq(gjenlevFnr))).thenReturn(BrukerMock.createWith(landkoder = true))
-        whenever(personV3Service.hentPerson(eq(forsikretFnr))).thenReturn(BrukerMock.createWith(landkoder = true))
+
+        every { personV3Service.hentPerson(gjenlevFnr) } returns BrukerMock.createWith(landkoder = true)
+        every { personV3Service.hentPerson(forsikretFnr) } returns BrukerMock.createWith(landkoder = true)
 
         val p6000 = generateSED(SedType.P6000, LEALAUS_KAKE, gjenlevFnr = gjenlevFnr)
         val h070 = generateSED(SedType.H070, forsikretFnr)
@@ -95,7 +71,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt en Sed som inneholder gjenlevende som ikke er en del av samlingen av Seds som er forsikret, dette er feks H070, H120, H121 så identifiseres en gjenlevende`() {
         val gjenlevFnr = LEALAUS_KAKE
-        whenever(personV3Service.hentPerson(eq(gjenlevFnr))).thenReturn(BrukerMock.createWith(landkoder = true))
+        every { personV3Service.hentPerson(gjenlevFnr) } returns BrukerMock.createWith(landkoder = true)
 
         val p6000 = generateSED(SedType.P6000, STERK_BUSK, gjenlevFnr = gjenlevFnr)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(p6000), BucType.P_BUC_05, SedType.P6000)
@@ -106,7 +82,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
-        whenever(personV3Service.hentPerson(eq("05127921999"))).thenReturn(BrukerMock.createWith(landkoder = true))
+        every { personV3Service.hentPerson("05127921999") } returns BrukerMock.createWith(landkoder = true)
 
         val sed = generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = "05127921999", gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_02, SedType.H070)
@@ -118,7 +94,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt et gyldig fnr og relasjon avdod så skal det identifiseres en person`() {
         val gjenlevFnr = LEALAUS_KAKE
 
-        whenever(personV3Service.hentPerson(eq(gjenlevFnr))).thenReturn(BrukerMock.createWith(landkoder = true))
+        every { personV3Service.hentPerson(gjenlevFnr) } returns BrukerMock.createWith(landkoder = true)
 
         val sed = createR005(
                 forsikretFnr = SLAPP_SKILPADDE, forsikretTilbakekreving = "avdød_mottaker_av_ytelser",
@@ -134,48 +110,18 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt et gyldig fnr og relasjon forsikret så skal det identifiseres en person`() {
-        whenever(personV3Service.hentPerson(eq("09035225916"))).thenReturn(BrukerMock.createWith(landkoder = true))
-        whenever(diskresjonkodeHelper.hentDiskresjonskode(any())).thenReturn(null)
+        val fnr = Fodselsnummer.fra("09035225916")!!
+
+        every { personV3Service.hentPerson(fnr.value) } returns BrukerMock.createWith(landkoder = true)
 
         val sed = sedFromJsonFile("/buc/P2000-NAV.json")
         val alleSediBuc = listOf(sed)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(alleSediBuc)
         val actual = personidentifiseringService.hentIdentifisertePersoner(null, alleSediBuc, BucType.P_BUC_01, potensiellePerson)
-        val expected = PersonRelasjon(Fodselsnummer.fra("09035225916"), Relasjon.FORSIKRET, sedType = SedType.P2000)
+        val expected = PersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000)
         assertEquals(expected, actual.first().personRelasjon)
-    }
 
-
-    @Test
-    fun `Gitt et gyldig fnr med mellomrom når identifiser person så hent person uten mellomrom`(){
-        //PERSONV3 - HENT PERSON
-        doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
-                .hentPerson(ArgumentMatchers.anyString())
-
-        val navBruker = Fodselsnummer.fra("1201 1577847")
-        personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_01, emptyList())
-        verify(personV3Service).hentPerson(eq("12011577847"))
-    }
-
-    @Test
-    fun `Gitt et gyldig fnr med bindestrek når identifiser person så hent person uten bindestrek`(){
-        doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
-                .hentPerson(ArgumentMatchers.anyString())
-        val navBruker = Fodselsnummer.fra("1201-1577847")
-        personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_01, emptyList())
-        verify(personV3Service).hentPerson(eq("12011577847"))
-    }
-
-    @Test
-    fun `Gitt et gyldig fnr med slash når identifiser person så hent person uten slash`() {
-        doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
-                .hentPerson(ArgumentMatchers.anyString())
-        val navBruker = Fodselsnummer.fra("1201/1577847")
-        personidentifiseringService.hentIdentifisertePersoner(navBruker, emptyList(), BucType.P_BUC_03, emptyList())
-        verify(personV3Service).hentPerson(eq("12011577847"))
+        verify(exactly = 1) { personV3Service.hentPerson(fnr.value) }
     }
 
     @Test
@@ -192,9 +138,7 @@ class PersonidentifiseringServiceTest {
         val forventetFnr = "22117320034"
 
         //PERSONV3 - HENT PERSON
-        doReturn(BrukerMock.createWith(landkoder = true))
-                .`when`(personV3Service)
-                .hentPerson(eq(forventetFnr))
+        every { personV3Service.hentPerson(forventetFnr) } returns BrukerMock.createWith(landkoder = true)
 
         val sed1 = sedFromJsonFile("/buc/P10000-enkel.json")
         val sed2 = sedFromJsonFile("/buc/P10000-superenkel.json")
@@ -204,6 +148,8 @@ class PersonidentifiseringServiceTest {
 
         assertEquals("1973-11-22", fdato.toString())
         assertEquals(forventetFnr, actual?.personRelasjon?.fnr!!.value)
+
+        verify(exactly = 1) { personV3Service.hentPerson(forventetFnr) }
     }
 
     @Test
@@ -214,13 +160,9 @@ class PersonidentifiseringServiceTest {
         val bucType = BucType.P_BUC_02
 
         //PERSONV3 - HENT PERSON
-        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende"))
-                .`when`(personV3Service)
-                .hentPerson(eq(gjenlevende))
+        every { personV3Service.hentPerson(gjenlevende) } returns BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende")
 
-        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død"))
-                .`when`(personV3Service)
-                .hentPerson(eq(navBruker))
+        every { personV3Service.hentPerson(navBruker) } returns BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død")
 
         val sedListe = listOf(
                 generateSED(SedType.P2100, forsikretFnr = navBruker, gjenlevFnr = gjenlevende, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE),
@@ -254,13 +196,9 @@ class PersonidentifiseringServiceTest {
         val bucType = BucType.P_BUC_02
 
         //PERSONV3 - HENT PERSON
-        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende"))
-                .`when`(personV3Service)
-                .hentPerson(eq(gjenlevende))
+        every { personV3Service.hentPerson(gjenlevende) } returns BrukerMock.createWith(landkoder = true, fornavn = "Gjenlevende")
 
-        doReturn(BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død"))
-                .`when`(personV3Service)
-                .hentPerson(eq(navBruker))
+        every { personV3Service.hentPerson(navBruker) } returns BrukerMock.createWith(landkoder = true, fornavn = "Avgått-død")
 
         val sed1 = sedFromJsonFile("/buc/P2100-PinNO.json")
         val sed2 = sedFromJsonFile("/buc/P6000-gjenlevende-NAV.json")
@@ -279,6 +217,8 @@ class PersonidentifiseringServiceTest {
         val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000, potensiellePerson)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon.relasjon)
+
+        verify(exactly = 1) { personV3Service.hentPerson(gjenlevende) }
     }
 
     @Test
@@ -500,13 +440,11 @@ class PersonidentifiseringServiceTest {
         val sedListFraBuc = listOf(sed1)
         val potensiellePerson = personidentifiseringService.potensiellePersonRelasjonfraSed(sedListFraBuc)
 
-        doReturn(BrukerMock.createWith(fornavn = "gjenlevende"))
-                .`when`(personV3Service)
-                .hentPerson(eq(gjenlevendeFnr!!.value))
+        every { diskresjonkodeHelper.hentDiskresjonskode(any()) } returns null
 
-        doReturn(BrukerMock.createWith(fornavn = "avgott"))
-                .`when`(personV3Service)
-                .hentPerson(eq(avdodBrukerFnr!!.value))
+        every { personV3Service.hentPerson(gjenlevendeFnr!!.value) } returns BrukerMock.createWith(fornavn = "gjenlevende")
+
+        every { personV3Service.hentPerson(avdodBrukerFnr!!.value) } returns BrukerMock.createWith(fornavn = "avgott")
 
         val actual = personidentifiseringService.hentIdentifisertePersoner(avdodBrukerFnr, sedListFraBuc, BucType.P_BUC_02, potensiellePerson)
 

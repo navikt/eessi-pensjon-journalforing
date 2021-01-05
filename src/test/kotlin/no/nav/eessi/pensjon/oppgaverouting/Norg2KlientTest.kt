@@ -1,37 +1,28 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.whenever
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.contains
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 
-@ExtendWith(MockitoExtension::class)
-class Norg2KlientTest {
+internal class Norg2KlientTest {
 
-    @Mock
-    private lateinit var mockrestTemplate: RestTemplate
+    private val mockrestTemplate = mockk<RestTemplate>()
 
-    private lateinit var norg2Klient: Norg2Klient
+    private val norg2Klient = Norg2Klient(mockrestTemplate)
 
     @BeforeEach
     fun setup() {
-        norg2Klient = Norg2Klient(mockrestTemplate)
         norg2Klient.initMetrics()
     }
 
@@ -59,10 +50,9 @@ class Norg2KlientTest {
                 behandlingstype = "ae0107"
         )
 
-        val expected = null
         val actual = norg2Klient.finnArbeidsfordelingEnheter(request, list = enheter)
 
-        assertEquals(expected, actual)
+        assertNull(actual)
     }
 
     @Test
@@ -98,13 +88,14 @@ class Norg2KlientTest {
     @Test
     fun `hent arbeidsfordeligEnheter fra Norg2 avd Oslo`() {
         val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"))
-        doReturn(response)
-                .whenever(mockrestTemplate).exchange(
-                        contains("/api/v1/arbeidsfordeling"),
-                        any(HttpMethod::class.java),
-                        any(HttpEntity::class.java),
-                        eq(String::class.java)
-                )
+        every {
+            mockrestTemplate.exchange(
+                    "/api/v1/arbeidsfordeling",
+                    HttpMethod.POST,
+                    any(),
+                    String::class.java
+            )
+        } returns response
 
         val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
                 landkode = "NOR",
@@ -120,13 +111,14 @@ class Norg2KlientTest {
     @Test
     fun `hent arbeidsfordeligEnheter fra Utland`() {
         val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"))
-        doReturn(response)
-                .whenever(mockrestTemplate).exchange(
-                        contains("/api/v1/arbeidsfordeling"),
-                        any(HttpMethod::class.java),
-                        any(HttpEntity::class.java),
-                        eq(String::class.java)
-                )
+        every {
+            mockrestTemplate.exchange(
+                    "/api/v1/arbeidsfordeling",
+                    HttpMethod.POST,
+                    any(),
+                    String::class.java
+            )
+        } returns response
 
         val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest())
 
@@ -140,13 +132,14 @@ class Norg2KlientTest {
     @Test
     fun `hent arbeidsfordeligEnheter ved diskresjon`() {
         val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"))
-        doReturn(response)
-                .whenever(mockrestTemplate).exchange(
-                        contains("/api/v1/arbeidsfordeling"),
-                        any(HttpMethod::class.java),
-                        any(HttpEntity::class.java),
-                        eq(String::class.java)
-                )
+        every {
+            mockrestTemplate.exchange(
+                    "/api/v1/arbeidsfordeling",
+                    HttpMethod.POST,
+                    any(),
+                    String::class.java
+            )
+        } returns response
 
         val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
                 landkode = "NOR",
@@ -168,7 +161,7 @@ class Norg2KlientTest {
         }
     }
 
-    fun getJsonFileFromResource(filename: String): String {
+    private fun getJsonFileFromResource(filename: String): String {
         return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
     }
 }
