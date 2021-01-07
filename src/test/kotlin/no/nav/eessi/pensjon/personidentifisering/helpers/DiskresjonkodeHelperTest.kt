@@ -17,7 +17,7 @@ internal class DiskresjonkodeHelperTest {
 
     private val personV3Service = mockk<PersonV3Service>()
 
-    private val diskresjonkodeHelper = DiskresjonkodeHelper(personV3Service, SedFnrSøk())
+    private val diskresjonkodeHelper = DiskresjonkodeHelper(personV3Service)
 
     @Test
     fun `Gitt ingen brukere med diskresjonskode SPSF når diskresjonskodehelper leter etter SPSF koder i alle SEDer i en BUC så returner diskresjonskode`() {

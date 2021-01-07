@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService.Companion.erFnrDnrFormat
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
 /**
  * Går gjennom SED og søker etter fnr/dnr
@@ -16,126 +14,81 @@ import org.springframework.stereotype.Component
  * Kjente keys: "Pin", "kompetenteuland"
  *
  */
-@Component
 class SedFnrSøk {
 
-    private val logger = LoggerFactory.getLogger(SedFnrSøk::class.java)
+    companion object {
+        private val logger = LoggerFactory.getLogger(SedFnrSøk::class.java)
 
-    /**
-     * Finner alle fnr i SED
-     *
-     * @param sed SED i json format
-     * @return distinkt set av fnr
-     */
-    fun finnAlleFnrDnrISed(sed: SED): Set<String> {
-        logger.info("Søker etter fnr i SED")
-        try {
-            val sedJson = sed.toJson()
+        /**
+         * Finner alle fnr i SED
+         *
+         * @param sed SED i json format
+         * @return distinkt set av fnr
+         */
+        fun finnAlleFnrDnrISed(sed: SED): Set<String> {
+            logger.info("Søker etter fnr i SED")
 
-            val sedRootNode = jacksonObjectMapper().readTree(sedJson)
-            val funnedeFnr = mutableSetOf<String>()
+            try {
+                val sedRootNode = jacksonObjectMapper().readTree(sed.toJson())
 
-            traverserNode(sedRootNode, funnedeFnr)
-            return funnedeFnr.toSet()
-        } catch (ex: Exception) {
-            logger.info("En feil oppstod under søk av fødselsnummer i SED", ex)
-            throw ex
+                return traverseNode(sedRootNode)
+                        .map { it.value }
+                        .toSet()
+            } catch (ex: Exception) {
+                logger.info("En feil oppstod under søk av fødselsnummer i SED", ex)
+                throw ex
+            }
         }
-    }
 
-    /**
-     * Rekursiv traversering av json noden
-     */
-    private fun traverserNode(jsonNode: JsonNode, funnedeFnr: MutableSet<String>) {
-        val fødselsnummere = finnFnr(jsonNode)
+        /**
+         * Rekursiv traversering av json noden
+         */
+        private fun traverseNode(jsonNode: JsonNode): List<Fodselsnummer> {
+            val fnrFraNode = finnFnr(jsonNode)
 
-        when {
-            jsonNode.isObject -> {
-                if(fødselsnummere.isEmpty()) {
-                    jsonNode.forEach { node -> traverserNode(node, funnedeFnr) }
-                } else {
-                    leggTilFunnedeFnr(fødselsnummere, jsonNode, funnedeFnr)
+            return when {
+                jsonNode.isObject -> {
+                    if (fnrFraNode.isEmpty())
+                        jsonNode.flatMap { traverseNode(it) }
+                    else
+                        fnrFraNode
                 }
-            }
-            jsonNode.isArray -> {
-                jsonNode.forEach { node -> traverserNode(node, funnedeFnr) }
-            }
-            else -> {
-                leggTilFunnedeFnr(fødselsnummere, jsonNode, funnedeFnr)
+                jsonNode.isArray -> {
+                    jsonNode.flatMap { traverseNode(it) }
+                }
+                else -> fnrFraNode
             }
         }
-    }
 
-    private fun leggTilFunnedeFnr(fnre: List<String>, jsonNode: JsonNode, funnedeFnr: MutableSet<String>) {
-        fnre.forEach { fnr ->
-            if (erPinNorsk(jsonNode)) {
-                funnedeFnr.add(fnr)
-            }
-        }
-    }
+        /**
+         * Leter etter fnr i flere felter/objekter.
+         * Siden et pin-objekt/identifikator skal kun gjelde én person, returnerer vi ved første gyldige treff.
+         *
+         * @return liste med norske fnr. Tom liste hvis null treff.
+         */
+        private fun finnFnr(jsonNode: JsonNode): List<Fodselsnummer> {
+            val fieldNames = listOf("pin", "pinland", "pinannen")
 
-    /**
-     * Sjekker om noden inneholder norsk fnr/dnr
-     *
-     * Eksempel node:
-     *  {
-     *       sektor" : "pensjoner",
-     *       identifikator" : "09809809809",
-     *       land" : "NO"
-     *  }
-     */
-    private fun erPinNorsk(jsonNode: JsonNode) : Boolean {
-        val land = jsonNode.get("land")
-        return land == null || land.textValue() == "NO"
-    }
-
-    /**
-     * Finner fnr i identifikator, kompetenteuland og oppholdsland feltene
-     *
-     * Eksempel node:
-     *  pin: {
-     *          sektor" : "pensjoner",
-     *          identifikator" : "12345678910",
-     *          land" : "NO"
-     *       }
-     *
-     *  eller:
-     *  pin: {
-     *          "identifikator" : "12345678910"
-     *       }
-     *
-     *  eller:
-     *  pin: {
-     *          "kompetenteuland": "12345678910",
-     *          "oppholdsland": "12345678910"
-     *       }
-     */
-    private fun finnFnr(jsonNode: JsonNode): List<String> {
-        val pin = jsonNode.get("pin")
-        pin?.let {
-            val idNode = pin.get("identifikator")
-            if (idNode != null && erFnrDnrFormat(idNode.asText())) {
-                return listOf(idNode.textValue())
-            }
-
-            val fnre = mutableListOf<String>()
-
-            val kompetenteulandNode = pin.findValue("kompetenteuland")
-            if (kompetenteulandNode != null && erFnrDnrFormat(kompetenteulandNode.asText())) {
-                fnre.add(kompetenteulandNode.textValue())
-            }
-
-            val oppholdslandNode = pin.findValue("oppholdsland")
-            if (oppholdslandNode != null && erFnrDnrFormat(oppholdslandNode.asText())) {
-                fnre.add(oppholdslandNode.textValue())
-            }
-            if(fnre.isNotEmpty()) return fnre
+            return fieldNames
+                    .mapNotNull { jsonNode.get(it) }
+                    .map { node -> fromSubNode(node) }
+                    .firstOrNull { it.isNotEmpty() }
+                    ?: listOfNotNull(jsonNode.get("identifikator").tilFnr())
         }
 
-        val idNode = jsonNode.get("identifikator")
-        if (idNode != null && erFnrDnrFormat(idNode.asText())) {
-            return listOf(idNode.asText())
+        private fun fromSubNode(node: JsonNode): List<Fodselsnummer> {
+            val identifikator = node.get("identifikator").tilFnr()
+
+            if (identifikator != null)
+                return listOf(identifikator)
+
+            val kompetenteuland = node.findValue("kompetenteuland").tilFnr()
+            val oppholdsland = node.findValue("oppholdsland").tilFnr()
+
+            return listOfNotNull(kompetenteuland, oppholdsland)
         }
-        return emptyList()
+
+        private fun JsonNode?.tilFnr(): Fodselsnummer? =
+                Fodselsnummer.fra(this?.textValue())
     }
 }
