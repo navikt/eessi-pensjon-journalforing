@@ -42,23 +42,20 @@ class JournalforingService(private val euxKlient: EuxKlient,
     }
 
     fun journalfor(
-        sedHendelseModel: SedHendelseModel,
-        hendelseType: HendelseType,
-        identifisertPerson: IdentifisertPerson?,
-        fdato: LocalDate?,
-        ytelseType: YtelseType?,
-        offset: Long = 0,
-        sakInformasjon: SakInformasjon?) {
+            sedHendelseModel: SedHendelseModel,
+            hendelseType: HendelseType,
+            identifisertPerson: IdentifisertPerson?,
+            fdato: LocalDate?,
+            ytelseType: YtelseType?,
+            offset: Long = 0,
+            sakInformasjon: SakInformasjon?
+    ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
-                logger.info(
-                    """
-                    **********
+                logger.info("""**********
                     rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId} sedType: ${sedHendelseModel.sedType?.name} bucType: ${sedHendelseModel.bucType}
                     kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId} ytelseType: $ytelseType
-                    **********
-                    """.trimIndent()
-                )
+                **********""".trimIndent())
 
                 // Henter dokumenter
                 val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelseModel.rinaSakId, sedHendelseModel.rinaDokumentId)

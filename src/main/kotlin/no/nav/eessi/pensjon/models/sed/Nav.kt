@@ -10,16 +10,12 @@ data class Nav(
         val eessisak: List<EessisakItem>? = null,
         val ektefelle: Ektefelle? = null,
         val barn: List<BarnItem>? = null, //pkt 6 og 8
-        val verge: Verge? = null,
         val krav: Krav? = null,
 
         //X005
         val sak: Navsak? = null,
         //P10000 hvordan få denne til å bli val?
-        val annenperson: Bruker? = null,
-
-        //H120
-        val endredeforhold: Endredeforhold? = null
+        val annenperson: Bruker? = null
 ) {
         /**
          * Forenklet uthenting forsikret (hovedperson)
@@ -46,9 +42,6 @@ data class Nav(
 
 data class Bruker(
         val person: Person? = null,
-        val mor: Person? = null,
-        val far: Person? = null,
-
         val tilbakekreving: Tilbakekreving? = null
 ) {
         fun ident(): String? = person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
@@ -75,20 +68,11 @@ enum class Rolle(@JsonValue val kode: String) {
         BARN("03");
 }
 
-//H121
-data class Endredeforhold(
-        val bruker: Bruker? = null
-)
+//X005
+data class Navsak(val kontekst: Kontekst? = null)
 
 //X005
-data class Navsak(
-        val kontekst: Kontekst? = null
-)
-
-//X005
-data class Kontekst(
-        val bruker: Bruker? = null
-)
+data class Kontekst(val bruker: Bruker? = null)
 
 data class Krav(
         val dato: String? = null,
@@ -102,23 +86,14 @@ enum class KravType(@JsonValue private val kode: String?) {
         UFORE("03")
 }
 
-data class BarnItem(
-        val mor: Person? = null,
-        val person: Person? = null,
-        val far: Person? = null
-)
+data class BarnItem(val person: Person? = null)
 
 data class Ektefelle(
-        val mor: Person? = null,
         val person: Person? = null,
-        val far: Person? = null,
         val type: String? = null
 )
 
-data class Verge(
-        val person: Person? = null
-)
-
+// H020, H021
 data class PinLandItem(
         val oppholdsland: String? = null,
         val kompetenteuland: String? = null
@@ -145,21 +120,16 @@ enum class RelasjonTilAvdod(@JsonValue private val kode: String?) {
 }
 
 data class PinItem(
-        val institusjonsnavn: String? = null,
-        val institusjonsid: String? = null,
         val sektor: String? = null,
-        val identifikator: String? = null,  //rename? f.eks personnummer
+        val identifikator: String? = null,
         val land: String? = null,
-        //P2000, P2100, P2200
-        val institusjon: Institusjon? = null,
 
+        // H020, H021
         val oppholdsland: String? = null,
         val kompetenteuland: String? = null
 )
 
 data class EessisakItem(
-        val institusjonsid: String? = null,
-        val institusjonsnavn: String? = null,
         val saksnummer: String? = null,
         val land: String? = null
 )

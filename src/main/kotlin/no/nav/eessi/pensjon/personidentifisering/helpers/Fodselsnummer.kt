@@ -17,7 +17,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
     private val controlDigits2 = intArrayOf(5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
 
     init {
-        require("""\d{11}""".toRegex().matches(value)) { "Ikke et gyldig fødselsnummer: $value" }
+        require(Regex("\\d{11}").matches(value)) { "Ikke et gyldig fødselsnummer: $value" }
         require(!(isHNumber() || isFhNumber())) { "Impelentasjonen støtter ikke H-nummer og FH-nummer" }
         require(validateControlDigits()) { "Ugyldig kontrollnummer" }
     }
@@ -27,10 +27,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
         @JsonCreator
         fun fra(fnr: String?): Fodselsnummer? {
             return try {
-                fnr?.replace(Regex("[^0-9]"), "")
-                        ?.let {
-                            Fodselsnummer(it)
-                        }
+                Fodselsnummer(fnr!!.replace(Regex("[^0-9]"), ""))
             } catch (e: Exception) {
                 null
             }

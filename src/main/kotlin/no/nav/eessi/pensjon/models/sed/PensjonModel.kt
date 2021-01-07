@@ -25,12 +25,7 @@ data class Merinformasjon(
 )
 
 //P7000
-data class SamletMeldingVedtak(
-        val avslag: List<PensjonAvslagItem>? = null,
-        val vedtaksammendrag: String? = null,
-        val startdatoPensjonsRettighet: String? = null,  // 4.1.5
-        val reduksjonsGrunn: String? = null    // 4.1.7
-)
+data class SamletMeldingVedtak(val avslag: List<PensjonAvslagItem>? = null)
 
 //P7000-5
 data class PensjonAvslagItem(
@@ -38,26 +33,5 @@ data class PensjonAvslagItem(
         val pin: PinItem? = null
 )
 
-//Institusjon
-data class Institusjon(
-        val institusjonsid: String? = null,
-        val institusjonsnavn: String? = null,
-        val saksnummer: String? = null,
-        val sektor: String? = null,
-        val land: String? = null,
-        val pin: String? = null,
-        val personNr: String? = null,
-        val innvilgetPensjon: String? = null,  // 4.1.3.
-        val utstedelsesDato: String? = null,  //4.1.4.
-        val startdatoPensjonsRettighet: String? = null  //4.1.5
-)
-
 //P2000 - P2200 - //P10000
-data class YtelserItem(
-        val annenytelse: String? = null,
-        val pin: PinItem? = null,
-        val ytelse: String? = null,
-        val status: String? = null,
-
-        val ytelsestype: String? = null
-)
+data class YtelserItem(val pin: PinItem? = null)

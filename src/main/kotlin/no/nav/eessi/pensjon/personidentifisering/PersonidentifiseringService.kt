@@ -36,13 +36,9 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     }
 
     fun hentIdentifisertPerson(navBruker: Fodselsnummer?, sedListe: List<SED>, bucType: BucType, sedType: SedType?): IdentifisertPerson? {
-        val potensiellePersonRelasjoner = potensiellePersonRelasjonfraSed(sedListe)
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe)
         val identifisertePersoner = hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePersonRelasjoner)
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
-    }
-
-    fun potensiellePersonRelasjonfraSed(sedListe: List<SED>): List<PersonRelasjon> {
-        return fnrHelper.getPotensielleFnrFraSeder(sedListe)
     }
 
     fun hentIdentifisertePersoner(navBruker: Fodselsnummer?, alleSediBuc: List<SED>, bucType: BucType?, potensiellePersonRelasjoner: List<PersonRelasjon>): List<IdentifisertPerson> {
@@ -158,9 +154,9 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     /**
      * Henter første treff på dato fra listen av SEDer
      */
-    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED?>): LocalDate? {
+    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
         return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
-                ?: FodselsdatoHelper.fraSedListe(seder,kansellerteSeder)
+                ?: FodselsdatoHelper.fraSedListe(seder, kansellerteSeder)
     }
 
     private fun hentAktoerId(fnr: Fodselsnummer?): String? {

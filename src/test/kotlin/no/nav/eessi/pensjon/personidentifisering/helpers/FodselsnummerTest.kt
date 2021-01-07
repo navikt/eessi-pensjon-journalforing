@@ -27,6 +27,7 @@ internal class FodselsnummerTest {
         assertNull(Fodselsnummer.fra("11111111111"))
         assertNull(Fodselsnummer.fra("22222222222"))
         assertNull(Fodselsnummer.fra("19191919191"))
+        assertNull(Fodselsnummer.fra(null))
     }
 
     @Test

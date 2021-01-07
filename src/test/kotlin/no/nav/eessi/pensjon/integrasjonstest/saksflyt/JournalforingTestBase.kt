@@ -48,7 +48,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
@@ -109,7 +108,7 @@ internal open class JournalforingTestBase {
 
     protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
     protected val personV3Service: PersonV3Service = mockk(relaxed = true)
-    protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service, SedFnrSøk()))
+    protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service))
 
     private val personidentifiseringService = PersonidentifiseringService(
             aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
@@ -351,8 +350,6 @@ internal open class JournalforingTestBase {
 
         return SED(
                 sedType,
-                sedGVer = "4",
-                sedVer = "2",
                 nav = Nav(
                         eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                         bruker = listOf(forsikretBruker),
@@ -380,8 +377,6 @@ internal open class JournalforingTestBase {
 
         return SED(
                 sedType,
-                sedGVer = "4",
-                sedVer = "2",
                 nav = Nav(
                         eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                         bruker = listOf(forsikretBruker),

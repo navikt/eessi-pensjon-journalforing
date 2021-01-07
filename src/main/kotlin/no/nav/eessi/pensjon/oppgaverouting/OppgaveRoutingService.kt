@@ -12,9 +12,10 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
-        logger.debug("personfdato: ${routingRequest.fdato},  bucType: ${routingRequest.bucType}, ytelseType: ${routingRequest.ytelseType}")
-
-        if (routingRequest.aktorId == null) return Enhet.ID_OG_FORDELING
+        if (routingRequest.aktorId == null) {
+            logger.info("AktørID mangler. Bruker enhet ID_OG_FORDELING.")
+            return Enhet.ID_OG_FORDELING
+        }
 
         val tildeltEnhet = tildelEnhet(routingRequest)
 
@@ -29,21 +30,17 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
     }
 
     private fun tildelEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
+        val enhet = BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
 
-        if(routingRequest.bucType == BucType.P_BUC_01){
+        if (enhet == Enhet.AUTOMATISK_JOURNALFORING)
+            return enhet
+
+        if (routingRequest.bucType == BucType.P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode?.name, routingRequest.landkode, routingRequest.geografiskTilknytning)
-            val norgEnhet = hentNorg2Enhet(norgKlientRequest, routingRequest.bucType)
-            val egenDefinertEnhet = BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
 
-            if(egenDefinertEnhet == Enhet.AUTOMATISK_JOURNALFORING){
-                return Enhet.AUTOMATISK_JOURNALFORING
-            }
-            else if(norgEnhet != null) {
-                return norgEnhet
-            }
-            return egenDefinertEnhet
+            return hentNorg2Enhet(norgKlientRequest, routingRequest.bucType) ?: enhet
         }
-        return BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
+        return enhet
     }
 
     @VisibleForTesting
