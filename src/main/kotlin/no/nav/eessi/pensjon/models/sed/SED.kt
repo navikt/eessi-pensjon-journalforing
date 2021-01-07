@@ -9,8 +9,6 @@ data class SED(
         @JsonProperty("sed")
         val type: SedType,
 
-        val sedGVer: String? = null,
-        val sedVer: String? = null,
         val nav: Nav? = null,
         val pensjon: Pensjon? = null,
         val tilbakekreving: Tilbakekreving? = null

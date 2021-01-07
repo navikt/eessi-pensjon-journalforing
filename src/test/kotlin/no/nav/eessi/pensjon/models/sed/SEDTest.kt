@@ -57,11 +57,6 @@ internal class SEDTest {
         val bruker = sed.nav?.bruker!!
         assertEquals(2, bruker.size)
 
-        bruker.forEach {
-            assertNotNull(it.far)
-            assertNotNull(it.mor)
-        }
-
         val person1 = bruker[0].person!!
         assertEquals("1998-04-05", person1.foedselsdato)
         assertNull(person1.rolle)
