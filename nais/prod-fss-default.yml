@@ -15,6 +15,8 @@ spec:
       value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.nais.adeo.no/cpi
+    - name: PDL_URL
+      value: https://pdl-api.nais.adeo.no/graphql
     - name: JOURNALPOST_V1_URL
       value: https://dokarkiv.nais.adeo.no/rest/journalpostapi/v1
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
