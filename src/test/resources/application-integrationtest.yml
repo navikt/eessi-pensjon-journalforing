@@ -33,6 +33,7 @@ securityTokenService:
 NAIS_APP_NAME: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
+PDL_URL: http://localhost:${mockServerport}
 securitytokenservice.url: http://someurl
 srvusername: someuser
 srvpassword: somepass
