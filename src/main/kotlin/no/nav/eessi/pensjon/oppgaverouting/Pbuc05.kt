@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 
 class Pbuc05 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
@@ -72,11 +71,11 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return true dersom det finnes mer enn én person.
      */
     private fun flerePersoner(request: OppgaveRoutingRequest): Boolean {
-      return request.identifisertPerson?.personListe?.isNotEmpty() ?: false
+        return request.identifisertPerson?.personListe?.isNotEmpty() ?: false
     }
 
     /**
-     * Henter ut enhet basert på [Diskresjonskode].
+     * Henter ut enhet basert på [Boolean].
      * Skal kun brukes dersom det finnes en [IdentifisertPerson] med [Relasjon.BARN]
      *
      * @return Kaller ruting-funksjon basert på [Relasjon]

@@ -13,7 +13,7 @@ class Pbuc02 : BucTilEnhetHandler {
 
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
+            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
             erUgyldig(request) -> Enhet.ID_OG_FORDELING
             kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
             request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType)

@@ -4,7 +4,7 @@ import no.nav.eessi.pensjon.models.Enhet
 
 class DefaultBucTilEnhetHandler : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
-        return if (erStrengtFortrolig(request.diskresjonskode))
+        return if (request.harAdressebeskyttelse)
             Enhet.DISKRESJONSKODE
         else
             enhetFraAlderOgLand(request)

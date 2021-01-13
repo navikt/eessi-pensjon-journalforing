@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -44,14 +43,13 @@ import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
@@ -108,10 +106,10 @@ internal open class JournalforingTestBase {
 
     protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
     protected val personV3Service: PersonV3Service = mockk(relaxed = true)
-    protected val diskresjonService: DiskresjonkodeHelper = spyk(DiskresjonkodeHelper(personV3Service))
+    protected val pdlPersonService: PersonService = mockk(relaxed = true)
 
     private val personidentifiseringService = PersonidentifiseringService(
-            aktoerregisterService, personV3Service, diskresjonService, FnrHelper()
+            aktoerregisterService, personV3Service, pdlPersonService, FnrHelper()
     )
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
@@ -162,7 +160,7 @@ internal open class JournalforingTestBase {
             fnrAnnenPerson: String?,
             saker: List<SakInformasjon> = emptyList(),
             sakId: String? = SAK_ID,
-            diskresjonkode: Diskresjonskode? = null,
+            harAdressebeskyttelse: Boolean = false,
             land: String = "NOR",
             rolle: Rolle?,
             hendelseType: HendelseType = HendelseType.SENDT,
@@ -171,13 +169,16 @@ internal open class JournalforingTestBase {
         val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
         initCommonMocks(sed)
 
+        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
+
         if (fnr != null) {
             every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land)
             every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
         }
 
         if (fnrAnnenPerson != null) {
-            every { personV3Service.hentPerson(fnrAnnenPerson) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", diskresjonkode?.name)
+            // TODO: Alle personV3Service skal byttes ut
+            every { personV3Service.hentPerson(fnrAnnenPerson) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", null)
             every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
         }
 
@@ -252,6 +253,8 @@ internal open class JournalforingTestBase {
     ) {
         val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
         initCommonMocks(sed)
+
+        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
 
         if (fnr != null) {
             every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land)

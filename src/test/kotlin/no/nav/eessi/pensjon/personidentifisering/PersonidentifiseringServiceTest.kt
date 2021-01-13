@@ -21,10 +21,10 @@ import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.Status
 import no.nav.eessi.pensjon.models.sed.Tilbakekreving
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,12 +44,10 @@ class PersonidentifiseringServiceTest {
 
     private val aktoerregisterService = mockk<AktoerregisterService>(relaxed = true)
     private val personV3Service = mockk<PersonV3Service>()
-    private val diskresjonkodeHelper = mockk<DiskresjonkodeHelper> {
-        every { hentDiskresjonskode(any()) } returns null
-    }
+    private val pdlPersonService = mockk<PersonService>(relaxed = true)
 
     private val personidentifiseringService = PersonidentifiseringService(
-            aktoerregisterService, personV3Service, diskresjonkodeHelper, FnrHelper())
+            aktoerregisterService, personV3Service, pdlPersonService, FnrHelper())
 
 
     private val fnrHelper = FnrHelper()
@@ -242,7 +240,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr og en liste med sed som inneholder fdato som gir en gyldig fdato`(){
         val personidentifiseringService2 = PersonidentifiseringService(aktoerregisterService,
                 personV3Service,
-                diskresjonkodeHelper,
+                pdlPersonService,
                 FnrHelper())
 
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
@@ -282,7 +280,7 @@ class PersonidentifiseringServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 "NO",
                 "010",
                 PersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET))
@@ -297,7 +295,7 @@ class PersonidentifiseringServiceTest {
         val gjenlevende = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 "NO",
                 "010",
                 PersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE))
@@ -316,7 +314,7 @@ class PersonidentifiseringServiceTest {
         val avdod = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 "NO",
                 "010",
                 PersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD))
@@ -324,7 +322,7 @@ class PersonidentifiseringServiceTest {
         val gjenlevende = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 "NO",
                 "010",
                 PersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE))
@@ -344,7 +342,7 @@ class PersonidentifiseringServiceTest {
         val forsikret = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 "NO",
                 "010",
                 PersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET))
@@ -429,8 +427,8 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val avdodPerson = IdentifisertPerson("", "avgott Testesen", null, "NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100))
-        val gjenlevendePerson = IdentifisertPerson("", "gjenlevende Testesen", null, "NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100))
+        val avdodPerson = IdentifisertPerson("", "avgott Testesen", false, "NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100))
+        val gjenlevendePerson = IdentifisertPerson("", "gjenlevende Testesen", false, "NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100))
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
 
@@ -438,7 +436,7 @@ class PersonidentifiseringServiceTest {
         val sedListFraBuc = listOf(sed1)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
-        every { diskresjonkodeHelper.hentDiskresjonskode(any()) } returns null
+        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
 
         every { personV3Service.hentPerson(gjenlevendeFnr!!.value) } returns BrukerMock.createWith(fornavn = "gjenlevende")
 
@@ -468,7 +466,7 @@ class PersonidentifiseringServiceTest {
     }
 
     private fun createIdentifisertPerson(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPerson =
-            IdentifisertPerson("", "Dummy", null, "NO", "", PersonRelasjon(fnr, relasjon))
+            IdentifisertPerson("", "Dummy", false, "NO", "", PersonRelasjon(fnr, relasjon))
     
     private fun generateSED(
             sedType: SedType,

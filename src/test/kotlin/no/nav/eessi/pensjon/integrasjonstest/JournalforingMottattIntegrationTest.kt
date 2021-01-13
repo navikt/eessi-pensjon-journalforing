@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.eessi.pensjon.security.sts.STSClientConfig
@@ -63,11 +64,16 @@ class JournalforingMottattIntegrationTest {
     @Autowired
     lateinit var personV3Service: PersonV3Service
 
+    @Autowired
+    lateinit var pdlPersonService: PersonService
+
     @Test
     fun `Når en sedMottatt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
         // Mock personV3
         capturePersonMock()
+
+        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
 
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_MOTTATT_TOPIC)
@@ -586,14 +592,14 @@ class JournalforingMottattIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 25) { personV3Service.hentPerson(any()) }
+        verify(exactly = 6) { personV3Service.hentPerson(any()) }
 
         assertEquals(0, sedListener.getMottattLatch().count,  "Alle meldinger har ikke blitt konsumert")
     }
 
     // Mocks the PersonV3 Service so we don't have to deal with SOAP
     @TestConfiguration
-    class TestConfig(private val stsClientConfig: STSClientConfig){
+    class TestConfig(private val stsClientConfig: STSClientConfig) {
         @Bean
         @Primary
         fun personV3(): PersonV3 = mockk()
@@ -602,5 +608,8 @@ class JournalforingMottattIntegrationTest {
         fun personV3Service(personV3: PersonV3): PersonV3Service {
             return spyk(PersonV3Service(personV3, stsClientConfig))
         }
+
+        @Bean
+        fun pdlPersonService(): PersonService = mockk()
     }
 }

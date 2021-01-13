@@ -90,7 +90,7 @@ internal class PBuc05Test : JournalforingTestBase() {
         val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<Document>>())
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns dokumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen sedP8000sendt
-        every { diskresjonService.hentDiskresjonskode(any()) } returns null
+        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
         every { personV3Service.hentPerson(afnr) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR")
         every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Død", "Helt Død", "NOR")

@@ -32,7 +32,6 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -169,14 +168,14 @@ internal class OppgaveRoutingServiceTest {
         val forsikret = IdentifisertPerson(
                 "123",
                 "Testern",
-                null,
+                false,
                 null,
                 "010",
                 PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET))
         val avod = IdentifisertPerson(
                 "234",
                 "Avdod",
-                null,
+                false,
                 null,
                 "010",
                 PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD))
@@ -399,10 +398,10 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_AALESUND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder17aar, landkode = NORGE, bucType = P_BUC_09, hendelseType = HendelseType.SENDT)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder17aar, landkode = UTLAND, bucType = P_BUC_09, hendelseType = HendelseType.SENDT)))
 
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, geografiskTilknytning = dummyTilknytning, bucType = P_BUC_01, ytelseType = YtelseType.ALDER, hendelseType = HendelseType.SENDT)))
-        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, landkode = NORGE, bucType = P_BUC_03, ytelseType = YtelseType.UFOREP, hendelseType = HendelseType.SENDT)))
-        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPFO, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV, hendelseType = HendelseType.SENDT)))
-        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, diskresjonskode = Diskresjonskode.SPSF, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV, hendelseType = HendelseType.SENDT)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, harAdressebeskyttelse = true, geografiskTilknytning = dummyTilknytning, bucType = P_BUC_01, ytelseType = YtelseType.ALDER, hendelseType = HendelseType.SENDT)))
+        assertEquals(UFORE_UTLANDSTILSNITT, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = NORGE, bucType = P_BUC_03, ytelseType = YtelseType.UFOREP, hendelseType = HendelseType.SENDT)))
+        assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV, hendelseType = HendelseType.SENDT)))
+        assertEquals(DISKRESJONSKODE, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, harAdressebeskyttelse = true, landkode = UTLAND, bucType = P_BUC_10, ytelseType = YtelseType.GJENLEV, hendelseType = HendelseType.SENDT)))
     }
 
     private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
@@ -453,7 +452,7 @@ internal class OppgaveRoutingServiceTest {
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "1102",
                 landkode = "NOR",
-                diskresjonskode = "SPSF"),
+                harAdressebeskyttelse = true),
                 P_BUC_01)
         val expected = DISKRESJONSKODE
 
@@ -497,7 +496,7 @@ internal class OppgaveRoutingServiceTest {
         val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
                 geografiskTilknytning = "0322",
                 landkode = "NOR",
-                diskresjonskode = "SPSF"),
+                harAdressebeskyttelse = true),
                 P_BUC_01)
 
         assertEquals(DISKRESJONSKODE, actual)
@@ -521,7 +520,7 @@ internal class OppgaveRoutingServiceTest {
     private fun mockerEnPerson() = IdentifisertPerson(
             "123",
             "Testern",
-            null,
+            false,
             "NO",
             "010",
             PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET))

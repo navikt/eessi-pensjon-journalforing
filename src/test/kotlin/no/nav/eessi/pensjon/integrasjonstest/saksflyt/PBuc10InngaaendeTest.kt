@@ -20,8 +20,8 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
-import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
@@ -392,10 +392,10 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrBarn != null) {
-            verify(exactly = 6) { personV3Service.hentPerson(any()) }
+            verify(exactly = 2) { personV3Service.hentPerson(any()) }
             verify(exactly = 2) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         } else {
-            verify(exactly = 2) { personV3Service.hentPerson(any()) }
+            verify(exactly = 1) { personV3Service.hentPerson(any()) }
             verify(exactly = 1) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
         }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }

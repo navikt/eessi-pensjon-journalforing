@@ -103,7 +103,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -136,7 +136,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -169,7 +169,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "SE",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
@@ -202,14 +202,14 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "3811",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         val dodPerson = IdentifisertPerson(
                 "22078945602",
                 "Dod Begravet",
-                null,
+                false,
                 "",
                 "3811",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD))
@@ -244,7 +244,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -281,7 +281,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "NOR",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -314,7 +314,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -348,7 +348,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -387,7 +387,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
@@ -421,7 +421,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "NOR",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -460,7 +460,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
@@ -494,7 +494,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -529,7 +529,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -586,7 +586,7 @@ internal class JournalforingServiceTest {
         val identifisertGjenlevendePerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, YtelseType.GJENLEV)
@@ -623,7 +623,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, YtelseType.GJENLEV)
@@ -661,7 +661,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "",
                 null,
-                null,
+                false,
                 "NO",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -696,7 +696,7 @@ internal class JournalforingServiceTest {
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
@@ -751,7 +751,7 @@ internal class JournalforingServiceTest {
         val identifisertGjenlevendePerson = IdentifisertPerson(
                 "12078945602",
                 "Test Testesen",
-                null,
+                false,
                 "",
                 "",
                 personRelasjon = PersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, YtelseType.BARNEP)

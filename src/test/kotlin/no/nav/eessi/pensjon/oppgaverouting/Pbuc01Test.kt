@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -22,11 +21,11 @@ internal class Pbuc01Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true)
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-        every { request.diskresjonskode } returns Diskresjonskode.SPSF
+        every { request.harAdressebeskyttelse } returns true
         assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
-        every { request.diskresjonskode } returns Diskresjonskode.SPFO
+        every { request.harAdressebeskyttelse } returns false
         assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
     }
 
@@ -35,7 +34,7 @@ internal class Pbuc01Test {
     fun `Automatisk journalføring, uavhengig av ytelsetype`(type: YtelseType) {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.SENDT
-            every { diskresjonskode } returns null
+            every { harAdressebeskyttelse } returns false
             every { ytelseType } returns type
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
@@ -48,7 +47,7 @@ internal class Pbuc01Test {
     fun `Manuell behandling, bosatt norge`() {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.MOTTATT
-            every { diskresjonskode } returns null
+            every { harAdressebeskyttelse } returns false
             every { ytelseType } returns null
             every { aktorId } returns null
             every { sakInformasjon } returns null
@@ -62,7 +61,7 @@ internal class Pbuc01Test {
     fun `Manuell behandling, bosatt utland`() {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.MOTTATT
-            every { diskresjonskode } returns null
+            every { harAdressebeskyttelse } returns false
             every { ytelseType } returns null
             every { aktorId } returns null
             every { sakInformasjon } returns null

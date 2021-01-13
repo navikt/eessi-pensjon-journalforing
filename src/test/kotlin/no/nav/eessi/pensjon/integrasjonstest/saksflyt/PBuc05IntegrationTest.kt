@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -524,12 +523,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(sakId = SAK_ID, sakType = YtelseType.OMSORG, sakStatus = SakStatus.TIL_BEHANDLING)
             )
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -606,12 +605,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
             )
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
@@ -624,22 +623,22 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(sakId = SAK_ID, sakType = YtelseType.GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
             )
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, diskresjonkode = Diskresjonskode.SPFO) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = false) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", diskresjonkode = Diskresjonskode.SPFO) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", harAdressebeskyttelse = false) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", diskresjonkode = Diskresjonskode.SPSF) {
+            testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE", harAdressebeskyttelse = true) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }

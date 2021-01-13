@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import java.time.LocalDate
 import java.time.Period
 
@@ -18,8 +17,6 @@ interface BucTilEnhetHandler {
                     && !sakInformasjon?.sakId.isNullOrBlank()
         }
     }
-
-    fun erStrengtFortrolig(diskresjonskode: Diskresjonskode?): Boolean = diskresjonskode == Diskresjonskode.SPSF
 }
 
 class BucTilEnhetHandlerCreator {

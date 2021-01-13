@@ -5,14 +5,15 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
@@ -23,7 +24,7 @@ import java.time.LocalDate
 @Component
 class PersonidentifiseringService(private val aktoerregisterService: AktoerregisterService,
                                   private val personV3Service: PersonV3Service,
-                                  private val diskresjonService: DiskresjonkodeHelper,
+                                  private val personService: PersonService,
                                   private val fnrHelper: FnrHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
@@ -82,11 +83,18 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
     private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<SED>, personRelasjon: PersonRelasjon): IdentifisertPerson {
         val personNavn = hentPersonNavn(person)
         val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
+        val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val landkode = hentLandkode(person)
         val geografiskTilknytning = hentGeografiskTilknytning(person)
 
-        return IdentifisertPerson(aktoerId, personNavn, diskresjonskode, landkode, geografiskTilknytning, personRelasjon)
+        return IdentifisertPerson(aktoerId, personNavn, adressebeskyttet, landkode, geografiskTilknytning, personRelasjon)
+    }
+
+    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<SED>): Boolean {
+        val fnr = alleSediBuc.flatMap { SedFnrSøk.finnAlleFnrDnrISed(it) }
+        val gradering = listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        return personService.harAdressebeskyttelse(fnr, gradering)
     }
 
     /**
@@ -174,14 +182,14 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
 data class IdentifisertPerson(
         val aktoerId: String,
         val personNavn: String?,
-        val diskresjonskode: Diskresjonskode? = null,
+        val harAdressebeskyttelse: Boolean = false,
         val landkode: String?,
         val geografiskTilknytning: String?,
         val personRelasjon: PersonRelasjon,
         var personListe: List<IdentifisertPerson>? = null
 ) {
     override fun toString(): String {
-        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, diskresjonskode=$diskresjonskode, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
+        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, harAdressebeskyttelse=$harAdressebeskyttelse, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
     }
 
     fun flereEnnEnPerson() = personListe != null && personListe!!.size > 1

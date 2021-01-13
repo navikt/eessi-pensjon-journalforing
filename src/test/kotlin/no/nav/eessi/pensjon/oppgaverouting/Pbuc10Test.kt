@@ -13,7 +13,6 @@ import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,19 +33,19 @@ internal class Pbuc10Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true)
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-        every { request.diskresjonskode } returns Diskresjonskode.SPSF
+        every { request.harAdressebeskyttelse } returns true
         assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
-        every { request.diskresjonskode } returns Diskresjonskode.SPFO
+        every { request.harAdressebeskyttelse } returns false
         assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
     }
 
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
-            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
-            every { diskresjonskode } returns null
+            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
+            every { harAdressebeskyttelse } returns false
             every { ytelseType } returns YtelseType.UFOREP
             every { hendelseType } returns SENDT
             every { sakInformasjon?.sakStatus } returns SakStatus.AVSLUTTET
@@ -160,9 +159,9 @@ internal class Pbuc10Test {
     ): OppgaveRoutingRequest {
         return mockk {
             if (hendelse == SENDT)
-                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", null, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
+                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P15000))
 
-            every { diskresjonskode } returns null
+            every { harAdressebeskyttelse } returns false
             every { hendelseType } returns hendelse
             every { ytelseType } returns ytelse
             every { aktorId } returns "111"
