@@ -2,15 +2,12 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.personv3.BrukerMock
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import no.nav.eessi.pensjon.security.sts.STSClientConfig
-import no.nav.tjeneste.virksomhet.person.v3.binding.PersonV3
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
@@ -24,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -63,18 +59,14 @@ class JournalforingSendtIntegrationTest {
     lateinit var sedListener: SedListener
 
     @Autowired
-    lateinit var personV3Service: PersonV3Service
-
-    @Autowired
-    lateinit var pdlPersonService: PersonService
+    lateinit var personService: PersonService
 
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
-        // Mock personV3
-        capturePersonMock()
-
-        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
+        // Mock PDL person
+        every { personService.hentPerson(any<NorskIdent>()) } answers { PersonMock.createWith() }
+        every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
@@ -146,11 +138,6 @@ class JournalforingSendtIntegrationTest {
         container.setupMessageListener(messageListener)
 
         return container
-    }
-
-    private fun capturePersonMock() {
-        val slot = slot<String>()
-        every { personV3Service.hentPerson(fnr = capture(slot)) } answers { BrukerMock.createWith()!! }
     }
 
     companion object {
@@ -558,24 +545,13 @@ class JournalforingSendtIntegrationTest {
         )
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
-        verify(exactly = 5) { personV3Service.hentPerson(any()) }
+        verify(exactly = 5) { personService.hentPerson(any<Ident<*>>()) }
     }
 
-    // Mocks the PersonV3 Service so we don't have to deal with SOAP
+    // Mocks the personService
     @TestConfiguration
-    class TestConfig(private val stsClientConfig: STSClientConfig) {
+    class TestConfig {
         @Bean
-        @Primary
-        fun personV3(): PersonV3 = mockk()
-
-        @Bean
-        fun personV3Service(personV3: PersonV3): PersonV3Service {
-            return spyk(PersonV3Service(personV3, stsClientConfig))
-        }
-
-        @Bean
-        fun pdlPersonService(): PersonService {
-            return mockk<PersonService>()
-        }
+        fun personService(): PersonService = mockk(relaxed = true)
     }
 }

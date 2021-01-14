@@ -45,28 +45,26 @@ import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Diskresjonskoder
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.GeografiskTilknytning
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Land
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Landkoder
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personnavn
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedsel
+import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
+import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Vegadresse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
+import java.time.LocalDateTime
 import no.nav.eessi.pensjon.models.sed.Bruker as SedBruker
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent as PersonV3NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Person as PdlPerson
 
 internal open class JournalforingTestBase {
 
@@ -104,13 +102,9 @@ internal open class JournalforingTestBase {
             oppgaveHandler = oppgaveHandler
     )
 
-    protected val aktoerregisterService: AktoerregisterService = mockk(relaxed = true)
-    protected val personV3Service: PersonV3Service = mockk(relaxed = true)
-    protected val pdlPersonService: PersonService = mockk(relaxed = true)
+    protected val personService: PersonService = mockk(relaxed = true)
 
-    private val personidentifiseringService = PersonidentifiseringService(
-            aktoerregisterService, personV3Service, pdlPersonService, FnrHelper()
-    )
+    private val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
@@ -169,17 +163,14 @@ internal open class JournalforingTestBase {
         val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
         initCommonMocks(sed)
 
-        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
+        every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
 
         if (fnr != null) {
-            every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
         }
 
         if (fnrAnnenPerson != null) {
-            // TODO: Alle personV3Service skal byttes ut
-            every { personV3Service.hentPerson(fnrAnnenPerson) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", null)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrAnnenPerson)) } returns AktoerId(AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(fnrAnnenPerson)) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", aktorId = AKTOER_ID_2)
         }
 
         if (rolle == Rolle.ETTERLATTE)
@@ -210,18 +201,10 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
-        val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-        val antallKallIdent = if (antallPersoner == 0) 0
-        else antallPersoner - (1.takeIf { rolle == Rolle.ETTERLATTE } ?: 0)
-        verify(exactly = antallKallIdent) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-
-
-//        val antallKallHentPerson = (antallPersoner + (1.takeIf { antallPersoner > 0 && rolle != null } ?: 0)) * 2
-//        verify(exactly = antallKallHentPerson) { personV3Service.hentPerson(any()) }
-
         if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
 
+            val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
             val antallKallTilPensjonSaklist = if (antallPersoner > 0 && sakId != null) 1 else 0
             verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
         } else {
@@ -254,11 +237,10 @@ internal open class JournalforingTestBase {
         val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
         initCommonMocks(sed)
 
-        every { pdlPersonService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         if (fnr != null) {
-            every { personV3Service.hentPerson(fnr) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr)) } returns AktoerId(AKTOER_ID)
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land, aktorId = AKTOER_ID)
         }
 
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
@@ -286,9 +268,6 @@ internal open class JournalforingTestBase {
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
         verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
 
-        val antallKallAktoerreg = if (gyldigFnr) 1 else 0
-        verify(exactly = antallKallAktoerreg) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-
         clearAllMocks()
     }
 
@@ -303,13 +282,40 @@ internal open class JournalforingTestBase {
     private fun getResource(resourcePath: String): String =
             javaClass.getResource(resourcePath).readText()
 
-    protected fun createBrukerWith(fnr: String?, fornavn: String = "Fornavn", etternavn: String = "Etternavn", land: String? = "NOR", geo: String = "1234", diskresjonskode: String? = null): Bruker {
-        return Bruker()
-                .withPersonnavn(Personnavn().withSammensattNavn("$fornavn $etternavn"))
-                .withGeografiskTilknytning(Land().withGeografiskTilknytning(geo) as GeografiskTilknytning)
-                .withAktoer(PersonIdent().withIdent(PersonV3NorskIdent().withIdent(fnr)))
-                .withBostedsadresse(Bostedsadresse().withStrukturertAdresse(Gateadresse().withLandkode(Landkoder().withValue(land))))
-                .withDiskresjonskode(Diskresjonskoder().withValue(diskresjonskode))
+    protected fun createBrukerWith(fnr: String?,
+                                   fornavn: String = "Fornavn",
+                                   etternavn: String = "Etternavn",
+                                   land: String? = "NOR",
+                                   geo: String = "1234",
+                                   harAdressebeskyttelse: Boolean = false,
+                                   aktorId: String? = null): PdlPerson {
+
+        val foedselsdato = fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
+        val utenlandskadresse = if (land == null || land == "NOR") null else UtenlandskAdresse(landkode = land)
+
+        val identer = listOfNotNull(
+                fnr?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.FOLKEREGISTERIDENT) },
+                aktorId?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.AKTORID) }
+        )
+
+        val adressebeskyttelse = if (harAdressebeskyttelse) listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        else listOf(AdressebeskyttelseGradering.UGRADERT)
+
+        return PdlPerson(
+                identer = identer,
+                navn = Navn(fornavn, null, etternavn),
+                adressebeskyttelse = adressebeskyttelse,
+                bostedsadresse = Bostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now(),
+                        gyldigTilOgMed = LocalDateTime.now(),
+                        vegadresse = Vegadresse("Oppoverbakken", "66", null, "1920"),
+                        utenlandskAdresse = utenlandskadresse
+                ),
+                oppholdsadresse = null,
+                statsborgerskap = emptyList(),
+                foedsel = Foedsel(foedselsdato, null),
+                geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo, null, null)
+        )
     }
 
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {

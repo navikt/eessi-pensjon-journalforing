@@ -26,9 +26,8 @@ import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -343,12 +342,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 ?: createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
-        every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrVoksen)) } returns AktoerId(AKTOER_ID)
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
 
         if (fnrBarn != null) {
-            every { personV3Service.hentPerson(fnrBarn) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrBarn)) } returns AktoerId(AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
@@ -368,13 +365,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block(journalpost.captured)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        if (fnrBarn != null) {
-            verify { personV3Service.hentPerson(any()) }
-            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-        } else {
-            verify { personV3Service.hentPerson(any()) }
-            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-        }
+        verify { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         clearAllMocks()
@@ -393,12 +384,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrVoksenSoker, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
-        every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrVoksen)) } returns AktoerId(AKTOER_ID)
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
 
         if (fnrVoksenSoker != null) {
-            every { personV3Service.hentPerson(fnrVoksenSoker) } returns createBrukerWith(fnrVoksenSoker, "Voksen", "Gjenlevende", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrVoksenSoker)) } returns AktoerId(AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(fnrVoksenSoker)) } returns createBrukerWith(fnrVoksenSoker, "Voksen", "Gjenlevende", land, aktorId = AKTOER_ID_2)
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
@@ -417,13 +406,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block(journalpost.captured)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        if (fnrVoksenSoker != null) {
-            verify { personV3Service.hentPerson(any()) }
-            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-        } else {
-            verify { personV3Service.hentPerson(any()) }
-            verify { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
-        }
+        verify { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
         clearAllMocks()
@@ -442,8 +425,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {
-            every { personV3Service.hentPerson(fnr1) } returns createBrukerWith(fnr1, "Fornavn", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr1)) } returns AktoerId(AKTOER_ID)
+            every { personService.hentPerson(NorskIdent(fnr1)) } returns createBrukerWith(fnr1, "Fornavn", "Etternavn", land, aktorId = AKTOER_ID)
             every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         }
 
