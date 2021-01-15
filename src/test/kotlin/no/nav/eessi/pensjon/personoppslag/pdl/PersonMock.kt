@@ -26,7 +26,8 @@ object PersonMock {
         val utenlandskadresse = if (landkoder) null else UtenlandskAdresse(landkode = "SWE")
 
         val identer = listOfNotNull(
-                aktoerId?.let { IdentInformasjon(ident = it.id, gruppe = IdentGruppe.AKTORID) }
+                aktoerId?.let { IdentInformasjon(ident = it.id, gruppe = IdentGruppe.AKTORID) },
+                fnr?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.FOLKEREGISTERIDENT) }
         )
 
         return Person(

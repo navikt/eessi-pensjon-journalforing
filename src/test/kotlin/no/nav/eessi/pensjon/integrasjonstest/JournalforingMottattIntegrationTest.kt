@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -15,7 +16,6 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
-import org.mockserver.model.Parameter
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -64,7 +64,12 @@ class JournalforingMottattIntegrationTest {
     fun `Når en sedMottatt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
 
         // Mock PDL Person
-        every { personService.hentPerson(any<NorskIdent>()) } answers { PersonMock.createWith() }
+        every {
+            personService.hentPerson(NorskIdent("09035225916"))
+        } answers {
+            PersonMock.createWith(aktoerId = AktoerId("1000101917358"))
+        }
+
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         // Vent til kafka er klar
@@ -389,20 +394,6 @@ class JournalforingMottattIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
                     )
 
-            // Mocker aktørregisteret
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/identer")
-                            .withQueryStringParameters(
-                                    listOf(
-                                            Parameter("identgruppe", "AktoerId"),
-                                            Parameter("gjeldende", "true"))))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/aktoerregister/200-OK_1-IdentinfoForAktoer-with-1-gjeldende-NorskIdent.json"))))
-                    )
             // Mocker STS service discovery
             mockServer.`when`(
                     request()

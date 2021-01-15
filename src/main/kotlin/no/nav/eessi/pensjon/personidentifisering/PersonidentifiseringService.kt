@@ -12,11 +12,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent as PdlFodselsnummer
 
 @Component
 class PersonidentifiseringService(private val personService: PersonService,
@@ -44,7 +44,7 @@ class PersonidentifiseringService(private val personService: PersonService,
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
             bucType == BucType.P_BUC_10 -> null
-            navBruker != null -> personService.hentPerson(PdlFodselsnummer(navBruker.value))
+            navBruker != null -> personService.hentPerson(NorskIdent(navBruker.value))
             else -> null
         }
 
@@ -63,7 +63,7 @@ class PersonidentifiseringService(private val personService: PersonService,
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
         return try {
-            personService.hentPerson(PdlFodselsnummer(relasjon.fnr!!.value))
+            personService.hentPerson(NorskIdent(relasjon.fnr!!.value))
                     ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, relasjon) }
                     ?.also {
                         logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
