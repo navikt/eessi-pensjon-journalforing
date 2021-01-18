@@ -63,11 +63,14 @@ class PersonidentifiseringService(private val personService: PersonService,
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
         return try {
-            personService.hentPerson(NorskIdent(relasjon.fnr!!.value))
+            val fnr = relasjon.fnr!!.value
+            logger.debug("Henter person med fnr. $fnr fra PDL")
+
+            personService.hentPerson(NorskIdent(fnr))
                     ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, relasjon) }
                     ?.also {
-                        logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
-                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name}""".trimIndent())
+                        logger.debug("""IdentifisertPerson hentet fra PDL (aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
+                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name})""".trimIndent())
                     }
         } catch (ex: Exception) {
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
@@ -78,6 +81,7 @@ class PersonidentifiseringService(private val personService: PersonService,
     private fun populerIdentifisertPerson(person: Person,
                                           alleSediBuc: List<SED>,
                                           personRelasjon: PersonRelasjon): IdentifisertPerson {
+        logger.debug("Populerer IdentifisertPerson med data fra PDL")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
