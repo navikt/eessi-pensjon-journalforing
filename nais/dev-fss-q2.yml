@@ -22,7 +22,7 @@ spec:
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
       value: SAML
     - name: VIRKSOMHET_PERSON_V3_ENDPOINTURL
-      value: https://wasapp-q2.adeo.no/tpsws/ws/Person/v3
+      value: https://app-q2.adeo.no/tpsws-aura/ws/Person/v3
     - name: VIRKSOMHET_PERSON_V3_WSDLURL
       value: http://maven.adeo.no/nexus/content/groups/public/no/nav/tjenester/nav-person-v3-tjenestespesifikasjon/3.6.1/nav-person-v3-tjenestespesifikasjon-3.6.1.zip
     - name: SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL
@@ -38,7 +38,7 @@ spec:
     - name: NORG2_URL
       value: https://app-q4.adeo.no/norg2/
     - name: BESTEMSAK_URL
-      value: https://wasapp-q2.adeo.no/pensjon-ws/api/bestemsak/v1
+      value: https://pensjon-pen-q2.nais.preprod.local/pen/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessi-basis-sedSendt-v1-q2
     - name: KAFKA_SEDMOTTATT_TOPIC
