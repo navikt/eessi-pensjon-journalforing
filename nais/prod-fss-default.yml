@@ -20,7 +20,7 @@ spec:
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
       value: SAML
     - name: VIRKSOMHET_PERSON_V3_ENDPOINTURL
-      value: https://wasapp.adeo.no/tpsws/ws/Person/v3
+      value: https://app.adeo.no/tpsws-aura/ws/Person/v3
     - name: SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL
       value: https://security-token-service.nais.adeo.no/rest/v1/sts/.well-known/openid-configuration
     - name: SECURITYTOKENSERVICE_URL
