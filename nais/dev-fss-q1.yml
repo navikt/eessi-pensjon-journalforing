@@ -20,7 +20,7 @@ spec:
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
       value: SAML
     - name: VIRKSOMHET_PERSON_V3_ENDPOINTURL
-      value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
+      value: https://app-q1.adeo.no/tpsws-aura/ws/Person/v3
     - name: VIRKSOMHET_PERSON_V3_WSDLURL
       value: http://maven.adeo.no/nexus/content/groups/public/no/nav/tjenester/nav-person-v3-tjenestespesifikasjon/3.6.1/nav-person-v3-tjenestespesifikasjon-3.6.1.zip
     - name: SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL
