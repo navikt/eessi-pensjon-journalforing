@@ -42,7 +42,11 @@ object PersonMock {
                 ),
                 oppholdsadresse = null,
                 statsborgerskap = emptyList(),
-                foedsel = Foedsel(foedselsdato, null),
+                foedsel = Foedsel(foedselsdato, null,null,null),
+                kjoenn = null,
+                doedsfall = null,
+                familierelasjoner = emptyList(),
+                sivilstand = emptyList(),
                 geografiskTilknytning = geo?.let { GeografiskTilknytning(GtType.KOMMUNE, it, null, null) }
         )
     }

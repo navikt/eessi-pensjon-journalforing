@@ -37,6 +37,61 @@ internal class SedFnrSøkTest {
     }
 
     @Test
+    fun `asdf`() {
+        val jsonString = """
+            {
+              "pensjon": {
+                "gjenlevende": {
+                  "person": {
+                    "kjoenn": "M",
+                    "pin": [
+                      {
+                        "identifikator": "25017019905",
+                        "land": "NO"
+                      }
+                    ],
+                    "foedselsdato": "1970-01-25",
+                    "etternavn": "STAUDE",
+                    "fornavn": "ABSURD"
+                  }
+                }
+              },
+              "nav": {
+                "bruker": {
+                  "person": {
+                    "kjoenn": "K",
+                    "etternavn": "HATT",
+                    "fornavn": "GRØNN",
+                    "foedselsdato": "1970-10-16",
+                    "pin": [
+                      {
+                        "land": "NO",
+                        "identifikator": "16107021284"
+                      }
+                    ]
+                  }
+                },
+                "eessisak": [
+                  {
+                    "saksnummer": "123456",
+                    "land": "AT"
+                  }
+                ]
+              },
+              "sedGVer": "4",
+              "sedVer": "2",
+              "sed": "P3000_NO"
+            }
+        """.trimIndent()
+
+        val sed = mapJsonToAny(jsonString, typeRefs<SED>())
+
+        val result =SedFnrSøk.finnAlleFnrDnrISed(sed)
+
+//        println(result)
+    }
+
+    @Test
     fun `SED med fnr under oppholdsland og eller kompetenteuland, gjelder H020 og H021`() {
         val sed = SED(
                 type = SedType.H020,

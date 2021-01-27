@@ -313,8 +313,12 @@ internal open class JournalforingTestBase {
                 ),
                 oppholdsadresse = null,
                 statsborgerskap = emptyList(),
-                foedsel = Foedsel(foedselsdato, null),
-                geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo, null, null)
+                doedsfall = null,
+                kjoenn = null,
+                foedsel = Foedsel(foedselsdato, null, null, null),
+                geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo, null, null),
+                familierelasjoner = emptyList(),
+                sivilstand = emptyList()
         )
     }
 

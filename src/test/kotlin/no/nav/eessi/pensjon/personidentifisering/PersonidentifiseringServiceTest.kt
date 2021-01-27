@@ -75,6 +75,8 @@ class PersonidentifiseringServiceTest {
         assertEquals(expected, actual?.personRelasjon)
     }
 
+
+
     @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         every { personService.hentPerson(NorskIdent("05127921999")) } returns PersonMock.createWith(landkoder = true)
