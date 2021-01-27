@@ -229,5 +229,17 @@ enum class SedType(val kanInneholdeFnrEllerFdato: Boolean) {
     },
     R006(true) {
         override fun toString() = "R006 - Svar på anmodning om informasjon"
+    };
+
+    companion object {
+        /**
+         * SED-typer vi IKKE behandler i Journalføring.
+         */
+        val ugyldigeTyper: List<SedType>
+            get() = listOf(
+                P13000, X001, X002, X003, X004, X005, X006, X007,
+                X008, X009, X010, X011, X012, X013, X050, X100,
+                H001, H002, H020, H021, H120, H121, R004, R006
+            )
     }
 }

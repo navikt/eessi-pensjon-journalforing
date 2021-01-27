@@ -8,6 +8,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Kjoenn
+import no.nav.eessi.pensjon.personoppslag.pdl.model.KjoennType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresse
@@ -42,12 +44,12 @@ object PersonMock {
                 ),
                 oppholdsadresse = null,
                 statsborgerskap = emptyList(),
-                foedsel = Foedsel(foedselsdato, null,null,null),
-                kjoenn = null,
+                foedsel = Foedsel(foedselsdato, null, null, null),
+                geografiskTilknytning = geo?.let { GeografiskTilknytning(GtType.KOMMUNE, it, null, null) },
+                kjoenn = Kjoenn(KjoennType.KVINNE, null),
                 doedsfall = null,
                 familierelasjoner = emptyList(),
-                sivilstand = emptyList(),
-                geografiskTilknytning = geo?.let { GeografiskTilknytning(GtType.KOMMUNE, it, null, null) }
+                sivilstand = emptyList()
         )
     }
 }

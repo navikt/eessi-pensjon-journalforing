@@ -4,10 +4,32 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 internal class SedTypeTest {
+
+    @ParameterizedTest
+    @EnumSource(SedType::class, names = [
+        "P13000", "X001", "X002", "X003", "X004", "X005", "X006", "X007",
+        "X008", "X009", "X010", "X011", "X012", "X013", "X050", "X100",
+        "H001", "H002", "H020", "H021", "H120", "H121", "R004", "R006"
+    ])
+    fun `Verifiser ugyldige SED-typer`(type: SedType) {
+        assertTrue(
+            type in SedType.ugyldigeTyper,
+            "SedType.${type.name} mangler i listen over ugyldige typer"
+        )
+    }
+
+    @Test
+    fun `Sjekk antall ugyldige SED-typer`() {
+        assertEquals(24, SedType.ugyldigeTyper.size, "Antall ugyldige SED-typer har blitt endret.")
+    }
+
     @ParameterizedTest
     @EnumSource(SedType::class)
     fun `Verifiser serde av SedType fungerer`(type: SedType) {

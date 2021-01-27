@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Nav
@@ -38,6 +39,23 @@ internal class SedDokumentHelperTest {
     @AfterEach
     fun after() {
         confirmVerified(fagmodulKlient)
+    }
+
+    @Test
+    fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt`() {
+        val allSedTypes = SedType.values().toList()
+        assertEquals(74, allSedTypes.size)
+
+        val docs = allSedTypes.mapIndexed { index, sedType -> Document("$index", sedType, mockk())}
+        assertEquals(allSedTypes.size, docs.size)
+
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns docs
+
+        val dokumenter = helper.hentAlleGydligeDokumenter("123")
+
+        assertEquals(50, dokumenter.size)
+
+        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
     }
 
     @Test

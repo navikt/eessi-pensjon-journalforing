@@ -48,11 +48,14 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Doedsfall
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedsel
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Kjoenn
+import no.nav.eessi.pensjon.personoppslag.pdl.model.KjoennType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresse
@@ -313,10 +316,10 @@ internal open class JournalforingTestBase {
                 ),
                 oppholdsadresse = null,
                 statsborgerskap = emptyList(),
-                doedsfall = null,
-                kjoenn = null,
-                foedsel = Foedsel(foedselsdato, null, null, null),
+                foedsel = Foedsel(foedselsdato, "NOR", "OSLO", null),
                 geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo, null, null),
+                kjoenn = Kjoenn(KjoennType.KVINNE, null),
+                doedsfall = null,
                 familierelasjoner = emptyList(),
                 sivilstand = emptyList()
         )

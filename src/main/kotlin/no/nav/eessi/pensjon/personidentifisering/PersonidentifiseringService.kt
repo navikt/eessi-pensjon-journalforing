@@ -101,9 +101,12 @@ class PersonidentifiseringService(private val personService: PersonService,
 
     private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<SED>): Boolean {
         val fnr = alleSediBuc.flatMap { SedFnrSøk.finnAlleFnrDnrISed(it) }
+        logger.info("Fant ${fnr.size} unike fnr i SEDer tilknyttet Buc")
+
         val gradering = listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         return personService.harAdressebeskyttelse(fnr, gradering)
+            .also { logger.info("Finnes adressebeskyttet person: $it") }
     }
 
     private fun hentLandkode(person: Person): String {
