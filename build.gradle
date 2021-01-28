@@ -97,7 +97,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-metrics:0.4.0")
 	implementation("no.nav.eessi.pensjon:ep-logging:0.0.17")
 	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.6")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.8")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
