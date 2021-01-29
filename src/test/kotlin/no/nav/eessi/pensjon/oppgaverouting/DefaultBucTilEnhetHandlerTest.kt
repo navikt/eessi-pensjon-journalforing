@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -27,11 +26,11 @@ internal class DefaultBucTilEnhetHandlerTest {
         val handler = BucTilEnhetHandlerCreator.getHandler(bucType)
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-        every { request.diskresjonskode } returns Diskresjonskode.SPSF
+        every { request.harAdressebeskyttelse } returns true
         assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
-        every { request.diskresjonskode } returns Diskresjonskode.SPFO
+        every { request.harAdressebeskyttelse } returns false
         assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
     }
 

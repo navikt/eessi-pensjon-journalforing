@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -113,30 +112,6 @@ internal class BucTilEnhetHandlerTest {
         assertFalse(
                 MockBuc().kanAutomatiskJournalfores(req),
                 "Request med tom sakId skal aldri automatisk journalføres"
-        )
-    }
-
-    @Test
-    fun `Diskresjonskode SPSF er strengt fortrolig`() {
-        assertTrue(
-                MockBuc().erStrengtFortrolig(Diskresjonskode.SPSF),
-                "Diskresjonkode == SPSF skal gi true, ettersom dette er strengt fortrolig kode"
-        )
-    }
-
-    @Test
-    fun `Diskresjonskode SPFO skal ikke være fortrolig`() {
-        assertFalse(
-                MockBuc().erStrengtFortrolig(Diskresjonskode.SPFO),
-                "Diskresjonkode == SPFO skal gi false"
-        )
-    }
-
-    @Test
-    fun `Diskresjonskode lik null skal ikke være fortrolig`() {
-        assertFalse(
-                MockBuc().erStrengtFortrolig(null),
-                "Diskresjonkode == null skal gi false"
         )
     }
 

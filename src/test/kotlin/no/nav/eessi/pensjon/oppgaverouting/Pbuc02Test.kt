@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -31,11 +30,11 @@ internal class Pbuc02Test {
             val request = mockk<OppgaveRoutingRequest>(relaxed = true)
 
             // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-            every { request.diskresjonskode } returns Diskresjonskode.SPSF
+            every { request.harAdressebeskyttelse } returns true
             assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
 
             // SPSF er mindre fortrolig og følger vanlig saksflyt
-            every { request.diskresjonskode } returns Diskresjonskode.SPFO
+            every { request.harAdressebeskyttelse } returns false
             assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
         }
 
@@ -149,11 +148,11 @@ internal class Pbuc02Test {
             val request = mockk<OppgaveRoutingRequest>(relaxed = true)
 
             // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-            every { request.diskresjonskode } returns Diskresjonskode.SPSF
+            every { request.harAdressebeskyttelse } returns true
             assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
 
             // SPSF er mindre fortrolig og følger vanlig saksflyt
-            every { request.diskresjonskode } returns Diskresjonskode.SPFO
+            every { request.harAdressebeskyttelse } returns false
             assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
         }
 
@@ -255,7 +254,7 @@ internal class Pbuc02Test {
             every { sakInformasjon?.sakType } returns type
             every { sakInformasjon?.sakStatus } returns status
             every { bosatt } returns Bosatt.fraLandkode(landkode)
-            every { diskresjonskode } returns null
+            every { harAdressebeskyttelse } returns false
         }
     }
 }

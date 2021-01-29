@@ -10,7 +10,6 @@ import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -24,10 +23,10 @@ internal class Rbuc02Test {
     @ParameterizedTest
     @EnumSource(HendelseType::class)
     fun `Verifiser håndtering av diskresjonskode`(hendelseType: HendelseType) {
-        val ikkeFortrolig = hendelseType.mockRequest(diskresjonskode = Diskresjonskode.SPFO)
+        val ikkeFortrolig = hendelseType.mockRequest()
         assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(ikkeFortrolig))
 
-        val strengtFortrolig = hendelseType.mockRequest(diskresjonskode = Diskresjonskode.SPSF)
+        val strengtFortrolig = hendelseType.mockRequest(harAdressebeskyttelse = true)
         assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(strengtFortrolig))
     }
 
@@ -138,7 +137,7 @@ internal class Rbuc02Test {
 
     private fun HendelseType.mockRequest(
             type: YtelseType? = null,
-            diskresjonskode: Diskresjonskode? = null,
+            harAdressebeskyttelse: Boolean = false,
             sedType: SedType = SedType.R005,
             person: IdentifisertPerson? = null
     ): OppgaveRoutingRequest {
@@ -152,7 +151,7 @@ internal class Rbuc02Test {
             every { identifisertPerson } returns person
 
             every { this@mockk.sedType } returns sedType
-            every { this@mockk.diskresjonskode } returns diskresjonskode
+            every { this@mockk.harAdressebeskyttelse } returns harAdressebeskyttelse
         }
     }
 

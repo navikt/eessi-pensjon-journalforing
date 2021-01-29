@@ -5,25 +5,21 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.helpers.DiskresjonkodeHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerregisterService
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.personv3.PersonV3Service
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
-class PersonidentifiseringService(private val aktoerregisterService: AktoerregisterService,
-                                  private val personV3Service: PersonV3Service,
-                                  private val diskresjonService: DiskresjonkodeHelper,
+class PersonidentifiseringService(private val personService: PersonService,
                                   private val fnrHelper: FnrHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
@@ -48,7 +44,7 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
             bucType == BucType.P_BUC_10 -> null
-            navBruker != null -> personV3Service.hentPerson(navBruker.value)
+            navBruker != null -> personService.hentPerson(NorskIdent(navBruker.value))
             else -> null
         }
 
@@ -67,26 +63,63 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
         return try {
-            personV3Service.hentPerson(relasjon.fnr!!.value)
-                    ?.let { bruker -> populerIdentifisertPerson(bruker, alleSediBuc, relasjon) }
+            val fnr = relasjon.fnr!!.value
+            logger.debug("Henter person med fnr. $fnr fra PDL")
+
+            personService.hentPerson(NorskIdent(fnr))
+                    ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, relasjon) }
                     ?.also {
-                        logger.debug("""IdentifisertPerson aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
-                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name}""".trimIndent())
+                        logger.debug("""IdentifisertPerson hentet fra PDL (aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
+                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name})""".trimIndent())
                     }
         } catch (ex: Exception) {
-            logger.warn("Feil ved henting av person fra personV3Service, fortsetter uten", ex)
+            logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
         }
     }
 
-    private fun populerIdentifisertPerson(person: Bruker, alleSediBuc: List<SED>, personRelasjon: PersonRelasjon): IdentifisertPerson {
-        val personNavn = hentPersonNavn(person)
-        val aktoerId = hentAktoerId(personRelasjon.fnr) ?: ""
-        val diskresjonskode = diskresjonService.hentDiskresjonskode(alleSediBuc)
-        val landkode = hentLandkode(person)
-        val geografiskTilknytning = hentGeografiskTilknytning(person)
+    private fun populerIdentifisertPerson(person: Person,
+                                          alleSediBuc: List<SED>,
+                                          personRelasjon: PersonRelasjon): IdentifisertPerson {
+        logger.debug("Populerer IdentifisertPerson med data fra PDL")
 
-        return IdentifisertPerson(aktoerId, personNavn, diskresjonskode, landkode, geografiskTilknytning, personRelasjon)
+        val personNavn = person.navn?.run { "$fornavn $etternavn" }
+        val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
+        val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
+        val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
+        val landkode = hentLandkode(person)
+
+        return IdentifisertPerson(
+                aktorId,
+                personNavn,
+                adressebeskyttet,
+                landkode,
+                geografiskTilknytning,
+                personRelasjon
+        )
+    }
+
+    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<SED>): Boolean {
+        val fnr = alleSediBuc.flatMap { SedFnrSøk.finnAlleFnrDnrISed(it) }
+        logger.info("Fant ${fnr.size} unike fnr i SEDer tilknyttet Buc")
+
+        val gradering = listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        return personService.harAdressebeskyttelse(fnr, gradering)
+            .also { logger.info("Finnes adressebeskyttet person: $it") }
+    }
+
+    private fun hentLandkode(person: Person): String {
+        val landkodeOppholdsadresse = person.oppholdsadresse?.utenlandskAdresse?.landkode
+        val landkodeBostedsadresse = person.bostedsadresse?.utenlandskAdresse?.landkode
+        val geografiskLandkode = person.geografiskTilknytning?.gtLand
+
+        return when {
+            landkodeOppholdsadresse != null -> landkodeOppholdsadresse
+            landkodeBostedsadresse != null -> landkodeBostedsadresse
+            geografiskLandkode != null -> geografiskLandkode
+            else -> "NOR"
+        }
     }
 
     /**
@@ -158,30 +191,19 @@ class PersonidentifiseringService(private val aktoerregisterService: Aktoerregis
         return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
                 ?: FodselsdatoHelper.fraSedListe(seder, kansellerteSeder)
     }
-
-    private fun hentAktoerId(fnr: Fodselsnummer?): String? {
-        if (fnr == null) return null
-
-        return try {
-            aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr.value))?.id
-        } catch (e: Exception) {
-            logger.warn("Det oppstod en feil ved henting av aktørid: ${e.cause}", e)
-            null
-        }
-    }
 }
 
 data class IdentifisertPerson(
         val aktoerId: String,
         val personNavn: String?,
-        val diskresjonskode: Diskresjonskode? = null,
+        val harAdressebeskyttelse: Boolean = false,
         val landkode: String?,
         val geografiskTilknytning: String?,
         val personRelasjon: PersonRelasjon,
         var personListe: List<IdentifisertPerson>? = null
 ) {
     override fun toString(): String {
-        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, diskresjonskode=$diskresjonskode, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
+        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, harAdressebeskyttelse=$harAdressebeskyttelse, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
     }
 
     fun flereEnnEnPerson() = personListe != null && personListe!!.size > 1
@@ -205,12 +227,3 @@ enum class Relasjon {
     BARN,
     FORSORGER
 }
-
-fun hentLandkode(person: Person) =
-        person.bostedsadresse?.strukturertAdresse?.landkode?.value
-
-fun hentPersonNavn(person: Person) =
-        person.personnavn?.sammensattNavn
-
-fun hentGeografiskTilknytning(bruker: Bruker?) = bruker?.geografiskTilknytning?.geografiskTilknytning
-

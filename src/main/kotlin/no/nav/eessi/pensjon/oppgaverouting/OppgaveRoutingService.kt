@@ -36,7 +36,7 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
             return enhet
 
         if (routingRequest.bucType == BucType.P_BUC_01) {
-            val norgKlientRequest = NorgKlientRequest(routingRequest.diskresjonskode?.name, routingRequest.landkode, routingRequest.geografiskTilknytning)
+            val norgKlientRequest = NorgKlientRequest(routingRequest.harAdressebeskyttelse, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
             return hentNorg2Enhet(norgKlientRequest, routingRequest.bucType) ?: enhet
         }

@@ -143,7 +143,7 @@ internal class Norg2KlientTest {
 
         val request = norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
                 landkode = "NOR",
-                diskresjonskode = "SPSF"))
+                harAdressebeskyttelse = true))
 
         val result = norg2Klient.hentArbeidsfordelingEnheter(request)
         assertEquals(3, result.size)
@@ -156,8 +156,8 @@ internal class Norg2KlientTest {
     fun `Gitt en ukjent norg2Klient request kast IllegalArgumentException`() {
         Assertions.assertThrows(IllegalArgumentException::class.java) {
             norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
-                    landkode = "BOGUS",
-                    diskresjonskode = "SPFO"))
+                    landkode = "NOR",
+                    harAdressebeskyttelse = false))
         }
     }
 

@@ -48,15 +48,15 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
 
     fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
         return when {
-            req.landkode == "NOR" && req.geografiskTilknytning != null && req.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+            req.landkode == "NOR" && req.geografiskTilknytning != null && !req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
                     geografiskOmraade = req.geografiskTilknytning,
                     behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
             )
-            req.landkode != "NOR" && req.diskresjonskode == null -> Norg2ArbeidsfordelingRequest(
+            req.landkode != "NOR" && !req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
                     geografiskOmraade = "ANY",
                     behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
             )
-            req.diskresjonskode != null && req.diskresjonskode == "SPSF" -> Norg2ArbeidsfordelingRequest(
+            req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
                     tema = "ANY",
                     diskresjonskode = "SPSF"
             )
@@ -105,9 +105,9 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
     }
 }
 
-data class NorgKlientRequest(val diskresjonskode: String? = null,
-                              val landkode: String? = null,
-                              val geografiskTilknytning: String? = null)
+data class NorgKlientRequest(val harAdressebeskyttelse: Boolean = false,
+                             val landkode: String? = null,
+                             val geografiskTilknytning: String? = null)
 
 class Norg2ArbeidsfordelingRequest(
     val tema: String = "PEN",

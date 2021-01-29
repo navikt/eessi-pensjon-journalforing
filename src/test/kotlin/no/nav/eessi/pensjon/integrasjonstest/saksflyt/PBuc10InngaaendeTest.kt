@@ -20,13 +20,12 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
-import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.KravType
+import no.nav.eessi.pensjon.models.sed.Pensjon
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.AktoerId
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.aktoerregister.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -160,8 +159,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                 Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
-        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
@@ -200,8 +198,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                 Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
-        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
@@ -240,8 +237,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                 Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
-        every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
@@ -280,8 +276,7 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                 Document("30002", SedType.P5000, DocStatus.RECEIVED)
         )
 
-        every { personV3Service.hentPerson(FNR_VOKSEN) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN)) } returns AktoerId(FNR_VOKSEN + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
@@ -325,20 +320,18 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
                 Document("30002", SedType.P5000, DocStatus.SENT)
         )
 
-        every { personV3Service.hentPerson(FNR_OVER_60) } returns createBrukerWith(FNR_OVER_60, "Avdød", "død", "SWE")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_OVER_60)) } returns AktoerId(FNR_OVER_60 + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Avdød", "død", "SWE")
 
-        every { personV3Service.hentPerson(FNR_VOKSEN_2) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE")
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(FNR_VOKSEN_2)) } returns AktoerId(FNR_VOKSEN_2 + "11111")
+        every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
         every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
         every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("pdf/pdfResponseUtenVedlegg.json")
-        every { fagmodulKlient.hentPensjonSaklist(FNR_VOKSEN_2 + "11111") } returns saker
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-        val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+        val (journalpost, _) = initJournalPostRequestSlot()
         val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
         listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -367,12 +360,10 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
-        every { personV3Service.hentPerson(fnrVoksen) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
-        every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrVoksen)) } returns AktoerId(AKTOER_ID)
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land)
 
         if (fnrBarn != null) {
-            every { personV3Service.hentPerson(fnrBarn) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnrBarn)) } returns AktoerId(AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land)
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
@@ -392,11 +383,9 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         if (fnrBarn != null) {
-            verify(exactly = 6) { personV3Service.hentPerson(any()) }
-            verify(exactly = 2) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify(exactly = 2) { personService.hentPerson(any<Ident<*>>()) }
         } else {
-            verify(exactly = 2) { personV3Service.hentPerson(any()) }
-            verify(exactly = 1) { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, any<NorskIdent>()) }
+            verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
         }
         verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
 
@@ -416,9 +405,8 @@ internal class PBuc10InngaaendeTest : JournalforingTestBase() {
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {
-            every { personV3Service.hentPerson(fnr1) } returns createBrukerWith(fnr1, "Fornavn", "Etternavn", land)
-            every { aktoerregisterService.hentGjeldendeIdent(IdentGruppe.AktoerId, NorskIdent(fnr1)) } returns AktoerId(AKTOER_ID)
-            every { bestemSakKlient.kallBestemSak( any()) } returns bestemSak
+            every { personService.hentPerson(NorskIdent(fnr1)) } returns createBrukerWith(fnr1, "Fornavn", "Etternavn", land)
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         }
 
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit

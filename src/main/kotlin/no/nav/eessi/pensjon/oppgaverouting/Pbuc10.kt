@@ -9,7 +9,7 @@ class Pbuc10 : BucTilEnhetHandler {
 
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
+            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
             erSakUgyldig(request) -> Enhet.ID_OG_FORDELING
             kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
             else -> enhetFraLand(request)

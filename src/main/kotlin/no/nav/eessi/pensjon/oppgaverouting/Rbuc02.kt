@@ -12,7 +12,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            erStrengtFortrolig(request.diskresjonskode) -> Enhet.DISKRESJONSKODE
+            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
             erPersonUgyldig(request.identifisertPerson) -> Enhet.ID_OG_FORDELING
             request.sedType == SedType.R004 -> Enhet.OKONOMI_PENSJON
             kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING

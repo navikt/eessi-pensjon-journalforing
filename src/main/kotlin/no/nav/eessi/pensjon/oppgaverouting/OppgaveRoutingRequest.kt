@@ -6,14 +6,13 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.helpers.Diskresjonskode
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import java.time.LocalDate
 
 class OppgaveRoutingRequest(
         val aktorId: String? = null,
         val fdato: LocalDate,
-        val diskresjonskode: Diskresjonskode? = null,
+        val harAdressebeskyttelse: Boolean = false,
         val landkode: String? = null,
         val geografiskTilknytning: String? = null,
         val ytelseType: YtelseType? = null,
@@ -37,7 +36,7 @@ class OppgaveRoutingRequest(
             return OppgaveRoutingRequest(
                     identifisertPerson?.aktoerId,
                     fdato,
-                    identifisertPerson?.diskresjonskode,
+                    identifisertPerson?.harAdressebeskyttelse ?: false,
                     identifisertPerson?.landkode,
                     identifisertPerson?.geografiskTilknytning,
                     ytelseType,
