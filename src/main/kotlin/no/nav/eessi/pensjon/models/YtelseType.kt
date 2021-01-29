@@ -6,5 +6,6 @@ enum class YtelseType {
     GJENLEV,
     BARNEP,
     UFOREP,
-    GENRL
+    GENRL,
+    AFP_PRIVAT
 }
