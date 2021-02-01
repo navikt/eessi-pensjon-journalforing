@@ -99,23 +99,11 @@ class SedListener(
         }
     }
 
-    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
-        topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-            partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "111160")])])
-    fun recoverConsumeMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        if (cr.offset() == 111160L) {
-            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
-            consumeSedMottatt(hendelse, cr, acknowledgment)
-        } else {
-            acknowledgment.acknowledge()
-        }
-    }
-
-//    @KafkaListener(id = "sedMottattListener",
-//            idIsGroup = false,
-//            topics = ["\${kafka.sedMottatt.topic}"],
-//            groupId = "\${kafka.sedMottatt.groupid}",
-//            autoStartup = "false")
+    @KafkaListener(id = "sedMottattListener",
+            idIsGroup = false,
+            topics = ["\${kafka.sedMottatt.topic}"],
+            groupId = "\${kafka.sedMottatt.groupid}",
+            autoStartup = "false")
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeIncomingSed.measure {
@@ -238,6 +226,18 @@ class SedListener(
         }
     }
     */
+
+    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
+        topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+            partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "111160")])])
+    fun recoverConsumeMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() == 111160L) {
+            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
+            consumeSedMottatt(hendelse, cr, acknowledgment)
+        } else {
+            throw java.lang.RuntimeException()
+        }
+    }
 
 }
 
