@@ -28,7 +28,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for utland`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(getJsonFileFromResource("/norg2/norg2arbeidsfordelig0001result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -57,7 +57,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for Oslo`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(getJsonFileFromResource("/norg2/norg2arbeidsfordelig4803result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -72,7 +72,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `finn fordeligsenhet for Aalesund`() {
-        val enheter =  mapJsonToAny(getJsonFileFromResource("norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
+        val enheter =  mapJsonToAny(getJsonFileFromResource("/norg2/norg2arbeidsfordelig4862result.json"), typeRefs<List<Norg2ArbeidsfordelingItem>>())
 
         val request = Norg2ArbeidsfordelingRequest(
                 geografiskOmraade = "ANY",
@@ -87,7 +87,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter fra Norg2 avd Oslo`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig4803result.json"))
+        val response = ResponseEntity.ok().body(getJsonFileFromResource("/norg2/norg2arbeidsfordelig4803result.json"))
         every {
             mockrestTemplate.exchange(
                     "/api/v1/arbeidsfordeling",
@@ -110,7 +110,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter fra Utland`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordelig0001result.json"))
+        val response = ResponseEntity.ok().body(getJsonFileFromResource("/norg2/norg2arbeidsfordelig0001result.json"))
         every {
             mockrestTemplate.exchange(
                     "/api/v1/arbeidsfordeling",
@@ -131,7 +131,7 @@ internal class Norg2KlientTest {
 
     @Test
     fun `hent arbeidsfordeligEnheter ved diskresjon`() {
-        val response = ResponseEntity.ok().body(getJsonFileFromResource("norg2arbeidsfordeling2103result.json"))
+        val response = ResponseEntity.ok().body(getJsonFileFromResource("/norg2/norg2arbeidsfordeling2103result.json"))
         every {
             mockrestTemplate.exchange(
                     "/api/v1/arbeidsfordeling",
@@ -152,17 +152,6 @@ internal class Norg2KlientTest {
         assertEquals("2103", actual)
     }
 
-    @Test
-    fun `Gitt en ukjent norg2Klient request kast IllegalArgumentException`() {
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
-            norg2Klient.opprettNorg2ArbeidsfordelingRequest(NorgKlientRequest(
-                    landkode = "NOR",
-                    harAdressebeskyttelse = false))
-        }
-    }
-
-    private fun getJsonFileFromResource(filename: String): String {
-        return String(Files.readAllBytes(Paths.get("src/test/resources/norg2/$filename")))
-    }
+    private fun getJsonFileFromResource(filename: String): String =
+        javaClass.getResource(filename).readText()
 }
-

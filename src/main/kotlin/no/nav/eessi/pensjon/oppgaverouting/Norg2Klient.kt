@@ -47,22 +47,17 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
     }
 
     fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
-        return when {
-            req.landkode == "NOR" && req.geografiskTilknytning != null && !req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
-                    geografiskOmraade = req.geografiskTilknytning,
-                    behandlingstype = BehandlingsTyper.BOSATT_NORGE.kode
-            )
-            req.landkode != "NOR" && !req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
-                    geografiskOmraade = "ANY",
-                    behandlingstype = BehandlingsTyper.BOSATT_UTLAND.kode
-            )
-            req.harAdressebeskyttelse -> Norg2ArbeidsfordelingRequest(
-                    tema = "ANY",
-                    diskresjonskode = "SPSF"
-            )
-            else ->
-                throw IllegalArgumentException("Klarte ikke opprette norg2Arbeidsfordeling request for input: $req")
-        }
+        if (req.harAdressebeskyttelse)
+            return Norg2ArbeidsfordelingRequest(tema = "ANY", diskresjonskode = "SPSF")
+
+        val behandlingstype = if (req.landkode === "NOR")
+            BehandlingsTyper.BOSATT_NORGE.kode
+        else BehandlingsTyper.BOSATT_UTLAND.kode
+
+        return Norg2ArbeidsfordelingRequest(
+            geografiskOmraade = req.geografiskTilknytning ?: "ANY",
+            behandlingstype = behandlingstype
+        )
     }
 
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem> {
