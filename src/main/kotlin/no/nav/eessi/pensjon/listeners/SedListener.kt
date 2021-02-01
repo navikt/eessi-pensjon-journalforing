@@ -21,8 +21,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.annotation.PartitionOffset
-import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
@@ -220,24 +218,12 @@ class SedListener(
     fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         if (cr.offset() == 38518L) {
             logger.info("Behandler sedMottatt offset: ${cr.offset()}")
-            consumeSedSendt(hendelse, cr, acknowledgment)
-        } else {
-            acknowledgment.acknowledge()
-        }
-    }
-    */
-
-    @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
-        topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-            partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "111160")])])
-    fun recoverConsumeMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        if (cr.offset() == 111160L) {
-            logger.info("Behandler sedMottatt offset: ${cr.offset()}")
             consumeSedMottatt(hendelse, cr, acknowledgment)
         } else {
             throw java.lang.RuntimeException()
         }
     }
+    */
 
 }
 
