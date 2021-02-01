@@ -1,6 +1,5 @@
-package no.nav.eessi.pensjon.oppgaverouting
+package no.nav.eessi.pensjon.klienter.norg2
 
-import com.google.common.annotations.VisibleForTesting
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
@@ -32,34 +31,6 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
         hentArbeidsfordeling = metricsHelper.init("hentArbeidsfordeling")
     }
 
-    //https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
-    protected enum class BehandlingsTyper(val kode : String) {
-        BOSATT_NORGE("ae0104"),
-        BOSATT_UTLAND("ae0107")
-    }
-
-    fun hentArbeidsfordelingEnhet(person: NorgKlientRequest): String? {
-        val request = opprettNorg2ArbeidsfordelingRequest(person)
-        logger.debug("følgende request til Norg2 : $request")
-        val enheter = hentArbeidsfordelingEnheter(request)
-
-        return finnArbeidsfordelingEnheter(request, enheter)
-    }
-
-    fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
-        if (req.harAdressebeskyttelse)
-            return Norg2ArbeidsfordelingRequest(tema = "ANY", diskresjonskode = "SPSF")
-
-        val behandlingstype = if (req.landkode === "NOR")
-            BehandlingsTyper.BOSATT_NORGE.kode
-        else BehandlingsTyper.BOSATT_UTLAND.kode
-
-        return Norg2ArbeidsfordelingRequest(
-            geografiskOmraade = req.geografiskTilknytning ?: "ANY",
-            behandlingstype = behandlingstype
-        )
-    }
-
     fun hentArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest) : List<Norg2ArbeidsfordelingItem> {
         return hentArbeidsfordeling.measure {
 
@@ -87,16 +58,6 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
                 throw RuntimeException("En feil oppstod under henting av arbeidsfordeling ex: ${ex.message}")
             }
         }
-    }
-
-    @VisibleForTesting
-    fun finnArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>): String? {
-        return list.asSequence()
-                .filter { it.diskresjonskode == request.diskresjonskode }
-                .filter { it.behandlingstype == request.behandlingstype }
-                .filter { it.tema == request.tema }
-                .map { it.enhetNr }
-                .lastOrNull()
     }
 }
 
