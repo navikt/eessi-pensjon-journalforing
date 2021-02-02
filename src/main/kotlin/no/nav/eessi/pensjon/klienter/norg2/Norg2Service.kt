@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
 import com.google.common.annotations.VisibleForTesting
+import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
+import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -8,12 +10,6 @@ import org.springframework.stereotype.Service
 @Service
 class Norg2Service(private val klient: Norg2Klient) {
     private val logger = LoggerFactory.getLogger(Norg2Service::class.java)
-
-    //https://kodeverk-web.nais.preprod.local/kodeverksoversikt/kodeverk/Behandlingstyper
-    companion object {
-        private const val BOSATT_NORGE = "ae0104"
-        private const val BOSATT_UTLAND = "ae0107"
-    }
 
     fun hentArbeidsfordelingEnhet(person: NorgKlientRequest): Enhet? {
         val request = opprettNorg2ArbeidsfordelingRequest(person)
@@ -42,7 +38,7 @@ class Norg2Service(private val klient: Norg2Klient) {
 
         return Norg2ArbeidsfordelingRequest(
             geografiskOmraade = req.geografiskTilknytning ?: "ANY",
-            behandlingstype = behandlingstype
+            behandlingstype = behandlingstype.kode
         )
     }
 
