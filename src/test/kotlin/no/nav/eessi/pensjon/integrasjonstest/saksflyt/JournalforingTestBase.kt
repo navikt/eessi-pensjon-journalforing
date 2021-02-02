@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedListener
@@ -39,7 +40,6 @@ import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
 import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -48,7 +48,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Doedsfall
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedsel
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
@@ -84,12 +83,12 @@ internal open class JournalforingTestBase {
     }
 
     protected val euxKlient: EuxKlient = mockk()
-    private val norg2Klient: Norg2Klient = mockk(relaxed = true)
+    private val norg2Service: Norg2Service = mockk(relaxed = true)
 
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
-    private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Klient)
+    private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
     private val pdfService: PDFService = PDFService()
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {

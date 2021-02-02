@@ -1,13 +1,14 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import com.google.common.annotations.VisibleForTesting
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
+import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
+class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
@@ -38,20 +39,9 @@ class OppgaveRoutingService(private val norg2Klient: Norg2Klient) {
         if (routingRequest.bucType == BucType.P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(routingRequest.harAdressebeskyttelse, routingRequest.landkode, routingRequest.geografiskTilknytning)
 
-            return hentNorg2Enhet(norgKlientRequest, routingRequest.bucType) ?: enhet
+            return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
         return enhet
     }
 
-    @VisibleForTesting
-    fun hentNorg2Enhet(person: NorgKlientRequest, bucType: BucType?): Enhet? {
-        return try {
-            val enhetVerdi = norg2Klient.hentArbeidsfordelingEnhet(person)
-            logger.info("Norg2tildeltEnhet: $enhetVerdi")
-            enhetVerdi?.let { Enhet.getEnhet(it) }
-        } catch (ex: Exception) {
-            logger.error("Ukjent feil oppstod; ${ex.message}")
-            null
-        }
-    }
 }

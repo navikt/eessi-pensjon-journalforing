@@ -1,9 +1,13 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
-import io.mockk.spyk
+import io.mockk.mockk
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
+import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType.H_BUC_07
 import no.nav.eessi.pensjon.models.BucType.P_BUC_01
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
@@ -40,9 +44,11 @@ import kotlin.test.assertNull
 
 internal class OppgaveRoutingServiceTest {
 
-    private val norg2Klient = spyk<Norg2Klient>()
+    private val norg2Klient = mockk<Norg2Klient>()
 
-    private val routingService = OppgaveRoutingService(norg2Klient)
+    private val norg2Service = Norg2Service(norg2Klient)
+
+    private val routingService = OppgaveRoutingService(norg2Service)
 
     companion object {
         private const val DUMMY_FNR = "09035225916" // Testbruker SLAPP SKILPADDE
@@ -414,7 +420,7 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(landkode = "SVE"), P_BUC_01)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(landkode = "SVE"))
 
         assertEquals(PENSJON_UTLAND, actual)
     }
@@ -425,8 +431,7 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-                P_BUC_01)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"))
 
         assertEquals(NFP_UTLAND_OSLO, actual)
     }
@@ -437,8 +442,7 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR"),
-                P_BUC_01)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR"))
 
         assertEquals(NFP_UTLAND_AALESUND, actual)
     }
@@ -449,20 +453,16 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
-                geografiskTilknytning = "1102",
-                landkode = "NOR",
-                harAdressebeskyttelse = true),
-                P_BUC_01)
-        val expected = DISKRESJONSKODE
+        val actual = norg2Service.hentArbeidsfordelingEnhet(
+            NorgKlientRequest(geografiskTilknytning = "1102", landkode = "NOR", harAdressebeskyttelse = true)
+        )
 
-        assertEquals(expected, actual)
+        assertEquals(DISKRESJONSKODE, actual)
     }
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge feil buc`() {
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-                P_BUC_03)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"))
 
         assertNull(actual)
     }
@@ -471,8 +471,7 @@ internal class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2`() {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns emptyList()
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-                P_BUC_01)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"))
 
         assertNull(actual)
     }
@@ -481,11 +480,9 @@ internal class OppgaveRoutingServiceTest {
     fun `hentNorg2Enhet for bosatt Norge mock feil mot Norg2 error`() {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } throws RuntimeException("dummy")
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"),
-                P_BUC_01)
-        val expected = null
+        val actual = norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"))
 
-        assertEquals(expected, actual)
+        assertNull(actual)
     }
 
     @Test
@@ -493,11 +490,9 @@ internal class OppgaveRoutingServiceTest {
         val enhetlist = fromResource("/norg2/norg2arbeidsfordeling2103result.json")
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
-        val actual = routingService.hentNorg2Enhet(NorgKlientRequest(
-                geografiskTilknytning = "0322",
-                landkode = "NOR",
-                harAdressebeskyttelse = true),
-                P_BUC_01)
+        val actual = norg2Service.hentArbeidsfordelingEnhet(
+            NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR", harAdressebeskyttelse = true)
+        )
 
         assertEquals(DISKRESJONSKODE, actual)
     }

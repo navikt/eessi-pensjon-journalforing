@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
@@ -18,7 +19,6 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Document
-import no.nav.eessi.pensjon.oppgaverouting.Norg2Klient
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -38,11 +38,14 @@ internal class JournalforingServiceTest {
     private val euxKlient = mockk<EuxKlient>()
     private val journalpostService = mockk<JournalpostService>(relaxUnitFun = true)
     private val fagmodulKlient = mockk<FagmodulKlient>()
-    private val norg2Klient = mockk<Norg2Klient>()
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
 
-    private val oppgaveRoutingService = OppgaveRoutingService(norg2Klient)
+    private val norg2Service = mockk<Norg2Service> {
+        every { hentArbeidsfordelingEnhet(any()) } returns null
+    }
+
+    private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(euxKlient,
             journalpostService,
@@ -239,7 +242,7 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
                 "12078945602",
