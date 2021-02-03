@@ -213,7 +213,7 @@ class SedListener(
             acknowledgment.acknowledge()
         }
     }
-*/
+
     @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
             topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
                     partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "104259")])])
@@ -225,7 +225,7 @@ class SedListener(
             throw java.lang.RuntimeException()
         }
     }
-
+*/
 
 }
 
