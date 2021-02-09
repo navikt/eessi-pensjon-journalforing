@@ -46,7 +46,7 @@ internal class SedDokumentHelperTest {
         val allSedTypes = SedType.values().toList()
         assertEquals(74, allSedTypes.size)
 
-        val docs = allSedTypes.mapIndexed { index, sedType -> Document("$index", sedType, mockk())}
+        val docs = allSedTypes.mapIndexed { index, sedType -> Document("$index", sedType, DocStatus.RECEIVED)}
         assertEquals(allSedTypes.size, docs.size)
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns docs

@@ -12,6 +12,10 @@ data class Document(
 ) {
     fun validStatus(): Boolean = (status == DocStatus.SENT || status == DocStatus.RECEIVED)
     fun cancelledStatus(): Boolean = (status == DocStatus.CANCELLED)
+
+    override fun toString(): String {
+        return "Document(id=$id, type=${type?.name}, status=${status?.name})"
+    }
 }
 
 @Suppress("unused")

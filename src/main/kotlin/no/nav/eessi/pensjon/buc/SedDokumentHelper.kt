@@ -25,6 +25,7 @@ class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
 
         return fagmodulKlient.hentAlleDokumenter(rinaSakId)
             .filterNot { doc -> doc.type == null || doc.type in ugyldigeSedTyper }
+            .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
 
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<Document>): List<SED> {
