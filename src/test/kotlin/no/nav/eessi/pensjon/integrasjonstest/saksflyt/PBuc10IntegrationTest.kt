@@ -1,25 +1,38 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.document.SedDokument
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.models.sed.*
+import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.sed.DocStatus
+import no.nav.eessi.pensjon.models.sed.Document
+import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.KravType.ALDER
 import no.nav.eessi.pensjon.models.sed.KravType.ETTERLATTE
+import no.nav.eessi.pensjon.models.sed.Pensjon
+import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
@@ -401,8 +414,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "NOR")
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -424,7 +437,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(Enhet.NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
 
         @Test
@@ -440,8 +453,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Fornavn", "Pensjonisten", "SWE")
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -463,7 +476,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(Enhet.PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
 
         @Test
@@ -479,8 +492,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "NOR")
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -502,7 +515,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(Enhet.UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
 
         @Test
@@ -518,8 +531,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns createBrukerWith(FNR_VOKSEN, "Fornavn", "Pensjonisten", "SWE")
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -541,7 +554,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(Enhet.UFORE_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
 
         @Test
@@ -558,8 +571,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             )
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP15000mottatt
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP15000mottatt
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -581,7 +594,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
     }
 
@@ -631,8 +644,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
 
             every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocumenter
-            every { euxKlient.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
-            every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
 
             val meldingSlot = slot<String>()
@@ -650,7 +663,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-            verify(exactly = 2) { euxKlient.hentSed(any(), any()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         }
     }
 
@@ -705,7 +718,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
 
         clearAllMocks()
     }
@@ -751,7 +764,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
         verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
 
         clearAllMocks()
     }
@@ -792,7 +805,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block(journalpost.captured)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
 
         if (bestemSak == null)
             verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
@@ -804,10 +817,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     private fun initCommonMocks(sed: SED, alleDocs: List<Document>) {
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alleDocs
-        every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
     }
 
     private fun getResource(resourcePath: String): String =
             javaClass.getResource(resourcePath).readText()
+
+    private fun getDokumentfilerUtenVedlegg(): SedDokument {
+        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        return mapJsonToAny(dokumentfilerJson, typeRefs())
+    }
 }

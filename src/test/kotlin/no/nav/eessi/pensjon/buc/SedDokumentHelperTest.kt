@@ -1,13 +1,14 @@
 package no.nav.eessi.pensjon.buc
 
+import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.Called
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -31,10 +32,10 @@ import java.nio.file.Paths
 
 internal class SedDokumentHelperTest {
 
-    private val euxKlient = mockk<EuxKlient>()
+    private val euxService = mockk<EuxService>()
     private val fagmodulKlient = mockk<FagmodulKlient>()
 
-    private val helper = SedDokumentHelper(fagmodulKlient, euxKlient)
+    private val helper = SedDokumentHelper(fagmodulKlient, euxService)
 
     @AfterEach
     fun after() {
@@ -108,7 +109,7 @@ internal class SedDokumentHelperTest {
         val sedP2000 = mapJsonToAny(sedJson, typeRefs<SED>())
 
         every { fagmodulKlient.hentAlleDokumenter(any()) } returns alldocsid
-        every { euxKlient.hentSed(any(), any()) } returns sedP2000
+        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP2000
 
         val result = helper.hentAlleGydligeDokumenter(rinaSakId)
         val actual = helper.hentAlleSedIBuc(rinaSakId, result)

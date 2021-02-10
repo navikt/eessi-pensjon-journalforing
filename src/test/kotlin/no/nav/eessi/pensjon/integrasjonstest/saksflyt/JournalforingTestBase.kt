@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.CapturingSlot
 import io.mockk.clearAllMocks
 import io.mockk.every
@@ -7,12 +8,12 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
@@ -27,7 +28,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.models.sed.DocStatus
 import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Krav
@@ -82,14 +82,14 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID_2 = "0009876543210"
     }
 
-    protected val euxKlient: EuxKlient = mockk()
+    protected val euxService: EuxService = mockk()
     private val norg2Service: Norg2Service = mockk(relaxed = true)
 
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
-    private val pdfService: PDFService = PDFService()
+    private val pdfService: PDFService = PDFService(euxService)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
@@ -97,7 +97,6 @@ internal open class JournalforingTestBase {
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
-            euxKlient = euxKlient,
             journalpostService = journalpostService,
             oppgaveRoutingService = oppgaveRoutingService,
             pdfService = pdfService,
@@ -109,7 +108,7 @@ internal open class JournalforingTestBase {
     private val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxKlient)
+    private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxService)
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
 
@@ -201,7 +200,7 @@ internal open class JournalforingTestBase {
         assertBlock(request)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
 
         if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
@@ -263,7 +262,7 @@ internal open class JournalforingTestBase {
         assertBlock(journalpost.captured)
 
         verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
-        verify(exactly = 1) { euxKlient.hentSed(any(), any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
@@ -273,12 +272,16 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: SED) {
-        val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
+    private fun initCommonMocks(sed: SED, documents: List<Document>? = null) {
+        val docs = if (documents == null || documents.isNullOrEmpty())
+            mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
+        else documents
 
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
-        every { euxKlient.hentSed(any(), any()) } returns sed
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns getResource("/pdf/pdfResponseUtenVedlegg.json")
+        every { fagmodulKlient.hentAlleDokumenter(any()) } returns docs
+        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
+
+        val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(dokumentVedleggJson, typeRefs())
     }
 
     private fun getResource(resourcePath: String): String =
@@ -421,14 +424,6 @@ internal open class JournalforingTestBase {
               "navBruker": ${forsikretFnr?.let { "\"$it\"" }}
             }
         """.trimIndent()
-    }
-
-    protected fun getMockDocuments(): List<Document> {
-        return listOf(
-                Document("44cb68f89a2f4e748934fb4722721018", SedType.P2000, DocStatus.SENT),
-                Document("3009f65dd2ac4948944c6b7cfa4f179d", SedType.H121, null),
-                Document("9498fc46933548518712e4a1d5133113", SedType.H070, null)
-        )
     }
 
 }
