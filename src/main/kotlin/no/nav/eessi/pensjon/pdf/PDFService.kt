@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.EuxDokument
+import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
@@ -20,7 +23,11 @@ val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeatur
  * @param metricsHelper Usually injected by Spring Boot, can be set manually in tests - no way to read metrics if not set.
  */
 @Service
-class PDFService(@Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
+class PDFService(
+    private val euxService: EuxService,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+) {
+
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
     private lateinit var pdfConverter: MetricsHelper.Metric
@@ -30,21 +37,15 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 
-    fun parseJsonDocuments(json: String, sedType: SedType): Pair<String, List<EuxDokument>> {
+    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<EuxDokument>> {
+        val documents = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
+            ?: throw RuntimeException("Failed to get documents from EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
+
         return pdfConverter.measure {
             try {
-                val documents = mapper.readValue(json, SedDokumenter::class.java)
                 val hovedDokument = EuxDokument("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
                 val vedlegg = (documents.vedlegg ?: listOf())
-                        .mapIndexed { index, vedlegg ->
-                            if (vedlegg.filnavn == null) {
-                                EuxDokument(genererFilnavn(sedType, index, vedlegg)
-                                        , vedlegg.mimeType
-                                        , vedlegg.innhold)
-                            } else {
-                                vedlegg
-                            }
-                        }
+                        .mapIndexed { index, vedlegg -> opprettDokument(index, vedlegg, sedType) }
                         .map { konverterEventuelleBilderTilPDF(it) }
                 val convertedDocuments = listOf(hovedDokument).plus(vedlegg)
 
@@ -65,7 +66,7 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                                 dokumentKategori = "SED",
                                 dokumentvarianter = listOf(
                                         Dokumentvarianter(
-                                                filtype = it.mimeType?.decode()
+                                                filtype = it.mimeType?.name
                                                         ?: throw RuntimeException("MimeType is null after being converted to PDF, $it"),
                                                 fysiskDokument = it.innhold,
                                                 variantformat = Variantformat.ARKIV
@@ -73,24 +74,31 @@ class PDFService(@Autowired(required = false) private val metricsHelper: Metrics
                                 tittel = it.filnavn)
                     })
                 } else {
-                    throw RuntimeException("No supported documents, $json")
+                    throw RuntimeException("No supported documents, ${documents.toJson()}")
                 }
 
                 Pair(supportedDocumentsJson, unsupportedDocuments)
-            } catch (ex: RuntimeException) {
-                logger.error("RuntimeException: Noe gikk galt under parsing av json, $json", ex)
-                throw ex
             } catch (ex: Exception) {
-                logger.error("Noe gikk galt under parsing av json, $json", ex)
+                logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
             }
         }
     }
 
+    private fun opprettDokument(index: Int, vedlegg: EuxDokument, sedType: SedType): EuxDokument {
+        if (vedlegg.filnavn != null)
+            return vedlegg
+
+        return EuxDokument(
+            genererFilnavn(sedType, index, vedlegg),
+            vedlegg.mimeType,
+            vedlegg.innhold
+        )
+    }
 
     private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: EuxDokument): String? {
         return if (vedlegg.mimeType != null) {
-            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType.decode().toLowerCase()}"
+            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.toLowerCase()}"
         } else {
             vedlegg.filnavn
         }
