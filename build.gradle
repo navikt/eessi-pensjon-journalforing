@@ -138,7 +138,7 @@ compileTestKotlin {
 repositories {
 	mavenCentral()
 
-	["maven-release","tjenestespesifikasjoner","ep-metrics", "ep-security-sts"].each { repo ->
+	["maven-release","tjenestespesifikasjoner","ep-metrics", "ep-security-sts","ep-eux"].each { repo ->
 		String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
 		if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
 		maven {
