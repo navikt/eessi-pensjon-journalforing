@@ -98,7 +98,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:0.0.17")
 	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.8")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.0.2")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.0.0")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
@@ -138,15 +138,14 @@ compileTestKotlin {
 repositories {
 	mavenCentral()
 
-	["maven-release","tjenestespesifikasjoner","ep-metrics", "ep-security-sts","ep-eux"].each { repo ->
-		String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
-		if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
-		maven {
-			url = uri("https://maven.pkg.github.com/navikt/$repo")
-			credentials {
-				username = "token"
-				password = token
-			}
+	String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
+	if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
+
+	maven {
+		url = uri("https://maven.pkg.github.com/navikt/maven-release")
+		credentials {
+			username = "token"
+			password = token
 		}
 	}
 }
