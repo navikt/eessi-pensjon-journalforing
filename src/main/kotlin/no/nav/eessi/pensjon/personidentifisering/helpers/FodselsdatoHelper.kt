@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -24,7 +25,7 @@ class FodselsdatoHelper {
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
             val fdato = seder
-                    .filter { it.type.kanInneholdeFnrEllerFdato }
+                    .filter { it.type.kanInneholdeIdentEllerFdato() }
                     .mapNotNull { filterFodselsdato(it) }
                     .firstOrNull()
 
@@ -33,7 +34,7 @@ class FodselsdatoHelper {
             }
 
             val kansellertfdato = kansellerteSeder
-                    .filter { it.type.kanInneholdeFnrEllerFdato }
+                    .filter { it.type.kanInneholdeIdentEllerFdato() }
                     .mapNotNull { filterFodselsdato(it) }
                     .firstOrNull()
 

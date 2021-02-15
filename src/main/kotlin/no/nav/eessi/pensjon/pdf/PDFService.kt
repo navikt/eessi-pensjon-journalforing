@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.document.MimeType
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -44,7 +44,7 @@ class PDFService(
 
         return pdfConverter.measure {
             try {
-                val hovedDokument = SedVedlegg("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
+                val hovedDokument = SedVedlegg("${sedType.typeMedBeskrivelse()}.pdf", documents.sed.mimeType, documents.sed.innhold)
                 val vedlegg = (documents.vedlegg ?: listOf())
                         .mapIndexed { index, vedlegg -> opprettDokument(index, vedlegg, sedType) }
                         .map { konverterEventuelleBilderTilPDF(it) }

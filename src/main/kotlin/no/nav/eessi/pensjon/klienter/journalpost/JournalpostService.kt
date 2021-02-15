@@ -1,11 +1,11 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.google.common.annotations.VisibleForTesting
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
@@ -52,7 +52,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         val sak = populerSak(arkivsaksnummer)
         val tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType)
         val tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId))
-        val tittel = "${journalpostType.decode()} $sedType"
+        val tittel = "${journalpostType.decode()} ${sedType.typeMedBeskrivelse()}"
 
         val request = OpprettJournalpostRequest(
                 avsenderMottaker,

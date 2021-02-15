@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
@@ -14,7 +15,6 @@ import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
@@ -135,11 +135,24 @@ class JournalforingMottattIntegrationTest {
         every { personService.hentPerson(NorskIdent("09035225916")) }
             .answers { PersonMock.createWith(aktoerId = AktoerId("1000101917358")) }
 
-        every { personService.harAdressebeskyttelse(any<List<String>>(), any<List<AdressebeskyttelseGradering>>()) }
+        every { personService.harAdressebeskyttelse(any(), any()) }
             .answers { false }
 
 
         // Mock EUX Service
+        every { euxService.hentBucDokumenter(any()) }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsids.json") }
+
+        every { euxService.hentBucDokumenter("2536475861") }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsidsR_BUC_02.json") }
+
+        every { euxService.hentBucDokumenter("7477291") }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocuments_ugyldigFNR_ids.json") }
+
+        every { euxService.hentBucDokumenter("747729177") }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsidsH_BUC_07.json") }
+
+
         every { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
@@ -162,6 +175,9 @@ class JournalforingMottattIntegrationTest {
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
 
+        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/sed/P2000-NAV.json") }
+
         every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", any<TypeReference<SED>>()) }
             .answers { opprettSED("/sed/R005-alderpensjon-NAV.json") }
 
@@ -183,12 +199,14 @@ class JournalforingMottattIntegrationTest {
         every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", any<TypeReference<SED>>()) }
             .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json") }
 
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/sed/P2000-NAV.json") }
-
         every { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113", any<TypeReference<SED>>()) }
             .answers { opprettSED("/buc/H070-NAV.json") }
 
+    }
+
+    private fun opprettForenkletSEDListe(file: String): List<ForenkletSED> {
+        val json = javaClass.getResource(file).readText()
+        return mapJsonToAny(json, typeRefs())
     }
 
     private fun opprettSedDokument(file: String): SedDokumentfiler {
@@ -242,51 +260,6 @@ class JournalforingMottattIntegrationTest {
                             .withStatusCode(HttpStatusCode.OK_200.code())
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
                     )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/2536475861/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsR_BUC_02.json"))))
-                    )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/7477291/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
-                    )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments -
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/747729177/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsH_BUC_07.json"))))
-                    )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/.*/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
-                    )
-
 
             // Mocker journalføringstjeneste
             mockServer.`when`(
@@ -368,38 +341,6 @@ class JournalforingMottattIntegrationTest {
                 VerificationTimes.atLeast(1)
         )
 
-        // Verfiy fagmodul allDocuments R_BUC_02
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/2536475861/allDocuments"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments on Sed ugyldigFNR
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/7477291/allDocuments"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments on BUC H_BUC_07
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/747729177/allDocuments"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/.*/allDocuments"),
-                VerificationTimes.atLeast(4)
-        )
-
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
@@ -408,6 +349,11 @@ class JournalforingMottattIntegrationTest {
                 VerificationTimes.exactly(7)
         )
 
+        // Verfiser at seder i buc har blitt hentet
+        verify(exactly = 1) { euxService.hentBucDokumenter("2536475861") }
+        verify(exactly = 1) { euxService.hentBucDokumenter("7477291") }
+        verify(exactly = 1) { euxService.hentBucDokumenter("747729177") }
+        verify(atLeast = 4) { euxService.hentBucDokumenter(any()) }
 
         // Verifiserer at det har blitt forsøkt å hente PDF fra eux
         verify(exactly = 1) { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }

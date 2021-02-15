@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

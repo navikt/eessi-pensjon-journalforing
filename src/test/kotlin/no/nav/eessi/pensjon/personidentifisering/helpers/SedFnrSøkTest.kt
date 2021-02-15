@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Kontekst
 import no.nav.eessi.pensjon.models.sed.Merinformasjon

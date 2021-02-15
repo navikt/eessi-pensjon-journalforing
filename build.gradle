@@ -85,7 +85,7 @@ dependencies {
 		exclude module: 'junit'
 	}
 	testImplementation("org.mock-server:mockserver-client-java:5.10")
-	testImplementation("io.mockk:mockk:1.10.2")
+	testImplementation("io.mockk:mockk:1.10.6")
 
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:0.14.1'
@@ -98,7 +98,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:0.0.17")
 	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.8")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.0.3")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.0.4")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")

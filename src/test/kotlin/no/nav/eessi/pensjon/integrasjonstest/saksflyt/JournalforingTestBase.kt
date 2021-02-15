@@ -9,6 +9,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -27,8 +29,6 @@ import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SedType
-import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Krav
 import no.nav.eessi.pensjon.models.sed.KravType
@@ -199,7 +199,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(request)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
 
         if (hendelseType == HendelseType.SENDT) {
@@ -261,7 +261,7 @@ internal open class JournalforingTestBase {
 
         assertBlock(journalpost.captured)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
@@ -272,12 +272,12 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: SED, documents: List<Document>? = null) {
+    private fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
         val docs = if (documents == null || documents.isNullOrEmpty())
-            mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<Document>>())
+            mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
         else documents
 
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns docs
+        every { euxService.hentBucDokumenter(any()) } returns docs
         every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
 
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
