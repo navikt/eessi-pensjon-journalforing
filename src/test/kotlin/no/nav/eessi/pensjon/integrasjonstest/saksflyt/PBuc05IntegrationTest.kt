@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.eux.model.document.SedDokument
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
@@ -1581,7 +1581,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         )
     }
 
-    private fun getDokumentfilerUtenVedlegg(): SedDokument {
+    private fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         return mapJsonToAny(dokumentfilerJson, typeRefs())
     }

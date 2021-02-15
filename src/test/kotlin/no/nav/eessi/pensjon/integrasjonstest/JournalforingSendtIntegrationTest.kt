@@ -7,7 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.document.SedDokument
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedListener
@@ -206,7 +206,7 @@ class JournalforingSendtIntegrationTest {
             .answers { opprettSED("/sed/P2000-NAV.json") }
     }
 
-    private fun opprettSedDokument(file: String): SedDokument {
+    private fun opprettSedDokument(file: String): SedDokumentfiler {
         val json = javaClass.getResource(file).readText()
         return mapJsonToAny(json, typeRefs())
     }

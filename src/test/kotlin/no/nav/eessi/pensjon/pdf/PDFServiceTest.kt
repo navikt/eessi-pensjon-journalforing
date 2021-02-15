@@ -6,9 +6,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.document.EuxDokument
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.document.MimeType
-import no.nav.eessi.pensjon.eux.model.document.SedDokument
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.SedType
@@ -101,9 +101,9 @@ class PDFServiceTest {
 
     @Test
     fun `Gitt en sed med et vedlegg uten filnavn og uten mimetype saa legges til unsupportertVedlegg`() {
-        val fileContent = SedDokument(
-            EuxDokument("P2000", MimeType.PDF, "dokInnhold"),
-            listOf(EuxDokument("filnavn", null, "dokInnhold"))
+        val fileContent = SedDokumentfiler(
+            SedVedlegg("P2000", MimeType.PDF, "dokInnhold"),
+            listOf(SedVedlegg("filnavn", null, "dokInnhold"))
         )
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns fileContent
 

@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.pdf
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.eux.model.document.SedDokument
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,7 +13,7 @@ class SedDokumenterTest {
     fun `Gitt en gyldig sedDokumenter med vedlegg når mapper så skal alle felter mappes`() {
         val mapper = jacksonObjectMapper()
         val medVedleggJson = javaClass.getResource("/pdf/pdfResponseMedVedlegg.json").readText()
-        val resp  = mapper.readValue(medVedleggJson, SedDokument::class.java)
+        val resp  = mapper.readValue(medVedleggJson, SedDokumentfiler::class.java)
 
         assertEquals(resp.sed.filnavn, "Sak_163373_dok_3f7bd9d1dfa04af6ac553a734ddc332e.pdf")
         assertEquals(resp.sed.mimeType, MimeType.PDF)
@@ -29,7 +29,7 @@ class SedDokumenterTest {
     fun `Gitt en gyldig sedDokumenter uten vedlegg når mapper så skal alle felter mappes`() {
         val mapper = jacksonObjectMapper()
         val utenVedleggJson = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json").readText()
-        val resp  = mapper.readValue(utenVedleggJson, SedDokument::class.java)
+        val resp  = mapper.readValue(utenVedleggJson, SedDokumentfiler::class.java)
 
         assertEquals(resp.sed.filnavn, "Sak_163373_dok_3f7bd9d1dfa04af6ac553a734ddc332e.pdf")
         assertEquals(resp.sed.mimeType, MimeType.PDF)

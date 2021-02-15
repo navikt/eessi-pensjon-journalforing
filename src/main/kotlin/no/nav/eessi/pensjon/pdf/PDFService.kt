@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.document.EuxDokument
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.document.MimeType
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SedType
 import org.slf4j.LoggerFactory
@@ -37,13 +38,13 @@ class PDFService(
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 
-    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<EuxDokument>> {
+    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<SedVedlegg>> {
         val documents = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
             ?: throw RuntimeException("Failed to get documents from EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
 
         return pdfConverter.measure {
             try {
-                val hovedDokument = EuxDokument("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
+                val hovedDokument = SedVedlegg("$sedType.pdf", documents.sed.mimeType, documents.sed.innhold)
                 val vedlegg = (documents.vedlegg ?: listOf())
                         .mapIndexed { index, vedlegg -> opprettDokument(index, vedlegg, sedType) }
                         .map { konverterEventuelleBilderTilPDF(it) }
@@ -85,18 +86,18 @@ class PDFService(
         }
     }
 
-    private fun opprettDokument(index: Int, vedlegg: EuxDokument, sedType: SedType): EuxDokument {
+    private fun opprettDokument(index: Int, vedlegg: SedVedlegg, sedType: SedType): SedVedlegg {
         if (vedlegg.filnavn != null)
             return vedlegg
 
-        return EuxDokument(
+        return SedVedlegg(
             genererFilnavn(sedType, index, vedlegg),
             vedlegg.mimeType,
             vedlegg.innhold
         )
     }
 
-    private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: EuxDokument): String? {
+    private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: SedVedlegg): String? {
         return if (vedlegg.mimeType != null) {
             "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.toLowerCase()}"
         } else {
@@ -104,13 +105,13 @@ class PDFService(
         }
     }
 
-    private fun konverterEventuelleBilderTilPDF(document: EuxDokument): EuxDokument {
+    private fun konverterEventuelleBilderTilPDF(document: SedVedlegg): SedVedlegg {
         return when (document.mimeType) {
             null -> document
             MimeType.PDF -> document
             MimeType.PDFA -> document
             else -> try {
-                EuxDokument(
+                SedVedlegg(
                         filnavn = konverterFilendingTilPdf(document.filnavn!!),
                         mimeType = MimeType.PDF,
                         innhold = ImageConverter.toBase64PDF(document.innhold)

@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.eux.model.document.EuxDokument
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
@@ -115,7 +115,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
         }
     }
 
-    private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {
+    private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
         return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
     }
 }
