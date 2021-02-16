@@ -1,5 +1,5 @@
 # Deployer pågående release-branch til Q1
-name: Deploy PDL-branch til Q1
+name: Deploy release-branch til Q1
 on:
   push:
     branches:
