@@ -2,7 +2,8 @@ package no.nav.eessi.pensjon.models.sed
 
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SedType.*
-
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.kanInneholdeIdentEllerFdato
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
 
 object SedTypeUtils {
 
@@ -27,4 +28,6 @@ object SedTypeUtils {
     )
 }
 
-internal fun SedType.kanInneholdeIdentEllerFdato(): Boolean = this in SedTypeUtils.kanInneholdeIdentEllerFdato
+fun SedType.kanInneholdeIdentEllerFdato(): Boolean = this in kanInneholdeIdentEllerFdato
+
+fun SedType?.erGyldig(): Boolean = this != null && this !in ugyldigeTyper

@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,8 +29,30 @@ internal class SedTypeTest {
     }
 
     @Test
+    fun `Sjekk antall SED-typer`() {
+        assertEquals(
+            74,
+            SedType.values().size,
+            "Antall SED-typer har blitt endret."
+        )
+    }
+
+    @Test
     fun `Sjekk antall ugyldige SED-typer`() {
-        assertEquals(24, ugyldigeTyper.size, "Antall ugyldige SED-typer har blitt endret.")
+        assertEquals(
+            24,
+            ugyldigeTyper.size,
+            "Antall ugyldige SED-typer har blitt endret."
+        )
+    }
+
+    @Test
+    fun `Sjekk antall SED-typer som kan inneholde fnr eller dnr`() {
+        assertEquals(
+            54,
+            kanInneholdeIdentEllerFdato.size,
+            "Antall SEDer som kan inneholde ident har blitt endret."
+        )
     }
 
     @ParameterizedTest

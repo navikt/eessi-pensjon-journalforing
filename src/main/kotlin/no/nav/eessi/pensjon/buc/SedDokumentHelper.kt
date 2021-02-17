@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils
+import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -27,11 +27,8 @@ class SedDokumentHelper(
     private val sedTypeRef = typeRefs<SED>()
 
     fun hentAlleGydligeDokumenter(rinaSakId: String): List<ForenkletSED> {
-        val ugyldigeSedTyper: Set<SedType> = SedTypeUtils.ugyldigeTyper
-
         return euxService.hentBucDokumenter(rinaSakId)
-            .filterNot { sed -> sed.type == null }
-            .filterNot { sed -> sed.type in ugyldigeSedTyper }
+            .filter { it.type.erGyldig() }
             .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
 
