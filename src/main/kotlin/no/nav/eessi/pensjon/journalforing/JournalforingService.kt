@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Enhet
@@ -14,7 +14,6 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -25,8 +24,7 @@ import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
-class JournalforingService(private val euxKlient: EuxKlient,
-                           private val journalpostService: JournalpostService,
+class JournalforingService(private val journalpostService: JournalpostService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
@@ -58,9 +56,9 @@ class JournalforingService(private val euxKlient: EuxKlient,
                 **********""".trimIndent())
 
                 // Henter dokumenter
-                val sedDokumenterJSON = euxKlient.hentSedDokumenter(sedHendelseModel.rinaSakId, sedHendelseModel.rinaDokumentId)
-                        ?: throw RuntimeException("Failed to get documents from EUX, ${sedHendelseModel.rinaSakId}, ${sedHendelseModel.rinaDokumentId}")
-                val (documents, uSupporterteVedlegg) = pdfService.parseJsonDocuments(sedDokumenterJSON, sedHendelseModel.sedType!!)
+                val (documents, uSupporterteVedlegg) = sedHendelseModel.run {
+                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
+                }
 
                 val tildeltEnhet = if (fdato == null) {
                     Enhet.ID_OG_FORDELING
@@ -76,7 +74,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
                         fnr = identifisertPerson?.personRelasjon?.fnr,
                         personNavn = identifisertPerson?.personNavn,
                         bucType = sedHendelseModel.bucType!!,
-                        sedType = sedHendelseModel.sedType,
+                        sedType = sedHendelseModel.sedType!!,
                         sedHendelseType = hendelseType,
                         journalfoerendeEnhet = tildeltEnhet,
                         arkivsaksnummer = arkivsaksnummer,
@@ -117,7 +115,7 @@ class JournalforingService(private val euxKlient: EuxKlient,
         }
     }
 
-    private fun usupporterteFilnavn(uSupporterteVedlegg: List<EuxDokument>): String {
+    private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
         return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
     }
 }

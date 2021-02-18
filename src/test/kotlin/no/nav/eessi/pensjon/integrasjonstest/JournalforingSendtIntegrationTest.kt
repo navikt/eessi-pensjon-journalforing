@@ -1,9 +1,18 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.fasterxml.jackson.core.type.TypeReference
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
+import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -21,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -37,7 +47,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.TimeUnit
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
@@ -61,17 +71,12 @@ class JournalforingSendtIntegrationTest {
     @Autowired
     lateinit var personService: PersonService
 
+    @Autowired
+    lateinit var euxService: EuxService
+
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
-
-        // Mock PDL person
-        every {
-            personService.hentPerson(NorskIdent("09035225916"))
-        } answers {
-            PersonMock.createWith(aktoerId = AktoerId("1000101917358"))
-        }
-
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        initMocks()
 
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
@@ -145,6 +150,86 @@ class JournalforingSendtIntegrationTest {
         return container
     }
 
+    private fun initMocks() {
+        // Mock PDL Person
+        every { personService.hentPerson(NorskIdent("09035225916")) }
+            .answers { PersonMock.createWith(aktoerId = AktoerId("1000101917358")) }
+
+        every { personService.harAdressebeskyttelse(any(), any()) }
+            .answers { false }
+
+
+        // Mock EUX Service (uthenting av alle sed i buc)
+        every { euxService.hentBucDokumenter(any()) }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsids.json") }
+
+        every { euxService.hentBucDokumenter("7477291") }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocuments_ugyldigFNR_ids.json") }
+
+        every { euxService.hentBucDokumenter("2536475861") }
+            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsidsR_BUC_02.json") }
+
+
+        // Mock EUX Service (FILER / VEDLEGG)
+        every { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentAlleDokumentfiler("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentAlleDokumentfiler("2536475861", "b12e06dda2c7474b9998c7139c77777") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentAlleDokumentfiler("147666", "b12e06dda2c7474b9998c7139c666666") }
+            .answers { opprettSedDokument("/pdf/pdfResponseMedUgyldigMimeType.json") }
+
+        // Mock EUX Service (SEDer)
+        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/sed/P2000-NAV.json") }
+
+        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/eux/SedResponseP2000.json") }
+
+        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/eux/SedResponseP2000.json") }
+
+        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/eux/SedResponseP2000.json") }
+
+        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/eux/SedResponseP2000.json") }
+
+        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/sed/R_BUC_02-R005-AP.json") }
+
+        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/buc/H070-NAV.json") }
+
+        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", any<TypeReference<SED>>()) }
+            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json") }
+    }
+
+    private fun opprettForenkletSEDListe(file: String): List<ForenkletSED> {
+        val json = javaClass.getResource(file).readText()
+        return mapJsonToAny(json, typeRefs())
+    }
+
+    private fun opprettSedDokument(file: String): SedDokumentfiler {
+        val json = javaClass.getResource(file).readText()
+        return mapJsonToAny(json, typeRefs())
+    }
+
+    private fun opprettSED(file: String): SED {
+        val json = javaClass.getResource(file).readText()
+        return mapJsonToAny(json, typeRefs())
+    }
+
     companion object {
 
         init {
@@ -164,178 +249,6 @@ class JournalforingSendtIntegrationTest {
                             .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
                     )
 
-            // Mocker Eux PDF generator
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseUtenVedlegg.json"))))
-                    )
-
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pdf/pdfResponseMedUgyldigMimeType.json"))))
-                    )
-
-            //Mock eux hent av sed
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
-                    )
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/eux/SedResponseP2000.json"))))
-                    )
-
-            //Mock eux hent sed R_BUC_02 -- R005 sed
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/R_BUC_02-R005-AP.json"))))
-                    )
-
-            //Mock eux hent sed R_BUC_02 -- H070 sed
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/buc/H070-NAV.json"))))
-                    )
-
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments - ugyldig FNR
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/7477291/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocuments_ugyldigFNR_ids.json"))))
-                    )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments - R_BUC
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/2536475861/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsidsR_BUC_02.json"))))
-                    )
-
-            //Mock fagmodul /buc/{rinanr}/allDocuments
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/.*/allDocuments"))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/fagmodul/alldocumentsids.json"))))
-                    )
-
-            //Mock eux hent av sed - ugyldig FNR
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx" ))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-ugyldigFNR-NAV.json"))))
-                    )
-
-            //Mock eux hent av sed
-            mockServer.`when`(
-                    request()
-                            .withMethod(HttpMethod.GET.name)
-                            .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018" ))
-                    .respond(HttpResponse.response()
-                            .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                            .withStatusCode(HttpStatusCode.OK_200.code())
-                            .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/P2000-NAV.json"))))
-                    )
 
             //Mock eux hent av sed
             mockServer.`when`(
@@ -426,100 +339,6 @@ class JournalforingSendtIntegrationTest {
     private fun verifiser() {
         assertEquals(0, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
 
-        // Verifiserer at det har blitt forsøkt å hente PDF fra eux
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer"),
-                VerificationTimes.once()
-        )
-
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer"),
-                VerificationTimes.once()
-        )
-
-        //verify R_BUC_02_R004
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c77777/filer"),
-                VerificationTimes.once()
-        )
-
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer"),
-                VerificationTimes.atLeast(1)
-        )
-
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments R_BUC_02 R004 sed
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/2536475861/allDocuments"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments on Sed ugyldigFNR
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/7477291/allDocuments"),
-                VerificationTimes.once()
-        )
-
-        // Verfiy fagmodul allDocuments
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/.*/allDocuments"),
-                VerificationTimes.atLeast(4)
-        )
-
-        // Verfiy eux sed on ugyldig-FNR
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx"),
-                VerificationTimes.atLeast(1)
-        )
-
-        //verify R_BUC_02 sed R005
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/2536475861/sed/b12e06dda2c7474b9998c7139c899999"),
-                VerificationTimes.atLeast(1)
-        )
-
-        //verify R_BUC_02 sed H070
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/2536475861/sed/9498fc46933548518712e4a1d5133113"),
-                VerificationTimes.atLeast(1)
-        )
-
-
-        // Verfiy eux sed
-        mockServer.verify(
-                request()
-                        .withMethod(HttpMethod.GET.name)
-                        .withPath("/buc/.*/sed/44cb68f89a2f4e748934fb4722721018"),
-                VerificationTimes.atLeast( 4 )
-        )
-
         // Verifiserer at det har blitt forsøkt å opprette en journalpost
         mockServer.verify(
                 request()
@@ -535,14 +354,46 @@ class JournalforingSendtIntegrationTest {
                 VerificationTimes.atLeast(1)
         )
 
+
+        // Verfiser uthenting av alle seder fra buc
+        verify(exactly = 1) { euxService.hentBucDokumenter("2536475861") }
+        verify(exactly = 1) { euxService.hentBucDokumenter("7477291") }
+        verify(atLeast = 4) { euxService.hentBucDokumenter(any()) }
+
+        // Verifiserer at det har blitt forsøkt å hente PDF fra eux
+        verify (exactly = 1) { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
+        verify (exactly = 1) { euxService.hentAlleDokumentfiler("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
+        verify (exactly = 1) { euxService.hentAlleDokumentfiler("2536475861", "b12e06dda2c7474b9998c7139c77777") }
+        verify (atLeast = 1) { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+        verify (exactly = 1) { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
+
+        // Verifiser uthenting av SEDer
+        verify (exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", any<TypeReference<SED>>()) }
+        verify (exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", any<TypeReference<SED>>()) }
+        verify (exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", any<TypeReference<SED>>()) }
+        verify (atLeast = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
+
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 5) { personService.hentPerson(any<Ident<*>>()) }
     }
 
     // Mocks the personService
+    @Suppress("unused")
+    @Profile("integrationtest")
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun personService(): PersonService = mockk(relaxed = true)
+        fun personService(): PersonService {
+            return mockk(relaxed = true) {
+                every { initMetrics() } just Runs
+            }
+        }
+
+        @Bean
+        fun euxService(): EuxService {
+            return mockk(relaxed = true) {
+                every { initMetrics() } just Runs
+            }
+        }
     }
 }

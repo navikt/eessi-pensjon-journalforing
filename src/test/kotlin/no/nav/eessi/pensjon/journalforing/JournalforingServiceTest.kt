@@ -3,11 +3,9 @@ package no.nav.eessi.pensjon.journalforing
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
@@ -16,11 +14,8 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.pdf.EuxDokument
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
@@ -35,9 +30,7 @@ import java.time.LocalDate
 
 internal class JournalforingServiceTest {
 
-    private val euxKlient = mockk<EuxKlient>()
     private val journalpostService = mockk<JournalpostService>(relaxUnitFun = true)
-    private val fagmodulKlient = mockk<FagmodulKlient>()
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
 
@@ -47,7 +40,7 @@ internal class JournalforingServiceTest {
 
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
-    private val journalforingService = JournalforingService(euxKlient,
+    private val journalforingService = JournalforingService(
             journalpostService,
             oppgaveRoutingService,
             pdfService,
@@ -68,17 +61,14 @@ internal class JournalforingServiceTest {
 
         //MOCK RESPONSES
 
-        //EUX - HENT SED DOKUMENT
-        every { euxKlient.hentSedDokumenter(any(), any()) } returns "MOCK DOCUMENTS"
-
         //PDF -
-        every { pdfService.parseJsonDocuments(any(), SedType.P2000) } returns Pair<String, List<EuxDokument>>("P2000 Supported Documents", emptyList())
-        every { pdfService.parseJsonDocuments(any(), SedType.P2100) } returns Pair("P2100 Supported Documents", listOf(EuxDokument("usupportertVedlegg.xml", null, "bleh")))
-        every { pdfService.parseJsonDocuments(any(), SedType.P2100) } returns Pair<String, List<EuxDokument>>("P2100 Krav om etterlattepensjon", emptyList())
-        every { pdfService.parseJsonDocuments(any(), SedType.P2200) } returns Pair<String, List<EuxDokument>>("P2200 Supported Documents", emptyList())
-        every { pdfService.parseJsonDocuments(any(), SedType.R004) } returns Pair<String, List<EuxDokument>>("R004 - Melding om utbetaling", emptyList())
-        every { pdfService.parseJsonDocuments(any(), SedType.R005) } returns Pair<String, List<EuxDokument>>("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
-        every { pdfService.parseJsonDocuments(any(), SedType.P15000) } returns Pair<String, List<EuxDokument>>("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Supported Documents", listOf(SedVedlegg("usupportertVedlegg.xml", null, "bleh")))
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2200) } returns Pair("P2200 Supported Documents", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R004) } returns Pair("R004 - Melding om utbetaling", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
 
         //JOURNALPOST OPPRETT JOURNALPOST
         every {
@@ -274,11 +264,6 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2200`() {
-        //FAGMODUL HENT ALLE DOKUMENTER
-        val documents = mapJsonToAny(javaClass.getResource("/buc/P2200-NAV.json").readText(), typeRefs<List<Document>>())
-
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns documents
-
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
@@ -379,11 +364,6 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`() {
-        val json = javaClass.getResource("/fagmodul/allDocumentsBuc01.json").readText()
-        val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
-
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns allDocuments
-
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
@@ -452,11 +432,6 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Mottat gyldig Sed P2200`() {
-        val json = javaClass.getResource("/buc/P2200-NAV.json").readText()
-        val allDocuments = mapJsonToAny(json, typeRefs<List<Document>>())
-
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns allDocuments
-
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 

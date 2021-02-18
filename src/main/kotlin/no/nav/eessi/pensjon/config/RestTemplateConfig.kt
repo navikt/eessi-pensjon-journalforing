@@ -12,7 +12,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpRequest
 import org.springframework.http.MediaType
-import org.springframework.http.client.*
+import org.springframework.http.client.BufferingClientHttpRequestFactory
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.ClientHttpResponse
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.http.client.support.BasicAuthenticationInterceptor
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
@@ -92,20 +97,6 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
                         RequestCountInterceptor(meterRegistry),
                         BasicAuthenticationInterceptor(username, password)
                 )
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
-    }
-
-    @Bean
-    fun euxOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(euxUrl)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestResponseLoggerInterceptor(),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }

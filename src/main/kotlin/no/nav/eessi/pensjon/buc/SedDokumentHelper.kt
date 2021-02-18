@@ -1,43 +1,47 @@
 package no.nav.eessi.pensjon.buc
 
+import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
+import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class SedDokumentHelper(private val fagmodulKlient: FagmodulKlient,
-                        private val euxKlient: EuxKlient) {
+class SedDokumentHelper(
+    private val fagmodulKlient: FagmodulKlient,
+    private val euxService: EuxService
+) {
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
 
-    fun hentAlleGydligeDokumenter(rinaSakId: String): List<Document> {
-        val ugyldigeSedTyper = SedType.ugyldigeTyper
+    private val sedTypeRef = typeRefs<SED>()
 
-        return fagmodulKlient.hentAlleDokumenter(rinaSakId)
-            .filterNot { doc -> doc.type == null || doc.type in ugyldigeSedTyper }
+    fun hentAlleGydligeDokumenter(rinaSakId: String): List<ForenkletSED> {
+        return euxService.hentBucDokumenter(rinaSakId)
+            .filter { it.type.erGyldig() }
             .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
 
-    fun hentAlleSedIBuc(rinaSakId: String, documents: List<Document>): List<SED> {
+    fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
-            .filter { it.validStatus() }
-            .mapNotNull { sed -> euxKlient.hentSed(rinaSakId , sed.id) }
+            .filter(ForenkletSED::harGyldigStatus)
+            .mapNotNull { sed -> euxService.hentSed(rinaSakId , sed.id, sedTypeRef) }
     }
 
-    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<Document>): List<SED> {
+    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
-                .filter { it.cancelledStatus() }
-                .mapNotNull { sed -> euxKlient.hentSed(rinaSakId, sed.id) }
+                .filter(ForenkletSED::erKansellert)
+                .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
     }
 
     fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): YtelseType? {

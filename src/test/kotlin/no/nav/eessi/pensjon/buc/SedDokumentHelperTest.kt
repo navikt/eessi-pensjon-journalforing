@@ -1,21 +1,22 @@
 package no.nav.eessi.pensjon.buc
 
+import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.Called
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.document.SedStatus
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.klienter.eux.EuxKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
-import no.nav.eessi.pensjon.models.sed.DocStatus
-import no.nav.eessi.pensjon.models.sed.Document
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.SED
@@ -31,10 +32,10 @@ import java.nio.file.Paths
 
 internal class SedDokumentHelperTest {
 
-    private val euxKlient = mockk<EuxKlient>()
+    private val euxService = mockk<EuxService>()
     private val fagmodulKlient = mockk<FagmodulKlient>()
 
-    private val helper = SedDokumentHelper(fagmodulKlient, euxKlient)
+    private val helper = SedDokumentHelper(fagmodulKlient, euxService)
 
     @AfterEach
     fun after() {
@@ -46,16 +47,16 @@ internal class SedDokumentHelperTest {
         val allSedTypes = SedType.values().toList()
         assertEquals(74, allSedTypes.size)
 
-        val docs = allSedTypes.mapIndexed { index, sedType -> Document("$index", sedType, DocStatus.RECEIVED)}
+        val docs = allSedTypes.mapIndexed { index, sedType -> ForenkletSED("$index", sedType, SedStatus.RECEIVED)}
         assertEquals(allSedTypes.size, docs.size)
 
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns docs
+        every { euxService.hentBucDokumenter(any()) } returns docs
 
         val dokumenter = helper.hentAlleGydligeDokumenter("123")
 
         assertEquals(50, dokumenter.size)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
     }
 
     @Test
@@ -102,13 +103,13 @@ internal class SedDokumentHelperTest {
         val rinaSakId = "123123"
 
         val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json").readText()
-        val alldocsid = mapJsonToAny(allDocsJson, typeRefs<List<Document>>())
+        val alldocsid = mapJsonToAny(allDocsJson, typeRefs<List<ForenkletSED>>())
 
         val sedJson = javaClass.getResource("/buc/P2000-NAV.json").readText()
         val sedP2000 = mapJsonToAny(sedJson, typeRefs<SED>())
 
-        every { fagmodulKlient.hentAlleDokumenter(any()) } returns alldocsid
-        every { euxKlient.hentSed(any(), any()) } returns sedP2000
+        every { euxService.hentBucDokumenter(any()) } returns alldocsid
+        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP2000
 
         val result = helper.hentAlleGydligeDokumenter(rinaSakId)
         val actual = helper.hentAlleSedIBuc(rinaSakId, result)
@@ -117,7 +118,7 @@ internal class SedDokumentHelperTest {
         val actualSed = actual.first()
         assertEquals(SedType.P2000, actualSed.type)
 
-        verify(exactly = 1) { fagmodulKlient.hentAlleDokumenter(any()) }
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
     }
 
     @Test

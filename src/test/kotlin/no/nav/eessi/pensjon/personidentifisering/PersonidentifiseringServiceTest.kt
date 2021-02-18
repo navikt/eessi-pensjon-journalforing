@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.SedType
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Krav

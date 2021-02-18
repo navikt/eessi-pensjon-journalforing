@@ -1,11 +1,12 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.models.SedType
 import no.nav.eessi.pensjon.models.YtelseType
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import org.slf4j.LoggerFactory
@@ -27,7 +28,7 @@ class FnrHelper {
 
         seder.forEach { sed ->
             try {
-                if (sed.type.kanInneholdeFnrEllerFdato) {
+                if (sed.type.kanInneholdeIdentEllerFdato()) {
                     logger.info("SED: ${sed.type}")
 
                     when (sed.type) {
