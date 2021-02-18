@@ -45,7 +45,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
             identifisertPerson: IdentifisertPerson?,
             fdato: LocalDate?,
             ytelseType: YtelseType?,
-            offset: Long = 0,
+            offset: Long,
             sakInformasjon: SakInformasjon?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
@@ -63,7 +63,12 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 val tildeltEnhet = if (fdato == null) {
                     Enhet.ID_OG_FORDELING
                 } else {
-                   oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson, fdato, ytelseType, sedHendelseModel, hendelseType, sakInformasjon) )
+                   oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
+                       fdato,
+                       ytelseType,
+                       sedHendelseModel,
+                       hendelseType,
+                       sakInformasjon) )
                 }
 
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
@@ -93,12 +98,24 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 val aktoerId = identifisertPerson?.aktoerId
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
-                    val melding = OppgaveMelding(sedType, journalPostResponse.journalpostId, tildeltEnhet, aktoerId, sedHendelseModel.rinaSakId, hendelseType, null)
+                    val melding = OppgaveMelding(sedType,
+                        journalPostResponse.journalpostId,
+                        tildeltEnhet,
+                        aktoerId,
+                        sedHendelseModel.rinaSakId,
+                        hendelseType,
+                        null)
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    val melding = OppgaveMelding(sedType, null, tildeltEnhet, aktoerId, sedHendelseModel.rinaSakId, hendelseType, usupporterteFilnavn(uSupporterteVedlegg))
+                    val melding = OppgaveMelding(sedType,
+                        null,
+                        tildeltEnhet,
+                        aktoerId,
+                        sedHendelseModel.rinaSakId,
+                        hendelseType,
+                        usupporterteFilnavn(uSupporterteVedlegg))
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 

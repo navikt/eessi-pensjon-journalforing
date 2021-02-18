@@ -45,26 +45,18 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             avsenderNavn: String?,
             ytelseType: YtelseType?): OpprettJournalPostResponse? {
 
-        val avsenderMottaker = populerAvsenderMottaker(avsenderNavn, sedHendelseType, avsenderLand)
-        val behandlingstema = hentBehandlingsTema(bucType, ytelseType)
-        val bruker = fnr?.let { Bruker(id = it.value) }
-        val journalpostType = populerJournalpostType(sedHendelseType)
-        val sak = populerSak(arkivsaksnummer)
-        val tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType)
-        val tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId))
-        val tittel = "${journalpostType.decode()} ${sedType.typeMedBeskrivelse()}"
-
         val request = OpprettJournalpostRequest(
-                avsenderMottaker,
-                behandlingstema,
-                bruker,
-                dokumenter,
-                journalfoerendeEnhet,
-                journalpostType,
-                sak,
-                tema,
-                tilleggsopplysninger,
-                tittel)
+            avsenderMottaker = populerAvsenderMottaker(avsenderNavn, sedHendelseType, avsenderLand),
+            behandlingstema = bestemBehandlingsTema(bucType, ytelseType),
+            bruker = fnr?.let { Bruker(id = it.value) },
+            journalpostType = bestemJournalpostType(sedHendelseType),
+            sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
+            tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType),
+            tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId)),
+            tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedType),
+            dokumenter = dokumenter,
+            journalfoerendeEnhet = journalfoerendeEnhet
+        )
 
         val forsokFerdigstill: Boolean = journalfoerendeEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
@@ -78,7 +70,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    private fun hentBehandlingsTema(bucType: BucType, ytelseType: YtelseType?): Behandlingstema {
+    private fun bestemBehandlingsTema(bucType: BucType, ytelseType: YtelseType?): Behandlingstema {
         return if (bucType == BucType.R_BUC_02) {
             return when (ytelseType) {
                 YtelseType.UFOREP -> Behandlingstema.UFOREPENSJON
@@ -91,16 +83,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     @VisibleForTesting
     fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
         logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $ytelseType")
+
         if (ytelseType == YtelseType.UFOREP) return Tema.UFORETRYGD
-        return when(bucType) {
-            BucType.R_BUC_02 -> {
-                when {
-                    sedType == SedType.R004 && enhet == Enhet.OKONOMI_PENSJON -> Tema.PENSJON
-                    else -> Tema.PENSJON
-               }
-            }
-            else -> bucType.tema
-        }
+        if(bucType == BucType.R_BUC_02) return Tema.PENSJON
+        return bucType.tema
     }
 
     private fun populerAvsenderMottaker(
@@ -123,10 +109,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             if (avsenderLand == "UK") "GB"
             else avsenderLand
 
-    private fun populerJournalpostType(sedHendelseType: HendelseType): JournalpostType =
+    private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
             if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE
             else JournalpostType.INNGAAENDE
 
-    private fun populerSak(arkivsaksnummer: String?): Sak? =
-            arkivsaksnummer?.let { Sak(it, "PSAK") }
+    private fun lagTittel(journalpostType: JournalpostType,
+                          sedType: SedType) = "${journalpostType.decode()} ${sedType.typeMedBeskrivelse()}"
 }
