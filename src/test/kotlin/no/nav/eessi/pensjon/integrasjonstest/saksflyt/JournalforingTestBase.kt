@@ -48,6 +48,8 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Endring
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Endringstype
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedsel
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
 import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
@@ -55,6 +57,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Kjoenn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.KjoennType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Metadata
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresse
@@ -97,10 +100,10 @@ internal open class JournalforingTestBase {
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
-            journalpostService = journalpostService,
-            oppgaveRoutingService = oppgaveRoutingService,
-            pdfService = pdfService,
-            oppgaveHandler = oppgaveHandler
+        journalpostService = journalpostService,
+        oppgaveRoutingService = oppgaveRoutingService,
+        pdfService = pdfService,
+        oppgaveHandler = oppgaveHandler
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -113,11 +116,11 @@ internal open class JournalforingTestBase {
     private val bestemSakService = BestemSakService(bestemSakKlient)
 
     protected val listener: SedListener = SedListener(
-            journalforingService = journalforingService,
-            personidentifiseringService = personidentifiseringService,
-            sedDokumentHelper = sedDokumentHelper,
-            bestemSakService = bestemSakService,
-            profile = "test"
+        journalforingService = journalforingService,
+        personidentifiseringService = personidentifiseringService,
+        sedDokumentHelper = sedDokumentHelper,
+        bestemSakService = bestemSakService,
+        profile = "test"
     )
 
     @BeforeEach
@@ -151,15 +154,15 @@ internal open class JournalforingTestBase {
      * @param assertBlock: En [Unit] for å kjøre assertions/validering på [OpprettJournalpostRequest]
      */
     protected fun testRunnerFlerePersoner(
-            fnr: String?,
-            fnrAnnenPerson: String?,
-            saker: List<SakInformasjon> = emptyList(),
-            sakId: String? = SAK_ID,
-            harAdressebeskyttelse: Boolean = false,
-            land: String = "NOR",
-            rolle: Rolle?,
-            hendelseType: HendelseType = HendelseType.SENDT,
-            assertBlock: (OpprettJournalpostRequest) -> Unit
+        fnr: String?,
+        fnrAnnenPerson: String?,
+        saker: List<SakInformasjon> = emptyList(),
+        sakId: String? = SAK_ID,
+        harAdressebeskyttelse: Boolean = false,
+        land: String = "NOR",
+        rolle: Rolle?,
+        hendelseType: HendelseType = HendelseType.SENDT,
+        assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
         initCommonMocks(sed)
@@ -167,11 +170,24 @@ internal open class JournalforingTestBase {
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
 
         if (fnr != null) {
-            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
+                fnr,
+                "Mamma forsørger",
+                "Etternavn",
+                land,
+                aktorId = AKTOER_ID
+            )
         }
 
         if (fnrAnnenPerson != null) {
-            every { personService.hentPerson(NorskIdent(fnrAnnenPerson)) } returns createBrukerWith(fnrAnnenPerson, "Barn", "Diskret", land, "1213", aktorId = AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(fnrAnnenPerson)) } returns createBrukerWith(
+                fnrAnnenPerson,
+                "Barn",
+                "Diskret",
+                land,
+                "1213",
+                aktorId = AKTOER_ID_2
+            )
         }
 
         if (rolle == Rolle.ETTERLATTE)
@@ -228,12 +244,12 @@ internal open class JournalforingTestBase {
      * @param assertBlock: En [Unit] for å kjøre assertions/validering på [OpprettJournalpostRequest]
      */
     protected fun testRunner(
-            fnr: String?,
-            saker: List<SakInformasjon> = emptyList(),
-            sakId: String? = SAK_ID,
-            land: String = "NOR",
-            hendelseType: HendelseType = HendelseType.SENDT,
-            assertBlock: (OpprettJournalpostRequest) -> Unit
+        fnr: String?,
+        saker: List<SakInformasjon> = emptyList(),
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        hendelseType: HendelseType = HendelseType.SENDT,
+        assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
         initCommonMocks(sed)
@@ -241,7 +257,13 @@ internal open class JournalforingTestBase {
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         if (fnr != null) {
-            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Fornavn", "Etternavn", land, aktorId = AKTOER_ID)
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
+                fnr,
+                "Fornavn",
+                "Etternavn",
+                land,
+                aktorId = AKTOER_ID
+            )
         }
 
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
@@ -285,45 +307,65 @@ internal open class JournalforingTestBase {
     }
 
     private fun getResource(resourcePath: String): String =
-            javaClass.getResource(resourcePath).readText()
+        javaClass.getResource(resourcePath).readText()
 
-    protected fun createBrukerWith(fnr: String?,
-                                   fornavn: String = "Fornavn",
-                                   etternavn: String = "Etternavn",
-                                   land: String? = "NOR",
-                                   geo: String = "1234",
-                                   harAdressebeskyttelse: Boolean = false,
-                                   aktorId: String? = null): PdlPerson {
+    protected fun createBrukerWith(
+        fnr: String?,
+        fornavn: String = "Fornavn",
+        etternavn: String = "Etternavn",
+        land: String? = "NOR",
+        geo: String = "1234",
+        harAdressebeskyttelse: Boolean = false,
+        aktorId: String? = null
+    ): PdlPerson {
 
         val foedselsdato = fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
         val utenlandskadresse = if (land == null || land == "NOR") null else UtenlandskAdresse(landkode = land)
 
         val identer = listOfNotNull(
-                fnr?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.FOLKEREGISTERIDENT) },
-                aktorId?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.AKTORID) }
+            fnr?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.FOLKEREGISTERIDENT) },
+            aktorId?.let { IdentInformasjon(ident = it, gruppe = IdentGruppe.AKTORID) }
         )
 
         val adressebeskyttelse = if (harAdressebeskyttelse) listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         else listOf(AdressebeskyttelseGradering.UGRADERT)
 
+        val metadata = Metadata(
+            listOf(
+                Endring(
+                    "kilde",
+                    LocalDateTime.now(),
+                    "ole",
+                    "system1",
+                    Endringstype.OPPRETT
+                )
+            ),
+            false,
+            "nav",
+            "1234"
+        )
+
         return PdlPerson(
-                identer = identer,
-                navn = Navn(fornavn, null, etternavn),
-                adressebeskyttelse = adressebeskyttelse,
-                bostedsadresse = Bostedsadresse(
-                        gyldigFraOgMed = LocalDateTime.now(),
-                        gyldigTilOgMed = LocalDateTime.now(),
-                        vegadresse = Vegadresse("Oppoverbakken", "66", null, "1920"),
-                        utenlandskAdresse = utenlandskadresse
-                ),
-                oppholdsadresse = null,
-                statsborgerskap = emptyList(),
-                foedsel = Foedsel(foedselsdato, "NOR", "OSLO", null),
-                geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo, null, null),
-                kjoenn = Kjoenn(KjoennType.KVINNE, null),
-                doedsfall = null,
-                familierelasjoner = emptyList(),
-                sivilstand = emptyList()
+            identer = identer,
+            navn = Navn(
+                fornavn = fornavn, etternavn = etternavn, metadata = metadata
+            ),
+            adressebeskyttelse = adressebeskyttelse,
+            bostedsadresse = Bostedsadresse(
+                gyldigFraOgMed = LocalDateTime.now(),
+                gyldigTilOgMed = LocalDateTime.now(),
+                vegadresse = Vegadresse("Oppoverbakken", "66", null, "1920"),
+                utenlandskAdresse = utenlandskadresse,
+                metadata
+            ),
+            oppholdsadresse = null,
+            statsborgerskap = emptyList(),
+            foedsel = Foedsel(foedselsdato, "NOR", "OSLO", metadata = metadata),
+            geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo),
+            kjoenn = Kjoenn(KjoennType.KVINNE, metadata = metadata),
+            doedsfall = null,
+            familierelasjoner = emptyList(),
+            sivilstand = emptyList()
         )
     }
 
@@ -336,75 +378,89 @@ internal open class JournalforingTestBase {
         return request to journalpostResponse
     }
 
-    protected fun createAnnenPerson(fnr: String? = null,
-                                    rolle: Rolle? = Rolle.ETTERLATTE,
-                                    relasjon: RelasjonTilAvdod? = null): Person {
+    protected fun createAnnenPerson(
+        fnr: String? = null,
+        rolle: Rolle? = Rolle.ETTERLATTE,
+        relasjon: RelasjonTilAvdod? = null
+    ): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
-                    foedselsdato = "1962-07-18",
-                    rolle = rolle,
-                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+                foedselsdato = "1962-07-18",
+                rolle = rolle,
+                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
             )
         }
         val validFnr = Fodselsnummer.fra(fnr)
 
         return Person(
-                validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
-                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
-                rolle = rolle,
-                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+            validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
+            foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
+            rolle = rolle,
+            relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
         )
     }
 
-    protected fun createSed(sedType: SedType, fnr: String? = null, annenPerson: Person? = null, eessiSaknr: String? = null, fdato: String? = "1988-07-12"): SED {
+    protected fun createSed(
+        sedType: SedType,
+        fnr: String? = null,
+        annenPerson: Person? = null,
+        eessiSaknr: String? = null,
+        fdato: String? = "1988-07-12"
+    ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = SedBruker(
-                person = Person(
-                        pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
-                        foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato
-                )
+            person = Person(
+                pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
+                foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato
+            )
         )
 
         return SED(
-                sedType,
-                nav = Nav(
-                        eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-                        bruker = listOf(forsikretBruker),
-                        annenperson = annenPerson?.let { SedBruker(person = it) }
-                )
+            sedType,
+            nav = Nav(
+                eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
+                bruker = listOf(forsikretBruker),
+                annenperson = annenPerson?.let { SedBruker(person = it) }
+            )
         )
     }
 
-    protected fun createSedPensjon(sedType: SedType,
-                                   fnr: String?,
-                                   eessiSaknr: String? = null,
-                                   gjenlevendeFnr: String? = null,
-                                   krav: KravType? = null,
-                                   relasjon: RelasjonTilAvdod? = null): SED {
+    protected fun createSedPensjon(
+        sedType: SedType,
+        fnr: String?,
+        eessiSaknr: String? = null,
+        gjenlevendeFnr: String? = null,
+        krav: KravType? = null,
+        relasjon: RelasjonTilAvdod? = null
+    ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = SedBruker(
-                person = Person(
-                        pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
-                        foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12"
-                )
+            person = Person(
+                pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
+                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12"
+            )
         )
 
         val annenPerson = SedBruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon))
 
         return SED(
-                sedType,
-                nav = Nav(
-                        eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-                        bruker = listOf(forsikretBruker),
-                        krav = Krav("2019-02-01", krav)
-                ),
-                pensjon = Pensjon(gjenlevende = annenPerson)
+            sedType,
+            nav = Nav(
+                eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
+                bruker = listOf(forsikretBruker),
+                krav = Krav("2019-02-01", krav)
+            ),
+            pensjon = Pensjon(gjenlevende = annenPerson)
         )
     }
 
-    protected fun createHendelseJson(sedType: SedType, bucType: BucType = BucType.P_BUC_05, forsikretFnr: String? = null): String {
+    protected fun createHendelseJson(
+        sedType: SedType,
+        bucType: BucType = BucType.P_BUC_05,
+        forsikretFnr: String? = null
+    ): String {
         return """
             {
               "id": 1869,

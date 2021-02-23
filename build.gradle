@@ -2,11 +2,12 @@ buildscript {
 
 	ext {
 		kotlinVersion = '1.4.30'
-		springBootVersion = '2.3.0.RELEASE'
+		springBootVersion = '2.4.2'
 		cxfVersion = '3.3.7'
 		oidcTokenSupportVersion = '0.2.9'
-		logstashLogbackVersion = '6.3'
+		logstashLogbackVersion = '6.6'
 		pensjonInformasjonVersion = '9.4.10'
+		mockserverVersion = '5.11.2'
 	}
 	repositories {
 		mavenCentral()
@@ -47,10 +48,11 @@ configurations {
 dependencies {
 
 	// Spring-boot
-	implementation("org.springframework.boot:spring-boot-starter-aop")
+	implementation("org.springframework.boot:spring-boot-starter-aop:${springBootVersion}")
+	implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}")
+	implementation("org.springframework.boot:spring-boot-actuator:${springBootVersion}")
 
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
@@ -67,8 +69,6 @@ dependencies {
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}") {
 		exclude module: 'spring-boot-starter-web'
 	}
-	// Forced version due to RCE error in Apache CXF above ( Snyk ): spring-boot-starter-web 2.1.15.RELEASE spring-boot-starter-web, legger til spring-boot-starter-web 2.3.2.RELEASE
-	implementation("org.springframework.boot:spring-boot-starter-web:2.3.2.RELEASE")
 
 	implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}")
 	implementation("commons-io:commons-io:2.6")
@@ -78,10 +78,10 @@ dependencies {
 		exclude module: 'kotlin-test-js'
 		exclude module: 'kotlin-test-testng'
 	}
-	testImplementation("org.mock-server:mockserver-netty:5.10") {
+	testImplementation("org.mock-server:mockserver-netty:${mockserverVersion}") {
 		exclude module: 'junit'
 	}
-	testImplementation("org.mock-server:mockserver-client-java:5.10")
+	testImplementation("org.mock-server:mockserver-client-java:${mockserverVersion}")
 	testImplementation("io.mockk:mockk:1.10.6")
 
 	// Architecture tests
@@ -91,11 +91,11 @@ dependencies {
 	implementation("io.micrometer:micrometer-registry-prometheus")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:0.4.0")
-	implementation("no.nav.eessi.pensjon:ep-logging:0.0.17")
-	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.10")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.8")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.0.7")
+	implementation("no.nav.eessi.pensjon:ep-metrics:0.4.5")
+	implementation("no.nav.eessi.pensjon:ep-logging:1.0.9")
+	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.15")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:7.1.24")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.0.10")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.13")
