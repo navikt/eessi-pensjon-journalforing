@@ -2,7 +2,7 @@ buildscript {
 
 	ext {
 		kotlinVersion = '1.4.30'
-		springBootVersion = '2.4.2'
+		springBootVersion = '2.3.9.RELEASE'
 		cxfVersion = '3.4.2'
 		oidcTokenSupportVersion = '0.2.9'
 		logstashLogbackVersion = '6.6'
@@ -62,6 +62,7 @@ dependencies {
 		exclude module: "junit-vintage-engine"
 	}
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testImplementation("org.scala-lang:scala-library:2.12.11")
 
 	// Apache CXF
 	implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}") {
