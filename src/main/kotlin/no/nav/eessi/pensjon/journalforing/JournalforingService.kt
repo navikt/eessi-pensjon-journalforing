@@ -89,7 +89,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 )
 
                 // Oppdaterer distribusjonsinfo
-                if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
+                if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
 
