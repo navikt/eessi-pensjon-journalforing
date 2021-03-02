@@ -66,7 +66,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 }
 
 data class BestemSakRequest(val aktoerId: String,
-                            val saktype: Saktype,
+                            val ytelseType: Saktype,
                             val callId: UUID,
                             val consumerId: UUID)
 

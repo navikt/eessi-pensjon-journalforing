@@ -8,9 +8,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -35,7 +33,7 @@ internal class BestemSakServiceTest {
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.ALDER, actualRequest.saktype)
+        assertEquals(Saktype.ALDER, actualRequest.ytelseType)
         assertNotNull(actualRequest.callId)
         assertNotNull(actualRequest.consumerId)
 
@@ -60,7 +58,7 @@ internal class BestemSakServiceTest {
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.GJENLEV, actualRequest.saktype)
+        assertEquals(Saktype.GJENLEV, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }
@@ -76,7 +74,7 @@ internal class BestemSakServiceTest {
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.UFOREP, actualRequest.saktype)
+        assertEquals(Saktype.UFOREP, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }
@@ -92,7 +90,7 @@ internal class BestemSakServiceTest {
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.GENRL, actualRequest.saktype)
+        assertEquals(Saktype.GENRL, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }
