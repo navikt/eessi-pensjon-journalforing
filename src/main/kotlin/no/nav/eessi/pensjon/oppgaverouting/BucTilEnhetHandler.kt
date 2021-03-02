@@ -12,7 +12,7 @@ interface BucTilEnhetHandler {
     fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
         return request.run {
             hendelseType == HendelseType.SENDT
-                    && ytelseType != null
+                    && saktype != null
                     && !aktorId.isNullOrBlank()
                     && !sakInformasjon?.sakId.isNullOrBlank()
         }

@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Krav
 import no.nav.eessi.pensjon.models.sed.KravType
@@ -83,7 +83,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = "05127921999", gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)
         val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(sed), BucType.P_BUC_02, SedType.H070)
-        val expected = PersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P2100)
+        val expected = PersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100)
         assertEquals(expected, actual?.personRelasjon)
     }
 

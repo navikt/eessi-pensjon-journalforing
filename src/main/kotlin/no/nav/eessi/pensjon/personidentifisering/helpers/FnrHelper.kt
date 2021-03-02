@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
@@ -35,14 +35,14 @@ class FnrHelper {
                         SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe)
                         SedType.P15000 -> {
                             val krav = sed.nav?.krav?.type
-                            val ytelseType = ytelseTypefraKravSed(krav)
-                            logger.info("${sed.type.name}, krav: $krav,  ytelsetype: $ytelseType")
+                            val saktype = mapKravtypeTilSaktype(krav)
+                            logger.info("${sed.type.name}, krav: $krav,  saktype: $saktype")
                             if (krav == KravType.ETTERLATTE) {
-                                logger.debug("legger til gjenlevende: ($ytelseType)")
-                                leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe, ytelseType)
+                                logger.debug("legger til gjenlevende: ($saktype)")
+                                leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe, saktype)
                             } else {
-                                logger.debug("legger til forsikret: ($ytelseType)")
-                                leggTilForsikretFnrHvisFinnes(sed, fnrListe, ytelseType)
+                                logger.debug("legger til forsikret: ($saktype)")
+                                leggTilForsikretFnrHvisFinnes(sed, fnrListe, saktype)
                             }
                         }
                         SedType.R005 -> {
@@ -91,25 +91,25 @@ class FnrHelper {
         }
     }
 
-    private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
+    private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
         Fodselsnummer.fra(sed.nav?.forsikretIdent())?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
+            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
         }
     }
 
-    private fun ytelseTypefraKravSed(krav: KravType?): YtelseType? {
+    private fun mapKravtypeTilSaktype(krav: KravType?): Saktype? {
         return when (krav) {
-            KravType.ALDER -> YtelseType.ALDER
-            KravType.ETTERLATTE -> YtelseType.GJENLEV
-            KravType.UFORE -> YtelseType.UFOREP
+            KravType.ALDER -> Saktype.ALDER
+            KravType.ETTERLATTE -> Saktype.GJENLEV
+            KravType.UFORE -> Saktype.UFOREP
             else -> null
         }
     }
 
-    private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, ytelseType: YtelseType? = null) {
+    private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
         Fodselsnummer.fra(sed.nav?.forsikretIdent())
                 ?.let {
-                    fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, ytelseType, sed.type))
+                    fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
                     logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
                 }
 
@@ -126,10 +126,10 @@ class FnrHelper {
             }
 
             if (gjenlevendeRelasjon.erGjenlevendeBarn()) {
-                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, YtelseType.BARNEP, sedType = sed.type))
+                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.BARNEP, sedType = sed.type))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
             } else {
-                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = sed.type))
+                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = sed.type))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
             }
         }
@@ -176,7 +176,7 @@ class FnrHelper {
     private fun filterPinPersonR005(sed: SED): List<PersonRelasjon> {
         return sed.nav?.bruker
                 ?.mapNotNull { bruker ->
-                    val relasjon = getType(bruker.tilbakekreving?.status?.type)
+                    val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
 
                     Fodselsnummer.fra(bruker.person?.ident())
                             ?.let { PersonRelasjon(it, relasjon, sedType = sed.type) }
@@ -184,7 +184,7 @@ class FnrHelper {
     }
 
     //Kun for R_BUC_02
-    private fun getType(type: String?): Relasjon {
+    private fun mapRelasjon(type: String?): Relasjon {
         return when (type) {
             "enke_eller_enkemann" -> Relasjon.GJENLEVENDE
             "forsikret_person" -> Relasjon.FORSIKRET

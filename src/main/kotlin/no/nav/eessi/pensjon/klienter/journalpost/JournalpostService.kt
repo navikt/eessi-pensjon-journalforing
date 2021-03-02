@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -32,26 +32,26 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * @return {@link OpprettJournalPostResponse?} som inneholder
      */
     fun opprettJournalpost(
-            rinaSakId: String,
-            fnr: Fodselsnummer?,
-            personNavn: String?,
-            bucType: BucType,
-            sedType: SedType,
-            sedHendelseType: HendelseType,
-            journalfoerendeEnhet: Enhet,
-            arkivsaksnummer: String?,
-            dokumenter: String,
-            avsenderLand: String?,
-            avsenderNavn: String?,
-            ytelseType: YtelseType?): OpprettJournalPostResponse? {
+        rinaSakId: String,
+        fnr: Fodselsnummer?,
+        bucType: BucType,
+        sedType: SedType,
+        sedHendelseType: HendelseType,
+        journalfoerendeEnhet: Enhet,
+        arkivsaksnummer: String?,
+        dokumenter: String,
+        avsenderLand: String?,
+        avsenderNavn: String?,
+        saktype: Saktype?
+    ): OpprettJournalPostResponse? {
 
         val request = OpprettJournalpostRequest(
             avsenderMottaker = populerAvsenderMottaker(avsenderNavn, sedHendelseType, avsenderLand),
-            behandlingstema = bestemBehandlingsTema(bucType, ytelseType),
+            behandlingstema = bestemBehandlingsTema(bucType, saktype),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
-            tema = hentTema(bucType, sedType, journalfoerendeEnhet, ytelseType),
+            tema = hentTema(bucType, sedType, journalfoerendeEnhet, saktype),
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedType),
             dokumenter = dokumenter,
@@ -70,21 +70,21 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    private fun bestemBehandlingsTema(bucType: BucType, ytelseType: YtelseType?): Behandlingstema {
+    private fun bestemBehandlingsTema(bucType: BucType, saktype: Saktype?): Behandlingstema {
         return if (bucType == BucType.R_BUC_02) {
-            return when (ytelseType) {
-                YtelseType.UFOREP -> Behandlingstema.UFOREPENSJON
-                YtelseType.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
+            return when (saktype) {
+                Saktype.UFOREP -> Behandlingstema.UFOREPENSJON
+                Saktype.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
                 else -> Behandlingstema.ALDERSPENSJON
             }
         } else bucType.behandlingstema
     }
 
     @VisibleForTesting
-    fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, ytelseType: YtelseType?): Tema {
-        logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $ytelseType")
+    fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, saktype: Saktype?): Tema {
+        logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $saktype")
 
-        if (ytelseType == YtelseType.UFOREP) return Tema.UFORETRYGD
+        if (saktype == Saktype.UFOREP) return Tema.UFORETRYGD
         if(bucType == BucType.R_BUC_02) return Tema.PENSJON
         return bucType.tema
     }

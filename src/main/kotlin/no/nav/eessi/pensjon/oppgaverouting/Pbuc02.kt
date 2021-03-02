@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 
 /**
  * P_BUC_02: Krav om etterlatteytelser
@@ -16,32 +16,32 @@ class Pbuc02 : BucTilEnhetHandler {
             request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
             erUgyldig(request) -> Enhet.ID_OG_FORDELING
             kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
-            request.bosatt == Bosatt.NORGE -> handleNorge(request.ytelseType)
-            else -> handleUtland(request.ytelseType)
+            request.bosatt == Bosatt.NORGE -> handleNorge(request.saktype)
+            else -> handleUtland(request.saktype)
         }
     }
 
-    private fun handleNorge(ytelseType: YtelseType?): Enhet =
-            when (ytelseType) {
-                YtelseType.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
-                YtelseType.ALDER,
-                YtelseType.BARNEP,
-                YtelseType.GJENLEV -> Enhet.NFP_UTLAND_AALESUND
+    private fun handleNorge(saktype: Saktype?): Enhet =
+            when (saktype) {
+                Saktype.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
+                Saktype.ALDER,
+                Saktype.BARNEP,
+                Saktype.GJENLEV -> Enhet.NFP_UTLAND_AALESUND
                 else -> Enhet.ID_OG_FORDELING
             }
 
-    private fun handleUtland(ytelseType: YtelseType?): Enhet =
-            when (ytelseType) {
-                YtelseType.UFOREP -> Enhet.UFORE_UTLAND
-                YtelseType.ALDER,
-                YtelseType.BARNEP,
-                YtelseType.GJENLEV -> Enhet.PENSJON_UTLAND
+    private fun handleUtland(saktype: Saktype?): Enhet =
+            when (saktype) {
+                Saktype.UFOREP -> Enhet.UFORE_UTLAND
+                Saktype.ALDER,
+                Saktype.BARNEP,
+                Saktype.GJENLEV -> Enhet.PENSJON_UTLAND
                 else -> Enhet.ID_OG_FORDELING
             }
 
     private fun erUgyldig(request: OppgaveRoutingRequest): Boolean {
         val sakInfo = request.sakInformasjon
-        val erUforepensjon = (request.ytelseType == YtelseType.UFOREP || sakInfo?.sakType == YtelseType.UFOREP)
+        val erUforepensjon = (request.saktype == Saktype.UFOREP || sakInfo?.sakType == Saktype.UFOREP)
 
         return erUforepensjon && sakInfo?.sakStatus == SakStatus.AVSLUTTET
     }

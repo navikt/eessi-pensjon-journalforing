@@ -16,7 +16,7 @@ import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.EessisakItem
 import no.nav.eessi.pensjon.models.sed.Nav
 import no.nav.eessi.pensjon.models.sed.SED
@@ -66,9 +66,9 @@ internal class SedDokumentHelperTest {
         BucType.R_BUC_02)
 
         val seds = listOf(mapJsonToAny(sedR005, typeRefs<SED>()))
-        val actual = helper.hentYtelseType(sedHendelse, seds)
+        val actual = helper.hentSaktypeType(sedHendelse, seds)
 
-        assertEquals(YtelseType.ALDER ,actual)
+        assertEquals(Saktype.ALDER ,actual)
     }
 
     @Test
@@ -79,8 +79,8 @@ internal class SedDokumentHelperTest {
 
         val seds = listOf(mapJsonToAny(sedR005, typeRefs<SED>()))
 
-        val actual = helper.hentYtelseType(sedHendelse, seds)
-        assertEquals(YtelseType.UFOREP, actual)
+        val actual = helper.hentSaktypeType(sedHendelse, seds)
+        assertEquals(Saktype.UFOREP, actual)
     }
 
     @Test
@@ -94,8 +94,8 @@ internal class SedDokumentHelperTest {
                 mapJsonToAny(sed, typeRefs())
         )
 
-        val actual = helper.hentYtelseType(sedHendelse, seds)
-        assertEquals(YtelseType.ALDER, actual)
+        val actual = helper.hentSaktypeType(sedHendelse, seds)
+        assertEquals(Saktype.ALDER, actual)
     }
 
     @Test
@@ -124,8 +124,8 @@ internal class SedDokumentHelperTest {
     @Test
     fun `Gitt det finnes aktoerid og det finnes en eller flere pensjonsak Så skal det sakid fra sed valideres og sakid returneres`() {
 
-        val expected = SakInformasjon(sakId = "22874955", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
-        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET))
+        val expected = SakInformasjon(sakId = "22874955", sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = Saktype.UFOREP, sakStatus = SakStatus.AVSLUTTET))
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
 
@@ -183,13 +183,13 @@ internal class SedDokumentHelperTest {
 
     @Test
     fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
-        val expected = SakInformasjon(sakId = "22874955", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
+        val expected = SakInformasjon(sakId = "22874955", sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
 
         val mockPensjonSaklist = listOf(
                 expected,
-                SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "22874123", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "22874456", sakType = YtelseType.BARNEP, sakStatus = SakStatus.AVSLUTTET))
+                SakInformasjon(sakId = "22874901", sakType = Saktype.UFOREP, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874123", sakType = Saktype.GJENLEV, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874456", sakType = Saktype.BARNEP, sakStatus = SakStatus.AVSLUTTET))
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(
@@ -209,13 +209,13 @@ internal class SedDokumentHelperTest {
 
     @Test
     fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag, hvis sak er GENERELL kan sjekkes om har tilknytteteSaker`() {
-        val expected = SakInformasjon(sakId = "22874456", sakType = YtelseType.GENRL, sakStatus = SakStatus.LOPENDE)
+        val expected = SakInformasjon(sakId = "22874456", sakType = Saktype.GENRL, sakStatus = SakStatus.LOPENDE)
 
         val mockPensjonSaklist = listOf(
                 expected,
-                SakInformasjon(sakId = "22874901", sakType = YtelseType.UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "22874123", sakType = YtelseType.GJENLEV, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "22874457", sakType = YtelseType.ALDER, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "22874901", sakType = Saktype.UFOREP, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874123", sakType = Saktype.GJENLEV, sakStatus = SakStatus.AVSLUTTET),
+                SakInformasjon(sakId = "22874457", sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
         )
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist

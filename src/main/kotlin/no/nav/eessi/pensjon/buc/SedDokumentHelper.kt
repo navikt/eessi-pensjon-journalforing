@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.erGyldig
@@ -44,21 +44,21 @@ class SedDokumentHelper(
                 .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
     }
 
-    fun hentYtelseType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): YtelseType? {
-        //hent ytelsetype fra R_BUC_02 - R005 sed
+    fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): Saktype? {
+        //hent saktype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == BucType.R_BUC_02) {
             return alleSedIBuc
                     .firstOrNull { it.type == SedType.R005 }
-                    ?.let { filterYtelseTypeR005(it) }
+                    ?.let { filterSaktypeR005(it) }
 
+        //hent saktype fra P15000 overgang fra papir til rina. (saktype)
         } else if (sedHendelse.bucType == BucType.P_BUC_10) {
-            //hent ytelsetype fra P15000 overgang fra papir til rina. (saktype)
             val sed = alleSedIBuc.firstOrNull { it.type == SedType.P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
-                    KravType.ETTERLATTE -> YtelseType.GJENLEV
-                    KravType.UFORE -> YtelseType.UFOREP
-                    else -> YtelseType.ALDER
+                    KravType.ETTERLATTE -> Saktype.GJENLEV
+                    KravType.UFORE -> Saktype.UFOREP
+                    else -> Saktype.ALDER
                 }
             }
         }
@@ -71,27 +71,24 @@ class SedDokumentHelper(
         }
     }
 
-    private fun filterYtelseTypeR005(sed: SED): YtelseType {
-        val type = sed.tilbakekreving?.feilutbetaling?.ytelse?.type
 
-        /*
-        eux-acl - /codes/mapping/tilbakekrevingfeilutbetalingytelsetypekoder.properties
-        uførepensjon=01
-        alderspensjon=02
-        etterlattepensjon_enke=03
-        etterlattepensjon_enkemann=04
-        barnepensjon=05
-        andre_former_for_etterlattepensjon=99
-        */
-
-        logger.info("Henter ytelse fra R005: $type")
-
-        return when (type) {
-            "alderspensjon" -> YtelseType.ALDER
-            "uførepensjon" -> YtelseType.UFOREP
-            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> YtelseType.GJENLEV
-            "barnepensjon" -> YtelseType.BARNEP
-            else -> throw RuntimeException("Klarte ikke å finne ytelsetype for R_BUC_02")
+    /**
+     * eux-acl - /codes/mapping/tilbakekrevingfeilutbetalingytelsetypekoder.properties
+     * uførepensjon=01
+     * alderspensjon=02
+     * etterlattepensjon_enke=03
+     * etterlattepensjon_enkemann=04
+     * barnepensjon=05
+     * andre_former_for_etterlattepensjon=99
+     *
+     * */
+    private fun filterSaktypeR005(sed: SED): Saktype {
+        return when (sed.tilbakekreving?.feilutbetaling?.ytelse?.type) {
+            "alderspensjon" -> Saktype.ALDER
+            "uførepensjon" -> Saktype.UFOREP
+            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> Saktype.GJENLEV
+            "barnepensjon" -> Saktype.BARNEP
+            else -> throw RuntimeException("Klarte ikke å finne saktype for R_BUC_02")
         }
     }
 

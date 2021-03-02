@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
@@ -142,7 +142,7 @@ class PersonidentifiseringService(private val personService: PersonService,
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
             bucType == BucType.P_BUC_10 -> {
-                val erGjenlevendeYtelse = potensiellePersonRelasjoner.any { it.ytelseType == YtelseType.GJENLEV }
+                val erGjenlevendeYtelse = potensiellePersonRelasjoner.any { it.saktype == Saktype.GJENLEV }
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
@@ -211,12 +211,12 @@ data class IdentifisertPerson(
 
 
 data class PersonRelasjon(
-        val fnr: Fodselsnummer?,
-        val relasjon: Relasjon,
-        val ytelseType: YtelseType? = null,
-        val sedType: SedType? = null
+    val fnr: Fodselsnummer?,
+    val relasjon: Relasjon,
+    val saktype: Saktype? = null,
+    val sedType: SedType? = null
 ) {
-    fun erGyldig(): Boolean = sedType != null && (ytelseType != null || relasjon == Relasjon.GJENLEVENDE)
+    fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
 }
 
 enum class Relasjon {

@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 
@@ -60,7 +60,7 @@ class Pbuc05 : BucTilEnhetHandler {
     private fun hentEnhetForGjenlevende(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.sakInformasjon == null -> Enhet.ID_OG_FORDELING
-            request.sakInformasjon.sakType == YtelseType.GENRL -> enhetFraAlderOgLand(request)
+            request.sakInformasjon.sakType == Saktype.GENRL -> enhetFraAlderOgLand(request)
             else -> Enhet.AUTOMATISK_JOURNALFORING
         }
     }
@@ -93,17 +93,17 @@ class Pbuc05 : BucTilEnhetHandler {
     /**
      * Henter korrekt enhet for [Relasjon.BARN]
      *
-     * @return Skal returnere [Enhet.AUTOMATISK_JOURNALFORING] dersom ytelseType er [YtelseType.ALDER],
-     *  [YtelseType.UFOREP], eller [YtelseType.OMSORG]. Hvis ikke skal forenklet rutingregel følges.
+     * @return Skal returnere [Enhet.AUTOMATISK_JOURNALFORING] dersom saktype er [Saktype.ALDER],
+     *  [Saktype.UFOREP], eller [Saktype.OMSORG]. Hvis ikke skal forenklet rutingregel følges.
      */
     private fun enhetForRelasjonBarn(request: OppgaveRoutingRequest): Enhet {
         if (request.sakInformasjon?.sakId == null) return Enhet.ID_OG_FORDELING
 
         // I tilfeller hvor sakInformasjon er null
         return when (request.sakInformasjon.sakType) {
-            YtelseType.ALDER,
-            YtelseType.UFOREP,
-            YtelseType.OMSORG -> Enhet.AUTOMATISK_JOURNALFORING
+            Saktype.ALDER,
+            Saktype.UFOREP,
+            Saktype.OMSORG -> Enhet.AUTOMATISK_JOURNALFORING
             else -> if (request.bosatt == Bosatt.NORGE) Enhet.NFP_UTLAND_AALESUND else Enhet.PENSJON_UTLAND
         }
     }
@@ -111,18 +111,18 @@ class Pbuc05 : BucTilEnhetHandler {
     /**
      * Henter enhet for [Relasjon.FORSORGER]
      *
-     * @return Følger rutingregler i [enhetFraAlderOgLand] dersom sakinfo mangler eller sakstype er [YtelseType.GENRL],
+     * @return Følger rutingregler i [enhetFraAlderOgLand] dersom sakinfo mangler eller sakstype er [Saktype.GENRL],
      *  hvis ikke regnes saken som gyldig for [Enhet.AUTOMATISK_JOURNALFORING]
      */
     private fun enhetForRelasjonForsorger(request: OppgaveRoutingRequest): Enhet {
-        return when (request.ytelseType) {
-            null, YtelseType.GENRL -> enhetFraAlderOgLand(request)
+        return when (request.saktype) {
+            null, Saktype.GENRL -> enhetFraAlderOgLand(request)
             else -> Enhet.AUTOMATISK_JOURNALFORING
         }
     }
 
     /**
-     * Sjekker om [YtelseType] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
+     * Sjekker om [Saktype] er av en type som er godkjent for [Enhet.AUTOMATISK_JOURNALFORING]
      *
      * @return Boolean-verdi som indikerer om saken kan journalføres automatisk.
      */

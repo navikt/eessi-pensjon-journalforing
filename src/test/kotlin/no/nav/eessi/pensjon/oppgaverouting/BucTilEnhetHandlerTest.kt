@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -15,7 +15,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Gyldig automatisk journalføring`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns "1111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -30,7 +30,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Mottatt hendelse skal ikke få automatisk`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.MOTTATT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns "1111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -42,17 +42,17 @@ internal class BucTilEnhetHandlerTest {
     }
 
     @Test
-    fun `Manglende ytelseType skal manuelt journalføres`() {
+    fun `Manglende saktype skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns null
+            every { saktype } returns null
             every { aktorId } returns "1111"
             every { sakInformasjon?.sakId } returns "555"
         }
 
         assertFalse(
                 MockBuc().kanAutomatiskJournalfores(req),
-                "Request med ytelseType == null skal aldri automatisk journalføres"
+                "Request med saktype == null skal aldri automatisk journalføres"
         )
     }
 
@@ -60,7 +60,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Manglende aktorId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns null
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -75,7 +75,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Tom aktorId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns " "
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -90,7 +90,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Manglende sakId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns null
         }
@@ -104,7 +104,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Tom sakId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { ytelseType } returns YtelseType.ALDER
+            every { saktype } returns Saktype.ALDER
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns " "
         }

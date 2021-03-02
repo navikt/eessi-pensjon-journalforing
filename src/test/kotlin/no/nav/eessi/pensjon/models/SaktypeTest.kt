@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
-internal class YtelseTypeTest {
+internal class SaktypeTest {
 
     @ParameterizedTest
-    @EnumSource(YtelseType::class)
-    fun `Verifiser serde fungerer som forventet`(type: YtelseType) {
+    @EnumSource(Saktype::class)
+    fun `Verifiser serde fungerer som forventet`(type: Saktype) {
         Assertions.assertEquals(type, serde(type))
     }
 
-    private fun serde(ytelseType: YtelseType): YtelseType {
-        val json = ytelseType.toJson()
+    private fun serde(saktype: Saktype): Saktype {
+        val json = saktype.toJson()
 
         return mapJsonToAny(json, typeRefs())
     }

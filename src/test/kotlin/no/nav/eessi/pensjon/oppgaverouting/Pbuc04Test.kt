@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -30,12 +30,12 @@ internal class Pbuc04Test {
     }
 
     @ParameterizedTest
-    @EnumSource(YtelseType::class)
-    fun `Automatisk journalføring, uavhengig av ytelsetype`(type: YtelseType) {
+    @EnumSource(Saktype::class)
+    fun `Automatisk journalføring, uavhengig av saktype`(type: Saktype) {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.SENDT
             every { harAdressebeskyttelse } returns false
-            every { ytelseType } returns type
+            every { saktype } returns type
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -44,12 +44,12 @@ internal class Pbuc04Test {
     }
 
     @ParameterizedTest
-    @EnumSource(YtelseType::class)
-    fun `Mottatt hendelse skal aldri journalføres automatisk`(type: YtelseType) {
+    @EnumSource(Saktype::class)
+    fun `Mottatt hendelse skal aldri journalføres automatisk`(type: Saktype) {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.MOTTATT
             every { harAdressebeskyttelse } returns false
-            every { ytelseType } returns type
+            every { saktype } returns type
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
             every { bosatt } returns Bosatt.NORGE
@@ -64,7 +64,7 @@ internal class Pbuc04Test {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns hendelse
             every { harAdressebeskyttelse } returns false
-            every { ytelseType } returns null
+            every { saktype } returns null
             every { aktorId } returns null
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.NORGE
@@ -79,7 +79,7 @@ internal class Pbuc04Test {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns hendelse
             every { harAdressebeskyttelse } returns false
-            every { ytelseType } returns null
+            every { saktype } returns null
             every { aktorId } returns null
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.UTLAND

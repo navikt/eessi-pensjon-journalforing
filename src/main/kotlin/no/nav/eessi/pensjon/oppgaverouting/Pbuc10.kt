@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 
 class Pbuc10 : BucTilEnhetHandler {
 
@@ -18,31 +18,31 @@ class Pbuc10 : BucTilEnhetHandler {
 
     private fun enhetFraLand(request: OppgaveRoutingRequest): Enhet {
         return if (request.bosatt == Bosatt.NORGE) routeNorge(request)
-        else routeUtland(request.ytelseType)
+        else routeUtland(request.saktype)
     }
 
     private fun routeNorge(request: OppgaveRoutingRequest): Enhet {
         if (erMottattAlderEllerGjenlev(request))
             return Enhet.NFP_UTLAND_AALESUND
 
-        return when (request.ytelseType) {
-            YtelseType.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
+        return when (request.saktype) {
+            Saktype.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
             else -> Enhet.ID_OG_FORDELING
         }
     }
 
-    private fun routeUtland(ytelseType: YtelseType?): Enhet {
-        return if (ytelseType == YtelseType.UFOREP) Enhet.UFORE_UTLAND
+    private fun routeUtland(saktype: Saktype?): Enhet {
+        return if (saktype == Saktype.UFOREP) Enhet.UFORE_UTLAND
         else Enhet.PENSJON_UTLAND
     }
 
     private fun erSakUgyldig(request: OppgaveRoutingRequest): Boolean {
         if (request.hendelseType ==  HendelseType.SENDT) {
             return request.run {
-                identifisertPerson?.personRelasjon?.ytelseType == YtelseType.GJENLEV
-                        && ytelseType == YtelseType.UFOREP
+                identifisertPerson?.personRelasjon?.saktype == Saktype.GJENLEV
+                        && saktype == Saktype.UFOREP
                         && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET
-                        && sakInformasjon.sakType == YtelseType.UFOREP
+                        && sakInformasjon.sakType == Saktype.UFOREP
             }
         }
         return false
@@ -51,7 +51,7 @@ class Pbuc10 : BucTilEnhetHandler {
     private fun erMottattAlderEllerGjenlev(request: OppgaveRoutingRequest): Boolean {
         return request.run {
             hendelseType == HendelseType.MOTTATT
-                    && (ytelseType == YtelseType.ALDER || request.ytelseType == YtelseType.GJENLEV)
+                    && (saktype == Saktype.ALDER || request.saktype == Saktype.GJENLEV)
         }
     }
 }

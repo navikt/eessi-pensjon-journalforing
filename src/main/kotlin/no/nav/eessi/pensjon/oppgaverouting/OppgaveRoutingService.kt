@@ -25,7 +25,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                 "Landkode: ${routingRequest.landkode}, " +
                 "Fødselsdato: ${routingRequest.fdato}, " +
                 "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
-                "Ytelsetype: ${routingRequest.ytelseType}")
+                "saktype: ${routingRequest.saktype}")
 
         return tildeltEnhet
     }

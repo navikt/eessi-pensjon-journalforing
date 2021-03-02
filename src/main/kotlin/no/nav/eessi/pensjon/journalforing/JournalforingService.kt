@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -40,19 +40,19 @@ class JournalforingService(private val journalpostService: JournalpostService,
     }
 
     fun journalfor(
-            sedHendelseModel: SedHendelseModel,
-            hendelseType: HendelseType,
-            identifisertPerson: IdentifisertPerson?,
-            fdato: LocalDate?,
-            ytelseType: YtelseType?,
-            offset: Long,
-            sakInformasjon: SakInformasjon?
+        sedHendelseModel: SedHendelseModel,
+        hendelseType: HendelseType,
+        identifisertPerson: IdentifisertPerson?,
+        fdato: LocalDate?,
+        saktype: Saktype?,
+        offset: Long,
+        sakInformasjon: SakInformasjon?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info("""**********
                     rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId} sedType: ${sedHendelseModel.sedType?.name} bucType: ${sedHendelseModel.bucType}
-                    kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId} ytelseType: $ytelseType
+                    kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId} sakType: $saktype
                 **********""".trimIndent())
 
                 // Henter dokumenter
@@ -65,7 +65,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 } else {
                    oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
                        fdato,
-                       ytelseType,
+                       saktype,
                        sedHendelseModel,
                        hendelseType,
                        sakInformasjon) )
@@ -75,18 +75,17 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
-                        rinaSakId = sedHendelseModel.rinaSakId,
-                        fnr = identifisertPerson?.personRelasjon?.fnr,
-                        personNavn = identifisertPerson?.personNavn,
-                        bucType = sedHendelseModel.bucType!!,
-                        sedType = sedHendelseModel.sedType!!,
-                        sedHendelseType = hendelseType,
-                        journalfoerendeEnhet = tildeltEnhet,
-                        arkivsaksnummer = arkivsaksnummer,
-                        dokumenter = documents,
-                        avsenderLand = sedHendelseModel.avsenderLand,
-                        avsenderNavn = sedHendelseModel.avsenderNavn,
-                        ytelseType = ytelseType
+                    rinaSakId = sedHendelseModel.rinaSakId,
+                    fnr = identifisertPerson?.personRelasjon?.fnr,
+                    bucType = sedHendelseModel.bucType!!,
+                    sedType = sedHendelseModel.sedType!!,
+                    sedHendelseType = hendelseType,
+                    journalfoerendeEnhet = tildeltEnhet,
+                    arkivsaksnummer = arkivsaksnummer,
+                    dokumenter = documents,
+                    avsenderLand = sedHendelseModel.avsenderLand,
+                    avsenderNavn = sedHendelseModel.avsenderNavn,
+                    saktype = saktype
                 )
 
                 // Oppdaterer distribusjonsinfo

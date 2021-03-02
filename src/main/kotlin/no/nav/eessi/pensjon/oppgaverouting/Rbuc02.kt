@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 
 /**
@@ -23,9 +23,9 @@ class Rbuc02 : BucTilEnhetHandler {
     private fun hentEnhetForYtelse(request: OppgaveRoutingRequest): Enhet {
         if (request.hendelseType == HendelseType.SENDT) return Enhet.ID_OG_FORDELING
 
-        return when (request.ytelseType) {
-            YtelseType.ALDER -> Enhet.PENSJON_UTLAND
-            YtelseType.UFOREP -> Enhet.UFORE_UTLAND
+        return when (request.saktype) {
+            Saktype.ALDER -> Enhet.PENSJON_UTLAND
+            Saktype.UFOREP -> Enhet.UFORE_UTLAND
             else -> Enhet.ID_OG_FORDELING
         }
     }

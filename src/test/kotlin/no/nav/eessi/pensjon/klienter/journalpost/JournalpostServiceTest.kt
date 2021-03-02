@@ -12,7 +12,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -46,31 +46,30 @@ internal class JournalpostServiceTest {
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
-                rinaSakId = "1111",
-                fnr = SLAPP_SKILPADDE,
-                personNavn = "navn navnesen",
-                bucType = BucType.P_BUC_01,
-                sedType = SedType.P2000,
-                sedHendelseType = HendelseType.MOTTATT,
-                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
-                arkivsaksnummer = "string",
-                dokumenter = """
-                    [{
-                        "brevkode": "NAV 14-05.09",
-                        "dokumentKategori": "SOK",
-                        "dokumentvarianter": [
-                                {
-                                    "filtype": "PDF/A",
-                                    "fysiskDokument": "string",
-                                    "variantformat": "ARKIV"
-                                }
-                            ],
-                            "tittel": "Søknad om foreldrepenger ved fødsel"
-                    }]
-                """.trimIndent(),
-                avsenderLand = "NO",
-                avsenderNavn = null,
-                ytelseType = null
+            rinaSakId = "1111",
+            fnr = SLAPP_SKILPADDE,
+            bucType = BucType.P_BUC_01,
+            sedType = SedType.P2000,
+            sedHendelseType = HendelseType.MOTTATT,
+            journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+            arkivsaksnummer = "string",
+            dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+            avsenderLand = "NO",
+            avsenderNavn = null,
+            saktype = null
         )
 
         // RESPONSE
@@ -106,31 +105,30 @@ internal class JournalpostServiceTest {
 
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
-                    rinaSakId = "1111",
-                    fnr = SLAPP_SKILPADDE,
-                    personNavn = "navn navnesen",
-                    bucType = BucType.P_BUC_01,
-                    sedType = SedType.P2000,
-                    sedHendelseType = HendelseType.MOTTATT,
-                    journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
-                    arkivsaksnummer = "string",
-                    dokumenter = """
-                    [{
-                        "brevkode": "NAV 14-05.09",
-                        "dokumentKategori": "SOK",
-                        "dokumentvarianter": [
-                                {
-                                    "filtype": "PDF/A",
-                                    "fysiskDokument": "string",
-                                    "variantformat": "ARKIV"
-                                }
-                            ],
-                            "tittel": "Søknad om foreldrepenger ved fødsel"
-                    }]
-                """.trimIndent(),
-                    avsenderLand = "NO",
-                    avsenderNavn = null,
-                    ytelseType = null
+                rinaSakId = "1111",
+                fnr = SLAPP_SKILPADDE,
+                bucType = BucType.P_BUC_01,
+                sedType = SedType.P2000,
+                sedHendelseType = HendelseType.MOTTATT,
+                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                arkivsaksnummer = "string",
+                dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+                avsenderLand = "NO",
+                avsenderNavn = null,
+                saktype = null
             )
         }
     }
@@ -148,19 +146,18 @@ internal class JournalpostServiceTest {
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
-                rinaSakId = "1111",
-                fnr = SLAPP_SKILPADDE,
-                personNavn = "navn navnesen",
-                bucType = BucType.P_BUC_01,
-                sedType = SedType.P2000,
-                sedHendelseType = HendelseType.MOTTATT,
-                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
-                arkivsaksnummer = "string",
-                dokumenter = """
-                     [{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""".trimIndent(),
-                avsenderLand = "UK",
-                avsenderNavn = null,
-                ytelseType = null
+            rinaSakId = "1111",
+            fnr = SLAPP_SKILPADDE,
+            bucType = BucType.P_BUC_01,
+            sedType = SedType.P2000,
+            sedHendelseType = HendelseType.MOTTATT,
+            journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+            arkivsaksnummer = "string",
+            dokumenter = """
+                 [{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""".trimIndent(),
+            avsenderLand = "UK",
+            avsenderNavn = null,
+            saktype = null
         )
 
         assertEqualResponse(expectedResponse, actualResponse!!)
@@ -225,18 +222,17 @@ internal class JournalpostServiceTest {
         every { mockKlient.opprettJournalpost(capture(requestSlot), any()) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
-                rinaSakId = "147730",
-                fnr = LEALAUS_KAKE,
-                personNavn = "Test Testesen",
-                bucType = BucType.P_BUC_02,
-                sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
-                journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "[\"P2100\"]",
-                avsenderLand = "NO",
-                avsenderNavn = "NAVT003",
-                ytelseType = null
+            rinaSakId = "147730",
+            fnr = LEALAUS_KAKE,
+            bucType = BucType.P_BUC_02,
+            sedType = SedType.P2100,
+            sedHendelseType = HendelseType.SENDT,
+            journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+            arkivsaksnummer = null,
+            dokumenter = "[\"P2100\"]",
+            avsenderLand = "NO",
+            avsenderNavn = "NAVT003",
+            saktype = null
         )
 
         assertEqualResponse(expectedResponse, actualResponse!!)
@@ -271,68 +267,68 @@ internal class JournalpostServiceTest {
     }
 
     @Test
-    fun `gitt det er en P_BUC_02 med ytelsetype BARNEP så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.BARNEP)
+    fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
+        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.BARNEP)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_02 med ytelsetype UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.UFOREP)
+    fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
+        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_02 med ytelsetype GJENLEVENDE så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, YtelseType.GJENLEV)
+    fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
+        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.GJENLEV)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_01 med ytelsetype ALDER så skal det settes teama PEN`() {
+    fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(BucType.P_BUC_01, SedType.P6000, Enhet.PENSJON_UTLAND, null)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R004, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R004, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.UFOREP)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
-        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.GENRL)
+        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.GENRL)
         assertEquals(Tema.PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.OMSORG)
+        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.OMSORG)
         assertEquals(Tema.PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.ALDER)
+        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
         assertEquals(Tema.PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.GJENLEV)
+        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.GJENLEV)
         assertEquals(Tema.PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.BARNEP)
+        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.BARNEP)
         assertEquals(Tema.PENSJON, resultatBARNEP)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, YtelseType.UFOREP)
+        val result = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 

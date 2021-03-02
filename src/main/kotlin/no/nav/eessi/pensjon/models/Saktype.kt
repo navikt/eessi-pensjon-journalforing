@@ -1,11 +1,12 @@
 package no.nav.eessi.pensjon.models
 
-enum class YtelseType {
+enum class Saktype {
     OMSORG,
     ALDER,
     GJENLEV,
     BARNEP,
     UFOREP,
     GENRL,
-    AFP_PRIVAT
+    AFP_PRIVAT,
+    AFP
 }

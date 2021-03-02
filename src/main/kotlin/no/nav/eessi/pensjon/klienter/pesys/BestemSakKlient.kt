@@ -7,7 +7,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +36,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
     }
 
     /**
-     * Henter pesys sakID for en gitt aktørID og ytelsetype
+     * Henter pesys sakID for en gitt aktørID og saktype
      *
      * Foreløbig er alder, uføre og gjenlevende støttet i her men tjenesten støtter alle typer
      */
@@ -66,7 +66,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 }
 
 data class BestemSakRequest(val aktoerId: String,
-                            val ytelseType: YtelseType,
+                            val saktype: Saktype,
                             val callId: UUID,
                             val consumerId: UUID)
 

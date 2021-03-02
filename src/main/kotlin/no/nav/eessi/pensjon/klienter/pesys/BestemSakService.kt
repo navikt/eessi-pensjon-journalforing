@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.klienter.pesys
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -17,24 +17,24 @@ class BestemSakService(private val klient: BestemSakKlient) {
      * Funksjon for å hente ut saksinformasjon fra Pesys.
      *
      * @param aktoerId:     Aktøren sin ID
-     * @param bucType:      Brukes for å sette riktig [YtelseType]
-     * @param ytelseType:   Type ytelse det gjelder. Kun i bruk dersom [BucType] er P_BUC_02 eller R_BUC_02
+     * @param bucType:      Brukes for å sette riktig [Saktype]
+     * @param saktype:   Type ytelse det gjelder. Kun i bruk dersom [BucType] er P_BUC_02 eller R_BUC_02
      *
      * @return [SakInformasjon]
      */
-    fun hentSakInformasjon(aktoerId: String, bucType: BucType, ytelsesType: YtelseType? = null): SakInformasjon? {
-        val ytelseType = when (bucType) {
-            BucType.P_BUC_01 -> YtelseType.ALDER
-            BucType.P_BUC_02 -> ytelsesType ?: return null
-            BucType.P_BUC_03 -> YtelseType.UFOREP
-            BucType.R_BUC_02 -> ytelsesType!!
-            BucType.P_BUC_10 -> ytelsesType ?: return null
+    fun hentSakInformasjon(aktoerId: String, bucType: BucType, saktype: Saktype? = null): SakInformasjon? {
+        val saktype = when (bucType) {
+            BucType.P_BUC_01 -> Saktype.ALDER
+            BucType.P_BUC_02 -> saktype ?: return null
+            BucType.P_BUC_03 -> Saktype.UFOREP
+            BucType.R_BUC_02 -> saktype!!
+            BucType.P_BUC_10 -> saktype ?: return null
             else -> return null
         }
 
-        logger.info("kallBestemSak aktoer: $aktoerId ytelseType: $ytelseType bucType: $bucType")
+        logger.info("KallBestemSak med aktoer: $aktoerId saktype: $saktype bucType: $bucType")
 
-        val resp = kallBestemSak(aktoerId, ytelseType)
+        val resp = kallBestemSak(aktoerId, saktype)
         if (resp != null && resp.sakInformasjonListe.size == 1) {
             return resp.sakInformasjonListe
                     .first()
@@ -45,9 +45,9 @@ class BestemSakService(private val klient: BestemSakKlient) {
         return null
     }
 
-    private fun kallBestemSak(aktoerId: String, ytelseType: YtelseType): BestemSakResponse? {
+    private fun kallBestemSak(aktoerId: String, saktype: Saktype): BestemSakResponse? {
         val randomId = UUID.randomUUID()
-        val request = BestemSakRequest(aktoerId, ytelseType, randomId, randomId)
+        val request = BestemSakRequest(aktoerId, saktype, randomId, randomId)
 
         return klient.kallBestemSak(request)
     }

@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -31,14 +31,14 @@ internal class Rbuc02Test {
     }
 
     @ParameterizedTest
-    @EnumSource(YtelseType::class)
-    fun `Sendt sak med kun én person kan automatisk behandles`(ytelseType: YtelseType) {
+    @EnumSource(Saktype::class)
+    fun `Sendt sak med kun én person kan automatisk behandles`(saktype: Saktype) {
         val person = mockk<IdentifisertPerson> {
             every { aktoerId } returns "111"
             every { flereEnnEnPerson() } returns false
         }
 
-        val request = SENDT.mockRequest(type = ytelseType, person = person)
+        val request = SENDT.mockRequest(type = saktype, person = person)
 
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
     }
@@ -56,14 +56,14 @@ internal class Rbuc02Test {
     }
 
     @ParameterizedTest
-    @EnumSource(YtelseType::class)
-    fun `Mottatt sak skal aldri til automatisk journalføring`(ytelseType: YtelseType) {
+    @EnumSource(Saktype::class)
+    fun `Mottatt sak skal aldri til automatisk journalføring`(saktype: Saktype) {
         val person = mockk<IdentifisertPerson> {
             every { aktoerId } returns "111"
             every { flereEnnEnPerson() } returns false
         }
 
-        val request = MOTTATT.mockRequest(type = ytelseType, person = person)
+        val request = MOTTATT.mockRequest(type = saktype, person = person)
 
         assertNotEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
     }
@@ -76,7 +76,7 @@ internal class Rbuc02Test {
             every { flereEnnEnPerson() } returns true
         }
 
-        val request = hendelseType.mockRequest(type = YtelseType.ALDER, person = person)
+        val request = hendelseType.mockRequest(type = Saktype.ALDER, person = person)
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
     }
@@ -84,7 +84,7 @@ internal class Rbuc02Test {
     @ParameterizedTest
     @EnumSource(HendelseType::class)
     fun `Sak med ukjent person skal til ID og Fordeling`(hendelseType: HendelseType) {
-        val request = hendelseType.mockRequest(type = YtelseType.ALDER, person = null)
+        val request = hendelseType.mockRequest(type = Saktype.ALDER, person = null)
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
     }
@@ -122,31 +122,31 @@ internal class Rbuc02Test {
             every { flereEnnEnPerson() } returns false
         }
 
-        val forventPensjonUtland = MOTTATT.mockRequest(type = YtelseType.ALDER, person = person)
+        val forventPensjonUtland = MOTTATT.mockRequest(type = Saktype.ALDER, person = person)
         assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(forventPensjonUtland))
 
-        val forventUforeUtland = MOTTATT.mockRequest(type = YtelseType.UFOREP, person = person)
+        val forventUforeUtland = MOTTATT.mockRequest(type = Saktype.UFOREP, person = person)
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(forventUforeUtland))
 
-        listOf(YtelseType.OMSORG, YtelseType.GJENLEV, YtelseType.BARNEP, YtelseType.GENRL)
-                .forEach { ytelseType ->
-                    val request = MOTTATT.mockRequest(type = ytelseType, person = person)
+        listOf(Saktype.OMSORG, Saktype.GJENLEV, Saktype.BARNEP, Saktype.GENRL)
+                .forEach { saktype ->
+                    val request = MOTTATT.mockRequest(type = saktype, person = person)
                     assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
                 }
     }
 
     private fun HendelseType.mockRequest(
-            type: YtelseType? = null,
-            harAdressebeskyttelse: Boolean = false,
-            sedType: SedType = SedType.R005,
-            person: IdentifisertPerson? = null
+        type: Saktype? = null,
+        harAdressebeskyttelse: Boolean = false,
+        sedType: SedType = SedType.R005,
+        person: IdentifisertPerson? = null
     ): OppgaveRoutingRequest {
         val hendelse = this
 
         return mockk {
             every { aktorId } returns "12345"
             every { hendelseType } returns hendelse
-            every { ytelseType } returns type
+            every { saktype } returns type
             every { sakInformasjon?.sakId } returns "sakId"
             every { identifisertPerson } returns person
 

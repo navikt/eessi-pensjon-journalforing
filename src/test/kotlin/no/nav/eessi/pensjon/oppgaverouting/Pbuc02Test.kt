@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -39,8 +39,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(YtelseType::class)
-        fun `Sendt hendelse kan automatisk journalføres`(type: YtelseType) {
+        @EnumSource(Saktype::class)
+        fun `Sendt hendelse kan automatisk journalføres`(type: Saktype) {
             // Gyldig sak hvor sakStatus IKKE er AVSLUTTET skal alltid automatisk journalføres
             val requestNorge = SENDT.request(type, "NOR", SakStatus.TIL_BEHANDLING)
             assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestNorge))
@@ -51,25 +51,25 @@ internal class Pbuc02Test {
 
         @Test
         fun `Sendt hendelse med sakType UFOREP og sakStatus AVSLUTTET`() {
-            val requestNorge = SENDT.request(YtelseType.UFOREP, "NOR", SakStatus.AVSLUTTET)
+            val requestNorge = SENDT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(requestNorge),
-                    "Skal aldri automatisk journalføres dersom YtelseType == UFOREP og SakStatus == AVSLUTTET"
+                    "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
 
-            val requestUtland = SENDT.request(YtelseType.UFOREP, "SWE", SakStatus.AVSLUTTET)
+            val requestUtland = SENDT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(requestUtland),
-                    "Skal aldri automatisk journalføres dersom YtelseType == UFOREP og SakStatus == AVSLUTTET"
+                    "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
         }
 
         @Test
-        fun `Manglende ytelseType går til ID_OG_FORDELING`() {
+        fun `Manglende saktype går til ID_OG_FORDELING`() {
             assertEquals(
                     Enhet.ID_OG_FORDELING,
                     handler.hentEnhet(SENDT.request(type = null, landkode = "NOR"))
@@ -85,23 +85,23 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.UFOREP, "NOR"))
+                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(YtelseType.UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.ALDER, "NOR"))
+                    handler.hentEnhet(SENDT.request(Saktype.ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.BARNEP, "NOR"))
+                    handler.hentEnhet(SENDT.request(Saktype.BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.GJENLEV, "NOR"))
+                    handler.hentEnhet(SENDT.request(Saktype.GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -113,23 +113,23 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.UFOREP, "SWE"))
+                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(YtelseType.UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.ALDER, "SWE"))
+                    handler.hentEnhet(SENDT.request(Saktype.ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.BARNEP, "SWE"))
+                    handler.hentEnhet(SENDT.request(Saktype.BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(YtelseType.GJENLEV, "SWE"))
+                    handler.hentEnhet(SENDT.request(Saktype.GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -157,8 +157,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(YtelseType::class)
-        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt NORGE`(type: YtelseType) {
+        @EnumSource(Saktype::class)
+        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt NORGE`(type: Saktype) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(MOTTATT.request(type, "NOR"))
@@ -166,8 +166,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(YtelseType::class)
-        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt UTLAND`(type: YtelseType) {
+        @EnumSource(Saktype::class)
+        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt UTLAND`(type: Saktype) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(MOTTATT.request(type, "SWE"))
@@ -175,7 +175,7 @@ internal class Pbuc02Test {
         }
 
         @Test
-        fun `Manglende ytelseType går til ID_OG_FORDELING`() {
+        fun `Manglende saktype går til ID_OG_FORDELING`() {
             assertEquals(
                     Enhet.ID_OG_FORDELING,
                     handler.hentEnhet(MOTTATT.request(type = null, landkode = "NOR"))
@@ -186,23 +186,23 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.UFORE_UTLANDSTILSNITT,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.UFOREP, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.ALDER, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.BARNEP, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.GJENLEV, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -214,23 +214,23 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.UFORE_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.UFOREP, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.ALDER, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.BARNEP, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(YtelseType.GJENLEV, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(Saktype.GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -240,16 +240,16 @@ internal class Pbuc02Test {
     }
 
     private fun HendelseType.request(
-            type: YtelseType?,
-            landkode: String,
-            status: SakStatus = SakStatus.TIL_BEHANDLING
+        type: Saktype?,
+        landkode: String,
+        status: SakStatus = SakStatus.TIL_BEHANDLING
     ): OppgaveRoutingRequest {
         val hendelse = this
 
         return mockk {
             every { aktorId } returns "12345"
             every { hendelseType } returns hendelse
-            every { ytelseType } returns type
+            every { saktype } returns type
             every { sakInformasjon?.sakId } returns "sakId"
             every { sakInformasjon?.sakType } returns type
             every { sakInformasjon?.sakStatus } returns status

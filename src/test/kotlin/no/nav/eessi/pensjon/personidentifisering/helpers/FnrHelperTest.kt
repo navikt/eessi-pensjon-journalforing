@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.YtelseType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Krav
 import no.nav.eessi.pensjon.models.sed.KravType
@@ -66,7 +66,7 @@ internal class FnrHelperTest {
         ))
 
         assertEquals(1, actual.size)
-        assertEquals(PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, YtelseType.ALDER, SedType.P15000), actual.first())
+        assertEquals(PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000), actual.first())
     }
 
     @Test
@@ -80,7 +80,7 @@ internal class FnrHelperTest {
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
 
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, YtelseType.GJENLEV, SedType.P15000), actual.first())
+        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, Saktype.GJENLEV, SedType.P15000), actual.first())
     }
 
     @Test
@@ -203,7 +203,7 @@ internal class FnrHelperTest {
                 generateSED(SedType.P8000, forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, forsikretRolle = Rolle.ETTERLATTE)
         ))
 
-        val expectedPersonRelasjon = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, YtelseType.GJENLEV, SedType.P5000)
+        val expectedPersonRelasjon = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000)
 
         assertEquals(1, actual.size)
 
@@ -224,8 +224,8 @@ internal class FnrHelperTest {
                 generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)
         ))
 
-        val expectedForsikret = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, YtelseType.GJENLEV, sedType = SedType.P15000)
-        val expectedGjenlev = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, YtelseType.GJENLEV, sedType = SedType.P15000)
+        val expectedForsikret = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000)
+        val expectedGjenlev = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
 
         assertEquals(2, actual.size)
 
@@ -244,7 +244,7 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(sedList)
 
-        val expectedPerson = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, YtelseType.ALDER, sedType = SedType.P15000)
+        val expectedPerson = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000)
 
         assertEquals(1, actual.size)
         assertEquals(expectedPerson, actual.first())
@@ -269,7 +269,7 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P2100, gjenlevRelasjon.sedType)
-            assertNull(gjenlevRelasjon.ytelseType)
+            assertNull(gjenlevRelasjon.saktype)
         }
 
         @ParameterizedTest
@@ -289,7 +289,7 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P2100, gjenlevRelasjon.sedType)
-            assertEquals(YtelseType.BARNEP, gjenlevRelasjon.ytelseType)
+            assertEquals(Saktype.BARNEP, gjenlevRelasjon.saktype)
         }
 
         @ParameterizedTest
@@ -309,7 +309,7 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P2100, gjenlevRelasjon.sedType)
-            assertEquals(YtelseType.GJENLEV, gjenlevRelasjon.ytelseType)
+            assertEquals(Saktype.GJENLEV, gjenlevRelasjon.saktype)
         }
     }
 
@@ -334,13 +334,13 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
             assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-            assertEquals(YtelseType.GJENLEV, forsikretRelasjon.ytelseType)
+            assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
 
             val gjenlevRelasjon = relasjoner[1]
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-            assertNull(gjenlevRelasjon.ytelseType)
+            assertNull(gjenlevRelasjon.saktype)
         }
 
         @ParameterizedTest
@@ -362,13 +362,13 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
             assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-            assertEquals(YtelseType.GJENLEV, forsikretRelasjon.ytelseType)
+            assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
 
             val gjenlevRelasjon = relasjoner[1]
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-            assertEquals(YtelseType.BARNEP, gjenlevRelasjon.ytelseType)
+            assertEquals(Saktype.BARNEP, gjenlevRelasjon.saktype)
         }
 
 
@@ -391,13 +391,13 @@ internal class FnrHelperTest {
             assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
             assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-            assertEquals(YtelseType.GJENLEV, forsikretRelasjon.ytelseType)
+            assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
 
             val gjenlevRelasjon = relasjoner[1]
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-            assertEquals(YtelseType.GJENLEV, gjenlevRelasjon.ytelseType)
+            assertEquals(Saktype.GJENLEV, gjenlevRelasjon.saktype)
         }
     }
 

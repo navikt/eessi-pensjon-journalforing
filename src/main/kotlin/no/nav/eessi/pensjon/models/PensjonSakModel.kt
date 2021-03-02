@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SakInformasjon(
-        val sakId: String?,
-        val sakType: YtelseType,
-        val sakStatus: SakStatus,
-        val saksbehandlendeEnhetId: String = "",
-        val nyopprettet: Boolean = false,
+    val sakId: String?,
+    val sakType: Saktype,
+    val sakStatus: SakStatus,
+    val saksbehandlendeEnhetId: String = "",
+    val nyopprettet: Boolean = false,
 
-        @JsonIgnore
+    @JsonIgnore
         val tilknyttedeSaker: List<SakInformasjon> = emptyList()
 ) {
     fun harGenerellSakTypeMedTilknyttetSaker() : Boolean {
-        return sakType == YtelseType.GENRL && tilknyttedeSaker.isNotEmpty()
+        return sakType == Saktype.GENRL && tilknyttedeSaker.isNotEmpty()
     }
 }
 
