@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -152,11 +152,12 @@ class SedListener(
     private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
-        return if (sedHendelseModel.bucType == BucType.P_BUC_02) {
-           bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.saktype)
-        } else {
-            null
+        return when(sedHendelseModel.bucType) {
+            BucType.P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.saktype)
+            BucType.P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
+            else  -> null
         }
+
     }
 
     private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: Saktype?, alleSedIBuc: List<SED>): SakInformasjon? {
