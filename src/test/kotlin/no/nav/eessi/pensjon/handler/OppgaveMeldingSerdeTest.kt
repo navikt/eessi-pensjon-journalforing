@@ -1,11 +1,11 @@
 package no.nav.eessi.pensjon.handler
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -14,13 +14,14 @@ internal class OppgaveMeldingSerdeTest {
     @Test
     fun serde_journalforing() {
         val melding = OppgaveMelding(
-                SedType.P8000,
-                "12345",
-                Enhet.ID_OG_FORDELING,
-                "aktoerId",
-                "TEST",
-                HendelseType.SENDT,
-                null
+            SedType.P8000,
+            "12345",
+            Enhet.ID_OG_FORDELING,
+            "aktoerId",
+            "TEST",
+            HendelseType.SENDT,
+            null,
+            OppgaveType.JOURNALFORING
         )
 
         val serialized = melding.toJson()
@@ -34,19 +35,20 @@ internal class OppgaveMeldingSerdeTest {
         assertEquals(melding.rinaSakId, deserialized.rinaSakId)
         assertEquals(melding.hendelseType, deserialized.hendelseType)
         assertEquals(melding.filnavn, deserialized.filnavn)
-        assertEquals("JOURNALFORING", deserialized.oppgaveType())
+        assertEquals(OppgaveType.JOURNALFORING, melding.oppgaveType)
     }
 
     @Test
     fun serde_behandleSed() {
         val melding = OppgaveMelding(
-                SedType.P8000,
-                null,
-                Enhet.ID_OG_FORDELING,
-                "aktoerId",
-                "TEST",
-                HendelseType.SENDT,
-                "filnavn"
+            SedType.P8000,
+            null,
+            Enhet.ID_OG_FORDELING,
+            "aktoerId",
+            "TEST",
+            HendelseType.SENDT,
+            "filnavn",
+            OppgaveType.BEHANDLE_SED
         )
 
         val serialized = melding.toJson()
@@ -60,6 +62,6 @@ internal class OppgaveMeldingSerdeTest {
         assertEquals(melding.rinaSakId, deserialized.rinaSakId)
         assertEquals(melding.hendelseType, deserialized.hendelseType)
         assertEquals(melding.filnavn, deserialized.filnavn)
-        assertEquals("BEHANDLE_SED", deserialized.oppgaveType())
+        assertEquals(OppgaveType.BEHANDLE_SED, melding.oppgaveType)
     }
 }

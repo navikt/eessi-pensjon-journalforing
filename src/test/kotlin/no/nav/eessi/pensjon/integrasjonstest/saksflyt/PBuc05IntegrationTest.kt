@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -22,9 +23,9 @@ import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.Rolle
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
@@ -690,7 +691,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -778,7 +779,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -815,7 +816,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -856,7 +857,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -907,7 +908,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(AUTOMATISK_JOURNALFORING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P9000", oppgaveMelding.sedType?.name)
@@ -958,7 +959,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P9000", oppgaveMelding.sedType?.name)
@@ -1008,7 +1009,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
@@ -1057,7 +1058,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
 
@@ -1161,7 +1162,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             // forvent tema == PEN og enhet 9999
@@ -1191,7 +1192,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -1224,7 +1225,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             // forvent tema == PEN og enhet 9999
@@ -1253,7 +1254,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             // forvent tema == PEN og enhet 9999
@@ -1390,7 +1391,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -1422,7 +1423,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -1454,7 +1455,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -1486,7 +1487,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -1518,7 +1519,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)

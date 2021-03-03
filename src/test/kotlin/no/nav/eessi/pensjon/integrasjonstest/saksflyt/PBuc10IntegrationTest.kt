@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
@@ -24,9 +25,9 @@ import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.KravType
 import no.nav.eessi.pensjon.models.sed.KravType.ALDER
 import no.nav.eessi.pensjon.models.sed.KravType.ETTERLATTE
@@ -427,7 +428,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -466,7 +467,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -505,7 +506,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -544,7 +545,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.UFORE_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
@@ -584,7 +585,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
-            assertEquals("JOURNALFORING", oppgaveMelding.oppgaveType())
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P15000", oppgaveMelding.sedType?.name)

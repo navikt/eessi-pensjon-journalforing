@@ -6,6 +6,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Enhet
@@ -97,24 +98,30 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 val aktoerId = identifisertPerson?.aktoerId
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
-                    val melding = OppgaveMelding(sedType,
+                    val melding = OppgaveMelding(
+                        sedType,
                         journalPostResponse.journalpostId,
                         tildeltEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
-                        null)
+                        null,
+                        OppgaveType.JOURNALFORING
+                    )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    val melding = OppgaveMelding(sedType,
+                    val melding = OppgaveMelding(
+                        sedType,
                         null,
                         tildeltEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
-                        usupporterteFilnavn(uSupporterteVedlegg))
+                        usupporterteFilnavn(uSupporterteVedlegg),
+                        OppgaveType.JOURNALFORING
+                    )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
