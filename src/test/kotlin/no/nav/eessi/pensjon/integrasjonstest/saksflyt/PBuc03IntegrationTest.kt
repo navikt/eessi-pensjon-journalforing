@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
@@ -61,7 +62,8 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 FNR_VOKSEN,
                 bestemsak,
                 alleDocs = allDocuemtActions,
-                hendelseType = MOTTATT
+                hendelseType = MOTTATT,
+                land = "SWE"
             ) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
@@ -78,10 +80,11 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 FNR_VOKSEN,
                 bestemsak,
                 alleDocs = allDocuemtActions,
-                hendelseType = MOTTATT
+                hendelseType = MOTTATT,
+                land = "SWE"
             ) {
                 assertEquals(UFORETRYGD, it.tema)
-                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
@@ -94,7 +97,8 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null,
                 bestemsak,
                 alleDocs = allDocuemtActions,
-                hendelseType = MOTTATT
+                hendelseType = MOTTATT,
+                land = "SWE"
             ) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
