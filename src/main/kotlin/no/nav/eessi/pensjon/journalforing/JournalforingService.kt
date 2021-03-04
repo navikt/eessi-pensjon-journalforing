@@ -95,11 +95,21 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                 val sedType = sedHendelseModel.sedType
                 val aktoerId = identifisertPerson?.aktoerId
+                val oppgaveEnhet = if (fdato == null) {
+                    Enhet.ID_OG_FORDELING
+                } else {
+                    oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
+                        fdato,
+                        saktype,
+                        sedHendelseModel,
+                        hendelseType,
+                        null) )
+                }
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
                     val melding = OppgaveMelding(sedType,
                         journalPostResponse.journalpostId,
-                        tildeltEnhet,
+                        oppgaveEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
@@ -110,7 +120,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     val melding = OppgaveMelding(sedType,
                         null,
-                        oppgaveEnhet(tildeltEnhet),
+                        oppgaveEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
@@ -129,14 +139,6 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
-        }
-    }
-
-    private fun oppgaveEnhet(tildeltEnhet: Enhet): Enhet {
-        return  if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
-            Enhet.UGYLDIG_ARKIV_TYPE
-        } else {
-            tildeltEnhet
         }
     }
 
