@@ -96,12 +96,22 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                 val sedType = sedHendelseModel.sedType
                 val aktoerId = identifisertPerson?.aktoerId
+                val oppgaveEnhet = if (fdato == null) {
+                    Enhet.ID_OG_FORDELING
+                } else {
+                    oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
+                        fdato,
+                        saktype,
+                        sedHendelseModel,
+                        hendelseType,
+                        null) )
+                }
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
                     val melding = OppgaveMelding(
                         sedType,
                         journalPostResponse.journalpostId,
-                        tildeltEnhet,
+                        oppgaveEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
@@ -115,7 +125,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                     val melding = OppgaveMelding(
                         sedType,
                         null,
-                        tildeltEnhet,
+                        oppgaveEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
@@ -124,6 +134,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
+
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
