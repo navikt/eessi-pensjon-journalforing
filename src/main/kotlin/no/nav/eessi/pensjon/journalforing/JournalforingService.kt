@@ -110,13 +110,14 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     val melding = OppgaveMelding(sedType,
                         null,
-                        tildeltEnhet,
+                        oppgaveEnhet(tildeltEnhet),
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
                         usupporterteFilnavn(uSupporterteVedlegg))
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
+
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
@@ -128,6 +129,14 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
+        }
+    }
+
+    private fun oppgaveEnhet(tildeltEnhet: Enhet): Enhet {
+        return  if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
+            Enhet.UGYLDIG_ARKIV_TYPE
+        } else {
+            tildeltEnhet
         }
     }
 
