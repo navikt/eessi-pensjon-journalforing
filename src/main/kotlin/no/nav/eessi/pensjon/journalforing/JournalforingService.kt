@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -94,27 +94,16 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
-
                 val sedType = sedHendelseModel.sedType
                 val aktoerId = identifisertPerson?.aktoerId
+                val pbuc03mottatt = sedHendelseModel.bucType == BucType.P_BUC_03 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
-                val sedP2200Mottatt = sedType == SedType.P2200 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
-                val oppgaveEnhet = if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
-                    oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
-                        fdato!!,
-                        saktype,
-                        sedHendelseModel,
-                        hendelseType,
-                        null) )
-                } else {
-                    tildeltEnhet
-                }
-                val oppgaveType = when {
-                    sedP2200Mottatt -> OppgaveType.KRAV
-                    else -> OppgaveType.JOURNALFORING
-                }
+//                val oppgaveType = when {
+//                    sedP2200Mottatt -> OppgaveType.KRAV
+//                    else -> OppgaveType.JOURNALFORING
+//                }
 
-                if (!journalPostResponse!!.journalpostferdigstilt || sedP2200Mottatt) {
+                if (!journalPostResponse!!.journalpostferdigstilt || pbuc03mottatt) {
                     val melding = OppgaveMelding(
                         sedType,
                         journalPostResponse.journalpostId,
@@ -123,12 +112,22 @@ class JournalforingService(private val journalpostService: JournalpostService,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
                         null,
-                        oppgaveType
+                        OppgaveType.JOURNALFORING
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
+                    val oppgaveEnhet = if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
+                        oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
+                            fdato!!,
+                            saktype,
+                            sedHendelseModel,
+                            hendelseType,
+                            null) )
+                    } else {
+                        tildeltEnhet
+                    }
                     val melding = OppgaveMelding(
                         sedType,
                         null,
