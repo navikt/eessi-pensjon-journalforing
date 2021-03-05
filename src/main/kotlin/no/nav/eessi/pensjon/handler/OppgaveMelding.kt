@@ -25,5 +25,6 @@ data class OppgaveMelding(
 }
 enum class OppgaveType{
     BEHANDLE_SED,
-    JOURNALFORING
+    JOURNALFORING,
+    KRAV;
 }

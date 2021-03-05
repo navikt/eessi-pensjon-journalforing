@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -96,27 +97,33 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                 val sedType = sedHendelseModel.sedType
                 val aktoerId = identifisertPerson?.aktoerId
-                val oppgaveEnhet = if (fdato == null) {
-                    Enhet.ID_OG_FORDELING
-                } else {
+
+                val sedP2200Mottatt = sedType == SedType.P2200 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
+                val oppgaveEnhet = if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
                     oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
-                        fdato,
+                        fdato!!,
                         saktype,
                         sedHendelseModel,
                         hendelseType,
                         null) )
+                } else {
+                    tildeltEnhet
+                }
+                val oppgaveType = when {
+                    sedP2200Mottatt -> OppgaveType.KRAV
+                    else -> OppgaveType.JOURNALFORING
                 }
 
-                if (!journalPostResponse!!.journalpostferdigstilt) {
+                if (!journalPostResponse!!.journalpostferdigstilt || sedP2200Mottatt) {
                     val melding = OppgaveMelding(
                         sedType,
                         journalPostResponse.journalpostId,
-                        oppgaveEnhet,
+                        tildeltEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
                         null,
-                        OppgaveType.JOURNALFORING
+                        oppgaveType
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
@@ -130,7 +137,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
                         usupporterteFilnavn(uSupporterteVedlegg),
-                        OppgaveType.JOURNALFORING
+                        OppgaveType.BEHANDLE_SED
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
