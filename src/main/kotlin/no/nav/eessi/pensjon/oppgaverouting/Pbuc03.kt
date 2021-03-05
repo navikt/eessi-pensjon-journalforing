@@ -11,12 +11,4 @@ class Pbuc03 : BucTilEnhetHandler {
             else -> Enhet.UFORE_UTLAND
         }
     }
-
-    override fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
-        return request.run {
-                    saktype != null
-                    && !aktorId.isNullOrBlank()
-                    && !sakInformasjon?.sakId.isNullOrBlank()
-        }
-    }
 }
