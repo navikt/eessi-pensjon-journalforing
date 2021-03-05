@@ -27,7 +27,7 @@ plugins {
 	id "org.owasp.dependencycheck" version "5.3.2.1"
 	id 'com.adarshr.test-logger' version '2.1.1'
 	id "org.sonarqube" version "3.0"
-
+	id 'jacoco'
 }
 
 assert JavaVersion.current().isJava11Compatible(): "Java 11 or newer is required"
@@ -153,7 +153,21 @@ wrapper {
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-/* https://github.com/ben-manes/gradle-versions-plugin */
+
+jacocoTestReport {
+	reports {
+		xml.enabled true
+	}
+}
+
+sonarqube {
+	properties {
+		property 'sonar.host.url', 'http://localhost:9000'
+	}
+}
+tasks.sonarqube.dependsOn tasks["jacocoTestReport"]
+
+
 dependencyUpdates {
 	rejectVersionIf {
 		['alpha', 'beta', 'rc', 'cr', 'm', 'preview', 'pr']
