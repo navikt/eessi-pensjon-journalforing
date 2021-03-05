@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory
  * Kjente keys: "Pin", "kompetenteuland"
  *
  */
-class SedFnrSøk {
+class SedFnrSok {
 
     companion object {
-        private val logger = LoggerFactory.getLogger(SedFnrSøk::class.java)
+        private val logger = LoggerFactory.getLogger(SedFnrSok::class.java)
 
         /**
          * Finner alle fnr i SED

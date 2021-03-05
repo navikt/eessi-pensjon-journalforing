@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSøk
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -100,7 +100,7 @@ class PersonidentifiseringService(private val personService: PersonService,
     }
 
     private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<SED>): Boolean {
-        val fnr = alleSediBuc.flatMap { SedFnrSøk.finnAlleFnrDnrISed(it) }
+        val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it) }
         logger.info("Fant ${fnr.size} unike fnr i SEDer tilknyttet Buc")
 
         val gradering = listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
