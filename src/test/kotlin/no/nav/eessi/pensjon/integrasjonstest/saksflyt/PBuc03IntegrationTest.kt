@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -17,6 +16,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
@@ -47,7 +47,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     inner class InngaaendeP_BUC_03 {
 
         @Test
-        fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak`() {
+        fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(
                 null, listOf(
                     SakInformasjon(
@@ -67,13 +67,57 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 forsokFerdigStilt = true,
                 land = "SWE"
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
 
-                assertEquals("429434378", oppgaveMelding.journalpostId)
-                assertEquals(OppgaveType.BEHANDLE_SED, oppgaveMelding.oppgaveType)
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals("", it.oppgaveMelding?.filnavn)
+                assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
+            }
+        }
+
+        @Test
+        fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(
+                        sakId = SAK_ID,
+                        sakType = Saktype.UFOREP,
+                        sakStatus = SakStatus.OPPRETTET
+                    )
+                )
+            )
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2200, SedStatus.RECEIVED))
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                bestemsak,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                forsokFerdigStilt = true,
+                documentFiler = getDokumentfilerUtenGyldigVedlegg(),
+                land = "SWE"
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(UFORETRYGD, journalpostRequest.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(2, oppgaveMeldingList.size)
+
+                assertEquals(null, it.oppgaveMeldingUgyldig?.journalpostId)
+                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig?.filnavn)
+                assertEquals(UFORE_UTLAND, it.oppgaveMeldingUgyldig?.tildeltEnhetsnr)
+                assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMeldingUgyldig?.oppgaveType)
+
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals("", it.oppgaveMelding?.filnavn)
+                assertEquals(Enhet.UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
             }
         }
 
@@ -99,13 +143,16 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 forsokFerdigStilt = false,
                 land = "SWE"
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
 
-                assertEquals("429434378", oppgaveMelding.journalpostId)
-                assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
+                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
             }
         }
@@ -124,10 +171,15 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 land = "SWE"
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
         }
 
@@ -143,10 +195,17 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 land = "SWE"
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(null, it.oppgaveMelding?.aktoerId)
+                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+
             }
         }
     }
@@ -154,6 +213,41 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Utgående")
     inner class UtgaaendeP_BUC_03 {
+
+        @Test
+        fun `Krav om uføre for Utgående P2200 journalføres automatisk med bruk av bestemsak uten forsokFerdigStilt oppretter en oppgave type JOURNALFORING`() {
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(
+                        sakId = SAK_ID,
+                        sakType = Saktype.UFOREP,
+                        sakStatus = SakStatus.LOPENDE
+                    )
+                )
+            )
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2200, SedStatus.SENT))
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                bestemsak,
+                alleDocs = allDocuemtActions,
+                hendelseType = SENDT
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(UFORETRYGD, journalpostRequest.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
+                assertEquals(HendelseType.SENDT, it.oppgaveMelding?.hendelseType)
+                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+
+            }
+
+        }
 
         @Test
         fun `Krav om uføre for Utgående P2200 journalføres automatisk med bruk av bestemsak`() {
@@ -172,12 +266,17 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 FNR_VOKSEN,
                 bestemsak,
                 alleDocs = allDocuemtActions,
+                forsokFerdigStilt = true,
                 hendelseType = SENDT
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
+
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(0, oppgaveMeldingList.size)
+
             }
 
         }
@@ -195,7 +294,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 hendelseType = SENDT
             ) {
-                val oppgaveMelding = it.oppgaveMelding
+                val oppgaveMelding = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, journalpostRequest.journalfoerendeEnhet)
@@ -213,11 +312,12 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         krav: KravType = UFORE,
         alleDocs: List<ForenkletSED>,
         forsokFerdigStilt: Boolean = false,
+        documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
         hendelseType: HendelseType,
         block: (TestResult) -> Unit
     ) {
         val sed = createSedPensjon(SedType.P2200, fnrVoksen, eessiSaknr = sakId, krav = krav)
-        initCommonMocks(sed, alleDocs)
+        initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
@@ -229,7 +329,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         val hendelse = createHendelseJson(SedType.P2200, BucType.P_BUC_03)
 
-        val meldingSlot = slot<String>()
+        val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         when (hendelseType) {
@@ -238,10 +338,10 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             else -> fail()
         }
 
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
-        assertEquals(hendelseType, oppgaveMelding.hendelseType)
-
-        block(TestResult(journalpost.captured, oppgaveMelding))
+        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+        }
+        block(TestResult(journalpost.captured, oppgaveMeldingList))
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
@@ -251,10 +351,10 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     }
 
 
-    private fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>) {
+    private fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler) {
         every { euxService.hentBucDokumenter(any()) } returns alleDocs
         every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns documentFiler
     }
 
     private fun getResource(resourcePath: String): String =
@@ -265,8 +365,16 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         return mapJsonToAny(dokumentfilerJson, typeRefs())
     }
 
-    data class TestResult (
+    private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
+        val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
+        return mapJsonToAny(dokumentfilerJson, typeRefs())
+    }
+
+    data class TestResult(
         val opprettJournalpostRequest: OpprettJournalpostRequest,
-        val oppgaveMelding: OppgaveMelding) {
+        val oppgaveMeldingList: List<OppgaveMelding>
+    ) {
+        val oppgaveMeldingUgyldig = if (oppgaveMeldingList.size == 2) oppgaveMeldingList.first() else null
+        val oppgaveMelding = if (oppgaveMeldingList.size == 2) oppgaveMeldingList.last() else if (oppgaveMeldingList.isNotEmpty()) oppgaveMeldingList.first() else null
     }
 }

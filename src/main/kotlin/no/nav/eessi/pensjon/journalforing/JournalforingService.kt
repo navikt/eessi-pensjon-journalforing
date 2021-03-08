@@ -128,7 +128,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                          if (pbuc03mottatt) {
                              opprettBehandleSedOppgave(
-                                 uSupporterteVedlegg,
+                                 emptyList(),
                                  journalPostResponse.journalpostId,
                                  oppgaveEnhet,
                                  aktoerId,
