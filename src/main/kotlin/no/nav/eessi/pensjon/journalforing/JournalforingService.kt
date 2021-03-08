@@ -94,18 +94,12 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
-                val sedType = sedHendelseModel.sedType
                 val aktoerId = identifisertPerson?.aktoerId
-                val pbuc03mottatt = sedHendelseModel.bucType == BucType.P_BUC_03 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING
 
-//                val oppgaveType = when {
-//                    sedP2200Mottatt -> OppgaveType.KRAV
-//                    else -> OppgaveType.JOURNALFORING
-//                }
 
-                if (!journalPostResponse!!.journalpostferdigstilt || pbuc03mottatt) {
+                if (!journalPostResponse!!.journalpostferdigstilt) {
                     val melding = OppgaveMelding(
-                        sedType,
+                        sedHendelseModel.sedType,
                         journalPostResponse.journalpostId,
                         tildeltEnhet,
                         aktoerId,
@@ -117,29 +111,34 @@ class JournalforingService(private val journalpostService: JournalpostService,
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
-                if (uSupporterteVedlegg.isNotEmpty()) {
-                    val oppgaveEnhet = if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
-                        oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
-                            fdato!!,
-                            saktype,
-                            sedHendelseModel,
-                            hendelseType,
-                            null) )
-                    } else {
-                        tildeltEnhet
-                    }
-                    val melding = OppgaveMelding(
-                        sedType,
-                        null,
-                        oppgaveEnhet,
-                        aktoerId,
-                        sedHendelseModel.rinaSakId,
-                        hendelseType,
-                        usupporterteFilnavn(uSupporterteVedlegg),
-                        OppgaveType.BEHANDLE_SED
-                    )
-                    oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
+
+                val pbuc03mottatt = sedHendelseModel.bucType == BucType.P_BUC_03 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt
+                if (uSupporterteVedlegg.isNotEmpty() || pbuc03mottatt) {
+                     hentOppgaveEnhet(tildeltEnhet, identifisertPerson, fdato, saktype, sedHendelseModel).let {oppgaveEnhet ->
+
+                         if (uSupporterteVedlegg.isNotEmpty()) {
+                             opprettBehandleSedOppgave(
+                                 uSupporterteVedlegg,
+                                 null,
+                                 oppgaveEnhet,
+                                 aktoerId,
+                                 sedHendelseModel
+                             )
+                         }
+
+                         if (pbuc03mottatt) {
+                             opprettBehandleSedOppgave(
+                                 uSupporterteVedlegg,
+                                 journalPostResponse.journalpostId,
+                                 oppgaveEnhet,
+                                 aktoerId,
+                                 sedHendelseModel
+                             )
+                         }
+                     }
+
                 }
+
 
 
             } catch (ex: MismatchedInputException) {
@@ -153,6 +152,48 @@ class JournalforingService(private val journalpostService: JournalpostService,
                 throw ex
             }
         }
+    }
+
+    private fun opprettBehandleSedOppgave(
+        uSupporterteVedlegg: List<SedVedlegg>,
+        journalpostId: String?,
+        oppgaveEnhet: Enhet,
+        aktoerId: String?,
+        sedHendelseModel: SedHendelseModel
+    ) {
+       val oppgave = OppgaveMelding(
+           sedHendelseModel.sedType,
+           journalpostId,
+           oppgaveEnhet,
+           aktoerId,
+           sedHendelseModel.rinaSakId,
+           HendelseType.MOTTATT,
+           usupporterteFilnavn(uSupporterteVedlegg),
+           OppgaveType.BEHANDLE_SED
+       )
+       oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
+    }
+
+    private fun hentOppgaveEnhet(
+        tildeltEnhet: Enhet,
+        identifisertPerson: IdentifisertPerson?,
+        fdato: LocalDate?,
+        saktype: Saktype?,
+        sedHendelseModel: SedHendelseModel,
+    ): Enhet {
+        return if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
+            oppgaveRoutingService.route(
+                OppgaveRoutingRequest.fra(
+                    identifisertPerson,
+                    fdato!!,
+                    saktype,
+                    sedHendelseModel,
+                    HendelseType.MOTTATT,
+                    null
+                )
+            )
+        } else
+        tildeltEnhet
     }
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
