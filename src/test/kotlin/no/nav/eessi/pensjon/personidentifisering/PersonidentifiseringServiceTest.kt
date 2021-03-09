@@ -3,10 +3,10 @@ package no.nav.eessi.pensjon.personidentifisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Krav
@@ -25,6 +25,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -52,10 +53,10 @@ class PersonidentifiseringServiceTest {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = STERK_BUSK
 
-        every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(landkoder = true)
-        every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(landkoder = true)
+        every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(aktoerId = AktoerId("123213"), landkoder = true)
+        every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(aktoerId = AktoerId("321211"), landkoder = true)
 
-        val p6000 = generateSED(SedType.P6000, LEALAUS_KAKE, gjenlevFnr = gjenlevFnr)
+        val p6000 = generateSED(SedType.P6000, forsikretFnr, gjenlevFnr = gjenlevFnr)
         val h070 = generateSED(SedType.H070, forsikretFnr)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(null, listOf(p6000, h070), BucType.P_BUC_05, SedType.H070)
