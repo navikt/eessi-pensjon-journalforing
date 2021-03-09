@@ -54,8 +54,9 @@ class PersonidentifiseringService(private val personService: PersonService,
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
             potensiellePersonRelasjoner
-                    .filterNot { it.fnr == null }
-                    .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc) }
+                .filterNot { it.fnr == null }
+                .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc) }
+                .distinctBy { it.aktoerId }
         }
     }
 
@@ -138,7 +139,6 @@ class PersonidentifiseringService(private val personService: PersonService,
             bucType == BucType.P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             bucType == BucType.P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensiellePersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
-
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
             bucType == BucType.P_BUC_10 -> {
@@ -179,6 +179,7 @@ class PersonidentifiseringService(private val personService: PersonService,
      */
     private fun brukForsikretPerson(sedType: SedType?, identifisertePersoner: List<IdentifisertPerson>): IdentifisertPerson? {
         if (sedType in brukForikretPersonISed) {
+            logger.info("Henter ut forsikret person fra følgende SED $sedType")
             return identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.FORSIKRET }
         }
         return null
