@@ -118,17 +118,16 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
                          if (uSupporterteVedlegg.isNotEmpty()) {
                              opprettBehandleSedOppgave(
-                                 uSupporterteVedlegg,
                                  null,
                                  oppgaveEnhet,
                                  aktoerId,
-                                 sedHendelseModel
+                                 sedHendelseModel,
+                                 usupporterteFilnavn(uSupporterteVedlegg)
                              )
                          }
 
                          if (pbuc03mottatt) {
                              opprettBehandleSedOppgave(
-                                 emptyList(),
                                  journalPostResponse.journalpostId,
                                  oppgaveEnhet,
                                  aktoerId,
@@ -136,9 +135,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
                              )
                          }
                      }
-
                 }
-
 
 
             } catch (ex: MismatchedInputException) {
@@ -155,11 +152,11 @@ class JournalforingService(private val journalpostService: JournalpostService,
     }
 
     private fun opprettBehandleSedOppgave(
-        uSupporterteVedlegg: List<SedVedlegg>,
-        journalpostId: String?,
+        journalpostId: String? = null,
         oppgaveEnhet: Enhet,
-        aktoerId: String?,
-        sedHendelseModel: SedHendelseModel
+        aktoerId: String? = null,
+        sedHendelseModel: SedHendelseModel,
+        uSupporterteVedlegg: String? = null
     ) {
        val oppgave = OppgaveMelding(
            sedHendelseModel.sedType,
@@ -168,7 +165,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
            aktoerId,
            sedHendelseModel.rinaSakId,
            HendelseType.MOTTATT,
-           usupporterteFilnavn(uSupporterteVedlegg),
+           uSupporterteVedlegg,
            OppgaveType.BEHANDLE_SED
        )
        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)

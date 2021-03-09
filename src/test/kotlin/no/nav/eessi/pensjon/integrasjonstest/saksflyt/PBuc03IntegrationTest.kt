@@ -74,7 +74,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals("", it.oppgaveMelding?.filnavn)
+                assertEquals(null, it.oppgaveMelding?.filnavn)
                 assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
             }
@@ -115,7 +115,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMeldingUgyldig?.oppgaveType)
 
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals("", it.oppgaveMelding?.filnavn)
+                assertEquals(null, it.oppgaveMelding?.filnavn)
                 assertEquals(Enhet.UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
             }
