@@ -55,10 +55,8 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
                 mapper.readValue(response.body, BestemSakResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
                 throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
                 throw RuntimeException("En feil oppstod under kall til bestemSkak i PESYS ex: ", ex)
             }
         }
