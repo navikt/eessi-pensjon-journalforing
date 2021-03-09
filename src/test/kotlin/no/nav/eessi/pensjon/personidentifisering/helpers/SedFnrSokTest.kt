@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.Bruker
 import no.nav.eessi.pensjon.models.sed.Kontekst
 import no.nav.eessi.pensjon.models.sed.Merinformasjon
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SedFnrSøkTest {
+internal class SedFnrSokTest {
 
     @Test
     fun `Gitt en SED med flere norske fnr i Pin-identifikator feltet når det søkes etter fnr i SED så returner alle norske fnr`() {
@@ -29,66 +29,11 @@ internal class SedFnrSøkTest {
         val sed = mapJsonToAny(sedJson, typeRefs<SED>())
 
         // Når
-        val funnedeFnr = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val funnedeFnr = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         // Så
         assertTrue(funnedeFnr.containsAll(listOf("22117320034", "09035225916", "11067122781", "12011577847")))
         assertEquals(funnedeFnr.size, 4)
-    }
-
-    @Test
-    fun `asdf`() {
-        val jsonString = """
-            {
-              "pensjon": {
-                "gjenlevende": {
-                  "person": {
-                    "kjoenn": "M",
-                    "pin": [
-                      {
-                        "identifikator": "25017019905",
-                        "land": "NO"
-                      }
-                    ],
-                    "foedselsdato": "1970-01-25",
-                    "etternavn": "STAUDE",
-                    "fornavn": "ABSURD"
-                  }
-                }
-              },
-              "nav": {
-                "bruker": {
-                  "person": {
-                    "kjoenn": "K",
-                    "etternavn": "HATT",
-                    "fornavn": "GRØNN",
-                    "foedselsdato": "1970-10-16",
-                    "pin": [
-                      {
-                        "land": "NO",
-                        "identifikator": "16107021284"
-                      }
-                    ]
-                  }
-                },
-                "eessisak": [
-                  {
-                    "saksnummer": "123456",
-                    "land": "AT"
-                  }
-                ]
-              },
-              "sedGVer": "4",
-              "sedVer": "2",
-              "sed": "P3000_NO"
-            }
-        """.trimIndent()
-
-        val sed = mapJsonToAny(jsonString, typeRefs<SED>())
-
-        val result =SedFnrSøk.finnAlleFnrDnrISed(sed)
-
-//        println(result)
     }
 
     @Test
@@ -103,7 +48,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(2, resultat.size)
         assertTrue(resultat.containsAll(listOf("22117320034", "09035225916")))
@@ -121,7 +66,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(2, resultat.size)
         assertTrue(resultat.containsAll(listOf("22117320034", "09035225916")))
@@ -139,7 +84,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(2, resultat.size)
         assertTrue(resultat.containsAll(listOf("22117320034", "09035225916")))
@@ -156,7 +101,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(1, resultat.size)
         assertEquals("09035225916", resultat.first())
@@ -173,7 +118,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(1, resultat.size)
         assertEquals("09035225916", resultat.first())
@@ -190,7 +135,7 @@ internal class SedFnrSøkTest {
                 )
         )
 
-        val resultat = SedFnrSøk.finnAlleFnrDnrISed(sed)
+        val resultat = SedFnrSok.finnAlleFnrDnrISed(sed)
 
         assertEquals(1, resultat.size)
         assertEquals("09035225916", resultat.first())
