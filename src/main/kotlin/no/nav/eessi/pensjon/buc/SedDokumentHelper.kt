@@ -35,13 +35,16 @@ class SedDokumentHelper(
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::harGyldigStatus)
-            .mapNotNull { sed -> euxService.hentSed(rinaSakId , sed.id, sedTypeRef) }
+            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
+            .also { logger.info("Fant ${it.size} SED ") }
+
     }
 
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
-                .filter(ForenkletSED::erKansellert)
-                .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
+            .filter(ForenkletSED::erKansellert)
+            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
+            .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
     fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): Saktype? {
