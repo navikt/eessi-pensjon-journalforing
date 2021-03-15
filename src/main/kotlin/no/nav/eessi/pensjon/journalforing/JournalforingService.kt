@@ -137,7 +137,7 @@ class JournalforingService(
                          }
 
                          if (pbuc03mottatt) {
-                             if(nameSpace == "q2"){
+                             if(nameSpace == "q2" || nameSpace == "test"){
                                  val hendelse = BehandleHendelseModel(
                                      sakId = sakInformasjon?.sakId,
                                      bucId = sedHendelseModel.rinaSakId,

@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.handler.BehandleHendelseModel
+import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
@@ -77,6 +79,13 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 assertEquals(null, it.oppgaveMelding?.filnavn)
                 assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
+
+                assertEquals(true, it.kravMeldingList?.isNotEmpty())
+                assertEquals(1, it.kravMeldingList?.size)
+                val kravMelding = it.kravMeldingList?.firstOrNull()
+                assertEquals(HendelseKode.SOKNAD_OM_UFORE, kravMelding?.hendelsesKode)
+                assertEquals("147729", kravMelding?.bucId)
+                assertEquals(SAK_ID, kravMelding?.sakId)
             }
         }
 
@@ -332,16 +341,22 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        val kravmeldingSlot = mutableListOf<String>()
+        every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
+
         when (hendelseType) {
             SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
+        val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
+            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+        }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
             mapJsonToAny(it, typeRefs<OppgaveMelding>())
         }
-        block(TestResult(journalpost.captured, oppgaveMeldingList))
+        block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
@@ -372,7 +387,8 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
     data class TestResult(
         val opprettJournalpostRequest: OpprettJournalpostRequest,
-        val oppgaveMeldingList: List<OppgaveMelding>
+        val oppgaveMeldingList: List<OppgaveMelding>,
+        val kravMeldingList: List<BehandleHendelseModel>? = null
     ) {
         val oppgaveMeldingUgyldig = if (oppgaveMeldingList.size == 2) oppgaveMeldingList.first() else null
         val oppgaveMelding = if (oppgaveMeldingList.size == 2) oppgaveMeldingList.last() else if (oppgaveMeldingList.isNotEmpty()) oppgaveMeldingList.first() else null

@@ -104,13 +104,13 @@ internal open class JournalforingTestBase {
     }
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
-    private val kravHandeler = KravInitialiseringsHandler(kravInitHandlerKafka)
+    private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
-        kravInitialiseringsHandler = kravHandeler
+        kravInitialiseringsHandler = kravHandler
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -134,12 +134,14 @@ internal open class JournalforingTestBase {
     fun setup() {
         ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
         ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
+        ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         listener.initMetrics()
         journalforingService.initMetrics()
         journalforingService.nameSpace = "test"
         pdfService.initMetrics()
         oppgaveHandler.initMetrics()
+        kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
     }
 
