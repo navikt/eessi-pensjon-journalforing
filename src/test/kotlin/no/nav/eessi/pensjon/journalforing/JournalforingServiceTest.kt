@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
@@ -33,6 +34,7 @@ internal class JournalforingServiceTest {
     private val journalpostService = mockk<JournalpostService>(relaxUnitFun = true)
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
+    private val kravHandeler = mockk<KravInitialiseringsHandler>()
 
     private val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -44,7 +46,8 @@ internal class JournalforingServiceTest {
             journalpostService,
             oppgaveRoutingService,
             pdfService,
-            oppgaveHandler
+            oppgaveHandler,
+            kravHandeler
     )
 
     private val fdato = LocalDate.now()

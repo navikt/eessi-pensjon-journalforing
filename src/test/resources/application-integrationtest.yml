@@ -13,6 +13,9 @@ kafka:
   oppgave:
     topic: ${KAFKA_OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group
+  krav:
+    topic: ${KAFKA_KRAVINIT_TOPIC}
+    groupid: eessi-pensjon-group
 
 namespace: 'test'
 

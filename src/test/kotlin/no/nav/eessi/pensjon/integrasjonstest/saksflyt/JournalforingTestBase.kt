@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -98,12 +99,18 @@ internal open class JournalforingTestBase {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
+    protected val kravInitHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
+        every { sendDefault(any(), any()).get() } returns mockk()
+    }
+
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
+    private val kravHandeler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
-        oppgaveHandler = oppgaveHandler
+        oppgaveHandler = oppgaveHandler,
+        kravInitialiseringsHandler = kravHandeler
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -130,6 +137,7 @@ internal open class JournalforingTestBase {
 
         listener.initMetrics()
         journalforingService.initMetrics()
+        journalforingService.nameSpace = "test"
         pdfService.initMetrics()
         oppgaveHandler.initMetrics()
         bestemSakKlient.initMetrics()

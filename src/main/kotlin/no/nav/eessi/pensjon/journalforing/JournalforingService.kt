@@ -30,17 +30,20 @@ import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
-class JournalforingService(@Value("\${NAMESPACE}") val nameSpace: String,
-                           private val journalpostService: JournalpostService,
-                           private val oppgaveRoutingService: OppgaveRoutingService,
-                           private val pdfService: PDFService,
-                           private val oppgaveHandler: OppgaveHandler,
-                           private val kravInitialiseringsHandler: KravInitialiseringsHandler,
-                           @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
+class JournalforingService(
+    private val journalpostService: JournalpostService,
+    private val oppgaveRoutingService: OppgaveRoutingService,
+    private val pdfService: PDFService,
+    private val oppgaveHandler: OppgaveHandler,
+    private val kravInitialiseringsHandler: KravInitialiseringsHandler,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()),
+) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+    @Value("\${namespace}")
+    lateinit var nameSpace: String
 
     @PostConstruct
     fun initMetrics() {
