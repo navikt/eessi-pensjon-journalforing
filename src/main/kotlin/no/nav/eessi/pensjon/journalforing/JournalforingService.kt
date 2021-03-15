@@ -167,6 +167,7 @@ class JournalforingService(
 
 
 
+
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
                 throw ex
