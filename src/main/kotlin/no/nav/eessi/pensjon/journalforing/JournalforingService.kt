@@ -113,6 +113,7 @@ class JournalforingService(private val journalpostService: JournalpostService,
 
 
                 val pbuc03mottatt = sedHendelseModel.bucType == BucType.P_BUC_03 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt
+
                 if (uSupporterteVedlegg.isNotEmpty() || pbuc03mottatt) {
                      hentOppgaveEnhet(tildeltEnhet, identifisertPerson, fdato, saktype, sedHendelseModel).let {oppgaveEnhet ->
 
@@ -127,6 +128,8 @@ class JournalforingService(private val journalpostService: JournalpostService,
                          }
 
                          if (pbuc03mottatt) {
+//                             Q2-> krav-->
+
                              opprettBehandleSedOppgave(
                                  journalPostResponse.journalpostId,
                                  oppgaveEnhet,

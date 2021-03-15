@@ -6,8 +6,11 @@ kafka:
     topic: ${KAFKA_SEDMOTTATT_TOPIC}
     groupid: eessi-pensjon-group
   oppgave:
-      topic: ${KAFKA_OPPGAVE_TOPIC}
-      groupid: eessi-pensjon-group
+    topic: ${KAFKA_OPPGAVE_TOPIC}
+    groupid: eessi-pensjon-group
+  krav:
+    topic: ${KAFKA_KRAVINIT_TOPIC}
+    groupid: eessi-pensjon-group
 
 #Spring
 spring:
