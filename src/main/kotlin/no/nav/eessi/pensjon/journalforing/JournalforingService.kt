@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.handler.BehandleHendelseModel
+import no.nav.eessi.pensjon.handler.HendelseKode
+import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -21,15 +24,18 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @Service
-class JournalforingService(private val journalpostService: JournalpostService,
+class JournalforingService(@Value("\${NAMESPACE}") val nameSpace: String,
+                           private val journalpostService: JournalpostService,
                            private val oppgaveRoutingService: OppgaveRoutingService,
                            private val pdfService: PDFService,
                            private val oppgaveHandler: OppgaveHandler,
+                           private val kravInitialiseringsHandler: KravInitialiseringsHandler,
                            @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -128,7 +134,13 @@ class JournalforingService(private val journalpostService: JournalpostService,
                          }
 
                          if (pbuc03mottatt) {
-//                             Q2-> krav-->
+                             if(nameSpace == "q2"){
+                                 val hendelse = BehandleHendelseModel(
+                                     sakId = sakInformasjon?.sakId,
+                                     bucId = sedHendelseModel.rinaSakId,
+                                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,)
+                                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                             }
 
                              opprettBehandleSedOppgave(
                                  journalPostResponse.journalpostId,

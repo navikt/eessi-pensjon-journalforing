@@ -45,6 +45,8 @@ spec:
       value: eessi-basis-sedMottatt-v1-q1
     - name: KAFKA_OPPGAVE_TOPIC
       value: privat-eessipensjon-oppgave-v1-q1
+    - name: KAFKA_KRAV_TOPIC
+      value: temp_place_holder
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing-q1.nais.preprod.local
