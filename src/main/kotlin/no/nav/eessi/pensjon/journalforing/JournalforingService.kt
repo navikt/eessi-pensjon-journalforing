@@ -104,23 +104,12 @@ class JournalforingService(
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
-                val oppgaveEnhet = if (fdato == null) {
-                    Enhet.ID_OG_FORDELING
-                } else {
-                    oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
-                        fdato,
-                        saktype,
-                        sedHendelseModel,
-                        hendelseType,
-                        null) )
-                }
-
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
                     val melding = OppgaveMelding(
                         sedHendelseModel.sedType,
                         journalPostResponse.journalpostId,
-                        oppgaveEnhet,
+                        tildeltEnhet,
                         aktoerId,
                         sedHendelseModel.rinaSakId,
                         hendelseType,
@@ -164,9 +153,6 @@ class JournalforingService(
                          }
                      }
                 }
-
-
-
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
