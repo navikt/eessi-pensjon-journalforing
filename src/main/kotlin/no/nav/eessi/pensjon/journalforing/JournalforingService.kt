@@ -141,7 +141,9 @@ class JournalforingService(
                                  val hendelse = BehandleHendelseModel(
                                      sakId = sakInformasjon?.sakId,
                                      bucId = sedHendelseModel.rinaSakId,
-                                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,)
+                                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
+                                     beskrivelse = "Søknad om uføre: sakId: ${sakInformasjon?.sakId}"
+                                     )
                                  kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
                              }
 
