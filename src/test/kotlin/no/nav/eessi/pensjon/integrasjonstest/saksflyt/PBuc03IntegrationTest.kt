@@ -82,10 +82,12 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(true, it.kravMeldingList?.isNotEmpty())
                 assertEquals(1, it.kravMeldingList?.size)
+
                 val kravMelding = it.kravMeldingList?.firstOrNull()
                 assertEquals(HendelseKode.SOKNAD_OM_UFORE, kravMelding?.hendelsesKode)
                 assertEquals("147729", kravMelding?.bucId)
                 assertEquals(SAK_ID, kravMelding?.sakId)
+
             }
         }
 

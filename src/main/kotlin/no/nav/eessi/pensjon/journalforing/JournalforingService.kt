@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
@@ -136,7 +137,7 @@ class JournalforingService(
                          }
 
                          if (pbuc03mottatt) {
-                             if(nameSpace == "q2" || nameSpace == "test"){
+                             if(sedHendelseModel.sedType == SedType.P2200 && nameSpace == "q2" || nameSpace == "test"){
                                  val hendelse = BehandleHendelseModel(
                                      sakId = sakInformasjon?.sakId,
                                      bucId = sedHendelseModel.rinaSakId,
