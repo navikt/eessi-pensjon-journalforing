@@ -111,15 +111,26 @@ class PersonidentifiseringService(private val personService: PersonService,
     }
 
     private fun hentLandkode(person: Person): String {
+        val landkodeOppholdKontakt =  person.kontaktadresse?.utenlandskAdresseIFrittFormat?.landkode
+        val landkodeUlandsAdresse = person.kontaktadresse?.utenlandskAdresse?.landkode
         val landkodeOppholdsadresse = person.oppholdsadresse?.utenlandskAdresse?.landkode
         val landkodeBostedsadresse = person.bostedsadresse?.utenlandskAdresse?.landkode
         val geografiskLandkode = person.geografiskTilknytning?.gtLand
+        val landkodeBostedNorge = person.bostedsadresse?.vegadresse
+        val landkodeKontaktNorge = person.kontaktadresse?.postadresseIFrittFormat
 
         return when {
+            landkodeOppholdKontakt != null -> landkodeOppholdKontakt
+            landkodeUlandsAdresse != null -> landkodeUlandsAdresse
             landkodeOppholdsadresse != null -> landkodeOppholdsadresse
             landkodeBostedsadresse != null -> landkodeBostedsadresse
             geografiskLandkode != null -> geografiskLandkode
-            else -> "NOR"
+            landkodeBostedNorge != null -> "NOR"
+            landkodeKontaktNorge != null -> "NOR"
+            else -> {
+                logger.warn("Ingen landkode funnet settes til ''")
+                ""
+            }
         }
     }
 

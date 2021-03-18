@@ -26,7 +26,10 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -433,6 +436,68 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.hentIdentifisertePersoner(avdodBrukerFnr, sedListFraBuc, BucType.P_BUC_02, potensiellePerson)
 
         assertEquals(identifisertePersoner[1], actual.single())
+    }
+
+    @Test
+    fun `hent ut person med landkode utland fra pBuc01`() {
+        val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
+
+        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sedListFraBuc = listOf(sed)
+        val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
+
+        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.hentPerson(NorskIdent(gjenlevendeFnr!!.value)) } returns PersonMock.createWith(fornavn = "gjenlevende", landkoder = false, etternavn = "Efternamnet")
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(null, sedListFraBuc, BucType.P_BUC_01, potensiellePerson)
+
+        val gjenlevperson = actual.first()
+        assertEquals("SWE", gjenlevperson.landkode)
+    }
+
+    @Test
+    fun `hent ut person med landkode fra kontaktaddresse`() {
+        val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
+
+        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sedListFraBuc = listOf(sed)
+        val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
+
+        val genericPerson = PersonMock.createWith(fornavn = "gjenlevende", landkoder = true, etternavn = "Efternamnet")
+        val person = genericPerson.copy(
+            bostedsadresse = null,
+            kontaktadresse = Kontaktadresse(utenlandskAdresseIFrittFormat = UtenlandskAdresseIFrittFormat(landkode = "DKK"),
+                metadata = genericPerson.navn?.metadata!!, type = KontaktadresseType.Utland)
+        )
+
+        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.hentPerson(NorskIdent(gjenlevendeFnr!!.value)) } returns person
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(null, sedListFraBuc, BucType.P_BUC_01, potensiellePerson)
+
+        val gjenlevperson = actual.first()
+        assertEquals("DKK", gjenlevperson.landkode)
+    }
+
+    @Test
+    fun `hent ut person med landkode`() {
+        val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
+
+        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sedListFraBuc = listOf(sed)
+        val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
+
+        val genericPerson = PersonMock.createWith(fornavn = "gjenlevende", landkoder = true, etternavn = "Efternamnet")
+        val person = genericPerson.copy(
+            bostedsadresse = null, kontaktadresse = null)
+
+        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.hentPerson(NorskIdent(gjenlevendeFnr!!.value)) } returns person
+
+        val actual = personidentifiseringService.hentIdentifisertePersoner(null, sedListFraBuc, BucType.P_BUC_01, potensiellePerson)
+
+        val gjenlevperson = actual.first()
+        assertEquals("", gjenlevperson.landkode)
     }
 
     @Test

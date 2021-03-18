@@ -64,7 +64,7 @@ class JournalforingService(
             try {
                 logger.info("""**********
                     rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId} sedType: ${sedHendelseModel.sedType?.name} bucType: ${sedHendelseModel.bucType}
-                    kafka offset: $offset, hentSak PESYS saknr: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerid: ${identifisertPerson?.aktoerId} sakType: $saktype
+                    hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerId: ${identifisertPerson?.aktoerId} sakType: $saktype
                 **********""".trimIndent())
 
                 // Henter dokumenter
