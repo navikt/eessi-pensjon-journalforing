@@ -42,8 +42,6 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
 
     //helper function to put message on kafka, will retry 3 times and wait before fail
     fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
-        logger.info("Trying to publish")
-
         var count = 0
         val maxTries = 3
         val waitTime = 8000L
@@ -52,7 +50,6 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
         while (count < maxTries) {
             try {
                 putMeldingPaaKafka(melding)
-                logger.info("Publishing oppgavemelding")
                 return
             } catch (ex: Exception) {
                 count++
