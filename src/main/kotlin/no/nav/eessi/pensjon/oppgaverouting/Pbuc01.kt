@@ -14,4 +14,12 @@ class Pbuc01 : BucTilEnhetHandler {
             else -> Enhet.PENSJON_UTLAND
         }
     }
+
+    override fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
+        return request.run {
+            saktype != null
+                    && !aktorId.isNullOrBlank()
+                    && !sakInformasjon?.sakId.isNullOrBlank()
+        }
+    }
 }

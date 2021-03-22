@@ -87,7 +87,7 @@ internal open class JournalforingTestBase {
     }
 
     protected val euxService: EuxService = mockk()
-    private val norg2Service: Norg2Service = mockk(relaxed = true)
+    protected val norg2Service: Norg2Service = mockk(relaxed = true)
 
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 

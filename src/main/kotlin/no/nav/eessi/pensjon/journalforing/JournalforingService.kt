@@ -43,6 +43,7 @@ class JournalforingService(
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+
     @Value("\${namespace}")
     lateinit var nameSpace: String
 
@@ -62,10 +63,12 @@ class JournalforingService(
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
-                logger.info("""**********
+                logger.info(
+                    """**********
                     rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId} sedType: ${sedHendelseModel.sedType?.name} bucType: ${sedHendelseModel.bucType}
                     hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerId: ${identifisertPerson?.aktoerId} sakType: $saktype
-                **********""".trimIndent())
+                **********""".trimIndent()
+                )
 
                 // Henter dokumenter
                 val (documents, uSupporterteVedlegg) = sedHendelseModel.run {
@@ -75,12 +78,16 @@ class JournalforingService(
                 val tildeltEnhet = if (fdato == null) {
                     Enhet.ID_OG_FORDELING
                 } else {
-                   oppgaveRoutingService.route( OppgaveRoutingRequest.fra(identifisertPerson,
-                       fdato,
-                       saktype,
-                       sedHendelseModel,
-                       hendelseType,
-                       sakInformasjon) )
+                    oppgaveRoutingService.route(
+                        OppgaveRoutingRequest.fra(
+                            identifisertPerson,
+                            fdato,
+                            saktype,
+                            sedHendelseModel,
+                            hendelseType,
+                            sakInformasjon
+                        )
+                    )
                 }
 
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
@@ -120,41 +127,60 @@ class JournalforingService(
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
+                val oppgaveEnhet = hentOppgaveEnhet(
+                    tildeltEnhet,
+                    identifisertPerson,
+                    fdato,
+                    saktype,
+                    sedHendelseModel
+                )
 
-                val pbuc03mottatt = sedHendelseModel.bucType == BucType.P_BUC_03 && hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt
+                if (uSupporterteVedlegg.isNotEmpty()) {
+                    opprettBehandleSedOppgave(
+                        null,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelseModel,
+                        usupporterteFilnavn(uSupporterteVedlegg)
+                    )
+                }
 
-                if (uSupporterteVedlegg.isNotEmpty() || pbuc03mottatt) {
-                     hentOppgaveEnhet(tildeltEnhet, identifisertPerson, fdato, saktype, sedHendelseModel).let {oppgaveEnhet ->
+                val bucType = sedHendelseModel.bucType
+                val pbuc01ogellerpbuc03mottatt = (bucType == BucType.P_BUC_01 || bucType == BucType.P_BUC_03)
+                        && ( hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
 
-                         if (uSupporterteVedlegg.isNotEmpty()) {
-                             opprettBehandleSedOppgave(
-                                 null,
-                                 oppgaveEnhet,
-                                 aktoerId,
-                                 sedHendelseModel,
-                                 usupporterteFilnavn(uSupporterteVedlegg)
-                             )
-                         }
 
-                         if (pbuc03mottatt) {
-                             if(sedHendelseModel.sedType == SedType.P2200 && nameSpace == "q2" || nameSpace == "test"){
-                                 val hendelse = BehandleHendelseModel(
-                                     sakId = sakInformasjon?.sakId,
-                                     bucId = sedHendelseModel.rinaSakId,
-                                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
-                                     beskrivelse = "Søknad om uføre: sakId: ${sakInformasjon?.sakId}"
-                                     )
-                                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
-                             }
+                if (pbuc01ogellerpbuc03mottatt) {
+                    if (nameSpace == "q2" || nameSpace == "test") {
+                        when (sedHendelseModel.sedType) {
+                            SedType.P2200 -> {
+                                val hendelse = BehandleHendelseModel(
+                                    sakId = sakInformasjon?.sakId,
+                                    bucId = sedHendelseModel.rinaSakId,
+                                    hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
+                                    beskrivelse = "Søknad om ${HendelseKode.SOKNAD_OM_UFORE}: sakId: ${sakInformasjon?.sakId}"
+                                )
+                                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                            }
+                            SedType.P2000 -> {
+                                val hendelse = BehandleHendelseModel(
+                                    sakId = sakInformasjon?.sakId,
+                                    bucId = sedHendelseModel.rinaSakId,
+                                    hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+                                    beskrivelse = "Søknad om ${HendelseKode.SOKNAD_OM_ALDERSPENSJON}: sakId: ${sakInformasjon?.sakId}"
+                                )
+                                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                            }
+                            else -> logger.warn("Ikke støttet sedtype for initiering av krav")
+                        }
+                    }
 
-                             opprettBehandleSedOppgave(
-                                 journalPostResponse.journalpostId,
-                                 oppgaveEnhet,
-                                 aktoerId,
-                                 sedHendelseModel
-                             )
-                         }
-                     }
+                    opprettBehandleSedOppgave(
+                        journalPostResponse.journalpostId,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelseModel
+                    )
                 }
 
             } catch (ex: MismatchedInputException) {
@@ -177,17 +203,17 @@ class JournalforingService(
         sedHendelseModel: SedHendelseModel,
         uSupporterteVedlegg: String? = null
     ) {
-       val oppgave = OppgaveMelding(
-           sedHendelseModel.sedType,
-           journalpostId,
-           oppgaveEnhet,
-           aktoerId,
-           sedHendelseModel.rinaSakId,
-           HendelseType.MOTTATT,
-           uSupporterteVedlegg,
-           OppgaveType.BEHANDLE_SED
-       )
-       oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
+        val oppgave = OppgaveMelding(
+            sedHendelseModel.sedType,
+            journalpostId,
+            oppgaveEnhet,
+            aktoerId,
+            sedHendelseModel.rinaSakId,
+            HendelseType.MOTTATT,
+            uSupporterteVedlegg,
+            OppgaveType.BEHANDLE_SED
+        )
+        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
     }
 
     private fun hentOppgaveEnhet(
@@ -209,7 +235,7 @@ class JournalforingService(
                 )
             )
         } else
-        tildeltEnhet
+            tildeltEnhet
     }
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
