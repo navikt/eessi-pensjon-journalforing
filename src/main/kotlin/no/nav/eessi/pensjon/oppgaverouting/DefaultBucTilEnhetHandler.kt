@@ -11,13 +11,13 @@ class DefaultBucTilEnhetHandler : BucTilEnhetHandler {
     }
 
     private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
-        val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
+        val ageIsBetween18and62 = request.fdato.ageIsBetween18and62()
 
         return if (request.bosatt == Bosatt.NORGE) {
-            if (ageIsBetween18and60) Enhet.UFORE_UTLANDSTILSNITT
+            if (ageIsBetween18and62) Enhet.UFORE_UTLANDSTILSNITT
             else Enhet.NFP_UTLAND_AALESUND
         } else {
-            if (ageIsBetween18and60) Enhet.UFORE_UTLAND
+            if (ageIsBetween18and62) Enhet.UFORE_UTLAND
             else Enhet.PENSJON_UTLAND
         }
     }

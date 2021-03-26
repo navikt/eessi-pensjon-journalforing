@@ -45,3 +45,8 @@ fun LocalDate.ageIsBetween18and60(): Boolean {
     val age = Period.between(this, LocalDate.now())
     return (age.years >= 18) && (age.years < 60)
 }
+
+fun LocalDate.ageIsBetween18and62(): Boolean {
+    val age = Period.between(this, LocalDate.now())
+    return (age.years >= 18) && (age.years < 62)
+}
