@@ -92,7 +92,8 @@ internal open class JournalforingTestBase {
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
-    private val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
+
     private val pdfService: PDFService = PDFService(euxService)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
@@ -143,6 +144,9 @@ internal open class JournalforingTestBase {
         oppgaveHandler.initMetrics()
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
+
+        oppgaveRoutingService.nameSpace = "test"
+
     }
 
     @AfterEach

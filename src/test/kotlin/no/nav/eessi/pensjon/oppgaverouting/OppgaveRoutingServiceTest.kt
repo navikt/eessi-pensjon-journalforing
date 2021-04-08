@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
@@ -31,12 +32,12 @@ import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -295,7 +296,6 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing for P_BUC_10'er`() {
-
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder18aar, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder18aar, landkode = NORGE, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder18aar, landkode = UTLAND, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
@@ -327,8 +327,36 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
         assertEquals(ID_OG_FORDELING, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = NORGE, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = UTLAND, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
+    }
+
+    @Test
+    fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
+        routingService.nameSpace = "q2"
+
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
+
+        val personRelasjon = PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
+        val identifisertPerson = IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, emptyList())
+
+        val sedHendelseModel = SedHendelseModel(1232312L, "2321313", "P", P_BUC_10, "32131", avsenderId = "12313123",
+            "SE", "SE", "2312312", "NO", "NO", "23123123","1",
+            SedType.P15000, null )
+
+        val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
+            identifisertPerson,
+            alder60aar,
+            Saktype.ALDER,
+            sedHendelseModel,
+            HendelseType.MOTTATT,
+            null
+        )
+
+        val result =  routingService.route(oppgaveroutingrequest)
+        assertEquals(NFP_UTLAND_OSLO, result)
 
     }
+
 
     @Test
     fun `Routing for vanlige BUC'er`() {

@@ -4,13 +4,18 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
+
+    @Value("\${namespace}")
+    lateinit var nameSpace: String
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
         if (routingRequest.aktorId == null) {
@@ -36,11 +41,27 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         if (enhet == Enhet.AUTOMATISK_JOURNALFORING)
             return enhet
 
-        if (routingRequest.bucType == BucType.P_BUC_01) {
-            val norgKlientRequest = NorgKlientRequest(routingRequest.harAdressebeskyttelse, routingRequest.landkode, routingRequest.geografiskTilknytning)
+        logger.debug("enhet: $enhet")
 
+        if (routingRequest.bucType == BucType.P_BUC_01) {
+            val norgKlientRequest = NorgKlientRequest(
+                    routingRequest.harAdressebeskyttelse,
+                    routingRequest.landkode,
+                    routingRequest.geografiskTilknytning,
+                    routingRequest.saktype)
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
+        if (routingRequest.bucType == BucType.P_BUC_10 && routingRequest.hendelseType == HendelseType.MOTTATT && nameSpace == "q2") {
+            val personRelasjon = routingRequest.identifisertPerson?.personRelasjon
+            val norgKlientRequest = NorgKlientRequest(
+                    routingRequest.harAdressebeskyttelse,
+                    routingRequest.landkode,
+                    routingRequest.geografiskTilknytning,
+                    routingRequest.saktype,
+                    personRelasjon)
+            return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
+        }
+
         return enhet
     }
 
