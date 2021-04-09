@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -20,7 +20,8 @@ class OppgaveRoutingRequest(
     val hendelseType: HendelseType,
     val sakInformasjon: SakInformasjon? = null,
     val identifisertPerson: IdentifisertPerson? = null,
-    val bucType: BucType
+    val bucType: BucType,
+    val avsenderLand: String? = null
 ) {
     val bosatt = Bosatt.fraLandkode(landkode)
 
@@ -44,7 +45,8 @@ class OppgaveRoutingRequest(
                     hendelseType,
                     sakInformasjon,
                     identifisertPerson,
-                    sedHendelseModel.bucType!!
+                    sedHendelseModel.bucType!!,
+                    sedHendelseModel.avsenderLand
             )
         }
     }

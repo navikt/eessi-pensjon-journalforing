@@ -138,13 +138,20 @@ class Pbuc05 : BucTilEnhetHandler {
      * @return [Enhet] basert på rutingregler.
      */
     private fun enhetFraAlderOgLand(request: OppgaveRoutingRequest): Enhet {
-        val ageIsBetween18and60 = request.fdato.ageIsBetween18and60()
+        val navArbeidOgYtelserForTyskland = request.fdato.ageIsBetween18and60()
+        val navArbeidOgYtelser = request.fdato.ageIsBetween18and62()
+
+        val ytelse = if (request.avsenderLand == "DE") {
+            navArbeidOgYtelserForTyskland
+        } else {
+            navArbeidOgYtelser
+        }
 
         return if (request.bosatt == Bosatt.NORGE) {
-            if (ageIsBetween18and60) Enhet.UFORE_UTLANDSTILSNITT
+            if (ytelse) Enhet.UFORE_UTLANDSTILSNITT
             else Enhet.NFP_UTLAND_AALESUND
         } else {
-            if (ageIsBetween18and60) Enhet.UFORE_UTLAND
+            if (ytelse) Enhet.UFORE_UTLAND
             else Enhet.PENSJON_UTLAND
         }
     }

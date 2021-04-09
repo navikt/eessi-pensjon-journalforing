@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-internal class Pbuc06Test {
+internal class Pbuc05Test {
 
     private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_06) as DefaultBucTilEnhetHandler
 
     companion object {
         private const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
-        private const val FNR_62 = "25095814525"   // SLAPP DORULL 62
+        private const val FNR_62 = "25095814525"        // SLAPP DORULL 62
         private const val FNR_VOKSEN = "11067122781"    // KRAFTIG VEGGPRYD
         private const val FNR_BARN = "12011577847"      // STERK BUSK
     }
@@ -50,9 +50,47 @@ internal class Pbuc06Test {
     }
 
     @Test
-    fun `Bosatt norge uføre mellom 18 til 62 år`() {
+    fun `Bosatt norge avsenderland Tyskland uføre mellom 18 til 60 år`() {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.NORGE
+            every { avsenderLand } returns "DE"
+        }
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
+        assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
+        assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+
+    }
+
+
+    @Test
+    fun `Bosatt utland avsenderland Tyskland uføre mellom 18 til 60 år`() {
+        val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
+            every { bosatt } returns Bosatt.UTLAND
+            every { avsenderLand } returns "DE"
+        }
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
+        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
+        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
+        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
+
+    }
+
+    @Test
+    fun `Bosatt norge avsenderland Danmark uføre mellom 18 til 62 år`() {
+        val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
+            every { bosatt } returns Bosatt.NORGE
+            every { avsenderLand } returns "DK"
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
@@ -65,19 +103,4 @@ internal class Pbuc06Test {
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
     }
 
-    @Test
-    fun `Bosatt utland`() {
-        val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
-            every { bosatt } returns Bosatt.UTLAND
-        }
-
-        every { request.fdato } returns Fodselsnummer.fra(FNR_OVER_60)!!.getBirthDate()
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
-
-        every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
-
-        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
-        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
-    }
 }
