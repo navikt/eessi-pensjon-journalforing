@@ -7,30 +7,16 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 internal class Pbuc05Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_06) as DefaultBucTilEnhetHandler
+    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_05) as Pbuc05
 
     companion object {
-        private const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
-        private const val FNR_62 = "25095814525"        // SLAPP DORULL 62
-        private const val FNR_VOKSEN = "11067122781"    // KRAFTIG VEGGPRYD
+        private const val FNR_63 = "05115743432"        // SLAPP DORULL 62
+        private const val FNR_61 = "12105928066"        // STERK UTEDO
+        private const val FNR_54 = "11067122781"    // KRAFTIG VEGGPRYD
         private const val FNR_BARN = "12011577847"      // STERK BUSK
-    }
-
-    @Test
-    fun `Sjekk diskresjonskode blir behandlet korrekt`() {
-        val request = mockk<OppgaveRoutingRequest>(relaxed = true)
-
-        // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
-        every { request.harAdressebeskyttelse } returns true
-        assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
-
-        // SPSF er mindre fortrolig og følger vanlig saksflyt
-        every { request.harAdressebeskyttelse } returns false
-        assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
     }
 
     @Test
@@ -39,14 +25,14 @@ internal class Pbuc05Test {
             every { bosatt } returns Bosatt.NORGE
         }
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_OVER_60)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
-
-        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
-        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
     }
 
     @Test
@@ -56,11 +42,11 @@ internal class Pbuc05Test {
             every { avsenderLand } returns "DE"
         }
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
-        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
-
-        every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_54)!!.getBirthDate()
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
@@ -75,10 +61,10 @@ internal class Pbuc05Test {
             every { avsenderLand } returns "DE"
         }
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()
         assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_54)!!.getBirthDate()
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
@@ -93,13 +79,13 @@ internal class Pbuc05Test {
             every { avsenderLand } returns "DK"
         }
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_62)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
+        every { request.fdato } returns Fodselsnummer.fra(FNR_54)!!.getBirthDate()
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
     }
 
