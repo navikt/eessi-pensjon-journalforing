@@ -43,12 +43,10 @@ class BucTilEnhetHandlerCreator {
 
 fun LocalDate.ageIsBetween18and60(): Boolean {
     val age = Period.between(this, LocalDate.now())
-    println("tyskland-age: ${age.years}")
     return (age.years >= 18) && (age.years < 60)
 }
 
 fun LocalDate.ageIsBetween18and62(): Boolean {
     val age = Period.between(this, LocalDate.now())
-    println("any-age: ${age.years}")
     return (age.years >= 18) && (age.years < 62)
 }

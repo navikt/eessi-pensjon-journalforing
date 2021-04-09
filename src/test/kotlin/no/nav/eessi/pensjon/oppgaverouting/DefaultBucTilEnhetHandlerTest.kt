@@ -71,4 +71,25 @@ internal class DefaultBucTilEnhetHandlerTest {
         every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
     }
+
+    @ParameterizedTest
+    @EnumSource(value = BucType::class, names = ["P_BUC_06", "P_BUC_07", "P_BUC_08", "P_BUC_09"])
+    fun `Bosatt norge uføre mellom 18 til 62 år`(bucType: BucType) {
+        val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
+            every { bosatt } returns Bosatt.NORGE
+        }
+
+        val handler = BucTilEnhetHandlerCreator.getHandler(bucType)
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_OVER_60)!!.getBirthDate()
+        assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
+        assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
+
+        every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
+    }
+
+
 }
