@@ -158,7 +158,7 @@ class JournalforingService(
                                     sakId = sakInformasjon?.sakId,
                                     bucId = sedHendelseModel.rinaSakId,
                                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
-                                    beskrivelse = "Søknad om ${HendelseKode.SOKNAD_OM_UFORE}: sakId: ${sakInformasjon?.sakId}"
+                                    beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet automatisk."
                                 )
                                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
                             }
