@@ -44,7 +44,14 @@ class PersonidentifiseringService(private val personService: PersonService,
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
             bucType == BucType.P_BUC_10 -> null
-            navBruker != null -> personService.hentPerson(NorskIdent(navBruker.value))
+            navBruker != null -> {
+                try {
+                    personService.hentPerson(NorskIdent(navBruker.value))
+                } catch (ex: Exception) {
+                    logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
+                    null
+                }
+            }
             else -> null
         }
 
