@@ -146,34 +146,42 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelseModel.bucType
-                val pbuc01ogellerpbuc03mottatt = (bucType == BucType.P_BUC_01 || bucType == BucType.P_BUC_03)
-                        && ( hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
+                val pbuc01mottatt = (bucType == BucType.P_BUC_01 && (nameSpace == "q2" || nameSpace == "test"))
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
+
+                val pbuc03mottatt = (bucType == BucType.P_BUC_03)
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
 
 
-                if (pbuc01ogellerpbuc03mottatt) {
-                    if (nameSpace == "q2" || nameSpace == "test") {
-                        when (sedHendelseModel.sedType) {
-                            SedType.P2200 -> {
-                                val hendelse = BehandleHendelseModel(
-                                    sakId = sakInformasjon?.sakId,
-                                    bucId = sedHendelseModel.rinaSakId,
-                                    hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
-                                    beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet automatisk."
-                                )
-                                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
-                            }
-                            SedType.P2000 -> {
-                                val hendelse = BehandleHendelseModel(
-                                    sakId = sakInformasjon?.sakId,
-                                    bucId = sedHendelseModel.rinaSakId,
-                                    hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
-                                    beskrivelse = "Søknad om ${HendelseKode.SOKNAD_OM_ALDERSPENSJON}: sakId: ${sakInformasjon?.sakId}"
-                                )
-                                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
-                            }
-                            else -> logger.warn("Ikke støttet sedtype for initiering av krav")
-                        }
-                    }
+                if (pbuc01mottatt) {
+                    if (sedHendelseModel.sedType == SedType.P2000) {
+                        val hendelse = BehandleHendelseModel(
+                            sakId = sakInformasjon?.sakId,
+                            bucId = sedHendelseModel.rinaSakId,
+                            hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+                            beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
+                        )
+                        kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                    } else logger.warn("Ikke støttet sedtype for initiering av krav")
+
+                    opprettBehandleSedOppgave(
+                        journalPostResponse.journalpostId,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelseModel
+                    )
+                }
+
+                if (pbuc03mottatt) {
+                    if (sedHendelseModel.sedType == SedType.P2200) {
+                        val hendelse = BehandleHendelseModel(
+                            sakId = sakInformasjon?.sakId,
+                            bucId = sedHendelseModel.rinaSakId,
+                            hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
+                            beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet."
+                        )
+                        kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                    } else logger.warn("Ikke støttet sedtype for initiering av krav")
 
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,

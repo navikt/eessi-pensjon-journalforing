@@ -63,6 +63,8 @@ internal class JournalforingServiceTest {
         journalforingService.initMetrics()
 
         oppgaveRoutingService.nameSpace = "test"
+        journalforingService.nameSpace = "test"
+
         //MOCK RESPONSES
 
         //PDF -
