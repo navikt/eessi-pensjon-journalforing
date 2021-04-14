@@ -44,7 +44,7 @@ spec:
     - name: KAFKA_OPPGAVE_TOPIC
       value: privat-eessipensjon-oppgave-v1-p
     - name: KAFKA_KRAV_TOPIC
-      value: temp_place_holder
+      value: privat-eessipensjon-krav-initialisering
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing.nais.adeo.no
