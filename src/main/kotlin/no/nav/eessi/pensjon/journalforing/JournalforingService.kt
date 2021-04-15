@@ -146,7 +146,7 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelseModel.bucType
-                val pbuc01mottatt = (bucType == BucType.P_BUC_01 && (nameSpace == "q2" || nameSpace == "test"))
+                val pbuc01mottatt = (bucType == BucType.P_BUC_01)
                         && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
 
                 val pbuc03mottatt = (bucType == BucType.P_BUC_03)
@@ -154,7 +154,7 @@ class JournalforingService(
 
 
                 if (pbuc01mottatt) {
-                    if (sedHendelseModel.sedType == SedType.P2000) {
+                    if (sedHendelseModel.sedType == SedType.P2000  && (nameSpace == "q2" || nameSpace == "test")) {
                         val hendelse = BehandleHendelseModel(
                             sakId = sakInformasjon?.sakId,
                             bucId = sedHendelseModel.rinaSakId,
