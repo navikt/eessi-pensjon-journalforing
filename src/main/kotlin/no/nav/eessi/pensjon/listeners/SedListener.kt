@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -113,9 +113,10 @@ class SedListener(
                 }
                 logger.debug(hendelse)
 
+                val offsetToSkip = listOf(38518L,166333L)
                 try {
                     val offset = cr.offset()
-                    if (offset == 38518L) {
+                    if (offsetToSkip.contains(offset)) {
                         logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
                     } else {
                         logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
