@@ -7,7 +7,6 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
-import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
@@ -23,6 +22,7 @@ import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.personidentifisering.helpers.KravType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,49 +58,6 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 forsokFerdigStilt = true,
                 land = "SWE"
-            ) {
-                val oppgaveMeldingList = it.oppgaveMeldingList
-                val journalpostRequest = it.opprettJournalpostRequest
-                assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
-
-                assertEquals(1, oppgaveMeldingList.size)
-                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(null, it.oppgaveMelding?.filnavn)
-                assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
-                assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
-
-                assertEquals(true, it.kravMeldingList?.isNotEmpty())
-                assertEquals(1, it.kravMeldingList?.size)
-
-                val kravMelding = it.kravMeldingList?.firstOrNull()
-                assertEquals(HendelseKode.SOKNAD_OM_UFORE, kravMelding?.hendelsesKode)
-                assertEquals("147729", kravMelding?.bucId)
-                assertEquals(SAK_ID, kravMelding?.sakId)
-
-            }
-        }
-
-        @Test
-        fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak der landkode ignoreres for kravBUC`() {
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(
-                        sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
-                        sakStatus = SakStatus.OPPRETTET
-                    )
-                )
-            )
-            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2200, SedStatus.RECEIVED))
-
-            testRunnerVoksen(
-                FNR_VOKSEN,
-                bestemsak,
-                alleDocs = allDocuemtActions,
-                hendelseType = MOTTATT,
-                forsokFerdigStilt = true,
-                land = "NOR"
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest

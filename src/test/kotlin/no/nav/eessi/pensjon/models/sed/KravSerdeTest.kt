@@ -1,10 +1,10 @@
 package no.nav.eessi.pensjon.models.sed
 
 import no.nav.eessi.pensjon.eux.model.sed.Krav
-import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.personidentifisering.helpers.KravType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -20,13 +20,13 @@ internal class KravSerdeTest {
 
     @Test
     fun `Serde Krav object`() {
-        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER)
+        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER.name)
         assertEquals(alder, serde(alder))
 
-        val gjenlev = Krav(dato = "01-01-2020", type = KravType.ETTERLATTE)
+        val gjenlev = Krav(dato = "01-01-2020", type = KravType.ETTERLATTE.name)
         assertEquals(gjenlev, serde(gjenlev))
 
-        val ufore = Krav(dato = "01-01-2020", type = KravType.UFORE)
+        val ufore = Krav(dato = "01-01-2020", type = KravType.UFORE.name)
         assertEquals(ufore, serde(ufore))
     }
 

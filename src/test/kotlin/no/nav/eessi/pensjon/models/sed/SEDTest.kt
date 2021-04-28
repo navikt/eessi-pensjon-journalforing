@@ -31,7 +31,7 @@ internal class SEDTest {
         assertEquals("NO", annenPerson.person!!.pin!![0].land)
 
         assertEquals("1953-07-08", annenPerson.person!!.foedselsdato)
-        assertEquals(Rolle.ETTERLATTE.kode, annenPerson.person!!.rolle)
+        assertEquals(Rolle.ETTERLATTE, annenPerson.person!!.rolle)
         assertNull(annenPerson.person!!.relasjontilavdod)
     }
 
@@ -74,7 +74,8 @@ internal class SEDTest {
     fun `Test felter på P2000`() {
         val sed = createSedFromFile("/sed/P2000-NAV.json")
 
-         assertNull(sed.pensjon?.gjenlevende)
+     //   assertNotNull(sed.pensjon?.bruker)
+        assertNull(sed.pensjon?.gjenlevende)
         assertEquals(2, sed.pensjon?.ytelser!!.size)
     }
 
