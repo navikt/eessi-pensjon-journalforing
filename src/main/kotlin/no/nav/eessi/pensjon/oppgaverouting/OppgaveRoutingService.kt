@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -49,7 +50,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
-        /*
+
         if (routingRequest.bucType == BucType.P_BUC_10 && routingRequest.hendelseType == HendelseType.MOTTATT) {
             val personRelasjon = routingRequest.identifisertPerson?.personRelasjon
             val norgKlientRequest = NorgKlientRequest(
@@ -61,7 +62,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
-        */
         return enhet
     }
 

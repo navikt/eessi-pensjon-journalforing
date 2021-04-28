@@ -42,3 +42,9 @@ enum class BehandlingType(val kode: String) {
     BOSATT_NORGE("ae0104"),
     BOSATT_UTLAND("ae0107")
 }
+
+enum class Norg2BehandlingsTema( val kode: String) {
+    BARNEP("ab0255"),
+    GJENLEV("ab0011"),
+    ANY("ANY")
+}

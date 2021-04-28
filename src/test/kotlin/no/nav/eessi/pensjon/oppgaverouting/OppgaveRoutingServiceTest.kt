@@ -39,7 +39,6 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertNull
@@ -330,7 +329,6 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(PENSJON_UTLAND, routingService.route(OppgaveRoutingRequest(aktorId = "01010101010", fdato = alder60aar, landkode = UTLAND, bucType = P_BUC_10, saktype = Saktype.ALDER, hendelseType = HendelseType.SENDT)))
     }
 
-    @Disabled
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
         val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
@@ -352,7 +350,7 @@ internal class OppgaveRoutingServiceTest {
             null
         )
 
-        val result =  routingService.route(oppgaveroutingrequest)
+        val result = routingService.route(oppgaveroutingrequest)
         assertEquals(NFP_UTLAND_OSLO, result)
 
     }

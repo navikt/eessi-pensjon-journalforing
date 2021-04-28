@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -44,23 +45,15 @@ class Norg2Service(private val klient: Norg2Klient) {
         )
     }
 
-    fun velgBehandligstype(landkode: String?) =  if (landkode === "NOR") BOSATT_NORGE.kode else BOSATT_UTLAND.kode
+    fun velgBehandligstype(landkode: String?) = if (landkode === "NOR") BOSATT_NORGE.kode else BOSATT_UTLAND.kode
+
+    fun velgTema(sakType: Saktype?) = if (sakType == Saktype.UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
     fun velgBehandlingTema(personRelasjon: PersonRelasjon?) : String {
-        return if (personRelasjon?.saktype == Saktype.BARNEP) {
-            "BARNP"
-        } else if (personRelasjon?.saktype == Saktype.GJENLEV) {
-            "GJENLEV"
-        } else {
-            "ANY"
-        }
-    }
-
-    fun velgTema(sakType: Saktype?): String {
-        return if (sakType == Saktype.UFOREP) {
-            "UFO"
-        } else {
-            "PEN"
+        return when (personRelasjon?.saktype) {
+            Saktype.BARNEP -> Norg2BehandlingsTema.BARNEP.kode
+            Saktype.GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
+            else -> Norg2BehandlingsTema.ANY.kode
         }
     }
 
