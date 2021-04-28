@@ -3,38 +3,21 @@ package no.nav.eessi.pensjon.personidentifisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.Bruker
-import no.nav.eessi.pensjon.models.sed.Krav
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.Nav
-import no.nav.eessi.pensjon.models.sed.Pensjon
-import no.nav.eessi.pensjon.models.sed.Person
-import no.nav.eessi.pensjon.models.sed.PinItem
-import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
-import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.models.sed.Status
-import no.nav.eessi.pensjon.models.sed.Tilbakekreving
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.KravType
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
-import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -495,7 +478,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode utland fra pBuc01`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000, nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -518,7 +501,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode fra kontaktaddresse`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000,nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -548,7 +531,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000,Nav(listOf(Bruker(createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000,nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -593,23 +576,23 @@ class PersonidentifiseringServiceTest {
             IdentifisertPerson("", "Dummy", false, "NO", "", PersonRelasjon(fnr, relasjon))
     
     private fun generateSED(
-            sedType: SedType,
-            forsikretFnr: String? = null,
-            forsikretRolle: Rolle? = null,
-            annenPersonFnr: String? = null,
-            annenPersonRolle: Rolle? = null,
-            navKrav: KravType? = null,
+        sedType: SedType,
+        forsikretFnr: String? = null,
+        forsikretRolle: Rolle? = null,
+        annenPersonFnr: String? = null,
+        annenPersonRolle: Rolle? = null,
+        navKrav: KravType? = null,
             // Gjenlevende (IKKE annenPerson)
-            gjenlevFnr: String? = null,
-            gjenlevRolle: Rolle? = null,
-            gjenlevRelasjon: RelasjonTilAvdod? = null
+        gjenlevFnr: String? = null,
+        gjenlevRolle: Rolle? = null,
+        gjenlevRelasjon: RelasjonTilAvdod? = null
     ): SED {
         return SED(
                 type = sedType,
                 nav = Nav(
-                        bruker = listOf(Bruker(createPerson(forsikretFnr, forsikretRolle))),
+                        bruker = listOf(Bruker(person = createPerson(forsikretFnr, forsikretRolle))),
                         annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                        krav = navKrav?.let { Krav(type = it) }
+                        krav = navKrav?.let { Krav(type = it.name) }
                 ),
                 pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
@@ -648,7 +631,7 @@ class PersonidentifiseringServiceTest {
 
     private fun createPerson(fnr: String?, rolle: Rolle? = null): Person {
         return Person(
-                rolle = rolle,
+                rolle = rolle?.name,
                 foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
                 pin = listOfNotNull(
                         PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
@@ -660,10 +643,10 @@ class PersonidentifiseringServiceTest {
     private fun createPensjon(gjenlevFnr: String?, relasjon: RelasjonTilAvdod?, rolle: Rolle? = null): Pensjon =
             Pensjon(
                     gjenlevende = Bruker(
-                            Person(
+                            person = Person(
                                     pin = listOf(PinItem(land = "NO", identifikator = gjenlevFnr)),
-                                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) },
-                                    rolle = rolle
+                                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
+                                    rolle = rolle?.name
                             )
                     )
             )

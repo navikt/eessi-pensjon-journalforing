@@ -1,27 +1,12 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.Bruker
-import no.nav.eessi.pensjon.models.sed.Krav
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.Nav
-import no.nav.eessi.pensjon.models.sed.Pensjon
-import no.nav.eessi.pensjon.models.sed.Person
-import no.nav.eessi.pensjon.models.sed.PinItem
-import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
-import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
-import no.nav.eessi.pensjon.models.sed.Status
-import no.nav.eessi.pensjon.models.sed.Tilbakekreving
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -417,9 +402,9 @@ internal class FnrHelperTest {
         return SED(
                 type = sedType,
                 nav = Nav(
-                        bruker = listOf(Bruker(createPerson(forsikretFnr, forsikretRolle))),
+                        bruker = listOf(Bruker(person = createPerson(forsikretFnr, forsikretRolle))),
                         annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                        krav = navKrav?.let { Krav(type = it) }
+                        krav = navKrav?.let { Krav(type = it.name) }
                 ),
                 pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
@@ -455,7 +440,7 @@ internal class FnrHelperTest {
 
     private fun createPerson(fnr: String?, rolle: Rolle? = null): Person {
         return Person(
-                rolle = rolle,
+                rolle = rolle?.name,
                 foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
                 pin = listOfNotNull(
                         PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
@@ -467,10 +452,10 @@ internal class FnrHelperTest {
     private fun createPensjon(gjenlevFnr: String?, relasjon: RelasjonTilAvdod?, rolle: Rolle? = null): Pensjon =
             Pensjon(
                     gjenlevende = Bruker(
-                            Person(
+                            person = Person(
                                     pin = listOf(PinItem(land = "NO", identifikator = gjenlevFnr)),
-                                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) },
-                                    rolle = rolle
+                                    relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
+                                    rolle = rolle?.name
                             )
                     )
             )
