@@ -145,8 +145,6 @@ internal open class JournalforingTestBase {
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
 
-        oppgaveRoutingService.nameSpace = "test"
-
     }
 
     @AfterEach

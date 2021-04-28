@@ -6,16 +6,12 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
-
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
 
     fun route(routingRequest: OppgaveRoutingRequest): Enhet {
         if (routingRequest.aktorId == null) {
@@ -25,12 +21,14 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         val tildeltEnhet = tildelEnhet(routingRequest)
 
-        logger.info("Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
-                "Buc: ${routingRequest.bucType}, " +
-                "Landkode: ${routingRequest.landkode}, " +
-                "Fødselsdato: ${routingRequest.fdato}, " +
-                "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
-                "saktype: ${routingRequest.saktype}")
+        logger.info(
+            "Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}) for:" +
+                    "Buc: ${routingRequest.bucType}, " +
+                    "Landkode: ${routingRequest.landkode}, " +
+                    "Fødselsdato: ${routingRequest.fdato}, " +
+                    "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
+                    "saktype: ${routingRequest.saktype}"
+        )
 
         return tildeltEnhet
     }
@@ -45,23 +43,24 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         if (routingRequest.bucType == BucType.P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(
-                    routingRequest.harAdressebeskyttelse,
-                    routingRequest.landkode,
-                    routingRequest.geografiskTilknytning,
-                    routingRequest.saktype)
+                routingRequest.harAdressebeskyttelse,
+                routingRequest.landkode,
+                routingRequest.geografiskTilknytning,
+                routingRequest.saktype
+            )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
-        if (routingRequest.bucType == BucType.P_BUC_10 && routingRequest.hendelseType == HendelseType.MOTTATT && nameSpace == "q2") {
+        if (routingRequest.bucType == BucType.P_BUC_10 && routingRequest.hendelseType == HendelseType.MOTTATT) {
             val personRelasjon = routingRequest.identifisertPerson?.personRelasjon
             val norgKlientRequest = NorgKlientRequest(
-                    routingRequest.harAdressebeskyttelse,
-                    routingRequest.landkode,
-                    routingRequest.geografiskTilknytning,
-                    routingRequest.saktype,
-                    personRelasjon)
+                routingRequest.harAdressebeskyttelse,
+                routingRequest.landkode,
+                routingRequest.geografiskTilknytning,
+                routingRequest.saktype,
+                personRelasjon
+            )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
-
         return enhet
     }
 

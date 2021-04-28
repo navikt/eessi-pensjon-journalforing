@@ -68,12 +68,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
              val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.TIL_BEHANDLING)))
              val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-             testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+             testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                  assertEquals(PENSJON, it.tema)
                  assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
              }
 
-             testRunner(FNR_OVER_60, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+             testRunner(FNR_OVER_60, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                  assertEquals(PENSJON, it.tema)
                  assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
              }
@@ -90,12 +90,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = Saktype.UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunner(FNR_VOKSEN, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+            testRunner(FNR_VOKSEN, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_VOKSEN_2, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+            testRunner(FNR_VOKSEN_2, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -108,12 +108,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     ForenkletSED("10001212", SedType.P15000, SedStatus.SENT)
             )
 
-            testRunner(FNR_VOKSEN, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+            testRunner(FNR_VOKSEN, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_VOKSEN_2, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+            testRunner(FNR_VOKSEN_2, bestemsak, krav = KravType.UFORE, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
@@ -136,7 +136,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = Saktype.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = ETTERLATTE, alleDocs = allDocuemtActions, sedJson = null, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                FNR_BARN,
+                bestemsak,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                sedJson = null,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
                 assertEquals(FNR_BARN, it.bruker?.id!!)
@@ -147,7 +155,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om barnepensjon ingen sak - id og fordeling`() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, null, krav = ETTERLATTE, alleDocs = allDocuemtActions, sedJson = null, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                FNR_BARN,
+                null,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                sedJson = null,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
                 assertEquals(FNR_BARN, it.bruker?.id!!)
@@ -158,7 +174,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om barnepensjon - barn ukjent ident - id og fordeling`() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunnerBarn(FNR_VOKSEN, null, null, krav = ETTERLATTE, alleDocs = allDocuemtActions, sedJson = null, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                null,
+                null,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                sedJson = null,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
                 assertNull(it.bruker)
@@ -169,10 +193,19 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om barnepensjon - relasjon mangler - id og fordeling`() {
             val bestemsak = BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = Saktype.BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)))
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = ETTERLATTE, alleDocs = allDocuemtActions, relasjonAvod = null, sedJson = null, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                FNR_BARN,
+                bestemsak,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                relasjonAvod = null,
+                sedJson = null,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-                assertEquals(FNR_BARN,it.bruker?.id)
+                assertEquals(FNR_BARN, it.bruker?.id)
             }
         }
 
@@ -184,7 +217,15 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             println("fnr: $fnr")
 
             val valgtbarnfnr = "05020876176"
-            testRunnerBarn("13017123321", "05020876176", bestemsak, krav = ETTERLATTE, alleDocs = allDocuemtActions, sedJson = mockSED(), hendelseType = SENDT) {
+            testRunnerBarn(
+                "13017123321",
+                "05020876176",
+                bestemsak,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                sedJson = mockSED(),
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
                 assertEquals(valgtbarnfnr, it.bruker?.id!!)
@@ -290,7 +331,14 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, bestemsak, krav = ETTERLATTE, alleDocs = allDocuemtActions, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                FNR_BARN,
+                bestemsak,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -311,7 +359,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `manuell oppgave det mangler er mangelfullt fnr dnr - kun en person - id og fordeling`() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P15000, SedStatus.SENT))
 
-            testRunner(null, krav = ALDER, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = null) {
+            testRunner(null, krav = ALDER, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -329,12 +377,25 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     ForenkletSED("10001212", SedType.P15000, SedStatus.SENT)
             )
 
-            testRunnerBarn(FNR_VOKSEN, null, krav = ETTERLATTE, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                null,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_VOKSEN, FNR_BARN, krav = ETTERLATTE, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
+            testRunnerBarn(
+                FNR_VOKSEN,
+                FNR_BARN,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                relasjonAvod = null,
+                hendelseType = SENDT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -363,7 +424,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario1Inngaende {
         @Test
         fun `Krav om alderspensjon`() {
-            oppgaveRoutingService.nameSpace = "q2"
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P15000, SedStatus.RECEIVED)
@@ -393,17 +453,37 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("10001212", SedType.P15000, SedStatus.RECEIVED)
             )
 
-            testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = ETTERLATTE, hendelseType = MOTTATT) {
+            testRunnerBarn(
+                FNR_VOKSEN_2,
+                null,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, hendelseType = MOTTATT) {
+            testRunnerBarn(
+                FNR_OVER_60,
+                FNR_BARN,
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                norg2svar = Enhet.NFP_UTLAND_OSLO
+            ) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+                assertEquals(Enhet.NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, land = "SWE", hendelseType = MOTTATT) {
+            testRunnerBarn(
+                FNR_OVER_60,
+                FNR_BARN,
+                land = "SWE",
+                krav = ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
@@ -701,17 +781,19 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         """.trimIndent()
     }
 
-    private fun testRunnerBarn(fnrVoksen: String,
-                               fnrBarn: String?,
-                               bestemSak: BestemSakResponse? = null,
-                               sakId: String? = SAK_ID,
-                               land: String = "NOR",
-                               krav: KravType = ALDER,
-                               alleDocs: List<ForenkletSED>,
-                               relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
-                               sedJson: String? = null,
-                               hendelseType: HendelseType,
-                               block: (OpprettJournalpostRequest) -> Unit
+    private fun testRunnerBarn(
+        fnrVoksen: String,
+        fnrBarn: String?,
+        bestemSak: BestemSakResponse? = null,
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        krav: KravType = ALDER,
+        alleDocs: List<ForenkletSED>,
+        relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
+        sedJson: String? = null,
+        hendelseType: HendelseType,
+        norg2svar: Enhet? = null,
+        block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny(it, typeRefs<SED>()) }
                 ?: createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, krav = krav, gjenlevendeFnr = fnrBarn, relasjon = relasjonAvod)
@@ -732,13 +814,14 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2svar
+
         when (hendelseType) {
             SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
-        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
         assertEquals(hendelseType, oppgaveMelding.hendelseType)

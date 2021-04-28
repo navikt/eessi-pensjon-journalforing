@@ -331,8 +331,6 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
-        routingService.nameSpace = "q2"
-
         val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
