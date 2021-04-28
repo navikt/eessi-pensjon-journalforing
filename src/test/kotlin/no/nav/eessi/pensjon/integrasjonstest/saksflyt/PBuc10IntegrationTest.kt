@@ -20,7 +20,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_OSLO
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -439,9 +438,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_OVER_60, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = NFP_UTLAND_OSLO) {
+            testRunner(FNR_OVER_60, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
+                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
         }
@@ -470,10 +469,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 krav = ETTERLATTE,
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
-                norg2svar = Enhet.NFP_UTLAND_OSLO
             ) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
+                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
             testRunnerBarn(
