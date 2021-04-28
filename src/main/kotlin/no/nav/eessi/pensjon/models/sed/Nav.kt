@@ -1,3 +1,4 @@
+/*
 package no.nav.eessi.pensjon.models.sed
 
 import com.fasterxml.jackson.annotation.JsonFormat
@@ -17,25 +18,33 @@ data class Nav(
         //P10000 hvordan få denne til å bli val?
         val annenperson: Bruker? = null
 ) {
-        /**
+        */
+/**
          * Forenklet uthenting forsikret (hovedperson)
-         */
+         *//*
+
         fun forsikret(): Person? = bruker?.firstOrNull()?.person
 
-        /**
+        */
+/**
          * Forenklet uthenting forsikret (hovedperson) sin identifikator (fnr)
-         */
+         *//*
+
         fun forsikretIdent(): String? =
                 bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
 
-        /**
+        */
+/**
          * Forenklet uthenting av annen person
-         */
+         *//*
+
         fun annenPerson(): Person? = annenperson?.person
 
-        /**
+        */
+/**
          * Forenklet uthenting annen person sin identifikator (fnr)
-         */
+         *//*
+
         fun annenPersonIdent(): String? =
                 annenperson?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
 }
@@ -143,3 +152,4 @@ data class Feilutbetaling(val ytelse: Ytelse?)
 
 data class Ytelse(val type: String?)
 data class Status(val type: String?)
+*/

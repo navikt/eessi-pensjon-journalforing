@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.models.sed
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -1,3 +1,4 @@
+/*
 package no.nav.eessi.pensjon.models.sed
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
@@ -13,3 +14,4 @@ data class SED(
         val pensjon: Pensjon? = null,
         val tilbakekreving: Tilbakekreving? = null
 )
+*/
