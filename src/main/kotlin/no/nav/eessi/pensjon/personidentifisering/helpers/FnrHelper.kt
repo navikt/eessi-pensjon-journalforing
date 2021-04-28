@@ -1,11 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -35,9 +34,9 @@ class FnrHelper {
                         SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe)
                         SedType.P15000 -> {
                             val krav = sed.nav?.krav?.type
-                            val saktype = mapKravtypeTilSaktype(krav)
+                            val saktype = if (krav == null) null else mapKravtypeTilSaktype(KravType.valueOf(krav))
                             logger.info("${sed.type.name}, krav: $krav,  saktype: $saktype")
-                            if (krav == KravType.ETTERLATTE) {
+                            if (krav == KravType.ETTERLATTE.name) {
                                 logger.debug("legger til gjenlevende: ($saktype)")
                                 leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe, saktype)
                             } else {
@@ -84,15 +83,15 @@ class FnrHelper {
      * P8000-P10000 - [03] Barn
      */
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
-        val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE }
+        val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
 
-        Fodselsnummer.fra(gjenlevende?.ident())?.let {
+        Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
         }
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
-        Fodselsnummer.fra(sed.nav?.forsikretIdent())?.let {
+        Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
         }
     }
@@ -107,7 +106,7 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
-        Fodselsnummer.fra(sed.nav?.forsikretIdent())
+        Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
                 ?.let {
                     fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
                     logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
@@ -116,7 +115,7 @@ class FnrHelper {
         val gjenlevendePerson = sed.pensjon?.gjenlevende?.person
 
         gjenlevendePerson?.let { person ->
-            val gjenlevendePin = Fodselsnummer.fra(person.ident()) ?: return
+            val gjenlevendePin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator) ?: return
 
             val gjenlevendeRelasjon = person.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
@@ -125,7 +124,7 @@ class FnrHelper {
                 return
             }
 
-            if (gjenlevendeRelasjon.erGjenlevendeBarn()) {
+            if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
                 fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.BARNEP, sedType = sed.type))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
             } else {
@@ -143,9 +142,9 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
-        val personPin = Fodselsnummer.fra(sed.nav?.forsikretIdent())
-        val annenPersonPin = Fodselsnummer.fra(sed.nav?.annenPersonIdent())
-        val rolle = sed.nav?.annenPerson()?.rolle
+        val personPin = Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        val annenPersonPin = Fodselsnummer.fra(sed.nav?.annenperson?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        val rolle = sed.nav?.annenperson?.person?.rolle
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
 
         //hvis to personer ingen rolle return uten pin..
@@ -157,9 +156,9 @@ class FnrHelper {
         }
 
         val annenPersonRelasjon = when (rolle) {
-            Rolle.ETTERLATTE -> PersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type)
-            Rolle.FORSORGER -> PersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type)
-            Rolle.BARN -> PersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type)
+            Rolle.ETTERLATTE.name -> PersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type)
+            Rolle.FORSORGER.name -> PersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type)
+            Rolle.BARN.name -> PersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type)
             else -> PersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sed.type)
         }
         fnrListe.add(annenPersonRelasjon)
@@ -178,7 +177,7 @@ class FnrHelper {
                 ?.mapNotNull { bruker ->
                     val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
 
-                    Fodselsnummer.fra(bruker.person?.ident())
+                    Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
                             ?.let { PersonRelasjon(it, relasjon, sedType = sed.type) }
                 } ?: emptyList()
     }
@@ -193,4 +192,30 @@ class FnrHelper {
         }
     }
 
+   /* *//**
+     * Forenklet uthenting forsikret (hovedperson) sin identifikator (fnr)
+     *//*
+    fun forsikretIdent(bruker: Bruker): String? =
+        bruker.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
+*/
+    fun erGjenlevendeBarn(relasjon: String): Boolean {
+        return (relasjon == "EGET_BARN" ||
+                relasjon =="ADOPTIVBARN" ||
+                relasjon == "FOSTERBARN" ||
+                relasjon =="STEBARN" )
+    }
+
+}
+
+enum class Rolle(@JsonValue val kode: String) {
+    ETTERLATTE("01"),
+    FORSORGER("02"),
+    BARN("03");
+}
+
+@Suppress("unused") // val kode (jsonvalue) brukes av jackson
+enum class KravType(@JsonValue private val kode: String?) {
+    ALDER("01"),
+    ETTERLATTE("02"),
+    UFORE("03")
 }

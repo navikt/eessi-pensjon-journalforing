@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -47,7 +45,7 @@ class FodselsdatoHelper {
         }
 
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE }
+            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE.name }
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
@@ -67,7 +65,7 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: SED): String? {
-            return if (sed.nav?.krav?.type == KravType.ETTERLATTE) filterGjenlevendeFodselsdato(sed)
+            return if (sed.nav?.krav?.type == KravType.ETTERLATTE.name) filterGjenlevendeFodselsdato(sed)
             else filterPersonFodselsdato(sed)
         }
 
@@ -89,9 +87,9 @@ class FodselsdatoHelper {
          */
         private fun filterAnnenPersonFodselsdato(sed: SED): String? {
             val annenPerson = sed.nav?.annenperson ?: return null
-            if (annenPerson.person?.rolle != Rolle.ETTERLATTE) return null
+            if (annenPerson.person?.rolle != Rolle.ETTERLATTE.name) return null
 
-            return annenPerson.person.foedselsdato
+            return annenPerson.person?.foedselsdato
         }
 
         private fun filterGjenlevendeFodselsdato(sed: SED): String? = sed.pensjon?.gjenlevende?.person?.foedselsdato

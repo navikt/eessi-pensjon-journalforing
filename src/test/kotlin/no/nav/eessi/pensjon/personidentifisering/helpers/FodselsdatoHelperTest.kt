@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.sed.SED
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -39,7 +40,7 @@ internal class FodselsdatoHelperTest {
     @Test
     fun `getFDatoFromSed return valid fdato when kansellertList innholder gydlig sed`() {
         val actual = FodselsdatoHelper.fraSedListe(
-            emptyList<SED>(),
+            emptyList(),
             listOf(
                 getSedFile("/buc/P2100-PinDK-NAV.json"),
                 getSedFile("/buc/P2000-NAV.json"),
@@ -94,14 +95,17 @@ internal class FodselsdatoHelperTest {
 
     @Test
     fun `ved henting ved fdato på R005 når det er flere personer og en er avød hentes den avdøde`() {
-        val sedListe = listOf(getSedFile("/sed/R005-avdod-enke-NAV.json"))
+        val sed = mapJsonToAny(javaClass.getResource("/sed/R005-avdod-enke-NAV.json").readText(), typeRefs<R005>())
+
+        val sedListe = listOf(sed)
         assertEquals(LocalDate.of(2000, 8, 26), FodselsdatoHelper.fraSedListe(sedListe,emptyList()))
     }
 
     @Test
     fun `ved henting ved fdato på R005 ved den person som debitor og sak er alderpensjon`() {
-        val sedListe = listOf(getSedFile("/sed/R005-alderpensjon-NAV.json"))
-        assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fraSedListe(sedListe,emptyList()))
+        val sed = mapJsonToAny(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText(), typeRefs<R005>())
+
+        assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fraSedListe(listOf(sed),emptyList()))
     }
 
     private fun getSedFile(file: String): SED {

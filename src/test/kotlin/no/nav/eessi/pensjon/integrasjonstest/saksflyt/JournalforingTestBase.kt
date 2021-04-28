@@ -1,16 +1,10 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import com.fasterxml.jackson.core.type.TypeReference
-import io.mockk.CapturingSlot
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
-import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
@@ -18,11 +12,7 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostType
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
@@ -30,46 +20,21 @@ import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.sed.EessisakItem
-import no.nav.eessi.pensjon.models.sed.Krav
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.Nav
-import no.nav.eessi.pensjon.models.sed.Pensjon
-import no.nav.eessi.pensjon.models.sed.Person
-import no.nav.eessi.pensjon.models.sed.PinItem
-import no.nav.eessi.pensjon.models.sed.RelasjonAvdodItem
-import no.nav.eessi.pensjon.models.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.KravType
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Endring
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Endringstype
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedsel
-import no.nav.eessi.pensjon.personoppslag.pdl.model.GeografiskTilknytning
-import no.nav.eessi.pensjon.personoppslag.pdl.model.GtType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Kjoenn
-import no.nav.eessi.pensjon.personoppslag.pdl.model.KjoennType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Metadata
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
-import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresse
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Vegadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDateTime
-import no.nav.eessi.pensjon.models.sed.Bruker as SedBruker
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person as PdlPerson
 
 internal open class JournalforingTestBase {
@@ -230,7 +195,7 @@ internal open class JournalforingTestBase {
         assertBlock(request)
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any()) }
 
         if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
@@ -298,7 +263,7 @@ internal open class JournalforingTestBase {
         assertBlock(journalpost.captured)
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
@@ -314,7 +279,7 @@ internal open class JournalforingTestBase {
         else documents
 
         every { euxService.hentBucDokumenter(any()) } returns docs
-        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
+        every { euxService.hentSed(any(), any()) } returns sed
 
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(dokumentVedleggJson, typeRefs())
@@ -400,8 +365,8 @@ internal open class JournalforingTestBase {
         if (fnr != null && fnr.isBlank()) {
             return Person(
                 foedselsdato = "1962-07-18",
-                rolle = rolle,
-                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+                rolle = rolle?.name,
+                relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) }
             )
         }
         val validFnr = Fodselsnummer.fra(fnr)
@@ -409,8 +374,8 @@ internal open class JournalforingTestBase {
         return Person(
             validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
             foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
-            rolle = rolle,
-            relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it) }
+            rolle = rolle?.name,
+            relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) }
         )
     }
 
@@ -423,7 +388,7 @@ internal open class JournalforingTestBase {
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
-        val forsikretBruker = SedBruker(
+        val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato
@@ -435,7 +400,7 @@ internal open class JournalforingTestBase {
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = listOf(forsikretBruker),
-                annenperson = annenPerson?.let { SedBruker(person = it) }
+                annenperson = annenPerson?.let { Bruker(person = it) }
             )
         )
     }
@@ -450,21 +415,21 @@ internal open class JournalforingTestBase {
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
-        val forsikretBruker = SedBruker(
+        val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12"
             )
         )
 
-        val annenPerson = SedBruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon))
+        val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon))
 
         return SED(
             sedType,
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = listOf(forsikretBruker),
-                krav = Krav("2019-02-01", krav)
+                krav = Krav("2019-02-01", krav?.name)
             ),
             pensjon = Pensjon(gjenlevende = annenPerson)
         )

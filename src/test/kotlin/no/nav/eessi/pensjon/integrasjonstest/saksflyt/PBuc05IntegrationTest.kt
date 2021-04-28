@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -8,26 +7,17 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.models.sed.Rolle
-import no.nav.eessi.pensjon.models.sed.SED
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -672,7 +662,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000,
                 FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null)
 
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
+            every { euxService.hentSed(any(), any()) } returns sed
             every { euxService.hentBucDokumenter(any()) } returns getMockDocuments()
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
@@ -716,7 +706,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<ForenkletSED>>())
             every { euxService.hentBucDokumenter(any()) } returns dokumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000_2 andThen sedP8000recevied andThen sedP8000sendt
+            every { euxService.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen sedP8000sendt
             every { personService.harAdressebeskyttelse(any(), any()) } returns false
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(afnr)) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR", aktorId = aktoera)
@@ -747,7 +737,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
-            verify(exactly = 3) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 3) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -766,7 +756,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Død", "Helt Død", "NOR", aktorId = AKTOER_ID_2)
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
@@ -789,7 +779,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -803,7 +793,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             val meldingSlot = slot<String>()
@@ -826,7 +816,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -842,7 +832,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
@@ -867,7 +857,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
 
         }
 
@@ -892,7 +882,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP9000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
@@ -919,7 +909,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(fnr, request.bruker?.id!!)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -943,7 +933,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP9000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
 
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
@@ -970,7 +960,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(fnr, request.bruker?.id!!)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
 
         }
 
@@ -988,7 +978,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
@@ -1019,7 +1009,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
 
         }
 
@@ -1037,7 +1027,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "SWE", aktorId = aktoer)
 
@@ -1068,7 +1058,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
 
         }
 
@@ -1086,7 +1076,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sedP8000recevied andThen sedP5000sent
+            every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
@@ -1111,7 +1101,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
-            verify(exactly = 2) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 2) { euxService.hentSed(any(), any()) }
         }
     }
 
@@ -1170,7 +1160,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1199,7 +1189,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
     }
 
@@ -1233,7 +1223,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1262,7 +1252,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
     }
 
@@ -1399,7 +1389,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(FNR_OVER_60, request.bruker!!.id)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1431,7 +1421,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(valgtFNR, request.bruker!!.id)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1463,7 +1453,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(valgtFNR, request.bruker!!.id)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1495,7 +1485,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(valgtFNR, request.bruker!!.id)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
         @Test
@@ -1527,7 +1517,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             Assertions.assertNull(request.bruker)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-            verify(exactly = 1) { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
     }
@@ -1567,7 +1557,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
 
         every { euxService.hentBucDokumenter(any()) } returns documents
-        every { euxService.hentSed(any(), any(), any<TypeReference<SED>>()) } returns sed
+        every { euxService.hentSed(any(), any()) } returns sed
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
     }
 
