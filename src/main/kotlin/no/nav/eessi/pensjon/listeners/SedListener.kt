@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
@@ -24,7 +25,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -78,7 +79,7 @@ class SedListener(
                         val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGydligeDokumenter(sedHendelse.rinaSakId)
                         val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                         val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType, SENDT)
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc, kansellerteSeder)
                         val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBuc)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBuc)
@@ -128,13 +129,13 @@ class SedListener(
                             val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGydligeDokumenter(sedHendelse.rinaSakId)
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType)
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType, MOTTATT)
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc, kansellerteSeder)
                             val saktypeFraSed = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBuc)
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
-                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
+                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
 
-                            journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
                         }
                     }
 

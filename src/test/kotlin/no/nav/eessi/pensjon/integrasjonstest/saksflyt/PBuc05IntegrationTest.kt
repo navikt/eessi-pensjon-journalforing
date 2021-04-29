@@ -134,15 +134,15 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_VOKSEN, saker) {
-                assertEquals(PENSJON, it.tema)
-                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
-            }
-
-            testRunner(FNR_BARN, saker) {
-                assertEquals(PENSJON, it.tema)
-                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-            }
+//            testRunner(FNR_VOKSEN, saker) {
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+//            }
+//
+//            testRunner(FNR_BARN, saker) {
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+//            }
         }
 
         @Test

@@ -92,6 +92,49 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
+        fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak der landkode ignoreres for kravBUC`() {
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(
+                        sakId = SAK_ID,
+                        sakType = Saktype.UFOREP,
+                        sakStatus = SakStatus.OPPRETTET
+                    )
+                )
+            )
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2200, SedStatus.RECEIVED))
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                bestemsak,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                forsokFerdigStilt = true,
+                land = "NOR"
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(UFORETRYGD, journalpostRequest.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(null, it.oppgaveMelding?.filnavn)
+                assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
+
+                assertEquals(true, it.kravMeldingList?.isNotEmpty())
+                assertEquals(1, it.kravMeldingList?.size)
+
+                val kravMelding = it.kravMeldingList?.firstOrNull()
+                assertEquals(HendelseKode.SOKNAD_OM_UFORE, kravMelding?.hendelsesKode)
+                assertEquals("147729", kravMelding?.bucId)
+                assertEquals(SAK_ID, kravMelding?.sakId)
+
+            }
+        }
+
+        @Test
         fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(
                 null, listOf(
