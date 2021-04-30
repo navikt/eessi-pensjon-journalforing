@@ -427,7 +427,7 @@ internal open class JournalforingTestBase {
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = listOf(forsikretBruker),
-                krav = Krav("2019-02-01", krav?.name)
+                krav = Krav("2019-02-01", krav)
             ),
             pensjon = Pensjon(gjenlevende = annenPerson)
         )

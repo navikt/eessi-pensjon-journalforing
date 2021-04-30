@@ -46,7 +46,7 @@ class FodselsdatoHelper {
         }
 
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE.name }
+            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE }
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
