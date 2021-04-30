@@ -124,13 +124,18 @@ class SedListener(
                             val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGydligeDokumenter(sedHendelse.rinaSakId)
                             val alleSedIBuc = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType, MOTTATT)
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBuc, bucType, sedHendelse.sedType,
+                                HendelseType.MOTTATT
+                            )
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBuc, kansellerteSeder)
                             val saktypeFraSed = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBuc)
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
-                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
+                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse,
+                                HendelseType.MOTTATT
+                            )
 
-                            journalforingService.journalfor(sedHendelse, MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                            journalforingService.journalfor(sedHendelse,
+                                HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
                         }
                     }
 
