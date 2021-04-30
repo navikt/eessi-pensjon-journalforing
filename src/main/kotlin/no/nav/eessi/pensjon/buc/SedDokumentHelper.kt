@@ -1,11 +1,11 @@
 package no.nav.eessi.pensjon.buc
 
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -22,8 +22,6 @@ class SedDokumentHelper(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
-
-    private val sedTypeRef = typeRefs<SED>()
 
     fun hentAlleGydligeDokumenter(rinaSakId: String): List<ForenkletSED> {
         return euxService.hentBucDokumenter(rinaSakId)
@@ -58,8 +56,8 @@ class SedDokumentHelper(
             val sed = alleSedIBuc.firstOrNull { it.type == SedType.P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
-                    "02" -> Saktype.GJENLEV
-                    "03" -> Saktype.UFOREP
+                    KravType.ETTERLATTE -> Saktype.GJENLEV
+                    KravType.UFORE -> Saktype.UFOREP
                     else -> Saktype.ALDER
                 }
             }

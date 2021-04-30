@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
@@ -34,9 +35,9 @@ class FnrHelper {
                         SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe)
                         SedType.P15000 -> {
                             val krav = sed.nav?.krav?.type
-                            val saktype = if (krav == null) null else mapKravtypeTilSaktype(KravType.valueOf(krav))
+                            val saktype = if (krav == null) null else mapKravtypeTilSaktype(krav)
                             logger.info("${sed.type.name}, krav: $krav,  saktype: $saktype")
-                            if (krav == KravType.ETTERLATTE.name) {
+                            if (krav == KravType.ETTERLATTE) {
                                 logger.debug("legger til gjenlevende: ($saktype)")
                                 leggTilGjenlevendeFnrHvisFinnes(sed, fnrListe, saktype)
                             } else {
@@ -192,12 +193,6 @@ class FnrHelper {
         }
     }
 
-   /* *//**
-     * Forenklet uthenting forsikret (hovedperson) sin identifikator (fnr)
-     *//*
-    fun forsikretIdent(bruker: Bruker): String? =
-        bruker.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator
-*/
     fun erGjenlevendeBarn(relasjon: String): Boolean {
         return (relasjon == "EGET_BARN" ||
                 relasjon =="ADOPTIVBARN" ||
@@ -211,11 +206,4 @@ enum class Rolle(@JsonValue val kode: String) {
     ETTERLATTE("01"),
     FORSORGER("02"),
     BARN("03");
-}
-
-@Suppress("unused") // val kode (jsonvalue) brukes av jackson
-enum class KravType(@JsonValue private val kode: String?) {
-    ALDER("01"),
-    ETTERLATTE("02"),
-    UFORE("03")
 }
