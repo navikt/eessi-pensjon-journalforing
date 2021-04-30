@@ -95,7 +95,7 @@ class JournalforingSendtIntegrationTest {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(20000, TimeUnit.MILLISECONDS)
+        sedListener.getLatch().await(40000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()
