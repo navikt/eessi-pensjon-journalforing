@@ -31,7 +31,7 @@ internal class SedTypeTest {
     @Test
     fun `Sjekk antall SED-typer`() {
         assertEquals(
-            74,
+            76,
             SedType.values().size,
             "Antall SED-typer har blitt endret."
         )

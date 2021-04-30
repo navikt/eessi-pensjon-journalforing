@@ -1,9 +1,12 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
+import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
@@ -171,31 +174,31 @@ class JournalforingMottattIntegrationTest {
 
 
         every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
-            .answers { opprettSED("/sed/P2000-NAV.json") }
+            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
 
         every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999") }
-            .answers { opprettSED("/sed/R005-alderpensjon-NAV.json") }
+            .answers { opprettSED("/sed/R005-alderpensjon-NAV.json", R005::class.java) }
 
         every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113") }
-            .answers { opprettSED("/sed/R_BUC_02_H070-NAV.json") }
+            .answers { opprettSED("/sed/R_BUC_02_H070-NAV.json", SED::class.java) }
 
         every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044") }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
         every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
         every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646") }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
         every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666") }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
         every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
-            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json") }
+            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
 
         every { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113") }
-            .answers { opprettSED("/buc/H070-NAV.json") }
+            .answers { opprettSED("/buc/H070-NAV.json",  SED::class.java) }
 
     }
 
@@ -209,9 +212,12 @@ class JournalforingMottattIntegrationTest {
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun opprettSED(file: String): SED {
+    private fun <T> opprettSED(file: String, clazz: Class<T>): T {
         val json = javaClass.getResource(file).readText()
-        return mapJsonToAny(json, typeRefs())
+        return jacksonObjectMapper()
+            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .readValue(json, clazz)
     }
 
     private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {

@@ -86,7 +86,7 @@ internal class ArchitectureTest {
                 .layer(Sed).definedBy("$rootDir.sed")
                 //define rules
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
-                .whereLayer(Buc).mayOnlyBeAccessedByLayers(Listeners, Journalforing) // Sed
+                .whereLayer(Buc).mayOnlyBeAccessedByLayers(Listeners, Journalforing, PDF) // Sed
                 .whereLayer(Config).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Handler).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(Health).mayNotBeAccessedByAnyLayer()

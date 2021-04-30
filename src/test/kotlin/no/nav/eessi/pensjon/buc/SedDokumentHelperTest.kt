@@ -33,7 +33,7 @@ internal class SedDokumentHelperTest {
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt`() {
         val allSedTypes = SedType.values().toList()
-        assertEquals(74, allSedTypes.size)
+        assertEquals(76, allSedTypes.size)
 
         val docs = allSedTypes.mapIndexed { index, sedType -> ForenkletSED("$index", sedType, SedStatus.RECEIVED)}
         assertEquals(allSedTypes.size, docs.size)
@@ -42,7 +42,7 @@ internal class SedDokumentHelperTest {
 
         val dokumenter = helper.hentAlleGydligeDokumenter("123")
 
-        assertEquals(50, dokumenter.size)
+        assertEquals(52, dokumenter.size)
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
     }

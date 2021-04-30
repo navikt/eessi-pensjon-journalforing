@@ -404,7 +404,7 @@ internal class FnrHelperTest {
                 nav = Nav(
                         bruker = listOf(Bruker(person = createPerson(forsikretFnr, forsikretRolle))),
                         annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                        krav = navKrav?.let { Krav(type = it.name) }
+                        krav = navKrav?.let { Krav(type = it) }
                 ),
                 pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
