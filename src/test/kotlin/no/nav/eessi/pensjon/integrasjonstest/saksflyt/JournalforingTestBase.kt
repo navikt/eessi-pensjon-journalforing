@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
@@ -25,7 +26,6 @@ import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personidentifisering.helpers.KravType
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
@@ -429,7 +429,7 @@ internal open class JournalforingTestBase {
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = listOf(forsikretBruker),
-                krav = Krav("2019-02-01", krav?.name)
+                krav = Krav("2019-02-01", krav)
             ),
             pensjon = Pensjon(gjenlevende = annenPerson)
         )
