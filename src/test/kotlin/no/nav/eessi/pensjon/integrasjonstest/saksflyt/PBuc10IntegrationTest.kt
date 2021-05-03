@@ -346,7 +346,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario1Inngaende {
         @Test
         fun `Krav om alderspensjon`() {
-            oppgaveRoutingService.nameSpace = "q2"
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P15000, SedStatus.RECEIVED)
@@ -715,13 +714,14 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+
         when (hendelseType) {
             SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
-        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
         assertEquals(hendelseType, oppgaveMelding.hendelseType)

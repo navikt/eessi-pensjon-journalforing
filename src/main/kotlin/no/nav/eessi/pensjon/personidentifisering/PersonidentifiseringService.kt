@@ -92,7 +92,7 @@ class PersonidentifiseringService(private val personService: PersonService,
         }
     }
 
-    private fun hentIdentifisertPerson(
+    fun hentIdentifisertPerson(
         relasjon: PersonRelasjon,
         alleSediBuc: List<SED>,
         hendelsesType: HendelseType,

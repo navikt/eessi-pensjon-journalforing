@@ -84,7 +84,7 @@ dependencies {
 		exclude module: 'junit'
 	}
 	testImplementation("org.mock-server:mockserver-client-java:${mockserverVersion}")
-	testImplementation("io.mockk:mockk:1.10.6")
+	testImplementation("io.mockk:mockk:1.11.0")
 
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:0.14.1'
