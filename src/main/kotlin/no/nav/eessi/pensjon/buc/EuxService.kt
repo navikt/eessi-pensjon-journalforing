@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.buc
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -117,7 +116,3 @@ private fun <T : Any> mapJsonToAny(json: String, typeRef: TypeReference<T>) = ja
     .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .readValue(json, typeRef)
-
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class SedWithOnlySedType(val sedType: SedType)
