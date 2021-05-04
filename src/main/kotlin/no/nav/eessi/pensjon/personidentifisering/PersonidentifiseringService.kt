@@ -1,11 +1,11 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
@@ -92,7 +92,7 @@ class PersonidentifiseringService(private val personService: PersonService,
         }
     }
 
-    private fun hentIdentifisertPerson(
+    fun hentIdentifisertPerson(
         relasjon: PersonRelasjon,
         alleSediBuc: List<SED>,
         hendelsesType: HendelseType,

@@ -31,16 +31,4 @@ inline fun <reified T : Any> mapJsonToAny(json: String, objekt: TypeReference<T>
                 .readValue(json, objekt)
 }
 
-fun validateJson(json: String): Boolean {
-    return try {
-        jacksonObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .readTree(json)
-        true
-    } catch (ex: Exception) {
-        ex.printStackTrace()
-        false
-    }
-}
-
 fun Any.toJson() =  mapAnyToJson(this)

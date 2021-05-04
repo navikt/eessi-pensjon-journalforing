@@ -1,16 +1,15 @@
 package no.nav.eessi.pensjon.buc
 
-import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.KravType
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -24,8 +23,6 @@ class SedDokumentHelper(
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
 
-    private val sedTypeRef = typeRefs<SED>()
-
     fun hentAlleGydligeDokumenter(rinaSakId: String): List<ForenkletSED> {
         return euxService.hentBucDokumenter(rinaSakId)
             .filter { it.type.erGyldig() }
@@ -35,7 +32,7 @@ class SedDokumentHelper(
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::harGyldigStatus)
-            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
+            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} SED ") }
 
     }
@@ -43,7 +40,7 @@ class SedDokumentHelper(
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::erKansellert)
-            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id, sedTypeRef) }
+            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
@@ -52,7 +49,7 @@ class SedDokumentHelper(
         if (sedHendelse.bucType == BucType.R_BUC_02) {
             return alleSedIBuc
                     .firstOrNull { it.type == SedType.R005 }
-                    ?.let { filterSaktypeR005(it) }
+                    ?.let { filterSaktypeR005(it as R005) }
 
         //hent saktype fra P15000 overgang fra papir til rina. (saktype)
         } else if (sedHendelse.bucType == BucType.P_BUC_10) {
@@ -85,7 +82,7 @@ class SedDokumentHelper(
      * andre_former_for_etterlattepensjon=99
      *
      * */
-    private fun filterSaktypeR005(sed: SED): Saktype {
+    private fun filterSaktypeR005(sed: R005): Saktype {
         return when (sed.tilbakekreving?.feilutbetaling?.ytelse?.type) {
             "alderspensjon" -> Saktype.ALDER
             "uførepensjon" -> Saktype.UFOREP

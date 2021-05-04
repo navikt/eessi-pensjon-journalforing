@@ -1,18 +1,16 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import com.fasterxml.jackson.core.type.TypeReference
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.eessi.pensjon.eux.EuxService
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.*
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedListener
-import no.nav.eessi.pensjon.models.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -95,7 +93,7 @@ class JournalforingSendtIntegrationTest {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(40000, TimeUnit.MILLISECONDS)
+        sedListener.getLatch().await(25000, TimeUnit.MILLISECONDS)
 
         // Verifiserer alle kall
         verifiser()
@@ -190,29 +188,29 @@ class JournalforingSendtIntegrationTest {
             .answers { opprettSedDokument("/pdf/pdfResponseMedUgyldigMimeType.json") }
 
         // Mock EUX Service (SEDer)
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/sed/P2000-NAV.json") }
+        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
+            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
 
-        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
-        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
-        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
-        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/eux/SedResponseP2000.json") }
+        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
 
-        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/sed/R_BUC_02-R005-AP.json") }
+        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
+            .answers { opprettSED("/sed/R_BUC_02-R005-AP.json", R005::class.java) }
 
-        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/buc/H070-NAV.json") }
+        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
+            .answers { opprettSED("/buc/H070-NAV.json", SED::class.java) }
 
-        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", any<TypeReference<SED>>()) }
-            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json") }
+        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
+            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
     }
 
     private fun opprettForenkletSEDListe(file: String): List<ForenkletSED> {
@@ -225,9 +223,17 @@ class JournalforingSendtIntegrationTest {
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun opprettSED(file: String): SED {
+    private fun <T> opprettSED(file: String, clazz: Class<T>): T {
         val json = javaClass.getResource(file).readText()
-        return mapJsonToAny(json, typeRefs())
+        return jacksonObjectMapper()
+            .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .readValue(json, clazz)
+    }
+
+    private inline fun <reified T: Any> String.toKotlinObject(): T {
+        val mapper = jacksonObjectMapper()
+        return mapper.readValue(this, T::class.java)
     }
 
     companion object {
@@ -368,10 +374,10 @@ class JournalforingSendtIntegrationTest {
         verify (exactly = 1) { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
 
         // Verifiser uthenting av SEDer
-        verify (exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", any<TypeReference<SED>>()) }
-        verify (exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", any<TypeReference<SED>>()) }
-        verify (exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", any<TypeReference<SED>>()) }
-        verify (atLeast = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", any<TypeReference<SED>>()) }
+        verify (exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
+        verify (exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
+        verify (exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
+        verify (atLeast = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 5) { personService.hentPerson(any<Ident<*>>()) }
