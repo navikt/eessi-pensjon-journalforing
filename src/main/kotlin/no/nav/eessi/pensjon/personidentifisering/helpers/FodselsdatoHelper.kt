@@ -79,7 +79,7 @@ class FodselsdatoHelper {
          * * hvis ingen intreffer returnerer vi null
          */
         private fun filterPersonR005Fodselsdato(sed: SED): String? =
-                sed.nav?.bruker?.first()?.person?.foedselsdato
+                sed.nav?.brukere?.first()?.person?.foedselsdato
 
         /**
          * P10000 - [01] Søker til etterlattepensjon
@@ -95,6 +95,6 @@ class FodselsdatoHelper {
 
         private fun filterGjenlevendeFodselsdato(sed: SED): String? = sed.pensjon?.gjenlevende?.person?.foedselsdato
 
-        private fun filterPersonFodselsdato(sed: SED): String? = sed.nav?.bruker?.firstOrNull()?.person?.foedselsdato
+        private fun filterPersonFodselsdato(sed: SED): String? = sed.nav?.bruker?.person?.foedselsdato
     }
 }

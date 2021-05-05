@@ -477,7 +477,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode utland fra pBuc01`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000, nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000, nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -500,7 +500,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode fra kontaktaddresse`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000,nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000,nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -530,7 +530,7 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person med landkode`() {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val sed = SED(SedType.P2000,nav = Nav(bruker = listOf(Bruker(person = createPerson(gjenlevendeFnr?.value)))))
+        val sed = SED(SedType.P2000,nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(sed)
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(sedListFraBuc)
 
@@ -589,7 +589,7 @@ class PersonidentifiseringServiceTest {
         return SED(
             type = sedType,
             nav = Nav(
-                bruker = listOf(Bruker(person = createPerson(forsikretFnr, forsikretRolle))),
+                bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                 annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
                 krav = navKrav?.let { Krav(type = it) }
             ),
@@ -616,7 +616,7 @@ class PersonidentifiseringServiceTest {
 
         return SED(
             type = SedType.R005,
-            nav = Nav(bruker = listOfNotNull(
+            nav = Nav(brukere = listOfNotNull(
                 Bruker(
                     person = createPerson(forsikretFnr),
                     tilbakekreving = forsikretTilbakekreving?.let {

@@ -17,7 +17,7 @@ internal class SEDTest {
     fun `Test felter på en P8000 deserialiseres korrekt`() {
         val sed = mapJsonToAny(javaClass.getResource("/sed/P_BUC_05-P8000.json").readText(), typeRefs<P8000>())
 
-        val person = sed.nav!!.bruker!![0].person
+        val person = sed.nav!!.bruker!!.person
 
         val pin = person!!.pin!![0]
         assertEquals("22115224755", pin.identifikator)
@@ -39,8 +39,8 @@ internal class SEDTest {
     fun `Test felter på en R005 deserialiseres korrekt`() {
         val sed = mapJsonToAny(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText(), typeRefs<R005>())
 
-        val bruker = sed.nav!!.bruker!![0]
-        val person = bruker.person!!
+        val brukere = sed.nav!!.brukere!!
+        val person = brukere.firstOrNull()?.person!!
 
         val pin = person.pin!![0]
         assertEquals("04117922400", pin.identifikator)
@@ -48,7 +48,7 @@ internal class SEDTest {
 
         assertEquals("1979-11-04", person.foedselsdato)
 
-        assertEquals("debitor", bruker.tilbakekreving?.status?.type)
+        assertEquals("debitor", brukere.firstOrNull()?.tilbakekreving?.status?.type)
 
         val tilbakekreving = sed.tilbakekreving!!
         assertEquals("alderspensjon", tilbakekreving.feilutbetaling!!.ytelse!!.type)
@@ -56,12 +56,12 @@ internal class SEDTest {
 
     @Test
     fun `Test felter på en R_BUC_02 R004 deserialiseres korrekt`() {
-        val sed = createSedFromFile("/sed/R_BUC_02_R004.json")
+        val sed = mapJsonToAny(javaClass.getResource("/sed/R_BUC_02_R004.json").readText(), typeRefs<R005>())
 
-        val bruker = sed.nav?.bruker!!
-        assertEquals(2, bruker.size)
+        val brukere = sed.nav?.brukere!!
+        assertEquals(2, brukere.size)
 
-        val person1 = bruker[0].person!!
+        val person1 = brukere[0].person!!
         assertEquals("1998-04-05", person1.foedselsdato)
         assertNull(person1.rolle)
 
