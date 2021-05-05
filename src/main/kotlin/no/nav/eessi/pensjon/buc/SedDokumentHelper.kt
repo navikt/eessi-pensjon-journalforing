@@ -32,7 +32,7 @@ class SedDokumentHelper(
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::harGyldigStatus)
-            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id) }
+            .map { sed -> euxService.hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} SED ") }
 
     }
@@ -40,7 +40,7 @@ class SedDokumentHelper(
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::erKansellert)
-            .mapNotNull { sed -> euxService.hentSed(rinaSakId, sed.id) }
+            .map { sed -> euxService.hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
