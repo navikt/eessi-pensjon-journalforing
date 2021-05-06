@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
@@ -8,8 +9,11 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Component
 class FnrHelper {
@@ -39,7 +43,7 @@ class FnrHelper {
                         else -> {
                             leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P10000, P9000
 
-                            leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000 - P2200 og H070 ? flere?
+                            leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200 og H070 ? flere?
                         }
                     }
                 }
@@ -65,8 +69,15 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
 
-        Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.GJENLEVENDE, sedType = sed.type))
+        val sokPersonKriterie = gjenlevende?.let { sokPersonKriterie(it) }
+
+        val fodselnummer = Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+
+        if (fodselnummer != null) {
+            fnrListe.add(PersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type))
+        }
+        if (sokPersonKriterie != null && fodselnummer == null) {
+            fnrListe.add(PersonRelasjon(null, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie))
         }
     }
 
@@ -87,10 +98,49 @@ class FnrHelper {
         
     }
 
+    //P2000, P2200..P15000(forsikret)
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
-        Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
-            fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
+        val sokPersonKriterie = sed.nav?.bruker?.let { sokPersonKriterie(it) }
+        val fodselnummer = Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+
+        logger.debug("-".repeat(100) +
+        """
+            
+            søkPerson: $sokPersonKriterie
+            fodselnr : ${fodselnummer?.value}
+
+        """.trimIndent() +
+        "-".repeat(100)
+        )
+
+        if (fodselnummer != null) {
+            fnrListe.add(PersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type))
         }
+        if (sokPersonKriterie != null && fodselnummer == null) {
+            fnrListe.add(PersonRelasjon(null, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie))
+        }
+
+    }
+
+    private fun sokPersonKriterie(navBruker: Bruker) : SokKriterier? {
+        // fnr -> pdl -> person -> automatisk journalføring ?
+        // null -> ikke -> null -> id og fortdel
+        // null -> søkperson -> fnr -> pdl -> person -> automatisk jorunalføring ?
+        // null -> søkperson -> null/formange -> null -> null -> id og fordelg
+        logger.debug("fdato : ${navBruker.person?.foedselsdato}")
+        logger.debug("fornavn : ${navBruker.person?.fornavn}")
+        logger.debug("etternavn : ${navBruker.person?.etternavn}")
+
+        val person = navBruker.person ?: return null
+        val fodseldato =  person.foedselsdato ?: return null
+        val fornavn = person.fornavn ?: return null
+        val etternavn = person.etternavn ?: return null
+
+        return SokKriterier(
+            fornavn,
+            etternavn,
+            LocalDate.parse(fodseldato, DateTimeFormatter.ISO_DATE)
+        )
     }
 
     private fun mapKravtypeTilSaktype(krav: String?): Saktype? {
@@ -108,10 +158,11 @@ class FnrHelper {
                     logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
                 }
 
-        val gjenlevendePerson = sed.pensjon?.gjenlevende?.person
+        val gjenlevende = sed.pensjon?.gjenlevende
+        val gjenlevendePerson = gjenlevende?.person
 
         gjenlevendePerson?.let { person ->
-            val gjenlevendePin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator) ?: return
+            val gjenlevendePin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
 
             val gjenlevendeRelasjon = person.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
@@ -120,12 +171,29 @@ class FnrHelper {
                 return
             }
 
+            val sokPersonKriterie = gjenlevende.let { sokPersonKriterie(it) }
             if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
-                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.BARNEP, sedType = sed.type))
-                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
+
+                if (gjenlevendePin != null) {
+                    fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.BARNEP, sedType = sed.type, sokKriterier = sokPersonKriterie))
+                    logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med barnerelasjoner")
+                }
+                if (sokPersonKriterie != null && gjenlevendePin == null) {
+                    fnrListe.add(PersonRelasjon(null, Relasjon.GJENLEVENDE, Saktype.BARNEP, sedType = sed.type, sokKriterier = sokPersonKriterie))
+                    logger.debug("Legger til sokPersonKriterie ${Relasjon.GJENLEVENDE} med barnerelasjoner")
+                }
+
             } else {
-                fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = sed.type))
-                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
+
+                if (gjenlevendePin != null) {
+                    fnrListe.add(PersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = sed.type))
+                    logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
+                }
+                if (sokPersonKriterie != null && gjenlevendePin == null) {
+                    fnrListe.add(PersonRelasjon(null, Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = sed.type, sokKriterier = sokPersonKriterie))
+                    logger.debug("Legger til sokPersonKriterie ${Relasjon.GJENLEVENDE} med gjenlevende relasjoner")
+                }
+
             }
         }
     }

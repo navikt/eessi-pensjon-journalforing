@@ -40,6 +40,7 @@ class PersonidentifiseringService(
         sedType: SedType?,
         hendelsesType: HendelseType
     ): IdentifisertPerson? {
+
         val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe)
         val identifisertePersoner = hentIdentifisertePersoner(
             navBruker,
@@ -87,7 +88,7 @@ class PersonidentifiseringService(
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
             potensiellePersonRelasjoner
-                .filterNot { it.fnr == null }
+                //.filterNot { it.fnr == null }
                 .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc, hendelsesType, bucType) }
                 .distinctBy { it.aktoerId }
         }
@@ -102,9 +103,19 @@ class PersonidentifiseringService(
         logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
 
         return try {
-            val fnr = relasjon.fnr!!.value
-            logger.debug("Henter person med fnr. $fnr fra PDL")
+            //hvis fnr == null --> sokPerosn --> sjekk Fnr..
+            val sokIdent = relasjon?.sokKriterier?.let { personService.sokPerson(it) }
+                ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                .also { logger.info("Har gjort et treff på SøkPerson fra PDL")  }
 
+            val fnr = relasjon.fnr!!.value
+//            val fnr = if (sokIdent != null) {
+//                sokIdent!!
+//            } else  {
+//                relasjon.fnr!!.value
+//            }
+
+            logger.debug("Henter person med fnr. $fnr fra PDL")
             personService.hentPerson(NorskIdent(fnr))
                     ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, relasjon, hendelsesType, bucType) }
                     ?.also {

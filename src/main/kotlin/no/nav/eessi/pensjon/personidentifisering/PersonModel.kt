@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 
 data class IdentifisertPerson(
     val aktoerId: String,
@@ -24,7 +25,8 @@ data class PersonRelasjon(
     val fnr: Fodselsnummer?,
     val relasjon: Relasjon,
     val saktype: Saktype? = null,
-    val sedType: SedType? = null
+    val sedType: SedType? = null,
+    val sokKriterier: SokKriterier? = null
 ) {
     fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
 }

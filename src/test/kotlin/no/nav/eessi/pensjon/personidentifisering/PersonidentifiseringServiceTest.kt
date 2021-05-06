@@ -468,8 +468,16 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val avdodPerson = IdentifisertPerson("", "avgott Testesen", false, "NOR", "026123", PersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100))
-        val gjenlevendePerson = IdentifisertPerson("", "gjenlevende Testesen", false, "NOR", "026123", PersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100))
+        val avdodPerson = IdentifisertPerson("", "avgott Testesen", false, "NOR", "026123", PersonRelasjon(
+            avdodBrukerFnr,
+            Relasjon.FORSIKRET,
+            sedType = SedType.P2100
+        ))
+        val gjenlevendePerson = IdentifisertPerson("", "gjenlevende Testesen", false, "NOR", "026123", PersonRelasjon(
+            gjenlevendeFnr,
+            Relasjon.GJENLEVENDE,
+            sedType = SedType.P2100
+        ))
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
 
