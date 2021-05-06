@@ -92,7 +92,7 @@ class FnrHelper {
     }
 
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
-        Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
+        Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)?.let {
             fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
         }
     }
@@ -107,7 +107,7 @@ class FnrHelper {
     }
 
     private fun leggTilGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>, saktype: Saktype? = null) {
-        Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
                 ?.let {
                     fnrListe.add(PersonRelasjon(it, Relasjon.FORSIKRET, saktype, sed.type))
                     logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
@@ -143,7 +143,7 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeOgForsikretHvisFinnes(sed: SED, fnrListe: MutableSet<PersonRelasjon>) {
         logger.debug("Leter i P8000")
 
-        val personPin = Fodselsnummer.fra(sed.nav?.bruker?.firstOrNull()?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        val personPin = Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
         val annenPersonPin = Fodselsnummer.fra(sed.nav?.annenperson?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
         val rolle = sed.nav?.annenperson?.person?.rolle
         logger.debug("Personpin: $personPin AnnenPersonpin $annenPersonPin  Annenperson rolle : $rolle")
@@ -174,7 +174,7 @@ class FnrHelper {
      * Hvis ingen intreffer returnerer vi tom liste
      */
     private fun filterPinPersonR005(sed: SED): List<PersonRelasjon> {
-        return sed.nav?.bruker
+        return sed.nav?.brukere
                 ?.mapNotNull { bruker ->
                     val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
 

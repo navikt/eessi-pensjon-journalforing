@@ -397,7 +397,7 @@ internal open class JournalforingTestBase {
             sedType,
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-                bruker = listOf(forsikretBruker),
+                bruker = forsikretBruker,
                 annenperson = annenPerson?.let { Bruker(person = it) }
             )
         )
@@ -426,7 +426,7 @@ internal open class JournalforingTestBase {
             sedType,
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-                bruker = listOf(forsikretBruker),
+                bruker = forsikretBruker,
                 krav = Krav("2019-02-01", krav)
             ),
             pensjon = Pensjon(gjenlevende = annenPerson)

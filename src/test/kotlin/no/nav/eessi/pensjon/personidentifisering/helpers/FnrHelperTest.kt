@@ -402,7 +402,7 @@ internal class FnrHelperTest {
         return SED(
                 type = sedType,
                 nav = Nav(
-                        bruker = listOf(Bruker(person = createPerson(forsikretFnr, forsikretRolle))),
+                        bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                         annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
                         krav = navKrav?.let { Krav(type = it) }
                 ),
@@ -426,7 +426,7 @@ internal class FnrHelperTest {
 
         return SED(
                 type = SedType.R005,
-                nav = Nav(bruker = listOfNotNull(
+                nav = Nav(brukere = listOfNotNull(
                         Bruker(
                                 person = createPerson(forsikretFnr),
                                 tilbakekreving = forsikretTilbakekreving?.let {

@@ -28,11 +28,11 @@ internal class SedFnrSokTest {
         val sed = SED(
                 type = SedType.H020,
                 nav = Nav(
-                        bruker = listOf(Bruker(person = Person(pinland = PinLandItem(
+                        bruker = Bruker(person = Person(pinland = PinLandItem(
                                 oppholdsland = "22117320034",
                                 kompetenteuland = "09035225916"
                         )
-                        )))
+                        ))
                 )
         )
 
