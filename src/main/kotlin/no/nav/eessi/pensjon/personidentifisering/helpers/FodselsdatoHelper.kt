@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
@@ -46,7 +45,7 @@ class FodselsdatoHelper {
         }
 
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == KravType.ETTERLATTE }
+            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == "02" }
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
@@ -66,7 +65,7 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: SED): String? {
-            return if (sed.nav?.krav?.type == KravType.ETTERLATTE) filterGjenlevendeFodselsdato(sed)
+            return if (sed.nav?.krav?.type == "02") filterGjenlevendeFodselsdato(sed)
             else filterPersonFodselsdato(sed)
         }
 

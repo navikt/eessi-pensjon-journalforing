@@ -3,8 +3,20 @@ package no.nav.eessi.pensjon.personidentifisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Brukere
+import no.nav.eessi.pensjon.eux.model.sed.Krav
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.Status
+import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -15,8 +27,15 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -591,7 +610,7 @@ class PersonidentifiseringServiceTest {
             nav = Nav(
                 bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                 annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                krav = navKrav?.let { Krav(type = it) }
+                krav = navKrav?.let { Krav(type = it.kode) }
             ),
             pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
@@ -606,7 +625,7 @@ class PersonidentifiseringServiceTest {
                            annenPersonTilbakekreving: String? = null): SED {
 
         val annenPerson = annenPersonFnr?.let {
-            Bruker(
+            Brukere(
                 person = createPerson(it),
                 tilbakekreving = annenPersonTilbakekreving?.let { type ->
                     Tilbakekreving(status = Status(type))
@@ -617,7 +636,7 @@ class PersonidentifiseringServiceTest {
         return SED(
             type = SedType.R005,
             nav = Nav(brukere = listOfNotNull(
-                Bruker(
+                Brukere(
                     person = createPerson(forsikretFnr),
                     tilbakekreving = forsikretTilbakekreving?.let {
                         Tilbakekreving(status = Status(it))

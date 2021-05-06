@@ -341,7 +341,7 @@ internal open class JournalforingTestBase {
             geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo),
             kjoenn = Kjoenn(KjoennType.KVINNE, metadata = metadata),
             doedsfall = null,
-            familierelasjoner = emptyList(),
+            forelderBarnRelasjon = emptyList(),
             sivilstand = emptyList()
         )
     }
@@ -427,7 +427,7 @@ internal open class JournalforingTestBase {
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = forsikretBruker,
-                krav = Krav("2019-02-01", krav)
+                krav = Krav("2019-02-01", krav?.kode)
             ),
             pensjon = Pensjon(gjenlevende = annenPerson)
         )

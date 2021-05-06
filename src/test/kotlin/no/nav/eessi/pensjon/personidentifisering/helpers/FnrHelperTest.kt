@@ -1,12 +1,27 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Brukere
+import no.nav.eessi.pensjon.eux.model.sed.Krav
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
+import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.Status
+import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -404,7 +419,7 @@ internal class FnrHelperTest {
                 nav = Nav(
                         bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                         annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                        krav = navKrav?.let { Krav(type = it) }
+                        krav = navKrav?.let { Krav(type = it.kode) }
                 ),
                 pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
@@ -416,7 +431,7 @@ internal class FnrHelperTest {
                            annenPersonTilbakekreving: String? = null): SED {
 
         val annenPerson = annenPersonFnr?.let {
-            Bruker(
+            Brukere(
                     person = createPerson(it),
                     tilbakekreving = annenPersonTilbakekreving?.let { type ->
                         Tilbakekreving(status = Status(type))
@@ -427,7 +442,7 @@ internal class FnrHelperTest {
         return SED(
                 type = SedType.R005,
                 nav = Nav(brukere = listOfNotNull(
-                        Bruker(
+                        Brukere(
                                 person = createPerson(forsikretFnr),
                                 tilbakekreving = forsikretTilbakekreving?.let {
                                     Tilbakekreving(status = Status(it))

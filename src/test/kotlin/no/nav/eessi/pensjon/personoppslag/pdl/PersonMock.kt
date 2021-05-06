@@ -69,7 +69,7 @@ object PersonMock {
             geografiskTilknytning = geo?.let { GeografiskTilknytning(GtType.KOMMUNE, it, null, null) },
             kjoenn = Kjoenn(KjoennType.KVINNE, null, metadata),
             doedsfall = null,
-            familierelasjoner = emptyList(),
+            forelderBarnRelasjon = emptyList(),
             sivilstand = emptyList()
         )
     }

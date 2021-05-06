@@ -20,8 +20,9 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
-class PersonidentifiseringService(private val personService: PersonService,
-                                  private val fnrHelper: FnrHelper) {
+class PersonidentifiseringService(
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
+    private val fnrHelper: FnrHelper) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
@@ -250,37 +251,7 @@ class PersonidentifiseringService(private val personService: PersonService,
     }
 }
 
-data class IdentifisertPerson(
-        val aktoerId: String,
-        val personNavn: String?,
-        val harAdressebeskyttelse: Boolean = false,
-        val landkode: String?,
-        val geografiskTilknytning: String?,
-        val personRelasjon: PersonRelasjon,
-        var personListe: List<IdentifisertPerson>? = null
-) {
-    override fun toString(): String {
-        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, harAdressebeskyttelse=$harAdressebeskyttelse, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
-    }
-
-    fun flereEnnEnPerson() = personListe != null && personListe!!.size > 1
-}
 
 
-data class PersonRelasjon(
-    val fnr: Fodselsnummer?,
-    val relasjon: Relasjon,
-    val saktype: Saktype? = null,
-    val sedType: SedType? = null
-) {
-    fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
-}
 
-enum class Relasjon {
-    FORSIKRET,
-    GJENLEVENDE,
-    AVDOD,
-    ANNET,
-    BARN,
-    FORSORGER
-}
+

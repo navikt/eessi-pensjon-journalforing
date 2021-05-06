@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.buc
 
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
-import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -56,8 +55,8 @@ class SedDokumentHelper(
             val sed = alleSedIBuc.firstOrNull { it.type == SedType.P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
-                    KravType.ETTERLATTE -> Saktype.GJENLEV
-                    KravType.UFORE -> Saktype.UFOREP
+                    "02" -> Saktype.GJENLEV
+                    "03" -> Saktype.UFOREP
                     else -> Saktype.ALDER
                 }
             }
