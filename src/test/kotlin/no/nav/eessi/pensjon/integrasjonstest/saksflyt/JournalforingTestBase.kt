@@ -409,14 +409,17 @@ internal open class JournalforingTestBase {
         eessiSaknr: String? = null,
         gjenlevendeFnr: String? = null,
         krav: KravType? = null,
-        relasjon: RelasjonTilAvdod? = null
+        relasjon: RelasjonTilAvdod? = null,
+        pdlPerson: PdlPerson? = null
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
-                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12"
+                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12",
+                fornavn = "${pdlPerson?.navn?.fornavn}",
+                etternavn =  "${pdlPerson?.navn?.etternavn}",
             )
         )
 

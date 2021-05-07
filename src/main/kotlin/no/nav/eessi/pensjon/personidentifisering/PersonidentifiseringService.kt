@@ -104,16 +104,22 @@ class PersonidentifiseringService(
 
         return try {
             //hvis fnr == null --> sokPerosn --> sjekk Fnr..
+            logger.debug("SokKriterie: ${relasjon.sokKriterier}")
+
             val sokIdent = relasjon?.sokKriterier?.let { personService.sokPerson(it) }
                 ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                .also { logger.info("Har gjort et treff på SøkPerson fra PDL")  }
+                .also { logger.info("Har gjort et treff på SøkPerson fra PDL (${it != null})")  }
 
-            val fnr = relasjon.fnr!!.value
-//            val fnr = if (sokIdent != null) {
-//                sokIdent!!
-//            } else  {
-//                relasjon.fnr!!.value
-//            }
+            //sjekk på sokIdent eller fnr fra sed.. return null hvis tomt.
+            //toddle. .
+
+            //PROD->            val fnr = relasjon.fnr!!.value
+            val fnr = sokIdent ?: if (relasjon.fnr != null) {
+                relasjon.fnr.value
+            } else {
+                logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
+                return null
+            }
 
             logger.debug("Henter person med fnr. $fnr fra PDL")
             personService.hentPerson(NorskIdent(fnr))

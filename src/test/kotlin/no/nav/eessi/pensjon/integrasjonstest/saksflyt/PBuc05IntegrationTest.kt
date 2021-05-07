@@ -13,8 +13,17 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.Enhet.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
+import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
+import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -743,7 +752,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Scenario 13 - 0 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
             val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSedPensjon(SedType.P5000,
+            val sedP5000sent = createSedPensjon(
+                SedType.P5000,
                 FNR_OVER_60, gjenlevendeFnr = FNR_BARN
             )
 
