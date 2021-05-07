@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
@@ -19,10 +18,16 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.Enhet.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
+import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
@@ -351,20 +356,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-
-    private fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler) {
-        every { euxService.hentBucDokumenter(any()) } returns alleDocs
-        every { euxService.hentSed(any(), any()) } returns sed
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns documentFiler
-    }
-
     private fun getResource(resourcePath: String): String =
         javaClass.getResource(resourcePath).readText()
-
-    private fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
-    }
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")

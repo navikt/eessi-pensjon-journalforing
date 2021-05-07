@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -52,6 +53,11 @@ class PersonidentifiseringServiceTest {
     private val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
 
     private val fnrHelper = FnrHelper()
+
+    @BeforeEach
+    fun setUp() {
+        personidentifiseringService.nameSpace = "test"
+    }
 
     @Test
     fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {

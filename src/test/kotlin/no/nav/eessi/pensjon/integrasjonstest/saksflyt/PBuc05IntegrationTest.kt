@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
-import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -1582,8 +1581,4 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         )
     }
 
-    private fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
-    }
 }

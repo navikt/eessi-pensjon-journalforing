@@ -4,8 +4,10 @@ import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.buc.SedDokumentHelper
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
@@ -16,6 +18,7 @@ import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedListener
 import no.nav.eessi.pensjon.models.BucType
@@ -30,6 +33,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
@@ -109,6 +113,7 @@ internal open class JournalforingTestBase {
         oppgaveHandler.initMetrics()
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
+        personidentifiseringService.nameSpace = "test"
 
     }
 
@@ -271,20 +276,93 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    private fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
+    fun testRunnerVoksenMedSokPerson(
+        fnrVoksen: String,
+        benyttSokPerson: Boolean = true,
+        bestemSak: BestemSakResponse? = null,
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        krav: KravType = KravType.UFORE,
+        alleDocs: List<ForenkletSED>,
+        forsokFerdigStilt: Boolean = false,
+        documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
+        hendelseType: HendelseType,
+        block: (PBuc03IntegrationTest.TestResult) -> Unit
+    ) {
+
+        val mockBruker = createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
+
+        val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
+        val sed = createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker)
+
+        initCommonMocks(sed, alleDocs, documentFiler)
+
+        if (benyttSokPerson) {
+            every { personService.sokPerson(any()) } returns setOf(
+                IdentInformasjon(
+                    fnrVoksen,
+                    IdentGruppe.FOLKEREGISTERIDENT
+                ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
+            )
+        }
+
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockBruker
+        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
+        val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
+
+        val hendelse = createHendelseJson(SedType.P2200, BucType.P_BUC_03)
+
+        val meldingSlot = mutableListOf<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val kravmeldingSlot = mutableListOf<String>()
+        every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
+
+        when (hendelseType) {
+            HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            else -> Assertions.fail()
+        }
+
+        val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
+            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+        }
+        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+        }
+        block(PBuc03IntegrationTest.TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
+
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+        verify { personService.hentPerson(any<Ident<*>>()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+
+        clearAllMocks()
+    }
+
+
+    fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
+        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        return mapJsonToAny(dokumentfilerJson, typeRefs())
+    }
+
+    fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler) {
+        every { euxService.hentBucDokumenter(any()) } returns alleDocs
+        every { euxService.hentSed(any(), any()) } returns sed
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns documentFiler
+    }
+
+    fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
         val docs = if (documents == null || documents.isNullOrEmpty())
             mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
         else documents
 
-        every { euxService.hentBucDokumenter(any()) } returns docs
-        every { euxService.hentSed(any(), any()) } returns sed
-
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(dokumentVedleggJson, typeRefs())
+        val dokumentFiler = mapJsonToAny(dokumentVedleggJson, typeRefs<SedDokumentfiler>())
+        initCommonMocks(sed, docs, dokumentFiler)
     }
 
-    private fun getResource(resourcePath: String): String =
-        javaClass.getResource(resourcePath).readText()
+    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
     protected fun createBrukerWith(
         fnr: String?,
@@ -358,7 +436,8 @@ internal open class JournalforingTestBase {
     protected fun createAnnenPerson(
         fnr: String? = null,
         rolle: Rolle? = Rolle.ETTERLATTE,
-        relasjon: RelasjonTilAvdod? = null
+        relasjon: RelasjonTilAvdod? = null,
+        pdlPerson: PdlPerson? = null
     ): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
@@ -373,7 +452,9 @@ internal open class JournalforingTestBase {
             validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
             foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
             rolle = rolle?.name,
-            relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) }
+            relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
+            fornavn = "${pdlPerson?.navn?.fornavn}",
+            etternavn = "${pdlPerson?.navn?.etternavn}"
         )
     }
 
@@ -414,16 +495,19 @@ internal open class JournalforingTestBase {
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
+        val pdlPersonAnnen = if (relasjon != null) pdlPerson else null
+        val pdlForsikret = if (relasjon == null) pdlPerson else null
+
         val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12",
-                fornavn = "${pdlPerson?.navn?.fornavn}",
-                etternavn =  "${pdlPerson?.navn?.etternavn}",
+                fornavn = "${pdlForsikret?.navn?.fornavn}",
+                etternavn = "${pdlForsikret?.navn?.etternavn}"
             )
         )
 
-        val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon))
+        val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen))
 
         return SED(
             sedType,

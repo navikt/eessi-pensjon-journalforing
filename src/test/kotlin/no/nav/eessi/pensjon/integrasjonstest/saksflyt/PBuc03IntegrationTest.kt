@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
@@ -32,8 +31,6 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
@@ -248,7 +245,6 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
 
 
-
     }
 
     @Nested
@@ -396,78 +392,9 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-    private fun testRunnerVoksenMedSokPerson(
-        fnrVoksen: String,
-        benyttSokPerson: Boolean = true,
-        bestemSak: BestemSakResponse? = null,
-        sakId: String? = SAK_ID,
-        land: String = "NOR",
-        krav: KravType = KravType.UFORE,
-        alleDocs: List<ForenkletSED>,
-        forsokFerdigStilt: Boolean = false,
-        documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
-        hendelseType: HendelseType,
-        block: (TestResult) -> Unit
-    ) {
-
-        val mockBruker = createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-
-        val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
-        val sed = createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker)
-
-        initCommonMocks(sed, alleDocs, documentFiler)
-
-        if (benyttSokPerson) {
-            every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(fnrVoksen, IdentGruppe.FOLKEREGISTERIDENT), IdentInformasjon("BLÆ", IdentGruppe.AKTORID))
-        }
-
-        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockBruker
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-
-        val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
-
-        val hendelse = createHendelseJson(SedType.P2200, BucType.P_BUC_03)
-
-        val meldingSlot = mutableListOf<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        val kravmeldingSlot = mutableListOf<String>()
-        every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
-
-        when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            else -> fail()
-        }
-
-        val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
-        }
-        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs<OppgaveMelding>())
-        }
-        block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
-
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
-
-        clearAllMocks()
-    }
-
-    private fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler) {
-        every { euxService.hentBucDokumenter(any()) } returns alleDocs
-        every { euxService.hentSed(any(), any()) } returns sed
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns documentFiler
-    }
-
     private fun getResource(resourcePath: String): String =
         javaClass.getResource(resourcePath).readText()
 
-    private fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
-    }
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
