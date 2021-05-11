@@ -126,8 +126,7 @@ class PersonidentifiseringService(
                     return null
                 }
             } else {
-                relasjon.fnr!!.value
-
+                relasjon.fnr?.value ?: return null
             }
 
             logger.debug("Henter person med fnr. $fnr fra PDL")
