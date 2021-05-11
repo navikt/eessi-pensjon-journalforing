@@ -26,6 +26,8 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -1206,14 +1208,18 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @DisplayName("Inngående - Scenario 3")
     inner class Scenario3Inngaende {
         @Test
-        fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte`() {
-            val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_VOKSEN, rolle = Rolle.ETTERLATTE), SAK_ID)
+        fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte mangler fnr medfører bruk av sokPerson`() {
+
+            val mockEttrelatte = createBrukerWith(FNR_VOKSEN, "Voksen", "Etterlatte", "NOR", "1213", aktorId = "123123123123")
+
+            val sed = createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte), SAK_ID)
+
             initCommonMocks(sed)
-
-            val voksen = createBrukerWith(FNR_VOKSEN, "Voksen", "Vanlig", "NOR", "1213")
-            every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns voksen
-
             val hendelse = createHendelseJson(SedType.P8000)
+
+            every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
+            every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Voksen", "Avdod", "NOR", "1213")
+            every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns mockEttrelatte
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1230,6 +1236,38 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             // forvent tema == PEN og enhet 9999
             assertEquals(PENSJON, request.tema)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+
+            verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+            verify(exactly = 1) { euxService.hentSed(any(), any()) }
+        }
+
+        @Test
+        fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
+
+            val mockForsikret = createBrukerWith(FNR_VOKSEN, "Voksen", "Etternavn", "NOR", "1213", aktorId = "123123123123")
+
+            val sed = createSed(SedType.P8000, null, pdlPerson = mockForsikret)
+
+            initCommonMocks(sed)
+            val hendelse = createHendelseJson(SedType.P8000)
+
+            every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
+            every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns mockForsikret
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            val (journalpost, _) = initJournalPostRequestSlot()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 1) { euxService.hentSed(any(), any()) }

@@ -442,7 +442,7 @@ internal open class JournalforingTestBase {
         if (fnr != null && fnr.isBlank()) {
             return Person(
                 foedselsdato = "1962-07-18",
-                rolle = rolle?.name,
+                rolle = rolle?.kode,
                 relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) }
             )
         }
@@ -451,7 +451,7 @@ internal open class JournalforingTestBase {
         return Person(
             validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
             foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
-            rolle = rolle?.name,
+            rolle = rolle?.kode,
             relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
             fornavn = "${pdlPerson?.navn?.fornavn}",
             etternavn = "${pdlPerson?.navn?.etternavn}"
@@ -463,14 +463,19 @@ internal open class JournalforingTestBase {
         fnr: String? = null,
         annenPerson: Person? = null,
         eessiSaknr: String? = null,
-        fdato: String? = "1988-07-12"
+        fdato: String? = "1988-07-12",
+        pdlPerson: PdlPerson? = null
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
+
+         val pdlForsikret = if (annenPerson == null) pdlPerson else null
 
         val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
-                foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato
+                foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato,
+                fornavn = "${pdlForsikret?.navn?.fornavn}",
+                etternavn = "${pdlForsikret?.navn?.etternavn}"
             )
         )
 

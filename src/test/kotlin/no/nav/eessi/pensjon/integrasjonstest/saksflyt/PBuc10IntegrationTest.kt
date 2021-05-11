@@ -393,25 +393,25 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("10001212", SedType.P15000, SedStatus.RECEIVED)
             )
 
-//            testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = ETTERLATTE, hendelseType = MOTTATT) {
-//                assertEquals(PENSJON, it.tema)
-//                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-//            }
+            testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = ETTERLATTE, hendelseType = MOTTATT) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
 
-//            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, hendelseType = MOTTATT) {
-//                assertEquals(PENSJON, it.tema)
-//                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-//            }
+            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, hendelseType = MOTTATT) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+            }
 
             testRunnerBarnmedSokPerson(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-//            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, land = "SWE", hendelseType = MOTTATT) {
-//                assertEquals(PENSJON, it.tema)
-//                assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
-//            }
+            testRunnerBarn(FNR_OVER_60, FNR_BARN, alleDocs = allDocuemtActions, krav = ETTERLATTE, land = "SWE", hendelseType = MOTTATT) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
 
         }
 

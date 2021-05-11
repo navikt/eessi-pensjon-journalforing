@@ -2,7 +2,11 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -131,7 +135,7 @@ class JournalforingMottattIntegrationTest {
     private fun initMocks() {
         // Mock PDL Person
         every { personService.hentPerson(NorskIdent("09035225916")) }
-            .answers { PersonMock.createWith(aktoerId = AktoerId("1000101917358")) }
+            .answers { PersonMock.createWith(fnr = "09035225916",  aktoerId = AktoerId("1000101917358")) }
 
         every { personService.harAdressebeskyttelse(any(), any()) }
             .answers { false }

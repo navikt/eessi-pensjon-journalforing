@@ -156,9 +156,11 @@ class PersonidentifiseringService(
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
+        val personFnr = person.identer.first{ it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person, hendelsesType, bucType)
+        val newPersonRelasjon =  personRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
             aktorId,
@@ -166,7 +168,7 @@ class PersonidentifiseringService(
             adressebeskyttet,
             landkode,
             geografiskTilknytning,
-            personRelasjon
+            newPersonRelasjon
         )
     }
 
