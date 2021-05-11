@@ -174,7 +174,7 @@ class FullRequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
             requestLog.append("\nURI            :  ${request.uri}")
             requestLog.append("\nMethod         :  ${request.method}")
             requestLog.append("\nHeaders        :  ${request.headers}")
-            requestLog.append(body)
+            requestLog.append("\nComplete body  :  ${String(body)}")
             requestLog.append("\n==========================request end================================================")
             log.debug(requestLog.toString())
         }
@@ -188,7 +188,7 @@ class FullRequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
             responseLog.append("\nStatus code    : ${response.statusCode}")
             responseLog.append("\nStatus text    : ${response.statusText}")
             responseLog.append("\nHeaders        : ${response.headers}")
-            responseLog.append(response.body.readBytes())
+            responseLog.append("\nComplete body  :  ${String(response.body.readBytes())}")
             responseLog.append("\n==========================response end================================================")
             log.debug(responseLog.toString())
         }
