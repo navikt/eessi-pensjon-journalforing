@@ -152,30 +152,48 @@ class PersonidentifiseringService(
             .also { logger.info("Finnes adressebeskyttet person: $it") }
     }
 
-    private fun hentLandkode(person: Person, hendelsesType: HendelseType, bucType: BucType): String {
+    private fun landKodeUtland(person: Person): String? {
         val landkodeOppholdKontakt =  person.kontaktadresse?.utenlandskAdresseIFrittFormat?.landkode
         val landkodeUtlandsAdresse = person.kontaktadresse?.utenlandskAdresse?.landkode
         val landkodeOppholdsadresse = person.oppholdsadresse?.utenlandskAdresse?.landkode
         val landkodeBostedsadresse = person.bostedsadresse?.utenlandskAdresse?.landkode
-        val geografiskLandkode = person.geografiskTilknytning?.gtLand
+            return when {
+                landkodeOppholdKontakt != null -> landkodeOppholdKontakt
+                landkodeUtlandsAdresse != null -> landkodeUtlandsAdresse
+                landkodeOppholdsadresse != null -> landkodeOppholdsadresse
+                landkodeBostedsadresse != null -> landkodeBostedsadresse
+                else -> null
+            }
+    }
+
+    private fun landKodeNor(person: Person): String? {
         val landkodeBostedNorge = person.bostedsadresse?.vegadresse
         val landkodeKontaktNorge = person.kontaktadresse?.postadresseIFrittFormat
-        val erMottatt = hendelsesType == HendelseType.MOTTATT
-        val erKravBuc = bucType in listOf(BucType.P_BUC_01, BucType.P_BUC_02, BucType.P_BUC_03)
+        return when {
+            landkodeBostedNorge != null -> "NOR"
+            landkodeKontaktNorge != null  -> "NOR"
+            else -> null
+        }
+    }
 
-        logger.debug("Landkode og person: ${person.toJson()}")
+    fun hentLandkode(person: Person, hendelsesType: HendelseType, bucType: BucType): String {
+        val landkodeUtland = landKodeUtland(person)
+        val landkodeNorge = landKodeNor(person)
+        val geografiskLandkode = person.geografiskTilknytning?.gtLand
+
+        //val erMottatt = hendelsesType == HendelseType.MOTTATT
+        //val erKravBuc = bucType in listOf(BucType.P_BUC_01, BucType.P_BUC_02, BucType.P_BUC_03)
+
+        logger.debug("landKodeUtland: $landkodeUtland, landKodeNorge: $landkodeNorge, geoGrafLand: $geografiskLandkode}")
 
         return when {
-            landkodeOppholdKontakt != null -> landkodeOppholdKontakt
-            landkodeUtlandsAdresse != null -> landkodeUtlandsAdresse
-            landkodeOppholdsadresse != null -> landkodeOppholdsadresse
-            landkodeBostedsadresse != null -> landkodeBostedsadresse
-            geografiskLandkode != null && !(erKravBuc && erMottatt) -> geografiskLandkode
-            landkodeBostedNorge != null && !(erKravBuc && erMottatt) -> "NOR"
-            landkodeKontaktNorge != null && !(erKravBuc && erMottatt)  -> "NOR"
+            landkodeUtland != null && landkodeNorge == null -> landkodeUtland
+            landkodeUtland == null && landkodeNorge != null -> landkodeNorge
+            landkodeUtland != null && landkodeNorge != null -> landkodeNorge
+            geografiskLandkode != null -> geografiskLandkode
             else -> {
-                logger.warn("Ingen landkode funnet settes til ''")
-                ""
+                logger.warn("Ingen landkode funnet settes til 'UKJENT'")
+                "UKJENT"
             }
         }
     }

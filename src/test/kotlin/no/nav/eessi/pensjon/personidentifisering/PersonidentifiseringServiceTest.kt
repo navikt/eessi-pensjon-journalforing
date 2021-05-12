@@ -585,6 +585,34 @@ class PersonidentifiseringServiceTest {
         assertEquals(false, actual?.flereEnnEnPerson())
     }
 
+    @Test
+    fun `hent korrekt landkode fra pdl hendelse sendt kravbuc bosatt nor forventer nor`() {
+        val person = PersonMock.createWith("213123")
+        val landkode = personidentifiseringService.hentLandkode(person, HendelseType.SENDT, BucType.P_BUC_01)
+        assertEquals("NOR", landkode)
+    }
+    @Test
+    fun `hent korrekt landkode fra pdl hendelse sendt kravbuc bosatt swe forventer swe`() {
+        val person = PersonMock.createWith("213123", landkoder = false)
+        val landkode = personidentifiseringService.hentLandkode(person, HendelseType.SENDT, BucType.P_BUC_01)
+        assertEquals("SWE", landkode)
+    }
+    @Test
+    fun `hent korrekt landkode fra pdl hendelse mottatt kravbuc bosatt nor forventer tom`() {
+        val person = PersonMock.createWith("213123")
+        val landkode = personidentifiseringService.hentLandkode(person, HendelseType.MOTTATT, BucType.P_BUC_01)
+        assertEquals("", landkode)
+    }
+
+    @Test
+    fun `hent korrekt landkode fra pdl hendelse mottatt kravbuc bosatt swe forventer swe`() {
+        val person = PersonMock.createWith("213123", false)
+        val landkode = personidentifiseringService.hentLandkode(person, HendelseType.MOTTATT, BucType.P_BUC_01)
+        assertEquals("SWE", landkode)
+    }
+
+
+
     private fun sedFromJsonFile(file: String): SED {
         val json = javaClass.getResource(file).readText()
         return mapJsonToAny(json, typeRefs())
