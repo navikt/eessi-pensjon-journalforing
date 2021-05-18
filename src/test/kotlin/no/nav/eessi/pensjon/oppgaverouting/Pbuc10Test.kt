@@ -2,13 +2,13 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
@@ -44,7 +44,12 @@ internal class Pbuc10Test {
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
-            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000))
+            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(
+                DUMMY_FNR,
+                Relasjon.GJENLEVENDE,
+                Saktype.GJENLEV,
+                SedType.P15000
+            ))
             every { harAdressebeskyttelse } returns false
             every { saktype } returns Saktype.UFOREP
             every { hendelseType } returns SENDT
@@ -159,7 +164,12 @@ internal class Pbuc10Test {
     ): OppgaveRoutingRequest {
         return mockk {
             if (hendelse == SENDT)
-                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000))
+                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(
+                    DUMMY_FNR,
+                    Relasjon.GJENLEVENDE,
+                    Saktype.GJENLEV,
+                    SedType.P15000
+                ))
 
             every { harAdressebeskyttelse } returns false
             every { hendelseType } returns hendelse
