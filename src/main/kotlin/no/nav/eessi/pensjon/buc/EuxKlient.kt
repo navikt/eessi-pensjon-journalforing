@@ -54,6 +54,11 @@ class EuxKlient(private val euxUsernameOidcRestTemplate: RestTemplate) {
         return response?.body
     }
 
+    @Retryable(
+        include = [HttpStatusCodeException::class],
+        exclude = [HttpClientErrorException.NotFound::class],
+        backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0)
+    )
     internal fun hentBuc(rinaSakId: String): Buc? {
         logger.info("Henter BUC (RinaSakId: $rinaSakId)")
 
