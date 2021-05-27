@@ -173,7 +173,7 @@ class JournalforingService(
                 }
 
                 if (pbuc03mottatt) {
-                    if (sedHendelseModel.sedType == SedType.P2200) {
+                    if (sedHendelseModel.sedType == SedType.P2200 && (nameSpace == "q2" || nameSpace == "test")) {
                         val hendelse = BehandleHendelseModel(
                             sakId = sakInformasjon?.sakId,
                             bucId = sedHendelseModel.rinaSakId,
