@@ -102,36 +102,32 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        relasjon: PersonRelasjon,
+        personRelasjon: PersonRelasjon,
         alleSediBuc: List<SED>,
         hendelsesType: HendelseType,
         bucType: BucType
     ): IdentifisertPerson? {
-        logger.debug("Henter ut følgende personRelasjon: ${relasjon.toJson()}")
+        logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 
         return try {
-            //hvis fnr == null --> sokPerosn --> sjekk Fnr..
-            logger.debug("SokKriterie: ${relasjon.sokKriterier}")
+            var valgtFnr = personRelasjon.fnr?.value
 
-            val sokIdent = relasjon.sokKriterier?.let { personService.sokPerson(it) }
-                ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                .also { logger.info("Har gjort et treff på SøkPerson fra PDL (${it != null})") }
+            if(valgtFnr == null) {
+                logger.info("Utfører personsøk")
+                logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
 
-            //sjekk på sokIdent eller fnr fra sed.. return null hvis tomt.
-            val fnr = if (nameSpace == "q2" || nameSpace == "test") {
-                sokIdent ?: if (relasjon.fnr != null) {
-                    relasjon.fnr.value
-                } else {
-                    logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
-                    return null
-                }
-            } else {
-                relasjon.fnr?.value ?: return null
+                valgtFnr = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
+                    ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                    .also { logger.info("Har gjort et treff på personsøk") }
+            }
+            if (valgtFnr == null) {
+                logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
+                return null
             }
 
-            logger.debug("Henter person med fnr. $fnr fra PDL")
-            personService.hentPerson(NorskIdent(fnr))
-                ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, relasjon, hendelsesType, bucType) }
+            logger.debug("Henter person med fnr. $valgtFnr fra PDL")
+            personService.hentPerson(NorskIdent(valgtFnr))
+                ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, personRelasjon, hendelsesType, bucType) }
                 ?.also {
                     logger.debug(
                         """IdentifisertPerson hentet fra PDL (aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
