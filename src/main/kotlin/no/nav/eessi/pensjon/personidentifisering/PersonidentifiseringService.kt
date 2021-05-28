@@ -112,14 +112,14 @@ class PersonidentifiseringService(
         return try {
             var valgtFnr = personRelasjon.fnr?.value
 
-            if(valgtFnr == null) {
-                logger.info("Utfører personsøk")
-                logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
-
-                valgtFnr = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
-                    ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                    .also { logger.info("Har gjort et treff på personsøk") }
-            }
+//            if(valgtFnr == null) {
+//                logger.info("Utfører personsøk")
+//                logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
+//
+//                valgtFnr = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
+//                    ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+//                    .also { logger.info("Har gjort et treff på personsøk") }
+//            }
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
                 return null
