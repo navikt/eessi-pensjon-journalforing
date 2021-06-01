@@ -332,6 +332,9 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
         val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+
+
+
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon = PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
@@ -354,6 +357,52 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(NFP_UTLAND_OSLO, result)
 
     }
+
+    @Test
+    fun `Routing for P_BUC_02 mottatt med bruk av Norg2 tjeneste`() {
+        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+
+        val json = """
+            {
+            "id": 100026861,
+            "diskresjonskode": "ANY",
+            "oppgavetype": "ANY",
+            "behandlingstype": "ae0104",
+            "behandlingstema": "ab0011",
+            "tema": "PEN",
+            "temagruppe": "ANY",
+            "geografiskOmraade": "3005",
+            "enhetId": 100000617,
+            "enhetNr": "0001",
+            "enhetNavn": "NAV Pensjon Utland",
+            "skalTilLokalkontor": false,
+            "gyldigFra": "2017-09-30"
+            }
+        """.trimIndent()
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
+
+        val personRelasjon = PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
+        val identifisertPerson = IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, emptyList())
+
+        val sedHendelseModel = SedHendelseModel(1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
+            "SE", "SE", "2312312", "NO", "NO", "23123123","1",
+            SedType.P2100, null )
+
+        val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
+            identifisertPerson,
+            alder60aar,
+            Saktype.GJENLEV,
+            sedHendelseModel,
+            HendelseType.MOTTATT,
+            null
+        )
+
+        val result = routingService.route(oppgaveroutingrequest)
+        assertEquals(NFP_UTLAND_AALESUND, result)
+
+    }
+
 
 
     @Test

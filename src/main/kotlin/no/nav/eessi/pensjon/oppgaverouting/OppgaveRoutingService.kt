@@ -4,7 +4,6 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -41,7 +40,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.debug("enhet: $enhet")
 
-        if (routingRequest.bucType == BucType.P_BUC_01) {
+        if (routingRequest.bucType == BucType.P_BUC_01 || routingRequest.bucType == BucType.P_BUC_03) {
             val norgKlientRequest = NorgKlientRequest(
                 routingRequest.harAdressebeskyttelse,
                 routingRequest.landkode,
@@ -51,7 +50,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
 
-        if (routingRequest.bucType == BucType.P_BUC_10 && routingRequest.hendelseType == HendelseType.MOTTATT) {
+        if (routingRequest.bucType == BucType.P_BUC_10 || routingRequest.bucType == BucType.P_BUC_02) {
             val personRelasjon = routingRequest.identifisertPerson?.personRelasjon
             val norgKlientRequest = NorgKlientRequest(
                 routingRequest.harAdressebeskyttelse,
