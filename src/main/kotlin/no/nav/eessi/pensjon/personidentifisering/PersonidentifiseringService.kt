@@ -154,7 +154,7 @@ class PersonidentifiseringService(
         val personFnr = person.identer.first{ it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
-        val landkode = hentLandkode(person, hendelsesType, bucType)
+        val landkode = hentLandkode(person)
         val newPersonRelasjon =  personRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
@@ -178,7 +178,7 @@ class PersonidentifiseringService(
             .also { logger.info("Finnes adressebeskyttet person: $it") }
     }
 
-    private fun hentLandkode(person: Person, hendelsesType: HendelseType, bucType: BucType): String {
+    private fun hentLandkode(person: Person): String {
         val landkodeOppholdKontakt = person.kontaktadresse?.utenlandskAdresseIFrittFormat?.landkode
         val landkodeUtlandsAdresse = person.kontaktadresse?.utenlandskAdresse?.landkode
         val landkodeOppholdsadresse = person.oppholdsadresse?.utenlandskAdresse?.landkode
@@ -186,8 +186,6 @@ class PersonidentifiseringService(
         val geografiskLandkode = person.geografiskTilknytning?.gtLand
         val landkodeBostedNorge = person.bostedsadresse?.vegadresse
         val landkodeKontaktNorge = person.kontaktadresse?.postadresseIFrittFormat
-        val erMottatt = hendelsesType == HendelseType.MOTTATT
-        val erKravBuc = bucType in listOf(BucType.P_BUC_01, BucType.P_BUC_02, BucType.P_BUC_03)
 
         logger.debug("Landkode og person: ${person.toJson()}")
 
@@ -196,9 +194,9 @@ class PersonidentifiseringService(
             landkodeUtlandsAdresse != null -> landkodeUtlandsAdresse
             landkodeOppholdsadresse != null -> landkodeOppholdsadresse
             landkodeBostedsadresse != null -> landkodeBostedsadresse
-            geografiskLandkode != null && !(erKravBuc && erMottatt) -> geografiskLandkode
-            landkodeBostedNorge != null && !(erKravBuc && erMottatt) -> "NOR"
-            landkodeKontaktNorge != null && !(erKravBuc && erMottatt) -> "NOR"
+            geografiskLandkode != null -> geografiskLandkode
+            landkodeBostedNorge != null -> "NOR"
+            landkodeKontaktNorge != null -> "NOR"
             else -> {
                 logger.warn("Ingen landkode funnet settes til ''")
                 ""
