@@ -9,30 +9,9 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
-import no.nav.eessi.pensjon.models.BucType.H_BUC_07
-import no.nav.eessi.pensjon.models.BucType.P_BUC_01
-import no.nav.eessi.pensjon.models.BucType.P_BUC_02
-import no.nav.eessi.pensjon.models.BucType.P_BUC_03
-import no.nav.eessi.pensjon.models.BucType.P_BUC_04
-import no.nav.eessi.pensjon.models.BucType.P_BUC_06
-import no.nav.eessi.pensjon.models.BucType.P_BUC_07
-import no.nav.eessi.pensjon.models.BucType.P_BUC_08
-import no.nav.eessi.pensjon.models.BucType.P_BUC_09
-import no.nav.eessi.pensjon.models.BucType.P_BUC_10
-import no.nav.eessi.pensjon.models.BucType.R_BUC_02
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.Enhet.DISKRESJONSKODE
-import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_OSLO
-import no.nav.eessi.pensjon.models.Enhet.OKONOMI_PENSJON
-import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType.*
+import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -359,9 +338,7 @@ internal class OppgaveRoutingServiceTest {
     }
 
     @Test
-    fun `Routing for P_BUC_02 mottatt med bruk av Norg2 tjeneste`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
-
+    fun `Gitt gjenlevendesak for P_BUC_02 mottatt når bruk av Norg2 tjeneste benyttes så routes det til PensjonUtland`() {
         val json = """
             {
             "id": 100026861,
@@ -379,8 +356,10 @@ internal class OppgaveRoutingServiceTest {
             "gyldigFra": "2017-09-30"
             }
         """.trimIndent()
+         val mappedResponse = mapJsonToAny(json, typeRefs<Norg2ArbeidsfordelingItem>())
 
-        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
+
+        every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon = PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
         val identifisertPerson = IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, emptyList())
@@ -399,9 +378,11 @@ internal class OppgaveRoutingServiceTest {
         )
 
         val result = routingService.route(oppgaveroutingrequest)
-        assertEquals(NFP_UTLAND_AALESUND, result)
+        assertEquals(PENSJON_UTLAND, result)
 
     }
+
+
 
 
 
