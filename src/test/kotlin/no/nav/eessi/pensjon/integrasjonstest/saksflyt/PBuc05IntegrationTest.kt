@@ -31,6 +31,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -1207,6 +1208,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Inngående - Scenario 3")
     inner class Scenario3Inngaende {
+        @Disabled
         @Test
         fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte mangler fnr medfører bruk av sokPerson`() {
 
@@ -1241,6 +1243,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
+        @Disabled
         @Test
         fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
 

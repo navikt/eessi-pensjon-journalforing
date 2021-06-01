@@ -34,6 +34,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -217,6 +218,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             }
         }
 
+        @Disabled
         @Test
         fun `Krav om uføre for inngående P2200 uten gyldig fnr med sokPerson sendes til UFORE_UTLAND`() {
             val bestemsak = BestemSakResponse(null, emptyList())
