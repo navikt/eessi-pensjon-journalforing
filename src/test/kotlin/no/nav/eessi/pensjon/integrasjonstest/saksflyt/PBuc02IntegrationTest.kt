@@ -29,9 +29,11 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 @DisplayName("P_BUC_02 – IntegrationTest")
-internal class PBuc02IntegrationTest: JournalforingTestBase() {
+internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Utgående - Scenario 1")
@@ -62,9 +64,11 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(null, listOf(
-                SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
-            ))
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                )
+            )
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -87,9 +91,11 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(null, listOf(
-                SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
-            ))
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                )
+            )
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -108,15 +114,39 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(
+        Saktype::class, names = [
+            "BARNEP", "GJENLEV"
+        ])
+
+    fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende GjenlevP eller BarneP, Så routes oppgave til NAV Pensjon Utland`(saktype: Saktype) {
+        val allDocuemtActions = listOf(
+            ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
+        )
+        val bestemsak = BestemSakResponse(
+            null, listOf(
+                SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+            )
+        )
+
+        testRunnerVoksen(
+            FNR_VOKSEN,
+            FNR_VOKSEN_2,
+            bestemsak,
+            krav = KravType.ETTERLATTE,
+            land = "SWE",
+            alleDocs = allDocuemtActions,
+            relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+            hendelseType = HendelseType.SENDT,
+            norg2enhet = null
+        ) {
+            Assertions.assertEquals(Tema.PENSJON, it.tema)
+            Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+        }
+    }
+
 /*
-
-
-    Hvis sjekk av adresser i PDL er gjort,
-    Og bruker er registrert med adresse Bosatt Utland,
-    Og SED er del av P_BUC_02,
-    Og bruker har løpende gjenlevendepensjon eller barnepensjon,
-    Så skal oppgaver sendes til 0001 NAV Pensjon Utland.
-
 
     Hvis sjekk av adresser i PDL er gjort,
     Og bruker er registrert med adresse Bosatt Norge,
@@ -142,55 +172,73 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
 
 
 
-    private fun testRunnerVoksen(
-        fnrVoksen: String,
-        fnrVoksenSoker: String?,
-        bestemSak: BestemSakResponse? = null,
-        land: String = "NOR",
-        krav: KravType = KravType.ETTERLATTE,
-        alleDocs: List<ForenkletSED>,
-        relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
-        hendelseType: HendelseType,
-        norg2enhet: Enhet? = null,
-        block: (OpprettJournalpostRequest) -> Unit
-    ) {
-        val sed = createSedPensjon(SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
-        initCommonMocks(sed, alleDocs)
+private fun testRunnerVoksen(
+    fnrVoksen: String,
+    fnrVoksenSoker: String?,
+    bestemSak: BestemSakResponse? = null,
+    land: String = "NOR",
+    krav: KravType = KravType.ETTERLATTE,
+    alleDocs: List<ForenkletSED>,
+    relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
+    hendelseType: HendelseType,
+    norg2enhet: Enhet? = null,
+    block: (OpprettJournalpostRequest) -> Unit
+) {
+    val sed = createSedPensjon(
+        SedType.P2100,
+        fnrVoksen,
+        gjenlevendeFnr = fnrVoksenSoker,
+        krav = krav,
+        relasjon = relasjonAvod
+    )
+    initCommonMocks(sed, alleDocs)
 
-        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
+    every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
+        fnrVoksen,
+        "Voksen ",
+        "Forsikret",
+        land,
+        aktorId = AKTOER_ID
+    )
 
-        if (fnrVoksenSoker != null) {
-            every { personService.hentPerson(NorskIdent(fnrVoksenSoker)) } returns createBrukerWith(fnrVoksenSoker, "Voksen", "Gjenlevende", land, aktorId = AKTOER_ID_2)
-        }
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-
-        val (journalpost, _) = initJournalPostRequestSlot()
-
-        val hendelse = createHendelseJson(SedType.P2100, BucType.P_BUC_02)
-
-        val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2enhet
-
-        println("SED: ${sed.toJson()}")
-        when (hendelseType) {
-            HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            else -> Assertions.fail()
-        }
-
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
-        Assertions.assertEquals(hendelseType, oppgaveMelding.hendelseType)
-
-        block(journalpost.captured)
-
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
-
-        clearAllMocks()
+    if (fnrVoksenSoker != null) {
+        every { personService.hentPerson(NorskIdent(fnrVoksenSoker)) } returns createBrukerWith(
+            fnrVoksenSoker,
+            "Voksen",
+            "Gjenlevende",
+            land,
+            aktorId = AKTOER_ID_2
+        )
     }
+    every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
+    val (journalpost, _) = initJournalPostRequestSlot()
+
+    val hendelse = createHendelseJson(SedType.P2100, BucType.P_BUC_02)
+
+    val meldingSlot = slot<String>()
+    every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+    every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2enhet
+
+    println("SED: ${sed.toJson()}")
+    when (hendelseType) {
+        HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+        HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+        else -> Assertions.fail()
+    }
+
+    val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+    Assertions.assertEquals(hendelseType, oppgaveMelding.hendelseType)
+
+    block(journalpost.captured)
+
+    verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+    verify { personService.hentPerson(any<Ident<*>>()) }
+    verify(exactly = 1) { euxService.hentSed(any(), any()) }
+
+    clearAllMocks()
+}
 
 }
 
