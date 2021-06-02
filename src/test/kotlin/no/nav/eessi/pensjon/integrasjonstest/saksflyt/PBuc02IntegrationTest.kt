@@ -24,7 +24,6 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -34,6 +33,209 @@ import org.junit.jupiter.params.provider.EnumSource
 
 @DisplayName("P_BUC_02 – IntegrationTest")
 internal class PBuc02IntegrationTest : JournalforingTestBase() {
+
+    @Nested
+    @DisplayName("Inngående")
+    inner class Scenario1Inngaende {
+        @Test
+        fun `Krav om gjenlevende`() {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                krav = KravType.ETTERLATTE,
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
+
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon så routes oppgave til PENSJON_UTLAND`() {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.ETTERLATTE,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = Enhet.NFP_UTLAND_OSLO
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.ETTERLATTE,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(Enhet.UFORE_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            Saktype::class, names = [
+                "BARNEP", "GJENLEV"
+            ]
+        )
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende GjenlevP eller BarneP, Så routes oppgave til NAV Pensjon Utland`(
+            saktype: Saktype
+        ) {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.ETTERLATTE,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så skal oppgaver fordeles i henhold til NORG2`( ) {
+
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2000, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.ALDER,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = Enhet.NFP_UTLAND_OSLO
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
+
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2200, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.UFORE,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(Enhet.UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            Saktype::class, names = [
+                "BARNEP", "GJENLEV"
+            ]
+        )
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: Saktype) {
+
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.UFORE,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+    }
+
 
     @Nested
     @DisplayName("Utgående - Scenario 1")
@@ -62,7 +264,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon så routes oppgave til PENSJON_UTLAND`() {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
+                ForenkletSED("10001212", SedType.P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -144,6 +346,34 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
                 Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så journalføres automatisk`( ) {
+
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2000, SedStatus.SENT)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.ALDER,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.SENDT,
+                norg2enhet = Enhet.NFP_UTLAND_OSLO
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
         }
 
@@ -282,11 +512,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         val hendelse = createHendelseJson(SedType.P2100, BucType.P_BUC_02)
 
         val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2enhet
 
-        println("SED: ${sed.toJson()}")
         when (hendelseType) {
             HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
