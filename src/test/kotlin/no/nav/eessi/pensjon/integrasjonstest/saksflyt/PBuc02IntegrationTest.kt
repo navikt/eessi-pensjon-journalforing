@@ -58,19 +58,18 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
         }
 
         @Test
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon Så skal det være AUTOMATISK_JOURNALFORING`() {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon så routes oppgave til PENSJON_UTLAND`() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(null, listOf(
-                SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
             ))
 
             testRunnerVoksen(
                 FNR_VOKSEN,
                 FNR_VOKSEN_2,
                 bestemsak,
-                SAK_ID,
                 krav = KravType.ETTERLATTE,
                 land = "SWE",
                 alleDocs = allDocuemtActions,
@@ -79,24 +78,23 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd,  Så skal det være AUTOMATISK_JOURNALFORING`() {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(null, listOf(
-                SakInformasjon(sakId = SAK_ID, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
             ))
 
             testRunnerVoksen(
                 FNR_VOKSEN,
                 FNR_VOKSEN_2,
                 bestemsak,
-                SAK_ID,
                 krav = KravType.ETTERLATTE,
                 land = "SWE",
                 alleDocs = allDocuemtActions,
@@ -105,7 +103,7 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
-                Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(Enhet.UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
     }
@@ -148,7 +146,6 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
         fnrVoksen: String,
         fnrVoksenSoker: String?,
         bestemSak: BestemSakResponse? = null,
-        sakId: String? = SAK_ID,
         land: String = "NOR",
         krav: KravType = KravType.ETTERLATTE,
         alleDocs: List<ForenkletSED>,
@@ -157,7 +154,7 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
         norg2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedPensjon(SedType.P2100, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
+        val sed = createSedPensjon(SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
@@ -194,5 +191,6 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
 
         clearAllMocks()
     }
+
 }
 
