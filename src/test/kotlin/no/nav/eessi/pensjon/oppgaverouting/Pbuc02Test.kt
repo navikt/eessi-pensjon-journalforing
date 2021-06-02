@@ -197,11 +197,11 @@ internal class Pbuc02Test {
                     handler.hentEnhet(MOTTATT.request(Saktype.ALDER, "NOR"))
             )
             assertEquals(
-                    Enhet.NFP_UTLAND_AALESUND,
+                    Enhet.PENSJON_UTLAND,
                     handler.hentEnhet(MOTTATT.request(Saktype.BARNEP, "NOR"))
             )
             assertEquals(
-                    Enhet.NFP_UTLAND_AALESUND,
+                    Enhet.PENSJON_UTLAND,
                     handler.hentEnhet(MOTTATT.request(Saktype.GJENLEV, "NOR"))
             )
             assertEquals(

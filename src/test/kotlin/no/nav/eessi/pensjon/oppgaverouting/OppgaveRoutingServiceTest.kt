@@ -372,7 +372,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing for P_BUC_02'er`() {
 
         assertEquals(
-            NFP_UTLAND_AALESUND,
+            PENSJON_UTLAND,
             routingService.route(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
@@ -414,7 +414,7 @@ internal class OppgaveRoutingServiceTest {
         )
 
         assertEquals(
-            NFP_UTLAND_AALESUND,
+            PENSJON_UTLAND,
             routingService.route(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
@@ -426,19 +426,7 @@ internal class OppgaveRoutingServiceTest {
                 )
             )
         )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+
         assertEquals(
             NFP_UTLAND_AALESUND,
             routingService.route(
@@ -453,20 +441,6 @@ internal class OppgaveRoutingServiceTest {
             )
         )
 
-
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
         assertEquals(
             UFORE_UTLANDSTILSNITT,
             routingService.route(
@@ -498,7 +472,7 @@ internal class OppgaveRoutingServiceTest {
 
 
         assertEquals(
-            NFP_UTLAND_AALESUND,
+            PENSJON_UTLAND,
             routingService.route(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
@@ -506,19 +480,6 @@ internal class OppgaveRoutingServiceTest {
                     landkode = NORGE,
                     bucType = P_BUC_02,
                     saktype = Saktype.BARNEP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.GJENLEV,
                     hendelseType = HendelseType.SENDT
                 )
             )
