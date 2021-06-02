@@ -58,7 +58,7 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
         }
 
         @Test
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon Så skal oppgaver sendes til 0001 NAV Pensjon Utland`() {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon Så skal det være AUTOMATISK_JOURNALFORING`() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
             )
@@ -75,32 +75,42 @@ internal class PBuc02IntegrationTest: JournalforingTestBase() {
                 land = "SWE",
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
-                hendelseType = HendelseType.MOTTATT,
+                hendelseType = HendelseType.SENDT,
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
         }
 
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd,  Så skal det være AUTOMATISK_JOURNALFORING`() {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
+            )
+            val bestemsak = BestemSakResponse(null, listOf(
+                SakInformasjon(sakId = SAK_ID, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+            ))
 
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FNR_VOKSEN_2,
+                bestemsak,
+                SAK_ID,
+                krav = KravType.ETTERLATTE,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.SENDT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+            }
+        }
     }
 
 /*
-    Hvis sjekk av adresser i PDL er gjort,
-    Og bruker er registrert med adresse Bosatt Utland,
-    Og SED er del av P_BUC_02,
-    Og bruker har løpende alderspensjon,  <-- bestemsak-- <-- pesys  --- saktype, sakstatus
-    Så skal oppgaver sendes til 0001 NAV Pensjon Utland.
-
-
-
-    Hvis sjekk av adresser i PDL er gjort,
-    Og bruker er registrert med adresse Bosatt Utland,
-    Og SED er del av P_BUC_02,
-    Og bruker har løpende uføretrygd,
-    Så skal oppgaver sendes til 4475 Uføretrygd Bosatt Utland.
-
 
 
     Hvis sjekk av adresser i PDL er gjort,
