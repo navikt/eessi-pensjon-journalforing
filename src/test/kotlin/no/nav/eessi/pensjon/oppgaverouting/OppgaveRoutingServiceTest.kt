@@ -1136,17 +1136,17 @@ internal class OppgaveRoutingServiceTest {
     }
 
     @Test
-    fun `Gitt uføresak for P_BUC_01 mottatt når bruk av Norg2 tjeneste benyttes så routes det til NFP_UTLAND_OSLO`() {
+    fun `Gitt uføresak for P_BUC_02 mottatt når bruk av Norg2 tjeneste benyttes så routes det til UFORE_UTLAND`() {
         val json = """
             {
             "id": 100026861,
             "diskresjonskode": "ANY",
             "oppgavetype": "ANY",
-            "behandlingstype": "ae0104",
+            "behandlingstype": "ae0107",
             "behandlingstema": "ANY",
             "tema": "UFO",
             "temagruppe": "ANY",
-            "geografiskOmraade": "3005",
+            "geografiskOmraade": "ANY",
             "enhetId": 100000617,
             "enhetNr": "4475",
             "enhetNavn": "UFORE UTLAND",
@@ -1161,11 +1161,11 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200)
         val identifisertPerson =
-            IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, emptyList())
+            IdentifisertPerson("01010101010", "Ole Olsen", false, "SWE", null, personRelasjon, emptyList())
 
         val sedHendelseModel = SedHendelseModel(
             1232312L, "2321313", "P", P_BUC_03, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
+            "NO", "NO", "2312312", "SE", "SE", "23123123", "1",
             SedType.P2200, null
         )
 
@@ -1174,17 +1174,13 @@ internal class OppgaveRoutingServiceTest {
             alder60aar,
             Saktype.UFOREP,
             sedHendelseModel,
-            HendelseType.MOTTATT,
+            HendelseType.SENDT,
             null
         )
 
         val result = routingService.route(oppgaveroutingrequest)
         assertEquals(UFORE_UTLAND, result)
-
     }
-
-
-
 
     @Test
     fun `Routing for vanlige BUC'er`() {

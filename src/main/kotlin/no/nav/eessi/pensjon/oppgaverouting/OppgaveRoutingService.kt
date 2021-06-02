@@ -40,7 +40,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.debug("enhet: $enhet")
 
-        if (routingRequest.bucType == BucType.P_BUC_01 || routingRequest.bucType == BucType.P_BUC_03) {
+        if (routingRequest.bucType == BucType.P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(
                 routingRequest.harAdressebeskyttelse,
                 routingRequest.landkode,
