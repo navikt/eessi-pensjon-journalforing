@@ -43,7 +43,8 @@ class PersonidentifiseringService(
         sedListe: List<Pair<String, SED>>,
         bucType: BucType,
         sedType: SedType?,
-        hendelsesType: HendelseType
+        hendelsesType: HendelseType,
+        rinaDocumentId: String
     ): IdentifisertPerson? {
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe)
@@ -54,6 +55,24 @@ class PersonidentifiseringService(
             potensiellePersonRelasjoner,
             hendelsesType
         )
+        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner) ?:
+        sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+    }
+
+    fun sokPersonUtvelger(navBruker: Fodselsnummer?, sedListe: List<Pair<String, SED>>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): IdentifisertPerson? {
+
+        val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
+        if (sokSedliste == null) return null
+
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf<Pair<String, SED>>(sokSedliste))
+        val identifisertePersoner = hentIdentifisertePersoner(
+            navBruker,
+            sedListe,
+            bucType,
+            potensiellePersonRelasjoner,
+            hendelsesType,
+            true
+        )
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
 
@@ -62,7 +81,8 @@ class PersonidentifiseringService(
         alleSediBuc: List<Pair<String, SED>>,
         bucType: BucType,
         potensiellePersonRelasjoner: List<PersonRelasjon>,
-        hendelsesType: HendelseType
+        hendelsesType: HendelseType,
+        benyttSokPerson: Boolean = false
     ): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
 
@@ -96,30 +116,34 @@ class PersonidentifiseringService(
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
             potensiellePersonRelasjoner
                 //.filterNot { it.fnr == null }
-                .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc, hendelsesType, bucType) }
+                .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc, hendelsesType, bucType, benyttSokPerson) }
                 .distinctBy { it.aktoerId }
         }
     }
 
     fun hentIdentifisertPerson(
         personRelasjon: PersonRelasjon,
-        alleSediBuc: List<SED>,
+        alleSediBuc: List<Pair<String, SED>>,
         hendelsesType: HendelseType,
-        bucType: BucType
+        bucType: BucType,
+        benyttSokPerson: Boolean = false
     ): IdentifisertPerson? {
         logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 
         return try {
-            var valgtFnr = personRelasjon.fnr?.value
+//            var valgtFnr = personRelasjon.fnr?.value
 
-//            if(valgtFnr == null) {
-//                logger.info("Utfører personsøk")
-//                logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
-//
-//                valgtFnr = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
-//                    ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-//                    .also { logger.info("Har gjort et treff på personsøk") }
-//            }
+            val valgtFnr = if (benyttSokPerson) {
+                logger.info("Utfører personsøk")
+                logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
+
+                 personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
+                    ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+                    .also { logger.info("Har gjort et treff på personsøk") }
+            } else {
+                personRelasjon?.fnr?.value
+            }
+
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
                 return null
@@ -142,7 +166,7 @@ class PersonidentifiseringService(
 
     private fun populerIdentifisertPerson(
         person: Person,
-        alleSediBuc: List<SED>,
+        alleSediBuc: List<Pair<String, SED>>,
         personRelasjon: PersonRelasjon,
         hendelsesType: HendelseType,
         bucType: BucType
@@ -167,8 +191,8 @@ class PersonidentifiseringService(
         )
     }
 
-    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<SED>): Boolean {
-        val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it) }
+    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<Pair<String, SED>>): Boolean {
+        val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
         logger.info("Fant ${fnr.size} unike fnr i SEDer tilknyttet Buc")
 
         val gradering =
@@ -287,6 +311,7 @@ class PersonidentifiseringService(
     ): LocalDate? {
         return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
             ?: FodselsdatoHelper.fraSedListe(seder, kansellerteSeder)
+
     }
 }
 

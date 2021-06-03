@@ -12,7 +12,7 @@ data class IdentifisertPerson(
     val landkode: String?,
     val geografiskTilknytning: String?,
     val personRelasjon: PersonRelasjon,
-    val fodselsdato: String,
+    val fodselsdato: String? = null,
     var personListe: List<IdentifisertPerson>? = null
 ) {
     override fun toString(): String {
