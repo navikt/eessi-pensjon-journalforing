@@ -60,7 +60,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation 'org.springframework.kafka:spring-kafka'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
 		exclude module: "mockito-core"
 		exclude module: "junit-vintage-engine"
@@ -97,7 +97,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:1.0.9")
 	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.17")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:8.0.3")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.0.40")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.0.43")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.22")

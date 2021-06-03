@@ -24,9 +24,9 @@ class Pbuc02 : BucTilEnhetHandler {
     private fun handleNorge(saktype: Saktype?): Enhet =
             when (saktype) {
                 Saktype.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
-                Saktype.ALDER,
+                Saktype.ALDER -> Enhet.NFP_UTLAND_AALESUND
                 Saktype.BARNEP,
-                Saktype.GJENLEV -> Enhet.NFP_UTLAND_AALESUND
+                Saktype.GJENLEV -> Enhet.PENSJON_UTLAND
                 else -> Enhet.ID_OG_FORDELING
             }
 
