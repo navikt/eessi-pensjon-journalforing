@@ -28,12 +28,11 @@ class SedDokumentHelper(
             .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
 
-    fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
+    fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
         return documents
             .filter(ForenkletSED::harGyldigStatus)
-            .map { sed -> euxService.hentSed(rinaSakId, sed.id) }
+            .map { sed -> Pair(sed.id, euxService.hentSed(rinaSakId, sed.id)) }
             .also { logger.info("Fant ${it.size} SED ") }
-
     }
 
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {

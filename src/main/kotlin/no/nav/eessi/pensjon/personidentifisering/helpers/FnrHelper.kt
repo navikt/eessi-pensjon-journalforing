@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
@@ -26,7 +25,7 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<SED>): List<PersonRelasjon> {
+    fun getPotensielleFnrFraSeder(seder: List<Pair<String, SED>>): List<PersonRelasjon> {
         val fnrListe = mutableSetOf<PersonRelasjon>()
 
         seder.forEach { sed ->

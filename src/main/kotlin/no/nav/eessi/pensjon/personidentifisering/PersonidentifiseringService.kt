@@ -40,7 +40,7 @@ class PersonidentifiseringService(
 
     fun hentIdentifisertPerson(
         navBruker: Fodselsnummer?,
-        sedListe: List<SED>,
+        sedListe: List<Pair<String, SED>>,
         bucType: BucType,
         sedType: SedType?,
         hendelsesType: HendelseType
@@ -59,7 +59,7 @@ class PersonidentifiseringService(
 
     fun hentIdentifisertePersoner(
         navBruker: Fodselsnummer?,
-        alleSediBuc: List<SED>,
+        alleSediBuc: List<Pair<String, SED>>,
         bucType: BucType,
         potensiellePersonRelasjoner: List<PersonRelasjon>,
         hendelsesType: HendelseType
