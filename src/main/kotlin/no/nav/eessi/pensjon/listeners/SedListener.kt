@@ -6,8 +6,12 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -76,11 +80,12 @@ class SedListener(
                         val alleSedIBucList = alleSedIBucMap.flatMap{ (_, sed) -> listOf(sed) }
 
                         val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBucMap, bucType, sedHendelse.sedType, SENDT)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(sedHendelse.navBruker, alleSedIBucMap, bucType, sedHendelse.sedType, SENDT
+                                 , sedHendelse.rinaDokumentId)
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                         val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
+                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
 
                         journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
                     }
