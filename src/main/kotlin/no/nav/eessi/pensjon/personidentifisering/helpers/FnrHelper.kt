@@ -26,10 +26,10 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<SED>): List<PersonRelasjon> {
+    fun getPotensielleFnrFraSeder(seder: List<Pair<String, SED>>): List<PersonRelasjon> {
         val fnrListe = mutableSetOf<PersonRelasjon>()
 
-        seder.forEach { sed ->
+        seder.forEach { (_,sed) ->
             try {
                 if (sed.type.kanInneholdeIdentEllerFdato()) {
                     logger.info("SED: ${sed.type}")

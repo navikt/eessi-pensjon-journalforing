@@ -31,6 +31,8 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
@@ -228,6 +230,75 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
             }
         }
+
+    }
+
+    @Nested
+    @DisplayName("Inngående sokPerson")
+    inner class InngaaendeSokPersonP_BUC_01 {
+
+        @Test
+        fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person automatisk journalføring`() {
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(
+                        sakId = SAK_ID,
+                        sakType = Saktype.ALDER,
+                        sakStatus = SakStatus.OPPRETTET
+                    )
+                )
+            )
+
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
+
+
+            testRunnerVoksenSokPerson(
+                FNR_VOKSEN,
+                bestemsak,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                land = "SWE",
+                sokPerson = setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(PENSJON, journalpostRequest.tema)
+                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
+                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+            }
+        }
+
+        @Test
+        fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson som heller ikke finner person Oppgave routes til ID Og Fordeling`() {
+
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
+
+
+            testRunnerVoksenSokPerson(
+                FNR_VOKSEN,
+                null,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                land = "SWE",
+                sokPerson = emptySet()
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(PENSJON, journalpostRequest.tema)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(null, it.oppgaveMelding?.aktoerId)
+                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+            }
+        }
     }
 
     @Nested
@@ -294,6 +365,62 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         }
 
+    }
+
+    private fun testRunnerVoksenSokPerson(
+        fnrVoksen: String,
+        bestemSak: BestemSakResponse? = null,
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        krav: KravType = KravType.ALDER,
+        alleDocs: List<ForenkletSED>,
+        forsokFerdigStilt: Boolean = false,
+        documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
+        hendelseType: HendelseType,
+        sokPerson: Set<IdentInformasjon> = emptySet(),
+        block: (TestResult) -> Unit
+    ) {
+
+        val fnrSokVoken = null
+
+        val mockPerson = createBrukerWith(fnrVoksen,  "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
+
+        val sed = createSedPensjon(SedType.P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson)
+
+        initCommonMocks(sed, alleDocs, documentFiler)
+
+        every { personService.sokPerson(any()) } returns sokPerson
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockPerson
+
+        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+        val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
+
+        val hendelse = createHendelseJson(SedType.P2000, BucType.P_BUC_01)
+        val meldingSlot = mutableListOf<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val kravmeldingSlot = mutableListOf<String>()
+        every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
+        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
+
+        when (hendelseType) {
+            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            else -> fail()
+        }
+
+        val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
+            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+        }
+        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+        }
+        block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
+
+        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+
+        clearAllMocks()
     }
 
     private fun testRunnerVoksen(

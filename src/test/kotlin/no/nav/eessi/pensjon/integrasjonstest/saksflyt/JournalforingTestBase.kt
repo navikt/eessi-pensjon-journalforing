@@ -85,12 +85,14 @@ internal open class JournalforingTestBase {
 
     protected val personService: PersonService = mockk(relaxed = true)
 
-    private val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
+    protected val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
+
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxService)
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
+
 
     protected val listener: SedListener = SedListener(
         journalforingService = journalforingService,
@@ -114,6 +116,7 @@ internal open class JournalforingTestBase {
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
         personidentifiseringService.nameSpace = "test"
+        personidentifiseringService.initMetrics()
 
     }
 
