@@ -1,8 +1,11 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
@@ -16,27 +19,47 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import javax.annotation.PostConstruct
 
 @Component
 class PersonidentifiseringService(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
-    private val fnrHelper: FnrHelper
+    private val fnrHelper: FnrHelper,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
+    private lateinit var sokPersonTellerTreff: Counter
+    private lateinit var sokPersonTellerMiss: Counter
 
     @Value("\${namespace}")
     lateinit var nameSpace: String
+
 
     companion object {
         fun erFnrDnrFormat(id: String?): Boolean {
             return id != null && id.length == 11 && id.isNotBlank()
         }
     }
+
+    @PostConstruct
+    fun initMetrics() {
+        sokPersonTellerTreff = Counter.builder("sokPersonTellerTreff")
+            .tag(metricsHelper.configuration.typeTag, metricsHelper.configuration.successTypeTagValue)
+            .tag(metricsHelper.configuration.alertTag, metricsHelper.configuration.toggleOffTagValue)
+            .register(metricsHelper.registry)
+
+        sokPersonTellerMiss = Counter.builder("sokPersonTellerMiss")
+            .tag(metricsHelper.configuration.typeTag, metricsHelper.configuration.failureTypeTagValue)
+            .tag(metricsHelper.configuration.alertTag, metricsHelper.configuration.toggleOffTagValue)
+            .register(metricsHelper.registry)
+    }
+
 
     fun hentIdentifisertPerson(
         navBruker: Fodselsnummer?,
@@ -55,11 +78,18 @@ class PersonidentifiseringService(
             potensiellePersonRelasjoner,
             hendelsesType
         )
-        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner) ?:
-        sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
+            ?: sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
     }
 
-    fun sokPersonUtvelger(navBruker: Fodselsnummer?, sedListe: List<Pair<String, SED>>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): IdentifisertPerson? {
+    fun sokPersonUtvelger(
+        navBruker: Fodselsnummer?,
+        sedListe: List<Pair<String, SED>>,
+        rinaDocumentId: String,
+        bucType: BucType,
+        sedType: SedType?,
+        hendelsesType: HendelseType
+    ): IdentifisertPerson? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
         logger.info("rinadocid : $rinaDocumentId")
@@ -120,7 +150,15 @@ class PersonidentifiseringService(
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
             potensiellePersonRelasjoner
                 //.filterNot { it.fnr == null }
-                .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, alleSediBuc, hendelsesType, bucType, benyttSokPerson) }
+                .mapNotNull { relasjon ->
+                    hentIdentifisertPerson(
+                        relasjon,
+                        alleSediBuc,
+                        hendelsesType,
+                        bucType,
+                        benyttSokPerson
+                    )
+                }
                 .distinctBy { it.aktoerId }
         }
     }
@@ -135,17 +173,24 @@ class PersonidentifiseringService(
         logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 
         return try {
-//            var valgtFnr = personRelasjon.fnr?.value
 
             val valgtFnr = if (benyttSokPerson) {
                 logger.info("Utfører personsøk")
                 logger.debug("SokKriterie: ${personRelasjon.sokKriterier}")
 
-                 personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
+                val sokPersonFnrTreff = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
                     ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                    .also { logger.info("Har gjort et treff på personsøk") }
+                    .also {
+                        logger.info("Har gjort et treff på personsøk")
+                    }
+                if (sokPersonFnrTreff != null) {
+                    sokPersonTellerTreff.increment()
+                } else {
+                    sokPersonTellerMiss.increment()
+                }
+                sokPersonFnrTreff
             } else {
-                personRelasjon?.fnr?.value
+                personRelasjon.fnr?.value
             }
 
             if (valgtFnr == null) {
@@ -155,7 +200,15 @@ class PersonidentifiseringService(
 
             logger.debug("Henter person med fnr. $valgtFnr fra PDL")
             personService.hentPerson(NorskIdent(valgtFnr))
-                ?.let { person -> populerIdentifisertPerson(person, alleSediBuc, personRelasjon, hendelsesType, bucType) }
+                ?.let { person ->
+                    populerIdentifisertPerson(
+                        person,
+                        alleSediBuc,
+                        personRelasjon,
+                        hendelsesType,
+                        bucType
+                    )
+                }
                 ?.also {
                     logger.debug(
                         """IdentifisertPerson hentet fra PDL (aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
@@ -179,11 +232,11 @@ class PersonidentifiseringService(
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
-        val personFnr = person.identer.first{ it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
+        val personFnr = person.identer.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
-        val newPersonRelasjon =  personRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        val newPersonRelasjon = personRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
             aktorId,
@@ -232,6 +285,9 @@ class PersonidentifiseringService(
         }
     }
 
+    /**
+     * Forsøker å finne om identifisert person er en eller fler med avdød person
+     */
     /**
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
@@ -294,6 +350,9 @@ class PersonidentifiseringService(
     /**
      * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
      */
+    /**
+     * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
+     */
     private fun brukForsikretPerson(
         sedType: SedType?,
         identifisertePersoner: List<IdentifisertPerson>
@@ -305,6 +364,9 @@ class PersonidentifiseringService(
         return null
     }
 
+    /**
+     * Henter første treff på dato fra listen av SEDer
+     */
     /**
      * Henter første treff på dato fra listen av SEDer
      */

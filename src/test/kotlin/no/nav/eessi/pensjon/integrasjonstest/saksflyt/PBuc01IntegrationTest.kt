@@ -231,6 +231,12 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             }
         }
 
+    }
+
+    @Nested
+    @DisplayName("Inngående sokPerson")
+    inner class InngaaendeSokPersonP_BUC_01 {
+
         @Test
         fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person automatisk journalføring`() {
             val bestemsak = BestemSakResponse(
@@ -252,7 +258,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
                 land = "SWE",
-                sokPerson = true
+                sokPerson = setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
@@ -263,6 +269,33 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
+                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+            }
+        }
+
+        @Test
+        fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson som heller ikke finner person Oppgave routes til ID Og Fordeling`() {
+
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
+
+
+            testRunnerVoksenSokPerson(
+                FNR_VOKSEN,
+                null,
+                alleDocs = allDocuemtActions,
+                hendelseType = MOTTATT,
+                land = "SWE",
+                sokPerson = emptySet()
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(PENSJON, journalpostRequest.tema)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(null, it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
         }
@@ -344,11 +377,11 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         forsokFerdigStilt: Boolean = false,
         documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
         hendelseType: HendelseType,
-        sokPerson: Boolean = true,
+        sokPerson: Set<IdentInformasjon> = emptySet(),
         block: (TestResult) -> Unit
     ) {
 
-        val fnrSokVoken = if (sokPerson) null else fnrVoksen
+        val fnrSokVoken = null
 
         val mockPerson = createBrukerWith(fnrVoksen,  "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
 
@@ -356,11 +389,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
-
-        if (sokPerson) {
-            every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(fnrVoksen, IdentGruppe.FOLKEREGISTERIDENT))
-            every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockPerson
-        }
+        every { personService.sokPerson(any()) } returns sokPerson
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockPerson
 
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
@@ -388,7 +418,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
         verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxService.hentSed(any(), any()) }
 
         clearAllMocks()
