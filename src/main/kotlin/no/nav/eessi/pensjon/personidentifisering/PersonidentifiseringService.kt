@@ -60,6 +60,10 @@ class PersonidentifiseringService(
     }
 
     fun sokPersonUtvelger(navBruker: Fodselsnummer?, sedListe: List<Pair<String, SED>>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): IdentifisertPerson? {
+        logger.info("PersonUtvelger *** SøkPerson *** ")
+
+        logger.info("rinadocid : $rinaDocumentId")
+        logger.info("sedliste : $sedListe")
 
         val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
         if (sokSedliste == null) return null
