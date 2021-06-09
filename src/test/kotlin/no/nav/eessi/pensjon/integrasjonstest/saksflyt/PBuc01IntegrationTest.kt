@@ -389,6 +389,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.sokPerson(any()) } returns sokPerson
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockPerson
 
@@ -448,6 +449,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             )
         }
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)

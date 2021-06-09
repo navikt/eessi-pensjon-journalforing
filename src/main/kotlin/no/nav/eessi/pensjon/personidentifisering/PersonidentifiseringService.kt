@@ -60,6 +60,17 @@ class PersonidentifiseringService(
             .register(metricsHelper.registry)
     }
 
+    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson?, hendelsesType: HendelseType, erNavCaseOwner: Boolean = false): IdentifisertPerson? {
+        return if (identifisertPerson != null && hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
+            if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
+                identifisertPerson
+            } else {
+                null
+            }
+        } else {
+            identifisertPerson
+        }
+    }
 
     fun hentIdentifisertPerson(
         navBruker: Fodselsnummer?,
@@ -67,7 +78,8 @@ class PersonidentifiseringService(
         bucType: BucType,
         sedType: SedType?,
         hendelsesType: HendelseType,
-        rinaDocumentId: String
+        rinaDocumentId: String,
+        erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe)
@@ -78,8 +90,15 @@ class PersonidentifiseringService(
             potensiellePersonRelasjoner,
             hendelsesType
         )
-        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
-            ?: sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+
+        val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
+        val validertIdentifisertPerson = validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
+
+        if (identifisertPerson == null) {
+            return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        }
+
+        return validertIdentifisertPerson
     }
 
     fun sokPersonUtvelger(
@@ -92,11 +111,12 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-        logger.info("rinadocid : $rinaDocumentId")
-        logger.info("sedliste : $sedListe")
 
         val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
-        if (sokSedliste == null) return null
+        if (sokSedliste == null) {
+            logger.info("Ingen gyldig sed for søkPerson")
+            return null
+        }
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf<Pair<String, SED>>(sokSedliste))
         val identifisertePersoner = hentIdentifisertePersoner(
@@ -114,7 +134,7 @@ class PersonidentifiseringService(
         navBruker: Fodselsnummer?,
         alleSediBuc: List<Pair<String, SED>>,
         bucType: BucType,
-        potensiellePersonRelasjoner: List<PersonRelasjon>,
+        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
         hendelsesType: HendelseType,
         benyttSokPerson: Boolean = false
     ): List<IdentifisertPerson> {
@@ -140,7 +160,7 @@ class PersonidentifiseringService(
                 populerIdentifisertPerson(
                     personForNavBruker,
                     alleSediBuc,
-                    PersonRelasjon(navBruker!!, Relasjon.FORSIKRET),
+                    SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET),
                     hendelsesType,
                     bucType
                 )
@@ -148,7 +168,7 @@ class PersonidentifiseringService(
         } else {
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
-            potensiellePersonRelasjoner
+            potensielleSEDPersonRelasjoner
                 //.filterNot { it.fnr == null }
                 .mapNotNull { relasjon ->
                     hentIdentifisertPerson(
@@ -164,7 +184,7 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        personRelasjon: PersonRelasjon,
+        personRelasjon: SEDPersonRelasjon,
         alleSediBuc: List<Pair<String, SED>>,
         hendelsesType: HendelseType,
         bucType: BucType,
@@ -180,9 +200,7 @@ class PersonidentifiseringService(
 
                 val sokPersonFnrTreff = personRelasjon.sokKriterier?.let { personService.sokPerson(it) }
                     ?.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-                    .also {
-                        logger.info("Har gjort et treff på personsøk")
-                    }
+                    .also { logger.info("Har gjort et treff på personsøk (${it!=null})") }
                 if (sokPersonFnrTreff != null) {
                     sokPersonTellerTreff.increment()
                 } else {
@@ -224,7 +242,7 @@ class PersonidentifiseringService(
     private fun populerIdentifisertPerson(
         person: Person,
         alleSediBuc: List<Pair<String, SED>>,
-        personRelasjon: PersonRelasjon,
+        SEDPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType,
         bucType: BucType
     ): IdentifisertPerson {
@@ -236,7 +254,7 @@ class PersonidentifiseringService(
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
-        val newPersonRelasjon = personRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        val newPersonRelasjon = SEDPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
             aktorId,
@@ -295,7 +313,7 @@ class PersonidentifiseringService(
         identifisertePersoner: List<IdentifisertPerson>,
         bucType: BucType,
         sedType: SedType?,
-        potensiellePersonRelasjoner: List<PersonRelasjon>
+        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>
     ): IdentifisertPerson? {
         logger.info("IdentifisertePersoner $bucType, SedType: ${sedType?.name}, antall identifisertePersoner : ${identifisertePersoner.size} ")
 
@@ -308,11 +326,11 @@ class PersonidentifiseringService(
             bucType == BucType.R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
             bucType == BucType.P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
             bucType == BucType.P_BUC_05 -> {
-                val erGjenlevendeRelasjon = potensiellePersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
+                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
             bucType == BucType.P_BUC_10 -> {
-                val erGjenlevendeYtelse = potensiellePersonRelasjoner.any { it.saktype == Saktype.GJENLEV }
+                val erGjenlevendeYtelse = potensielleSEDPersonRelasjoner.any { it.saktype == Saktype.GJENLEV }
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }

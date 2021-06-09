@@ -19,8 +19,8 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
@@ -103,7 +103,7 @@ internal class JournalforingServiceTest {
                 false,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.ALDER, 0, null)
@@ -135,7 +135,7 @@ internal class JournalforingServiceTest {
                 false,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.UFOREP, 0, null)
@@ -167,7 +167,7 @@ internal class JournalforingServiceTest {
                 false,
                 "SE",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.UFOREP, 0, null)
@@ -199,14 +199,14 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "3811",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         val dodPerson = IdentifisertPerson(
                 "22078945602",
                 "Dod Begravet",
                 false,
                 "",
                 "3811",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD))
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD))
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
@@ -240,7 +240,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
@@ -271,7 +271,7 @@ internal class JournalforingServiceTest {
                 false,
                 "NOR",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
@@ -303,7 +303,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
@@ -336,7 +336,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
@@ -369,7 +369,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
@@ -402,7 +402,7 @@ internal class JournalforingServiceTest {
                 false,
                 "NOR",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, Saktype.ALDER, 0, null)
@@ -435,7 +435,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
@@ -468,7 +468,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
@@ -502,7 +502,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
         val sakInformasjon = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -558,7 +558,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV)
         )
         val saksInfo = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -594,7 +594,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV)
         )
         val sakInformasjon = SakInformasjon("111222", Saktype.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
@@ -631,7 +631,7 @@ internal class JournalforingServiceTest {
                 false,
                 "NO",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
@@ -665,7 +665,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
@@ -719,7 +719,7 @@ internal class JournalforingServiceTest {
                 false,
                 "",
                 "",
-                personRelasjon = PersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP)
+                personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP)
         )
         val saksInfo = SakInformasjon("111111", Saktype.BARNEP, SakStatus.LOPENDE, "4862", false)
 

@@ -11,8 +11,8 @@ import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -44,11 +44,8 @@ internal class Pbuc10Test {
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
-            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(
-                DUMMY_FNR,
-                Relasjon.GJENLEVENDE,
-                Saktype.GJENLEV,
-                SedType.P15000
+            every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", SEDPersonRelasjon(
+                DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000
             ))
             every { harAdressebeskyttelse } returns false
             every { saktype } returns Saktype.UFOREP
@@ -164,11 +161,8 @@ internal class Pbuc10Test {
     ): OppgaveRoutingRequest {
         return mockk {
             if (hendelse == SENDT)
-                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", PersonRelasjon(
-                    DUMMY_FNR,
-                    Relasjon.GJENLEVENDE,
-                    Saktype.GJENLEV,
-                    SedType.P15000
+                every { identifisertPerson } returns IdentifisertPerson("1231", "ole dunk", false, "NOR", "1234", SEDPersonRelasjon(
+                    DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000
                 ))
 
             every { harAdressebeskyttelse } returns false

@@ -5,6 +5,9 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
+import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
@@ -52,7 +55,7 @@ internal class SedDokumentHelperTest {
 
         every { euxService.hentBucDokumenter(any()) } returns docs
 
-        val dokumenter = helper.hentAlleGydligeDokumenter("123")
+        val dokumenter = helper.hentAlleGyldigeDokumenter(Buc())
 
         assertEquals(52, dokumenter.size)
 
@@ -101,6 +104,43 @@ internal class SedDokumentHelperTest {
     }
 
     @Test
+    fun `Sjekker om Norge er caseOwner på buc`() {
+
+        val buc = Buc(
+            "123545",
+            participants = listOf(Participant("CaseOwner", Organisation(
+                countryCode = "NO"
+            )))
+        )
+        assertEquals(true, helper.isNavCaseOwner(buc))
+    }
+
+    @Test
+    fun `Sjekker om Norge ikke er caseOwner på buc`() {
+
+        val buc = Buc(
+            "123545",
+            participants = listOf(Participant("CaseOwner", Organisation(
+                countryCode = "PL"
+            )))
+        )
+        assertEquals(false, helper.isNavCaseOwner(buc))
+    }
+
+    @Test
+    fun `Sjekker om Norge ikk er caseOwner på buc del 2`() {
+
+        val buc = Buc(
+            "123545",
+            participants = listOf(Participant("CounterParty", Organisation(
+                countryCode = "NO"
+            )))
+        )
+        assertEquals(false, helper.isNavCaseOwner(buc))
+    }
+
+
+    @Test
     fun `henter en map av gyldige seds i buc`() {
         val rinaSakId = "123123"
 
@@ -113,7 +153,7 @@ internal class SedDokumentHelperTest {
         every { euxService.hentBucDokumenter(any()) } returns alldocsid
         every { euxService.hentSed(any(), any()) } returns sedP2000
 
-        val result = helper.hentAlleGydligeDokumenter(rinaSakId)
+        val result = helper.hentAlleGyldigeDokumenter(Buc())
         val actual = helper.hentAlleSedIBuc(rinaSakId, result)
         assertEquals(1, actual.size)
 

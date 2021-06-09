@@ -34,8 +34,8 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -267,7 +267,7 @@ internal class OppgaveRoutingServiceTest {
             false,
             null,
             "010",
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
         )
         val avod = IdentifisertPerson(
             "234",
@@ -275,7 +275,7 @@ internal class OppgaveRoutingServiceTest {
             false,
             null,
             "010",
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD)
         )
         forsikret.personListe = listOf(forsikret, avod)
 
@@ -947,7 +947,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -996,7 +996,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -1044,7 +1044,7 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
-        val personRelasjon = PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
+        val personRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
         val identifisertPerson = IdentifisertPerson("01010101010", "Ole Olsen", false, "SWE", "3005", personRelasjon, personListe = emptyList())
 
         val sedHendelseModel = SedHendelseModel(1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
@@ -1072,7 +1072,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000)
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -1120,7 +1120,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200)
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", false, "SWE", null, personRelasjon, personListe = emptyList())
 
@@ -2008,7 +2008,7 @@ internal class OppgaveRoutingServiceTest {
         false,
         "NO",
         "010",
-        PersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
+        SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
     )
 
 }

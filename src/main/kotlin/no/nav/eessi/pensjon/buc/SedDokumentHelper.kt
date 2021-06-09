@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.buc
 
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -22,8 +23,12 @@ class SedDokumentHelper(
 
     private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
 
-    fun hentAlleGydligeDokumenter(rinaSakId: String): List<ForenkletSED> {
-        return euxService.hentBucDokumenter(rinaSakId)
+    fun hentBuc(rinaSakId: String): Buc {
+        return euxService.hentBuc(rinaSakId) ?: throw RuntimeException("Ingen BUC")
+    }
+
+    fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {
+        return euxService.hentBucDokumenter(buc)
             .filter { it.type.erGyldig() }
             .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
@@ -33,6 +38,16 @@ class SedDokumentHelper(
             .filter(ForenkletSED::harGyldigStatus)
             .map { sed -> Pair(sed.id, euxService.hentSed(rinaSakId, sed.id)) }
             .also { logger.info("Fant ${it.size} SED ") }
+    }
+
+    fun isNavCaseOwner(buc: Buc): Boolean {
+        val caseOwner = buc.participants?.filter {
+            part -> part.role == "CaseOwner"
+        }?.filter {
+            part -> part.organisation?.countryCode == "NO"
+        }?.mapNotNull { it.organisation?.countryCode }?.singleOrNull()
+
+        return caseOwner == "NO"
     }
 
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
