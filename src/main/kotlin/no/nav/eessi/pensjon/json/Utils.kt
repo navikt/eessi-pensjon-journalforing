@@ -31,4 +31,10 @@ inline fun <reified T : Any> mapJsonToAny(json: String, objekt: TypeReference<T>
                 .readValue(json, objekt)
 }
 
+inline fun <reified T: Any> String.toKotlinObject(): T {
+    val mapper = jacksonObjectMapper()
+    return mapper.readValue(this, T::class.java)
+}
+
+
 fun Any.toJson() =  mapAnyToJson(this)

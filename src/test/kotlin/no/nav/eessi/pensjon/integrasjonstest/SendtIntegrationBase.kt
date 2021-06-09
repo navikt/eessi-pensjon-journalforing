@@ -1,12 +1,17 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toKotlinObject
 import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.listeners.SedListener
 import org.junit.jupiter.api.AfterEach
 import org.mockserver.integration.ClientAndServer
@@ -14,6 +19,7 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
@@ -30,12 +36,13 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+
 private lateinit var mockServer : ClientAndServer
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
-abstract class JournalforingSendtIntegrationBase {
+abstract class SendtIntegrationBase {
 
     @Autowired
     lateinit var sedListener: SedListener
@@ -43,6 +50,10 @@ abstract class JournalforingSendtIntegrationBase {
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
+
+//    val deugLogger: Logger = LoggerFactory.getLogger(JournalforingSendtIntegrationBase::class.java) as Logger
+    protected val deugLogger: Logger = LoggerFactory.getLogger("no.nav.eessi.pensjon")  as Logger
+    protected val listAppender = ListAppender<ILoggingEvent>()
 
     @AfterEach
     fun after() {
@@ -54,11 +65,28 @@ abstract class JournalforingSendtIntegrationBase {
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
+
     abstract fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>)
 
     abstract fun verifiser()
 
-    fun initContainer() {
+    open fun initMock() {  }
+
+    //** mock every må kjøres før denne
+    fun initAndRunContainer() {
+        println("Abstract - Mockserver Port: ${mockServer.port}")
+        println("Abstract - Mockserver Prop: " +System.getProperty("mockServerport"))
+
+        // create and start a ListAppender
+        listAppender.start()
+
+        // add the appender to the logger
+        // addAppender is outdated now
+        deugLogger.addAppender(listAppender)
+
+        initMock()
+        moreMockServer(mockServer)
+
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
         container.start()
@@ -76,7 +104,7 @@ abstract class JournalforingSendtIntegrationBase {
         produserSedHendelser(sedSendtProducerTemplate)
 
         // Venter på at sedListener skal consumeSedSendt meldingene
-        sedListener.getLatch().await(5, TimeUnit.SECONDS)
+        sedListener.getLatch().await(10, TimeUnit.SECONDS)
 
         verifiser()
     }
@@ -111,17 +139,17 @@ abstract class JournalforingSendtIntegrationBase {
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun opprettBucDocuments(file: String): List<Document> {
+    protected fun opprettBucDocuments(file: String): List<Document> {
         val json = javaClass.getResource(file).readText()
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun opprettSedDokument(file: String): SedDokumentfiler {
+    protected fun opprettSedDokument(file: String): SedDokumentfiler {
         val json = javaClass.getResource(file).readText()
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun <T> opprettSED(file: String, clazz: Class<T>): T {
+    protected fun <T> opprettSED(file: String, clazz: Class<T>): T {
         val json = javaClass.getResource(file).readText()
         return jacksonObjectMapper()
             .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
@@ -129,9 +157,9 @@ abstract class JournalforingSendtIntegrationBase {
             .readValue(json, clazz)
     }
 
-    private inline fun <reified T : Any> String.toKotlinObject(): T {
-        val mapper = jacksonObjectMapper()
-        return mapper.readValue(this, T::class.java)
+    protected fun opprettArbeidsFordeling(file: String): List<Norg2ArbeidsfordelingItem> {
+        val json = javaClass.getResource(file).readText()
+        return json.toKotlinObject()
     }
 
     companion object {
@@ -174,7 +202,11 @@ abstract class JournalforingSendtIntegrationBase {
                                     "}"
                         )
                 )
+
         }
+
     }
+    //override this
+    abstract fun moreMockServer(mockServer: ClientAndServer)
 }
 
