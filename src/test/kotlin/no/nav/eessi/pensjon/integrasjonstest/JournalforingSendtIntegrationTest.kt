@@ -55,7 +55,7 @@ import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
@@ -97,7 +97,7 @@ class JournalforingSendtIntegrationTest {
 //            return mockk(relaxed = true)
         }
     }
-
+    @Disabled
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initMocks()
