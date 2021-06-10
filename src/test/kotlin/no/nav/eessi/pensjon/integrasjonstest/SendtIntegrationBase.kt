@@ -15,8 +15,13 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.listeners.SedListener
 import org.junit.jupiter.api.AfterEach
 import org.mockserver.integration.ClientAndServer
+import org.mockserver.model.Header
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.HttpStatusCode
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -26,10 +31,13 @@ import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.util.concurrent.TimeUnit
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.*
+import java.util.concurrent.*
 
 
-//lateinit var mockServer : ClientAndServer
+private lateinit var mockServer : ClientAndServer
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
@@ -160,50 +168,50 @@ abstract class SendtIntegrationBase {
         return json.toKotlinObject()
     }
 
-//    companion object {
-//        init {
-//            // Start Mockserver in memory
-//            val port = Random().nextInt( 65535 - 1024) + 1024
-//            mockServer = ClientAndServer.startClientAndServer(port)
-//            System.setProperty("mockServerport", port.toString())
-//
-//            // Mocker STS
-//            mockServer.`when`(
-//                HttpRequest.request()
-//                    .withMethod(HttpMethod.GET.name)
-//                    .withQueryStringParameter("grant_type", "client_credentials")
-//            )
-//                .respond(
-//                    HttpResponse.response()
-//                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-//                        .withStatusCode(HttpStatusCode.OK_200.code())
-//                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
-//                )
-//
-//            // Mocker STS service discovery
-//            mockServer.`when`(
-//                HttpRequest.request()
-//                    .withMethod(HttpMethod.GET.name)
-//                    .withPath("/.well-known/openid-configuration")
-//            )
-//                .respond(
-//                    HttpResponse.response()
-//                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-//                        .withStatusCode(HttpStatusCode.OK_200.code())
-//                        .withBody(
-//                            "{\n" +
-//                                    "  \"issuer\": \"http://localhost:$port\",\n" +
-//                                    "  \"token_endpoint\": \"http://localhost:$port/rest/v1/sts/token\",\n" +
-//                                    "  \"exchange_token_endpoint\": \"http://localhost:$port/rest/v1/sts/token/exchange\",\n" +
-//                                    "  \"jwks_uri\": \"http://localhost:$port/rest/v1/sts/jwks\",\n" +
-//                                    "  \"subject_types_supported\": [\"public\"]\n" +
-//                                    "}"
-//                        )
-//                )
-//
-//        }
-//
-//    }
+    companion object {
+        init {
+            // Start Mockserver in memory
+            val port = Random().nextInt( 65535 - 1024) + 1024
+            mockServer = ClientAndServer.startClientAndServer(port)
+            System.setProperty("mockServerport", port.toString())
+
+            // Mocker STS
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.GET.name)
+                    .withQueryStringParameter("grant_type", "client_credentials")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
+                )
+
+            // Mocker STS service discovery
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.GET.name)
+                    .withPath("/.well-known/openid-configuration")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(
+                            "{\n" +
+                                    "  \"issuer\": \"http://localhost:$port\",\n" +
+                                    "  \"token_endpoint\": \"http://localhost:$port/rest/v1/sts/token\",\n" +
+                                    "  \"exchange_token_endpoint\": \"http://localhost:$port/rest/v1/sts/token/exchange\",\n" +
+                                    "  \"jwks_uri\": \"http://localhost:$port/rest/v1/sts/jwks\",\n" +
+                                    "  \"subject_types_supported\": [\"public\"]\n" +
+                                    "}"
+                        )
+                )
+
+        }
+
+    }
 
 }
 
