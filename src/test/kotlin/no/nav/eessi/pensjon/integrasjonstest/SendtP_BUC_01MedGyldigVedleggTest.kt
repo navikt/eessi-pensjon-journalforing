@@ -36,8 +36,10 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.TimeUnit
 
+private lateinit var mockServer : ClientAndServer
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
@@ -54,8 +56,6 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
     @Autowired
     lateinit var euxService: EuxService
 
-//    @Autowired
-//    lateinit var klient: Norg2Klient
 
     @TestConfiguration
     class TestConfig {
@@ -144,59 +144,101 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
     }
 
     override fun moreMockServer(mockServer: ClientAndServer) {
-        println("Mockserver Port: ${mockServer.port}")
-        println("MockServer params: " +System.getProperty("mockServerport") )
-
-        // Mocker bestemSak
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
-                .withPath("/")
-        )
-            .respond(HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
-                .withDelay(TimeUnit.SECONDS, 1)
-            )
-
-        // Mocker journalføringstjeneste
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
-                .withPath("/journalpost"))
-            .respond(
-                HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
-                .withDelay(TimeUnit.SECONDS, 1)
-            )
-
-        // Mocker oppdaterDistribusjonsinfo
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(HttpMethod.PATCH.name)
-                .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
-            .respond(HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody("")
-                .withDelay(TimeUnit.SECONDS, 1)
-            )
-
-        //Mock norg2tjeneste
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
-                .withPath("/api/v1/arbeidsfordeling")
-            )
-            .respond(
-                HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
-            )
-
     }
+
+    companion object {
+        init {
+            // Start Mockserver in memory
+            val port = Random().nextInt( 65535 - 1024) + 1024
+            mockServer = ClientAndServer.startClientAndServer(port)
+            System.setProperty("mockServerport", port.toString())
+
+            // Mocker STS
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.GET.name)
+                    .withQueryStringParameter("grant_type", "client_credentials")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/sed/STStoken.json"))))
+                )
+
+            // Mocker STS service discovery
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.GET.name)
+                    .withPath("/.well-known/openid-configuration")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(
+                            "{\n" +
+                                    "  \"issuer\": \"http://localhost:$port\",\n" +
+                                    "  \"token_endpoint\": \"http://localhost:$port/rest/v1/sts/token\",\n" +
+                                    "  \"exchange_token_endpoint\": \"http://localhost:$port/rest/v1/sts/token/exchange\",\n" +
+                                    "  \"jwks_uri\": \"http://localhost:$port/rest/v1/sts/jwks\",\n" +
+                                    "  \"subject_types_supported\": [\"public\"]\n" +
+                                    "}"
+                        )
+                )
+
+
+            // Mocker bestemSak
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/")
+            )
+                .respond(HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
+                    .withDelay(TimeUnit.SECONDS, 1)
+                )
+
+            // Mocker journalføringstjeneste
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/journalpost"))
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
+                        .withDelay(TimeUnit.SECONDS, 1)
+                )
+
+            // Mocker oppdaterDistribusjonsinfo
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.PATCH.name)
+                    .withPath("/journalpost/.*/oppdaterDistribusjonsinfo"))
+                .respond(HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody("")
+                    .withDelay(TimeUnit.SECONDS, 1)
+                )
+
+            //Mock norg2tjeneste
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/api/v1/arbeidsfordeling")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
+                )
+        }
+    }
+
 }
