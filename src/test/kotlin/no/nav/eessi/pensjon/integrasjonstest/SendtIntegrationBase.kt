@@ -111,6 +111,7 @@ abstract class SendtIntegrationBase {
         sedListener.getLatch().await(10, TimeUnit.SECONDS)
 
         verifiser()
+        container.stop()
     }
 
     private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
