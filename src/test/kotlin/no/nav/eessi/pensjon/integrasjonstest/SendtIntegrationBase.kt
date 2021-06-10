@@ -51,7 +51,6 @@ abstract class SendtIntegrationBase {
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
 
-//    val deugLogger: Logger = LoggerFactory.getLogger(JournalforingSendtIntegrationBase::class.java) as Logger
     protected val deugLogger: Logger = LoggerFactory.getLogger("no.nav.eessi.pensjon")  as Logger
     protected val listAppender = ListAppender<ILoggingEvent>()
 
@@ -65,12 +64,17 @@ abstract class SendtIntegrationBase {
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
     }
 
-
+    //legger til hendlese på kafka her
     abstract fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>)
 
+    //override bruk denne for ekstra mockServere
+    abstract fun moreMockServer(mockServer: ClientAndServer)
+
+    //verifiser kall og asserts
     abstract fun verifiser()
 
-    open fun initMock() {  }
+    //legg til ekstra mockk o.l her
+    open fun initExtraMock() {  }
 
     //** mock every må kjøres før denne
     fun initAndRunContainer() {
@@ -84,7 +88,7 @@ abstract class SendtIntegrationBase {
         // addAppender is outdated now
         deugLogger.addAppender(listAppender)
 
-        initMock()
+        initExtraMock()
         moreMockServer(mockServer)
 
         // Vent til kafka er klar
@@ -109,7 +113,7 @@ abstract class SendtIntegrationBase {
         verifiser()
     }
 
-    protected fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
+    private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
         val senderProps = KafkaTestUtils.producerProps(embeddedKafka.brokersAsString)
         val pf = DefaultKafkaProducerFactory<Int, String>(senderProps)
         val template = KafkaTemplate(pf)
@@ -117,7 +121,7 @@ abstract class SendtIntegrationBase {
         return template
     }
 
-    protected fun settOppUtitlityConsumer(topicNavn: String): KafkaMessageListenerContainer<String, String> {
+    private fun settOppUtitlityConsumer(topicNavn: String): KafkaMessageListenerContainer<String, String> {
         val consumerProperties = KafkaTestUtils.consumerProps(
             "eessi-pensjon-group2",
             "false",
@@ -206,7 +210,6 @@ abstract class SendtIntegrationBase {
         }
 
     }
-    //override this
-    abstract fun moreMockServer(mockServer: ClientAndServer)
+
 }
 

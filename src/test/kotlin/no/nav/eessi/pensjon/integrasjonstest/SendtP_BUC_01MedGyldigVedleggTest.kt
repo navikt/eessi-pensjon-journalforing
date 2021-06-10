@@ -78,7 +78,7 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
         initAndRunContainer()
     }
 
-    override fun initMock() {
+    override fun initExtraMock() {
         // Mock PDL Person
         every { personService.hentPerson(NorskIdent("09035225916")) }
             .answers { PersonMock.createWith(fnr = "09035225916", aktoerId = AktoerId("1000101917358")) }
@@ -113,7 +113,6 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
 
     override fun verifiser() {
         assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
-
         verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxService.hentBuc(any()) }
         verify (exactly = 1) { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
