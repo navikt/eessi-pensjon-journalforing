@@ -8,7 +8,19 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.P10000
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P2200
+import no.nav.eessi.pensjon.eux.model.sed.P4000
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P6000
+import no.nav.eessi.pensjon.eux.model.sed.P7000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.X005
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,7 +73,11 @@ class EuxService(
                 SedType.P7000 -> mapJsonToAny(json, typeRefs<P7000>())
                 SedType.P8000 -> mapJsonToAny(json, typeRefs<P8000>())
                 SedType.P10000 -> mapJsonToAny(json, typeRefs<P10000>())
-                SedType.P15000 -> mapJsonToAny(json, typeRefs<P15000>())
+                SedType.P15000 -> {
+                    val psed = mapJsonToAny(json, typeRefs<P15000>())
+                    psed.pensjon = Pensjon(gjenlevende = psed.p15000Pensjon?.gjenlevende)
+                    psed
+                }
                 SedType.X005 -> mapJsonToAny(json, typeRefs<X005>())
                 SedType.R005 -> mapJsonToAny(json, typeRefs<R005>())
                 else -> sed
