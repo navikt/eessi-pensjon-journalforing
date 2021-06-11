@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.integrasjonstest
+package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -13,13 +13,14 @@ import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.integrasjonstest.SendtIntegrationBase
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Header
@@ -42,18 +43,24 @@ import java.util.concurrent.TimeUnit
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
-@SpringBootTest(classes = [SendtP_BUC_01MedGyldigVedleggTest.TestConfig::class],  value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest(
+    classes = [SendtP_BUC_01MedGyldigVedleggTest.TestConfig::class],
+    value = ["SPRING_PROFILES_ACTIVE", "integrationtest"]
+)
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkasendt"])
-class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
-
+@EmbeddedKafka(
+    controlledShutdown = true,
+    partitions = 1,
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
+    brokerProperties = ["log.dir=out/embedded-kafkasendt"]
+)
+class P_BUC_03Test : SendtIntegrationBase() {
     @Autowired
     lateinit var personService: PersonService
 
     @Autowired
     lateinit var euxService: EuxService
-
 
     @TestConfiguration
     class TestConfig {
@@ -68,13 +75,16 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
         fun euxService(): EuxService {
             return spyk(EuxService(mockk(relaxed = true), MetricsHelper(SimpleMeterRegistry())))
         }
-
     }
 
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
         clearAllMocks()
+    }
+
+    override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
+        sedSendtProducerTemplate.sendDefault(javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json").readText())
     }
 
     override fun initExtraMock() {
@@ -99,23 +109,23 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
         every { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
-
         // Mock EUX Service (SEDer)
         every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
             .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
 
+        every { euxService.hentAlleDokumentfiler("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
     }
 
-    override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
-        sedSendtProducerTemplate.sendDefault(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText())
-    }
 
     override fun verifiser() {
-        assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
+        Assertions.assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
         verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxService.hentBuc(any()) }
-        verify(exactly = 1) { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
-        verify(exactly = 1) { euxService.hentSed("147729", "44cb68f89a2f4e748934fb4722721018") }
+        verify(exactly = 1) { euxService.hentAlleDokumentfiler("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
 
         println("****".repeat(30))
         println("****".repeat(10) + " Start logging " + "****".repeat(10))
@@ -128,17 +138,19 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
 
         val oppgavemelding = """
             Opprette oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding: {
-              "sedType" : "P2000",
+              "sedType" : "P2200",
               "journalpostId" : "429434378",
-              "tildeltEnhetsnr" : "9999",
-              "aktoerId" : "1000101917358",
-              "rinaSakId" : "147729",
+              "tildeltEnhetsnr" : "4303",
+              "aktoerId" : null,
+              "rinaSakId" : "148161",
               "hendelseType" : "SENDT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING"
             }
         """.trimIndent()
-        assertEquals(oppgavemelding, logsList.get(51).message)
+        //ssertions.assertTrue(logsList.stream().anyMatch { it.message.contentEquals(oppgavemelding) })
+        val messageSent = logsList.find { message -> message.message.contains("\"sedType\" : \"P2200\"") }?.message
+        Assertions.assertEquals(messageSent, oppgavemelding)
 
     }
 
@@ -198,6 +210,4 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
                     .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
             )
     }
-
-
 }

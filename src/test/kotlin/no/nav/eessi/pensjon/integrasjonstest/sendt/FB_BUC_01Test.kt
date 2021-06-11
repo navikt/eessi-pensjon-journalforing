@@ -1,10 +1,11 @@
-package no.nav.eessi.pensjon.integrasjonstest
+package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.eessi.pensjon.integrasjonstest.SendtIntegrationBase
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
