@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import ch.qos.logback.classic.spi.ILoggingEvent
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -36,25 +37,15 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.concurrent.*
-
-//private lateinit var mockServer : ClientAndServer
+import java.util.concurrent.TimeUnit
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
-@SpringBootTest(
-    classes = [SendtP_BUC_01MedGyldigVedleggTest.TestConfig::class],
-    value = ["SPRING_PROFILES_ACTIVE", "integrationtest"]
-)
+@SpringBootTest(classes = [SendtP_BUC_01MedGyldigVedleggTest.TestConfig::class],  value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(
-    controlledShutdown = true,
-    partitions = 1,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
-    brokerProperties = ["log.dir=out/embedded-kafkasendt"]
-)
+@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkasendt"])
 class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
 
     @Autowired
@@ -75,7 +66,7 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
 
         @Bean
         fun euxService(): EuxService {
-            return spyk(EuxService(mockk(), MetricsHelper(SimpleMeterRegistry())))
+            return spyk(EuxService(mockk(relaxed = true), MetricsHelper(SimpleMeterRegistry())))
         }
 
     }
@@ -83,6 +74,7 @@ class SendtP_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
+        clearAllMocks()
     }
 
     override fun initExtraMock() {

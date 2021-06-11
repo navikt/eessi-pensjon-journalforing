@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.Runs
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -16,8 +17,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-
-//private lateinit var mockServer : ClientAndServer
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
@@ -44,6 +43,7 @@ class SendtFB_BUC_01Test : SendtIntegrationBase() {
     @Test
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
+        clearAllMocks()
     }
 
     override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {

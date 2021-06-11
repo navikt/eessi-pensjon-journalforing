@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.clearAllMocks
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -34,7 +35,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.TimeUnit
 
 
 private lateinit var mockServer : ClientAndServer
@@ -56,12 +57,10 @@ abstract class SendtIntegrationBase {
 
     @AfterEach
     fun after() {
-        shutdown()
-    }
-
-    private fun shutdown() {
-        //mockServer.stop()
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
+        clearAllMocks()
+//        mockServer.stop()
+//        System.clearProperty("mockServerport")
     }
 
     //legger til hendlese på kafka her
@@ -87,7 +86,7 @@ abstract class SendtIntegrationBase {
         deugLogger.addAppender(listAppender)
 
         initExtraMock()
-//       moreMockServer(mockServer)
+        moreMockServer(mockServer)
 
         // Vent til kafka er klar
         val container = settOppUtitlityConsumer(SED_SENDT_TOPIC)
@@ -112,7 +111,6 @@ abstract class SendtIntegrationBase {
 
         container.stop()
         oppgaveContainer.stop()
-        System.clearProperty("mockServerport")
     }
 
     private fun settOppProducerTemplate(): KafkaTemplate<Int, String> {
@@ -169,11 +167,32 @@ abstract class SendtIntegrationBase {
     }
 
     companion object {
-        init {
+        private fun checkAndRandomPort(): Int {
+            return try {
+                val port = System.getProperty("mockServerport").toInt()
+                println("mockServerport: $port")
+                port
+            } catch (ex: Exception) {
+                val randPort = Random().nextInt( 65535 - 1024) + 1024
+                System.setProperty("mockServerport", randPort.toString())
+                println("mockServerport: $randPort")
+                randPort
+            }
+        }
+
+        private fun initClientAndServer() : ClientAndServer {
+            return try {
+                ClientAndServer.startClientAndServer(checkAndRandomPort())
+            } catch (ex: Exception) {
+                ClientAndServer.startClientAndServer(checkAndRandomPort())
+            }
+        }
+
+         init {
             // Start Mockserver in memory
-            val port = Random().nextInt( 65535 - 1024) + 1024
-            mockServer = ClientAndServer.startClientAndServer(port)
-            System.setProperty("mockServerport", port.toString())
+            //val port = Random().nextInt( 65535 - 1024) + 1024
+            //mockServer = ClientAndServer.startClientAndServer(checkAndRandomPort())
+            mockServer = initClientAndServer()
 
             // Mocker STS
             mockServer.`when`(
@@ -200,17 +219,16 @@ abstract class SendtIntegrationBase {
                         .withStatusCode(HttpStatusCode.OK_200.code())
                         .withBody(
                             "{\n" +
-                                    "  \"issuer\": \"http://localhost:$port\",\n" +
-                                    "  \"token_endpoint\": \"http://localhost:$port/rest/v1/sts/token\",\n" +
-                                    "  \"exchange_token_endpoint\": \"http://localhost:$port/rest/v1/sts/token/exchange\",\n" +
-                                    "  \"jwks_uri\": \"http://localhost:$port/rest/v1/sts/jwks\",\n" +
+                                    "  \"issuer\": \"http://localhost:${checkAndRandomPort()}\",\n" +
+                                    "  \"token_endpoint\": \"http://localhost:${checkAndRandomPort()}/rest/v1/sts/token\",\n" +
+                                    "  \"exchange_token_endpoint\": \"http://localhost:${checkAndRandomPort()}/rest/v1/sts/token/exchange\",\n" +
+                                    "  \"jwks_uri\": \"http://localhost:${checkAndRandomPort()}/rest/v1/sts/jwks\",\n" +
                                     "  \"subject_types_supported\": [\"public\"]\n" +
                                     "}"
                         )
                 )
 
-        }
-
+         }
     }
 
 }
