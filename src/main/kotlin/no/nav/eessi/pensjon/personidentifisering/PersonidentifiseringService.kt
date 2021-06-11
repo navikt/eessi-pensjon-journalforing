@@ -92,9 +92,6 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-        logger.info("rinadocid : $rinaDocumentId")
-        logger.info("sedliste : $sedListe")
-
         val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
         if (sokSedliste == null) return null
 
