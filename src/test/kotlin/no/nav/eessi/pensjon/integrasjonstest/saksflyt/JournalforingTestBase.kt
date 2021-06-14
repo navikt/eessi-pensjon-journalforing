@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.*
@@ -149,7 +150,9 @@ internal open class JournalforingTestBase {
         hendelseType: HendelseType = HendelseType.SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
+        val sedjson = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId).toJson()
+        val sed = hentSed(sedjson)
+
         initCommonMocks(sed)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -221,6 +224,23 @@ internal open class JournalforingTestBase {
     }
 
 
+    fun hentSed(json: String): SED {
+        val sed = json.let { mapJsonToAny(it, typeRefs<SED>()) }
+        return when(sed!!.type) {
+            SedType.P2200 -> mapJsonToAny(json, typeRefs<P2200>())
+            SedType.P4000 -> mapJsonToAny(json, typeRefs<P4000>())
+            SedType.P5000 -> mapJsonToAny(json, typeRefs<P5000>())
+            SedType.P6000 -> mapJsonToAny(json, typeRefs<P6000>())
+            SedType.P7000 -> mapJsonToAny(json, typeRefs<P7000>())
+            SedType.P8000 -> mapJsonToAny(json, typeRefs<P8000>())
+            SedType.P10000 -> mapJsonToAny(json, typeRefs<P10000>())
+            SedType.P15000 -> mapJsonToAny(json, typeRefs<P15000>())
+            SedType.X005 -> mapJsonToAny(json, typeRefs<X005>())
+            SedType.R005 -> mapJsonToAny(json, typeRefs<R005>())
+            else -> sed
+        }
+    }
+
     /**
      * Forenklet TestRunner for testing av Journalføring med kun én person.
      *
@@ -238,7 +258,8 @@ internal open class JournalforingTestBase {
         hendelseType: HendelseType = HendelseType.SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
+        val sedjson = createSed(SedType.P8000, fnr, eessiSaknr = sakId).toJson()
+        val sed = hentSed(sedjson)
         initCommonMocks(sed)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -299,7 +320,8 @@ internal open class JournalforingTestBase {
         val mockBruker = createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
 
         val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
-        val sed = createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker)
+        val sedjson = createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker).toJson()
+        val sed = hentSed(sedjson)
 
         initCommonMocks(sed, alleDocs, documentFiler)
 

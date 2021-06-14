@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -18,6 +19,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.Status
 import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
@@ -124,10 +126,11 @@ class PersonidentifiseringServiceTest {
 
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
 
-        val sed = createR005(
+        val sedjson = createR005(
             forsikretFnr = SLAPP_SKILPADDE, forsikretTilbakekreving = "avdød_mottaker_av_ytelser",
             annenPersonFnr = gjenlevFnr, annenPersonTilbakekreving = "enke_eller_enkemann"
-        )
+        ).toJson()
+        val sed = mapJsonToAny(sedjson, typeRefs<R005>())
         val listPair = listOf(Pair("23123", sed))
 
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(listPair)

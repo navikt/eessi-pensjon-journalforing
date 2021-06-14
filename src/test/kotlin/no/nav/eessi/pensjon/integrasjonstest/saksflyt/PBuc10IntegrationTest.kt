@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.KravType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.KravType.ETTERLATTE
 import no.nav.eessi.pensjon.eux.model.sed.KravType.UFORE
+import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -39,6 +40,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
@@ -694,15 +696,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     @DisplayName("Inngående - Scenario 4")
     inner class Scenario4Inngaende {
         @Test
-        fun `Flere sed i buc, mottar en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-            val sed15000sent = createSedPensjon(
-                SedType.P15000,
-                FNR_OVER_60,
-                gjenlevendeFnr = "",
-                krav = ETTERLATTE,
-                relasjon = RelasjonTilAvdod.EKTEFELLE
-            )
-            val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2)
+        fun `Flere sed i buc, mottatt en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
+            val sed15000mottatt = hentSed(createSedPensjon( SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE).toJson())
+            val sedP5000sendt = hentSed(createSedPensjon(SedType.P5000, FNR_OVER_60, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2).toJson())
 
             val saker = listOf(
                 SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
@@ -718,7 +714,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Avdød", "død", "SWE")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
-            every { euxService.hentSed(any(), any()) } returns sedP5000mottatt andThen sed15000sent
+            every { euxService.hentSed(any(), any()) } returns sedP5000sendt andThen sed15000mottatt
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
 
@@ -728,14 +724,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
             listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
             val request = journalpost.captured
-
 
             assertEquals("UTGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
             assertEquals(AUTOMATISK_JOURNALFORING, request.journalfoerendeEnhet)
-
             verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
             verify(exactly = 2) { euxService.hentSed(any(), any()) }
         }
@@ -744,7 +737,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     private fun mockSED() : String {
         return """
-            {"pensjon":{"gjenlevende":{"person":{"pin":[{"identifikator":"05020876176","land":"NO"}],"foedselsdato":"2008-02-05","etternavn":"TRANFLASKE","fornavn":"TYKKMAGET","kjoenn":"M","relasjontilavdod":{"relasjon":"06"}}}},"sedGVer":"4","nav":{"bruker":{"adresse":{"land":"NO","gate":"BEISKKÁNGEAIDNU 7","postnummer":"8803","by":"SANDNESSJØEN"},"person":{"fornavn":"BLÅ","pin":[{"land":"NO","institusjonsid":"NO:NAVAT07","institusjonsnavn":"NAV ACCEPTANCE TEST 07","identifikator":"13017123321"}],"kjoenn":"M","etternavn":"SKILPADDE","foedselsdato":"1971-01-13","statsborgerskap":[{"land":"NO"}]}},"eessisak":[{"institusjonsnavn":"NAV ACCEPTANCE TEST 07","saksnummer":"22919587","institusjonsid":"NO:NAVAT07","land":"NO"}],"krav":{"dato":"2020-10-01","type":"02"}},"sedVer":"2","sed":"P15000"}            
+            {"pensjon":{"gjenlevende":{"person":{"pin":[{"identifikator":"05020876176","land":"NO"}],"foedselsdato":"2008-02-05","etternavn":"TRANFLASKE","fornavn":"TYKKMAGET","kjoenn":"M","relasjontilavdod":{"relasjon":"06"}}}},"sedGVer":"4","nav":{"bruker":{"adresse":{"land":"NO","gate":"BEISKKÁNGEAIDNU 7","postnummer":"8803","by":"SANDNESSJØEN"},"person":{"fornavn":"BLÅ","pin":[{"land":"NO","institusjonsid":"NO:NAVAT07","institusjonsnavn":"NAV ACCEPTANCE TEST 07","identifikator":"13017123321"}],"kjoenn":"M","etternavn":"SKILPADDE","foedselsdato":"1971-01-13","statsborgerskap":[{"land":"NO"}]}},"eessisak":[{"institusjonsnavn":"NAV ACCEPTANCE TEST 07","saksnummer":"22919587","institusjonsid":"NO:NAVAT07","land":"NO"}],"krav":{"dato":"2020-10-01","type":"02"}},"sedVer":"2","sed":"P15000"}
         """.trimIndent()
     }
 
@@ -760,8 +753,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                hendelseType: HendelseType,
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = sedJson?.let { mapJsonToAny(it, typeRefs<SED>()) }
-                ?: createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod)
+        val sed = sedJson?.let { mapJsonToAny(it, typeRefs<P15000>()) }
+                ?: hentSed(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod).toJson())
+
         initCommonMocks(sed, alleDocs)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -876,7 +870,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         nor2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
+        val sed = hentSed(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod).toJson())
         initCommonMocks(sed, alleDocs)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
