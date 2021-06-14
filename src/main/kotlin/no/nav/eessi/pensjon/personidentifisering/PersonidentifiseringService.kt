@@ -111,7 +111,6 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-
         val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
         if (sokSedliste == null) {
             logger.info("Ingen gyldig sed for søkPerson")
