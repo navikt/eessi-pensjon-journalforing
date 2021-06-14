@@ -34,7 +34,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -218,11 +217,10 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `Krav om uføre for inngående P2200 uten gyldig fnr med sokPerson sendes til UFORE_UTLAND`() {
             val bestemsak = BestemSakResponse(null, emptyList())
-            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2200, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2200, SedStatus.RECEIVED))
 
             testRunnerVoksenMedSokPerson(
                 FNR_VOKSEN,
@@ -360,6 +358,8 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         if (fnrVoksen != null) {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
         }
+
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
 
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 

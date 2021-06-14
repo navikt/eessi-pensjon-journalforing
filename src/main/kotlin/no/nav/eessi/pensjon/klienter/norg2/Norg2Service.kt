@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -39,7 +39,7 @@ class Norg2Service(private val klient: Norg2Klient) {
 
         return Norg2ArbeidsfordelingRequest(
             tema = velgTema(req.saktype).also { logger.debug("HentTema: $it") },
-            behandlingstema = velgBehandlingTema(req.personRelasjon).also { logger.debug("hentBehandlingtema: $it") },
+            behandlingstema = velgBehandlingTema(req.SEDPersonRelasjon).also { logger.debug("hentBehandlingtema: $it") },
             geografiskOmraade = req.geografiskTilknytning ?: "ANY",
             behandlingstype = velgBehandligstype(req.landkode)
         )
@@ -49,8 +49,8 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun velgTema(sakType: Saktype?) = if (sakType == Saktype.UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
-    fun velgBehandlingTema(personRelasjon: PersonRelasjon?) : String {
-        return when (personRelasjon?.saktype) {
+    fun velgBehandlingTema(SEDPersonRelasjon: SEDPersonRelasjon?) : String {
+        return when (SEDPersonRelasjon?.saktype) {
             Saktype.BARNEP -> Norg2BehandlingsTema.BARNEP.kode
             Saktype.GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
             else -> Norg2BehandlingsTema.ANY.kode

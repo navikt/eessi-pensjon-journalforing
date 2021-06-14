@@ -6,7 +6,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -31,7 +30,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -673,6 +671,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000,
                 FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentSed(any(), any()) } returns sed
             every { euxService.hentBucDokumenter(any()) } returns getMockDocuments()
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -716,6 +715,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sedP8000recevied = createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null)
 
             val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<ForenkletSED>>())
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns dokumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000_2 andThen sedP8000recevied andThen sedP8000sendt
             every { personService.harAdressebeskyttelse(any(), any()) } returns false
@@ -764,9 +764,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns createBrukerWith(FNR_BARN, "Lever", "Helt i live", "NOR", aktorId = AKTOER_ID)
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns createBrukerWith(FNR_OVER_60, "Død", "Helt Død", "NOR", aktorId = AKTOER_ID_2)
-
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -804,6 +804,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -843,10 +844,10 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
             val meldingSlot = slot<String>()
@@ -892,11 +893,11 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 SakInformasjon(sakId = sakid, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
 
             val meldingSlot = slot<String>()
@@ -943,11 +944,11 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 SakInformasjon(sakId = "123123123123123", sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP9000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
 
             val meldingSlot = slot<String>()
@@ -988,7 +989,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
-
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -1038,6 +1039,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -1087,6 +1089,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
             )
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentBucDokumenter(any()) } returns alleDocumenter
             every { euxService.hentSed(any(), any()) } returns sedP8000recevied andThen sedP5000sent
             every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -1150,6 +1153,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.BARN), SAK_ID)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
             val barn = createBrukerWith(FNR_BARN, "Barn", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns barn
 
@@ -1180,6 +1185,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_VOKSEN, rolle = Rolle.FORSORGER), SAK_ID)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
             val voksen = createBrukerWith(FNR_VOKSEN, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns voksen
 
@@ -1208,7 +1215,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Inngående - Scenario 3")
     inner class Scenario3Inngaende {
-        @Disabled
         @Test
         fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte mangler fnr medfører bruk av sokPerson`() {
 
@@ -1216,9 +1222,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val sed = createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte), SAK_ID)
 
-            initCommonMocks(sed)
+            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
+            initCommonMocks(sed, documetAction)
+
             val hendelse = createHendelseJson(SedType.P8000)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Voksen", "Avdod", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns mockEttrelatte
@@ -1243,7 +1252,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             verify(exactly = 1) { euxService.hentSed(any(), any()) }
         }
 
-        @Disabled
         @Test
         fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
 
@@ -1251,9 +1259,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val sed = createSed(SedType.P8000, null, pdlPerson = mockForsikret)
 
-            initCommonMocks(sed)
+            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
+
+            initCommonMocks(sed, documetAction)
             val hendelse = createHendelseJson(SedType.P8000)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT))
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns mockForsikret
 
@@ -1281,6 +1292,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), SAK_ID)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             val voksen = createBrukerWith(FNR_VOKSEN_2, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns voksen
 
@@ -1416,6 +1428,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
             val voksen = createBrukerWith(FNR_OVER_60, "Voksen", "Vanlig", "SWE", "1213")
             every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
@@ -1447,6 +1461,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val valgtFNR = FNR_VOKSEN
             val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
             initCommonMocks(sed)
+
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "SWE", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
@@ -1480,6 +1496,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
@@ -1512,6 +1530,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
             initCommonMocks(sed)
 
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
@@ -1543,6 +1563,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val valgtFNR = FNR_OVER_60
             val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null)
             initCommonMocks(sed)
+
+            every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
@@ -1603,13 +1625,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
     }
 
-    private fun initCommonMocks(sed: SED) {
-        val documents = mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
-
-        every { euxService.hentBucDokumenter(any()) } returns documents
-        every { euxService.hentSed(any(), any()) } returns sed
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-    }
 
     private fun getResource(resourcePath: String): String =
         javaClass.getResource(resourcePath).readText()

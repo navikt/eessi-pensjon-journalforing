@@ -23,6 +23,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.X005
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
@@ -32,6 +33,7 @@ class EuxService(
     private val klient: EuxKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
+    private val logger = LoggerFactory.getLogger(EuxService::class.java)
 
     private lateinit var hentSed: MetricsHelper.Metric
     private lateinit var sendSed: MetricsHelper.Metric
@@ -115,14 +117,14 @@ class EuxService(
     /**
      * Henter alle dokumenter (SEDer) i en Buc.
      *
-     * @param rinaSakId: Hvilken Rina-sak (buc) dokumentene skal hentes fra.
+     * @param buc: Hvilken Rina-sak (buc) dokumentene skal hentes fra.
      *
      * @return Liste med [ForenkletSED]
      */
-    fun hentBucDokumenter(rinaSakId: String): List<ForenkletSED> {
-        val documents = hentBuc(rinaSakId)?.documents ?: return emptyList()
-
+    fun hentBucDokumenter(buc: Buc): List<ForenkletSED> {
+        val documents = buc.documents ?: return emptyList()
         return documents
+            .onEach { logger.debug("Hva er dette: ${it.id}, ${it.type}, ${it.status}") }
             .filter { it.id != null }
             .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
     }

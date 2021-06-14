@@ -17,8 +17,8 @@ import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.PersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
+import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import java.time.LocalDate
 
 internal class FnrHelperTest {
 
@@ -49,7 +50,7 @@ internal class FnrHelperTest {
             Pair("3123123", generateSED(SedType.P2000, forsikretFnr = forventetFnr))
         ))
 
-        val expected = setOf(PersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000))
+        val expected = setOf(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1952,3,9)))
 
         assertEquals(1, actual.size)
         assertTrue(actual.containsAll(expected))
@@ -66,7 +67,7 @@ internal class FnrHelperTest {
         ))
 
         assertEquals(1, actual.size)
-        assertEquals(PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000), actual.first())
+        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000, fdato = LocalDate.of(1971,6,11)), actual.first())
     }
 
     @Test
@@ -80,7 +81,7 @@ internal class FnrHelperTest {
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
 
-        assertEquals(PersonRelasjon(expectedFnr, Relasjon.FORSIKRET, Saktype.GJENLEV, SedType.P15000), actual.first())
+        assertEquals(SEDPersonRelasjon(expectedFnr, Relasjon.FORSIKRET, Saktype.GJENLEV, SedType.P15000, fdato = LocalDate.of(1971,6,11)), actual.first())
     }
 
     @Test
@@ -93,7 +94,7 @@ internal class FnrHelperTest {
                 )
         )))
 
-        val enke = PersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005)
+        val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
 
         assertEquals(1, actual.size)
         assertTrue(actual.contains(enke))
@@ -106,7 +107,7 @@ internal class FnrHelperTest {
             Pair("3123123", createR005(expectedFnr, "forsikret_person")
         )))
         assertEquals(1, actual.size)
-        assertEquals(PersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.FORSIKRET, sedType = SedType.R005), actual.first())
+        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11)), actual.first())
     }
 
     @Test
@@ -127,8 +128,8 @@ internal class FnrHelperTest {
                         annenPersonFnr = annenPersonFnr, annenPersonTilbakekreving = "debitor"))
         ))
 
-        val forste = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.ANNET, sedType = SedType.R005)
-        val andre = PersonRelasjon(Fodselsnummer.fra(annenPersonFnr), Relasjon.ANNET, sedType = SedType.R005)
+        val forste = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1952,3,9))
+        val andre = SEDPersonRelasjon(Fodselsnummer.fra(annenPersonFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
 
         assertEquals(2, actual.size)
         assertTrue(actual.contains(forste))
@@ -142,7 +143,7 @@ internal class FnrHelperTest {
                     Pair("13123123", createR005(forsikretFnr = KRAFTIG_VEGGPRYD, forsikretTilbakekreving = "debitor")),
                     Pair("23123123", generateSED(SedType.H070, forsikretFnr = KRAFTIG_VEGGPRYD))
                 ))
-        val forste = PersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070)
+        val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = LocalDate.of(1971, 6,11))
 
         assertEquals(1, actual.size)
         assertEquals(forste, actual[0])
@@ -159,7 +160,7 @@ internal class FnrHelperTest {
                 )
             )
         ))
-        val enke = PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005)
+        val enke = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971, 6, 11))
 
         assertEquals(1, actual.size)
         assertEquals(actual[0], enke)
@@ -170,7 +171,7 @@ internal class FnrHelperTest {
         val forventetFnr = KRAFTIG_VEGGPRYD
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))))
-        val annen = PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005)
+        val annen = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
 
         assertEquals(1, actual.size)
         assertTrue(actual.contains(annen))
@@ -185,7 +186,7 @@ internal class FnrHelperTest {
             Pair("3123123",generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = null))
         ))
 
-        val expectedPersonRelasjon = PersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
 
         assertEquals(1, actual.size)
 
@@ -203,7 +204,7 @@ internal class FnrHelperTest {
             Pair("33123123",generateSED(SedType.P8000, forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, forsikretRolle = Rolle.ETTERLATTE))
         ))
 
-        val expectedPersonRelasjon = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000)
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000)
 
         assertEquals(1, actual.size)
 
@@ -224,8 +225,8 @@ internal class FnrHelperTest {
             Pair("3123123", generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr))
         ))
 
-        val expectedForsikret = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000)
-        val expectedGjenlev = PersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
+        val expectedForsikret = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) )
+        val expectedGjenlev = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
 
         assertEquals(2, actual.size)
 
@@ -244,7 +245,7 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(sedList)
 
-        val expectedPerson = PersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000)
+        val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, fdato = LocalDate.of(1971, 6,11))
 
         assertEquals(1, actual.size)
         assertEquals(expectedPerson, actual.first())

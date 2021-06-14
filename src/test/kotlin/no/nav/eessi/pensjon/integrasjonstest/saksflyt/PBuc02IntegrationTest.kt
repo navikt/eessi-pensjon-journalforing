@@ -488,6 +488,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         )
         initCommonMocks(sed, alleDocs)
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
             fnrVoksen,
             "Voksen ",

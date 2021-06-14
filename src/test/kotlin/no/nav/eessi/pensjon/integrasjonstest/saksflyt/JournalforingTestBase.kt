@@ -152,6 +152,8 @@ internal open class JournalforingTestBase {
         val sed = createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId)
         initCommonMocks(sed)
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
 
         if (fnr != null) {
@@ -239,6 +241,7 @@ internal open class JournalforingTestBase {
         val sed = createSed(SedType.P8000, fnr, eessiSaknr = sakId)
         initCommonMocks(sed)
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         if (fnr != null) {
@@ -309,6 +312,7 @@ internal open class JournalforingTestBase {
             )
         }
 
+        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockBruker
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
@@ -356,9 +360,7 @@ internal open class JournalforingTestBase {
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
-        val docs = if (documents == null || documents.isNullOrEmpty())
-            mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
-        else documents
+        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
 
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         val dokumentFiler = mapJsonToAny(dokumentVedleggJson, typeRefs<SedDokumentfiler>())

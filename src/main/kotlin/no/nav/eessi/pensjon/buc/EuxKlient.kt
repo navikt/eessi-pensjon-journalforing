@@ -76,7 +76,6 @@ class EuxKlient(private val euxUsernameOidcRestTemplate: RestTemplate) {
         } catch (ex: Exception) {
             if (ex is HttpStatusCodeException && ex.statusCode == HttpStatus.NOT_FOUND)
                 return null
-
             logger.error("Ukjent feil oppsto: ", ex)
             throw ex
         }
