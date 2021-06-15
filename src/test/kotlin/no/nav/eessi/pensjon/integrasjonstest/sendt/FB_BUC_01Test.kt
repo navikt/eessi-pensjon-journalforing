@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import no.nav.eessi.pensjon.integrasjonstest.SendtIntegrationBase
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,11 +21,11 @@ import org.springframework.test.context.ActiveProfiles
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
-@SpringBootTest(classes = [ SendtFB_BUC_01Test.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest(classes = [ FB_BUC_01Test.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkasendt"])
-class SendtFB_BUC_01Test : SendtIntegrationBase() {
+class FB_BUC_01Test : SendtIntegrationBase() {
 
     @Autowired
     lateinit var personService: PersonService
