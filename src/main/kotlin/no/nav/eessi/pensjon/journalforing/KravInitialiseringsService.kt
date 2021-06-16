@@ -1,31 +1,35 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.HendelseKode
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
+import no.nav.eessi.pensjon.handler.*
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.sed.SedHendelseModel
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
-class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
+@Component
+class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler,
+                                  private val oppgaveHandler: OppgaveHandler) {
 
 
     @Value("\${namespace}")
     lateinit var nameSpace: String
+
+    private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
     fun fixKRav(
         sedHendelseModel: SedHendelseModel,
         hendelseType: HendelseType,
         tildeltEnhet: Enhet,
         journalPostResponse: OpprettJournalPostResponse,
-        sakInformasjon: SakInformasjon?
+        sakInformasjon: SakInformasjon?,
+        oppgaveEnhet: Enhet,
+        aktoerId: String?
     ) {
         val bucType = sedHendelseModel.bucType
         val pbuc01mottatt = (bucType == BucType.P_BUC_01)

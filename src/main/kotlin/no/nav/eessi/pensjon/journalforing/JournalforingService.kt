@@ -142,7 +142,7 @@ class JournalforingService(
                     )
                 }
 
-                //TODO
+                kravInitialiseringsService.fixKRav(sedHendelseModel, hendelseType, tildeltEnhet, journalPostResponse, sakInformasjon, oppgaveEnhet, aktoerId)
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)

@@ -82,7 +82,7 @@ internal open class JournalforingTestBase {
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsHandler = kravHandler
-    )
+    akt)
 
     protected val personService: PersonService = mockk(relaxed = true)
 
