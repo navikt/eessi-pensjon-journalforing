@@ -35,6 +35,7 @@ internal class JournalforingServiceTest {
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
     private val kravHandeler = mockk<KravInitialiseringsHandler>()
+    private val kravService = KravInitialiseringsService(kravHandeler, oppgaveHandler)
 
     private val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -47,7 +48,7 @@ internal class JournalforingServiceTest {
             oppgaveRoutingService,
             pdfService,
             oppgaveHandler,
-            kravHandeler
+            kravService
     )
 
     private val fdato = LocalDate.now()

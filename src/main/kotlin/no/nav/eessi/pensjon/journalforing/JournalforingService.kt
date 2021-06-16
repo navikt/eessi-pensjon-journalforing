@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -32,7 +31,6 @@ class JournalforingService(
     private val oppgaveRoutingService: OppgaveRoutingService,
     private val pdfService: PDFService,
     private val oppgaveHandler: OppgaveHandler,
-    private val kravInitialiseringsHandler: KravInitialiseringsHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()),
 ) {
