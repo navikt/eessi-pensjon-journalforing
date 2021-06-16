@@ -103,6 +103,5 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
     }
-
-    fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null && nav?.bruker?.person?.statsborgerskap != null)
 }
+fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null && nav?.bruker?.person?.statsborgerskap != null)
