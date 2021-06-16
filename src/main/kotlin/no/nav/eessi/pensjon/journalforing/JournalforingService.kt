@@ -9,10 +9,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -139,8 +136,25 @@ class JournalforingService(
                         usupporterteFilnavn(uSupporterteVedlegg)
                     )
                 }
+                val bucType = sedHendelseModel.bucType
+                val pbuc01mottatt = (bucType == BucType.P_BUC_01)
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
 
-                kravInitialiseringsService.fixKRav(sedHendelseModel, hendelseType, tildeltEnhet, journalPostResponse, sakInformasjon, oppgaveEnhet, aktoerId)
+                val pbuc03mottatt = (bucType == BucType.P_BUC_03)
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
+
+                if (pbuc01mottatt || pbuc03mottatt) {
+                    opprettBehandleSedOppgave(
+                        journalPostResponse.journalpostId,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelseModel
+                    )
+                }
+                kravInitialiseringsService.initKrav(sedHendelseModel,
+                    sakInformasjon,
+                    pbuc01mottatt,
+                    pbuc03mottatt)
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)

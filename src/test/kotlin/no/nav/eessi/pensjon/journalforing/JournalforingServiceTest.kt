@@ -10,12 +10,7 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -35,7 +30,7 @@ internal class JournalforingServiceTest {
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
     private val kravHandeler = mockk<KravInitialiseringsHandler>()
-    private val kravService = KravInitialiseringsService(kravHandeler, oppgaveHandler)
+    private val kravService = KravInitialiseringsService(kravHandeler)
 
     private val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null

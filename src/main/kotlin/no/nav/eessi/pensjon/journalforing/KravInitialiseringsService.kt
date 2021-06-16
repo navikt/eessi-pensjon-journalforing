@@ -5,13 +5,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -19,8 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler,
-                                  private val oppgaveHandler: OppgaveHandler) {
+class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
 
 
     @Value("\${namespace}")
@@ -28,22 +20,12 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
     private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
-    fun fixKRav(
+    fun initKrav(
         sedHendelseModel: SedHendelseModel,
-        hendelseType: HendelseType,
-        tildeltEnhet: Enhet,
-        journalPostResponse: OpprettJournalPostResponse,
         sakInformasjon: SakInformasjon?,
-        oppgaveEnhet: Enhet,
-        aktoerId: String?
+        pbuc01mottatt: Boolean,
+        pbuc03mottatt: Boolean
     ) {
-        val bucType = sedHendelseModel.bucType
-        val pbuc01mottatt = (bucType == BucType.P_BUC_01)
-                && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
-
-        val pbuc03mottatt = (bucType == BucType.P_BUC_03)
-                && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
-
 
         if (pbuc01mottatt) {
             if (sedHendelseModel.sedType == SedType.P2000  && (nameSpace == "q2" || nameSpace == "test")) {
@@ -55,13 +37,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                 )
                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
             } else logger.warn("Ikke støttet sedtype for initiering av krav")
-
-            opprettBehandleSedOppgave(
-                journalPostResponse.journalpostId,
-                oppgaveEnhet,
-                aktoerId,
-                sedHendelseModel
-            )
         }
 
         if (pbuc03mottatt) {
@@ -74,34 +49,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                 )
                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
             } else logger.warn("Ikke støttet sedtype for initiering av krav")
-
-            opprettBehandleSedOppgave(
-                journalPostResponse.journalpostId,
-                oppgaveEnhet,
-                aktoerId,
-                sedHendelseModel
-            )
         }
-    }
-
-    private fun opprettBehandleSedOppgave(
-        journalpostId: String? = null,
-        oppgaveEnhet: Enhet,
-        aktoerId: String? = null,
-        sedHendelseModel: SedHendelseModel,
-        uSupporterteVedlegg: String? = null
-    ) {
-        val oppgave = OppgaveMelding(
-            sedHendelseModel.sedType,
-            journalpostId,
-            oppgaveEnhet,
-            aktoerId,
-            sedHendelseModel.rinaSakId,
-            HendelseType.MOTTATT,
-            uSupporterteVedlegg,
-            OppgaveType.BEHANDLE_SED
-        )
-        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
     }
 }
 fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null

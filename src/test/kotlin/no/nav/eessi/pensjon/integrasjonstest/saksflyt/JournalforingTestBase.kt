@@ -77,7 +77,7 @@ internal open class JournalforingTestBase {
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
-    private val kravService = KravInitialiseringsService(kravHandler, oppgaveHandler)
+    private val kravService = KravInitialiseringsService(kravHandler)
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
