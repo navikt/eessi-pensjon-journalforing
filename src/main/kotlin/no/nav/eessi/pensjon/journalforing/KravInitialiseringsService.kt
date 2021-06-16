@@ -1,7 +1,13 @@
 package no.nav.eessi.pensjon.journalforing
 
+import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.handler.*
+import no.nav.eessi.pensjon.handler.BehandleHendelseModel
+import no.nav.eessi.pensjon.handler.HendelseKode
+import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
+import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
@@ -97,4 +103,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
     }
+
+    fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null && nav?.bruker?.person?.statsborgerskap != null)
 }
