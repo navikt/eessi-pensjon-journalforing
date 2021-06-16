@@ -1,11 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
-import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
+import no.nav.eessi.pensjon.eux.model.sed.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -47,11 +42,11 @@ internal class KravInitialiseringsServiceTest {
     }
 
     @Test
-    fun `Gitt en SED som ikke kan automatisk kravinit så returner false`() {
+    fun `Gitt en SED som ikke kan automatisk kravinit på grunn av manglende fradato så returner false`() {
         val p2000 = P2000(nav = Nav(bruker = Bruker(
             person = Person(
                 sivilstand = listOf(
-                    SivilstandItem(
+                    SivilstandItem(null,
                         "enslig"
                     )
                 ),
@@ -62,5 +57,4 @@ internal class KravInitialiseringsServiceTest {
         )), pensjon = null)
         assertEquals(false, p2000.validerForKravinit() )
     }
-}
 }
