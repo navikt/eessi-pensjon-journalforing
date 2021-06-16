@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.integrasjonstest
+package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
@@ -38,7 +38,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-private lateinit var mockServer : ClientAndServer
+private lateinit var mockServer: ClientAndServer
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
@@ -52,15 +52,13 @@ abstract class SendtIntegrationBase {
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
 
-    protected val deugLogger: Logger = LoggerFactory.getLogger("no.nav.eessi.pensjon")  as Logger
+    protected val deugLogger: Logger = LoggerFactory.getLogger("no.nav.eessi.pensjon") as Logger
     protected val listAppender = ListAppender<ILoggingEvent>()
 
     @AfterEach
     fun after() {
         embeddedKafka.kafkaServers.forEach { it.shutdown() }
         clearAllMocks()
-//        mockServer.stop()
-//        System.clearProperty("mockServerport")
     }
 
     //legger til hendlese på kafka her
@@ -73,7 +71,7 @@ abstract class SendtIntegrationBase {
     abstract fun verifiser()
 
     //legg til ekstra mockk o.l her
-    open fun initExtraMock() {  }
+    open fun initExtraMock() {}
 
     //** mock every må kjøres før denne
     fun initAndRunContainer() {
@@ -173,14 +171,14 @@ abstract class SendtIntegrationBase {
                 println("mockServerport: $port")
                 port
             } catch (ex: Exception) {
-                val randPort = Random().nextInt( 65535 - 1024) + 1024
+                val randPort = Random().nextInt(65535 - 1024) + 1024
                 System.setProperty("mockServerport", randPort.toString())
                 println("mockServerport: $randPort")
                 randPort
             }
         }
 
-        private fun initClientAndServer() : ClientAndServer {
+        private fun initClientAndServer(): ClientAndServer {
             return try {
                 ClientAndServer.startClientAndServer(checkAndRandomPort())
             } catch (ex: Exception) {
@@ -188,7 +186,7 @@ abstract class SendtIntegrationBase {
             }
         }
 
-         init {
+        init {
             // Start Mockserver in memory
             //val port = Random().nextInt( 65535 - 1024) + 1024
             //mockServer = ClientAndServer.startClientAndServer(checkAndRandomPort())
@@ -228,8 +226,71 @@ abstract class SendtIntegrationBase {
                         )
                 )
 
-         }
+        }
     }
 
+    class CustomMockServer(
+        var mockServer: ClientAndServer
+    ) {
+
+        fun mockBestemSak() = apply {
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/pen/bestemSakResponse.json"))))
+                        .withDelay(TimeUnit.SECONDS, 1)
+                )
+        }
+
+        fun medJournalforing() = apply {
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/journalpost")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json"))))
+                        .withDelay(TimeUnit.SECONDS, 1)
+                )
+        }
+
+        fun medOppdatertDistroTjeneste() = apply {
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.PATCH.name)
+                    .withPath("/journalpost/.*/oppdaterDistribusjonsinfo")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody("")
+                        .withDelay(TimeUnit.SECONDS, 1)
+                )
+        }
+
+        fun medNorg2Tjeneste() = apply {
+            mockServer.`when`(
+                HttpRequest.request()
+                    .withMethod(HttpMethod.POST.name)
+                    .withPath("/api/v1/arbeidsfordeling")
+            )
+                .respond(
+                    HttpResponse.response()
+                        .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                        .withStatusCode(HttpStatusCode.OK_200.code())
+                        .withBody(String(Files.readAllBytes(Paths.get("src/test/resources/norg2/norg2arbeidsfordelig4803result.json"))))
+                )
+        }
+    }
 }
 

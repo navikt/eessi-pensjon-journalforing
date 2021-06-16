@@ -19,7 +19,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,18 +34,24 @@ import org.springframework.test.context.ActiveProfiles
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
-@SpringBootTest(classes = [P_BUC_01MedGyldigVedleggTest.TestConfig::class],  value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest(
+    classes = [P_BUC_05_X008Test.TestConfig::class],
+    value = ["SPRING_PROFILES_ACTIVE", "integrationtest"]
+)
 @ActiveProfiles("integrationtest")
 @DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], brokerProperties = ["log.dir=out/embedded-kafkasendt"])
-class P_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
-
+@EmbeddedKafka(
+    controlledShutdown = true,
+    partitions = 1,
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
+    brokerProperties = ["log.dir=out/embedded-kafkasendt"]
+)
+class P_BUC_05_X008Test : SendtIntegrationBase() {
     @Autowired
     lateinit var personService: PersonService
 
     @Autowired
     lateinit var euxService: EuxService
-
 
     @TestConfiguration
     class TestConfig {
@@ -68,6 +74,10 @@ class P_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
         clearAllMocks()
     }
 
+    override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
+        sedSendtProducerTemplate.sendDefault(javaClass.getResource("/eux/hendelser/P_BUC_05_X008.json").readText())
+    }
+
     override fun initExtraMock() {
         // Mock PDL Person
         every { personService.hentPerson(NorskIdent("09035225916")) }
@@ -86,44 +96,46 @@ class P_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
                 )
             }
 
-        // Mock EUX vedlegg PDF
+        // General mocks: Mock EUX vedlegg PDF
         every { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
-        // Mock EUX Service (SEDer)
+        // General mocks: Mock EUX Service (SEDer)
         every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
             .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
-    }
 
-    override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
-        sedSendtProducerTemplate.sendDefault(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText())
+
+        //Specific mocks
+        every { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
+            .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
+
+        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
     }
 
     override fun verifiser() {
-        assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
+        Assertions.assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
         verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxService.hentBuc(any()) }
-        verify(exactly = 1) { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
-        verify(exactly = 1) { euxService.hentSed("147729", "44cb68f89a2f4e748934fb4722721018") }
+        verify(exactly = 1) { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
 
         val logsList: List<ILoggingEvent> = listAppender.list
+        logsList.onEachIndexed { index, iLoggingEvent -> println("$index\t  ${iLoggingEvent.message}") }
 
         val oppgavemelding = """
             Opprette oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding: {
-              "sedType" : "P2000",
+              "sedType" : "X008",
               "journalpostId" : "429434378",
-              "tildeltEnhetsnr" : "9999",
-              "aktoerId" : "1000101917358",
-              "rinaSakId" : "147729",
+              "tildeltEnhetsnr" : "4303",
+              "aktoerId" : null,
+              "rinaSakId" : "161558",
               "hendelseType" : "SENDT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING"
             }
         """.trimIndent()
-        assertEquals(
-            oppgavemelding,
-            logsList.find { message -> message.message.contains("Opprette oppgave melding på kafka") }?.message
-        )
+        val messageSent = logsList.find { message -> message.message.contains("Opprette oppgave melding på kafka") }?.message
+        Assertions.assertEquals(oppgavemelding, messageSent)
     }
 
     override fun moreMockServer(mockServer: ClientAndServer) {
