@@ -68,6 +68,7 @@ class EuxService(
             val sed = json?.let { mapJsonToAny(it, typeRefs<SED>()) }
 
             when(sed!!.type) {
+                SedType.P2000 -> mapJsonToAny(json, typeRefs<P2000>())
                 SedType.P2200 -> mapJsonToAny(json, typeRefs<P2200>())
                 SedType.P4000 -> mapJsonToAny(json, typeRefs<P4000>())
                 SedType.P5000 -> mapJsonToAny(json, typeRefs<P5000>())
