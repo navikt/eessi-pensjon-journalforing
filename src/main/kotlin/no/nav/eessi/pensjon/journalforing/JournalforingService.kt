@@ -159,7 +159,8 @@ class JournalforingService(
 
                     kravInitialiseringsService.initKrav(
                         sedHendelseModel,
-                        sakInformasjon
+                        sakInformasjon,
+                        sed
                     )
 
                 }

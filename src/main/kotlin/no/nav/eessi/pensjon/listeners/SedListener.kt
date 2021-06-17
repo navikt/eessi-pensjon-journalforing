@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -96,6 +96,7 @@ class SedListener(
                         val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                         val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
+                        val currentSed = alleSedIBucMap.first { it.first == sedHendelse.rinaDokumentId }.second
 
                         journalforingService.journalfor(
                             sedHendelse,
@@ -105,6 +106,7 @@ class SedListener(
                             saktype,
                             offset,
                             sakInformasjon,
+                            currentSed
                         )
                     }
                     acknowledgment.acknowledge()

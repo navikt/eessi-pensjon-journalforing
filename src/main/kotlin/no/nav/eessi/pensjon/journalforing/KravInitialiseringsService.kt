@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
@@ -23,11 +24,12 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
     fun initKrav(
         sedHendelseModel: SedHendelseModel,
         sakInformasjon: SakInformasjon?,
+        sed: SED
     ) {
 
         when(sedHendelseModel.sedType) {
             SedType.P2000 -> {
-                if ((sedHendelseModel.sed as P2000).validerForKravinit() && nameSpace == "q2" || nameSpace == "test") {
+                if ((sed as P2000).validerForKravinit() && nameSpace == "q2" || nameSpace == "test") {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelseModel.rinaSakId,
