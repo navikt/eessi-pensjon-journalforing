@@ -92,8 +92,18 @@ class SedListener(
                         val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                         val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
+                        val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
-                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                        journalforingService.journalfor(
+                            sedHendelse,
+                            SENDT,
+                            identifisertPerson,
+                            fdato,
+                            saktype,
+                            offset,
+                            sakInformasjon,
+                            currentSed
+                        )
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -159,8 +169,17 @@ class SedListener(
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
 
-                            journalforingService.journalfor(sedHendelse,
-                                HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                            val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                HendelseType.MOTTATT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                offset,
+                                sakInformasjon,
+                                currentSed
+                            )
                         }
                     }
 

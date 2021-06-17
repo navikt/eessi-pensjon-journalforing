@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
@@ -76,12 +77,13 @@ internal open class JournalforingTestBase {
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
+    private val kravService = KravInitialiseringsService(kravHandler)
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
-        kravInitialiseringsHandler = kravHandler
+        kravInitialiseringsService = kravService
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -110,6 +112,7 @@ internal open class JournalforingTestBase {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         listener.initMetrics()
+        kravService.nameSpace = "test"
         journalforingService.initMetrics()
         journalforingService.nameSpace = "test"
         pdfService.initMetrics()
