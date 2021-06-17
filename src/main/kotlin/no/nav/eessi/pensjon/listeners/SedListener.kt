@@ -122,7 +122,7 @@ class SedListener(
                 }
                 logger.debug(hendelse)
 
-                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L)
+                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L)
                 try {
                     val offset = cr.offset()
                     if (offsetToSkip.contains(offset)) {
