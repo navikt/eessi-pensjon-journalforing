@@ -24,7 +24,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
     fun initKrav(
         sedHendelseModel: SedHendelseModel,
         sakInformasjon: SakInformasjon?,
-        sed: SED
+        sed: SED?
     ) {
 
         when(sedHendelseModel.sedType) {

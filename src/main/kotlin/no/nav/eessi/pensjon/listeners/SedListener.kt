@@ -6,12 +6,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -96,7 +92,7 @@ class SedListener(
                         val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                         val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
-                        val currentSed = alleSedIBucMap.first { it.first == sedHendelse.rinaDokumentId }.second
+                        val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                         journalforingService.journalfor(
                             sedHendelse,
@@ -173,7 +169,7 @@ class SedListener(
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
 
-                            val currentSed = alleSedIBucMap.first { it.first == sedHendelse.rinaDokumentId }.second
+                            val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                             journalforingService.journalfor(
                                 sedHendelse,
                                 HendelseType.MOTTATT,
