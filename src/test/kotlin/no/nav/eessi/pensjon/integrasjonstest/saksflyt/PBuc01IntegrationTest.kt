@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
@@ -15,6 +16,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
@@ -60,7 +62,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -105,7 +107,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -436,7 +438,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         block: (TestResult) -> Unit
     ) {
-        val sed = createSedPensjon(SedType.P2000, fnrVoksen, eessiSaknr = sakId, krav = krav)
+        val sed = mapJsonToAny(createSedPensjon(SedType.P2000, fnrVoksen, eessiSaknr = sakId, krav = krav).toJson(), typeRefs<P2000>())
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {
