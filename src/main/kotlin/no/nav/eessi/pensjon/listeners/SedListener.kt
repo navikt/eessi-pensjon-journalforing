@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -97,7 +97,15 @@ class SedListener(
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                         val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
 
-                        journalforingService.journalfor(sedHendelse, SENDT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                        journalforingService.journalfor(
+                            sedHendelse,
+                            SENDT,
+                            identifisertPerson,
+                            fdato,
+                            saktype,
+                            offset,
+                            sakInformasjon,
+                        )
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -163,9 +171,17 @@ class SedListener(
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
 
-                            val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-                            val hend2 = sedHendelse.copy(sed = currentSed)
-                            journalforingService.journalfor(hend2, HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                            val currentSed = alleSedIBucMap.first { it.first == sedHendelse.rinaDokumentId }.second
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                HendelseType.MOTTATT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                offset,
+                                sakInformasjon,
+                                currentSed
+                            )
                         }
                     }
 

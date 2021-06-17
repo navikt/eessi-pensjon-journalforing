@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -55,7 +56,8 @@ class JournalforingService(
         fdato: LocalDate?,
         saktype: Saktype?,
         offset: Long,
-        sakInformasjon: SakInformasjon?
+        sakInformasjon: SakInformasjon?,
+        sed: SED
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {

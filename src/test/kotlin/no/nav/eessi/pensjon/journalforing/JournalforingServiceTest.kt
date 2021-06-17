@@ -10,7 +10,12 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -102,7 +107,15 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.ALDER, 0, null)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            Saktype.ALDER,
+            0,
+            null,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -134,7 +147,15 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.UFOREP, 0, null)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            Saktype.UFOREP,
+            0,
+            null,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -166,7 +187,15 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.UFOREP, 0, null)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            Saktype.UFOREP,
+            0,
+            null,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -206,7 +235,15 @@ internal class JournalforingServiceTest {
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, Saktype.ALDER, 0, null)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            Saktype.ALDER,
+            0,
+            null,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -239,7 +276,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,)
         verify {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147729",
@@ -270,7 +307,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -302,7 +339,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -335,7 +372,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -368,7 +405,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -401,7 +438,15 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, Saktype.ALDER, 0, null)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            Saktype.ALDER,
+            0,
+            null,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -434,7 +479,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -467,7 +512,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -502,7 +547,15 @@ internal class JournalforingServiceTest {
         )
         val sakInformasjon = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, Saktype.GJENLEV, 0, sakInformasjon)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            Saktype.GJENLEV,
+            0,
+            sakInformasjon,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -558,7 +611,15 @@ internal class JournalforingServiceTest {
         )
         val saksInfo = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertGjenlevendePerson, fdato, Saktype.GJENLEV, 0, saksInfo)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertGjenlevendePerson,
+            fdato,
+            Saktype.GJENLEV,
+            0,
+            saksInfo,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -594,7 +655,15 @@ internal class JournalforingServiceTest {
         )
         val sakInformasjon = SakInformasjon("111222", Saktype.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, sakInformasjon)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            sakInformasjon,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -630,7 +699,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -664,7 +733,7 @@ internal class JournalforingServiceTest {
                 personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null)
+        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,)
 
         verify {
             journalpostService.opprettJournalpost(
@@ -719,7 +788,15 @@ internal class JournalforingServiceTest {
         )
         val saksInfo = SakInformasjon("111111", Saktype.BARNEP, SakStatus.LOPENDE, "4862", false)
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertGjenlevendePerson, fdato, Saktype.BARNEP, 0, saksInfo)
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertGjenlevendePerson,
+            fdato,
+            Saktype.BARNEP,
+            0,
+            saksInfo,
+        )
 
         verify {
             journalpostService.opprettJournalpost(
