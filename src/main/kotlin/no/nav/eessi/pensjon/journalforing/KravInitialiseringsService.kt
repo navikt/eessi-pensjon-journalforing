@@ -23,24 +23,21 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
     fun initKrav(
         sedHendelseModel: SedHendelseModel,
         sakInformasjon: SakInformasjon?,
-        pbuc01mottatt: Boolean,
-        pbuc03mottatt: Boolean
     ) {
 
-        if (pbuc01mottatt) {
-            if (sedHendelseModel.sedType == SedType.P2000  && (nameSpace == "q2" || nameSpace == "test")) {
-                val hendelse = BehandleHendelseModel(
-                    sakId = sakInformasjon?.sakId,
-                    bucId = sedHendelseModel.rinaSakId,
-                    hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
-                    beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
-                )
-                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
-            } else logger.warn("Ikke støttet sedtype for initiering av krav")
-        }
-
-        if (pbuc03mottatt) {
-            if (sedHendelseModel.sedType == SedType.P2200) {
+        when(sedHendelseModel.sedType) {
+            SedType.P2000 -> {
+                if ((sedHendelseModel.sed as P2000).validerForKravinit() && nameSpace == "q2" || nameSpace == "test") {
+                    val hendelse = BehandleHendelseModel(
+                        sakId = sakInformasjon?.sakId,
+                        bucId = sedHendelseModel.rinaSakId,
+                        hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+                        beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
+                    )
+                    kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                }
+            }
+            SedType.P2200 -> {
                 val hendelse = BehandleHendelseModel(
                     sakId = sakInformasjon?.sakId,
                     bucId = sedHendelseModel.rinaSakId,
@@ -48,9 +45,37 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                     beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet."
                 )
                 kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
-            } else logger.warn("Ikke støttet sedtype for initiering av krav")
+            }
+            else ->  logger.warn("Ikke støttet sedtype for initiering av krav")
         }
     }
+
+//        if (pbuc01mottatt) {
+//            if (sedHendelseModel.sedType == SedType.P2000 && (sedHendelseModel.sed as P2000).validerForKravinit() && (nameSpace == "q2" || nameSpace == "test")) {
+//                val hendelse = BehandleHendelseModel(
+//                    sakId = sakInformasjon?.sakId,
+//                    bucId = sedHendelseModel.rinaSakId,
+//                    hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+//                    beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
+//                )
+//                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+//            } else logger.warn("Ikke støttet sedtype for initiering av krav")
+//        }
+//
+//        if (pbuc03mottatt) {
+//            if (sedHendelseModel.sedType == SedType.P2200) {
+//                val hendelse = BehandleHendelseModel(
+//                    sakId = sakInformasjon?.sakId,
+//                    bucId = sedHendelseModel.rinaSakId,
+//                    hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
+//                    beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet."
+//                )
+//                kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+//            } else logger.warn("Ikke støttet sedtype for initiering av krav")
+//        }
+//    }
+
+
 }
 fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null
         && nav?.bruker?.person?.statsborgerskap != null

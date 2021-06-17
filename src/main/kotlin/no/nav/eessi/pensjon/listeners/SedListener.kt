@@ -163,8 +163,9 @@ class SedListener(
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
 
-                            journalforingService.journalfor(sedHendelse,
-                                HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
+                            val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            val hend2 = sedHendelse.copy(sed = currentSed)
+                            journalforingService.journalfor(hend2, HendelseType.MOTTATT, identifisertPerson, fdato, saktype, offset, sakInformasjon)
                         }
                     }
 
