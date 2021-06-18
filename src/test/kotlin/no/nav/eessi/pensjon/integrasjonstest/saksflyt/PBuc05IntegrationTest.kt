@@ -757,8 +757,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Scenario 13 - 0 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
             val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
             val sedP5000sent = createSedPensjon(
-                SedType.P5000,
-                FNR_OVER_60, gjenlevendeFnr = FNR_BARN
+                SedType.P5000, FNR_OVER_60, gjenlevendeFnr = FNR_BARN
             )
 
             val alleDocumenter = listOf(

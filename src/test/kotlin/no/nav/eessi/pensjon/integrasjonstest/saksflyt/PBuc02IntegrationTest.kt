@@ -480,11 +480,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = createSedPensjon(
-            SedType.P2100,
-            fnrVoksen,
-            gjenlevendeFnr = fnrVoksenSoker,
-            krav = krav,
-            relasjon = relasjonAvod
+            SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod
         )
         initCommonMocks(sed, alleDocs)
 

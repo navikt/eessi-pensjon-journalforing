@@ -93,6 +93,7 @@ class P_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
         // Mock EUX Service (SEDer)
         every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
             .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
+
     }
 
     override fun produserSedHendelser(sedSendtProducerTemplate: KafkaTemplate<Int, String>) {
@@ -121,8 +122,7 @@ class P_BUC_01MedGyldigVedleggTest : SendtIntegrationBase() {
             }
         """.trimIndent()
         assertEquals(
-            oppgavemelding,
-            logsList.find { message -> message.message.contains("Opprette oppgave melding på kafka") }?.message
+            oppgavemelding, logsList.find { message -> message.message.contains("Opprette oppgave melding på kafka") }?.message
         )
     }
 

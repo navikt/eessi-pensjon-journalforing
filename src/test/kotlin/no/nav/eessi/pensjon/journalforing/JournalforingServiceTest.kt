@@ -63,9 +63,6 @@ internal class JournalforingServiceTest {
     @BeforeEach
     fun setup() {
         journalforingService.initMetrics()
-
-        journalforingService.nameSpace = "test"
-
         //MOCK RESPONSES
 
         //PDF -

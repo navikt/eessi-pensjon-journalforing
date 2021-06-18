@@ -37,9 +37,6 @@ class JournalforingService(
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
 
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
-
     @PostConstruct
     fun initMetrics() {
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
@@ -138,14 +135,10 @@ class JournalforingService(
                         usupporterteFilnavn(uSupporterteVedlegg)
                     )
                 }
+
                 val bucType = sedHendelseModel.bucType
-                val pbuc01mottatt = (bucType == BucType.P_BUC_01)
-                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
-
-                val pbuc03mottatt = (bucType == BucType.P_BUC_03)
-                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
-
-                if (pbuc01mottatt || pbuc03mottatt) {
+                if ((bucType == BucType.P_BUC_01 || bucType == BucType.P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
+                    logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
                         oppgaveEnhet,
@@ -158,7 +151,6 @@ class JournalforingService(
                         sakInformasjon,
                         sed
                     )
-
                 }
 
 

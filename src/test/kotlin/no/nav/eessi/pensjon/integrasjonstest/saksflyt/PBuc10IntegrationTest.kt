@@ -697,7 +697,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario4Inngaende {
         @Test
         fun `Flere sed i buc, mottatt en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-            val sed15000mottatt = hentSed(createSedPensjon( SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE).toJson())
+            val sed15000mottatt = hentSed(createSedPensjon(
+                SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE
+            ).toJson())
             val sedP5000sendt = hentSed(createSedPensjon(SedType.P5000, FNR_OVER_60, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2).toJson())
 
             val saker = listOf(
@@ -813,7 +815,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val fnrBarnsok = if (benyttSokPerson) null else fnrBarn
 
         val sed = sedJson?.let { mapJsonToAny(it, typeRefs<SED>()) }
-            ?: createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarnsok, krav = krav, relasjon = relasjonAvod, pdlPerson = mockBarn)
+            ?: createSedPensjon(
+                SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarnsok, krav = krav, relasjon = relasjonAvod, pdlPerson = mockBarn
+            )
 
         initCommonMocks(sed, alleDocs)
 

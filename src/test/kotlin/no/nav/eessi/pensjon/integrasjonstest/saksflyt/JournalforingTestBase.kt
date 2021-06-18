@@ -112,14 +112,11 @@ internal open class JournalforingTestBase {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         listener.initMetrics()
-        kravService.nameSpace = "test"
         journalforingService.initMetrics()
-        journalforingService.nameSpace = "test"
         pdfService.initMetrics()
         oppgaveHandler.initMetrics()
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
-        personidentifiseringService.nameSpace = "test"
         personidentifiseringService.initMetrics()
 
     }
@@ -526,7 +523,9 @@ internal open class JournalforingTestBase {
         gjenlevendeFnr: String? = null,
         krav: KravType? = null,
         relasjon: RelasjonTilAvdod? = null,
-        pdlPerson: PdlPerson? = null
+        pdlPerson: no.nav.eessi.pensjon.personoppslag.pdl.model.Person? = null,
+        sivilstand: SivilstandItem? = null,
+        statsborgerskap: StatsborgerskapItem? = null
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
@@ -538,7 +537,9 @@ internal open class JournalforingTestBase {
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
                 foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12",
                 fornavn = "${pdlForsikret?.navn?.fornavn}",
-                etternavn = "${pdlForsikret?.navn?.etternavn}"
+                etternavn = "${pdlForsikret?.navn?.etternavn}",
+                sivilstand = createSivilstand(sivilstand),
+                statsborgerskap = createStatsborger(statsborgerskap)
             )
         )
 
@@ -554,6 +555,9 @@ internal open class JournalforingTestBase {
             pensjon = Pensjon(gjenlevende = annenPerson)
         )
     }
+    private fun createSivilstand(sivilstand: SivilstandItem?): List<SivilstandItem>? = if (sivilstand != null) listOf(sivilstand) else null
+
+    private fun createStatsborger(statsborgerskap: StatsborgerskapItem?): List<StatsborgerskapItem>? = if (statsborgerskap != null) listOf(statsborgerskap) else null
 
     protected fun createHendelseJson(
         sedType: SedType,

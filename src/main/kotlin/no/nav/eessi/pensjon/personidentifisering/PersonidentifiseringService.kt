@@ -37,10 +37,6 @@ class PersonidentifiseringService(
     private lateinit var sokPersonTellerTreff: Counter
     private lateinit var sokPersonTellerMiss: Counter
 
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
-
-
     companion object {
         fun erFnrDnrFormat(id: String?): Boolean {
             return id != null && id.length == 11 && id.isNotBlank()

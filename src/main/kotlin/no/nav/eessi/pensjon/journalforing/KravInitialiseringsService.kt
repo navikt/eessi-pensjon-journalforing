@@ -15,9 +15,6 @@ import org.springframework.stereotype.Component
 @Component
 class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
 
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
-
     private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
     fun initKrav(
@@ -28,7 +25,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
         when(sedHendelseModel.sedType) {
             SedType.P2000 -> {
-                if ((sed as P2000).validerForKravinit() && nameSpace == "q2" || nameSpace == "test") {
+                if ((sed as P2000).validerForKravinit()) {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelseModel.rinaSakId,

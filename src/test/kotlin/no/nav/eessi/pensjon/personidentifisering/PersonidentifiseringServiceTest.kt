@@ -60,11 +60,6 @@ class PersonidentifiseringServiceTest {
 
     private val fnrHelper = FnrHelper()
 
-    @BeforeEach
-    fun setUp() {
-        personidentifiseringService.nameSpace = "test"
-    }
-
     @Test
     fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {
         val forsikretFnr = SLAPP_SKILPADDE
