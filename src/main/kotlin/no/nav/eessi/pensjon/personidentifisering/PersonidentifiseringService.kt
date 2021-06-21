@@ -36,6 +36,8 @@ class PersonidentifiseringService(
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
     private lateinit var sokPersonTellerTreff: Counter
     private lateinit var sokPersonTellerMiss: Counter
+    @Value("\${namespace}")
+    lateinit var nameSpace: String
 
     companion object {
         fun erFnrDnrFormat(id: String?): Boolean {
@@ -61,6 +63,7 @@ class PersonidentifiseringService(
             if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
                 identifisertPerson
             } else {
+                logger.warn("Klarte ikke å validere person, fnr og fdato er forskjellig")
                 null
             }
         } else {
@@ -88,13 +91,16 @@ class PersonidentifiseringService(
         )
 
         val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
-        val validertIdentifisertPerson = validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
 
-        if (identifisertPerson == null) {
-            return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        if (identifisertPerson != null && (nameSpace == "test" || nameSpace == "q2")) {
+            return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
         }
 
-        return validertIdentifisertPerson
+        if (identifisertPerson == null) {
+            logger.warn("Klarte ikke å finne identifisertPerson, fnr og fdato er forskjellig")
+            return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        }
+        return identifisertPerson
     }
 
     fun sokPersonUtvelger(
@@ -269,7 +275,7 @@ class PersonidentifiseringService(
             listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         return personService.harAdressebeskyttelse(fnr, gradering)
-            .also { logger.info("Finnes adressebeskyttet person: $it") }
+            .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }
 
     private fun hentLandkode(person: Person): String {

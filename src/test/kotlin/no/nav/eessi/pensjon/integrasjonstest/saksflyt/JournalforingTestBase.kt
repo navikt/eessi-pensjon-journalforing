@@ -118,6 +118,7 @@ internal open class JournalforingTestBase {
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
         personidentifiseringService.initMetrics()
+        personidentifiseringService.nameSpace = "test"
 
     }
 
