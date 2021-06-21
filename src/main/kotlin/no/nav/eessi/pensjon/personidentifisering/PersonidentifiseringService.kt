@@ -97,7 +97,7 @@ class PersonidentifiseringService(
         }
 
         if (identifisertPerson == null) {
-            logger.warn("Klarte ikke å finne identifisertPerson, fnr og fdato er forskjellig")
+            logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
             return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
         }
         return identifisertPerson
