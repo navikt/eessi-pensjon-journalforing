@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -594,7 +593,7 @@ class PersonidentifiseringServiceTest {
     inner class ValiderIdentifisertPerson {
 
         @Test
-        fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjelli gir null ut`() {
+        fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjellig gir null ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
             assertNull(personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false))
         }

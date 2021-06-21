@@ -61,6 +61,7 @@ class PersonidentifiseringService(
     fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson?, hendelsesType: HendelseType, erNavCaseOwner: Boolean = false): IdentifisertPerson? {
         return if (identifisertPerson != null && hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
             if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
+                logger.debug("Validert person OK, er Nav CaseOwner: $erNavCaseOwner")
                 identifisertPerson
             } else {
                 logger.warn("Klarte ikke å validere person, fnr og fdato er forskjellig")
@@ -68,7 +69,7 @@ class PersonidentifiseringService(
             }
         } else {
             identifisertPerson
-        }
+        }.also { logger.debug("Nav er caseOwner, hendelsesType: $hendelsesType, hopper over validering") }
     }
 
     fun hentIdentifisertPerson(
