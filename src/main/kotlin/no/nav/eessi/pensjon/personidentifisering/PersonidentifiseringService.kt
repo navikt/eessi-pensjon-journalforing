@@ -36,6 +36,7 @@ class PersonidentifiseringService(
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
     private lateinit var sokPersonTellerTreff: Counter
     private lateinit var sokPersonTellerMiss: Counter
+
     @Value("\${namespace}")
     lateinit var nameSpace: String
 
