@@ -112,11 +112,14 @@ internal open class JournalforingTestBase {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         listener.initMetrics()
+        kravService.nameSpace = "test"
         journalforingService.initMetrics()
+        journalforingService.nameSpace = "test"
         pdfService.initMetrics()
         oppgaveHandler.initMetrics()
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
+        personidentifiseringService.nameSpace = "test"
         personidentifiseringService.initMetrics()
         personidentifiseringService.nameSpace = "test"
 

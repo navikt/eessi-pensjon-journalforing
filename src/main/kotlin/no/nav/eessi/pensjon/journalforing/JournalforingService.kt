@@ -10,7 +10,11 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -36,6 +40,9 @@ class JournalforingService(
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+
+    @Value("\${namespace}")
+    lateinit var nameSpace: String
 
     @PostConstruct
     fun initMetrics() {
@@ -137,7 +144,29 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelseModel.bucType
-                if ((bucType == BucType.P_BUC_01 || bucType == BucType.P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
+                val pbuc01mottatt = (bucType == BucType.P_BUC_01) && (nameSpace == "test" || nameSpace == "q2")
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
+
+                val pbuc03mottatt = (bucType == BucType.P_BUC_03)
+                        && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)
+
+                if (pbuc01mottatt) {
+                    logger.info("Oppretter BehandleOppgave til bucType: $bucType")
+                    opprettBehandleSedOppgave(
+                        journalPostResponse.journalpostId,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelseModel
+                    )
+
+                    kravInitialiseringsService.initKrav(
+                        sedHendelseModel,
+                        sakInformasjon,
+                        sed
+                    )
+                }
+
+                if (pbuc03mottatt) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
