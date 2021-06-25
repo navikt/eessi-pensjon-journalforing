@@ -94,6 +94,10 @@ class PersonidentifiseringService(
 
         val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
 
+        if (identifisertPerson != null) {
+            val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
+            logger.info("valider, $check. fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
+        }
         if (identifisertPerson != null && (nameSpace == "test" || nameSpace == "q2")) {
             return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
         }

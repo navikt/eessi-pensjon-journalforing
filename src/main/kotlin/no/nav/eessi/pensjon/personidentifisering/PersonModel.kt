@@ -34,9 +34,15 @@ data class SEDPersonRelasjon(
     private val logger = LoggerFactory.getLogger(SEDPersonRelasjon::class.java)
 
     fun validateFnrOgDato(): Boolean {
-        val validertFnr = fnr?.getBirthDate() == fdato
-        logger.debug("Validert fnr-dato: ${fnr?.getBirthDate()} sed-fdato: $fdato")
-        return validertFnr
+        if (fdato == null) return true
+
+        return if (fnr != null && fdato != null) {
+            val validertFnr = fnr.getBirthDate() == fdato
+            logger.debug("Validert fnr-dato: ${fnr.getBirthDate()} sed-fdato: $fdato")
+            validertFnr
+        } else {
+            true
+        }
     }
     fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
 }
