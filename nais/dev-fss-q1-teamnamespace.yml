@@ -1,8 +1,8 @@
 kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
-  name: eessi-pensjon-journalforing
-  namespace: q1
+  name: eessi-pensjon-journalforing-q1
+  namespace: eessipensjon
   labels:
     team: eessipensjon
 spec:
@@ -77,6 +77,6 @@ spec:
     enabled: true
     paths:
       - kvPath: {{serviceuserkv}}
-        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing
+        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q1
       - kvPath: /apikey/appdynamics/dev
         mountPath: /var/run/secrets/nais.io/vault

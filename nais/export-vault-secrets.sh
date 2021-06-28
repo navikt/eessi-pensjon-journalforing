@@ -15,8 +15,7 @@ then
 fi
 
 
-# Team namespace
-
+# Team namespace Q2
 echo "Sjekker srvpassword eessi-pensjon-journalforing q2 i team namespace"
 if test -f /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q2/password;
 then
@@ -29,4 +28,20 @@ if test -f /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q2/username;
 then
     echo "Setter srvusername i eessi-pensjon-journalforing q2 i team namespace"
     export srvusername=$(cat /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q2/username)
+fi
+
+
+# Team namespace Q1
+echo "Sjekker srvpassword eessi-pensjon-journalforing q1 i team namespace"
+if test -f /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q1/password;
+then
+  echo "Setter srvpassword eessi-pensjon-journalforing q1 i team namespace"
+    export srvpassword=$(cat /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q1/password)
+fi
+
+echo "Sjekker srvusername i eessi-pensjon-journalforing q1 i team namespace"
+if test -f /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q1/username;
+then
+    echo "Setter srvusername i eessi-pensjon-journalforing q1 i team namespace"
+    export srvusername=$(cat /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q1/username)
 fi
