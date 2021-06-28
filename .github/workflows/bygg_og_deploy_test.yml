@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # DEPLOYER TIL NAIS
+      # DEPLOYER TIL NAIS Q2
       - name: 'Deploy to NAIS'
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -70,3 +70,13 @@ jobs:
           repository: ${{ github.repository }}
           event-type: deploy-q1
           client-payload: '{"image": "${{ env.IMAGE }}"}'
+
+      # DEPLOYER TIL NAIS Q2 team namespace
+      - name: 'Deploy to NAIS q2 team namespace'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: nais/dev-fss-q2-teamnamespace.yml
+          VARS: nais/dev-fss-q2.json
+          IMAGE: ${{ env.IMAGE }}
