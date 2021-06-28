@@ -53,7 +53,7 @@ class PDFService(
                 logger.info("SED omfatter ${convertedDocuments.size} dokumenter, inkludert vedlegg")
 
                 val (supportedDocuments, unsupportedDocuments) = convertedDocuments.partition {
-                    (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null
+                    (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null && it.innhold != null
                 }
 
                 logger.info("SED omfatter ${unsupportedDocuments.size} dokumenter som vi ikke har klart å konvertere til PDF")
@@ -61,7 +61,8 @@ class PDFService(
                     logger.info("Usupportert dokument: ${it.filnavn} - av type${it.mimeType}")
                 }
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
-                    mapper.writeValueAsString(supportedDocuments.map {
+                    val filtrertSupportedDokument = supportedDocuments.filterNot { it.innhold == null }
+                    mapper.writeValueAsString(filtrertSupportedDokument.map {
                         JournalPostDokument(
                                 brevkode = sedType.name,
                                 dokumentKategori = "SED",
@@ -69,7 +70,7 @@ class PDFService(
                                         Dokumentvarianter(
                                                 filtype = it.mimeType?.name
                                                         ?: throw RuntimeException("MimeType is null after being converted to PDF, $it"),
-                                                fysiskDokument = it.innhold,
+                                                fysiskDokument = it.innhold!!,
                                                 variantformat = Variantformat.ARKIV
                                         )),
                                 tittel = it.filnavn)
@@ -111,11 +112,11 @@ class PDFService(
             MimeType.PDF -> document
             MimeType.PDFA -> document
             else -> try {
-                SedVedlegg(
+                    SedVedlegg(
                         filnavn = konverterFilendingTilPdf(document.filnavn!!),
                         mimeType = MimeType.PDF,
-                        innhold = ImageConverter.toBase64PDF(document.innhold)
-                )
+                        innhold =  document.innhold?.let { ImageConverter.toBase64PDF(it) }
+                    )
             } catch (ex: Exception) {
                 document
             }

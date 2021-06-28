@@ -12,7 +12,10 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -53,6 +56,22 @@ class PDFServiceTest {
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
         assertEquals(0, unsupported.size)
+
+        unmockkAll()
+    }
+
+    @Test
+    fun `Gitt en json dokument med tomt vedlegg saa konvertes den til et usupportert vedlegg`() {
+
+        mockkObject(ImageConverter)
+        every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
+
+        val fileContent = javaClass.getResource("/pdf/pdfResponseMedTomtVedlegg.json").readText()
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+
+        val (_, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
+
+        assertEquals(1, unsupported.size)
 
         unmockkAll()
     }
