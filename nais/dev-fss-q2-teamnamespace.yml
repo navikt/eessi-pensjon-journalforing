@@ -1,0 +1,82 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: eessi-pensjon-journalforing-q2
+  namespace: eessipensjon
+  labels:
+    team: eessipensjon
+spec:
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: test
+    - name: NAMESPACE
+      value: q2
+    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+    - name: EUX_RINA_API_V1_URL
+      value: https://eux-rina-api-q2.nais.preprod.local/cpi
+    - name: PDL_URL
+      value: https://pdl-api.nais.preprod.local/graphql
+    - name: JOURNALPOST_V1_URL
+      value: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
+    - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
+      value: SAML
+    - name: VIRKSOMHET_PERSON_V3_ENDPOINTURL
+      value: https://app-q2.adeo.no/tpsws-aura/ws/Person/v3
+    - name: VIRKSOMHET_PERSON_V3_WSDLURL
+      value: http://maven.adeo.no/nexus/content/groups/public/no/nav/tjenester/nav-person-v3-tjenestespesifikasjon/3.6.1/nav-person-v3-tjenestespesifikasjon-3.6.1.zip
+    - name: SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL
+      value: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
+    - name: SECURITYTOKENSERVICE_URL
+      value: https://sts-q2.preprod.local/SecurityTokenServiceProvider/
+    - name: OPPGAVE_OPPGAVER_URL
+      value: https://oppgave-q2.nais.preprod.local/api/v1/oppgaver
+    - name: AKTOERREGISTER_API_V1_URL
+      value: https://app-q2.adeo.no/aktoerregister/api/v1
+    - name: EESSI_PENSJON_FAGMODUL_URL
+      value: https://eessi-pensjon-fagmodul-q2.nais.preprod.local/
+    - name: NORG2_URL
+      value: https://app-q4.adeo.no/norg2/
+    - name: BESTEMSAK_URL
+      value: https://pensjon-pen-q2.nais.preprod.local/pen/api/bestemsak/v1
+    - name: KAFKA_SEDSENDT_TOPIC
+      value: eessi-basis-sedSendt-v1-q2
+    - name: KAFKA_SEDMOTTATT_TOPIC
+      value: eessi-basis-sedMottatt-v1-q2
+    - name: KAFKA_OPPGAVE_TOPIC
+      value: privat-eessipensjon-oppgave-v1-q2
+    - name: KAFKA_KRAV_TOPIC
+      value: privat-eessipensjon-krav-initialisering-q2
+  image: {{ image }}
+  ingresses:
+    - https://eessi-pensjon-journalforing-q2.nais.preprod.local
+  liveness:
+    path: /internal/isalive
+    port: 8080
+    initialDelay: 20
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
+  readiness:
+    path: /internal/isready
+    port: 8080
+    initialDelay: 20
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "4"
+      memory: 8096Mi
+    requests:
+      cpu: 400m
+      memory: 4024Mi
+  vault:
+    enabled: true
+    paths:
+      - kvPath: {{serviceuserkv}}
+        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing
+      - kvPath: /apikey/appdynamics/dev
+        mountPath: /var/run/secrets/nais.io/vault
