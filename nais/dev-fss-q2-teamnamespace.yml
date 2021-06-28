@@ -77,6 +77,6 @@ spec:
     enabled: true
     paths:
       - kvPath: {{serviceuserkv}}
-        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing
+        mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing-q2
       - kvPath: /apikey/appdynamics/dev
         mountPath: /var/run/secrets/nais.io/vault
