@@ -8,6 +8,8 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.P2200
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
@@ -352,15 +354,13 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         block: (TestResult) -> Unit
     ) {
-        val sed = createSedPensjon(SedType.P2200, fnrVoksen, eessiSaknr = sakId, krav = krav)
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksen, eessiSaknr = sakId, krav = krav))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {
-        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-        }
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID) }
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
-
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)

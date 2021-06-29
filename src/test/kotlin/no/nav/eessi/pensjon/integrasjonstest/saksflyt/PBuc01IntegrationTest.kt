@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
@@ -18,7 +19,6 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
 import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
@@ -38,7 +38,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
@@ -373,10 +372,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
     ) {
 
         val fnrSokVoken = null
-
         val mockPerson = createBrukerWith(fnrVoksen,  "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-
-        val sed = createSedPensjon(SedType.P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson)
+        val sed = SED.generateSedToClass<P2000>(createSedPensjon(SedType.P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson))
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
@@ -430,7 +427,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         block: (TestResult) -> Unit
     ) {
 
-        val sed = mapJsonToAny(createSedPensjon(SedType.P2000, fnrVoksen, eessiSaknr = sakId, krav = krav, sivilstand = sivilstand, statsborgerskap = statsborgerskap).toJson(), typeRefs<P2000>())
+        val sed = SED.generateSedToClass<P2000>(createSedPensjon(SedType.P2000, fnrVoksen, eessiSaknr = sakId, krav = krav, sivilstand = sivilstand, statsborgerskap = statsborgerskap))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {

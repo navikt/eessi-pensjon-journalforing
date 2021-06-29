@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.KravType.ETTERLATTE
 import no.nav.eessi.pensjon.eux.model.sed.KravType.UFORE
 import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -40,7 +41,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
@@ -697,10 +697,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario4Inngaende {
         @Test
         fun `Flere sed i buc, mottatt en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-            val sed15000mottatt = hentSed(createSedPensjon(
-                SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE
-            ).toJson())
-            val sedP5000sendt = hentSed(createSedPensjon(SedType.P5000, FNR_OVER_60, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2).toJson())
+            val sed15000mottatt = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_OVER_60, gjenlevendeFnr = "", krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE))
+            val sedP5000sendt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_60, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2))
 
             val saker = listOf(
                 SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
@@ -756,7 +754,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                                block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny(it, typeRefs<P15000>()) }
-                ?: hentSed(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod).toJson())
+                ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod))
 
         initCommonMocks(sed, alleDocs)
 
@@ -874,7 +872,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         nor2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = hentSed(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod).toJson())
+        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod))
         initCommonMocks(sed, alleDocs)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -924,7 +922,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block: (OpprettJournalpostRequest) -> Unit
     ) {
 
-        val sed = createSedPensjon(SedType.P15000, fnr1, eessiSaknr = sakId, krav = krav)
+        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnr1, eessiSaknr = sakId, krav = krav))
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {
@@ -963,13 +961,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-//    private fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>) {
-//        every { euxService.hentBucDokumenter(any()) } returns alleDocs
-//        every { euxService.hentSed(any(), any()) } returns sed
-//        every { euxService.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-//    }
-
-    private fun getResource(resourcePath: String): String =
-            javaClass.getResource(resourcePath).readText()
+//    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
 }

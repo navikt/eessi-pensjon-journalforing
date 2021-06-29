@@ -33,6 +33,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
 import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -148,7 +149,6 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(fnr.value)) } returns PersonMock.createWith(fnr.value, landkoder = true)
 
         val sed = sedFromJsonFile("/buc/P2000-NAV.json")
-
         val alleSediBuc = listOf(Pair("23123", sed))
 
         val potensiellePerson = fnrHelper.getPotensielleFnrFraSeder(alleSediBuc)
@@ -159,7 +159,8 @@ class PersonidentifiseringServiceTest {
             potensiellePerson,
             HendelseType.SENDT
         )
-        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1980, 1, 1))
+        val sokKriterier = SokKriterier("øjøløjøjø","jkljkjl", LocalDate.of(1980, 1, 1))
+        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, sokKriterier = sokKriterier,  fdato = LocalDate.of(1980, 1, 1))
         assertEquals(expected, actual.first().personRelasjon)
 
         verify(exactly = 1) { personService.hentPerson(NorskIdent(fnr.value)) }
@@ -470,8 +471,10 @@ class PersonidentifiseringServiceTest {
         val avdodPerson = IdentifisertPerson("", "avgott Testesen", false, "NOR", "026123", SEDPersonRelasjon(
             avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100
         ))
+
+        val sokKriterier = SokKriterier("RASK","MULDVARP", LocalDate.of(1969, 11, 28))
         val gjenlevendePerson = IdentifisertPerson("", "gjenlevende Testesen", false, "NOR", "026123", SEDPersonRelasjon(
-            gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28)
+            gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier
         ))
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)

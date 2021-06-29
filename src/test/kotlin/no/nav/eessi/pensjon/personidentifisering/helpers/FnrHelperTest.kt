@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
@@ -24,6 +25,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.utils.mapAnyToJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -50,9 +52,9 @@ internal class FnrHelperTest {
         val forventetFnr = SLAPP_SKILPADDE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-                // P2100 som mangler norsk fnr
+            // P2100 som mangler norsk fnr
             Pair("3123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
-            Pair("3123123", generateSED(SedType.P2000, forsikretFnr = forventetFnr))
+            Pair("3123123", generateSEDtoClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
         ))
 
         val expected = setOf(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1952,3,9)))
@@ -415,6 +417,7 @@ internal class FnrHelperTest {
         }
     }
 
+    inline fun <reified T : SED> generateSEDtoClass(sed: SED): T = mapJsonToAny(mapAnyToJson(sed), typeRefs<T>())
 
     private fun generateSED(
             sedType: SedType,

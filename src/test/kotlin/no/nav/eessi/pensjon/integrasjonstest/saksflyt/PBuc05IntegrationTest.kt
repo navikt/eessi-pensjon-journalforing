@@ -6,10 +6,14 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
@@ -28,7 +32,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -669,9 +672,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario13Utgaende {
         @Test
         fun `2 personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
-            val sedjson = createSed(SedType.P8000,
-                FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null).toJson()
-            val sed = hentSed(sedjson)
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
             every { euxService.hentSed(any(), any()) } returns sed
@@ -712,9 +713,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000_2 = hentSed(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr).toJson())
-            val sedP8000sendt = hentSed(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr).toJson())
-            val sedP8000recevied = hentSed(createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null).toJson())
+            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null))
 
             val dokumenter = mapJsonToAny(getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json"), typeRefs<List<ForenkletSED>>())
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -880,7 +881,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val aktoer = "${fnr}111"
             val sakid = SAK_ID
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
             val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
             val alleDocumenter = listOf(
@@ -931,7 +932,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val aktoer = "${fnr}111"
             val sakid = SAK_ID
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
             val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
             val alleDocumenter = listOf(
@@ -983,8 +984,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
+            val sedP5000sent = mapJsonToAny(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson(), typeRefs<P5000>())
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
@@ -1032,8 +1033,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
+            val sedP5000sent = mapJsonToAny(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson(), typeRefs<P5000>())
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
@@ -1082,8 +1083,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSed(SedType.P5000, fnr, eessiSaknr = sakid)
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
+            val sedP5000sent = mapJsonToAny(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson(), typeRefs<P5000>())
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
@@ -1221,7 +1222,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val mockEttrelatte = createBrukerWith(FNR_VOKSEN, "Voksen", "Etterlatte", "NOR", "1213", aktorId = "123123123123")
 
-            val sed = hentSed(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte), SAK_ID).toJson())
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte), SAK_ID))
 
             val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
             initCommonMocks(sed, documetAction)
@@ -1257,8 +1258,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
 
             val mockForsikret = createBrukerWith(FNR_VOKSEN, "Voksen", "Etternavn", "NOR", "1213", aktorId = "123123123123")
-
-            val sed = createSed(SedType.P8000, null, pdlPerson = mockForsikret)
+            val sed = mapJsonToAny(createSed(SedType.P8000, null, pdlPerson = mockForsikret).toJson(), typeRefs<P8000>())
 
             val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
 
@@ -1290,7 +1290,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte med feil FNR for annen person, eller soker`() {
-            val sed = hentSed(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), SAK_ID).toJson())
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), SAK_ID))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -1426,7 +1426,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `To personer angitt, gyldig fnr og ugyldig annenperson, rolle er 02, bosatt utland del 1`() {
-            val sed = createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_OVER_60, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -1460,7 +1460,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt utland del 2`() {
             val valgtFNR = FNR_VOKSEN
-            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -1494,7 +1494,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 3`() {
             val valgtFNR = FNR_VOKSEN
-            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -1528,7 +1528,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            val sed = createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null)
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
@@ -1562,7 +1562,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_60
-            val sed = hentSed(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null).toJson())
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
             initCommonMocks(sed)
 
             every { euxService.hentBuc (any()) } returns mockk(relaxed = true)

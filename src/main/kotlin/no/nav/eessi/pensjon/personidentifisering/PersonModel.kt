@@ -36,7 +36,7 @@ data class SEDPersonRelasjon(
     fun validateFnrOgDato(): Boolean {
         if (fdato == null) return true
 
-        return if (fnr != null && fdato != null) {
+        return if (fnr != null) {
             val validertFnr = fnr.getBirthDate() == fdato
             logger.debug("Validert fnr-dato: ${fnr.getBirthDate()} sed-fdato: $fdato")
             validertFnr
@@ -45,6 +45,7 @@ data class SEDPersonRelasjon(
         }
     }
     fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
+    fun filterUbrukeligeElemeterAvSedPersonRelasjon(): Boolean = fnr == null && fdato == null && sokKriterier == null
 }
 
 enum class Relasjon {

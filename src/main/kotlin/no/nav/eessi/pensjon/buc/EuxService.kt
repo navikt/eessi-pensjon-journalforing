@@ -8,8 +8,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
-import no.nav.eessi.pensjon.eux.model.sed.*
-import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,22 +52,7 @@ class EuxService(
     fun hentSed(rinaSakId: String, dokumentId: String): SED {
         return hentSed.measure {
             val json = klient.hentSedJson(rinaSakId, dokumentId)
-            val sed = json?.let { mapJsonToAny(it, typeRefs<SED>()) }
-
-            when(sed!!.type) {
-                SedType.P2000 -> mapJsonToAny(json, typeRefs<P2000>())
-                SedType.P2200 -> mapJsonToAny(json, typeRefs<P2200>())
-                SedType.P4000 -> mapJsonToAny(json, typeRefs<P4000>())
-                SedType.P5000 -> mapJsonToAny(json, typeRefs<P5000>())
-                SedType.P6000 -> mapJsonToAny(json, typeRefs<P6000>())
-                SedType.P7000 -> mapJsonToAny(json, typeRefs<P7000>())
-                SedType.P8000 -> mapJsonToAny(json, typeRefs<P8000>())
-                SedType.P10000 -> mapJsonToAny(json, typeRefs<P10000>())
-                SedType.P15000 -> mapJsonToAny(json, typeRefs<P15000>())
-                SedType.X005 -> mapJsonToAny(json, typeRefs<X005>())
-                SedType.R005 -> mapJsonToAny(json, typeRefs<R005>())
-                else -> sed
-            }
+            SED.fromJsonToConcrete(json)
         }
     }
 

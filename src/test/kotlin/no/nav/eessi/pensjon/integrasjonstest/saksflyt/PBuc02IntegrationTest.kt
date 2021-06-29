@@ -479,9 +479,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         norg2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedPensjon(
-            SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod
-        )
+        val sed = createSedPensjon(SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
