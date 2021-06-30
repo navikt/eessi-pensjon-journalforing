@@ -112,11 +112,11 @@ class PDFService(
             MimeType.PDF -> document
             MimeType.PDFA -> document
             else -> try {
-                    SedVedlegg(
+                SedVedlegg(
                         filnavn = konverterFilendingTilPdf(document.filnavn!!),
                         mimeType = MimeType.PDF,
-                        innhold =  document.innhold?.let { ImageConverter.toBase64PDF(it) }
-                    )
+                        innhold = ImageConverter.toBase64PDF(document.innhold!!)
+                )
             } catch (ex: Exception) {
                 document
             }
