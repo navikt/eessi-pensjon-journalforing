@@ -59,18 +59,22 @@ class PersonidentifiseringService(
             .register(metricsHelper.registry)
     }
 
-    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson?, hendelsesType: HendelseType, erNavCaseOwner: Boolean = false): IdentifisertPerson? {
-        return if (identifisertPerson != null && hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
+    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean = false): IdentifisertPerson? {
+        val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
+        logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
+
+        return if (hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
             if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
-                logger.debug("Validert person OK, er Nav CaseOwner: $erNavCaseOwner")
+                logger.info("IdentifisertPerson Validert OK")
                 identifisertPerson
             } else {
                 logger.warn("Klarte ikke å validere person, fnr og fdato er forskjellig")
                 null
             }
         } else {
+            logger.debug("Nav er $erNavCaseOwner, hendelsesType: $hendelsesType, hopper over validering")
             identifisertPerson
-        }.also { logger.debug("Nav er caseOwner, hendelsesType: $hendelsesType, hopper over validering") }
+        }
     }
 
     fun hentIdentifisertPerson(
@@ -95,18 +99,11 @@ class PersonidentifiseringService(
         val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
 
         if (identifisertPerson != null) {
-            val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
-            logger.info("valider, $check. fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
-        }
-        if (identifisertPerson != null && (nameSpace == "test" || nameSpace == "q2")) {
-            return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
+            return validateIdentifisertPerson(identifisertPerson, hendelsesType, !erNavCaseOwner)
         }
 
-        if (identifisertPerson == null) {
-            logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-            return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
-        }
-        return identifisertPerson
+        logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
+        return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
     }
 
     fun sokPersonUtvelger(

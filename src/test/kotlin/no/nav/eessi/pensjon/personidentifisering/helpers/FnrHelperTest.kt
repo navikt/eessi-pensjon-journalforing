@@ -20,12 +20,10 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.Status
 import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import no.nav.eessi.pensjon.utils.mapAnyToJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -53,14 +51,14 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
             // P2100 som mangler norsk fnr
-            Pair("3123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
-            Pair("3123123", generateSEDtoClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
+            Pair("3123131", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
+            Pair("3123134", SED.generateSedToClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
         ))
 
         val expected = setOf(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1952,3,9)))
-
-        assertEquals(1, actual.size)
+        assertEquals(2, actual.size)
         assertTrue(actual.containsAll(expected))
+        assertEquals(expected.first(), actual.firstOrNull { it.sedType == SedType.P2000 })
     }
 
     @Test
@@ -70,7 +68,7 @@ internal class FnrHelperTest {
             // P2100 som mangler norsk fnr
             Pair("3123123",generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
             // P15000 som mangler gyldig gjenlevende fnr, med krav = ALDER
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P15000, forsikretFnr = forventetFnr, gjenlevFnr = "1234", navKrav = KravType.ALDER, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE).toJson(), typeRefs<P15000>()))
+            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forventetFnr, gjenlevFnr = "1234", navKrav = KravType.ALDER, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)))
         ))
 
         assertEquals(1, actual.size)
@@ -83,7 +81,7 @@ internal class FnrHelperTest {
                 // P2100 som mangler norsk fnr
                 Pair("3123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
                 // P15000 som mangler gyldig gjenlevende fnr, med krav = GJENLEV
-                Pair("3123123", mapJsonToAny(generateSED(SedType.P15000, forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE).toJson(), typeRefs<P15000>()))
+                Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = "1234", navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)))
         ))
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
@@ -189,7 +187,7 @@ internal class FnrHelperTest {
         val forventetFnr = SLAPP_SKILPADDE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P5000, forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE).toJson(), typeRefs<P5000>())),
+            Pair("3123123", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE))),
             Pair("3123123",generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = null))
         ))
 
@@ -207,14 +205,12 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
             Pair("13123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.SAMBOER)),
-            Pair("23123123", mapJsonToAny(generateSED(SedType.P5000, forsikretFnr = "25105424704", gjenlevFnr = gjenlevFnr, gjenlevRelasjon = RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP).toJson(), typeRefs<P5000>())),
-            Pair("33123123", mapJsonToAny(generateSED(SedType.P8000, forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, forsikretRolle = Rolle.ETTERLATTE).toJson(), typeRefs<P8000>() ))
+            Pair("23123123", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr = "25105424704", gjenlevFnr = gjenlevFnr, gjenlevRelasjon = RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP))),
+            Pair("33123123", SED.generateSedToClass<P8000>(generateSED(SedType.P8000, forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, forsikretRolle = Rolle.ETTERLATTE)))
         ))
-
         val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000)
 
         assertEquals(1, actual.size)
-
         val actualPersonRelasjon = actual.first()
         assertEquals(gjenlevFnr, actualPersonRelasjon.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, actualPersonRelasjon.relasjon)
@@ -228,8 +224,8 @@ internal class FnrHelperTest {
         val gjenlevFnr = LEALAUS_KAKE
 
         val actual = helper.getPotensielleFnrFraSeder(listOf(
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE).toJson(), typeRefs<P15000>())),
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr).toJson(), typeRefs<P5000>()))
+            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
+            Pair("3123123", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)))
         ))
 
         val expectedForsikret = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) )
@@ -246,12 +242,11 @@ internal class FnrHelperTest {
         val forsikretFnr = KRAFTIG_VEGGPRYD
 
         val sedList = listOf(
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = null, navKrav = KravType.ALDER, gjenlevRelasjon = null).toJson(), typeRefs<P15000>())),
-            Pair("3123123", mapJsonToAny(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = null).toJson(), typeRefs<P5000>()))
+            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = null, navKrav = KravType.ALDER, gjenlevRelasjon = null))),
+            Pair("3123123", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = null)))
         )
 
         val actual = helper.getPotensielleFnrFraSeder(sedList)
-
         val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, fdato = LocalDate.of(1971, 6,11))
 
         assertEquals(1, actual.size)
@@ -335,7 +330,7 @@ internal class FnrHelperTest {
 
             val sedList = listOf(
                 Pair("3123123",
-                mapJsonToAny(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = null).toJson(), typeRefs<P15000>())
+                    SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = null))
                 )
             )
 
@@ -364,13 +359,10 @@ internal class FnrHelperTest {
 
             val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(
-                Pair("3123123",
-                    mapJsonToAny(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon).toJson(), typeRefs<P15000>())
-                )
+                Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
             )
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
-
             assertEquals(2, relasjoner.size)
 
             val forsikretRelasjon = relasjoner[0]
@@ -395,12 +387,10 @@ internal class FnrHelperTest {
 
             val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(
-                    Pair("3123123",
-                    mapJsonToAny(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon).toJson(), typeRefs<P15000>()))
+                Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
             )
 
             val relasjoner = FnrHelper().getPotensielleFnrFraSeder(sedList)
-
             assertEquals(2, relasjoner.size)
 
             val forsikretRelasjon = relasjoner[0]
@@ -416,8 +406,6 @@ internal class FnrHelperTest {
             assertEquals(Saktype.GJENLEV, gjenlevRelasjon.saktype)
         }
     }
-
-    inline fun <reified T : SED> generateSEDtoClass(sed: SED): T = mapJsonToAny(mapAnyToJson(sed), typeRefs<T>())
 
     private fun generateSED(
             sedType: SedType,
@@ -439,7 +427,7 @@ internal class FnrHelperTest {
                         krav = navKrav?.let { Krav(type = it.kode) }
                 ),
                 pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
-        )
+        ).also { println(it.toString()) }
     }
 
     private fun createR005(forsikretFnr: String?,

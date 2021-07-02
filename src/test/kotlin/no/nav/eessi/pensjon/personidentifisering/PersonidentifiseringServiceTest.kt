@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import kotlin.test.assertNotNull
 
 class PersonidentifiseringServiceTest {
 
@@ -598,32 +597,42 @@ class PersonidentifiseringServiceTest {
         @Test
         fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjellig gir null ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            assertNull(personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false))
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false)
+            assertEquals(null, valid)
+        }
+
+        @Test
+        fun `valider identifisertPerson mottatt caseowner ikke norge fdato er null ident returneres`() {
+            val ident = mockIdentPerson(SLAPP_SKILPADDE, null)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false)
+            assertEquals(ident, valid)
         }
 
         @Test
         fun `valider identifisertPerson mottatt og caseowner ikke norge og fnr og dato er lik gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE, Fodselsnummer.fra(SLAPP_SKILPADDE)?.getBirthDate())
-            assertNotNull(personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false))
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, false)
+            assertEquals(ident, valid)
         }
 
         @Test
         fun `valider identifisertPerson mottatt caseowner norge gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            assertNotNull(personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, true))
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, true)
+            assertEquals(ident, valid)
         }
 
         @Test
         fun `valider identifisertPerson sendt gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            assertNotNull(personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.SENDT, true))
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.SENDT, true)
+            assertEquals(ident, valid)
         }
 
     }
 
 
-    private fun mockIdentPerson(fnr: String? = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPerson? {
-        if (fnr == null) return null
+    private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPerson {
         return IdentifisertPerson(
             "1231231312",
             "Ola Test Testing",

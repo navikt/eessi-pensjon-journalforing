@@ -56,9 +56,8 @@ class FnrHelper {
                                 SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
                                 in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
                                 else -> {
-                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P10000, P9000
-
-                                    leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
+                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000
+                                    leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // flere?
                                 }
                             }
                         }
@@ -83,12 +82,12 @@ class FnrHelper {
      */
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
-
-        val sokPersonKriterie = gjenlevende?.let { sokPersonKriterie(it) }
-        val fodselnummer = Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-        val fdato = gjenlevende?.let { mapFdatoTilLocalDate(it.person?.foedselsdato) }
-
-        fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato))
+        gjenlevende?.let {
+            val sokPersonKriterie = gjenlevende?.let { sokPersonKriterie(it) }
+            val fodselnummer = Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato = gjenlevende?.let { mapFdatoTilLocalDate(it.person?.foedselsdato) }
+            fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato))
+        }
     }
 
     private fun behandleP15000(sed: P15000, fnrListe: MutableSet<SEDPersonRelasjon>) {
@@ -115,12 +114,15 @@ class FnrHelper {
 
     //P2000, P2200..P15000(forsikret)
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>, saktype: Saktype? = null) {
-        val sokPersonKriterie = sed.nav?.bruker?.let { sokPersonKriterie(it) }
-        val fodselnummer = Fodselsnummer.fra(sed.nav?.bruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-        val fdato = mapFdatoTilLocalDate(sed.nav?.bruker?.person?.foedselsdato)
+        val forsikretBruker = sed.nav?.bruker
+        forsikretBruker?.let {  bruker ->
+            val sokPersonKriterie =  sokPersonKriterie(bruker)
+            val fodselnummer = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
 
-        fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie, fdato))
-        logger.debug("Legger til person ${Relasjon.FORSIKRET}, med $saktype og sedType: ${sed.type}")
+            fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie, fdato))
+            logger.debug("Legger til person ${Relasjon.FORSIKRET}, med $saktype og sedType: ${sed.type}")
+        }
 
     }
 
@@ -161,15 +163,19 @@ class FnrHelper {
         fnrListe: MutableSet<SEDPersonRelasjon>,
         saktype: Saktype? = null
     ) {
-        Fodselsnummer.fra(forsikretBruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-                ?.let {
-                    val fdato = mapFdatoTilLocalDate(forsikretBruker?.person?.foedselsdato)
-                    fnrListe.add(SEDPersonRelasjon(it, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato))
-                    logger.debug("Legger til avdød person ${Relasjon.FORSIKRET}")
-                }
 
+        //forsikretPerson (avdød eller søker)
+        forsikretBruker?.let {
+            val forsikretPersonKriterie = forsikretBruker?.let { sokPersonKriterie(it) }
+            val forsikretFnr = Fodselsnummer.fra(forsikretBruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato = mapFdatoTilLocalDate(forsikretBruker?.person?.foedselsdato)
+
+            fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie))
+            logger.debug("Legger til forsikret-person ${Relasjon.FORSIKRET}")
+        }
+
+        //gjenlevendePerson (søker)
         val gjenlevendePerson = gjenlevendeBruker?.person
-
         gjenlevendePerson?.let { person ->
             val gjenlevendePin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)

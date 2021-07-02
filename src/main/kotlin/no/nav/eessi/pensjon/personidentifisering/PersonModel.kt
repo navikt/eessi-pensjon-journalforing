@@ -4,7 +4,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 data class IdentifisertPerson(
@@ -31,19 +30,8 @@ data class SEDPersonRelasjon(
     val sokKriterier: SokKriterier? = null,
     val fdato: LocalDate? = null
 ) {
-    private val logger = LoggerFactory.getLogger(SEDPersonRelasjon::class.java)
+    fun validateFnrOgDato(): Boolean = if (fnr != null && fdato != null) fnr.getBirthDate() == fdato else true
 
-    fun validateFnrOgDato(): Boolean {
-        if (fdato == null) return true
-
-        return if (fnr != null) {
-            val validertFnr = fnr.getBirthDate() == fdato
-            logger.debug("Validert fnr-dato: ${fnr.getBirthDate()} sed-fdato: $fdato")
-            validertFnr
-        } else {
-            true
-        }
-    }
     fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
     fun filterUbrukeligeElemeterAvSedPersonRelasjon(): Boolean = fnr == null && fdato == null && sokKriterier == null
 }
