@@ -58,55 +58,70 @@ class SedListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                if(cr.offset() == 0L && profile == "prod") {
+                if (cr.offset() == 0L && profile == "prod") {
                     logger.error("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                     throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                 }
                 logger.debug(hendelse)
+                val offsetToSkip = listOf(206688L)
                 try {
                     val offset = cr.offset()
+                    if (offsetToSkip.contains(offset)) {
+                        logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
+                    } else {
 
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                    if (GyldigeHendelser.sendt(sedHendelse)) {
-                        val bucType = sedHendelse.bucType!!
+                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        if (GyldigeHendelser.sendt(sedHendelse)) {
+                            val bucType = sedHendelse.bucType!!
 
-                        logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                        val buc = sedDokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                        val erNavCaseOwner = sedDokumentHelper.isNavCaseOwner(buc)
-                        val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGyldigeDokumenter(buc)
+                            logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+                            val buc = sedDokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                            val erNavCaseOwner = sedDokumentHelper.isNavCaseOwner(buc)
+                            val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGyldigeDokumenter(buc)
 
-                        val alleSedIBucMap = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                        val alleSedIBucList = alleSedIBucMap.flatMap{ (_, sed) -> listOf(sed) }
+                            val alleSedIBucMap =
+                                sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val alleSedIBucList = alleSedIBucMap.flatMap { (_, sed) -> listOf(sed) }
 
-                        val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                            sedHendelse.navBruker,
-                            alleSedIBucMap,
-                            bucType,
-                            sedHendelse.sedType,
-                            SENDT,
-                            sedHendelse.rinaDokumentId,
-                            erNavCaseOwner
-                        )
-                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
-                        val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-                        val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT, )
-                        val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(
+                                sedHendelse.rinaSakId,
+                                alleGyldigeDokumenter
+                            )
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
+                                sedHendelse.navBruker,
+                                alleSedIBucMap,
+                                bucType,
+                                sedHendelse.sedType,
+                                SENDT,
+                                sedHendelse.rinaDokumentId,
+                                erNavCaseOwner
+                            )
+                            val fdato = personidentifiseringService.hentFodselsDato(
+                                identifisertPerson,
+                                alleSedIBucList,
+                                kansellerteSeder
+                            )
+                            val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                            val sakInformasjon =
+                                pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
+                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT,)
+                            val currentSed =
+                                alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
-                        journalforingService.journalfor(
-                            sedHendelse,
-                            SENDT,
-                            identifisertPerson,
-                            fdato,
-                            saktype,
-                            offset,
-                            sakInformasjon,
-                            currentSed
-                        )
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                SENDT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                offset,
+                                sakInformasjon,
+                                currentSed
+                            )
+                        }
+                        acknowledgment.acknowledge()
+                        logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                     }
-                    acknowledgment.acknowledge()
-                    logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)
                     throw JournalforingException(ex)
@@ -132,7 +147,7 @@ class SedListener(
                 }
                 logger.debug(hendelse)
 
-                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L)
+                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L, 118452L)
                 try {
                     val offset = cr.offset()
                     if (offsetToSkip.contains(offset)) {
