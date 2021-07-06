@@ -32,7 +32,6 @@ class SedListener(
         @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
-
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
     private val sendtLatch = CountDownLatch(7)
     private val mottattLatch = CountDownLatch(8)
