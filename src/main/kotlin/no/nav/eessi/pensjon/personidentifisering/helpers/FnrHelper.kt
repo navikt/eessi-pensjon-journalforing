@@ -43,11 +43,11 @@ class FnrHelper {
                     logger.info("SED: ${sed.type}, class: ${sed.javaClass.simpleName}")
 
                     when (sed) {
-                        is R005 ->  fnrListe.addAll(filterPinPersonR005(sed))
+                        is R005   -> behandleR005(sed, fnrListe)
                         is P15000 -> behandleP15000(sed, fnrListe)
-                        is P6000 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type,   fnrListe = fnrListe)
-                        is P5000 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type,   fnrListe = fnrListe)
-                        is P8000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe)
+                        is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+                        is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe)
                         is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe)
                         is P2000, is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
                         else -> {
@@ -82,10 +82,10 @@ class FnrHelper {
      */
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
-        gjenlevende?.let {
-            val sokPersonKriterie = gjenlevende?.let { sokPersonKriterie(it) }
-            val fodselnummer = Fodselsnummer.fra(gjenlevende?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-            val fdato = gjenlevende?.let { mapFdatoTilLocalDate(it.person?.foedselsdato) }
+        gjenlevende?.let { bruker ->
+            val sokPersonKriterie = sokPersonKriterie(bruker)
+            val fodselnummer = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato =  mapFdatoTilLocalDate(bruker.person?.foedselsdato)
             fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato))
         }
     }
@@ -127,26 +127,23 @@ class FnrHelper {
     }
 
     private fun sokPersonKriterie(navBruker: Bruker) : SokKriterier? {
-        logger.debug("fdato : ${navBruker.person?.foedselsdato}")
-        logger.debug("fornavn : ${navBruker.person?.fornavn}")
-        logger.debug("etternavn : ${navBruker.person?.etternavn}")
-
         val person = navBruker.person ?: return null
-        val fodseldato =  person.foedselsdato ?: return null
-        val fornavn = person.fornavn ?: return null
-        val etternavn = person.etternavn ?: return null
-
-        logger.debug("Oppretter SokKriterier")
-        return SokKriterier(
+        val fdatotmp: String = person.foedselsdato ?: return null
+        val fornavn: String = person.fornavn ?: return null
+        val etternavn: String = person.etternavn ?: return null
+        val fodseldato: LocalDate = mapFdatoTilLocalDate(fdatotmp)!!
+        val sokKriterier = SokKriterier(
             fornavn,
             etternavn,
-            LocalDate.parse(fodseldato, DateTimeFormatter.ISO_DATE)
+            fodseldato
         )
+        logger.debug("Oppretter SokKriterier: ${sokKriterier.fornavn}, ${sokKriterier.etternavn}, ${sokKriterier.foedselsdato}")
+        return sokKriterier
     }
 
-    private fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? {
-       return fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
-    }
+    private fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? =
+        fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
+            .also { logger.info("Parse fdato fra sed: $fdato, return ${it.toString()}")}
 
     private fun mapKravtypeTilSaktype(krav: String?): Saktype {
         return when (krav) {
@@ -245,6 +242,10 @@ class FnrHelper {
      *
      * Hvis ingen intreffer returnerer vi tom liste
      */
+    private fun behandleR005(sed: R005, fnrListe: MutableSet<SEDPersonRelasjon>) {
+        fnrListe.addAll(filterPinPersonR005(sed))
+    }
+
     private fun filterPinPersonR005(sed: R005): List<SEDPersonRelasjon> {
         return sed.nav?.brukere
                 ?.mapNotNull { bruker ->

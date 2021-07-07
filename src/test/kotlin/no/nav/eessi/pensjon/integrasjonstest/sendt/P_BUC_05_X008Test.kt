@@ -1,13 +1,18 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
+import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -45,7 +50,7 @@ class P_BUC_05_X008Test : SendtIntegrationBase() {
     lateinit var personService: PersonService
 
     @Autowired
-    lateinit var euxService: EuxService
+    lateinit var euxKlient: EuxKlient
 
     @TestConfiguration
     class TestConfig {
@@ -57,8 +62,8 @@ class P_BUC_05_X008Test : SendtIntegrationBase() {
         }
 
         @Bean
-        fun euxService(): EuxService {
-            return spyk(EuxService(mockk(relaxed = true), MetricsHelper(SimpleMeterRegistry())))
+        fun euxKlient(): EuxKlient {
+            return spyk(EuxKlient(mockk(relaxed = true)))
         }
     }
 
@@ -81,7 +86,7 @@ class P_BUC_05_X008Test : SendtIntegrationBase() {
             .answers { false }
 
         // Mock EUX buc
-        every { euxService.hentBuc(any()) }
+        every { euxKlient.hentBuc(any()) }
             .answers {
                 Buc(
                     id = "12312312312452345624355",
@@ -91,27 +96,26 @@ class P_BUC_05_X008Test : SendtIntegrationBase() {
             }
 
         // General mocks: Mock EUX vedlegg PDF
-        every { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
+        every { euxKlient.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
         // General mocks: Mock EUX Service (SEDer)
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
-            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
-
+        every { euxKlient.hentSedJson(any(), "44cb68f89a2f4e748934fb4722721018") }
+            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java).toJson() }
 
         //Specific mocks
-        every { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
+        every { euxKlient.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
-        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+        every { euxKlient.hentSedJson("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java).toJson() }
     }
 
     override fun verifiser() {
         Assertions.assertEquals(6, sedListener.getLatch().count, "Alle meldinger har ikke blitt konsumert")
         verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentBuc(any()) }
-        verify(exactly = 1) { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
 
         val logsList: List<ILoggingEvent> = listAppender.list
         logsList.onEachIndexed { index, iLoggingEvent -> println("$index\t  ${iLoggingEvent.message}") }

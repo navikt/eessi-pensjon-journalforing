@@ -1,11 +1,18 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
+import no.nav.eessi.pensjon.buc.EuxKlient
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -35,7 +42,7 @@ class P_BUC_01MedUgyldigVedleggTest : SendtIntegrationBase() {
     lateinit var personService: PersonService
 
     @Autowired
-    lateinit var euxService: EuxService
+    lateinit var euxKlient: EuxKlient
 
 
     @TestConfiguration
@@ -48,9 +55,10 @@ class P_BUC_01MedUgyldigVedleggTest : SendtIntegrationBase() {
         }
 
         @Bean
-        fun euxService(): EuxService {
-            return spyk(EuxService(mockk(relaxed = true), MetricsHelper(SimpleMeterRegistry())))
+        fun euxKlient(): EuxKlient {
+            return spyk(EuxKlient(mockk(relaxed = true)))
         }
+
     }
 
     @Test
@@ -71,16 +79,30 @@ class P_BUC_01MedUgyldigVedleggTest : SendtIntegrationBase() {
         every { personService.harAdressebeskyttelse(any(), any()) }
             .answers { false }
 
-        every { euxService.hentAlleDokumentfiler("147666", "b12e06dda2c7474b9998c7139c666666") }
+        // Mock EUX buc
+        every { euxKlient.hentBuc(any()) }
+            .answers {
+                Buc(
+                    id = "12312312312452345624355",
+                    participants = emptyList<Participant>(),
+                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
+                )
+            }
+
+        every { euxKlient.hentAlleDokumentfiler("147666", "b12e06dda2c7474b9998c7139c666666") }
             .answers { opprettSedDokument("/pdf/pdfResponseMedUgyldigMimeType.json") }
 
-        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+        every { euxKlient.hentSedJson("147666", "b12e06dda2c7474b9998c7139c666666", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java).toJson() }
+
+        every { euxKlient.hentSedJson("147666", "44cb68f89a2f4e748934fb4722721018", ) }
+            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java).toJson() }
+
 
     }
 
     override fun verifiser() {
-        verify(exactly = 1) { euxService.hentAlleDokumentfiler("147666", "b12e06dda2c7474b9998c7139c666666") }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler("147666", "b12e06dda2c7474b9998c7139c666666") }
 
         val logsList: List<ILoggingEvent> = listAppender.list
 

@@ -2,20 +2,20 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedListener
-import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -31,7 +31,6 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
@@ -42,11 +41,8 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
-import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -57,10 +53,12 @@ private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
-@SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
-@ActiveProfiles("integrationtest")
-@DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkasendt"])
+@Disabled
+@Deprecated("Utgår", replaceWith = ReplaceWith("se under sendt"))
+//@SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+//@ActiveProfiles("integrationtest")
+//@DirtiesContext
+//@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkasendt"])
 class JournalforingSendtIntegrationTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -74,7 +72,7 @@ class JournalforingSendtIntegrationTest {
     lateinit var personService: PersonService
 
     @Autowired
-    lateinit var euxService: EuxService
+    lateinit var euxService: EuxKlient
 
     @TestConfiguration
     class TestConfig {
@@ -85,11 +83,11 @@ class JournalforingSendtIntegrationTest {
             }
         }
 
-        @Bean
-        fun euxService(): EuxService {
-            return spyk(EuxService(mockk(), MetricsHelper(SimpleMeterRegistry())))
-//            return mockk(relaxed = true)
-        }
+//        @Bean
+//        fun euxService(): EuxService {
+//            return spyk(EuxService(mockk(), MetricsHelper(SimpleMeterRegistry())))
+////            return mockk(relaxed = true)
+//        }
     }
     @Disabled
     @Test
@@ -239,29 +237,29 @@ class JournalforingSendtIntegrationTest {
             .answers { opprettSedDokument("/pdf/pdfResponseMedUgyldigMimeType.json") }
 
         // Mock EUX Service (SEDer)
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
-            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
-
-        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", ) }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
-            .answers { opprettSED("/sed/R_BUC_02-R005-AP.json", R005::class.java) }
-
-        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
-            .answers { opprettSED("/buc/H070-NAV.json", SED::class.java) }
-
-        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
-            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
+//        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
+//            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
+//
+//        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044", ) }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc", ) }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646", ) }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666", ) }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
+//            .answers { opprettSED("/sed/R_BUC_02-R005-AP.json", R005::class.java) }
+//
+//        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
+//            .answers { opprettSED("/buc/H070-NAV.json", SED::class.java) }
+//
+//        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
+//            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
     }
 
     private fun opprettForenkletSEDListe(file: String): List<ForenkletSED> {
@@ -434,10 +432,10 @@ class JournalforingSendtIntegrationTest {
         verify (exactly = 1) { euxService.hentAlleDokumentfiler("161558", "40b5723cd9284af6ac0581f3981f3044") }
 
         // Verifiser uthenting av SEDer
-        verify (exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
-        verify (exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
-        verify (exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
-        verify (atLeast = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
+//        verify (exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
+//        verify (exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999", ) }
+//        verify (exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113", ) }
+//        verify (atLeast = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018", ) }
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 5) { personService.hentPerson(any<Ident<*>>()) }

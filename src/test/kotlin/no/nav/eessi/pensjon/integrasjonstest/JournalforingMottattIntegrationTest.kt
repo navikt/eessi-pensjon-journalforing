@@ -2,12 +2,14 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
+import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedListener
@@ -26,7 +28,6 @@ import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
 import org.mockserver.verify.VerificationTimes
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
@@ -38,11 +39,8 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.listener.KafkaMessageListenerContainer
 import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
-import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -53,10 +51,12 @@ private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
-@SpringBootTest(classes = [ JournalforingMottattIntegrationTest.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
-@ActiveProfiles("integrationtest")
-@DirtiesContext
-@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkamottatt"])
+@Disabled
+@Deprecated("Utgår", replaceWith = ReplaceWith("Flere sed i sendt*"))
+//@SpringBootTest(classes = [ JournalforingMottattIntegrationTest.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+//@ActiveProfiles("integrationtest")
+//@DirtiesContext
+//@EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, SED_MOTTATT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkamottatt"])
 class JournalforingMottattIntegrationTest {
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -70,7 +70,7 @@ class JournalforingMottattIntegrationTest {
     lateinit var personService: PersonService
 
     @Autowired
-    lateinit var euxService: EuxService
+    lateinit var euxService: EuxKlient
 
     @Disabled
     @Test
@@ -140,8 +140,8 @@ class JournalforingMottattIntegrationTest {
 
 
         // Mock EUX Service
-        every { euxService.hentBucDokumenter(any()) }
-            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsids.json") }
+//        every { euxService.hentBucDokumenter(any()) }
+//            .answers { opprettForenkletSEDListe("/fagmodul/alldocumentsids.json") }
 
 
 //        every { euxService.hentBuc("2536475861") }
@@ -177,33 +177,33 @@ class JournalforingMottattIntegrationTest {
         every { euxService.hentAlleDokumentfiler("2536475861", "b12e06dda2c7474b9998c7139c899999") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
-
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
-            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
-
-        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999") }
-            .answers { opprettSED("/sed/R005-alderpensjon-NAV.json", R005::class.java) }
-
-        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113") }
-            .answers { opprettSED("/sed/R_BUC_02_H070-NAV.json", SED::class.java) }
-
-        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044") }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646") }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666") }
-            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
-
-        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
-            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
-
-        every { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113") }
-            .answers { opprettSED("/buc/H070-NAV.json",  SED::class.java) }
+//
+//        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
+//            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
+//
+//        every { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999") }
+//            .answers { opprettSED("/sed/R005-alderpensjon-NAV.json", R005::class.java) }
+//
+//        every { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113") }
+//            .answers { opprettSED("/sed/R_BUC_02_H070-NAV.json", SED::class.java) }
+//
+//        every { euxService.hentSed("161558", "40b5723cd9284af6ac0581f3981f3044") }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("148161", "f899bf659ff04d20bc8b978b186f1ecc") }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("147729", "b12e06dda2c7474b9998c7139c841646") }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("147666", "b12e06dda2c7474b9998c7139c666666") }
+//            .answers { opprettSED("/eux/SedResponseP2000.json", SED::class.java) }
+//
+//        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+//            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
+//
+//        every { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113") }
+//            .answers { opprettSED("/buc/H070-NAV.json",  SED::class.java) }
 
     }
 
@@ -369,11 +369,11 @@ class JournalforingMottattIntegrationTest {
         verify(exactly = 1) { euxService.hentAlleDokumentfiler("2536475861", "b12e06dda2c7474b9998c7139c899999") }
 
         // Verifiser uthenting av SEDer
-        verify(exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999") }
-        verify(exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113") }
-        verify(exactly = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
-        verify(exactly = 1) { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113") }
-        verify(exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+//        verify(exactly = 1) { euxService.hentSed("2536475861", "b12e06dda2c7474b9998c7139c899999") }
+//        verify(exactly = 1) { euxService.hentSed("2536475861", "9498fc46933548518712e4a1d5133113") }
+//        verify(exactly = 4) { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
+//        verify(exactly = 1) { euxService.hentSed("747729177", "9498fc46933548518712e4a1d5133113") }
+//        verify(exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
 
         // Verifiser at det har blitt forsøkt å hente person fra tps
         verify(exactly = 6) { personService.hentPerson(any<Ident<*>>()) }
@@ -393,11 +393,11 @@ class JournalforingMottattIntegrationTest {
             }
         }
 
-        @Bean
-        fun euxService(): EuxService {
-            return mockk(relaxed = true) {
-                every { initMetrics() } just Runs
-            }
-        }
+//        @Bean
+//        fun euxService(): EuxService {
+//            return mockk(relaxed = true) {
+//                every { initMetrics() } just Runs
+//            }
+//        }
     }
 }

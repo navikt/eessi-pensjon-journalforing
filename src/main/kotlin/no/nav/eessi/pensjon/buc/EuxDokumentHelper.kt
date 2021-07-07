@@ -1,34 +1,105 @@
 package no.nav.eessi.pensjon.buc
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
+import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import javax.annotation.PostConstruct
 
-@Component
-class SedDokumentHelper(
+@Service
+class EuxDokumentHelper(
     private val fagmodulKlient: FagmodulKlient,
-    private val euxService: EuxService
+    private val euxKlient: EuxKlient,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(SedDokumentHelper::class.java)
+    private val logger = LoggerFactory.getLogger(EuxDokumentHelper::class.java)
 
+    private lateinit var hentSed: MetricsHelper.Metric
+    private lateinit var sendSed: MetricsHelper.Metric
+    private lateinit var hentBuc: MetricsHelper.Metric
+    private lateinit var hentPdf: MetricsHelper.Metric
+    private lateinit var settSensitiv: MetricsHelper.Metric
+    private lateinit var hentBucDeltakere: MetricsHelper.Metric
+    private lateinit var hentInstitusjoner: MetricsHelper.Metric
+
+    @PostConstruct
+    fun initMetrics() {
+        hentSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
+        sendSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
+        hentBuc = metricsHelper.init("hentBuc", alert = MetricsHelper.Toggle.OFF)
+        hentPdf = metricsHelper.init("hentpdf", alert = MetricsHelper.Toggle.OFF)
+        settSensitiv = metricsHelper.init("settSensitiv", alert = MetricsHelper.Toggle.OFF)
+        hentBucDeltakere = metricsHelper.init("hentBucDeltakere", alert = MetricsHelper.Toggle.OFF)
+        hentInstitusjoner = metricsHelper.init("hentInstitusjoner", alert = MetricsHelper.Toggle.OFF)
+    }
+
+    /**
+     * Henter SED fra Rina EUX API.
+     *
+     * @param rinaSakId: Hvilken Rina-sak SED skal hentes fra.
+     * @param dokumentId: Hvilket SED-dokument som skal hentes fra spesifisert sak.
+     *
+     * @return Objekt av type <T : Any> som spesifisert i param typeRef.
+     */
+    fun hentSed(rinaSakId: String, dokumentId: String): SED {
+        return hentSed.measure {
+            val json = euxKlient.hentSedJson(rinaSakId, dokumentId)
+            SED.fromJsonToConcrete(json)
+        }
+    }
+
+    /**
+     * Henter alle filer/vedlegg tilknyttet en SED fra Rina EUX API.
+     *
+     * @param rinaSakId: Hvilken Rina-sak filene skal hentes fra.
+     * @param dokumentId: SED-dokumentet man vil hente vedleggene til.
+     *
+     * @return [SedDokumentfiler] som inneholder hovedfil, samt vedlegg.
+     */
+    fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? {
+        return hentPdf.measure {
+            euxKlient.hentAlleDokumentfiler(rinaSakId, dokumentId)
+        }
+    }
+
+    /**
+     * Henter Buc fra Rina.
+     */
     fun hentBuc(rinaSakId: String): Buc {
-        return euxService.hentBuc(rinaSakId) ?: throw RuntimeException("Ingen BUC")
+        return hentBuc.measure {
+            euxKlient.hentBuc(rinaSakId) ?: throw RuntimeException("Ingen BUC")
+        }
+    }
+
+    /**
+     * Henter alle dokumenter (SEDer) i en Buc.
+     */
+    fun hentBucDokumenter(buc: Buc): List<ForenkletSED> {
+        val documents = buc.documents ?: return emptyList()
+        return documents
+            .onEach { logger.debug("Hva er dette: ${it.id}, ${it.type}, ${it.status}") }
+            .filter { it.id != null }
+            .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
     }
 
     fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {
-        return euxService.hentBucDokumenter(buc)
+        return hentBucDokumenter(buc)
             .filter { it.type.erGyldig() }
             .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
     }
@@ -36,7 +107,7 @@ class SedDokumentHelper(
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
         return documents
             .filter(ForenkletSED::harGyldigStatus)
-            .map { sed -> Pair(sed.id, euxService.hentSed(rinaSakId, sed.id)) }
+            .map { sed -> Pair(sed.id, hentSed(rinaSakId, sed.id)) }
             .also { logger.info("Fant ${it.size} SED ") }
     }
 
@@ -47,13 +118,13 @@ class SedDokumentHelper(
             part -> part.organisation?.countryCode == "NO"
         }?.mapNotNull { it.organisation?.countryCode }?.singleOrNull()
 
-        return caseOwner == "NO"
+        return (caseOwner == "NO").also { if (it) logger.info("NAV er CaseOwner") else logger.info("NAV er IKKE CaseOwner") }
     }
 
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::erKansellert)
-            .map { sed -> euxService.hentSed(rinaSakId, sed.id) }
+            .map { sed -> hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
