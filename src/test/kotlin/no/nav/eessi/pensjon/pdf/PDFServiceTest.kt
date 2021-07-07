@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.assertThrows
 
 class PDFServiceTest {
 
-    private val euxService = mockk<EuxService>()
+    private val dokumentHelper: EuxDokumentHelper = mockk()
 
-    private val pdfService = PDFService(euxService)
+    private val pdfService = PDFService(dokumentHelper)
 
     @BeforeEach
     fun init() {
@@ -35,7 +35,7 @@ class PDFServiceTest {
     @Test
     fun `Gitt en json dokument uten vedlegg saa konverter til json dokument med pdf innhold`() {
         val fileContent = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
 
@@ -50,7 +50,7 @@ class PDFServiceTest {
         every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
 
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedVedlegg.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
 
@@ -67,7 +67,7 @@ class PDFServiceTest {
         every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
 
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedTomtVedlegg.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (_, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
 
@@ -79,7 +79,7 @@ class PDFServiceTest {
     @Test
     fun `Gitt en json dokument med manglende mimeType saa blir den satt paa listen over uSupporterte vedlegg`() {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedManglendeMimeType.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (_, uSpporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
         assertEquals(1, uSpporterteVedlegg.size)
@@ -87,7 +87,7 @@ class PDFServiceTest {
 
     @Test
     fun `Feil som kastes fra EuxService skal ikke fanges`() {
-        every { euxService.hentAlleDokumentfiler(any(), any()) } throws mockk<MismatchedInputException>()
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } throws mockk<MismatchedInputException>()
 
         assertThrows<MismatchedInputException> {
             pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
@@ -96,7 +96,7 @@ class PDFServiceTest {
 
     @Test
     fun `Manglende dokument fra EuxService skal kaste exception`() {
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns null
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns null
 
         assertThrows<RuntimeException> {
             pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
@@ -106,7 +106,7 @@ class PDFServiceTest {
     @Test
     fun `Gitt en sed med et vedlegg uten filnavn saa opprettes et løpenavn`() {
         val fileContent = javaClass.getResource("/pdf/pdfResonseMedP2000MedVedlegg.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (supportereVedlegg, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
 
@@ -121,7 +121,7 @@ class PDFServiceTest {
             SedVedlegg("P2000", MimeType.PDF, "dokInnhold"),
             listOf(SedVedlegg("filnavn", null, "dokInnhold"))
         )
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns fileContent
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns fileContent
 
         val (_, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
 
@@ -132,7 +132,7 @@ class PDFServiceTest {
     @Test
     fun `Gitt en json dokument med ugyldig innhold saa blir den satt paa listen over uSupporterte vedlegg`() {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedUgyldigInnhold.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val (_, uSupporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
         assertEquals(1, uSupporterteVedlegg.size)
@@ -143,7 +143,7 @@ class PDFServiceTest {
     fun `Gitt en json dokument med ugyldig MimeType saa returneres det ugyldige dokumentet i usupporterteVedlegg`() {
         val fileContent =
             javaClass.getResource("/pdf/pdfResponseMedUgyldigMimeType.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
+        every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent, typeRefs())
 
         val docs = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SedType.P2000)
         assertNotNull(docs.second)

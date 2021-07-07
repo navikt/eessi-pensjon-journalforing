@@ -59,9 +59,13 @@ class PersonidentifiseringService(
             .register(metricsHelper.registry)
     }
 
-    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean = false): IdentifisertPerson? {
+    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPerson? {
         val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
-        logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
+        if( check) {
+            logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
+        } else {
+            logger.warn("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
+        }
 
         return if (hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
             if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
@@ -93,13 +97,14 @@ class PersonidentifiseringService(
             sedListe,
             bucType,
             potensiellePersonRelasjoner,
-            hendelsesType
+            hendelsesType,
+            rinaDocumentId = rinaDocumentId
         )
 
         val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
 
         if (identifisertPerson != null) {
-            return validateIdentifisertPerson(identifisertPerson, hendelsesType, !erNavCaseOwner)
+            return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
@@ -119,17 +124,20 @@ class PersonidentifiseringService(
         val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
         if (sokSedliste == null) {
             logger.info("Ingen gyldig sed for søkPerson")
+            sokPersonTellerMiss.increment()
             return null
         }
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf<Pair<String, SED>>(sokSedliste))
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sokSedliste))
+
         val identifisertePersoner = hentIdentifisertePersoner(
-            navBruker,
+            null,
             sedListe,
             bucType,
             potensiellePersonRelasjoner,
             hendelsesType,
-            true
+            true,
+            rinaDocumentId
         )
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
@@ -140,7 +148,8 @@ class PersonidentifiseringService(
         bucType: BucType,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
         hendelsesType: HendelseType,
-        benyttSokPerson: Boolean = false
+        benyttSokPerson: Boolean = false,
+        rinaDocumentId: String
     ): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
 
@@ -160,15 +169,16 @@ class PersonidentifiseringService(
         }
 
         return if (personForNavBruker != null) {
-            listOf(
-                populerIdentifisertPerson(
+            logger.info("*** Funnet identifisertPerson: personForNavBruker, fra hendelse: $hendelsesType, bucType: $bucType ***")
+             val identifisertPerson = populerIdentifisertPerson(
                     personForNavBruker,
                     alleSediBuc,
                     SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET),
                     hendelsesType,
-                    bucType
-                )
+                    bucType,
+                    fdatoFraSed = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)
             )
+            listOf(identifisertPerson)
         } else {
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
@@ -185,6 +195,18 @@ class PersonidentifiseringService(
                 }
                 .distinctBy { it.aktoerId }
         }
+    }
+
+    //finne korrekt fdato fra SED på current rinadocid (sed på hendelsen)
+    fun injectFdatoFraSedPersonNavBruker(alleSediBuc: List<Pair<String, SED>>, rinaDocumentId: String): LocalDate? {
+        logger.debug("rinaDocumentId $rinaDocumentId")
+        val currentSed = alleSediBuc.firstOrNull { it.first == rinaDocumentId }?.second
+        logger.debug("CurrentSED type: ${currentSed?.type}")
+
+        val fdato = currentSed?.let { FodselsdatoHelper.fraSedListe(listOf(it), emptyList()) }
+
+        logger.info("Navbruker fdato-fraSed: $fdato, sedtype: ${currentSed?.type}")
+        return fdato
     }
 
     fun hentIdentifisertPerson(
@@ -246,11 +268,12 @@ class PersonidentifiseringService(
     private fun populerIdentifisertPerson(
         person: Person,
         alleSediBuc: List<Pair<String, SED>>,
-        SEDPersonRelasjon: SEDPersonRelasjon,
+        sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType,
-        bucType: BucType
+        bucType: BucType,
+        fdatoFraSed: LocalDate? = null
     ): IdentifisertPerson {
-        logger.debug("Populerer IdentifisertPerson med data fra PDL")
+        logger.debug("Populerer IdentifisertPerson med data fra PDL hendelseType: $hendelsesType")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
@@ -258,7 +281,11 @@ class PersonidentifiseringService(
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
-        val newPersonRelasjon = SEDPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        val newPersonRelasjon = if (sedPersonRelasjon.fdato == null && fdatoFraSed != null) {
+             sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr), fdato = fdatoFraSed)
+        } else {
+            sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        }
 
         return IdentifisertPerson(
             aktorId,

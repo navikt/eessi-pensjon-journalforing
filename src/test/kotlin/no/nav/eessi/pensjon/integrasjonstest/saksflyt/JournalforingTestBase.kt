@@ -1,8 +1,12 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.buc.SedDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxKlient
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Document
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
+import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
@@ -14,6 +18,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.journalpost.*
@@ -56,7 +61,10 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID_2 = "0009876543210"
     }
 
-    protected val euxService: EuxService = mockk()
+    protected val euxKlient: EuxKlient = mockk()
+    protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
+    private val dokumentHelper = EuxDokumentHelper(fagmodulKlient, euxKlient)
+
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
 
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
@@ -64,7 +72,7 @@ internal open class JournalforingTestBase {
     private val journalpostService = JournalpostService(journalpostKlient)
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
-    private val pdfService: PDFService = PDFService(euxService)
+    private val pdfService: PDFService = PDFService(dokumentHelper)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
@@ -90,8 +98,6 @@ internal open class JournalforingTestBase {
     protected val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
 
 
-    protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val sedDokumentHelper = SedDokumentHelper(fagmodulKlient, euxService)
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
 
@@ -99,7 +105,7 @@ internal open class JournalforingTestBase {
     protected val listener: SedListener = SedListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
-        sedDokumentHelper = sedDokumentHelper,
+        dokumentHelper = dokumentHelper,
         bestemSakService = bestemSakService,
         profile = "test"
     )
@@ -121,7 +127,7 @@ internal open class JournalforingTestBase {
         personidentifiseringService.nameSpace = "test"
         personidentifiseringService.initMetrics()
         personidentifiseringService.nameSpace = "test"
-
+        dokumentHelper.initMetrics()
     }
 
     @AfterEach
@@ -155,8 +161,6 @@ internal open class JournalforingTestBase {
     ) {
         val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId))
         initCommonMocks(sed)
-
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
 
@@ -206,8 +210,8 @@ internal open class JournalforingTestBase {
 
         assertBlock(request)
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
 
         if (hendelseType == HendelseType.SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
@@ -244,7 +248,6 @@ internal open class JournalforingTestBase {
         val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, eessiSaknr = sakId))
         initCommonMocks(sed)
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
         if (fnr != null) {
@@ -274,8 +277,9 @@ internal open class JournalforingTestBase {
 
         assertBlock(journalpost.captured)
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
@@ -315,7 +319,6 @@ internal open class JournalforingTestBase {
             )
         }
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockBruker
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
@@ -343,9 +346,10 @@ internal open class JournalforingTestBase {
         }
         block(PBuc03IntegrationTest.TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
         verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
 
         clearAllMocks()
     }
@@ -356,15 +360,22 @@ internal open class JournalforingTestBase {
         return mapJsonToAny(dokumentfilerJson, typeRefs())
     }
 
-    fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler) {
-        every { euxService.hentBucDokumenter(any()) } returns alleDocs
-        every { euxService.hentSed(any(), any()) } returns sed
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns documentFiler
+    fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler, bucType: BucType = BucType.P_BUC_01, bucLand: String = "NO") {
+        every { euxKlient.hentBuc(any()) } returns bucFrom(bucType, forenkletSed = alleDocs, bucLand)
+        every { euxKlient.hentSedJson(any(), any()) } returns sed.toJson()
+        every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns documentFiler
+    }
+
+    fun bucFrom(bucType: BucType, forenkletSed: List<ForenkletSED>, bucLand: String? = null): Buc {
+        val part = if (bucLand != null) listOf(Participant(role = "CaseOwner", organisation = Organisation(name = bucLand, countryCode = bucLand))) else null
+        return Buc(id = "2",  processDefinitionName = bucType.name, participants = part ,  documents = bucDocumentsFrom(forenkletSed))
+    }
+    fun bucDocumentsFrom(forenkletSed: List<ForenkletSED>): List<Document> {
+        return forenkletSed.map { forenklet -> Document(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.toLowerCase()) }
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
         val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
-
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         val dokumentFiler = mapJsonToAny(dokumentVedleggJson, typeRefs<SedDokumentfiler>())
         initCommonMocks(sed, docs, dokumentFiler)
@@ -506,17 +517,20 @@ internal open class JournalforingTestBase {
         relasjon: RelasjonTilAvdod? = null,
         pdlPerson: no.nav.eessi.pensjon.personoppslag.pdl.model.Person? = null,
         sivilstand: SivilstandItem? = null,
-        statsborgerskap: StatsborgerskapItem? = null
+        statsborgerskap: StatsborgerskapItem? = null,
+        fdato: String? = null
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
         val pdlPersonAnnen = if (relasjon != null) pdlPerson else null
         val pdlForsikret = if (relasjon == null) pdlPerson else null
 
+        val foedselsdato = fdato ?: (validFnr?.getBirthDateAsIso() ?: "1988-07-12")
+
         val forsikretBruker = Bruker(
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
-                foedselsdato = validFnr?.getBirthDateAsIso() ?: "1988-07-12",
+                foedselsdato = foedselsdato,
                 fornavn = "${pdlForsikret?.navn?.fornavn}",
                 etternavn = "${pdlForsikret?.navn?.etternavn}",
                 sivilstand = createSivilstand(sivilstand),

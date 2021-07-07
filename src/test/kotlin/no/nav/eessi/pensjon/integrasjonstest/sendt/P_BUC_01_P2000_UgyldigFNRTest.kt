@@ -1,13 +1,16 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.*
-import no.nav.eessi.pensjon.buc.EuxService
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
+import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
-import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -45,7 +48,8 @@ class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
     lateinit var personService: PersonService
 
     @Autowired
-    lateinit var euxService: EuxService
+    lateinit var euxKlient: EuxKlient
+
 
     @TestConfiguration
     class TestConfig {
@@ -57,8 +61,8 @@ class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
         }
 
         @Bean
-        fun euxService(): EuxService {
-            return spyk(EuxService(mockk(relaxed = true), MetricsHelper(SimpleMeterRegistry())))
+        fun euxKlient(): EuxKlient {
+            return spyk(EuxKlient(mockk(relaxed = true)))
         }
     }
 
@@ -81,7 +85,7 @@ class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
             .answers { false }
 
         // mock ugyldig fnr
-        every { euxService.hentBuc("7477291") }
+        every { euxKlient.hentBuc("7477291") }
             .answers {
                 Buc(
                     id ="7477291",
@@ -91,7 +95,7 @@ class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
             }
 
         // Mock EUX buc
-        every { euxService.hentBuc(any()) }
+        every { euxKlient.hentBuc(any()) }
             .answers {
                 Buc(
                     id = "12312312312452345624355",
@@ -101,25 +105,24 @@ class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
             }
 
         // General mocks: Mock EUX vedlegg PDF
-        every { euxService.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
+        every { euxKlient.hentAlleDokumentfiler("147729", "b12e06dda2c7474b9998c7139c841646") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
         // General mocks: Mock EUX Service (SEDer)
-        every { euxService.hentSed(any(), "44cb68f89a2f4e748934fb4722721018") }
-            .answers { opprettSED("/sed/P2000-NAV.json", SED::class.java) }
+        every { euxKlient.hentSedJson(any(), "44cb68f89a2f4e748934fb4722721018") }
+            .answers {  javaClass.getResource("/sed/P2000-NAV.json").readText() }
 
         //Specific mocks
-        every { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+        every { euxKlient.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
             .answers { opprettSedDokument("/pdf/pdfResponseUtenVedlegg.json") }
 
-        every { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
-            .answers { opprettSED("/sed/P2000-ugyldigFNR-NAV.json", SED::class.java) }
+        every { euxKlient.hentSedJson("7477291", "b12e06dda2c7474b9998c7139c841646fffx", ) }
+            .answers { javaClass.getResource("/sed/P2000-ugyldigFNR-NAV.json").readText() }
     }
 
     override fun verifiser() {
-        verify(atLeast = 1) { euxService.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
+        verify(atLeast = 1) { euxKlient.hentAlleDokumentfiler("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
         verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
-        //verify(exactly = 1) { euxService.hentSed("7477291", "b12e06dda2c7474b9998c7139c841646fffx") }
 
         val logsList: List<ILoggingEvent> = listAppender.list
 

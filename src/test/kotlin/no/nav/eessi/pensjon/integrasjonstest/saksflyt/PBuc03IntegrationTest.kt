@@ -355,12 +355,12 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         block: (TestResult) -> Unit
     ) {
         val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksen, eessiSaknr = sakId, krav = krav))
+
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID) }
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
@@ -387,16 +387,16 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
         clearAllMocks()
     }
 
-    private fun getResource(resourcePath: String): String =
-        javaClass.getResource(resourcePath).readText()
-
+    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")

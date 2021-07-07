@@ -482,8 +482,6 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         val sed = createSedPensjon(SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
-
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
             fnrVoksen,
             "Voksen ",
@@ -523,9 +521,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
         clearAllMocks()
     }

@@ -1,13 +1,17 @@
 package no.nav.eessi.pensjon.listeners
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.buc.SedDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -25,12 +29,12 @@ import javax.annotation.PostConstruct
 
 @Service
 class SedListener(
-        private val journalforingService: JournalforingService,
-        private val personidentifiseringService: PersonidentifiseringService,
-        private val sedDokumentHelper: SedDokumentHelper,
-        private val bestemSakService: BestemSakService,
-        @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+    private val journalforingService: JournalforingService,
+    private val personidentifiseringService: PersonidentifiseringService,
+    private val dokumentHelper: EuxDokumentHelper,
+    private val bestemSakService: BestemSakService,
+    @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
     private val sendtLatch = CountDownLatch(7)
@@ -74,48 +78,25 @@ class SedListener(
                             val bucType = sedHendelse.bucType!!
 
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                            val buc = sedDokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                            val erNavCaseOwner = sedDokumentHelper.isNavCaseOwner(buc)
-                            val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGyldigeDokumenter(buc)
+                            val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                            val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
+                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
+                            val alleSedIBucMap = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
 
-                            val alleSedIBucMap =
-                                sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val alleSedIBucList = alleSedIBucMap.flatMap { (_, sed) -> listOf(sed) }
-
-                            val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(
-                                sedHendelse.rinaSakId,
-                                alleGyldigeDokumenter
-                            )
+                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                                sedHendelse.navBruker,
-                                alleSedIBucMap,
-                                bucType,
-                                sedHendelse.sedType,
-                                SENDT,
-                                sedHendelse.rinaDokumentId,
-                                erNavCaseOwner
+                                sedHendelse.navBruker, alleSedIBucMap, bucType, sedHendelse.sedType, SENDT, sedHendelse.rinaDokumentId, erNavCaseOwner
                             )
-                            val fdato = personidentifiseringService.hentFodselsDato(
-                                identifisertPerson,
-                                alleSedIBucList,
-                                kansellerteSeder
-                            )
-                            val sakTypeFraSED = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-                            val sakInformasjon =
-                                pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
+
+                            val alleSedIBucList = alleSedIBucMap.flatMap { (_, sed) -> listOf(sed) }
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
+                            val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                            val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                             val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT,)
-                            val currentSed =
-                                alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            val currentSed = alleSedIBucMap.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                             journalforingService.journalfor(
-                                sedHendelse,
-                                SENDT,
-                                identifisertPerson,
-                                fdato,
-                                saktype,
-                                offset,
-                                sakInformasjon,
-                                currentSed
+                                sedHendelse, SENDT, identifisertPerson, fdato, saktype, offset, sakInformasjon, currentSed
                             )
                         }
                         acknowledgment.acknowledge()
@@ -158,14 +139,12 @@ class SedListener(
                             val bucType = sedHendelse.bucType!!
 
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                            val buc = sedDokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                            val erNavCaseOwner = sedDokumentHelper.isNavCaseOwner(buc)
-                            val alleGyldigeDokumenter = sedDokumentHelper.hentAlleGyldigeDokumenter(buc)
+                            val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                            val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
+                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
 
-                            val alleSedIBucMap = sedDokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val alleSedIBucList = alleSedIBucMap.flatMap{ (_, sed) -> listOf(sed) }
-
-                            val kansellerteSeder = sedDokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val alleSedIBucMap = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
 
                             //identifisere Person hent Person fra PDL valider Person
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
@@ -178,8 +157,9 @@ class SedListener(
                                 erNavCaseOwner
                             )
 
+                            val alleSedIBucList = alleSedIBucMap.flatMap{ (_, sed) -> listOf(sed) }
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
-                            val saktypeFraSed = sedDokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                            val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
 
@@ -228,7 +208,7 @@ class SedListener(
 
         return if (sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_05 || sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_10) {
             logger.info("skal hente pensjonSak for sed kap.1 og validere mot pesys")
-            sedDokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+            dokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
         } else
             sakInformasjonFraBestemSak
     }

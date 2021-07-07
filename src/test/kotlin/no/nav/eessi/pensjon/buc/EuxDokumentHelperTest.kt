@@ -1,11 +1,13 @@
 package no.nav.eessi.pensjon.buc
 
 import io.mockk.Called
+import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
@@ -17,6 +19,7 @@ import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.BucType
@@ -29,20 +32,27 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
-internal class SedDokumentHelperTest {
+internal class EuxDokumentHelperTest {
 
-    private val euxService = mockk<EuxService>()
-    private val fagmodulKlient = mockk<FagmodulKlient>()
+    private val euxKlient: EuxKlient = mockk(relaxed = true)
+    private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
 
-    private val helper = SedDokumentHelper(fagmodulKlient, euxService)
+    private val helper = EuxDokumentHelper(fagmodulKlient, euxKlient)
+
+    @BeforeEach
+    fun before() {
+        helper.initMetrics()
+    }
 
     @AfterEach
     fun after() {
         confirmVerified(fagmodulKlient)
+        clearAllMocks()
     }
 
     @Test
@@ -50,16 +60,22 @@ internal class SedDokumentHelperTest {
         val allSedTypes = SedType.values().toList()
         assertEquals(76, allSedTypes.size)
 
-        val docs = allSedTypes.mapIndexed { index, sedType -> ForenkletSED("$index", sedType, SedStatus.RECEIVED)}
-        assertEquals(allSedTypes.size, docs.size)
+        val bucDocs = allSedTypes.mapIndexed { index, sedType -> Document(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.toLowerCase() ) }
+        val buc = Buc(id = "1", processDefinitionName = "P_BUC_01", documents = bucDocs)
+        assertEquals(allSedTypes.size, buc.documents?.size)
 
-        every { euxService.hentBucDokumenter(any()) } returns docs
-
-        val dokumenter = helper.hentAlleGyldigeDokumenter(Buc())
+        val dokumenter = helper.hentAlleGyldigeDokumenter(buc)
 
         assertEquals(52, dokumenter.size)
+    }
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+    @Test
+    fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt fra mock Buc`() {
+        val json = javaClass.getResource("/eux/buc/buc279020.json").readText()
+        val buc = mapJsonToAny(json, typeRefs<Buc>())
+
+        assertEquals(25, helper.hentBucDokumenter(buc).size)
+        assertEquals(13, helper.hentAlleGyldigeDokumenter(buc).size)
     }
 
     @Test
@@ -146,21 +162,23 @@ internal class SedDokumentHelperTest {
 
         val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json").readText()
         val alldocsid = mapJsonToAny(allDocsJson, typeRefs<List<ForenkletSED>>())
+        val bucDocs = alldocsid.mapIndexed { index, docs -> Document(id = "$index", type = docs.type, status = docs.status?.name?.toLowerCase() )  }
+        val buc = Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocs)
 
         val sedJson = javaClass.getResource("/buc/P2000-NAV.json").readText()
         val sedP2000 = mapJsonToAny(sedJson, typeRefs<SED>())
 
-        every { euxService.hentBucDokumenter(any()) } returns alldocsid
-        every { euxService.hentSed(any(), any()) } returns sedP2000
+        every { euxKlient.hentSedJson(any(), any()) } returns sedP2000.toJson()
 
-        val result = helper.hentAlleGyldigeDokumenter(Buc())
+        val result = helper.hentAlleGyldigeDokumenter(buc)
         val actual = helper.hentAlleSedIBuc(rinaSakId, result)
+
         assertEquals(1, actual.size)
 
         val actualSed = actual.first()
         assertEquals(SedType.P2000, actualSed.second.type)
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
     }
 
     @Test

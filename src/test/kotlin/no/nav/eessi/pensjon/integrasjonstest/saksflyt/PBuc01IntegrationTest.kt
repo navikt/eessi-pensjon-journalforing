@@ -206,6 +206,30 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
+        fun `Krav om Alder P2000 uten gydldig Validering fnr-fato og sed-fdato går til ID og Fordeling`() {
+            val bestemsak = BestemSakResponse(null, emptyList())
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
+            val fdato = "1970-06-20"
+
+            testRunnerVoksen(
+                FNR_VOKSEN, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT, fdato = fdato
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(PENSJON, journalpostRequest.tema)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(1, oppgaveMeldingList.size)
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(null, it.oppgaveMelding?.aktoerId)
+                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+
+            }
+        }
+
+
+        @Test
         fun `Krav om Alder P2000 uten gyldig fnr sendes til ID og Fordeling`() {
             val bestemsak = BestemSakResponse(null, emptyList())
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
@@ -377,7 +401,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
         every { personService.sokPerson(any()) } returns sokPerson
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockPerson
 
@@ -406,8 +429,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
 
         clearAllMocks()
     }
@@ -424,28 +449,37 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         sivilstand: SivilstandItem? = null,
         statsborgerskap: StatsborgerskapItem? = null,
+        fdato: String? = null,
         block: (TestResult) -> Unit
     ) {
 
-        val sed = SED.generateSedToClass<P2000>(createSedPensjon(SedType.P2000, fnrVoksen, eessiSaknr = sakId, krav = krav, sivilstand = sivilstand, statsborgerskap = statsborgerskap))
-        initCommonMocks(sed, alleDocs, documentFiler)
-
-        if (fnrVoksen != null) {
-            every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
-                fnrVoksen,
-                "Voksen ",
-                "Forsikret",
-                land,
-                aktorId = AKTOER_ID
+        val mockPerson = if (fnrVoksen != null) {
+            val mockp = createBrukerWith(
+                fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID
             )
+            every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
+            mockp
+        } else {
+            null
         }
+        val sed = SED.generateSedToClass<P2000>(createSedPensjon(
+            SedType.P2000,
+            fnrVoksen,
+            eessiSaknr = sakId,
+            krav = krav,
+            sivilstand = sivilstand,
+            statsborgerskap = statsborgerskap,
+            pdlPerson = mockPerson,
+            fdato = fdato
+        ))
 
-        every { euxService.hentBuc (any()) } returns mockk(relaxed = true)
+        val bucland = if (land === "SWE") "SE" else "NO"
+        initCommonMocks(sed, alleDocs, documentFiler, bucLand = bucland)
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(SedType.P2000, BucType.P_BUC_01)
+        val hendelse = createHendelseJson(SedType.P2000, BucType.P_BUC_01, fnrVoksen)
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -469,15 +503,16 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        verify(exactly = 1) { euxService.hentBucDokumenter(any()) }
         if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
-        verify(exactly = 1) { euxService.hentSed(any(), any()) }
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
         clearAllMocks()
     }
 
-    private fun getResource(resourcePath: String): String =
-        javaClass.getResource(resourcePath).readText()
+    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
