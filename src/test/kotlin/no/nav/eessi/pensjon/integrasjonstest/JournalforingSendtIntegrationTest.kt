@@ -3,12 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
@@ -55,14 +50,13 @@ import org.springframework.test.context.ActiveProfiles
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.TimeUnit
 
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
 private lateinit var mockServer : ClientAndServer
-@Disabled
 @SpringBootTest(classes = [ JournalforingSendtIntegrationTest.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
