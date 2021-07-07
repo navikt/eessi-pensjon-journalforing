@@ -26,6 +26,7 @@ import org.springframework.test.context.ActiveProfiles
 private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 
+@Disabled
 @SpringBootTest(classes = [P_BUC_01MedUgyldigVedleggTest.TestConfig::class],  value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
@@ -55,7 +56,6 @@ class P_BUC_01MedUgyldigVedleggTest : SendtIntegrationBase() {
     }
 
     @Test
-    @Disabled
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
         clearAllMocks()
