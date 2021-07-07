@@ -263,7 +263,7 @@ class SedListener(
      **/
     @KafkaListener(groupId = "\${kafka.sedSendt.groupid}-recovery",
             topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "118224L")])])
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "118224")])])
     fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         if (cr.offset() == 118224L) {
             logger.info("Behandler sedSendt offset: ${cr.offset()}")
