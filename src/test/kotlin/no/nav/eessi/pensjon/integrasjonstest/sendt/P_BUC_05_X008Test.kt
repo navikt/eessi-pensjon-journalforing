@@ -2,13 +2,7 @@ package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.Runs
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
@@ -20,6 +14,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,6 +64,7 @@ class P_BUC_05_X008Test : SendtIntegrationBase() {
     }
 
     @Test
+    @Disabled
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
         clearAllMocks()

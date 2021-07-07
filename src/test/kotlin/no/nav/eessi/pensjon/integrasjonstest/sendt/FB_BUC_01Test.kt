@@ -1,12 +1,9 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
-import io.mockk.Runs
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
+import io.mockk.*
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +38,7 @@ class FB_BUC_01Test : SendtIntegrationBase() {
     }
 
     @Test
+    @Disabled
     fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
         initAndRunContainer()
         clearAllMocks()
