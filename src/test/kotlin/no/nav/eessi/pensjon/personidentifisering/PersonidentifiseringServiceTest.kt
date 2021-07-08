@@ -629,7 +629,7 @@ class PersonidentifiseringServiceTest {
         fun `valider identifisertPerson mottatt caseowner norge gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
             val valid = personidentifiseringService.validateIdentifisertPerson(ident, HendelseType.MOTTATT, true)
-            assertEquals(ident, valid)
+            assertEquals(null, valid)
         }
 
         @Test

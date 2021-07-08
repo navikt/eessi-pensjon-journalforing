@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -60,24 +61,29 @@ class PersonidentifiseringService(
     }
 
     fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPerson? {
-        val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
-        if( check) {
-            logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
-        } else {
-            logger.warn("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}")
-        }
+        return if (hendelsesType == HendelseType.MOTTATT) {
 
-        return if (hendelsesType == HendelseType.MOTTATT && !erNavCaseOwner) {
-            if (identifisertPerson.personRelasjon.validateFnrOgDato()) {
-                logger.info("IdentifisertPerson Validert OK")
+            val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
+            if(check) {
+                logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+                validerCounter("successful")
                 identifisertPerson
             } else {
-                logger.warn("Klarte ikke å validere person, fnr og fdato er forskjellig")
+                logger.warn("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+                validerCounter("failed")
                 null
             }
+
         } else {
-            logger.debug("Nav er $erNavCaseOwner, hendelsesType: $hendelsesType, hopper over validering")
             identifisertPerson
+        }
+    }
+
+    private fun validerCounter(typeValue: String) {
+        try {
+            Metrics.counter("validerPerson", "hendelse", "MOTTATT", "type", "$typeValue").increment()
+        } catch (ex: Exception) {
+            logger.warn("Metrics feilet på validerPerson value: $typeValue")
         }
     }
 
@@ -156,6 +162,7 @@ class PersonidentifiseringService(
         val personForNavBruker = when {
             bucType == BucType.P_BUC_02 -> null
             bucType == BucType.P_BUC_05 -> null
+            bucType == BucType.P_BUC_06 -> null
             bucType == BucType.P_BUC_10 -> null
             navBruker != null -> {
                 try {
@@ -203,7 +210,7 @@ class PersonidentifiseringService(
         logger.debug("CurrentSED type: ${currentSed?.type}")
 
         val fdato = currentSed?.let { FodselsdatoHelper.fdatoFraSedListe(listOf(it), emptyList()) }
-        logger.info("Navbruker fdato-fraSed: $fdato, sedtype: ${currentSed?.type}")
+        logger.debug("Navbruker fdato-fraSed: $fdato, sedtype: ${currentSed?.type}")
         return fdato
     }
 

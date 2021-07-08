@@ -143,7 +143,7 @@ class FnrHelper {
 
     private fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? =
         fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
-            .also { logger.info("Parse fdato fra sed: $fdato, return ${it.toString()}")}
+            .also { logger.debug("Parse fdato fra sed: $fdato, return ${it.toString()}")}
 
     private fun mapKravtypeTilSaktype(krav: String?): Saktype {
         return when (krav) {
