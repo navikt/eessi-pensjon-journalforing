@@ -1,5 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P6000
+import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
@@ -18,7 +23,7 @@ class FodselsdatoHelper {
          *
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
-        fun fraSedListe(seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
+        fun fdatoFraSedListe(seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
             if (seder.isEmpty() && kansellerteSeder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
@@ -50,23 +55,40 @@ class FodselsdatoHelper {
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
+                logger.info("Finner fdato fra SED: ${sed.type}")
                 val fdato = when (sed.type) {
                     SedType.R005 -> filterPersonR005Fodselsdato(sed)
-                    SedType.P2100 -> filterGjenlevendeFodselsdato(sed)
-                    SedType.P15000 -> filterP15000(sed)
-                    else -> filterAnnenPersonFodselsdato(sed) ?: filterPersonFodselsdato(sed)
+                    SedType.P2000, SedType.P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedType.P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
+                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
+                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
+                    SedType.P8000, SedType.P10000 -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.bruker?.person, sed.nav?.annenperson?.person)
+                    SedType.P15000 -> filterP15000(sed as P15000)
+                    SedType.H121, SedType.H120, SedType.H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    else -> filterAnnenPersonFodselsdato(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
-                fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
+                fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }.also {
+                    if (it != null) logger.info("Fant fdato fra SED")
+                }
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt ved henting av fødselsdato fra SED", ex)
                 null
             }
         }
 
-        private fun filterP15000(sed: SED): String? {
-            return if (sed.nav?.krav?.type == "02") filterGjenlevendeFodselsdato(sed)
-            else filterPersonFodselsdato(sed)
+        private fun leggTilAnnenPersonFdatoHvisFinnes(person: Person?, annenPerson: Person?): String? {
+            return filterAnnenPersonFodselsdato(annenPerson) ?: filterPersonFodselsdato(person)
+        }
+
+        private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Bruker?): String? {
+            return if (gjenlevende != null) filterGjenlevendeFodselsdato(gjenlevende)
+            else filterPersonFodselsdato(person)
+        }
+
+        private fun filterP15000(sed: P15000): String? {
+            return if (sed.nav?.krav?.type == "02") filterGjenlevendeFodselsdato(sed.p15000Pensjon?.gjenlevende)
+            else filterPersonFodselsdato(sed.nav?.bruker?.person)
         }
 
 
@@ -85,15 +107,13 @@ class FodselsdatoHelper {
          * P10000 - [02] Forsørget/familiemedlem
          * P10000 - [03] Barn
          */
-        private fun filterAnnenPersonFodselsdato(sed: SED): String? {
-            val annenPerson = sed.nav?.annenperson ?: return null
-            if (annenPerson.person?.rolle != Rolle.ETTERLATTE.name) return null
-
-            return annenPerson.person?.foedselsdato
+        private fun filterAnnenPersonFodselsdato(annenPerson: Person?): String? {
+            if (annenPerson?.rolle != Rolle.ETTERLATTE.name) return null
+            return annenPerson.foedselsdato
         }
 
-        private fun filterGjenlevendeFodselsdato(sed: SED): String? = sed.pensjon?.gjenlevende?.person?.foedselsdato
+        private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? = gjenlevende?.person?.foedselsdato
 
-        private fun filterPersonFodselsdato(sed: SED): String? = sed.nav?.bruker?.person?.foedselsdato
+        private fun filterPersonFodselsdato(person: Person?): String? = person?.foedselsdato
     }
 }

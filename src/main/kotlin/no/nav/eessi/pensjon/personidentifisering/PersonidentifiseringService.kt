@@ -173,10 +173,9 @@ class PersonidentifiseringService(
              val identifisertPerson = populerIdentifisertPerson(
                     personForNavBruker,
                     alleSediBuc,
-                    SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET),
+                    SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET, fdato = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)),
                     hendelsesType,
-                    bucType,
-                    fdatoFraSed = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)
+                    bucType
             )
             listOf(identifisertPerson)
         } else {
@@ -203,8 +202,7 @@ class PersonidentifiseringService(
         val currentSed = alleSediBuc.firstOrNull { it.first == rinaDocumentId }?.second
         logger.debug("CurrentSED type: ${currentSed?.type}")
 
-        val fdato = currentSed?.let { FodselsdatoHelper.fraSedListe(listOf(it), emptyList()) }
-
+        val fdato = currentSed?.let { FodselsdatoHelper.fdatoFraSedListe(listOf(it), emptyList()) }
         logger.info("Navbruker fdato-fraSed: $fdato, sedtype: ${currentSed?.type}")
         return fdato
     }
@@ -270,8 +268,7 @@ class PersonidentifiseringService(
         alleSediBuc: List<Pair<String, SED>>,
         sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType,
-        bucType: BucType,
-        fdatoFraSed: LocalDate? = null
+        bucType: BucType
     ): IdentifisertPerson {
         logger.debug("Populerer IdentifisertPerson med data fra PDL hendelseType: $hendelsesType")
 
@@ -281,11 +278,7 @@ class PersonidentifiseringService(
         val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
-        val newPersonRelasjon = if (sedPersonRelasjon.fdato == null && fdatoFraSed != null) {
-             sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr), fdato = fdatoFraSed)
-        } else {
-            sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
-        }
+        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
             aktorId,
@@ -425,7 +418,7 @@ class PersonidentifiseringService(
         kansellerteSeder: List<SED>
     ): LocalDate? {
         return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
-            ?: FodselsdatoHelper.fraSedListe(seder, kansellerteSeder)
+            ?: FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
 
     }
 }
