@@ -1,13 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import ch.qos.logback.classic.spi.ILoggingEvent
-import io.mockk.Runs
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
@@ -19,7 +13,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,7 +39,6 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
     brokerProperties = ["log.dir=out/embedded-kafkasendt"]
 )
-@Disabled
 class P_BUC_05_X008Test : SendtIntegrationBase() {
     @Autowired
     lateinit var personService: PersonService
