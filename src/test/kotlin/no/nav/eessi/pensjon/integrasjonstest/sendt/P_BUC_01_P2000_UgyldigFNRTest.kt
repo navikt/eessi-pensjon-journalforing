@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,6 +44,7 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
     brokerProperties = ["log.dir=out/embedded-kafkasendt"]
 )
+@Disabled
 class P_BUC_01P2000MedUgyldigFNRTest : SendtIntegrationBase() {
     @Autowired
     lateinit var personService: PersonService

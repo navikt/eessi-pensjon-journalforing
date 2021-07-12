@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest.sendt
 import io.mockk.*
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,7 @@ private const val OPPGAVE_TOPIC = "privat-eessipensjon-oppgave-v1"
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(controlledShutdown = true, partitions = 1, topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], brokerProperties= ["log.dir=out/embedded-kafkasendt"])
+@Disabled
 class FB_BUC_01Test : SendtIntegrationBase() {
 
     @Autowired
