@@ -6,12 +6,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -21,8 +17,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.annotation.PartitionOffset
-import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
@@ -251,20 +245,20 @@ class SedListener(
 //        }
 //    }
 
-
+     /*
 
     @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
             topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "210257")])])
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "104259")])])
     fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-        if (cr.offset() == 210257L) {
+        if (cr.offset() == 104259L) {
             logger.info("Behandler sedMottatt offset: ${cr.offset()}")
             consumeSedMottatt(hendelse, cr, acknowledgment)
         } else {
             throw java.lang.RuntimeException()
         }
     }
-
+*/
 
 }
 
