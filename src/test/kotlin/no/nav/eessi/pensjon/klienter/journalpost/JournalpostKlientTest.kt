@@ -29,7 +29,7 @@ internal class JournalpostKlientTest {
 
     @Test
     fun `Sjekker opprettelse av journalpost`(){
-        val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponse.json")!!.readText()
+        val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
 
         every { mockrestTemplate.exchange(
                 "/journalpost?forsoekFerdigstill=false",
