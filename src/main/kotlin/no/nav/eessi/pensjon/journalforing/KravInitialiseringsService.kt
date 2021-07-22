@@ -28,7 +28,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
         when(sedHendelseModel.sedType) {
             SedType.P2000 -> {
-                if ((sed as P2000).validerForKravinit() && nameSpace == "q2" || nameSpace == "test") {
+                if ((sed as P2000).validerForKravinit() && nameSpace == "q1" || nameSpace == "q2" || nameSpace == "test") {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelseModel.rinaSakId,
