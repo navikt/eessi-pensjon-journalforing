@@ -2,19 +2,20 @@ package no.nav.eessi.pensjon.integrasjonstest.mottatt
 
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.integrasjonstest.CustomMockServer
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsBase
+import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
+import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
+import no.nav.eessi.pensjon.integrasjonstest.SED_MOTTATT_TOPIC
 import no.nav.eessi.pensjon.json.toJson
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.util.concurrent.TimeUnit
 
-private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
-private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
 
-@SpringBootTest( classes = [IntegrasjonsBase.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
@@ -22,8 +23,8 @@ internal class PBuc01MottattIntegrasjonsIntegrasjons : IntegrasjonsBase() {
 
     @Test
     fun `Sender gyldig Pensjon SED (P2000) og forventer routing til 4303`() {
-        //given a person
 
+        //setup server
         CustomMockServer()
             .medJournalforing(false, "429434378")
             .medNorg2Tjeneste()
@@ -38,14 +39,13 @@ internal class PBuc01MottattIntegrasjonsIntegrasjons : IntegrasjonsBase() {
             .medEuxGetRequest("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
             .medEuxGetRequest("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer","/pdf/pdfResponseMedVedlegg.json")
 
-        initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC)
-            .also {
-                it.kafkaTemplate.send(SED_MOTTATT_TOPIC, javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText())
-            }
+        //send msg
+        initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
+            it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_01_P2000.json")
+            it.waitForlatch(sedListener)
+        }
 
-        sedListener.getSendtLatch().await(10, TimeUnit.SECONDS)
-
-        //then we expect automatisk journalforing
+        //verify route
         OppgaveMeldingVerification("429434378")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")

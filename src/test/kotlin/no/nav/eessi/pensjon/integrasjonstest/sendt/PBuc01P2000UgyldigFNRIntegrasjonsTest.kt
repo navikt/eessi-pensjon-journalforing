@@ -2,19 +2,19 @@ package no.nav.eessi.pensjon.integrasjonstest.sendt
 
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.integrasjonstest.CustomMockServer
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsBase
+import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
+import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
+import no.nav.eessi.pensjon.integrasjonstest.SED_SENDT_TOPIC
 import no.nav.eessi.pensjon.json.toJson
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import java.util.concurrent.TimeUnit
 
-private const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
-private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
-
-@SpringBootTest(classes = [IntegrasjonsBase.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest(classes = [IntegrasjonsTestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka( topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC])
@@ -23,7 +23,7 @@ internal class PBuc01P2000UgyldigFNRIntegrasjonsIntegrasjons : IntegrasjonsBase(
     @Test
     fun `Når en p2000 med ugyldig FNR blir konsumert så skal den rutes til 4303`() {
 
-        //given a http service with buc and sed
+        //server setup
         CustomMockServer()
             .medJournalforing(false, "429434379")
             .medNorg2Tjeneste()
@@ -39,11 +39,11 @@ internal class PBuc01P2000UgyldigFNRIntegrasjonsIntegrasjons : IntegrasjonsBase(
             .medEuxGetRequest("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx","/sed/P2000-ugyldigFNR-NAV.json")
             .medEuxGetRequest( "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
 
-        //when receiving a p2000 with invalid fnr
+        //send msg
         initAndRunContainer(SED_SENDT_TOPIC, OPPGAVE_TOPIC).also {
-            it.kafkaTemplate.sendDefault(SED_SENDT_TOPIC ,javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json").readText() )
+            it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
+            it.waitForlatch(sedListener)
         }
-        sedListener.getSendtLatch().await(10, TimeUnit.SECONDS)
 
         //then route to 4303
         OppgaveMeldingVerification("429434379")
