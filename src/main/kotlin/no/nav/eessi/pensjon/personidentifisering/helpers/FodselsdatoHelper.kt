@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P6000
 import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
@@ -57,7 +58,7 @@ class FodselsdatoHelper {
             return try {
                 logger.info("Finner fdato fra SED: ${sed.type}")
                 val fdato = when (sed.type) {
-                    SedType.R005 -> filterPersonR005Fodselsdato(sed)
+                    SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
                     SedType.P2000, SedType.P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     SedType.P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
                     SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
@@ -99,8 +100,8 @@ class FodselsdatoHelper {
          *
          * * hvis ingen intreffer returnerer vi null
          */
-        private fun filterPersonR005Fodselsdato(sed: SED): String? =
-                sed.nav?.brukere?.first()?.person?.foedselsdato
+        private fun filterPersonR005Fodselsdato(sed: R005): String? =
+                sed.recoveryNav?.brukere?.first()?.person?.foedselsdato
 
         /**
          * P10000 - [01] Søker til etterlattepensjon

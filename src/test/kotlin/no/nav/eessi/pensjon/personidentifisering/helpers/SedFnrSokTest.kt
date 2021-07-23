@@ -1,6 +1,16 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Kontekst
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.Navsak
+import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.PinLandItem
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.X005
+import no.nav.eessi.pensjon.eux.model.sed.XNav
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +58,7 @@ internal class SedFnrSokTest {
 
         val sed = X005(
                 type = SedType.X005,
-                nav = Nav(
+                xnav = XNav(
                         sak = Navsak(Kontekst(Bruker(person = Person(pin))))
                 )
         )

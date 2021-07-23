@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.PinItem
 import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.RNav
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -446,7 +447,7 @@ internal class FnrHelperTest {
 
         return R005(
                 type = SedType.R005,
-                nav = Nav(brukere = listOfNotNull(
+                recoveryNav = RNav(brukere = listOfNotNull(
                         Brukere(
                                 person = createPerson(forsikretFnr),
                                 tilbakekreving = forsikretTilbakekreving?.let {

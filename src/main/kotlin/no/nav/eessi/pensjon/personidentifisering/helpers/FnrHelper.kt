@@ -247,7 +247,7 @@ class FnrHelper {
     }
 
     private fun filterPinPersonR005(sed: R005): List<SEDPersonRelasjon> {
-        return sed.nav?.brukere
+        return sed.recoveryNav?.brukere
                 ?.mapNotNull { bruker ->
                     val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
                     val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
