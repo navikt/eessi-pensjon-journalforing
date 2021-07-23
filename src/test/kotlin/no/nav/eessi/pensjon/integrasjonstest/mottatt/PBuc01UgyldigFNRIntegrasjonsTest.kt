@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.integrasjonstest.mottatt
 
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
-import no.nav.eessi.pensjon.integrasjonstest.MottattOgSendtIntegrationBase
+import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsBase
 import no.nav.eessi.pensjon.json.toJson
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -14,17 +14,16 @@ import java.util.concurrent.TimeUnit
 private const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
 
-@SpringBootTest( classes = [MottattOgSendtIntegrationBase.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsBase.TestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-internal class PBuc01UgyldigFNRIntegrasjonsTest : MottattOgSendtIntegrationBase() {
+internal class PBuc01UgyldigFNRIntegrasjonsTest : IntegrasjonsBase() {
 
     @Test
     fun `Sender Pensjon SED (P2000) med ugyldig FNR og forventer routing til 4303`() {
 
         //given a person
-        mockPerson()
 
         //given a http service with buc and sed
         CustomMockServer()
@@ -48,9 +47,10 @@ internal class PBuc01UgyldigFNRIntegrasjonsTest : MottattOgSendtIntegrationBase(
             )
 
         //when receiving a p2000 with invalid fnr
-        initAndRunContainer().apply {
-            send(SED_MOTTATT_TOPIC, javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json").readText())
+        initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
+                it.kafkaTemplate.send(SED_MOTTATT_TOPIC, javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json").readText())
         }
+
         sedListener.getSendtLatch().await(10, TimeUnit.SECONDS)
 
         //then route to 4303
@@ -59,6 +59,4 @@ internal class PBuc01UgyldigFNRIntegrasjonsTest : MottattOgSendtIntegrationBase(
             .medSedtype("P2000")
             .medtildeltEnhetsnr("4303")
     }
-
-
 }

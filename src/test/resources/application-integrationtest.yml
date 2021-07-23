@@ -25,6 +25,7 @@ spring:
       ack-mode: manual
     consumer:
       enable-auto-commit: false
+      group-id: eessi-pensjon-test
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT

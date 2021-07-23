@@ -18,34 +18,31 @@ private const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-internal class PBuc01MottattIntegrasjonsIntegrasjons : IntegrasjonsBase() {
+internal class PBuc01UgyldigVedleggIntegrasjonTest : IntegrasjonsBase() {
 
     @Test
-    fun `Sender gyldig Pensjon SED (P2000) og forventer routing til 4303`() {
-        //given a person
+    fun `Sender Pensjon SED (P2000) med ugyldig vedlegg og skal routes til 9999`() {
 
         CustomMockServer()
-            .medJournalforing(false, "429434378")
+            .medJournalforing()
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medEuxGetRequestWithJson(
-                "/buc/147729", Buc(
-                    id = "7477291",
+                "/buc/147666", Buc(
+                    id = "147666",
                     participants = emptyList<Participant>(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
-            .medEuxGetRequest("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer","/pdf/pdfResponseMedVedlegg.json")
+            .medEuxGetRequest("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2000-NAV.json")
+            .medEuxGetRequest("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer","/pdf/pdfResponseMedUgyldigVedlegg.json" )
 
-        initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC)
-            .also {
-                it.kafkaTemplate.send(SED_MOTTATT_TOPIC, javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText())
-            }
+        initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
+            it.kafkaTemplate.send(SED_MOTTATT_TOPIC, javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json").readText())
+        }
+        sedListener.getMottattLatch().await(10, TimeUnit.SECONDS)
 
-        sedListener.getSendtLatch().await(10, TimeUnit.SECONDS)
-
-        //then we expect automatisk journalforing
+        //then
         OppgaveMeldingVerification("429434378")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
