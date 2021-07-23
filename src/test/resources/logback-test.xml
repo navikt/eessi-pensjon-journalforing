@@ -13,6 +13,13 @@
     <logger name="no.nav" level="DEBUG"/>
     <logger name="no.nav.security" level="INFO"/>
     <logger name="no.nav.eessi" level="DEBUG"/>
+
+    <logger name="kafka" level="WARN"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.apache.zookeeper" level="WARN"/>
+    <logger name="org.springframework.kafka" level="WARN"/>
+    <logger name="org.mockserver.log" level="WARN"/>
+
     <root level="DEBUG">
         <appender-ref ref="stdout" />
     </root>

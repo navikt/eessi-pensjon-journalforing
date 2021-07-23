@@ -11,8 +11,8 @@ import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -40,7 +40,7 @@ internal class JournalpostServiceTest {
 
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
-        val responseBody = getResource("journalpost/opprettJournalpostResponse.json")
+        val responseBody = getResource("journalpost/opprettJournalpostResponseFalse.json")
         val expectedResponse = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
@@ -137,7 +137,7 @@ internal class JournalpostServiceTest {
     fun `gitt En UK Journalpost Så Bytt Til GB Fordi Pesys Kun Støtter GB`() {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
-        val responseJson = getResource("journalpost/opprettJournalpostResponse.json")
+        val responseJson = getResource("journalpost/opprettJournalpostResponseFalse.json")
         val expectedResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>())
 
         val requestJson = getResource("journalpost/opprettJournalpostRequestGB.json")

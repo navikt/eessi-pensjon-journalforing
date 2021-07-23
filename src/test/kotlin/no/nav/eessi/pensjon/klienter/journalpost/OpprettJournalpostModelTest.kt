@@ -72,7 +72,7 @@ internal class OpprettJournalpostModelTest {
 
     @Test
     fun `Gitt en gyldig journalpostResponse json når mapping så skal alle felter mappes`() {
-        val opprettjournalpostResponseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponse.json")))
+        val opprettjournalpostResponseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponseFalse.json")))
         val opprettJournalpostResponse = mapJsonToAny(opprettjournalpostResponseJson, typeRefs<OpprettJournalPostResponse>())
         assertEquals(opprettJournalpostResponse.journalpostId, "429434378")
         assertEquals(opprettJournalpostResponse.journalstatus, "M")

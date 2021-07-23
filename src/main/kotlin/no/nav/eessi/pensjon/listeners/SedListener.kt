@@ -6,8 +6,12 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -33,8 +37,8 @@ class SedListener(
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
     private val logger = LoggerFactory.getLogger(SedListener::class.java)
-    private val sendtLatch = CountDownLatch(7)
-    private val mottattLatch = CountDownLatch(8)
+    private val sendtLatch = CountDownLatch(1)
+    private val mottattLatch = CountDownLatch(1)
 
     private lateinit var consumeOutgoingSed: MetricsHelper.Metric
     private lateinit var consumeIncomingSed: MetricsHelper.Metric
@@ -45,7 +49,7 @@ class SedListener(
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
 
-    fun getLatch() = sendtLatch
+    fun getSendtLatch() = sendtLatch
     fun getMottattLatch() = mottattLatch
 
     @KafkaListener(id = "sedSendtListener",
