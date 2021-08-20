@@ -26,8 +26,6 @@ class SedFnrSok {
          * @return distinkt set av fnr
          */
         fun finnAlleFnrDnrISed(sed: SED): Set<String> {
-            logger.info("Søker etter fnr i SED")
-
             try {
                 val sedRootNode = jacksonObjectMapper().readTree(sed.toJson())
 

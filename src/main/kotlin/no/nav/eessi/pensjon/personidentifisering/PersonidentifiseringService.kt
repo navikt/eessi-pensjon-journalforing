@@ -298,9 +298,9 @@ class PersonidentifiseringService(
     }
 
     private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<Pair<String, SED>>): Boolean {
+        val alleSedTyper = alleSediBuc.map { it.second.type}.toJson()
+        logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
-        logger.info("Fant ${fnr.size} unike fnr i SEDer tilknyttet Buc")
-
         val gradering =
             listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
