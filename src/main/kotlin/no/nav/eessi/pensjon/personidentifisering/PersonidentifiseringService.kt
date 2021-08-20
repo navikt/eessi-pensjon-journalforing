@@ -188,6 +188,7 @@ class PersonidentifiseringService(
         } else {
             // Leser inn fnr fra utvalgte seder
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
+
             potensielleSEDPersonRelasjoner
                 //.filterNot { it.fnr == null }
                 .mapNotNull { relasjon ->
@@ -239,6 +240,7 @@ class PersonidentifiseringService(
                 }
                 sokPersonFnrTreff
             } else {
+                logger.info("Velger fnr med relasjon: ${personRelasjon.relasjon} i SED: ${personRelasjon.sedType}")
                 personRelasjon.fnr?.value
             }
 
