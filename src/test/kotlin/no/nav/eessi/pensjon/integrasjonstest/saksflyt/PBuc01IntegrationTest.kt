@@ -4,11 +4,13 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
@@ -19,6 +21,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
 import no.nav.eessi.pensjon.json.mapJsonToAny
+import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
@@ -34,6 +37,7 @@ import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
@@ -319,7 +323,66 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
         }
+
     }
+        @Test
+        fun `Gitt en P_BUC_01 med flere P8000 med forskjellige roller - så velges forsikret person som det journalfores på`() {
+            val fnr = "28127822044"
+            val afnr = "05127921999"
+            val bfnr = "05121021999"
+            val aktoerf = "${fnr}0000"
+            val saknr = "1223123123"
+
+            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, null, saknr))
+            val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
+            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
+
+            val dokumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841647", SedType.P8000, SedStatus.SENT),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841648", SedType.P8000, SedStatus.RECEIVED))
+
+            every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
+            every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
+            every { personService.harAdressebeskyttelse(any(), any()) } returns false
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
+            every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
+
+            val (journalpost, _) = initJournalPostRequestSlot(false)
+            val hendelse = createHendelseJson(SedType.P8000, BucType.P_BUC_01)
+
+            val meldingSlot = mutableListOf<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+                mapJsonToAny(it, typeRefs<OppgaveMelding>())
+            }
+
+            val request = journalpost.captured
+
+            // forvent tema == PEN og enhet Pensjon Utland
+            assertEquals(PENSJON, request.tema)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(fnr, request.bruker?.id)
+
+            assertEquals(1, oppgaveMeldingList.size)
+            val oppgaveMelding = oppgaveMeldingList.first()
+            assertEquals("429434378", oppgaveMelding.journalpostId)
+            assertEquals(null, oppgaveMelding.filnavn)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
+            assertEquals(SedType.P8000, oppgaveMelding.sedType)
+
+            verify(exactly = 1) { personService.hentPerson(any<NorskIdent>()) }
+            verify(exactly = 1) { euxKlient.hentBuc(any()) }
+            verify(exactly = 3) { euxKlient.hentSedJson(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
+            clearAllMocks()
+
+        }
 
     @Nested
     @DisplayName("Utgående")

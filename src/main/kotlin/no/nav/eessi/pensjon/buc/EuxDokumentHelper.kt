@@ -93,7 +93,6 @@ class EuxDokumentHelper(
     fun hentBucDokumenter(buc: Buc): List<ForenkletSED> {
         val documents = buc.documents ?: return emptyList()
         return documents
-            .onEach { logger.debug("Hva er dette: ${it.id}, ${it.type}, ${it.status}") }
             .filter { it.id != null }
             .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
     }

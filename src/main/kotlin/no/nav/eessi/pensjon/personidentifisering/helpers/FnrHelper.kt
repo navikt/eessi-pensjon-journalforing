@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -34,7 +35,7 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<Pair<String, SED>>): List<SEDPersonRelasjon> {
+    fun getPotensielleFnrFraSeder(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
         val fnrListe = mutableSetOf<SEDPersonRelasjon>()
 
         seder.forEach { (_,sed) ->
@@ -47,8 +48,8 @@ class FnrHelper {
                         is P15000 -> behandleP15000(sed, fnrListe)
                         is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
                         is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe)
-                        is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe)
+                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe,bucType)
+                        is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
                         is P2000, is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
                         else -> {
                             logger.debug("Else sedType: ${sed.type}")
@@ -202,7 +203,12 @@ class FnrHelper {
      * P8000 - [03] Barn
      * P10000
      */
-    private fun behandleP8000AndP10000(nav: Nav?, sedType: SedType, fnrListe: MutableSet<SEDPersonRelasjon>) {
+    private fun behandleP8000AndP10000(
+        nav: Nav?,
+        sedType: SedType,
+        fnrListe: MutableSet<SEDPersonRelasjon>,
+        bucType: BucType
+    ) {
         logger.debug("Leter i $sedType")
 
         val forsikretBruker = nav?.bruker
@@ -225,14 +231,17 @@ class FnrHelper {
         logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
 
         //Annenperson søker/barn o.l
-        val annenPersonRelasjon = when (rolle) {
-            Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato)
-            Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
-            Rolle.BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
-            else -> SEDPersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
+        if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
+            val annenPersonRelasjon = when (rolle) {
+                Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato)
+                Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
+                Rolle.BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
+                else -> SEDPersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
+            }
+
+            fnrListe.add(annenPersonRelasjon)
+            logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}, sokForsikret: ${sokAnnenPersonKriterie != null}")
         }
-        fnrListe.add(annenPersonRelasjon)
-        logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}, sokForsikret: ${sokAnnenPersonKriterie != null}")
     }
 
     /**

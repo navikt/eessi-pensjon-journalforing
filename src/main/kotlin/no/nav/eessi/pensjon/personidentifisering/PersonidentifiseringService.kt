@@ -97,7 +97,7 @@ class PersonidentifiseringService(
         erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe)
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe, bucType)
         val identifisertePersoner = hentIdentifisertePersoner(
             navBruker,
             sedListe,
@@ -134,7 +134,7 @@ class PersonidentifiseringService(
             return null
         }
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sokSedliste))
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sokSedliste), bucType)
 
         val identifisertePersoner = hentIdentifisertePersoner(
             null,
