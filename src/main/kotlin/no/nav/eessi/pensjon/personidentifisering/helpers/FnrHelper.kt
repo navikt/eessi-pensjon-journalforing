@@ -222,7 +222,6 @@ class FnrHelper {
         val rolle = annenPerson?.person?.rolle
 
         val sokForsikretKriterie = forsikretBruker?.let { sokPersonKriterie(it) }
-        val sokAnnenPersonKriterie = annenPerson?.let { sokPersonKriterie(it) }
 
         logger.debug("Personpin: $personPin, AnnenPersonpin $annenPersonPin, Annenperson rolle : $rolle, sokForsikret: ${sokForsikretKriterie != null}")
 
@@ -232,6 +231,7 @@ class FnrHelper {
 
         //Annenperson søker/barn o.l
         if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
+            val sokAnnenPersonKriterie = annenPerson?.let { sokPersonKriterie(it) }
             val annenPersonRelasjon = when (rolle) {
                 Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato)
                 Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
