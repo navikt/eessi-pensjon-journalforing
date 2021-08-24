@@ -35,6 +35,7 @@ import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
@@ -94,8 +95,9 @@ internal open class JournalforingTestBase {
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
+    private val personSok = PersonSok(personService)
 
-    protected val personidentifiseringService = PersonidentifiseringService(personService, FnrHelper())
+    private val personidentifiseringService = PersonidentifiseringService(personSok, personService, FnrHelper())
 
 
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
@@ -125,7 +127,7 @@ internal open class JournalforingTestBase {
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
         personidentifiseringService.nameSpace = "test"
-        personidentifiseringService.initMetrics()
+        personSok.initMetrics()
         personidentifiseringService.nameSpace = "test"
         dokumentHelper.initMetrics()
     }
