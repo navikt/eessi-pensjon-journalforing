@@ -15,7 +15,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -25,12 +24,8 @@ class PersonidentifiseringService(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
     private val fnrHelper: FnrHelper,
 ) {
-
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
-
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
 
     companion object {
         fun erFnrDnrFormat(id: String?): Boolean {
@@ -92,37 +87,7 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        return sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
-    }
-
-    fun sokPersonUtvelger(
-        navBruker: Fodselsnummer?,
-        sedListe: List<Pair<String, SED>>,
-        rinaDocumentId: String,
-        bucType: BucType,
-        sedType: SedType?,
-        hendelsesType: HendelseType
-    ): IdentifisertPerson? {
-        logger.info("PersonUtvelger *** SøkPerson *** ")
-
-        val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
-        if (sokSedliste == null) {
-            logger.info("Ingen gyldig sed for søkPerson")
-            return null
-        }
-
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sokSedliste), bucType)
-
-        val identifisertePersoner = hentIdentifisertePersoner(
-            null,
-            sedListe,
-            bucType,
-            potensiellePersonRelasjoner,
-            hendelsesType,
-            true,
-            rinaDocumentId
-        )
-        return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
+        return personSok.sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
     }
 
     fun hentIdentifisertePersoner(

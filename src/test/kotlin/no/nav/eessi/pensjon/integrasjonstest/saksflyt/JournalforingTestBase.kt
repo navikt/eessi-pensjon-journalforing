@@ -95,7 +95,7 @@ internal open class JournalforingTestBase {
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
-    private val personSok = PersonSok(personService)
+    private val personSok = PersonSok(personService, FnrHelper())
 
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService, FnrHelper())
 
@@ -126,9 +126,7 @@ internal open class JournalforingTestBase {
         oppgaveHandler.initMetrics()
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
-        personidentifiseringService.nameSpace = "test"
         personSok.initMetrics()
-        personidentifiseringService.nameSpace = "test"
         dokumentHelper.initMetrics()
     }
 
