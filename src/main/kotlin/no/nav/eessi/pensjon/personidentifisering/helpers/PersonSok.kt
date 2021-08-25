@@ -53,22 +53,19 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
     ): IdentifisertPerson? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-        val sokSedliste = sedListe.firstOrNull { it.first == rinaDocumentId }
-        if (sokSedliste == null) {
+        val sedFraHendelse = sedListe.firstOrNull { it.first == rinaDocumentId }
+        if (sedFraHendelse == null) {
             logger.info("Ingen gyldig sed for søkPerson")
             return null
         }
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sokSedliste), bucType)
+        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sedFraHendelse), bucType)
 
         val identifisertePersoner = hentIdentifisertePersoner(
-            null,
             sedListe,
             bucType,
             potensiellePersonRelasjoner,
-            hendelsesType,
-            true,
-            rinaDocumentId
+            hendelsesType
         )
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
@@ -193,58 +190,22 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
     }
 
     fun hentIdentifisertePersoner(
-        navBruker: Fodselsnummer?,
         alleSediBuc: List<Pair<String, SED>>,
         bucType: BucType,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
-        hendelsesType: HendelseType,
-        benyttSokPerson: Boolean = false,
-        rinaDocumentId: String
+        hendelsesType: HendelseType
     ): List<IdentifisertPerson> {
-        logger.info("Forsøker å identifisere personen")
-
-        val personForNavBruker = when {
-            bucType == BucType.P_BUC_02 -> null
-            bucType == BucType.P_BUC_05 -> null
-            bucType == BucType.P_BUC_06 -> null
-            bucType == BucType.P_BUC_10 -> null
-            navBruker != null -> {
-                try {
-                    personService.hentPerson(NorskIdent(navBruker.value))
-                } catch (ex: Exception) {
-                    logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
-                    null
-                }
-            }
-            else -> null
-        }
-
-        return if (personForNavBruker != null) {
-            logger.info("*** Funnet identifisertPerson: personForNavBruker, fra hendelse: $hendelsesType, bucType: $bucType ***")
-            val identifisertPerson = populerIdentifisertPerson(
-                personForNavBruker,
-                alleSediBuc,
-                SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET, fdato = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)),
-                hendelsesType
-            )
-            listOf(identifisertPerson)
-        } else {
-            // Leser inn fnr fra utvalgte seder
-            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
-
-            potensielleSEDPersonRelasjoner
-                //.filterNot { it.fnr == null }
+           return  potensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->
                     hentIdentifisertPerson(
                         relasjon,
                         alleSediBuc,
                         hendelsesType,
                         bucType,
-                        benyttSokPerson
+                        true
                     )
                 }
                 .distinctBy { it.aktoerId }
-        }
     }
 
     /**
