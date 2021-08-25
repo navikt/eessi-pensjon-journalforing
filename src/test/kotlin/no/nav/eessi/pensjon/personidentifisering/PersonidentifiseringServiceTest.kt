@@ -71,9 +71,7 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null),
-            HendelseType.SENDT,
-            BucType.P_BUC_05
+            SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null), HendelseType.SENDT, BucType.P_BUC_05
         )
         val expected = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, sedType = SedType.H070)
         assertEquals(expected, actual?.personRelasjon)
@@ -85,9 +83,7 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra(LEALAUS_KAKE), Relasjon.GJENLEVENDE, null, sedType = SedType.P6000, null),
-            HendelseType.SENDT,
-            BucType.P_BUC_05
+            SEDPersonRelasjon(Fodselsnummer.fra(LEALAUS_KAKE), Relasjon.GJENLEVENDE, null, sedType = SedType.P6000, null), HendelseType.SENDT, BucType.P_BUC_05
         )
 
         val expected = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, SedType.P6000)
@@ -167,9 +163,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null),
-            HendelseType.SENDT,
-            BucType.P_BUC_06
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null), HendelseType.SENDT, BucType.P_BUC_06
         )
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed), emptyList())
         assertEquals("1958-07-11", fdato.toString())
@@ -179,9 +173,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
         val sed1 = sedFromJsonFile("/buc/P10000-superenkel.json")
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null),
-            HendelseType.SENDT,
-            BucType.P_BUC_06
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null), HendelseType.SENDT, BucType.P_BUC_06
         )
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed1), emptyList())
 

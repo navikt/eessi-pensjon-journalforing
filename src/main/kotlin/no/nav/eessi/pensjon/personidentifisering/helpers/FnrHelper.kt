@@ -1,7 +1,18 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.P10000
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2200
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P6000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
@@ -30,7 +41,6 @@ class FnrHelper {
         seder.forEach { (_,sed) ->
             try {
                 if (sed.type.kanInneholdeIdentEllerFdato()) {
-                    logger.info("SED: ${sed.type}, class: ${sed.javaClass.simpleName}")
 
                     when (sed) {
                         is R005   -> behandleR005(sed, fnrListe)
@@ -41,7 +51,6 @@ class FnrHelper {
                         is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
                         is P2000, is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
                         else -> {
-                            logger.debug("Else sedType: ${sed.type}")
                             when (sed.type) {
                                 SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
                                 in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
@@ -131,9 +140,7 @@ class FnrHelper {
         return sokKriterier
     }
 
-    private fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? =
-        fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
-            .also { logger.debug("Parse fdato fra sed: $fdato, return ${it.toString()}")}
+    private fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? = fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
 
     private fun mapKravtypeTilSaktype(krav: String?): Saktype {
         return when (krav) {

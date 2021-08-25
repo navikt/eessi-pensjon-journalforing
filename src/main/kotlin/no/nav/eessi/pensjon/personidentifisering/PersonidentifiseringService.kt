@@ -91,13 +91,18 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        personSok.sokPersonRelasjon(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)?.let {
-            return hentIdentifisertPerson(
-                it,
-                hendelsesType,
-                bucType,
-                true
-            )
+        val personRelasjon = personSok.sokPersonRelasjon(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+
+        if (personRelasjon != null) {
+
+            val fnr = personSok.pdlSokEtterFnr(personRelasjon.sokKriterier!!)
+
+            if (fnr != null) {
+                return hentIdentifisertPerson(
+                    personRelasjon.copy(Fodselsnummer.fra(fnr)), hendelsesType, bucType
+                )
+            }
+
         }
         return null
     }
@@ -142,14 +147,8 @@ class PersonidentifiseringService(
             logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
 
             potensielleSEDPersonRelasjoner
-                //.filterNot { it.fnr == null }
                 .mapNotNull { relasjon ->
-                    hentIdentifisertPerson(
-                        relasjon,
-                        hendelsesType,
-                        bucType,
-                        benyttSokPerson
-                    )
+                    hentIdentifisertPerson( relasjon, hendelsesType, bucType )
                 }
                 .distinctBy { it.aktoerId }
         }
@@ -167,21 +166,13 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        personRelasjon: SEDPersonRelasjon,
-        hendelsesType: HendelseType,
-        bucType: BucType,
-        benyttSokPerson: Boolean = false
+        personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType, bucType: BucType
     ): IdentifisertPerson? {
         logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 
         return try {
-
-            val valgtFnr = if (benyttSokPerson) {
-               personSok.sokEtterPerson(personRelasjon.sokKriterier!!)
-            } else {
-                logger.info("Velger fnr med relasjon: ${personRelasjon.relasjon} i SED: ${personRelasjon.sedType}")
-                personRelasjon.fnr?.value
-            }
+            logger.info("Velger fnr med relasjon: ${personRelasjon.relasjon} i SED: ${personRelasjon.sedType}")
+            val valgtFnr = personRelasjon.fnr?.value
 
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")

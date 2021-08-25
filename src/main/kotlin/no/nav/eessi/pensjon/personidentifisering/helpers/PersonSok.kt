@@ -63,16 +63,16 @@ class PersonSok(
         return potensiellePersonRelasjoner.firstOrNull()
     }
 
-    fun sokEtterPerson(sokeKriterier: SokKriterier): String? {
-        logger.info("Utfører personsøk")
-        logger.debug("SokKriterie: $sokeKriterier}")
+    fun pdlSokEtterFnr(sokeKriterier: SokKriterier): String? {
+        logger.info("Utfører søk etter fnr, $sokeKriterier")
 
         val sokPersonFnrTreff = sokeKriterier.let { personService.sokPerson(it) }
             .firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
-            .also { logger.info("Har gjort et treff på personsøk (${it != null})") }
         if (sokPersonFnrTreff != null) {
+            logger.info("Har gjort et treff på personsøk")
             sokPersonTellerTreff.increment()
         } else {
+            logger.info("IKKE treff på personsøk")
             sokPersonTellerMiss.increment()
         }
         return sokPersonFnrTreff
