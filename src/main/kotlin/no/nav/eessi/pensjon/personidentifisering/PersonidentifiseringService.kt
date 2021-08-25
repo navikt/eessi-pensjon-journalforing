@@ -7,7 +7,11 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.helpers.*
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -87,7 +91,15 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        return personSok.sokPersonUtvelger(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        personSok.sokPersonRelasjon(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)?.let {
+            return hentIdentifisertPerson(
+                it,
+                hendelsesType,
+                bucType,
+                true
+            )
+        }
+        return null
     }
 
     fun hentIdentifisertePersoner(
@@ -134,7 +146,6 @@ class PersonidentifiseringService(
                 .mapNotNull { relasjon ->
                     hentIdentifisertPerson(
                         relasjon,
-                        alleSediBuc,
                         hendelsesType,
                         bucType,
                         benyttSokPerson
@@ -157,7 +168,6 @@ class PersonidentifiseringService(
 
     fun hentIdentifisertPerson(
         personRelasjon: SEDPersonRelasjon,
-        alleSediBuc: List<Pair<String, SED>>,
         hendelsesType: HendelseType,
         bucType: BucType,
         benyttSokPerson: Boolean = false

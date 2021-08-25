@@ -3,8 +3,22 @@ package no.nav.eessi.pensjon.personidentifisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Brukere
+import no.nav.eessi.pensjon.eux.model.sed.Krav
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.RNav
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.Status
+import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
@@ -17,8 +31,16 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
+import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
+import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -48,12 +70,8 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, aktoerId = AktoerId("123213"), landkoder = true)
         every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
 
-        val p6000 = generateSED(SedType.P6000, forsikretFnr, gjenlevFnr = gjenlevFnr)
-        val h070 = generateSED(SedType.H070, forsikretFnr)
-
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null),
-            listOf(Pair("323123", p6000), Pair("213123", h070)),
             HendelseType.SENDT,
             BucType.P_BUC_05
         )
@@ -66,10 +84,8 @@ class PersonidentifiseringServiceTest {
         val gjenlevFnr = LEALAUS_KAKE
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
 
-        val p6000 = generateSED(SedType.P6000, STERK_BUSK, gjenlevFnr = gjenlevFnr)
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(Fodselsnummer.fra(LEALAUS_KAKE), Relasjon.GJENLEVENDE, null, sedType = SedType.P6000, null),
-            listOf(Pair("23123", p6000)),
             HendelseType.SENDT,
             BucType.P_BUC_05
         )
@@ -84,10 +100,8 @@ class PersonidentifiseringServiceTest {
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         every { personService.hentPerson(NorskIdent("05127921999")) } returns PersonMock.createWith("05127921999", landkoder = true)
 
-        val sed = generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = "05127921999", gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, null),
-            listOf(Pair("23123", sed)),
             HendelseType.SENDT,
             BucType.P_BUC_02
         )
@@ -152,10 +166,8 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
-        val alleSediBuc = listOf(Pair("3123123", sed))
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null),
-            alleSediBuc,
             HendelseType.SENDT,
             BucType.P_BUC_06
         )
@@ -166,10 +178,8 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
         val sed1 = sedFromJsonFile("/buc/P10000-superenkel.json")
-        val alleSediBuc = listOf(Pair("1232131", sed1))
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null),
-            alleSediBuc,
             HendelseType.SENDT,
             BucType.P_BUC_06
         )
