@@ -1,18 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.P10000
-import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.P2200
-import no.nav.eessi.pensjon.eux.model.sed.P5000
-import no.nav.eessi.pensjon.eux.model.sed.P6000
-import no.nav.eessi.pensjon.eux.model.sed.P8000
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
@@ -35,7 +24,7 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensielleFnrFraSeder(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
+    fun getPotensiellePersonRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
         val fnrListe = mutableSetOf<SEDPersonRelasjon>()
 
         seder.forEach { (_,sed) ->

@@ -9,15 +9,14 @@ import java.time.LocalDate
 data class IdentifisertPerson(
     val aktoerId: String,                               //fra PDL
     val personNavn: String?,                            //fra PDL
-    val harAdressebeskyttelse: Boolean = false,         //fra PDL
-    val landkode: String?,                              //fra PDL
-    val geografiskTilknytning: String?,                 //fra PDL
-    val personRelasjon: SEDPersonRelasjon,              //innhenting fra FnrHelper og SED
-    val fodselsdato: String? = null,                    // FnrHelper og SED
-    var personListe: List<IdentifisertPerson>? = null   //fra PDL
+    val landkode: String?,         //fra PDL
+    val geografiskTilknytning: String?,                              //fra PDL
+    val personRelasjon: SEDPersonRelasjon,                 //fra PDL
+    val fodselsdato: String? = null,              //innhenting fra FnrHelper og SED
+    var personListe: List<IdentifisertPerson>? = null   //fra PDL){}
 ) {
     override fun toString(): String {
-        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, harAdressebeskyttelse=$harAdressebeskyttelse, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
+        return "IdentifisertPerson(aktoerId='$aktoerId', personNavn=$personNavn, landkode=$landkode, geografiskTilknytning=$geografiskTilknytning, personRelasjon=$personRelasjon)"
     }
     fun flereEnnEnPerson() = personListe != null && personListe!!.size > 1
 }

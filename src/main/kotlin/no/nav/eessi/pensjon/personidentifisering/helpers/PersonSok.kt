@@ -13,7 +13,10 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -59,7 +62,7 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
             return null
         }
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(listOf(sedFraHendelse), bucType)
+        val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(listOf(sedFraHendelse), bucType)
 
         val identifisertePersoner = hentIdentifisertePersoner(
             sedListe,
@@ -67,6 +70,9 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
             potensiellePersonRelasjoner,
             hendelsesType
         )
+        logger.info("Har identifisert ${identifisertePersoner.size} person(er) med søkPerson")
+        logger.debug("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.toJson()}")
+
         return identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
     }
 
@@ -137,7 +143,7 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
         val personFnr = person.identer.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
-        val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
+
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
         val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
@@ -145,22 +151,10 @@ class PersonSok(@Suppress("SpringJavaInjectionPointsAutowiringInspection") priva
         return IdentifisertPerson(
             aktorId,
             personNavn,
-            adressebeskyttet,
             landkode,
             geografiskTilknytning,
             newPersonRelasjon
         )
-    }
-
-    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<Pair<String, SED>>): Boolean {
-        val alleSedTyper = alleSediBuc.map { it.second.type}.toJson()
-        logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
-        val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
-        val gradering =
-            listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
-
-        return personService.harAdressebeskyttelse(fnr, gradering)
-            .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }
 
     private fun hentLandkode(person: Person): String {

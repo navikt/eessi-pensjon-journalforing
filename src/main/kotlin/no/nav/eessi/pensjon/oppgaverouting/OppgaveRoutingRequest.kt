@@ -32,12 +32,13 @@ class OppgaveRoutingRequest(
             saktype: Saktype?,
             sedHendelseModel: SedHendelseModel,
             hendelseType: HendelseType,
-            sakInformasjon: SakInformasjon?
+            sakInformasjon: SakInformasjon?,
+            harAdressebeskyttelse: Boolean = false
         ): OppgaveRoutingRequest {
             return OppgaveRoutingRequest(
                     identifisertPerson?.aktoerId,
                     fdato,
-                    identifisertPerson?.harAdressebeskyttelse ?: false,
+                    harAdressebeskyttelse,
                     identifisertPerson?.landkode,
                     identifisertPerson?.geografiskTilknytning,
                     saktype,

@@ -10,12 +10,7 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -98,12 +93,11 @@ internal class JournalforingServiceTest {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "SE",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "SE",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
@@ -114,7 +108,7 @@ internal class JournalforingServiceTest {
             Saktype.ALDER,
             0,
             null,
-            SED(type = SedType.R004)
+            SED(type = SedType.R004),
         )
 
         verify {
@@ -139,12 +133,11 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "SE",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "SE",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
@@ -155,7 +148,7 @@ internal class JournalforingServiceTest {
             Saktype.UFOREP,
             0,
             null,
-            SED(type = SedType.R005)
+            SED(type = SedType.R005),
         )
 
         verify {
@@ -180,12 +173,12 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "SE",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
+            "12078945602",
+            "Test Testesen",
+            "SE",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+        )
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
         journalforingService.journalfor(
@@ -196,9 +189,9 @@ internal class JournalforingServiceTest {
             Saktype.UFOREP,
             0,
             null,
-            SED(type = SedType.R005)
+            SED(type = SedType.R005),
 
-        )
+            )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -222,19 +215,19 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "3811",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET))
+            "12078945602",
+            "Test Testesen",
+            "",
+            "3811",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+        )
         val dodPerson = IdentifisertPerson(
-                "22078945602",
-                "Dod Begravet",
-                false,
-                "",
-                "3811",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD))
+            "22078945602",
+            "Dod Begravet",
+            "",
+            "3811",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD)
+        )
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
 
@@ -246,9 +239,9 @@ internal class JournalforingServiceTest {
             Saktype.ALDER,
             0,
             null,
-            SED(type = SedType.R005)
+            SED(type = SedType.R005),
 
-        )
+            )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -273,17 +266,16 @@ internal class JournalforingServiceTest {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
             sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,
-            SED(type = SedType.P2000)
+            SED(type = SedType.P2000),
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -307,15 +299,23 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "NOR",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "NOR",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null,SED(type = SedType.P2200))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -339,15 +339,23 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P15000))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P15000),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -372,15 +380,23 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,SED(type = SedType.P2000))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2000),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -405,15 +421,23 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,SED(type = SedType.P2000))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2000),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -438,12 +462,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "NOR",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "NOR",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
@@ -453,7 +476,7 @@ internal class JournalforingServiceTest {
             fdato,
             Saktype.ALDER,
             0,
-            null,SED(type = SedType.P2100)
+            null, SED(type = SedType.P2100),
         )
 
         verify {
@@ -479,15 +502,23 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,SED(type = SedType.P2200))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -512,15 +543,23 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
-        journalforingService.journalfor(sedHendelse, HendelseType.MOTTATT, identifisertPerson, fdato, null, 0, null,SED(type = SedType.P15000))
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P15000),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -546,12 +585,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
         val sakInformasjon = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -563,7 +601,7 @@ internal class JournalforingServiceTest {
             Saktype.GJENLEV,
             0,
             sakInformasjon,
-            SED(type = SedType.P2100)
+            SED(type = SedType.P2100),
         )
 
         verify {
@@ -611,12 +649,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertGjenlevendePerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV)
         )
         val saksInfo = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -628,7 +665,7 @@ internal class JournalforingServiceTest {
             Saktype.GJENLEV,
             0,
             saksInfo,
-            SED(type = SedType.P2100)
+            SED(type = SedType.P2100),
         )
 
         verify {
@@ -656,12 +693,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV)
         )
         val sakInformasjon = SakInformasjon("111222", Saktype.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
@@ -673,7 +709,7 @@ internal class JournalforingServiceTest {
             null,
             0,
             sakInformasjon,
-            SED(type = SedType.P2100)
+            SED(type = SedType.P2100),
         )
 
         verify {
@@ -702,16 +738,16 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "",
-                null,
-                false,
-                "NO",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "",
+            null,
+            "NO",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
-            sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100))
+            sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -737,12 +773,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
         )
 
         journalforingService.journalfor(
@@ -792,12 +827,11 @@ internal class JournalforingServiceTest {
         val sedHendelse = SedHendelseModel.fromJson(hendelse)
 
         val identifisertGjenlevendePerson = IdentifisertPerson(
-                "12078945602",
-                "Test Testesen",
-                false,
-                "",
-                "",
-                personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP)
+            "12078945602",
+            "Test Testesen",
+            "",
+            "",
+            personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP)
         )
         val saksInfo = SakInformasjon("111111", Saktype.BARNEP, SakStatus.LOPENDE, "4862", false)
 
@@ -809,7 +843,7 @@ internal class JournalforingServiceTest {
             Saktype.BARNEP,
             0,
             saksInfo,
-            SED(type = SedType.P2100)
+            SED(type = SedType.P2100),
         )
 
         verify {

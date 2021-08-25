@@ -70,7 +70,7 @@ class PersonidentifiseringService(
         erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensielleFnrFraSeder(sedListe, bucType)
+        val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
         val identifisertePersoner = hentIdentifisertePersoner(
             navBruker,
             sedListe,
@@ -121,7 +121,6 @@ class PersonidentifiseringService(
             logger.info("*** Funnet identifisertPerson: personForNavBruker, fra hendelse: $hendelsesType, bucType: $bucType ***")
              val identifisertPerson = populerIdentifisertPerson(
                  personForNavBruker,
-                 alleSediBuc,
                  SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET, fdato = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)),
                  hendelsesType
              )
@@ -184,7 +183,6 @@ class PersonidentifiseringService(
                 ?.let { person ->
                     populerIdentifisertPerson(
                         person,
-                        alleSediBuc,
                         personRelasjon,
                         hendelsesType
                     )
@@ -203,7 +201,6 @@ class PersonidentifiseringService(
 
     private fun populerIdentifisertPerson(
         person: Person,
-        alleSediBuc: List<Pair<String, SED>>,
         sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType
     ): IdentifisertPerson {
@@ -212,7 +209,6 @@ class PersonidentifiseringService(
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
         val personFnr = person.identer.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
-        val adressebeskyttet = finnesPersonMedAdressebeskyttelse(alleSediBuc)
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune
         val landkode = hentLandkode(person)
         val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
@@ -220,14 +216,13 @@ class PersonidentifiseringService(
         return IdentifisertPerson(
             aktorId,
             personNavn,
-            adressebeskyttet,
             landkode,
             geografiskTilknytning,
             newPersonRelasjon
         )
     }
 
-    private fun finnesPersonMedAdressebeskyttelse(alleSediBuc: List<Pair<String, SED>>): Boolean {
+    fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
         val alleSedTyper = alleSediBuc.map { it.second.type}.toJson()
         logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }

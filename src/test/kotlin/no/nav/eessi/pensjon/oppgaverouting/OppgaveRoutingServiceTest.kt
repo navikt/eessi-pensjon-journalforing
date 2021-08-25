@@ -9,30 +9,9 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
-import no.nav.eessi.pensjon.models.BucType.H_BUC_07
-import no.nav.eessi.pensjon.models.BucType.P_BUC_01
-import no.nav.eessi.pensjon.models.BucType.P_BUC_02
-import no.nav.eessi.pensjon.models.BucType.P_BUC_03
-import no.nav.eessi.pensjon.models.BucType.P_BUC_04
-import no.nav.eessi.pensjon.models.BucType.P_BUC_06
-import no.nav.eessi.pensjon.models.BucType.P_BUC_07
-import no.nav.eessi.pensjon.models.BucType.P_BUC_08
-import no.nav.eessi.pensjon.models.BucType.P_BUC_09
-import no.nav.eessi.pensjon.models.BucType.P_BUC_10
-import no.nav.eessi.pensjon.models.BucType.R_BUC_02
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.Enhet.DISKRESJONSKODE
-import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_OSLO
-import no.nav.eessi.pensjon.models.Enhet.OKONOMI_PENSJON
-import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.BucType.*
+import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
@@ -264,7 +243,6 @@ internal class OppgaveRoutingServiceTest {
         val forsikret = IdentifisertPerson(
             "123",
             "Testern",
-            false,
             null,
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
@@ -272,7 +250,6 @@ internal class OppgaveRoutingServiceTest {
         val avod = IdentifisertPerson(
             "234",
             "Avdod",
-            false,
             null,
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD)
@@ -949,7 +926,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
         val identifisertPerson =
-            IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
+            IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
         val sedHendelseModel = SedHendelseModel(
             1232312L, "2321313", "P", P_BUC_10, "32131", avsenderId = "12313123",
@@ -963,7 +940,7 @@ internal class OppgaveRoutingServiceTest {
             Saktype.ALDER,
             sedHendelseModel,
             HendelseType.MOTTATT,
-            null
+            null,
         )
 
         val result = routingService.route(oppgaveroutingrequest)
@@ -998,7 +975,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
         val identifisertPerson =
-            IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
+            IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
         val sedHendelseModel = SedHendelseModel(
             1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
@@ -1012,7 +989,7 @@ internal class OppgaveRoutingServiceTest {
             Saktype.GJENLEV,
             sedHendelseModel,
             HendelseType.MOTTATT,
-            null
+            null,
         )
 
         val result = routingService.route(oppgaveroutingrequest)
@@ -1045,7 +1022,14 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
-        val identifisertPerson = IdentifisertPerson("01010101010", "Ole Olsen", false, "SWE", "3005", personRelasjon, personListe = emptyList())
+        val identifisertPerson = IdentifisertPerson(
+            "01010101010",
+            "Ole Olsen",
+            "SWE",
+            "3005",
+            personRelasjon,
+            personListe = emptyList()
+        )
 
         val sedHendelseModel = SedHendelseModel(1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
             "SE", "SE", "2312312", "NO", "NO", "23123123","1",
@@ -1057,7 +1041,7 @@ internal class OppgaveRoutingServiceTest {
             Saktype.BARNEP,
             sedHendelseModel,
             HendelseType.MOTTATT,
-            null
+            null,
         )
 
         val result = routingService.route(oppgaveroutingrequest)
@@ -1074,7 +1058,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000)
         val identifisertPerson =
-            IdentifisertPerson("01010101010", "Ole Olsen", false, "NOR", "3005", personRelasjon, personListe = emptyList())
+            IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
         val sedHendelseModel = SedHendelseModel(
             1232312L, "2321313", "P", P_BUC_01, "32131", avsenderId = "12313123",
@@ -1088,7 +1072,7 @@ internal class OppgaveRoutingServiceTest {
             Saktype.ALDER,
             sedHendelseModel,
             HendelseType.MOTTATT,
-            null
+            null,
         )
 
         val result = routingService.route(oppgaveroutingrequest)
@@ -1122,7 +1106,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200)
         val identifisertPerson =
-            IdentifisertPerson("01010101010", "Ole Olsen", false, "SWE", null, personRelasjon, personListe = emptyList())
+            IdentifisertPerson("01010101010", "Ole Olsen", "SWE", null, personRelasjon, personListe = emptyList())
 
         val sedHendelseModel = SedHendelseModel(
             1232312L, "2321313", "P", P_BUC_03, "32131", avsenderId = "12313123",
@@ -1136,7 +1120,7 @@ internal class OppgaveRoutingServiceTest {
             Saktype.UFOREP,
             sedHendelseModel,
             HendelseType.SENDT,
-            null
+            null,
         )
 
         val result = routingService.route(oppgaveroutingrequest)
@@ -2005,7 +1989,6 @@ internal class OppgaveRoutingServiceTest {
     private fun mockerEnPerson() = IdentifisertPerson(
         "123",
         "Testern",
-        false,
         "NO",
         "010",
         SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)

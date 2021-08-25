@@ -53,7 +53,8 @@ class JournalforingService(
         saktype: Saktype?,
         offset: Long,
         sakInformasjon: SakInformasjon?,
-        sed: SED?
+        sed: SED?,
+        harAdressebeskyttelse: Boolean = false
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -79,7 +80,8 @@ class JournalforingService(
                             saktype,
                             sedHendelseModel,
                             hendelseType,
-                            sakInformasjon
+                            sakInformasjon,
+                            harAdressebeskyttelse
                         )
                     )
                 }
@@ -126,7 +128,8 @@ class JournalforingService(
                     identifisertPerson,
                     fdato,
                     saktype,
-                    sedHendelseModel
+                    sedHendelseModel,
+                    harAdressebeskyttelse
                 )
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
@@ -195,6 +198,7 @@ class JournalforingService(
         fdato: LocalDate?,
         saktype: Saktype?,
         sedHendelseModel: SedHendelseModel,
+        harAdressebeskyttelse: Boolean,
     ): Enhet {
         return if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
             oppgaveRoutingService.route(
@@ -204,7 +208,8 @@ class JournalforingService(
                     saktype,
                     sedHendelseModel,
                     HendelseType.MOTTATT,
-                    null
+                    null,
+                    harAdressebeskyttelse
                 )
             )
         } else
