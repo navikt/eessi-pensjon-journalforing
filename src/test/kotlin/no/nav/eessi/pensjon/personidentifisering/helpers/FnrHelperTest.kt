@@ -1,13 +1,35 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Brukere
+import no.nav.eessi.pensjon.eux.model.sed.Krav
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
+import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PinItem
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.RNav
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.Status
+import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -266,7 +288,7 @@ internal class FnrHelperTest {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
-            val sedList = listOf(Pair("3123123",generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = null)))
+            val sedList = listOf(Pair("3123123",SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = null))))
 
             val relasjoner = FnrHelper().getPotensiellePersonRelasjoner(sedList, BucType.P_BUC_02)
 
@@ -286,7 +308,7 @@ internal class FnrHelperTest {
             val gjenlevFnr = LEALAUS_KAKE
 
             val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
-            val sedList = listOf(Pair("3123123", generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon)))
+            val sedList = listOf(Pair("3123123", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon))))
 
             val relasjoner = FnrHelper().getPotensiellePersonRelasjoner(sedList, BucType.P_BUC_02)
 
@@ -307,9 +329,7 @@ internal class FnrHelperTest {
 
             val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
             val sedList = listOf(
-                Pair("3123123",
-                    generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon))
-            )
+                Pair("3123123", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon))))
 
             val relasjoner = FnrHelper().getPotensiellePersonRelasjoner(sedList, BucType.P_BUC_02)
 

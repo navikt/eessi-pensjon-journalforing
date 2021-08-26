@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P10000
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P6000
@@ -43,17 +44,25 @@ class FnrHelper {
                 if (sed.type.kanInneholdeIdentEllerFdato()) {
 
                     when (sed) {
+                        //Tilbakebetaling
                         is R005   -> behandleR005(sed, fnrListe)
-                        is P15000 -> behandleP15000(sed, fnrListe)
-                        is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+
+                        //Krav
+                        is P2000 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
+                        is P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+                        is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
+
+                        //Vedtak mm..
                         is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+                        is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
                         is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe,bucType)
                         is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
-                        is P2000, is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
+                        is P15000 -> behandleP15000(sed, fnrListe)
+
                         else -> {
+                            // P9000, H070, X?? ? flere?
                             when (sed.type) {
-                                SedType.P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                                in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // P2000, P2200, P5000, og H070 ? flere?
+                                in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)
                                 else -> {
                                     leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000
                                     leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // flere?

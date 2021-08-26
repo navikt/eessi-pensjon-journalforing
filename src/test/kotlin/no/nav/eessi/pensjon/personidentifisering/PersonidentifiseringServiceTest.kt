@@ -8,6 +8,9 @@ import no.nav.eessi.pensjon.eux.model.sed.Brukere
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.P10000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
+import no.nav.eessi.pensjon.eux.model.sed.P6000
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.PinItem
@@ -179,8 +182,8 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(navBruker)) } returns PersonMock.createWith(navBruker, landkoder = true, fornavn = "Avgått-død")
 
         val sedListe = listOf(
-            Pair("231231", generateSED(SedType.P2100, forsikretFnr = navBruker, gjenlevFnr = gjenlevende, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE)),
-            Pair("13231212212A", generateSED(SedType.P6000, forsikretFnr = navBruker, gjenlevFnr = gjenlevende))
+            Pair("231231", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr = navBruker, gjenlevFnr = gjenlevende, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
+            Pair("13231212212A", SED.generateSedToClass<P6000>(generateSED(SedType.P6000, forsikretFnr = navBruker, gjenlevFnr = gjenlevende)))
         )
         val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListe, BucType.P_BUC_02)
 
@@ -212,9 +215,9 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(gjenlevende)) } returns PersonMock.createWith(gjenlevende, landkoder = true, fornavn = "Gjenlevende")
         every { personService.hentPerson(NorskIdent(navBruker)) } returns PersonMock.createWith(navBruker, landkoder = true, fornavn = "Avgått-død")
 
-        val sed1 = sedFromJsonFile("/buc/P2100-PinNO.json")
-        val sed2 = sedFromJsonFile("/buc/P6000-gjenlevende-NAV.json")
-        val sed3 = sedFromJsonFile("/buc/P10000-person-annenperson.json")
+        val sed1 = SED.generateSedToClass<P2100>(sedFromJsonFile("/buc/P2100-PinNO.json"))
+        val sed2 = SED.generateSedToClass<P6000>(sedFromJsonFile("/buc/P6000-gjenlevende-NAV.json"))
+        val sed3 = SED.generateSedToClass<P10000>(sedFromJsonFile("/buc/P10000-person-annenperson.json"))
         val alleSediBuc = listOf(Pair("123123", sed1), Pair("23123123", sed2), Pair("23143-adads-23123", sed3))
         val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.P_BUC_02)
 
@@ -453,7 +456,7 @@ class PersonidentifiseringServiceTest {
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
 
-        val sed1 = sedFromJsonFile("/sed/P_BUC_02_P2100_Sendt.json")
+        val sed1 = SED.generateSedToClass<P2100>(sedFromJsonFile("/sed/P_BUC_02_P2100_Sendt.json"))
         val sedListFraBuc = listOf(Pair("123123", sed1))
         val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListFraBuc, BucType.P_BUC_02)
 
