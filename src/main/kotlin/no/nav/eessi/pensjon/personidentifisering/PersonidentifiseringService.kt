@@ -75,14 +75,7 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
-        val identifisertePersoner = hentIdentifisertePersoner(
-            navBruker,
-            sedListe,
-            bucType,
-            potensiellePersonRelasjoner,
-            hendelsesType,
-            rinaDocumentId = rinaDocumentId
-        )
+        val identifisertePersoner = hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
         val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
 
@@ -91,19 +84,9 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        val personRelasjon = personSok.sokPersonRelasjon(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        personSok.sokPersonEtterFnr(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
 
-        if (personRelasjon != null) {
-
-            val fnr = personSok.pdlSokEtterFnr(personRelasjon.sokKriterier!!)
-
-            if (fnr != null) {
-                return hentIdentifisertPerson(
-                    personRelasjon.copy(Fodselsnummer.fra(fnr)), hendelsesType, bucType
-                )
-            }
-
-        }
         return null
     }
 
@@ -113,7 +96,6 @@ class PersonidentifiseringService(
         bucType: BucType,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
         hendelsesType: HendelseType,
-        benyttSokPerson: Boolean = false,
         rinaDocumentId: String
     ): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
@@ -148,7 +130,7 @@ class PersonidentifiseringService(
 
             potensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->
-                    hentIdentifisertPerson( relasjon, hendelsesType, bucType )
+                    hentIdentifisertPerson(relasjon, hendelsesType)
                 }
                 .distinctBy { it.aktoerId }
         }
@@ -166,7 +148,7 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType, bucType: BucType
+        personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType
     ): IdentifisertPerson? {
         logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 

@@ -41,7 +41,7 @@ class PersonSok(
             .register(metricsHelper.registry)
     }
 
-    fun sokPersonRelasjon(
+    fun sokPersonEtterFnr(
         navBruker: Fodselsnummer?,
         sedListe: List<Pair<String, SED>>,
         rinaDocumentId: String,
@@ -60,7 +60,13 @@ class PersonSok(
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(listOf(sedFraHendelse), bucType)
         logger.debug("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.toJson()}")
 
-        return potensiellePersonRelasjoner.firstOrNull()
+        val personRelasjon = potensiellePersonRelasjoner.firstOrNull()
+
+        pdlSokEtterFnr(personRelasjon?.sokKriterier!!)?.let { fnr ->
+            return personRelasjon.copy(fnr = Fodselsnummer.fra(fnr))
+        }
+
+        return null
     }
 
     fun pdlSokEtterFnr(sokeKriterier: SokKriterier): String? {
