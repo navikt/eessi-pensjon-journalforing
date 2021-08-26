@@ -7,11 +7,7 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
-import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
-import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
+import no.nav.eessi.pensjon.personidentifisering.helpers.*
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -117,7 +113,7 @@ class PersonidentifiseringService(
         }
 
         return if (personForNavBruker != null) {
-            logger.info("*** Funnet identifisertPerson: personForNavBruker, fra hendelse: $hendelsesType, bucType: $bucType ***")
+            logger.info("Fikk treff på person i : $hendelsesType SED, bucType: $bucType , dokumentId: $rinaDocumentId")
              val identifisertPerson = populerIdentifisertPerson(
                  personForNavBruker,
                  SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET, fdato = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)),
@@ -126,7 +122,7 @@ class PersonidentifiseringService(
             listOf(identifisertPerson)
         } else {
             // Leser inn fnr fra utvalgte seder
-            logger.info("Forsøker å identifisere personer ut fra SEDer i BUC: $bucType")
+            logger.info("Fikk ikke treff på person i $hendelsesType SED, Forsøker å identifisere personer ut fra andre SEDer i samme BUC: $bucType")
 
             potensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->
@@ -254,7 +250,7 @@ class PersonidentifiseringService(
         sedType: SedType?,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>
     ): IdentifisertPerson? {
-        logger.info("IdentifisertePersoner $bucType, SedType: ${sedType?.name}, antall identifisertePersoner : ${identifisertePersoner.size} ")
+        logger.info("Antall identifisertePersoner : ${identifisertePersoner.size} ")
 
         val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
         if (forsikretPerson != null)

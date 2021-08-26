@@ -16,14 +16,10 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun hentArbeidsfordelingEnhet(norgRequest: NorgKlientRequest): Enhet? {
         val request = opprettNorg2ArbeidsfordelingRequest(norgRequest)
-        logger.debug("følgende request til Norg2 : $request, norgklientreq: $norgRequest")
-
         return try {
             val enheter = klient.hentArbeidsfordelingEnheter(request)
 
             val enhet = finnArbeidsfordelingEnheter(request, enheter)
-
-            logger.info("Norg2 gav følgende enhet: $enhet")
 
             enhet?.let { Enhet.getEnhet(it) }
 

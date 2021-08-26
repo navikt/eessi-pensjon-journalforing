@@ -32,13 +32,11 @@ class BestemSakService(private val klient: BestemSakKlient) {
             else -> return null
         }
 
-        logger.info("KallBestemSak med aktoer: $aktoerId saktype: $saktype bucType: $bucType")
-
         val resp = kallBestemSak(aktoerId, saktype)
         if (resp != null && resp.sakInformasjonListe.size == 1) {
             return resp.sakInformasjonListe
                     .first()
-                    .also { logger.info("resultat en sakInformasjon: ${it.toJson()}") }
+                    .also { logger.info("BestemSak respons: ${it.toJson()}") }
         }
 
         logger.info("SakInformasjonListe er null eller større enn 1: ${resp?.sakInformasjonListe?.toJson()}")

@@ -1,13 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.P5000
-import no.nav.eessi.pensjon.eux.model.sed.P6000
-import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -56,7 +49,6 @@ class FodselsdatoHelper {
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
-                logger.info("Finner fdato fra SED: ${sed.type}")
                 val fdato = when (sed.type) {
                     SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
                     SedType.P2000, SedType.P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
@@ -70,7 +62,7 @@ class FodselsdatoHelper {
                 }
 
                 fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }.also {
-                    if (it != null) logger.info("Fant fdato fra SED")
+                    if (it != null) logger.info("Fant fødselsdato i ${sed.type}")
                 }
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt ved henting av fødselsdato fra SED", ex)

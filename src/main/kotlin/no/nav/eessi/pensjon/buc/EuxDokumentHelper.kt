@@ -107,7 +107,7 @@ class EuxDokumentHelper(
         return documents
             .filter(ForenkletSED::harGyldigStatus)
             .map { sed -> Pair(sed.id, hentSed(rinaSakId, sed.id)) }
-            .also { logger.info("Fant ${it.size} SED ") }
+            .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
     }
 
     fun isNavCaseOwner(buc: Buc): Boolean {
@@ -117,7 +117,10 @@ class EuxDokumentHelper(
             part -> part.organisation?.countryCode == "NO"
         }?.mapNotNull { it.organisation?.countryCode }?.singleOrNull()
 
-        return (caseOwner == "NO").also { if (it) logger.info("NAV er CaseOwner") else logger.info("NAV er IKKE CaseOwner") }
+        return (caseOwner == "NO").also {
+            if (it) { logger.info("NAV er CaseOwner i BUCid: ${buc.id} BUCtype: ${buc.processDefinitionName}")
+            } else { logger.info("NAV er IKKE CaseOwner i BUCid: ${buc.id} BUCtype: ${buc.processDefinitionName}") }
+        }
     }
 
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
