@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

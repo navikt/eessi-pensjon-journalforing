@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.personoppslag.pdl
 
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Endring

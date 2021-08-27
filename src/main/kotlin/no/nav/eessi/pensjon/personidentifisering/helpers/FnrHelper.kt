@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

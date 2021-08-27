@@ -29,9 +29,9 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
@@ -41,9 +41,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -234,21 +232,6 @@ class PersonidentifiseringServiceTest {
         assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon.relasjon)
 
         verify(exactly = 1) { personService.hentPerson(NorskIdent(gjenlevende)) }
-    }
-
-    @Test
-    fun `Gitt en tom fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(PersonidentifiseringService.erFnrDnrFormat(null))
-    }
-
-    @Test
-    fun `Gitt en ugyldig lengde fnr naar fnr valideres saa svar invalid`(){
-        assertFalse(PersonidentifiseringService.erFnrDnrFormat("1234"))
-    }
-
-    @Test
-    fun `Gitt en gyldig lengde fnr naar fnr valideres saa svar valid`(){
-        assertTrue(PersonidentifiseringService.erFnrDnrFormat("12345678910"))
     }
 
     @Test

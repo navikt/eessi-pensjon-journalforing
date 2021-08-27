@@ -7,7 +7,11 @@ import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.helpers.*
+import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
+import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
+import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -27,16 +31,11 @@ class PersonidentifiseringService(
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
 
-    companion object {
-        fun erFnrDnrFormat(id: String?): Boolean {
-            return id != null && id.length == 11 && id.isNotBlank()
-        }
-    }
-
     fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPerson? {
         return if (hendelsesType == HendelseType.MOTTATT) {
 
             val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
+
             if(check) {
                 logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
                 validerCounter("successful")

@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SedHendelseModel(

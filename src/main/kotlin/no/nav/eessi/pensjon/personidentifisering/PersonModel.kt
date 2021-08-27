@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.helpers.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import java.time.LocalDate
 
@@ -29,7 +29,11 @@ data class SEDPersonRelasjon(
     val sokKriterier: SokKriterier? = null,
     val fdato: LocalDate? = null
 ) {
-    fun validateFnrOgDato(): Boolean = if (fnr != null && fdato != null) fnr.getBirthDate() == fdato else true
+    fun validateFnrOgDato(): Boolean {
+        if (fdato == null) return true
+
+        return fnr?.getBirthDate() == fdato
+    }
 
     fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
     fun filterUbrukeligeElemeterAvSedPersonRelasjon(): Boolean = fnr == null && fdato == null && sokKriterier == null
