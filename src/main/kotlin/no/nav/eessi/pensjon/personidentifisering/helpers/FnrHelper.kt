@@ -56,8 +56,9 @@ class FnrHelper {
                         //Vedtak mm..
                         is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
                         is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe,bucType)
+                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
                         is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
+
                         is P15000 -> behandleP15000(sed, fnrListe)
 
                         else -> {
@@ -65,7 +66,7 @@ class FnrHelper {
                             when (sed.type) {
                                 in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)
                                 else -> {
-                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000
+                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000, P1000+++
                                     leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // flere?
                                 }
                             }
@@ -169,10 +170,10 @@ class FnrHelper {
     ) {
 
         //forsikretPerson (avdød eller søker)
-        forsikretBruker?.let {
-            val forsikretPersonKriterie = forsikretBruker?.let { sokPersonKriterie(it) }
-            val forsikretFnr = Fodselsnummer.fra(forsikretBruker?.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-            val fdato = mapFdatoTilLocalDate(forsikretBruker?.person?.foedselsdato)
+        forsikretBruker?.let { bruker ->
+            val forsikretPersonKriterie = sokPersonKriterie(bruker)
+            val forsikretFnr = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
 
             fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie))
             logger.debug("Legger til forsikret-person ${Relasjon.FORSIKRET}")

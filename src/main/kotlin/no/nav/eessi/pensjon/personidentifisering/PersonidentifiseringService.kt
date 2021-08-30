@@ -33,19 +33,17 @@ class PersonidentifiseringService(
 
     fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPerson? {
         return if (hendelsesType == HendelseType.MOTTATT) {
+            val isFnrDnrFdatoLikSedFdato =  identifisertPerson.personRelasjon.isFnrDnrSinFdatoLikSedFdato()
 
-            val check =  identifisertPerson.personRelasjon.validateFnrOgDato()
-
-            if(check) {
-                logger.info("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+            if(isFnrDnrFdatoLikSedFdato) {
+                logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
                 validerCounter("successful")
                 identifisertPerson
             } else {
-                logger.warn("valider: $check, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+                logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
                 validerCounter("failed")
                 null
             }
-
         } else {
             identifisertPerson
         }
@@ -95,51 +93,13 @@ class PersonidentifiseringService(
     ): List<IdentifisertPerson> {
         logger.info("Forsøker å identifisere personen")
 
-        val personForNavBruker = when {
-            bucType == BucType.P_BUC_02 -> null
-            bucType == BucType.P_BUC_05 -> null
-            bucType == BucType.P_BUC_06 -> null
-            bucType == BucType.P_BUC_10 -> null
-            navBruker != null -> {
-                try {
-                    personService.hentPerson(NorskIdent(navBruker.value))
-                } catch (ex: Exception) {
-                    logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
-                    null
-                }
-            }
-            else -> null
-        }
+            logger.info("Forsøker å identifisere personer ut fra: $hendelsesType, samt sed i samme BUC: $bucType, sedRelasjoner ${potensielleSEDPersonRelasjoner.map { it.sedType }}")
 
-        return if (personForNavBruker != null) {
-            logger.info("Fikk treff på person i : $hendelsesType SED, bucType: $bucType , dokumentId: $rinaDocumentId")
-             val identifisertPerson = populerIdentifisertPerson(
-                 personForNavBruker,
-                 SEDPersonRelasjon(navBruker!!, Relasjon.FORSIKRET, fdato = injectFdatoFraSedPersonNavBruker(alleSediBuc, rinaDocumentId)),
-                 hendelsesType
-             )
-            listOf(identifisertPerson)
-        } else {
-            // Leser inn fnr fra utvalgte seder
-            logger.info("Fikk ikke treff på person i $hendelsesType SED, Forsøker å identifisere personer ut fra andre SEDer i samme BUC: $bucType")
-
-            potensielleSEDPersonRelasjoner
+            return potensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->
                     hentIdentifisertPerson(relasjon, hendelsesType)
                 }
                 .distinctBy { it.aktoerId }
-        }
-    }
-
-    //finne korrekt fdato fra SED på current rinadocid (sed på hendelsen)
-    fun injectFdatoFraSedPersonNavBruker(alleSediBuc: List<Pair<String, SED>>, rinaDocumentId: String): LocalDate? {
-        logger.debug("rinaDocumentId $rinaDocumentId")
-        val currentSed = alleSediBuc.firstOrNull { it.first == rinaDocumentId }?.second
-        logger.debug("CurrentSED type: ${currentSed?.type}")
-
-        val fdato = currentSed?.let { FodselsdatoHelper.fdatoFraSedListe(listOf(it), emptyList()) }
-        logger.debug("Navbruker fdato-fraSed: $fdato, sedtype: ${currentSed?.type}")
-        return fdato
     }
 
     fun hentIdentifisertPerson(

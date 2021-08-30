@@ -29,7 +29,9 @@ data class SEDPersonRelasjon(
     val sokKriterier: SokKriterier? = null,
     val fdato: LocalDate? = null
 ) {
-    fun validateFnrOgDato(): Boolean {
+    fun isFnrDnrSinFdatoLikSedFdato(): Boolean {
+        //fdato == null and return true validation allow fnr
+        //fdato == null and return false validation fail
         if (fdato == null) return true
 
         return fnr?.getBirthDate() == fdato

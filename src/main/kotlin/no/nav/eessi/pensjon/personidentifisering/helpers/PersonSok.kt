@@ -62,7 +62,7 @@ class PersonSok(
         logger.debug("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.toJson()}")
 
         val personRelasjon = potensiellePersonRelasjoner.firstOrNull()
-        logger.info("Personrelasjon, sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}")
+        logger.info("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}")
 
         personRelasjon?.sokKriterier?.let {
             pdlSokEtterFnr(it)?.let { fnr ->
