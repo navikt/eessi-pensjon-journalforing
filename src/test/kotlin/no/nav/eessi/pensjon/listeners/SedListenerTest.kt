@@ -4,6 +4,7 @@ import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.FagmodulHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -23,8 +24,14 @@ internal class SedListenerTest {
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val sedDokumentHelper = mockk<EuxDokumentHelper>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
+    private val fagmodulHelper = mockk<FagmodulHelper>(relaxed = true)
 
-    private val sedListener = SedListener(jouralforingService, personidentifiseringService, sedDokumentHelper, bestemSakService, "test")
+    private val sedListener = SedListener(jouralforingService,
+        personidentifiseringService,
+        sedDokumentHelper,
+        fagmodulHelper,
+        bestemSakService,
+        "test")
 
     @BeforeEach
     fun setup() {

@@ -8,11 +8,8 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -23,7 +20,6 @@ import javax.annotation.PostConstruct
 
 @Service
 class EuxDokumentHelper(
-    private val fagmodulKlient: FagmodulKlient,
     private val euxKlient: EuxKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
@@ -151,13 +147,6 @@ class EuxDokumentHelper(
         return null
     }
 
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
-        }
-    }
-
-
     /**
      * eux-acl - /codes/mapping/tilbakekrevingfeilutbetalingytelsetypekoder.properties
      * uførepensjon=01
@@ -177,40 +166,4 @@ class EuxDokumentHelper(
             else -> throw RuntimeException("Klarte ikke å finne saktype for R_BUC_02")
         }
     }
-
-    private fun hentSakIdFraSED(sedListe: List<SED>): String? {
-        return sedListe
-                .mapNotNull { sed -> filterEESSIsak(sed) }
-                .map { id -> trimSakidString(id) }
-                .distinct()
-                .singleOrNull()
-                .also { sakId -> logger.debug("Fant sakId i SED: $sakId") }
-    }
-
-    private fun filterEESSIsak(sed: SED): String? {
-        val sak = sed.nav?.eessisak ?: return null
-
-        return sak.filter { it.land == "NO" }
-                .mapNotNull { it.saksnummer }
-                .lastOrNull()
-    }
-
-    private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
-
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String): SakInformasjon? {
-        val saklist: List<SakInformasjon> = try {
-            fagmodulKlient.hentPensjonSaklist(aktoerId)
-        } catch (e: Exception) {
-            logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
-            return null
-        }
-        logger.info("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
-
-        val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
-        return if (saklist.size > 1)
-            gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
-        else
-            gyldigSak
-    }
-
 }

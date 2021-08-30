@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.listeners
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.FagmodulHelper
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
@@ -28,6 +29,7 @@ class SedListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
     private val dokumentHelper: EuxDokumentHelper,
+    private val fagmodulHelper: FagmodulHelper,
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
@@ -216,7 +218,7 @@ class SedListener(
 
         return if (sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_05 || sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_10) {
             logger.info("skal hente pensjonSak for sed kap.1 og validere mot pesys")
-            dokumentHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+            fagmodulHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
         } else
             sakInformasjonFraBestemSak
     }

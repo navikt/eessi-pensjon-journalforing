@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 import io.mockk.*
 import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.buc.EuxKlient
+import no.nav.eessi.pensjon.buc.FagmodulHelper
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
@@ -64,7 +65,8 @@ internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlient = mockk()
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val dokumentHelper = EuxDokumentHelper(fagmodulKlient, euxKlient)
+    private val dokumentHelper = EuxDokumentHelper(euxKlient)
+    private val fagmodulHelper = FagmodulHelper(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
 
@@ -109,6 +111,7 @@ internal open class JournalforingTestBase {
         personidentifiseringService = personidentifiseringService,
         dokumentHelper = dokumentHelper,
         bestemSakService = bestemSakService,
+        fagmodulHelper = fagmodulHelper,
         profile = "test"
     )
 
