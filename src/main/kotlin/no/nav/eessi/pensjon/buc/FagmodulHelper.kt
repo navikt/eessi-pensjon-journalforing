@@ -12,6 +12,13 @@ class FagmodulHelper(private val fagmodulKlient: FagmodulKlient) {
 
     private val logger = LoggerFactory.getLogger(FagmodulHelper::class.java)
 
+
+    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
+        return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
+            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
+        }
+    }
+
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, sedSakId: String): SakInformasjon? {
         val saklist: List<SakInformasjon> = try {
             fagmodulKlient.hentPensjonSaklist(aktoerId)
@@ -22,16 +29,11 @@ class FagmodulHelper(private val fagmodulKlient: FagmodulKlient) {
         logger.info("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
 
         val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
+        //noe skjer når det er generell saker
         return if (saklist.size > 1)
             gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
         else
             gyldigSak
-    }
-
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
-        }
     }
 
     private fun hentSakIdFraSED(sedListe: List<SED>): String? {
