@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class PersonidentifiseringServiceTest {
@@ -347,9 +346,9 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc,BucType.P_BUC_01)
 
-        assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01, SedType.P2000, potensiellePerson)
-        }
+        val actual = personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01, SedType.P2000, potensiellePerson)
+        assertNull(actual)
+
     }
 
     @Test
@@ -389,12 +388,11 @@ class PersonidentifiseringServiceTest {
         val list = listOf(person1, person2, person3)
         val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(emptyList(),BucType.P_BUC_01)
 
-        assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01, SedType.P2100, potensiellePerson)
-        }
-        assertThrows<RuntimeException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03, SedType.P2100, potensiellePerson)
-        }
+        val actualbuc1 = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01, SedType.P2100, potensiellePerson)
+        assertNull(actualbuc1)
+
+        val actualbuc3 = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_03, SedType.P2100, potensiellePerson)
+        assertNull(actualbuc3)
     }
 
     @Test
