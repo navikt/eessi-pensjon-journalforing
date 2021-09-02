@@ -70,7 +70,12 @@ class PersonidentifiseringService(
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
         val identifisertePersoner = hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
-        val identifisertPerson = identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
+        val identifisertPerson = try {
+            identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
+        } catch (fppbe: FlerePersonPaaBucException) {
+            //flere personer på buc return null for id og fordeling
+            return null
+        }
 
         if (identifisertPerson != null) {
             return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
@@ -229,8 +234,8 @@ class PersonidentifiseringService(
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
             //buc_01,buc_03 hvis flere enn en forsikret person så sendes til id_og_fordeling
-            bucType == BucType.P_BUC_01 && (identifisertePersoner.size > 1) -> null
-            bucType == BucType.P_BUC_03 && (identifisertePersoner.size > 1) -> null
+            bucType == BucType.P_BUC_01 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
+            bucType == BucType.P_BUC_03 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
 
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
@@ -297,7 +302,7 @@ class PersonidentifiseringService(
     }
 }
 
-
+class FlerePersonPaaBucException(): Exception()
 
 
 
