@@ -31,7 +31,7 @@ internal class FbBuc01F001IntegrasjonsIntegrasjons : IntegrasjonsBase(){
         //when receiving a P2000
         initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/FB_BUC_01_F001.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(mottattListener)
         }
     }
 }

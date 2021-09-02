@@ -354,7 +354,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val meldingSlot = mutableListOf<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
                 mapJsonToAny(it, typeRefs<OppgaveMelding>())
@@ -479,8 +479,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
@@ -553,8 +553,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 

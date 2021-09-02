@@ -58,7 +58,6 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        navBruker: Fodselsnummer?,
         sedListe: List<Pair<String, SED>>,
         bucType: BucType,
         sedType: SedType?,
@@ -68,11 +67,12 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
-        val identifisertePersoner = hentIdentifisertePersoner(navBruker, sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
+        val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
+            logger.warn("Flere personer funnet i $bucType, returnerer null")
             //flere personer på buc return null for id og fordeling
             return null
         }
@@ -82,23 +82,20 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        personSok.sokPersonEtterFnr(navBruker, sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        personSok.sokPersonEtterFnr(sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
         ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
 
         return null
     }
 
     fun hentIdentifisertePersoner(
-        navBruker: Fodselsnummer?,
         alleSediBuc: List<Pair<String, SED>>,
         bucType: BucType,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
         hendelsesType: HendelseType,
         rinaDocumentId: String
     ): List<IdentifisertPerson> {
-        logger.info("Forsøker å identifisere personen")
-
-            logger.info("Forsøker å identifisere personer ut fra: $hendelsesType, samt sed i samme BUC: $bucType, sedRelasjoner ${potensielleSEDPersonRelasjoner.map { it.sedType }}")
+        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${potensielleSEDPersonRelasjoner.map { it.sedType }}, BUC: $bucType")
 
             return potensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->

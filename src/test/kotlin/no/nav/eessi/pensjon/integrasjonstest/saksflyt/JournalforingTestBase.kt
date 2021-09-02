@@ -27,7 +27,8 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
-import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.listeners.SedMottattListener
+import no.nav.eessi.pensjon.listeners.SedSendtListner
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -105,8 +106,15 @@ internal open class JournalforingTestBase {
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
 
+    protected val mottattListener: SedMottattListener = SedMottattListener(
+        journalforingService = journalforingService,
+        personidentifiseringService = personidentifiseringService,
+        dokumentHelper = dokumentHelper,
+        bestemSakService = bestemSakService,
+        profile = "test"
+    )
 
-    protected val listener: SedListener = SedListener(
+    protected val sendtListener: SedSendtListner = SedSendtListner(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
         dokumentHelper = dokumentHelper,
@@ -115,13 +123,15 @@ internal open class JournalforingTestBase {
         profile = "test"
     )
 
+
     @BeforeEach
     fun setup() {
         ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
         ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
-        listener.initMetrics()
+        sendtListener.initMetrics()
+        mottattListener.initMetrics()
         kravService.nameSpace = "test"
         journalforingService.initMetrics()
         journalforingService.nameSpace = "test"
@@ -201,9 +211,9 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         if (hendelseType == HendelseType.SENDT)
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         // forvent tema == PEN og enhet 2103
         val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -274,9 +284,9 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         if (hendelseType == HendelseType.SENDT)
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         assertBlock(journalpost.captured)
 
@@ -336,8 +346,8 @@ internal open class JournalforingTestBase {
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
 
         when (hendelseType) {
-            HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            HendelseType.SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            HendelseType.MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> Assertions.fail()
         }
 
@@ -374,7 +384,7 @@ internal open class JournalforingTestBase {
         return Buc(id = "2",  processDefinitionName = bucType.name, participants = part ,  documents = bucDocumentsFrom(forenkletSed))
     }
     fun bucDocumentsFrom(forenkletSed: List<ForenkletSED>): List<Document> {
-        return forenkletSed.map { forenklet -> Document(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.toLowerCase()) }
+        return forenkletSed.map { forenklet -> Document(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.lowercase()) }
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {

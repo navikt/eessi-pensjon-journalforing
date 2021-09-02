@@ -7,7 +7,8 @@ import io.mockk.clearAllMocks
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.listeners.SedListener
+import no.nav.eessi.pensjon.listeners.SedMottattListener
+import no.nav.eessi.pensjon.listeners.SedSendtListner
 import no.nav.eessi.pensjon.security.sts.STSService
 import org.junit.jupiter.api.AfterEach
 import org.mockserver.integration.ClientAndServer
@@ -40,7 +41,10 @@ const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
 abstract class IntegrasjonsBase() {
 
     @Autowired
-    lateinit var sedListener: SedListener
+    lateinit var mottattListener: SedMottattListener
+
+    @Autowired
+    lateinit var sendtListener: SedSendtListner
 
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
@@ -190,12 +194,9 @@ abstract class IntegrasjonsBase() {
             kafkaTemplate.sendDefault(javaClass.getResource(kafkaMsgFromPath).readText())
         }
 
-        fun waitForlatch(sedListener: SedListener){
-            when(kafkaTemplate.defaultTopic){
-                SED_MOTTATT_TOPIC -> sedListener.getMottattLatch().await(10, TimeUnit.SECONDS)
-                SED_SENDT_TOPIC -> sedListener.getSendtLatch().await(10, TimeUnit.SECONDS)
-            }
-        }
+        fun waitForlatch(sendtListner: SedSendtListner) = sendtListner.getLatch().await(10, TimeUnit.SECONDS)
+        fun waitForlatch(mottattListener: SedMottattListener) = mottattListener.getLatch().await(10, TimeUnit.SECONDS)
+
     }
 }
 

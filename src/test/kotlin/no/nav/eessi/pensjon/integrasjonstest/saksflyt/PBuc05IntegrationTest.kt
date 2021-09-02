@@ -689,7 +689,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -743,7 +743,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
 
@@ -784,7 +784,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -825,7 +825,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -869,7 +869,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -923,7 +923,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val hendelse = createHendelseJson(SedType.P9000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -977,7 +977,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val hendelse = createHendelseJson(SedType.P9000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -1029,7 +1029,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -1080,7 +1080,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -1130,7 +1130,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot(true)
             val hendelse = createHendelseJson(SedType.P6000, BucType.P_BUC_05)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
 
@@ -1190,7 +1190,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1223,7 +1223,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1265,7 +1265,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1302,7 +1302,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1333,7 +1333,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1473,7 +1473,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1508,7 +1508,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1543,7 +1543,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1578,7 +1578,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
@@ -1614,7 +1614,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 

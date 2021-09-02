@@ -47,7 +47,7 @@ internal class PBuc01UgyldigFNRIntegrasjonsTest : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(mottattListener)
         }
 
         //then route to 4303

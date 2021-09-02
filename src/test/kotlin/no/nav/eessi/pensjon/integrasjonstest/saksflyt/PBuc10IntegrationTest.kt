@@ -478,7 +478,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -519,7 +519,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -561,7 +561,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -603,7 +603,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -640,7 +640,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P15000, BucType.P_BUC_10)
 
-            listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
@@ -717,7 +717,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_10)
 
-            listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             val request = journalpost.captured
 
             assertEquals("UTGAAENDE", request.journalpostType.name)
@@ -774,8 +774,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
@@ -837,8 +837,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
@@ -889,8 +889,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns nor2enhet
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
@@ -939,8 +939,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2svar
 
         when (hendelseType) {
-            SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 

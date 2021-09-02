@@ -511,8 +511,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2enhet
 
         when (hendelseType) {
-            HendelseType.SENDT -> listener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            HendelseType.MOTTATT -> listener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            HendelseType.SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            HendelseType.MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> Assertions.fail()
         }
 

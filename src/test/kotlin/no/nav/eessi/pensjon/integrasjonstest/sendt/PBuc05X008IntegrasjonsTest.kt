@@ -47,7 +47,7 @@ internal class PBuc05X008IntegrasjonsIntegrasjons : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_SENDT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_05_X008.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(sendtListener)
         }
 
         //verify route

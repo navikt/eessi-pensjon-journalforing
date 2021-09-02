@@ -42,7 +42,7 @@ internal class PBuc01MottattIntegrasjonsIntegrasjons : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_MOTTATT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_01_P2000.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(mottattListener)
         }
 
         //verify route

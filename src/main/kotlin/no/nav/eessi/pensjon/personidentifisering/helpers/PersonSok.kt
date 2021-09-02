@@ -42,14 +42,7 @@ class PersonSok(
             .register(metricsHelper.registry)
     }
 
-    fun sokPersonEtterFnr(
-        navBruker: Fodselsnummer?,
-        sedListe: List<Pair<String, SED>>,
-        rinaDocumentId: String,
-        bucType: BucType,
-        sedType: SedType?,
-        hendelsesType: HendelseType
-    ): SEDPersonRelasjon? {
+    fun sokPersonEtterFnr(sedListe: List<Pair<String, SED>>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
         val sedFraHendelse = sedListe.firstOrNull { it.first == rinaDocumentId }

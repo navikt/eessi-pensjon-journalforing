@@ -16,7 +16,7 @@ import org.springframework.kafka.support.Acknowledgment
 import java.nio.file.Files
 import java.nio.file.Paths
 
-internal class SedListenerTest {
+internal class SedSendtListenerTest {
 
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
@@ -26,7 +26,7 @@ internal class SedListenerTest {
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val fagmodulHelper = mockk<FagmodulHelper>(relaxed = true)
 
-    private val sedListener = SedListener(jouralforingService,
+    private val sedListener = SedSendtListner(jouralforingService,
         personidentifiseringService,
         sedDokumentHelper,
         fagmodulHelper,
@@ -41,21 +41,6 @@ internal class SedListenerTest {
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
-
-        verify(exactly = 1) { acknowledgment.acknowledge() }
-    }
-
-    @Test
-    fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
-        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
-
-        verify(exactly = 1) { acknowledgment.acknowledge() }
-    }
-
-    @Test
-    fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres, skal melding ackes`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
     }
@@ -77,22 +62,10 @@ internal class SedListenerTest {
     }
 
     @Test
-    fun `gitt en exception ved sedMottatt så kastes RunTimeException og meldig blir IKKE ack'et`() {
-        assertThrows<RuntimeException> {
-            sedListener.consumeSedMottatt("Explode!", cr, acknowledgment)
-        }
-        verify { acknowledgment wasNot Called }
-    }
-
-    @Test
     fun `Mottat og sendt Sed med ugyldige verdier kaster exception`(){
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
-        //denne inneholder da ikke guldig P eller H_BUC_07
-        assertThrows<JournalforingException> {
-            sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
-        }
 
-        assertThrows<JournalforingException> {
+        assertThrows<SedSendtRuntimeException> {
             sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
         }
     }
@@ -101,15 +74,6 @@ internal class SedListenerTest {
     fun `gitt en sendt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
-
-        verify(exactly = 1) { acknowledgment.acknowledge() }
-        verify { jouralforingService wasNot Called }
-    }
-
-    @Test
-    fun `gitt en mottatt sed som ikke tilhoerer pensjon saa blir den ignorert`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/FB_BUC_01_F001.json")))
-        sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
         verify { jouralforingService wasNot Called }

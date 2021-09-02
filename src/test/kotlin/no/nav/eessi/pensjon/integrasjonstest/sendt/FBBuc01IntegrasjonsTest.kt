@@ -30,7 +30,7 @@ internal class FBBuc01IntegrasjonsTest : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_SENDT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/FB_BUC_01_F001.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(sendtListener)
         }
     }
 }

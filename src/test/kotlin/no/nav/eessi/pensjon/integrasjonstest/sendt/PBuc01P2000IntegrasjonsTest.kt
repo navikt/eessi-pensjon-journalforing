@@ -44,7 +44,7 @@ internal class PBuc01P2000IntegrasjonsTest : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_SENDT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_01_P2000.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(sendtListener)
         }
 
         //verify route

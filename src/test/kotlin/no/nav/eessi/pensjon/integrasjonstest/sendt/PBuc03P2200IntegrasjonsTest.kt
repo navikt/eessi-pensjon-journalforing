@@ -42,7 +42,7 @@ internal class PBuc03P2200IntegrasjonsTest : IntegrasjonsBase() {
         //send msg
         initAndRunContainer(SED_SENDT_TOPIC, OPPGAVE_TOPIC).also {
             it.sendMsgOnDefaultTopic("/eux/hendelser/P_BUC_03_P2200.json")
-            it.waitForlatch(sedListener)
+            it.waitForlatch(sendtListener)
         }
 
         //then route to 4303
