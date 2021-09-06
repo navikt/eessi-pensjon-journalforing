@@ -459,8 +459,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
-            val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, krav = ALDER)
-            val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60, krav = ALDER)
+            val sed15000sent = SED.generateSedToClass<P15000>( createSedPensjon(SedType.P15000, FNR_OVER_60, krav = ALDER))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.P5000, FNR_OVER_60, krav = ALDER))
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
@@ -500,8 +500,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
-            val sed15000sent = createSedPensjon(SedType.P15000, FNR_OVER_60, krav = ALDER)
-            val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_OVER_60)
+            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_OVER_60, krav = ALDER))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_60))
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
@@ -542,8 +542,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP skal routes til UFORE_UTLANDSTILSNITT 4476`() {
-            val sed15000sent = createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = UFORE)
-            val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
+            val sed15000sent =  SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = UFORE))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_VOKSEN))
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
@@ -584,8 +584,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP bosatt utland skal routes til UFORE_UTLAND 4475`() {
-            val sed15000sent = createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = UFORE)
-            val sedP5000mottatt = createSedPensjon(SedType.P5000, FNR_VOKSEN)
+            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN, krav = UFORE))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_VOKSEN))
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
