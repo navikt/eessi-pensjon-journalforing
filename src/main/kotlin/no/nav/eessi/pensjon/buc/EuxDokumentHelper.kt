@@ -91,12 +91,13 @@ class EuxDokumentHelper(
         return documents
             .filter { it.id != null }
             .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
+            .filter { it.harGyldigStatus() }
     }
 
     fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {
         return hentBucDokumenter(buc)
             .filter { it.type.erGyldig() }
-            .also { logger.info("Fant ${it.size} dokumenter i Fagmodulen: $it") }
+            .also { logger.info("Fant ${it.size} dokumenter i BUC: $it") }
     }
 
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {

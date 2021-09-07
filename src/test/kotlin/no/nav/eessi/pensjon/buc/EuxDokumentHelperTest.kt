@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.buc
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
@@ -60,8 +64,8 @@ internal class EuxDokumentHelperTest {
         val json = javaClass.getResource("/eux/buc/buc279020.json").readText()
         val buc = mapJsonToAny(json, typeRefs<Buc>())
 
-        assertEquals(25, helper.hentBucDokumenter(buc).size)
-        assertEquals(13, helper.hentAlleGyldigeDokumenter(buc).size)
+        assertEquals(9, helper.hentBucDokumenter(buc).size)
+        assertEquals(8, helper.hentAlleGyldigeDokumenter(buc).size)
     }
 
     @Test
