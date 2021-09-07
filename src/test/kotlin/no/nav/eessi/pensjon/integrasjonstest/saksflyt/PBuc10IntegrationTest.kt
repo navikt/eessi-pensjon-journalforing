@@ -467,7 +467,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
-                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED)
+                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED),
+                ForenkletSED("654654", SedType.P8000, SedStatus.EMPTY)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(BucType.P_BUC_10, alleDocumenter)
