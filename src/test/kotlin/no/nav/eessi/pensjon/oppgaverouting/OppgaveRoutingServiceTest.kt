@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
+import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.BucType.H_BUC_07
 import no.nav.eessi.pensjon.models.BucType.P_BUC_01
 import no.nav.eessi.pensjon.models.BucType.P_BUC_02
@@ -39,17 +40,21 @@ import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import java.util.*
 import kotlin.test.assertNull
 
+val norg2Klient = mockk<Norg2Klient>()
+val norg2Service = Norg2Service(norg2Klient)
+val routingService = OppgaveRoutingService(norg2Service)
+
+fun irrelevantDato() = LocalDate.MIN
 internal class OppgaveRoutingServiceTest {
-
-    private val norg2Klient = mockk<Norg2Klient>()
-
-    private val norg2Service = Norg2Service(norg2Klient)
-
-    private val routingService = OppgaveRoutingService(norg2Service)
 
     companion object {
         private const val DUMMY_FNR = "09035225916" // Testbruker SLAPP SKILPADDE
@@ -63,14 +68,11 @@ internal class OppgaveRoutingServiceTest {
         val alder18aar: LocalDate = LocalDate.now().minusYears(18).minusDays(1)
         val alder59aar: LocalDate = LocalDate.now().minusYears(60).plusDays(1)
 
-
         // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
         val alder17aar: LocalDate = LocalDate.now().minusYears(18).plusDays(1)
         val alder60aar: LocalDate = LocalDate.now().minusYears(60)
-
     }
 
-    private fun irrelevantDato() = LocalDate.MIN
 
     @Test
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
@@ -298,649 +300,189 @@ internal class OppgaveRoutingServiceTest {
 
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
-    @Test
-    fun `Routing av utgående seder i R_BUC_02`() {
-        assertEquals(
-            ID_OG_FORDELING, routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = R_BUC_02,
-                    sedType = SedType.R005,
-                    hendelseType = HendelseType.SENDT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
+    @Nested
+    @DisplayName("Routing_R_BUC_02")
+    class Routing_R_BUC_02 {
+        private companion object {
+            @JvmStatic
+            fun arguments() =
+                Arrays.stream(
+                    arrayOf(
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R005),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SedType.R004),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SedType.R004),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SedType.R005),
+                    )
                 )
-            )
+        }
+        private fun mockerEnPerson() = IdentifisertPerson(
+            "123",
+            "Testern",
+            "NO",
+            "010",
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
         )
 
-        assertEquals(
-            OKONOMI_PENSJON, routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = R_BUC_02,
-                    sedType = SedType.R004,
-                    hendelseType = HendelseType.SENDT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
-                )
-            )
+        data class TestArgumentsPBuc02(
+            val expectedResult: Enhet,
+            val landkode: String?,
+            val sedType: SedType
         )
 
-        assertEquals(
-            OKONOMI_PENSJON, routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = R_BUC_02,
-                    sedType = SedType.R004,
-                    hendelseType = HendelseType.SENDT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
+        @ParameterizedTest
+        @MethodSource("arguments")
+        fun `Routing for R_BUC_02'er`(arguments: TestArgumentsPBuc02) {
+            assertEquals(
+                arguments.expectedResult, routingService.route(
+                    OppgaveRoutingRequest(
+                        aktorId = "01010101010",
+                        fdato = irrelevantDato(),
+                        landkode = arguments.landkode,
+                        geografiskTilknytning = dummyTilknytning,
+                        bucType = R_BUC_02,
+                        sedType = arguments.sedType,
+                        hendelseType = HendelseType.SENDT,
+                        sakInformasjon = null,
+                        identifisertPerson = mockerEnPerson()
+                    )
                 )
             )
-        )
-
-        assertEquals(
-            ID_OG_FORDELING, routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = R_BUC_02,
-                    sedType = SedType.R005,
-                    hendelseType = HendelseType.SENDT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
-                )
-            )
-        )
-
+        }
     }
 
-    @Test
-    fun `Routing for P_BUC_02'er`() {
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
+    @Nested
+    @DisplayName("Routing_P_BUC_10")
+    class Routing_P_BUC_02 {
+        private companion object {
+            @JvmStatic
+            fun arguments() =
+                Arrays.stream(
+                    arrayOf(
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.GJENLEV),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, Saktype.UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, Saktype.UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.BARNEP),
+
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, Saktype.ALDER),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, Saktype.UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, Saktype.UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.BARNEP),
+
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, Saktype.ALDER),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, Saktype.UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, Saktype.UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE),
+
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, Saktype.UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, Saktype.UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.BARNEP),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.GJENLEV),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.ALDER),
+                    )
                 )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.LOPENDE),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.AVSLUTTET),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
+        }
+        data class TestArgumentsPBuc02(
+            val expectedResult: Enhet,
+            val landkode: String?,
+            val saktype: Saktype? = null,
+            val sakStatus: SakStatus? = null
         )
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.BARNEP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
+            return SakInformasjon(null, Saktype.UFOREP, sakStatus)
+        }
 
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        @ParameterizedTest
+        @MethodSource("arguments")
+        fun `Routing for P_BUC_02'er`(arguments: TestArgumentsPBuc02) {
 
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.LOPENDE),
-                    hendelseType = HendelseType.SENDT
+            assertEquals(
+                arguments.expectedResult,
+                routingService.route(
+                    OppgaveRoutingRequest(
+                        aktorId = "01010101010",
+                        fdato = irrelevantDato(),
+                        landkode = arguments.landkode,
+                        bucType = P_BUC_02,
+                        saktype = arguments.saktype,
+                        sakInformasjon = arguments.sakStatus?.let { opprettSakInfo(it) },
+                        hendelseType = HendelseType.SENDT
+                    )
                 )
             )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.AVSLUTTET),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.BARNEP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.LOPENDE),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.AVSLUTTET),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_02,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.LOPENDE),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.UFOREP,
-                    sakInformasjon = opprettSakInfo(SakStatus.AVSLUTTET),
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.BARNEP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_02,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
+        }
     }
 
-    @Test
-    fun `Routing for P_BUC_10'er`() {
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+    data class TestArguments(
+        val expectedResult: Enhet,
+        val alder: LocalDate,
+        val landkode: String?,
+        val saktype: Saktype?
+    )
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+    @Nested
+    @DisplayName("Routing_P_BUC_10")
+    class Routing_P_BUC_10 {
+        private companion object {
+            @JvmStatic
+            fun arguments() =
+                Arrays.stream(
+                    arrayOf(
+                        TestArguments(PENSJON_UTLAND, alder18aar, null, Saktype.ALDER),
+                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder17aar, null, Saktype.ALDER),
+                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, Saktype.ALDER),
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, Saktype.GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, Saktype.GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder17aar, null, Saktype.GJENLEV),
+                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, Saktype.GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, Saktype.GJENLEV),
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArguments(UFORE_UTLAND, alder18aar, null, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLANDSTILSNITT, alder18aar, NORGE, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLAND, alder18aar, UTLAND, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLAND, alder17aar, null, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLANDSTILSNITT, alder17aar, NORGE, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLAND, alder17aar, UTLAND, Saktype.UFOREP),
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
+                        TestArguments(PENSJON_UTLAND, alder59aar, null, Saktype.ALDER),
+                        TestArguments(ID_OG_FORDELING, alder59aar, NORGE, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder59aar, UTLAND, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder60aar, null, Saktype.ALDER),
+                        TestArguments(ID_OG_FORDELING, alder60aar, NORGE, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder60aar, UTLAND, Saktype.ALDER),
+                    )
                 )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        }
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        @ParameterizedTest
+        @MethodSource("arguments")
+        fun `Routing_P_BUC_10`(arguments: TestArguments) {
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder59aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
+            assertEquals(
+                arguments.expectedResult,
+                routingService.route(
+                    OppgaveRoutingRequest(
+                        aktorId = "01010101010",
+                        fdato = arguments.alder,
+                        bucType = P_BUC_10,
+                        landkode = arguments.landkode,
+                        saktype = arguments.saktype,
+                        hendelseType = HendelseType.SENDT
+                    )
                 )
             )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder59aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder59aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            ID_OG_FORDELING,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        }
     }
 
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
         val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
-
-
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -966,7 +508,6 @@ internal class OppgaveRoutingServiceTest {
 
         val result = routingService.route(oppgaveroutingrequest)
         assertEquals(NFP_UTLAND_OSLO, result)
-
     }
 
     @Test
@@ -1042,7 +583,8 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
-        val personRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
+        val personRelasjon =
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
         val identifisertPerson = IdentifisertPerson(
             "01010101010",
             "Ole Olsen",
@@ -1052,9 +594,11 @@ internal class OppgaveRoutingServiceTest {
             personListe = emptyList()
         )
 
-        val sedHendelseModel = SedHendelseModel(1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123","1",
-            SedType.P2100, null )
+        val sedHendelseModel = SedHendelseModel(
+            1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
+            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
+            SedType.P2100, null
+        )
 
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
@@ -1148,756 +692,122 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(UFORE_UTLAND, result)
     }
 
-    @Test
-    fun `Routing for vanlige BUC'er`() {
-
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = P_BUC_01,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = P_BUC_01,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = P_BUC_01,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_01,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
+    @Nested
+    @DisplayName("Routing_P_BUC_10")
+    class Routing_vanligeBucs {
+        data class TestArgumentsBucs(
+            val expectedResult: Enhet,
+            val bucType: BucType,
+            val landkode: String? = null,
+            val geografiskTilknytning: String? = null,
+            val fdato: LocalDate? = null,
+            val saksType: Saktype? = null,
+            val adressebeskyttet: Boolean? = false
         )
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        private companion object {
+            @JvmStatic
+            fun arguments() =
+                Arrays.stream(
+                    arrayOf(
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01,  dummyTilknytning, fdato = irrelevantDato()),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_01, NORGE, dummyTilknytning, fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01, UTLAND, dummyTilknytning, fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01, UTLAND,  fdato = irrelevantDato()),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_03,   fdato = irrelevantDato()),
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_03, NORGE,  fdato = irrelevantDato()),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_03, UTLAND,  fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_04,   fdato = irrelevantDato()),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_04, NORGE, fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_04, UTLAND),
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_06, UTLAND, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_06, NORGE,  fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_06,   fdato = alder18aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_06, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_06, NORGE,  fdato = alder17aar),
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_06, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_07,  fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_07, NORGE,  fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_07, fdato = alder18aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, fdato = alder17aar),
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_06, NORGE, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, UTLAND,  fdato = alder17aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_08, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_08, NORGE, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_08, UTLAND, fdato = alder18aar),
+
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_08, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_08, NORGE,  fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_08, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_03),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_03, NORGE),
+
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_03, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_04, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_04,NORGE, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_04, UTLAND),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_06, fdato = alder18aar),
+
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_06, NORGE, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_06, UTLAND, fdato = alder18aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_06, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_06, NORGE, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_06, UTLAND, fdato = alder17aar),
+
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_07,  fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_07, NORGE, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_07, UTLAND, fdato = alder18aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_07, NORGE, fdato = alder17aar),
+
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_08, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_08, NORGE, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_08, UTLAND, fdato = alder18aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_08, fdato = alder17aar),
+
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_07, NORGE, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_08, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_09, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_09, NORGE, fdato = alder18aar),
+                        TestArgumentsBucs(UFORE_UTLAND, P_BUC_09, UTLAND, fdato = alder18aar),
 
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_03,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_08, NORGE, fdato = alder17aar),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_09, UTLAND, fdato = alder17aar),
+                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_01, NORGE, fdato = alder60aar, adressebeskyttet = true, saksType = Saktype.ALDER),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_03, NORGE, fdato = alder60aar, saksType = Saktype.UFOREP),
 
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_10, UTLAND, fdato = alder60aar, saksType = Saktype.GJENLEV),
+                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_10, UTLAND, fdato = alder60aar, adressebeskyttet = true, saksType = Saktype.GJENLEV),
+                        )
                 )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    bucType = P_BUC_04,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        }
 
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
+        @ParameterizedTest
+        @MethodSource("arguments")
+        fun `Ruting for vanlige BUCer`(arguments: TestArgumentsBucs) {
+            assertEquals(
+                arguments.expectedResult,
+                routingService.route(
+                    OppgaveRoutingRequest(
+                        aktorId = "01010101010",
+                        fdato = arguments.fdato ?: irrelevantDato(),
+                        geografiskTilknytning = arguments.geografiskTilknytning,
+                        bucType = arguments.bucType,
+                        landkode = arguments.landkode,
+                        hendelseType = HendelseType.SENDT,
+                        harAdressebeskyttelse = arguments.adressebeskyttet ?: false,
+                        saktype = arguments.saksType
+                    )
                 )
             )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_06,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_08,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            NFP_UTLAND_AALESUND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder17aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_09,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-
-        assertEquals(
-            DISKRESJONSKODE,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    harAdressebeskyttelse = true,
-                    geografiskTilknytning = dummyTilknytning,
-                    bucType = P_BUC_01,
-                    saktype = Saktype.ALDER,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            UFORE_UTLANDSTILSNITT,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    landkode = NORGE,
-                    bucType = P_BUC_03,
-                    saktype = Saktype.UFOREP,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            DISKRESJONSKODE,
-            routingService.route(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    harAdressebeskyttelse = true,
-                    landkode = UTLAND,
-                    bucType = P_BUC_10,
-                    saktype = Saktype.GJENLEV,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
+        }
     }
 
     private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
@@ -2007,7 +917,7 @@ internal class OppgaveRoutingServiceTest {
         return mapJsonToAny(json, typeRefs())
     }
 
-    private fun mockerEnPerson() = IdentifisertPerson(
+    fun mockerEnPerson() = IdentifisertPerson(
         "123",
         "Testern",
         "NO",
