@@ -67,6 +67,7 @@ class PersonidentifiseringService(
     ): IdentifisertPerson? {
 
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
+
         val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
         val identifisertPerson = try {
@@ -95,9 +96,11 @@ class PersonidentifiseringService(
         hendelsesType: HendelseType,
         rinaDocumentId: String
     ): List<IdentifisertPerson> {
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${potensielleSEDPersonRelasjoner.map { it.sedType }}, BUC: $bucType")
 
-            return potensielleSEDPersonRelasjoner
+        val distinctByPotensielleSEDPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "${it.relasjon}, ${it.sedType}" }}, BUC: $bucType")
+
+            return distinctByPotensielleSEDPersonRelasjoner
                 .mapNotNull { relasjon ->
                     hentIdentifisertPerson(relasjon, hendelsesType)
                 }

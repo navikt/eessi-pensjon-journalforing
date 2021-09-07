@@ -80,7 +80,7 @@ class FnrHelper {
         val resultat = fnrListe
                 .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
                 .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
-                .distinctBy { it.fnr }
+               .sortedBy { it.relasjon }
 
         return resultat.ifEmpty { fnrListe.distinctBy { it.fnr } }
     }
@@ -93,7 +93,7 @@ class FnrHelper {
     private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
         gjenlevende?.let { bruker ->
-            val sokPersonKriterie = sokPersonKriterie(bruker)
+            val sokPersonKriterie = opprettSokKriterie(bruker)
             val fodselnummer = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato =  mapFdatoTilLocalDate(bruker.person?.foedselsdato)
             fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato))
@@ -126,7 +126,7 @@ class FnrHelper {
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>, saktype: Saktype? = null) {
         val forsikretBruker = sed.nav?.bruker
         forsikretBruker?.let {  bruker ->
-            val sokPersonKriterie =  sokPersonKriterie(bruker)
+            val sokPersonKriterie =  opprettSokKriterie(bruker)
             val fodselnummer = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
 
@@ -136,18 +136,19 @@ class FnrHelper {
 
     }
 
-    private fun sokPersonKriterie(navBruker: Bruker) : SokKriterier? {
+    private fun opprettSokKriterie(navBruker: Bruker) : SokKriterier? {
         val person = navBruker.person ?: return null
         val fdatotmp: String = person.foedselsdato ?: return null
         val fornavn: String = person.fornavn ?: return null
         val etternavn: String = person.etternavn ?: return null
+
         val fodseldato: LocalDate = mapFdatoTilLocalDate(fdatotmp)!!
         val sokKriterier = SokKriterier(
             fornavn,
             etternavn,
             fodseldato
         )
-        logger.debug("Oppretter SokKriterier: ${sokKriterier.fornavn}, ${sokKriterier.etternavn}, ${sokKriterier.foedselsdato}")
+        logger.debug("Oppretter sokKriterier: ${sokKriterier.fornavn}, ${sokKriterier.etternavn}, ${sokKriterier.foedselsdato}")
         return sokKriterier
     }
 
@@ -171,7 +172,7 @@ class FnrHelper {
 
         //forsikretPerson (avdød eller søker)
         forsikretBruker?.let { bruker ->
-            val forsikretPersonKriterie = sokPersonKriterie(bruker)
+            val forsikretPersonKriterie = opprettSokKriterie(bruker)
             val forsikretFnr = Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
 
@@ -184,7 +185,7 @@ class FnrHelper {
         gjenlevendePerson?.let { person ->
             val gjenlevendePin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)
-            val sokPersonKriterie = gjenlevendeBruker.let { sokPersonKriterie(it) }
+            val sokPersonKriterie = gjenlevendeBruker.let { opprettSokKriterie(it) }
 
             val gjenlevendeRelasjon = person.relasjontilavdod?.relasjon
             if (gjenlevendeRelasjon == null) {
@@ -228,7 +229,7 @@ class FnrHelper {
 
         val rolle = annenPerson?.person?.rolle
 
-        val sokForsikretKriterie = forsikretBruker?.let { sokPersonKriterie(it) }
+        val sokForsikretKriterie = forsikretBruker?.let { opprettSokKriterie(it) }
 
         logger.debug("Personpin: $personPin, AnnenPersonpin $annenPersonPin, Annenperson rolle : $rolle, sokForsikret: ${sokForsikretKriterie != null}")
 
@@ -238,7 +239,7 @@ class FnrHelper {
 
         //Annenperson søker/barn o.l
         if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
-            val sokAnnenPersonKriterie = annenPerson?.let { sokPersonKriterie(it) }
+            val sokAnnenPersonKriterie = annenPerson?.let { opprettSokKriterie(it) }
             val annenPersonRelasjon = when (rolle) {
                 Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato)
                 Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sedType, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)

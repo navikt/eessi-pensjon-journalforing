@@ -60,7 +60,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation 'org.springframework.kafka:spring-kafka'
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.4.6') {
 		exclude module: 'junit'
 		exclude module: "mockito-core"
 		exclude module: "junit-vintage-engine"

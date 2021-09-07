@@ -544,8 +544,8 @@ internal open class JournalforingTestBase {
             person = Person(
                 pin = validFnr?.let { listOf(PinItem(identifikator = it.value, land = "NO")) },
                 foedselsdato = foedselsdato,
-                fornavn = "${pdlForsikret?.navn?.fornavn}",
-                etternavn = "${pdlForsikret?.navn?.etternavn}",
+                fornavn = pdlForsikret?.navn?.fornavn,
+                etternavn = pdlForsikret?.navn?.etternavn,
                 sivilstand = createSivilstand(sivilstand),
                 statsborgerskap = createStatsborger(statsborgerskap)
             )

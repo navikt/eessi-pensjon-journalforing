@@ -4,10 +4,10 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
@@ -22,8 +22,7 @@ import javax.annotation.PostConstruct
 class PersonSok(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
     @Autowired private val fnrHelper: FnrHelper,
-    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
-) {
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(PersonSok::class.java)
     private lateinit var sokPersonTellerTreff: Counter
@@ -50,12 +49,13 @@ class PersonSok(
             logger.info("Ingen gyldig sed for søkPerson")
             return null
         }
-
         val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(listOf(sedFraHendelse), bucType)
-        logger.debug("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.toJson()}")
+        logger.info("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner?.mapNotNull { it.relasjon }}, $sedType ")
 
-        val personRelasjon = potensiellePersonRelasjoner.firstOrNull()
-        logger.info("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}")
+        val personRelasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE }
+            ?: potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.FORSIKRET }
+
+        logger.info("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}, relasjon: ${personRelasjon?.relasjon}")
 
         personRelasjon?.sokKriterier?.let {
             pdlSokEtterFnr(it)?.let { fnr ->

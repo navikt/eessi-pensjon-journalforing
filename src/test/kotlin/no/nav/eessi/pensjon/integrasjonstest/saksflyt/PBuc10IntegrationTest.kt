@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
@@ -28,6 +29,7 @@ import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_OSLO
+import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -41,6 +43,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
@@ -413,7 +416,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             testRunner(FNR_VOKSEN_2, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
 
             testRunner(FNR_OVER_60, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
@@ -525,13 +528,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(Enhet.PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
-            assertEquals(Enhet.PENSJON_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
@@ -660,6 +663,57 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             clearAllMocks()
         }
+
+        @Test
+        fun `Innkommende P15000 gjenlevende og forsikret mangler fnr prøver søk persom på gjenlevende`() {
+
+            val sokPerson = setOf(IdentInformasjon(FNR_VOKSEN, IdentGruppe.FOLKEREGISTERIDENT)) // korrekt return sokPerson
+
+            val land = "SWE"
+            val fnrSokVoken = null
+            val mockGjenlevende = createBrukerWith(FNR_VOKSEN,  "Voksen ", "Gjenlevnde", land, aktorId = AKTOER_ID)
+
+            val sedP15000 = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, "12321", gjenlevendeFnr = fnrSokVoken, sivilstand = SivilstandItem("01-30-1980", "01"),  krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE ,  pdlPerson = mockGjenlevende))
+
+            val alleDocumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P15000, SedStatus.RECEIVED))
+
+            every { personService.sokPerson(any()) } returns sokPerson
+            every { personService.hentPerson(NorskIdent(FNR_VOKSEN)) } returns mockGjenlevende
+            every { euxKlient.hentBuc(any()) } returns bucFrom(BucType.P_BUC_10, alleDocumenter)
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP15000.toJsonSkipEmpty()
+            every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
+            every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+            val hendelse = createHendelseJson(SedType.P15000, BucType.P_BUC_10)
+
+            //kjør
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val request = journalpost.captured
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+            assertEquals("P15000", oppgaveMelding.sedType?.name)
+
+            assertEquals("INNGAAENDE", request.journalpostType.name)
+            assertEquals(PENSJON, request.tema)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
+
+            verify(exactly = 1) { personService.sokPerson(any()) }
+            verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
+
+            verify(exactly = 1) { euxKlient.hentBuc(any()) }
+            verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
+            clearAllMocks()
+        }
+
     }
 
     @Nested

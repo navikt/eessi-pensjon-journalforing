@@ -250,18 +250,20 @@ internal class FnrHelperTest {
 
         val actual = helper.getPotensiellePersonRelasjoner(
             listOf(
-                Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
-                Pair("3123123", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)))
-            ), BucType.P_BUC_02
+                Pair("31231231", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
+                Pair("31231233", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)))
+            ), BucType.P_BUC_10
         )
 
-        val expectedForsikret = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) )
-        val expectedGjenlev = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
+        val expectedForsikretP15000 = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) )
+        val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
+        val expectedGjenlevP5000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
 
-        assertEquals(2, actual.size)
+        assertEquals(3, actual.size)
 
-        assertEquals(expectedGjenlev, actual.last())
-        assertEquals(expectedForsikret, actual.first())
+        assertEquals(expectedForsikretP15000, actual[0])
+        assertEquals(expectedGjenlevP15000, actual[1])
+        assertEquals(expectedGjenlevP5000, actual[2])
     }
 
     @Test
