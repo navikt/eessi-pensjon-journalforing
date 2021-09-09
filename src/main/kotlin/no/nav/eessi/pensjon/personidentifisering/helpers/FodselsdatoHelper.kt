@@ -1,6 +1,16 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P6000
+import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.R005
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
+import no.nav.eessi.pensjon.eux.model.sed.X005
+import no.nav.eessi.pensjon.eux.model.sed.X008
+import no.nav.eessi.pensjon.eux.model.sed.X010
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -58,6 +68,7 @@ class FodselsdatoHelper {
                     SedType.P8000, SedType.P10000 -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.bruker?.person, sed.nav?.annenperson?.person)
                     SedType.P15000 -> filterP15000(sed as P15000)
                     SedType.H121, SedType.H120, SedType.H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedType.X005, SedType.X008, SedType.X010 -> filterPersonFodselsdatoX00Sed(sed)
                     else -> filterAnnenPersonFodselsdato(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
@@ -108,5 +119,14 @@ class FodselsdatoHelper {
         private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? = gjenlevende?.person?.foedselsdato
 
         private fun filterPersonFodselsdato(person: Person?): String? = person?.foedselsdato
+
+        private fun filterPersonFodselsdatoX00Sed(sed: SED) : String? {
+            return when {
+                sed is X005 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+                sed is X010 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+                sed is X008 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+                else -> null
+            }
+        }
     }
 }

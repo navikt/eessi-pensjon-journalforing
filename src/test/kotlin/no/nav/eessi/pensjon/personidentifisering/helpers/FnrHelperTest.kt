@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.PersonR005
 import no.nav.eessi.pensjon.eux.model.sed.PinItem
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.RNav
@@ -20,7 +21,7 @@ import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.Status
-import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
+import no.nav.eessi.pensjon.eux.model.sed.TilbakekrevingBrukere
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -464,9 +465,9 @@ internal class FnrHelperTest {
 
         val annenPerson = annenPersonFnr?.let {
             Brukere(
-                    person = createPerson(it),
+                    person = createPersonR005(it),
                     tilbakekreving = annenPersonTilbakekreving?.let { type ->
-                        Tilbakekreving(status = Status(type))
+                        TilbakekrevingBrukere(status = Status(type))
                     }
             )
         }
@@ -475,9 +476,9 @@ internal class FnrHelperTest {
                 type = SedType.R005,
                 recoveryNav = RNav(brukere = listOfNotNull(
                         Brukere(
-                                person = createPerson(forsikretFnr),
+                                person = createPersonR005(forsikretFnr),
                                 tilbakekreving = forsikretTilbakekreving?.let {
-                                    Tilbakekreving(status = Status(it))
+                                    TilbakekrevingBrukere(status = Status(it))
                                 }
                         ),
                         annenPerson
@@ -485,14 +486,25 @@ internal class FnrHelperTest {
         )
     }
 
-    private fun createPerson(fnr: String?, rolle: Rolle? = null): Person {
-        return Person(
+    private fun createPersonR005(fnr: String?, rolle: Rolle? = null): PersonR005 {
+        return PersonR005(
                 rolle = rolle?.name,
                 foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
                 pin = listOfNotNull(
                         PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
                         fnr?.let { PinItem(land = "NO", identifikator = fnr) }
                 )
+        )
+    }
+
+    private fun createPerson(fnr: String?, rolle: Rolle? = null): Person {
+        return Person(
+            rolle = rolle?.name,
+            foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
+            pin = listOfNotNull(
+                PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
+                fnr?.let { PinItem(land = "NO", identifikator = fnr) }
+            )
         )
     }
 
