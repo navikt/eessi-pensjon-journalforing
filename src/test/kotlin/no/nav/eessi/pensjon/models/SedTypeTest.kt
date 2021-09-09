@@ -17,8 +17,8 @@ internal class SedTypeTest {
     @ParameterizedTest
     @EnumSource(
         SedType::class, names = [
-        "P13000", "X001", "X002", "X003", "X004", "X005", "X006", "X007",
-        "X008", "X009", "X010", "X011", "X012", "X013", "X050", "X100",
+        "P13000", "X001", "X002", "X003", "X004", "X006", "X007",
+        "X009", "X011", "X012", "X013", "X050", "X100",
         "H001", "H002", "H020", "H021", "H120", "H121", "R004", "R006"
     ])
     fun `Verifiser ugyldige SED-typer`(type: SedType) {
@@ -40,7 +40,7 @@ internal class SedTypeTest {
     @Test
     fun `Sjekk antall ugyldige SED-typer`() {
         assertEquals(
-            24,
+            21,
             ugyldigeTyper.size,
             "Antall ugyldige SED-typer har blitt endret."
         )
@@ -49,7 +49,7 @@ internal class SedTypeTest {
     @Test
     fun `Sjekk antall SED-typer som kan inneholde fnr eller dnr`() {
         assertEquals(
-            54,
+            57,
             kanInneholdeIdentEllerFdato.size,
             "Antall SEDer som kan inneholde ident har blitt endret."
         )

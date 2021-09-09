@@ -56,7 +56,7 @@ internal class EuxDokumentHelperTest {
 
         val dokumenter = helper.hentAlleGyldigeDokumenter(buc)
 
-        assertEquals(52, dokumenter.size)
+        assertEquals(55, dokumenter.size)
     }
 
     @Test
