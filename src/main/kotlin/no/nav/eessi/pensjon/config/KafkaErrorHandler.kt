@@ -19,11 +19,14 @@ class KafkaErrorHandler : ContainerAwareErrorHandler {
 
     private val stopper = ContainerStoppingErrorHandler()
 
-    override fun handle(thrownException: Exception?,
-                        records: MutableList<ConsumerRecord<*, *>>?,
-                        consumer: Consumer<*, *>?, container: MessageListenerContainer?) {
+    override fun handle(
+        thrownException: java.lang.Exception,
+        records: MutableList<ConsumerRecord<*, *>>?,
+        consumer: Consumer<*, *>,
+        container: MessageListenerContainer
+    ) {
         val stacktrace = StringWriter()
-        thrownException?.printStackTrace(PrintWriter(stacktrace))
+        thrownException.printStackTrace(PrintWriter(stacktrace))
 
         logger.error("En feil oppstod under kafka konsumering av meldinger: \n ${hentMeldinger(records)} \n" +
                 "Stopper containeren ! Restart er nødvendig for å fortsette konsumering, $stacktrace")
@@ -39,4 +42,5 @@ class KafkaErrorHandler : ContainerAwareErrorHandler {
         }
         return meldinger
     }
- }
+
+}

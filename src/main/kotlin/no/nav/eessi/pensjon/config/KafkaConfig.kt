@@ -13,12 +13,12 @@ class KafkaConfig {
     fun sedSendtAuthRetry(registry: KafkaListenerEndpointRegistry): ApplicationRunner? {
         return ApplicationRunner {
             val sedSendtListenerContainer = registry.getListenerContainer("sedSendtListener")
-            sedSendtListenerContainer.containerProperties.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
-            sedSendtListenerContainer.start()
+            sedSendtListenerContainer?.containerProperties?.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
+            sedSendtListenerContainer?.start()
 
             val sedMottattListenerContainer = registry.getListenerContainer("sedMottattListener")
-            sedMottattListenerContainer.containerProperties.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
-            sedMottattListenerContainer.start()
+            sedMottattListenerContainer?.containerProperties?.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
+            sedMottattListenerContainer?.start()
         }
     }
 }
