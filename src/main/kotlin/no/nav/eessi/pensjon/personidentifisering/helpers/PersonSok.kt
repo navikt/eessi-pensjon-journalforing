@@ -67,7 +67,7 @@ class PersonSok(
     }
 
     fun pdlSokEtterFnr(sokeKriterier: SokKriterier): String? {
-        logger.info("Utfører søk etter fnr, $sokeKriterier")
+        logger.info("Utfører personsøk etter fnr")
 
         val sokPersonFnrTreff = sokeKriterier.let { personService.sokPerson(it) }
             .firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
