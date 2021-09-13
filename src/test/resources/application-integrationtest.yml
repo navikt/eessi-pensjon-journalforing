@@ -2,6 +2,7 @@ KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
 KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
 KAFKA_KRAVINIT_TOPIC: 'eessi-pensjon-krav-q'
+KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
 
 kafka:
   sedSendt:
@@ -15,6 +16,9 @@ kafka:
     groupid: eessi-pensjon-group
   krav:
     topic: ${KAFKA_KRAVINIT_TOPIC}
+    groupid: eessi-pensjon-group
+  automatisering:
+    topic: ${KAFKA_AUTOMATISERING_TOPIC}
     groupid: eessi-pensjon-group
 
 namespace: 'test'

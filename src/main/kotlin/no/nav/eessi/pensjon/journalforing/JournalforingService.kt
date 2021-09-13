@@ -3,8 +3,11 @@ package no.nav.eessi.pensjon.journalforing
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
+import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -30,6 +33,7 @@ class JournalforingService(
     private val pdfService: PDFService,
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
+    private val automatiseringStatistikkPublisher: AutomatiseringStatistikkPublisher,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()),
 ) {
 
@@ -158,6 +162,19 @@ class JournalforingService(
                         sed
                     )
                 }
+                produserAutomatiseringsmelding(sedHendelseModel.rinaSakId,
+                    sedHendelseModel.rinaDokumentId,
+                    sedHendelseModel.rinaDokumentVersjon,
+                    java.time.LocalDateTime.now(),
+                    tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING,
+                    tildeltEnhet.enhetsNr,
+                    sedHendelseModel.bucType,
+                    sedHendelseModel.sedType,
+                    saktype,
+                    hendelseType
+
+                )
+
 
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
@@ -170,6 +187,31 @@ class JournalforingService(
                 throw ex
             }
         }
+    }
+
+    private fun produserAutomatiseringsmelding(
+        bucId: String,
+        sedId: String,
+        sedVersjon: String,
+        opprettetTidspunkt: java.time.LocalDateTime,
+        bleAutomatisert: Boolean,
+        oppgaveEierEnhet: String?,
+        bucType: BucType,
+        sedType: SedType,
+        sakType: Saktype?,
+        hendelsesType: HendelseType
+    ) {
+        automatiseringStatistikkPublisher.publiserAutomatiseringStatistikk(AutomatiseringMelding(
+            bucId,
+            sedId,
+            sedVersjon,
+            opprettetTidspunkt,
+            bleAutomatisert,
+            oppgaveEierEnhet,
+            bucType,
+            sedType,
+            sakType,
+            hendelsesType))
     }
 
     private fun opprettBehandleSedOppgave(

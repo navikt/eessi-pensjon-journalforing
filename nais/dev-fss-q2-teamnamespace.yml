@@ -47,6 +47,8 @@ spec:
       value: privat-eessipensjon-oppgave-v1-q2
     - name: KAFKA_KRAV_TOPIC
       value: privat-eessipensjon-krav-initialisering-q2
+    - name: KAFKA_AUTOMATISERING_TOPIC
+      value: public-eessipensjon-automatisering-q2
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing-q2.nais.preprod.local

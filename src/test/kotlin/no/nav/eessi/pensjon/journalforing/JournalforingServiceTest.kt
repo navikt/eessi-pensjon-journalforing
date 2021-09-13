@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
@@ -10,12 +11,7 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -25,6 +21,7 @@ import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.kafka.core.KafkaTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -40,7 +37,11 @@ internal class JournalforingServiceTest {
     private val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
     }
+    protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
+        every { sendDefault(any(), any()).get() } returns mockk()
+    }
 
+    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(automatiseringHandlerKafka, automatiseringTopic = "AutomatiseringsTopic")
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(
@@ -48,7 +49,8 @@ internal class JournalforingServiceTest {
             oppgaveRoutingService,
             pdfService,
             oppgaveHandler,
-            kravService
+            kravService,
+            automatiseringStatistikkPublisher
     )
 
     private val fdato = LocalDate.now()

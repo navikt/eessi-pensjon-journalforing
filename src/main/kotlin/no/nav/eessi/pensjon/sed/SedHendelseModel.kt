@@ -21,7 +21,7 @@ data class SedHendelseModel(
         val mottakerNavn: String? = null,
         val mottakerLand: String? = null,
         val rinaDokumentId: String,
-        val rinaDokumentVersjon: String? = null,
+        val rinaDokumentVersjon: String,
         val sedType: SedType? = null,
         val navBruker: Fodselsnummer? = null
 ) {

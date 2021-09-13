@@ -7,11 +7,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -106,6 +102,8 @@ class SedSendtListner(
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
+                        logger.info("Genererer automatiseringstatistikk")
+
                     }
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)

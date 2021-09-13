@@ -62,5 +62,5 @@ internal class GyldigeHendelserTest {
     }
 
     private fun createDummy(sektor: String, bucType: BucType?) =
-            SedHendelseModel(sektorKode = sektor, bucType = bucType, rinaSakId = "12345", rinaDokumentId = "654634")
+            SedHendelseModel(sektorKode = sektor, bucType = bucType, rinaSakId = "12345", rinaDokumentId = "654634", rinaDokumentVersjon = "1")
 }

@@ -1,10 +1,6 @@
 package no.nav.eessi.pensjon.buc
 
-import io.mockk.clearAllMocks
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
@@ -73,7 +69,7 @@ internal class EuxDokumentHelperTest {
         val sedR005 = mapJsonToAny(javaClass.getResource("/sed/R_BUC_02-R005-AP.json").readText(), typeRefs<R005>())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
-        BucType.R_BUC_02)
+        BucType.R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
         val actual = helper.hentSaktypeType(sedHendelse, seds)
@@ -86,7 +82,7 @@ internal class EuxDokumentHelperTest {
         val sedR005 = mapJsonToAny(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText(), typeRefs<R005>())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
-        BucType.R_BUC_02)
+        BucType.R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
 
@@ -99,7 +95,7 @@ internal class EuxDokumentHelperTest {
         val sedR005 = mapJsonToAny(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText(), typeRefs<R005>())
         val sedP15000 = mapJsonToAny(javaClass.getResource("/buc/P15000-NAV.json").readText(), typeRefs<P15000>())
 
-        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = BucType.P_BUC_10, sedType = SedType.P15000)
+        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = BucType.P_BUC_10, sedType = SedType.P15000, rinaDokumentVersjon = "1")
         val seds: List<SED> = listOf(
             sedR005,
             sedP15000

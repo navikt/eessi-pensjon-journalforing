@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
+import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.buc.FagmodulHelper
@@ -89,12 +90,17 @@ internal open class JournalforingTestBase {
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
+    protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
+        every { sendDefault(any(), any()).get() } returns mockk()
+    }
+    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(kafkaTemplate = automatiseringHandlerKafka, automatiseringTopic = "AutomatiseringsTopic")
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
-        kravInitialiseringsService = kravService
+        kravInitialiseringsService = kravService,
+        automatiseringStatistikkPublisher = automatiseringStatistikkPublisher
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

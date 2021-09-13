@@ -12,7 +12,7 @@ internal class SedHendelseModelSerdeTest {
 
     @Test
     fun `Sjekk at serialisering virker`() {
-        val model = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = BucType.R_BUC_02)
+        val model = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = BucType.R_BUC_02, rinaDokumentVersjon = "1")
         val serialized = model.toJson()
 
         val result = SedHendelseModel.fromJson(serialized)
@@ -35,7 +35,7 @@ internal class SedHendelseModelSerdeTest {
             "mottakerNavn" : null,
             "mottakerLand" : null,
             "rinaDokumentId" : "1234",
-            "rinaDokumentVersjon" : null,
+            "rinaDokumentVersjon" : "1",
             "sedType" : null,
             "navBruker" : null
         }""".trimMargin()
@@ -61,7 +61,7 @@ internal class SedHendelseModelSerdeTest {
             "mottakerNavn" : null,
             "mottakerLand" : null,
             "rinaDokumentId" : "1234",
-            "rinaDokumentVersjon" : null,
+            "rinaDokumentVersjon" : "1",
             "sedType" : null,
             "navBruker" : null
         }""".trimMargin()
@@ -87,7 +87,7 @@ internal class SedHendelseModelSerdeTest {
             "mottakerNavn" : null,
             "mottakerLand" : null,
             "rinaDokumentId" : "1234",
-            "rinaDokumentVersjon" : null,
+            "rinaDokumentVersjon" : "1",
             "sedType" : null,
             "navBruker" : "22117320034"
         }""".trimMargin()
@@ -112,7 +112,7 @@ internal class SedHendelseModelSerdeTest {
             "mottakerNavn" : null,
             "mottakerLand" : null,
             "rinaDokumentId" : "1234",
-            "rinaDokumentVersjon" : null,
+            "rinaDokumentVersjon" : "1",
             "sedType" : null,
             "navBruker" : "1234"
         }""".trimMargin()
