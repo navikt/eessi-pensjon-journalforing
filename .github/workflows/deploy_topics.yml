@@ -1,0 +1,30 @@
+name: Deploy topics
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'src/**'
+jobs:
+  deploy_topics:
+    name: 'Deploy topics'
+    runs-on: ubuntu-latest
+    steps:
+      # PULLER REPO
+      - name: 'Pull repo'
+        uses: actions/checkout@v2
+
+      - name: 'Deploy public-automatisering-q2 to eessipensjon namespace'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/topics/topic-public-automatisering-q2.yaml
+
+      - name: 'Deploy public-automatisering to eessipensjon namespace'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/topics/topic-public-automatisering.yaml
