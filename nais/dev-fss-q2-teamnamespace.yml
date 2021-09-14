@@ -13,7 +13,7 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
-    - name: KAFKA_BOOTSTRAP_SERVERS_URL
+    - name: ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL
       value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.nais.preprod.local/cpi
