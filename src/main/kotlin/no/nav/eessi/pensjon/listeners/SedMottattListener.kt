@@ -22,7 +22,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -47,11 +47,13 @@ class SedMottattListener(
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
 
-    @KafkaListener(id = "sedMottattListener",
+    @KafkaListener(
+        containerFactory = "onpremKafkaListenerContainerFactory",
         idIsGroup = false,
         topics = ["\${kafka.sedMottatt.topic}"],
-        groupId = "\${kafka.sedMottatt.groupid}",
-        autoStartup = "false")
+        groupId = "\${kafka.sedMottatt.groupid}"
+    )
+
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeIncomingSed.measure {
@@ -150,8 +152,10 @@ class SedMottattListener(
      * Se jira-sak: EP-968
      **/
     /*
-   @KafkaListener(groupId = "\${kafka.sedMottatt.groupid}-recovery",
-       topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+   @KafkaListener(
+           containerFactory = "onpremKafkaListenerContainerFactory",
+           groupId = "\${kafka.sedMottatt.groupid}-recovery",
+           topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
            partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "104259")])])
    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
        if (cr.offset() == 104259L) {

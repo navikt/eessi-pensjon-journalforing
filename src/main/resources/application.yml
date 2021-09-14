@@ -12,23 +12,6 @@ kafka:
     topic: ${KAFKA_KRAVINIT_TOPIC}
     groupid: eessi-pensjon-group
 
-#Spring
-spring:
-  kafka:
-    listener:
-      ack-mode: manual
-    consumer:
-      enable-auto-commit: false
-      max-poll-records: 1
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS_URL}
-    properties:
-      security.protocol: SASL_SSL
-      key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      sasl:
-        mechanism: PLAIN
-        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${srvusername}" password="${srvpassword}";
-
 securityTokenService:
   discoveryUrl: ${SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL}
 
@@ -39,6 +22,11 @@ management:
     web.exposure.include: '*'
     export.prometheus.enabled: true
     prometheus.enabled: true
-  metrics.web.server.auto-time-requests: false
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: false
 
 no.nav.orgnummer: 889640782

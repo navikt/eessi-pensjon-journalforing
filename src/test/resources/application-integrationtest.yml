@@ -21,20 +21,9 @@ kafka:
     topic: ${KAFKA_AUTOMATISERING_TOPIC}
     groupid: eessi-pensjon-group
 
-namespace: 'test'
+  security.protocol: SSL
 
-spring:
-  kafka:
-    listener:
-      ack-mode: manual
-    consumer:
-      enable-auto-commit: false
-      group-id: eessi-pensjon-test
-    bootstrap-servers: ${spring.embedded.kafka.brokers}
-    properties:
-      security.protocol: PLAINTEXT
-  main:
-    allow-bean-definition-overriding: true
+namespace: 'test'
 
 securityTokenService:
   discoveryUrl: http://localhost:${mockServerport}/.well-known/openid-configuration
