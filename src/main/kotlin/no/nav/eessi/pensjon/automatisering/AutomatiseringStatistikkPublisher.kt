@@ -7,7 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class AutomatiseringStatistikkPublisher(private val kafkaTemplate: KafkaTemplate<String, String>,
+class AutomatiseringStatistikkPublisher(private val aivenKafkaTemplate: KafkaTemplate<String, String>,
                                         @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String
 ) {
 
@@ -16,6 +16,6 @@ class AutomatiseringStatistikkPublisher(private val kafkaTemplate: KafkaTemplate
     fun publiserAutomatiseringStatistikk(automatiseringMelding: AutomatiseringMelding) {
         logger.info("Produserer melding på kafka: $automatiseringTopic  melding: $automatiseringMelding")
 
-        kafkaTemplate.send(automatiseringTopic, automatiseringMelding.toJson()).get()
+        aivenKafkaTemplate.send(automatiseringTopic, automatiseringMelding.toJson()).get()
     }
 }
