@@ -50,9 +50,26 @@ class KafkaConfig(
         return DefaultKafkaProducerFactory(configMap)
     }
 
+
     @Bean
     fun aivenKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(aivenProducerFactory())
+    }
+
+    @Bean
+    fun onpremProducerFactory(): ProducerFactory<String, String> {
+        val configMap: MutableMap<String, Any> = HashMap()
+        populerOnpremCommonConfig(configMap)
+        configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
+        configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = onpremBootstrapServers
+        return DefaultKafkaProducerFactory(configMap)
+    }
+
+    @Bean
+    fun kafkaTemplate(): KafkaTemplate<String, String> {
+        return KafkaTemplate(onpremProducerFactory())
     }
 
     fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
