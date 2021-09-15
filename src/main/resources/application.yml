@@ -1,5 +1,5 @@
 kafka:
-  security.protocol: SASL_SSL
+  security.protocol: SSL
   sedSendt:
     topic: ${KAFKA_SEDSENDT_TOPIC}
     groupid: eessi-pensjon-group
