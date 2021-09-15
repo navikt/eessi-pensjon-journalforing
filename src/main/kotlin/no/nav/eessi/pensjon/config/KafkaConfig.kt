@@ -31,8 +31,8 @@ class KafkaConfig(
     @param:Value("\${kafka.credstore.password}") private val credstorePassword: String,
     @param:Value("\${kafka.truststore.path}") private val truststorePath: String,
     @param:Value("\${kafka.brokers}") private val aivenBootstrapServers: String,
-    @param:Value("\${ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL}") private val onpremBootstrapServers: String,
     @param:Value("\${kafka.security.protocol}") private val securityProtocol: String,
+    @param:Value("\${ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL}") private val onpremBootstrapServers: String,
     @param:Value("\${srvusername}") private val srvusername: String,
     @param:Value("\${srvpassword}") private val srvpassword: String
 
@@ -121,19 +121,7 @@ class KafkaConfig(
     private fun populerOnpremCommonConfig(configMap: MutableMap<String, Any>) {
         configMap[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] = "SASL_SSL"
         configMap[SaslConfigs.SASL_MECHANISM] = "PLAIN"
-        configMap[SaslConfigs.SASL_JAAS_CONFIG] = "org.apache.kafka.common.security.plain.PlainLoginModule required username=${srvusername} password=${srvpassword};"
+        configMap[SaslConfigs.SASL_JAAS_CONFIG] = "org.apache.kafka.common.security.plain.PlainLoginModule required username='${srvusername}' password='${srvpassword}';"
     }
 
-//    @Bean
-//    fun sedSendtAuthRetry(registry: KafkaListenerEndpointRegistry): ApplicationRunner? {
-//        return ApplicationRunner {
-//            val sedSendtListenerContainer = registry.getListenerContainer("sedSendtListener")
-//            sedSendtListenerContainer?.containerProperties?.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
-//            sedSendtListenerContainer?.start()
-//
-//            val sedMottattListenerContainer = registry.getListenerContainer("sedMottattListener")
-//            sedMottattListenerContainer?.containerProperties?.authorizationExceptionRetryInterval = Duration.ofSeconds(4L)
-//            sedMottattListenerContainer?.start()
-//        }
-//    }
 }
