@@ -34,7 +34,8 @@ class KafkaConfig(
     @param:Value("\${kafka.security.protocol}") private val securityProtocol: String,
     @param:Value("\${ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL}") private val onpremBootstrapServers: String,
     @param:Value("\${srvusername}") private val srvusername: String,
-    @param:Value("\${srvpassword}") private val srvpassword: String
+    @param:Value("\${srvpassword}") private val srvpassword: String,
+    private val kafkaErrorHandler: KafkaErrorHandler
 
 ) {
 
@@ -46,7 +47,6 @@ class KafkaConfig(
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
         configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
-
         return DefaultKafkaProducerFactory(configMap)
     }
 
@@ -111,6 +111,7 @@ class KafkaConfig(
         factory.consumerFactory = aivenKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.authorizationExceptionRetryInterval =  Duration.ofSeconds(4L)
+        factory.setErrorHandler(kafkaErrorHandler)
         return factory
     }
 
@@ -120,6 +121,7 @@ class KafkaConfig(
         factory.consumerFactory = onpremKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.authorizationExceptionRetryInterval =  Duration.ofSeconds(4L)
+        factory.setErrorHandler(kafkaErrorHandler)
         return factory
     }
 
