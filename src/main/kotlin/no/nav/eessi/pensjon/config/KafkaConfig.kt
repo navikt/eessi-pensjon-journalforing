@@ -36,7 +36,7 @@ class KafkaConfig(
     @param:Value("\${ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL}") private val onpremBootstrapServers: String,
     @param:Value("\${srvusername}") private val srvusername: String,
     @param:Value("\${srvpassword}") private val srvpassword: String,
-    @Autowired private val kafkaErrorHandler: KafkaErrorHandler
+    @Autowired private val kafkaErrorHandler: KafkaErrorHandler?
 
 ) {
 
@@ -112,7 +112,9 @@ class KafkaConfig(
         factory.consumerFactory = aivenKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.authorizationExceptionRetryInterval =  Duration.ofSeconds(4L)
-        factory.setErrorHandler(kafkaErrorHandler)
+        if (kafkaErrorHandler != null) {
+            factory.setErrorHandler(kafkaErrorHandler)
+        }
         return factory
     }
 
@@ -122,7 +124,9 @@ class KafkaConfig(
         factory.consumerFactory = onpremKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.authorizationExceptionRetryInterval =  Duration.ofSeconds(4L)
-        factory.setErrorHandler(kafkaErrorHandler)
+        if (kafkaErrorHandler != null) {
+            factory.setErrorHandler(kafkaErrorHandler)
+        }
         return factory
     }
 
