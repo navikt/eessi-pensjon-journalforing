@@ -169,17 +169,17 @@ class JournalforingService(
 
 
 
-//                produserAutomatiseringsmelding(sedHendelseModel.rinaSakId,
-//                    sedHendelseModel.rinaDokumentId,
-//                    sedHendelseModel.rinaDokumentVersjon,
-//                    java.time.LocalDateTime.now(),
-//                    tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING,
-//                    tildeltEnhet.enhetsNr,
-//                    sedHendelseModel.bucType,
-//                    sedHendelseModel.sedType,
-//                    saktype,
-//                    hendelseType
-//                )
+                produserAutomatiseringsmelding(sedHendelseModel.rinaSakId,
+                    sedHendelseModel.rinaDokumentId,
+                    sedHendelseModel.rinaDokumentVersjon,
+                    java.time.LocalDateTime.now(),
+                    tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING,
+                    tildeltEnhet.enhetsNr,
+                    sedHendelseModel.bucType,
+                    sedHendelseModel.sedType,
+                    saktype,
+                    hendelseType
+                )
 
 
             } catch (ex: MismatchedInputException) {
