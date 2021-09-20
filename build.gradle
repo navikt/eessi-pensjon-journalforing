@@ -12,7 +12,7 @@ buildscript {
 		epLoggingVersion = '1.0.9'
 		epSecurityStsVersion = '0.0.17'
 		epPersonoppslagVersion = '8.0.17'
-		epEuxVersion = '1.1.50'
+		epEuxVersion = '1.1.52'
 	}
 	repositories {
 		mavenCentral()
