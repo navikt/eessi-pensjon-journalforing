@@ -8,6 +8,11 @@ buildscript {
 		logstashLogbackVersion = '6.6'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.11.2'
+		epMetricsVersion = '0.4.9'
+		epLoggingVersion = '1.0.9'
+		epSecurityStsVersion = '0.0.17'
+		epPersonoppslagVersion = '8.0.17'
+		epEuxVersion = '1.1.50'
 	}
 	repositories {
 		mavenCentral()
@@ -93,11 +98,11 @@ dependencies {
 	implementation("io.micrometer:micrometer-registry-prometheus")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:0.4.9")
-	implementation("no.nav.eessi.pensjon:ep-logging:1.0.9")
-	implementation("no.nav.eessi.pensjon:ep-security-sts:0.0.17")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:8.0.17")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.1.49")
+	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
+	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
+	implementation("no.nav.eessi.pensjon:ep-security-sts:${epSecurityStsVersion}")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
+	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.22")
