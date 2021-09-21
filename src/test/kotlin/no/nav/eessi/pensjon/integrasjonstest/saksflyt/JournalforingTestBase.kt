@@ -93,7 +93,7 @@ internal open class JournalforingTestBase {
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
-    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(aivenKafkaTemplate = automatiseringHandlerKafka, automatiseringTopic = "AutomatiseringsTopic")
+    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(automatiseringHandlerKafka)
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,

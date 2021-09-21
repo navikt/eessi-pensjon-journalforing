@@ -14,7 +14,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.*
+import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaProducerFactory
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
@@ -32,8 +36,8 @@ class KafkaConfigProd(
     @param:Value("\${ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL}") private val onpremBootstrapServers: String,
     @param:Value("\${srvusername}") private val srvusername: String,
     @param:Value("\${srvpassword}") private val srvpassword: String,
-    @Autowired private val kafkaErrorHandler: KafkaErrorHandler?
-
+    @Autowired private val kafkaErrorHandler: KafkaErrorHandler?,
+    @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String
 ) {
 
     @Bean
@@ -48,9 +52,11 @@ class KafkaConfigProd(
     }
 
 
-    @Bean
+    @Bean("aivenAutomatiseringKafkaTemplate")
     fun aivenKafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(aivenProducerFactory())
+        val template = KafkaTemplate(aivenProducerFactory())
+        template.defaultTopic = automatiseringTopic
+        return template
     }
 
     @Bean

@@ -1,21 +1,17 @@
 package no.nav.eessi.pensjon.automatisering
 
-import no.nav.eessi.pensjon.json.toJson
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class AutomatiseringStatistikkPublisher(private val aivenKafkaTemplate: KafkaTemplate<String, String>,
-                                        @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String
-) {
+class AutomatiseringStatistikkPublisher(private val aivenAutomatiseringKafkaTemplate: KafkaTemplate<String, String>) {
 
     private val logger = LoggerFactory.getLogger(AutomatiseringStatistikkPublisher::class.java)
 
     fun publiserAutomatiseringStatistikk(automatiseringMelding: AutomatiseringMelding) {
-        logger.info("Produserer melding på kafka: $automatiseringTopic  melding: $automatiseringMelding")
+        logger.info("Produserer melding på kafka: ${aivenAutomatiseringKafkaTemplate.defaultTopic}  melding: $automatiseringMelding")
 
-        aivenKafkaTemplate.send(automatiseringTopic, automatiseringMelding.toJson()).get()
+        aivenAutomatiseringKafkaTemplate.send(KafkaAutomatiseringMessage(automatiseringMelding)).get()
     }
 }
