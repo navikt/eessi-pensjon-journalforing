@@ -18,7 +18,7 @@ spec:
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.nais.preprod.local/cpi
     - name: PDL_URL
-      value: https://pdl-api.nais.preprod.local/graphql
+      value: https://pdl-api-q2.dev-fss.nais.io/graphql
     - name: JOURNALPOST_V1_URL
       value: https://dokarkiv-q2.nais.preprod.local/rest/journalpostapi/v1
     - name: VIRKSOMHET_PERSON_V3_SECURITYTOKEN
