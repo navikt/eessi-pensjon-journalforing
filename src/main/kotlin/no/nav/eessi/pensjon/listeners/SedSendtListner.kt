@@ -24,7 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -65,7 +65,7 @@ class SedSendtListner(
                     throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                 }
                 logger.debug(hendelse)
-                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L)
+                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L, 140374L)
                 try {
                     val offset = cr.offset()
                     if (offsetToSkip.contains(offset)) {
