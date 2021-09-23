@@ -22,7 +22,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -65,7 +65,7 @@ class SedMottattListener(
                 }
                 logger.debug(hendelse)
 
-                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L, 206688L, 118452L)
+                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L, 206688L, 118452L, 258088L)
                 try {
                     val offset = cr.offset()
                     if (offsetToSkip.contains(offset)) {
