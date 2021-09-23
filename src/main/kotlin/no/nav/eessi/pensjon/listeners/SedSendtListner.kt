@@ -65,7 +65,7 @@ class SedSendtListner(
                     throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                 }
                 logger.debug(hendelse)
-                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L)
+                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L)
                 try {
                     val offset = cr.offset()
                     if (offsetToSkip.contains(offset)) {
