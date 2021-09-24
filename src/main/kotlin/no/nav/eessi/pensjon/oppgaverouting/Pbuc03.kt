@@ -3,12 +3,25 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.models.Enhet
 
 class Pbuc03 : BucTilEnhetHandler {
+
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
-            kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
-            request.bosatt == Bosatt.NORGE -> Enhet.UFORE_UTLANDSTILSNITT
-            else -> Enhet.UFORE_UTLAND
+            request.harAdressebeskyttelse -> {
+                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)
+                Enhet.DISKRESJONSKODE
+            }
+            kanAutomatiskJournalfores(request) ->  {
+                automatiskJournalforingLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                Enhet.AUTOMATISK_JOURNALFORING
+            }
+            request.bosatt == Bosatt.NORGE ->  {
+                bosattNorgeLogging(request.sedType, request.bucType, Enhet.UFORE_UTLANDSTILSNITT)
+                Enhet.UFORE_UTLANDSTILSNITT
+            }
+            else -> {
+                ingenSærreglerLogging(request.sedType, request.bucType, Enhet.UFORE_UTLANDSTILSNITT)
+                Enhet.UFORE_UTLAND
+            }
         }
     }
 

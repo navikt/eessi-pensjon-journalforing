@@ -3,13 +3,9 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
@@ -54,6 +50,9 @@ internal class Pbuc10Test {
             every { hendelseType } returns SENDT
             every { sakInformasjon?.sakStatus } returns SakStatus.AVSLUTTET
             every { sakInformasjon?.sakType } returns Saktype.UFOREP
+            every { sedType } returns SedType.P15000
+            every { bucType } returns BucType.P_BUC_10
+
         }
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
@@ -176,6 +175,10 @@ internal class Pbuc10Test {
             every { landkode } returns "NOR"
             every { bosatt } returns land
             every { sakInformasjon } returns null
+            every { bucType } returns BucType.P_BUC_10
+            every { sedType } returns SedType.P15000
+
+
         }
     }
 }

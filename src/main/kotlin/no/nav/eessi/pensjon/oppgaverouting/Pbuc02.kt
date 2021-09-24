@@ -13,33 +13,60 @@ class Pbuc02 : BucTilEnhetHandler {
 
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
-            erUgyldig(request) -> Enhet.ID_OG_FORDELING
-            kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
-            request.bosatt == Bosatt.NORGE -> handleNorge(request.saktype)
-            else -> handleUtland(request.saktype)
+            request.harAdressebeskyttelse -> {
+                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)
+                Enhet.DISKRESJONSKODE
+            }
+            erUforeSakAvsluttet(request) -> {
+                logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av uføresak er avsluttet")
+                Enhet.ID_OG_FORDELING
+            }
+            kanAutomatiskJournalfores(request) -> {
+                automatiskJournalforingLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                Enhet.AUTOMATISK_JOURNALFORING
+            }
+            request.bosatt == Bosatt.NORGE -> {
+                when (request.saktype) {
+                    Saktype.UFOREP -> {
+                        bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.UFORE_UTLANDSTILSNITT)
+                        Enhet.UFORE_UTLANDSTILSNITT
+                    }
+                    Saktype.ALDER -> {
+                        bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.NFP_UTLAND_AALESUND)
+                        Enhet.NFP_UTLAND_AALESUND
+                    }
+                    Saktype.BARNEP,
+                    Saktype.GJENLEV -> {
+                        bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.PENSJON_UTLAND)
+                        Enhet.PENSJON_UTLAND
+                    }
+                    else -> {
+                        logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av bosatt norge med ugyldig saktype")
+                        Enhet.ID_OG_FORDELING
+                    }
+                }
+            }
+            else ->
+                when (request.saktype) {
+                    Saktype.UFOREP -> {
+                        bosattUtlandLogging(request.sedType, request.bucType, request.saktype, Enhet.UFORE_UTLAND)
+                        Enhet.UFORE_UTLAND
+                    }
+                    Saktype.ALDER,
+                    Saktype.BARNEP,
+                    Saktype.GJENLEV -> {
+                        bosattUtlandLogging(request.sedType, request. bucType, request.saktype, Enhet.PENSJON_UTLAND)
+                        Enhet.PENSJON_UTLAND
+                    }
+                    else -> {
+                        logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av bosatt utland med ugyldig saktype")
+                        Enhet.ID_OG_FORDELING
+                    }
+                }
         }
     }
 
-    private fun handleNorge(saktype: Saktype?): Enhet =
-            when (saktype) {
-                Saktype.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
-                Saktype.ALDER -> Enhet.NFP_UTLAND_AALESUND
-                Saktype.BARNEP,
-                Saktype.GJENLEV -> Enhet.PENSJON_UTLAND
-                else -> Enhet.ID_OG_FORDELING
-            }
-
-    private fun handleUtland(saktype: Saktype?): Enhet =
-            when (saktype) {
-                Saktype.UFOREP -> Enhet.UFORE_UTLAND
-                Saktype.ALDER,
-                Saktype.BARNEP,
-                Saktype.GJENLEV -> Enhet.PENSJON_UTLAND
-                else -> Enhet.ID_OG_FORDELING
-            }
-
-    private fun erUgyldig(request: OppgaveRoutingRequest): Boolean {
+    private fun erUforeSakAvsluttet(request: OppgaveRoutingRequest): Boolean {
         val sakInfo = request.sakInformasjon
         val erUforepensjon = (request.saktype == Saktype.UFOREP || sakInfo?.sakType == Saktype.UFOREP)
 

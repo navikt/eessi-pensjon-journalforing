@@ -1,10 +1,16 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.Saktype
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Period
+
+val logger: Logger = LoggerFactory.getLogger(BucTilEnhetHandler::class.java)
 
 interface BucTilEnhetHandler {
     fun hentEnhet(request: OppgaveRoutingRequest): Enhet
@@ -17,6 +23,32 @@ interface BucTilEnhetHandler {
                     && !sakInformasjon?.sakId.isNullOrBlank()
         }
     }
+
+    fun adresseBeskyttelseLogging(sedType: SedType?, bucType: BucType, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av adressebeskyttelse")
+    }
+
+    fun automatiskJournalforingLogging(sedType: SedType?, bucType: BucType, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av automatisk journalføring")
+    }
+
+    fun bosattNorgeLogging(sedType: SedType?, bucType: BucType, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av personen er bosatt i norge")
+    }
+
+    fun bosattNorgeLogging(sedType: SedType?, bucType: BucType, sakType: Saktype, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av saktype: $sakType og personen er bosatt i norge")
+    }
+
+    fun bosattUtlandLogging(sedType: SedType?, bucType: BucType, sakType: Saktype, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av saktype: $sakType og personen er bosatt i utlandet")
+    }
+
+    fun ingenSærreglerLogging(sedType: SedType?, bucType: BucType, enhet: Enhet) {
+        logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av ingen særregler ble inntruffet")
+    }
+
+
 }
 
 class BucTilEnhetHandlerCreator {

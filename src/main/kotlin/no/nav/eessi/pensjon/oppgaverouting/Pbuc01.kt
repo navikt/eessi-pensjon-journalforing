@@ -8,10 +8,22 @@ import no.nav.eessi.pensjon.models.Enhet
 class Pbuc01 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
-            kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
-            request.bosatt == Bosatt.NORGE -> Enhet.NFP_UTLAND_AALESUND
-            else -> Enhet.PENSJON_UTLAND
+            request.harAdressebeskyttelse -> {
+                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)
+                Enhet.DISKRESJONSKODE
+            }
+            kanAutomatiskJournalfores(request) -> {
+                automatiskJournalforingLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                Enhet.AUTOMATISK_JOURNALFORING
+            }
+            request.bosatt == Bosatt.NORGE -> {
+                bosattNorgeLogging(request.sedType, request.bucType, Enhet.NFP_UTLAND_AALESUND)
+                Enhet.NFP_UTLAND_AALESUND
+            }
+            else -> {
+                ingenSærreglerLogging(request.sedType, request.bucType, Enhet.PENSJON_UTLAND)
+                Enhet.PENSJON_UTLAND
+            }
         }
     }
 

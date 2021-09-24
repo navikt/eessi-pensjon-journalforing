@@ -2,13 +2,9 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -255,6 +251,8 @@ internal class Pbuc02Test {
             every { sakInformasjon?.sakStatus } returns status
             every { bosatt } returns Bosatt.fraLandkode(landkode)
             every { harAdressebeskyttelse } returns false
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_02
         }
     }
 }
