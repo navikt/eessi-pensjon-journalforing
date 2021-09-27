@@ -13,7 +13,7 @@ class Rbuc02 : BucTilEnhetHandler {
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
-                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)
                 Enhet.DISKRESJONSKODE
             }
             erPersonUgyldig(request.identifisertPerson) -> {
@@ -39,11 +39,11 @@ class Rbuc02 : BucTilEnhetHandler {
         } else {
             when (request.saktype) {
                 Saktype.ALDER -> {
-                    logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av traff ingen særregler og SED er mottatt med sakstype: alder")
+                    logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.PENSJON_UTLAND.enhetsNr} på grunn av traff ingen særregler og SED er mottatt med sakstype: alder")
                     Enhet.PENSJON_UTLAND
                 }
                 Saktype.UFOREP -> {
-                    logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av traff ingen særregler og SED er mottatt med sakstype: uføre")
+                    logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.UFORE_UTLAND.enhetsNr} på grunn av traff ingen særregler og SED er mottatt med sakstype: uføre")
                     Enhet.UFORE_UTLAND
                 }
                 else -> {

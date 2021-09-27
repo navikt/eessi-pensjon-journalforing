@@ -21,7 +21,7 @@ class Pbuc04 : BucTilEnhetHandler {
                 Enhet.NFP_UTLAND_AALESUND
             }
             else -> {
-                ingenSærreglerLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                ingenSærreglerLogging(request.sedType, request.bucType, Enhet.PENSJON_UTLAND)
                 Enhet.PENSJON_UTLAND
             }
         }
