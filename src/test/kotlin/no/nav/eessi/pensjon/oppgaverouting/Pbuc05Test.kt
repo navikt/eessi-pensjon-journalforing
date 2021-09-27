@@ -23,6 +23,8 @@ internal class Pbuc05Test {
     fun `Bosatt norge`() {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.NORGE
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
@@ -40,6 +42,8 @@ internal class Pbuc05Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.NORGE
             every { avsenderLand } returns "DE"
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
@@ -59,6 +63,8 @@ internal class Pbuc05Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.UTLAND
             every { avsenderLand } returns "DE"
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()
@@ -77,6 +83,8 @@ internal class Pbuc05Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.NORGE
             every { avsenderLand } returns "DK"
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()

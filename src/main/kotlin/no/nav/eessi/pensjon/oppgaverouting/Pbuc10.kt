@@ -9,31 +9,52 @@ class Pbuc10 : BucTilEnhetHandler {
 
     override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
-            request.harAdressebeskyttelse -> Enhet.DISKRESJONSKODE
-            erSakUgyldig(request) -> Enhet.ID_OG_FORDELING
-            kanAutomatiskJournalfores(request) -> Enhet.AUTOMATISK_JOURNALFORING
+            request.harAdressebeskyttelse -> {
+                adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)
+                Enhet.DISKRESJONSKODE
+            }
+            erSakUgyldig(request) -> {
+                logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING} på grunn av komplisert sak og person-identifisering")
+                Enhet.ID_OG_FORDELING
+            }
+            kanAutomatiskJournalfores(request) -> {
+                automatiskJournalforingLogging(request.sedType, request.bucType, Enhet.AUTOMATISK_JOURNALFORING)
+                Enhet.AUTOMATISK_JOURNALFORING
+            }
             else -> enhetFraLand(request)
         }
     }
 
     private fun enhetFraLand(request: OppgaveRoutingRequest): Enhet {
-        return if (request.bosatt == Bosatt.NORGE) routeNorge(request)
-        else routeUtland(request.saktype)
-    }
-
-    private fun routeNorge(request: OppgaveRoutingRequest): Enhet {
-        if (erMottattAlderEllerGjenlev(request))
-            return Enhet.NFP_UTLAND_AALESUND
-
-        return when (request.saktype) {
-            Saktype.UFOREP -> Enhet.UFORE_UTLANDSTILSNITT
-            else -> Enhet.ID_OG_FORDELING
+        return when {
+            request.bosatt == Bosatt.NORGE -> routeNorge(request)
+            request.saktype == Saktype.UFOREP -> {
+                logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.UFORE_UTLAND} på grunn av bosatt utland og sak er uføre")
+                Enhet.UFORE_UTLAND
+            }
+            else -> {
+                logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.PENSJON_UTLAND} på grunn av bosatt utland og sak er ikke uføre")
+                Enhet.PENSJON_UTLAND
+            }
         }
     }
 
-    private fun routeUtland(saktype: Saktype?): Enhet {
-        return if (saktype == Saktype.UFOREP) Enhet.UFORE_UTLAND
-        else Enhet.PENSJON_UTLAND
+    private fun routeNorge(request: OppgaveRoutingRequest): Enhet {
+        if (erMottattAlderEllerGjenlev(request)){
+            logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.NFP_UTLAND_AALESUND} på grunn av bosatt Norge, alder eller gjenlevende-sak")
+            return Enhet.NFP_UTLAND_AALESUND
+        }
+
+        return when (request.saktype) {
+            Saktype.UFOREP -> {
+                logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.UFORE_UTLANDSTILSNITT} på grunn av, bosatt Norge, uføre-sak")
+                Enhet.UFORE_UTLANDSTILSNITT
+            }
+            else -> {
+                logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING} på grunn av sak er hverken alder, gjenlevende eller uføre")
+                Enhet.ID_OG_FORDELING
+            }
+        }
     }
 
     private fun erSakUgyldig(request: OppgaveRoutingRequest): Boolean {

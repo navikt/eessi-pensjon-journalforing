@@ -38,6 +38,8 @@ internal class Pbuc01Test {
             every { saktype } returns type
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_01
         }
 
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
@@ -52,6 +54,8 @@ internal class Pbuc01Test {
             every { aktorId } returns null
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.NORGE
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_01
         }
 
         assertEquals(Enhet.NFP_UTLAND_AALESUND, handler.hentEnhet(request))
@@ -66,6 +70,8 @@ internal class Pbuc01Test {
             every { aktorId } returns null
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.UTLAND
+            every { sedType } returns null
+            every { bucType } returns BucType.P_BUC_01
         }
 
         assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
