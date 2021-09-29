@@ -18,6 +18,9 @@ spec:
     - team: eessipensjon
       application: eessi-pensjon-journalforing
       access: write   # read, write, readwrite
+    - team: eessipensjon
+      application: eessi-pensjon-prefill
+      access: write   # read, write, readwrite
     - team: dv-team-pensjon
       application: dv-team-pensjon-eessipensjon
       access: read
