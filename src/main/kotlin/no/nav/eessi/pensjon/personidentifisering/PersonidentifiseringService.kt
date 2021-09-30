@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.eessi.pensjon.eux.model.sed.P10000
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -72,7 +74,7 @@ class PersonidentifiseringService(
         erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
-        val potensiellePersonRelasjoner = hentRelasjoner()
+        val potensiellePersonRelasjoner = hentRelasjoner(sedListe, bucType)
 
         val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
@@ -97,30 +99,40 @@ class PersonidentifiseringService(
 
     private fun hentRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
             val fnrListe = mutableSetOf<SEDPersonRelasjon>()
+            val sedMedForsikretPrioritet = listOf(SedType.H121, SedType.H120, SedType.H070)
 
             seder.forEach { (_,sed) ->
                 try {
-                    if (sed.type.kanInneholdeIdentEllerFdato()) {
 
-                        getRelasjonHandler()
-
-
-                        }
+                    getRelasjonHandler(sed, bucType)?.let { handler ->
+                        fnrListe.addAll(handler.hentRelasjoner())
                     }
+
+                } catch (ex: Exception) {
+                    logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
                 }
             }
 
 
+        val resultat = fnrListe
+            .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
+            .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
+            .sortedBy { it.relasjon }
 
-    companion object {
-        fun getRelasjonHandler(sed: SED, bucType: BucType): T2000TurboRelasjon {
+        return resultat.ifEmpty { fnrListe.distinctBy { it.fnr } }
+
+    }
+
+    fun getRelasjonHandler(sed: SED, bucType: BucType): T2000TurboRelasjon? {
+
         if (sed.type.kanInneholdeIdentEllerFdato()) {
             return when (sed) {
-                is P2000  -> P2000Relasjon(sed, bucType)
-                is P8000 -> P8000AndP10000Relasjon(sed, bucType)
+                is P2000, is P2200 -> P2000Relasjon(sed, bucType)
+                is P8000, is P10000 -> P8000AndP10000Relasjon(sed, bucType)
                 else -> P2000Relasjon(sed, bucType)
             }
         }
+        return null
     }
 
     fun hentIdentifisertePersoner(
