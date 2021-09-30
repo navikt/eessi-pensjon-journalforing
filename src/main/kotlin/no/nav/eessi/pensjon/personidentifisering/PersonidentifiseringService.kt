@@ -1,16 +1,22 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.P2000Relasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.P8000AndP10000Relasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.T2000TurboRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
@@ -66,7 +72,7 @@ class PersonidentifiseringService(
         erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
-        val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(sedListe, bucType)
+        val potensiellePersonRelasjoner = hentRelasjoner()
 
         val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
@@ -87,6 +93,34 @@ class PersonidentifiseringService(
         ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
 
         return null
+    }
+
+    private fun hentRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
+            val fnrListe = mutableSetOf<SEDPersonRelasjon>()
+
+            seder.forEach { (_,sed) ->
+                try {
+                    if (sed.type.kanInneholdeIdentEllerFdato()) {
+
+                        getRelasjonHandler()
+
+
+                        }
+                    }
+                }
+            }
+
+
+
+    companion object {
+        fun getRelasjonHandler(sed: SED, bucType: BucType): T2000TurboRelasjon {
+        if (sed.type.kanInneholdeIdentEllerFdato()) {
+            return when (sed) {
+                is P2000  -> P2000Relasjon(sed, bucType)
+                is P8000 -> P8000AndP10000Relasjon(sed, bucType)
+                else -> P2000Relasjon(sed, bucType)
+            }
+        }
     }
 
     fun hentIdentifisertePersoner(
