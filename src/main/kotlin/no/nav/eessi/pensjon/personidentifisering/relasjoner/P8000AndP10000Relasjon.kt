@@ -15,8 +15,8 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType)
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
         logger.debug("Leter i ${sed.type}")
 
-        val personPin = Fodselsnummer.fra(forsikretbruker?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-        val personFdato = mapFdatoTilLocalDate(forsikretbruker?.foedselsdato)
+        val personPin = Fodselsnummer.fra(forsikretPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        val personFdato = mapFdatoTilLocalDate(forsikretPerson?.foedselsdato)
 
         val annenPerson = sed.nav?.annenperson?.person
         val annenPersonPin = Fodselsnummer.fra(annenPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
@@ -24,7 +24,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType)
 
         val rolle = annenPerson?.rolle
 
-        val sokForsikretKriterie = forsikretbruker?.let { opprettSokKriterie(it) }
+        val sokForsikretKriterie = forsikretPerson?.let { opprettSokKriterie(it) }
 
         logger.debug("Personpin: $personPin, AnnenPersonpin $annenPersonPin, Annenperson rolle : $rolle, sokForsikret: ${sokForsikretKriterie != null}")
 

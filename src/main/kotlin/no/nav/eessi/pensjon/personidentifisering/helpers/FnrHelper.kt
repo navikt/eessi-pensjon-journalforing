@@ -3,20 +3,12 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.P10000
 import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.P2100
-import no.nav.eessi.pensjon.eux.model.sed.P2200
-import no.nav.eessi.pensjon.eux.model.sed.P5000
-import no.nav.eessi.pensjon.eux.model.sed.P6000
-import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -38,51 +30,52 @@ class FnrHelper {
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
     fun getPotensiellePersonRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
-        val fnrListe = mutableSetOf<SEDPersonRelasjon>()
-
-        seder.forEach { (_,sed) ->
-            try {
-                if (sed.type.kanInneholdeIdentEllerFdato()) {
-
-                    when (sed) {
-                        //Tilbakebetaling
-                        is R005   -> behandleR005(sed, fnrListe)
-
-                        //Krav
-                        is P2000 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
-                        is P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                        is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
-
-                        //Vedtak mm..
-                        is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                        is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
-                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
-                        is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
-
-                        is P15000 -> behandleP15000(sed, fnrListe)
-
-                        else -> {
-                            // P9000, H070, X?? ? flere?
-                            when (sed.type) {
-                                in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)
-                                else -> {
-                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000, P1000+++
-                                    leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // flere?
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
-            }
-        }
-        val resultat = fnrListe
-                .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
-                .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
-               .sortedBy { it.relasjon }
-
-        return resultat.ifEmpty { fnrListe.distinctBy { it.fnr } }
+        return emptyList()
+//        val fnrListe = mutableSetOf<SEDPersonRelasjon>()
+//
+//        seder.forEach { (_,sed) ->
+//            try {
+//                if (sed.type.kanInneholdeIdentEllerFdato()) {
+//
+//                    when (sed) {
+//                        //Tilbakebetaling
+//                        is R005   -> behandleR005(sed, fnrListe)
+//
+//                        //Krav
+//                        is P2000 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
+//                        is P2100 -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+//                        is P2200 -> leggTilForsikretFnrHvisFinnes(sed, fnrListe)
+//
+//                        //Vedtak mm..
+//                        is P5000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p5000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+//                        is P6000  -> leggTilGjenlevendeFnrHvisFinnes(sed.nav?.bruker, sed.p6000Pensjon?.gjenlevende, sed.type, fnrListe = fnrListe)
+//                        is P8000  -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
+//                        is P10000 -> behandleP8000AndP10000(sed.nav, sed.type, fnrListe, bucType)
+//
+//                        is P15000 -> behandleP15000(sed, fnrListe)
+//
+//                        else -> {
+//                            // P9000, H070, X?? ? flere?
+//                            when (sed.type) {
+//                                in sedMedForsikretPrioritet ->  leggTilForsikretFnrHvisFinnes(sed, fnrListe)
+//                                else -> {
+//                                    leggTilAnnenGjenlevendeFnrHvisFinnes(sed, fnrListe)   // P9000, P1000+++
+//                                    leggTilForsikretFnrHvisFinnes(sed, fnrListe)          // flere?
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            } catch (ex: Exception) {
+//                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
+//            }
+//        }
+//        val resultat = fnrListe
+//                .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
+//                .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
+//               .sortedBy { it.relasjon }
+//
+//        return resultat.ifEmpty { fnrListe.distinctBy { it.fnr } }
     }
 
     /**

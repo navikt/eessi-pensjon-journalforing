@@ -3,7 +3,9 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,9 +16,26 @@ val logger: Logger = LoggerFactory.getLogger(T2000TurboRelasjon::class.java)
 
 abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: BucType) {
 
-    val forsikretbruker = sed.nav?.bruker?.person
+    val forsikretPerson = sed.nav?.bruker?.person
 
     abstract fun hentRelasjoner() :List<SEDPersonRelasjon>
+
+    fun hentForsikretPerson() : List<SEDPersonRelasjon> {
+        logger.info("Henter relasjon på SedType: ${sed.type}")
+
+        forsikretPerson?.let { person ->
+            val sokPersonKriterie =  opprettSokKriterie(person)
+            val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato = mapFdatoTilLocalDate(person.foedselsdato)
+
+            logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
+            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, null, sed.type, sokPersonKriterie, fdato))
+        }
+
+        logger.warn("Ingen forsikret person funnet")
+        return emptyList()
+
+    }
 
     fun opprettSokKriterie(person: Person) : SokKriterier? {
         val fdatotmp: String = person.foedselsdato ?: return null

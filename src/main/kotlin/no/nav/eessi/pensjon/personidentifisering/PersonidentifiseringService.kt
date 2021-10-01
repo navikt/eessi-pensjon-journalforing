@@ -2,8 +2,11 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.sed.P10000
+import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.P2200
+import no.nav.eessi.pensjon.eux.model.sed.P6000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -16,7 +19,11 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.GenericRelasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.P15000Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.P2000Relasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.P2100Relasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.P6000Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.P8000AndP10000Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.T2000TurboRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -103,7 +110,6 @@ class PersonidentifiseringService(
 
             seder.forEach { (_,sed) ->
                 try {
-
                     getRelasjonHandler(sed, bucType)?.let { handler ->
                         fnrListe.addAll(handler.hentRelasjoner())
                     }
@@ -127,9 +133,13 @@ class PersonidentifiseringService(
 
         if (sed.type.kanInneholdeIdentEllerFdato()) {
             return when (sed) {
-                is P2000, is P2200 -> P2000Relasjon(sed, bucType)
+                is P2000 -> P2000Relasjon(sed, bucType)
+                is P2200 -> P2000Relasjon(sed, bucType)
+                is P2100 -> P2100Relasjon(sed, bucType)
                 is P8000, is P10000 -> P8000AndP10000Relasjon(sed, bucType)
-                else -> P2000Relasjon(sed, bucType)
+                is P6000 -> P6000Relasjon(sed, bucType)
+                is P15000 -> P15000Relasjon(sed, bucType)
+                else -> GenericRelasjon(sed, bucType)
             }
         }
         return null
