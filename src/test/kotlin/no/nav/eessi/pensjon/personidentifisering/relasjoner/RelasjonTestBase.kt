@@ -13,6 +13,14 @@ import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 open class RelasjonTestBase {
 
+    companion object {
+        const val SLAPP_SKILPADDE = "09035225916"
+        const val KRAFTIG_VEGGPRYD = "11067122781"
+        const val LEALAUS_KAKE = "22117320034"
+        const val STERK_BUSK = "12011577847"
+    }
+
+
     fun createR005(forsikretFnr: String?,
                            forsikretTilbakekreving: String?,
                            annenPersonFnr: String? = null,

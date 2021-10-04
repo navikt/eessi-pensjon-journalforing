@@ -109,7 +109,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "SE",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -149,7 +149,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "SE",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -189,7 +189,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "SE",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
@@ -231,14 +231,14 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "3811",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
         val dodPerson = IdentifisertPerson(
             "22078945602",
             "Dod Begravet",
             "",
             "3811",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD, rinaDocumentId =  "3123123")
         )
 
         identifisertPerson.personListe = listOf(identifisertPerson, dodPerson)
@@ -282,7 +282,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -315,7 +315,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "NOR",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -355,7 +355,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -396,7 +396,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -437,7 +437,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -478,7 +478,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "NOR",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -518,7 +518,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -559,7 +559,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -601,7 +601,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
         val sakInformasjon = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -665,7 +665,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV, rinaDocumentId =  "3123123")
         )
         val saksInfo = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
 
@@ -709,7 +709,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV, rinaDocumentId =  "3123123")
         )
         val sakInformasjon = SakInformasjon("111222", Saktype.UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
@@ -754,7 +754,7 @@ internal class JournalforingServiceTest {
             null,
             "NO",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -789,7 +789,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET)
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         journalforingService.journalfor(
@@ -843,7 +843,7 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP)
+            personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP, rinaDocumentId =  "3123123")
         )
         val saksInfo = SakInformasjon("111111", Saktype.BARNEP, SakStatus.LOPENDE, "4862", false)
 

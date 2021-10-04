@@ -23,12 +23,10 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.eux.model.sed.Status
 import no.nav.eessi.pensjon.eux.model.sed.TilbakekrevingBrukere
 import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -61,7 +59,7 @@ class PersonidentifiseringServiceTest {
 
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
-    private val fnrHelper = FnrHelper()
+//    private val fnrHelper = FnrHelper()
 
     @Test
     fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {
@@ -72,9 +70,9 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null), HendelseType.SENDT
+            SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null, rinaDocumentId =  "3123123"), HendelseType.SENDT
         )
-        val expected = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, sedType = SedType.H070)
+        val expected = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, sedType = SedType.H070, rinaDocumentId =  "3123123")
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -84,10 +82,10 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra(LEALAUS_KAKE), Relasjon.GJENLEVENDE, null, sedType = SedType.P6000, null), HendelseType.SENDT
+            SEDPersonRelasjon(Fodselsnummer.fra(LEALAUS_KAKE), Relasjon.GJENLEVENDE, null, sedType = SedType.P6000, null, rinaDocumentId =  "3123123"), HendelseType.SENDT
         )
 
-        val expected = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, SedType.P6000)
+        val expected = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, SedType.P6000, rinaDocumentId =  "3123123")
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -98,34 +96,13 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent("05127921999")) } returns PersonMock.createWith("05127921999", landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, null), HendelseType.SENDT
+            SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, null, rinaDocumentId =  "3123123"), HendelseType.SENDT
         )
-        val expected = SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100)
+        val expected = SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, rinaDocumentId =  "3123123")
         assertEquals(expected, actual?.personRelasjon)
     }
 
-    @Test
-    fun `Gitt et gyldig fnr og relasjon avdod så skal det identifiseres en person`() {
-        val gjenlevFnr = LEALAUS_KAKE
 
-        every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
-
-        val sedjson = createR005(
-            forsikretFnr = SLAPP_SKILPADDE, forsikretTilbakekreving = "avdød_mottaker_av_ytelser",
-            annenPersonFnr = gjenlevFnr, annenPersonTilbakekreving = "enke_eller_enkemann"
-        ).toJson()
-        val sed = mapJsonToAny(sedjson, typeRefs<R005>())
-        val listPair = listOf(Pair("23123", sed))
-
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(listPair, bucType = BucType.R_BUC_02)
-        val actual = personidentifiseringService.hentIdentifisertePersoner(
-            listPair, BucType.R_BUC_02, potensiellePerson, HendelseType.SENDT, "23123"
-        )
-        val expected = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1973,11,22))
-
-        val person = actual.single()
-        assertEquals(expected, person.personRelasjon)
-    }
 
     @Test
     fun `Gitt et gyldig fnr og relasjon forsikret så skal det identifiseres en person`() {
@@ -136,12 +113,12 @@ class PersonidentifiseringServiceTest {
         val sed = sedFromJsonFile("/buc/P2000-NAV.json")
         val alleSediBuc = listOf(Pair("23123", sed))
 
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner (alleSediBuc, BucType.P_BUC_01)
         val actual = personidentifiseringService.hentIdentifisertePersoner(
             alleSediBuc, BucType.P_BUC_01, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "23123"
         )
         val sokKriterier = SokKriterier("øjøløjøjø","jkljkjl", LocalDate.of(1980, 1, 1))
-        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, sokKriterier = sokKriterier,  fdato = LocalDate.of(1980, 1, 1))
+        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, sokKriterier = sokKriterier,  fdato = LocalDate.of(1980, 1, 1),rinaDocumentId =  "3123123")
         assertEquals(expected, actual.first().personRelasjon)
 
         verify(exactly = 1) { personService.hentPerson(NorskIdent(fnr.value)) }
@@ -151,7 +128,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fdato`() {
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null), HendelseType.SENDT
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null, rinaDocumentId = "23123"), HendelseType.SENDT
         )
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed), emptyList())
         assertEquals("1958-07-11", fdato.toString())
@@ -161,7 +138,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr så skal det slås opp fnr og fdato i seder og returnere gyldig fnr`() {
         val sed1 = sedFromJsonFile("/buc/P10000-superenkel.json")
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null), HendelseType.SENDT
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null, rinaDocumentId = "312321"), HendelseType.SENDT
         )
         val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed1), emptyList())
 
@@ -183,7 +160,7 @@ class PersonidentifiseringServiceTest {
             Pair("231231", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr = navBruker, gjenlevFnr = gjenlevende, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
             Pair("13231212212A", SED.generateSedToClass<P6000>(generateSED(SedType.P6000, forsikretFnr = navBruker, gjenlevFnr = gjenlevende)))
         )
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListe, BucType.P_BUC_02)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner (sedListe, BucType.P_BUC_02)
 
         val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(
             sedListe, bucType, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "13231212212A"
@@ -206,34 +183,34 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt fnr på navbruker på en P_BUC_02 med P2100 og P10000 så skal det slås opp fnr og fdato i seder og returnere gyldig gjenlevendefnr`() {
         //EUX - FnrServide (fin pin)
-        val navBruker = "11067122781" //avdød bruker fra eux
-        val gjenlevende = "09035225916"
-        val bucType = BucType.P_BUC_02
-
-        every { personService.hentPerson(NorskIdent(gjenlevende)) } returns PersonMock.createWith(gjenlevende, landkoder = true, fornavn = "Gjenlevende")
-        every { personService.hentPerson(NorskIdent(navBruker)) } returns PersonMock.createWith(navBruker, landkoder = true, fornavn = "Avgått-død")
-
-        val sed1 = SED.generateSedToClass<P2100>(sedFromJsonFile("/buc/P2100-PinNO.json"))
-        val sed2 = SED.generateSedToClass<P6000>(sedFromJsonFile("/buc/P6000-gjenlevende-NAV.json"))
-/*
-        val sed3 = SED.generateSedToClass<P10000>(sedFromJsonFile("/buc/P10000-person-annenperson.json"))
-*/
-/*        val alleSediBuc = listOf(Pair("123123", sed1), Pair("23123123", sed2), Pair("23143-adads-23123", sed3))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.P_BUC_02)
-
-        val actual = personidentifiseringService.hentIdentifisertePersoner(
-            alleSediBuc, bucType, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "23123123"
-        )
-
-        assertEquals(1, actual.size)
-        assertEquals(gjenlevende, actual.first().personRelasjon.fnr!!.value)
-        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
-
-        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000, potensiellePerson)
-        assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr!!.value)
-        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon.relasjon)
-
-        verify(exactly = 1) { personService.hentPerson(NorskIdent(gjenlevende)) }*/
+//        val navBruker = "11067122781" //avdød bruker fra eux
+//        val gjenlevende = "09035225916"
+//        val bucType = BucType.P_BUC_02
+//
+//        every { personService.hentPerson(NorskIdent(gjenlevende)) } returns PersonMock.createWith(gjenlevende, landkoder = true, fornavn = "Gjenlevende")
+//        every { personService.hentPerson(NorskIdent(navBruker)) } returns PersonMock.createWith(navBruker, landkoder = true, fornavn = "Avgått-død")
+//
+//        val sed1 = SED.generateSedToClass<P2100>(sedFromJsonFile("/buc/P2100-PinNO.json"))
+//        val sed2 = SED.generateSedToClass<P6000>(sedFromJsonFile("/buc/P6000-gjenlevende-NAV.json"))
+//
+//        val sed3 = SED.generateSedToClass<P10000>(sedFromJsonFile("/buc/P10000-person-annenperson.json"))
+//
+//        val alleSediBuc = listOf(Pair("123123", sed1), Pair("23123123", sed2), Pair("23143-adads-23123", sed3))
+//        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.P_BUC_02)
+//
+//        val actual = personidentifiseringService.hentIdentifisertePersoner(
+//            alleSediBuc, bucType, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "23123123"
+//        )
+//
+//        assertEquals(1, actual.size)
+//        assertEquals(gjenlevende, actual.first().personRelasjon.fnr!!.value)
+//        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
+//
+//        val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000, potensiellePerson)
+//        assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr!!.value)
+//        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon.relasjon)
+//
+//        verify(exactly = 1) { personService.hentPerson(NorskIdent(gjenlevende)) }
     }
 
     @Test
@@ -259,7 +236,7 @@ class PersonidentifiseringServiceTest {
     fun `Gitt manglende fnr og en liste med seder vil returnere en liste size 0`(){
         val sed1 = sedFromJsonFile("/buc/EmptySED.json")
         val alleSediBuc = listOf(Pair("123123", sed1), Pair("23123123", sed1), Pair("23143-adads-23123", sed1))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc,BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc,BucType.P_BUC_01)
 
         val actual = personidentifiseringService.hentIdentifisertePersoner(
             alleSediBuc, BucType.P_BUC_01, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "23123123"
@@ -270,7 +247,7 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Gitt en tom liste av identifiserte personer når velger person så returner null`(){
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.H_BUC_07)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc, BucType.H_BUC_07)
         assertNull(personidentifiseringService.identifisertPersonUtvelger(emptyList(), BucType.H_BUC_07, null, potensiellePerson))
     }
 
@@ -281,10 +258,10 @@ class PersonidentifiseringServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET)
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "123123")
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.H_BUC_07)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc, BucType.H_BUC_07)
 
         assertEquals(personidentifiseringService.identifisertPersonUtvelger(listOf(identifisertPerson), BucType.H_BUC_07, SedType.H001, potensiellePerson), identifisertPerson)
     }
@@ -296,10 +273,10 @@ class PersonidentifiseringServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE)
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "23123")
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.R_BUC_02)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc, BucType.R_BUC_02)
 
         val result = personidentifiseringService.identifisertPersonUtvelger(listOf(gjenlevende), BucType.R_BUC_02, SedType.R004, potensiellePerson)
 
@@ -315,7 +292,7 @@ class PersonidentifiseringServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD)
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD, rinaDocumentId = "231231")
         )
 
         val gjenlevende = IdentifisertPerson(
@@ -323,11 +300,11 @@ class PersonidentifiseringServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE)
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231")
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.R_BUC_02)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc, BucType.R_BUC_02)
 
         val result = personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), BucType.R_BUC_02, SedType.R004, potensiellePerson)
 
@@ -343,11 +320,11 @@ class PersonidentifiseringServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET)
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "23123")
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc,BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc,BucType.P_BUC_01)
 
         assertThrows<FlerePersonPaaBucException> {
             personidentifiseringService.identifisertPersonUtvelger(listOf(forsikret, forsikret, forsikret), BucType.P_BUC_01, SedType.P2000, potensiellePerson)
@@ -364,7 +341,7 @@ class PersonidentifiseringServiceTest {
         val list = listOf(person1, person2, person3)
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(alleSediBuc, BucType.P_BUC_02)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(alleSediBuc, BucType.P_BUC_02)
 
 
         val actual = personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_02, SedType.P2100, potensiellePerson)
@@ -390,7 +367,7 @@ class PersonidentifiseringServiceTest {
         val person3 = createIdentifisertPerson(Fodselsnummer.fra("4567"), Relasjon.ANNET)
 
         val list = listOf(person1, person2, person3)
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(emptyList(),BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(emptyList(),BucType.P_BUC_01)
 
         assertThrows<FlerePersonPaaBucException> {
             personidentifiseringService.identifisertPersonUtvelger(list, BucType.P_BUC_01, SedType.P2100, potensiellePerson)
@@ -429,23 +406,21 @@ class PersonidentifiseringServiceTest {
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
         val avdodPerson = IdentifisertPerson(
-            "", "avgott Testesen", "NOR", "026123", SEDPersonRelasjon(
-                avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100
-            )
+            "", "avgott Testesen", "NOR", "026123",
+            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123")
         )
 
         val sokKriterier = SokKriterier("RASK","MULDVARP", LocalDate.of(1969, 11, 28))
         val gjenlevendePerson = IdentifisertPerson(
-            "", "gjenlevende Testesen", "NOR", "026123", SEDPersonRelasjon(
-                gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier
-            )
+            "", "gjenlevende Testesen", "NOR", "026123",
+            SEDPersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier, rinaDocumentId = "23123")
         )
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
 
         val sed1 = SED.generateSedToClass<P2100>(sedFromJsonFile("/sed/P_BUC_02_P2100_Sendt.json"))
         val sedListFraBuc = listOf(Pair("123123", sed1))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListFraBuc, BucType.P_BUC_02)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(sedListFraBuc, BucType.P_BUC_02)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
         every { personService.hentPerson(NorskIdent(gjenlevendeFnr!!.value)) } returns PersonMock.createWith(gjenlevendeFnr!!.value, fornavn = "gjenlevende", geo = "026123")
@@ -464,7 +439,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = SED(SedType.P2000, nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(Pair("12312312", sed))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListFraBuc, BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(sedListFraBuc, BucType.P_BUC_01)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
         every { personService.hentPerson(NorskIdent(gjenlevendeFnr!!.value)) } returns PersonMock.createWith("28116925275", fornavn = "gjenlevende", landkoder = false, etternavn = "Efternamnet")
@@ -483,7 +458,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = SED(SedType.P2000,nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(Pair("123123", sed))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListFraBuc, BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(sedListFraBuc, BucType.P_BUC_01)
 
         val genericPerson = PersonMock.createWith("28116925275", fornavn = "gjenlevende", landkoder = true, etternavn = "Efternamnet")
         val person = genericPerson.copy(
@@ -509,7 +484,7 @@ class PersonidentifiseringServiceTest {
 
         val sed = SED(SedType.P2000,nav = Nav(bruker = Bruker(person = createPerson(gjenlevendeFnr?.value))))
         val sedListFraBuc = listOf(Pair("2312321", sed))
-        val potensiellePerson = fnrHelper.getPotensiellePersonRelasjoner(sedListFraBuc, BucType.P_BUC_01)
+        val potensiellePerson = personidentifiseringService.hentRelasjoner(sedListFraBuc, BucType.P_BUC_01)
 
         val genericPerson = PersonMock.createWith("28116925275", fornavn = "gjenlevende", landkoder = true, etternavn = "Efternamnet")
         val person = genericPerson.copy(
@@ -587,7 +562,7 @@ class PersonidentifiseringServiceTest {
             "Ola Test Testing",
             "NOR",
             "3041",
-            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000, null, fdato)
+            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323")
         )
 
     }
@@ -598,7 +573,7 @@ class PersonidentifiseringServiceTest {
     }
 
     private fun createIdentifisertPerson(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPerson =
-        IdentifisertPerson("", "Dummy", "NO", "", SEDPersonRelasjon(fnr, relasjon))
+        IdentifisertPerson("", "Dummy", "NO", "", SEDPersonRelasjon(fnr, relasjon, rinaDocumentId = "123123"))
 
     private fun generateSED(
         sedType: SedType,

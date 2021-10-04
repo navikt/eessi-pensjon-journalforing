@@ -62,7 +62,7 @@ internal class FnrHelperTest {
             ), BucType.P_BUC_01
         )
 
-        val expected = setOf(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1952,3,9)))
+        val expected = setOf(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), relasjon = Relasjon.FORSIKRET, sedType = SedType.P2000, fdato = LocalDate.of(1952,3,9), rinaDocumentId = "23423"))
         assertEquals(2, actual.size)
         assertTrue(actual.containsAll(expected))
         assertEquals(expected.first(), actual.firstOrNull { it.sedType == SedType.P2000 })
@@ -81,7 +81,7 @@ internal class FnrHelperTest {
         )
 
         assertEquals(1, actual.size)
-        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000, fdato = LocalDate.of(1971,6,11)), actual.first())
+        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234"), actual.first())
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class FnrHelperTest {
         val expectedFnr = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)
         assertEquals(1, actual.size)
 
-        assertEquals(SEDPersonRelasjon(expectedFnr, Relasjon.FORSIKRET, Saktype.GJENLEV, SedType.P15000, fdato = LocalDate.of(1971,6,11)), actual.first())
+        assertEquals(SEDPersonRelasjon(expectedFnr, Relasjon.FORSIKRET, Saktype.GJENLEV, SedType.P15000, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234"), actual.first())
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class FnrHelperTest {
             )), BucType.R_BUC_02
         )
 
-        val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
+        val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         assertTrue(actual.contains(enke))
@@ -127,7 +127,7 @@ internal class FnrHelperTest {
             )), BucType.R_BUC_02
         )
         assertEquals(1, actual.size)
-        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11)), actual.first())
+        assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234"), actual.first())
     }
 
     @Test
@@ -152,8 +152,8 @@ internal class FnrHelperTest {
             ), BucType.R_BUC_02
         )
 
-        val forste = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1952,3,9))
-        val andre = SEDPersonRelasjon(Fodselsnummer.fra(annenPersonFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
+        val forste = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1952,3,9), rinaDocumentId = "234234")
+        val andre = SEDPersonRelasjon(Fodselsnummer.fra(annenPersonFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234")
 
         assertEquals(2, actual.size)
         assertTrue(actual.contains(forste))
@@ -168,7 +168,7 @@ internal class FnrHelperTest {
                 Pair("23123123", generateSED(SedType.H070, forsikretFnr = KRAFTIG_VEGGPRYD))
             ), BucType.P_BUC_02
         )
-        val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = LocalDate.of(1971, 6,11))
+        val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         assertEquals(forste, actual[0])
@@ -187,7 +187,7 @@ internal class FnrHelperTest {
                 )
             ), BucType.R_BUC_02
         )
-        val enke = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971, 6, 11))
+        val enke = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971, 6, 11), rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         assertEquals(actual[0], enke)
@@ -198,7 +198,7 @@ internal class FnrHelperTest {
         val forventetFnr = KRAFTIG_VEGGPRYD
 
         val actual = helper.getPotensiellePersonRelasjoner(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))), BucType.R_BUC_02)
-        val annen = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11))
+        val annen = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         assertTrue(actual.contains(annen))
@@ -215,7 +215,7 @@ internal class FnrHelperTest {
             ), BucType.P_BUC_02
         )
 
-        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000, rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
 
@@ -234,7 +234,7 @@ internal class FnrHelperTest {
                 Pair("33123123", SED.generateSedToClass<P8000>(generateSED(SedType.P8000, forsikretFnr = "25105424704", annenPersonFnr = gjenlevFnr, forsikretRolle = Rolle.ETTERLATTE)))
             ), BucType.P_BUC_02
         )
-        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000)
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000, rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         val actualPersonRelasjon = actual.first()
@@ -256,9 +256,9 @@ internal class FnrHelperTest {
             ), BucType.P_BUC_10
         )
 
-        val expectedForsikretP15000 = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) )
-        val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000)
-        val expectedGjenlevP5000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000)
+        val expectedForsikretP15000 = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, fdato = LocalDate.of(2015,1,12) , rinaDocumentId = "234234")
+        val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000, rinaDocumentId = "234234")
+        val expectedGjenlevP5000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000, rinaDocumentId = "234234")
 
         assertEquals(3, actual.size)
 
@@ -277,7 +277,7 @@ internal class FnrHelperTest {
         )
 
         val actual = helper.getPotensiellePersonRelasjoner(sedList, BucType.P_BUC_01)
-        val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, fdato = LocalDate.of(1971, 6,11))
+        val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "234234")
 
         assertEquals(1, actual.size)
         assertEquals(expectedPerson, actual.first())

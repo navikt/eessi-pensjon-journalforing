@@ -91,13 +91,13 @@ class PersonidentifiseringService(
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
-        personSok.sokPersonEtterFnr(sedListe, rinaDocumentId, bucType, sedType, hendelsesType)
+        personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
         ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
 
         return null
     }
 
-    private fun hentRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
+    fun hentRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
             val fnrListe = mutableSetOf<SEDPersonRelasjon>()
             val sedMedForsikretPrioritet = listOf(SedType.H121, SedType.H120, SedType.H070)
 
@@ -122,7 +122,7 @@ class PersonidentifiseringService(
 
     }
 
-    fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): T2000TurboRelasjon? {
+    private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): T2000TurboRelasjon? {
 
         if (sed.type.kanInneholdeIdentEllerFdato()) {
             return when (sed.type) {
