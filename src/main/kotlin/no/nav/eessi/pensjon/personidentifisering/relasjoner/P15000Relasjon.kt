@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 
-class P15000Relasjon(private val sed: SED, private val bucType: BucType) : GjenlevendeHvisFinnes(sed, bucType) {
+class P15000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : GjenlevendeHvisFinnes( sed, bucType,rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val sedKravString = sed.nav?.krav?.type

@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
-abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType) : T2000TurboRelasjon(sed, bucType) {
+abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : T2000TurboRelasjon(sed, bucType, rinaDocumentId) {
 
     fun hentRelasjonGjenlevendeFnrHvisFinnes(
         gjenlevendeBruker: Bruker? = null
@@ -25,7 +25,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             val forsikretFnr = Fodselsnummer.fra(forsikretPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato = mapFdatoTilLocalDate(forsikretPerson?.foedselsdato)
 
-            fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie))
+            fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie, rinaDocumentId = rinaDocumentId))
             logger.debug("Legger til forsikret-person ${Relasjon.FORSIKRET}")
         }
 
@@ -40,7 +40,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
 
             if (gjenlevendeRelasjon == null) {
-                fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato))
+                fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
                 return fnrListe
             }
@@ -50,7 +50,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             } else {
                 Saktype.GJENLEV
             }
-            fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato))
+            fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
             logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
         }
 

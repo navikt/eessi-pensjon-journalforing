@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
-class GenericRelasjon(private val sed: SED, private val bucType: BucType) : T2000TurboRelasjon(sed, bucType) {
+class GenericRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : T2000TurboRelasjon(sed,bucType,rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
@@ -34,7 +34,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType) : T200
             val sokPersonKriterie = opprettSokKriterie(person)
             val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato =  mapFdatoTilLocalDate(person.foedselsdato)
-            return SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato)
+            return SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato, rinaDocumentId=rinaDocumentId)
         }
         return null
     }

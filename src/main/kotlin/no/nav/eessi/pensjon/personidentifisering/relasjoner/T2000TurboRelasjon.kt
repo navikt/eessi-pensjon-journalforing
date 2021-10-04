@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 
 val logger: Logger = LoggerFactory.getLogger(T2000TurboRelasjon::class.java)
 
-abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: BucType) {
+abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
 
     val forsikretPerson = sed.nav?.bruker?.person
 
@@ -29,7 +29,7 @@ abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: Buc
             val fdato = mapFdatoTilLocalDate(person.foedselsdato)
 
             logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
-            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, null, sed.type, sokPersonKriterie, fdato))
+            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, null, sed.type, sokPersonKriterie, fdato, rinaDocumentId))
         }
 
         logger.warn("Ingen forsikret person funnet")

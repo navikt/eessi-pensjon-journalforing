@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 
-class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType)  :T2000TurboRelasjon(sed, bucType) {
+class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String)  :T2000TurboRelasjon(sed,bucType,rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
 
@@ -29,17 +29,17 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType)
         logger.debug("Personpin: $personPin, AnnenPersonpin $annenPersonPin, Annenperson rolle : $rolle, sokForsikret: ${sokForsikretKriterie != null}")
 
         //kap.2 forsikret person
-        fnrListe.add(SEDPersonRelasjon(personPin, Relasjon.FORSIKRET, sedType = sed.type, sokKriterier = sokForsikretKriterie, fdato = personFdato))
+        fnrListe.add(SEDPersonRelasjon(personPin, Relasjon.FORSIKRET, sedType = sed.type, sokKriterier = sokForsikretKriterie, fdato = personFdato, rinaDocumentId=rinaDocumentId))
         logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
 
         //Annenperson søker/barn o.l
         if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
             val sokAnnenPersonKriterie = annenPerson?.let { opprettSokKriterie(it) }
             val annenPersonRelasjon = when (rolle) {
-                Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato)
-                Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
-                Rolle.BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
-                else -> SEDPersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato)
+                Rolle.ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId= rinaDocumentId)
+                Rolle.FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato,rinaDocumentId= rinaDocumentId)
+                Rolle.BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato, rinaDocumentId=rinaDocumentId)
+                else -> SEDPersonRelasjon(annenPersonPin, Relasjon.ANNET, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato, rinaDocumentId=rinaDocumentId)
             }
 
             fnrListe.add(annenPersonRelasjon)

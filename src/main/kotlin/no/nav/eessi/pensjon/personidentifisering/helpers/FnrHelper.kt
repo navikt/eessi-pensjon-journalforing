@@ -2,15 +2,8 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -82,7 +75,7 @@ class FnrHelper {
      * P8000-P10000 - [02] Forsørget/familiemedlem
      * P8000-P10000 - [03] Barn
      */
-    private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>) {
+/*    private fun leggTilAnnenGjenlevendeFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>) {
         val gjenlevende = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }
         gjenlevende?.let { bruker ->
             val sokPersonKriterie = opprettSokKriterie(bruker)
@@ -90,9 +83,9 @@ class FnrHelper {
             val fdato =  mapFdatoTilLocalDate(bruker.person?.foedselsdato)
             fnrListe.add(SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato))
         }
-    }
+    }*/
 
-    private fun behandleP15000(sed: P15000, fnrListe: MutableSet<SEDPersonRelasjon>) {
+/*    private fun behandleP15000(sed: P15000, fnrListe: MutableSet<SEDPersonRelasjon>) {
         val sedKravString = sed.nav?.krav?.type
 
         val saktype = if (sedKravString == null) null else mapKravtypeTilSaktype(sedKravString)
@@ -112,9 +105,9 @@ class FnrHelper {
             leggTilForsikretFnrHvisFinnes(sed, fnrListe, saktype)
         }
         
-    }
+    }*/
 
-    //P2000, P2200..P15000(forsikret)
+/*    //P2000, P2200..P15000(forsikret)
     private fun leggTilForsikretFnrHvisFinnes(sed: SED, fnrListe: MutableSet<SEDPersonRelasjon>, saktype: Saktype? = null) {
         val forsikretBruker = sed.nav?.bruker
         forsikretBruker?.let {  bruker ->
@@ -126,7 +119,7 @@ class FnrHelper {
             logger.debug("Legger til person ${Relasjon.FORSIKRET}, med $saktype og sedType: ${sed.type}")
         }
 
-    }
+    }*/
 
     private fun opprettSokKriterie(navBruker: Bruker) : SokKriterier? {
         val person = navBruker.person ?: return null
@@ -154,7 +147,7 @@ class FnrHelper {
         }
     }
 
-    private fun leggTilGjenlevendeFnrHvisFinnes(
+/*    private fun leggTilGjenlevendeFnrHvisFinnes(
         forsikretBruker: Bruker? = null,
         gjenlevendeBruker: Bruker? = null,
         sedType: SedType,
@@ -195,7 +188,7 @@ class FnrHelper {
             logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
         }
 
-    }
+    }*/
 
     /**
      * P8000 - [01] Søker til etterlattepensjon
@@ -203,7 +196,7 @@ class FnrHelper {
      * P8000 - [03] Barn
      * P10000
      */
-    private fun behandleP8000AndP10000(
+/*    private fun behandleP8000AndP10000(
         nav: Nav?,
         sedType: SedType,
         fnrListe: MutableSet<SEDPersonRelasjon>,
@@ -242,7 +235,7 @@ class FnrHelper {
             fnrListe.add(annenPersonRelasjon)
             logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}, sokForsikret: ${sokAnnenPersonKriterie != null}")
         }
-    }
+    }*/
 
     /**
      * R005 har mulighet for flere personer.

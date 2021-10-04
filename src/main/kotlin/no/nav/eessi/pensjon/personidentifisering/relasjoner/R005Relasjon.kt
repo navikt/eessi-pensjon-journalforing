@@ -7,10 +7,9 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
-class R005Relasjon(private val sed: SED, private val bucType: BucType) : T2000TurboRelasjon(sed, bucType) {
+class R005Relasjon(private val sed: SED, private val bucType: BucType, val rinaDocumentId: String) : T2000TurboRelasjon(sed, bucType,rinaDocumentId) {
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         return filterPinPersonR005(sed as R005)
-
     }
 
     private fun filterPinPersonR005(sed: R005): List<SEDPersonRelasjon> {
@@ -19,7 +18,7 @@ class R005Relasjon(private val sed: SED, private val bucType: BucType) : T2000Tu
                 val relasjon = mapRBUC02Relasjon(bruker.tilbakekreving?.status?.type)
                 val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
                 Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-                    ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato) }
+                    ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato, rinaDocumentId = rinaDocumentId) }
             } ?: emptyList()
     }
 
@@ -31,5 +30,4 @@ class R005Relasjon(private val sed: SED, private val bucType: BucType) : T2000Tu
             else -> Relasjon.ANNET
         }
     }
-
 }
