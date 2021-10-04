@@ -188,15 +188,36 @@ class PersonidentifiseringService(
         logger.debug("Landkode og person: ${person.toJson()}")
 
         return when {
-            landkodeOppholdKontakt != null -> landkodeOppholdKontakt
-            landkodeUtlandsAdresse != null -> landkodeUtlandsAdresse
-            landkodeOppholdsadresse != null -> landkodeOppholdsadresse
-            landkodeBostedsadresse != null -> landkodeBostedsadresse
-            geografiskLandkode != null -> geografiskLandkode
-            landkodeBostedNorge != null -> "NOR"
-            landkodeKontaktNorge != null -> "NOR"
+            landkodeOppholdKontakt != null -> {
+                logger.info("Velger landkode fra kontaktadresse.utenlandskAdresseIFrittFormat ")
+                landkodeOppholdKontakt
+            }
+            landkodeUtlandsAdresse != null -> {
+                logger.info("Velger landkode fra kontaktadresse.utenlandskAdresse")
+                landkodeUtlandsAdresse
+            }
+            landkodeOppholdsadresse != null -> {
+                logger.info("Velger landkode fra oppholdsadresse.utenlandskAdresse")
+                landkodeOppholdsadresse
+            }
+            landkodeBostedsadresse != null -> {
+                logger.info("Velger landkode fra bostedsadresse.utenlandskAdresse")
+                landkodeBostedsadresse
+            }
+            geografiskLandkode != null -> {
+                logger.info("Velger landkode fra geografiskTilknytning.gtLand")
+                geografiskLandkode
+            }
+            landkodeBostedNorge != null -> {
+                logger.info("Velger landkode NOR fordi  bostedsadresse.vegadresse ikke er tom")
+                "NOR"
+            }
+            landkodeKontaktNorge != null -> {
+                logger.info("Velger landkode NOR fordi  kontaktadresse.postadresseIFrittFormat ikke er tom")
+                "NOR"
+            }
             else -> {
-                logger.warn("Ingen landkode funnet settes til ''")
+                logger.info("Velger tom landkode siden ingen særregler for adresseutvelger inntraff")
                 ""
             }
         }
