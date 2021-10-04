@@ -59,7 +59,7 @@ class PersonidentifiseringServiceTest {
     private val personService = mockk<PersonService>(relaxed = true)
     private val personSok = mockk<PersonSok>(relaxed = true)
 
-    private val personidentifiseringService = PersonidentifiseringService(personSok, personService, FnrHelper())
+    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
     private val fnrHelper = FnrHelper()
 
@@ -238,7 +238,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt manglende fnr og en liste med sed som inneholder fdato som gir en gyldig fdato`(){
-        val personidentifiseringService2 = PersonidentifiseringService(personSok, personService, FnrHelper())
+        val personidentifiseringService2 = PersonidentifiseringService(personSok, personService)
 
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
         val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed), emptyList())

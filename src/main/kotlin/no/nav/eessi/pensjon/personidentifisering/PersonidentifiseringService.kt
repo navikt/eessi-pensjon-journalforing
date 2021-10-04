@@ -1,13 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+//import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import io.micrometer.core.instrument.Metrics
-import no.nav.eessi.pensjon.eux.model.sed.P10000
-import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.P2100
-import no.nav.eessi.pensjon.eux.model.sed.P2200
-import no.nav.eessi.pensjon.eux.model.sed.P6000
-import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.toJson
@@ -15,7 +9,6 @@ import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
@@ -25,6 +18,7 @@ import no.nav.eessi.pensjon.personidentifisering.relasjoner.P2000Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.P2100Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.P6000Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.P8000AndP10000Relasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.R005Relasjon
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.T2000TurboRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
@@ -41,7 +35,6 @@ import java.time.LocalDate
 class PersonidentifiseringService(
     @Autowired private val personSok: PersonSok,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
-    private val fnrHelper: FnrHelper,
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
@@ -132,13 +125,16 @@ class PersonidentifiseringService(
     fun getRelasjonHandler(sed: SED, bucType: BucType): T2000TurboRelasjon? {
 
         if (sed.type.kanInneholdeIdentEllerFdato()) {
-            return when (sed) {
-                is P2000 -> P2000Relasjon(sed, bucType)
-                is P2200 -> P2000Relasjon(sed, bucType)
-                is P2100 -> P2100Relasjon(sed, bucType)
-                is P8000, is P10000 -> P8000AndP10000Relasjon(sed, bucType)
-                is P6000 -> P6000Relasjon(sed, bucType)
-                is P15000 -> P15000Relasjon(sed, bucType)
+            return when (sed.type) {
+                SedType.R005 -> R005Relasjon(sed,bucType)
+                SedType.P2000 -> P2000Relasjon(sed, bucType)
+                SedType.P2200 -> P2000Relasjon(sed, bucType)
+                SedType.P2100 -> P2100Relasjon(sed, bucType)
+                SedType.P8000, SedType.P10000 -> P8000AndP10000Relasjon(sed, bucType)
+                SedType.P6000 -> P6000Relasjon(sed, bucType)
+                SedType.P15000 -> P15000Relasjon(sed, bucType)
+
+                SedType.H070, SedType.H120, SedType.H121 -> GenericRelasjon(sed, bucType)
                 else -> GenericRelasjon(sed, bucType)
             }
         }

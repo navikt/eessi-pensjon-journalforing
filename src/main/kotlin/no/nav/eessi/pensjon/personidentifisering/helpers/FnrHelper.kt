@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
@@ -29,8 +28,8 @@ class FnrHelper {
      * leter etter et gyldig fnr i alle seder henter opp person i PersonV3
      * ved R_BUC_02 leter etter alle personer i Seder og lever liste
      */
-    fun getPotensiellePersonRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
-        return emptyList()
+//    fun getPotensiellePersonRelasjoner(seder: List<Pair<String, SED>>, bucType: BucType): List<SEDPersonRelasjon> {
+//        return emptyList()
 //        val fnrListe = mutableSetOf<SEDPersonRelasjon>()
 //
 //        seder.forEach { (_,sed) ->
@@ -76,7 +75,7 @@ class FnrHelper {
 //               .sortedBy { it.relasjon }
 //
 //        return resultat.ifEmpty { fnrListe.distinctBy { it.fnr } }
-    }
+//    }
 
     /**
      * P8000-P10000 - [01] Søker til etterlattepensjon
@@ -252,29 +251,29 @@ class FnrHelper {
      *
      * Hvis ingen intreffer returnerer vi tom liste
      */
-    private fun behandleR005(sed: R005, fnrListe: MutableSet<SEDPersonRelasjon>) {
-        fnrListe.addAll(filterPinPersonR005(sed))
-    }
+//    private fun behandleR005(sed: R005, fnrListe: MutableSet<SEDPersonRelasjon>) {
+//        fnrListe.addAll(filterPinPersonR005(sed))
+//    }
 
-    private fun filterPinPersonR005(sed: R005): List<SEDPersonRelasjon> {
-        return sed.recoveryNav?.brukere
-                ?.mapNotNull { bruker ->
-                    val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
-                    val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
-                    Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-                            ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato) }
-                } ?: emptyList()
-    }
-
-    //Kun for R_BUC_02
-    private fun mapRelasjon(type: String?): Relasjon {
-        return when (type) {
-            "enke_eller_enkemann" -> Relasjon.GJENLEVENDE
-            "forsikret_person" -> Relasjon.FORSIKRET
-            "avdød_mottaker_av_ytelser" -> Relasjon.AVDOD
-            else -> Relasjon.ANNET
-        }
-    }
+//    private fun filterPinPersonR005(sed: R005): List<SEDPersonRelasjon> {
+//        return sed.recoveryNav?.brukere
+//                ?.mapNotNull { bruker ->
+//                    val relasjon = mapRelasjon(bruker.tilbakekreving?.status?.type)
+//                    val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
+//                    Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+//                            ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato) }
+//                } ?: emptyList()
+//    }
+//
+//    //Kun for R_BUC_02
+//    private fun mapRelasjon(type: String?): Relasjon {
+//        return when (type) {
+//            "enke_eller_enkemann" -> Relasjon.GJENLEVENDE
+//            "forsikret_person" -> Relasjon.FORSIKRET
+//            "avdød_mottaker_av_ytelser" -> Relasjon.AVDOD
+//            else -> Relasjon.ANNET
+//        }
+//    }
 
     fun erGjenlevendeBarn(relasjon: String): Boolean {
         return (relasjon == "EGET_BARN" ||

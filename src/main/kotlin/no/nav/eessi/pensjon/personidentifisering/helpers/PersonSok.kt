@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -21,7 +22,7 @@ import javax.annotation.PostConstruct
 @Component
 class PersonSok(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
-    @Autowired private val fnrHelper: FnrHelper,
+    @Autowired private val personidentifiseringService: PersonidentifiseringService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(PersonSok::class.java)
@@ -49,7 +50,7 @@ class PersonSok(
             logger.info("Ingen gyldig sed for søkPerson")
             return null
         }
-        val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(listOf(sedFraHendelse), bucType)
+        val potensiellePersonRelasjoner = personidentifiseringService.hentRelasjoner(listOf(sedFraHendelse), bucType)
         logger.info("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner?.mapNotNull { it.relasjon }}, $sedType ")
 
         val personRelasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE }
