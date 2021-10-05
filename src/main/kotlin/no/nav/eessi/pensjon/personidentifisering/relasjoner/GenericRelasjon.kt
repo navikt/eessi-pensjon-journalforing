@@ -7,6 +7,10 @@ import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
+/**
+ * Generic Hjelpe Relasjon klassse for innhenting av ident fra øvrikge SED vi ikke har spesefikkt laget egne klasser for.
+ *
+ */
 class GenericRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : T2000TurboRelasjon(sed,bucType,rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
@@ -15,7 +19,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType, privat
         leggTilAnnenGjenlevendeFnrHvisFinnes()?.let { annenRelasjon ->
             fnrListe.add(annenRelasjon)
         }
-        fnrListe.addAll(hentForsikretPerson())
+        fnrListe.addAll(hentForsikretPerson(null))
 
         return fnrListe
     }

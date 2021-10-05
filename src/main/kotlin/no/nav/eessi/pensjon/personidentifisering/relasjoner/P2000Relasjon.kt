@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 class P2000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : T2000TurboRelasjon( sed, bucType,rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
-        return hentForsikretPerson()
+        return hentForsikretPerson(null)
 
     }
 

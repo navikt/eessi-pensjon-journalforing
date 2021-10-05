@@ -53,7 +53,5 @@ internal class R005RelasjonTest : RelasjonTestBase(){
         val relasjon = R005Relasjon(sed, BucType.R_BUC_02, "23123").hentRelasjoner()
 
         assertEquals(2, relasjon.size)
-        print(relasjon)
-//        val expected = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1973,11,22))
     }
 }

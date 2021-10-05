@@ -10,17 +10,16 @@ class P15000Relasjon(private val sed: SED, private val bucType: BucType, private
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val sedKravString = sed.nav?.krav?.type
-
         val saktype = if (sedKravString == null) null else mapKravtypeTilSaktype(sedKravString)
 
         logger.info("${sed.type.name}, krav: $sedKravString,  saktype: $saktype")
 
         return if (saktype == Saktype.GJENLEV) {
             logger.debug("legger til gjenlevende: ($saktype)")
-            hentRelasjonGjenlevendeFnrHvisFinnes( (sed as P15000).p15000Pensjon?.gjenlevende )
+            hentRelasjonGjenlevendeFnrHvisFinnes((sed as P15000).p15000Pensjon?.gjenlevende, saktype)
         } else {
             logger.debug("legger til forsikret: ($saktype)")
-            hentForsikretPerson()
+            hentForsikretPerson(saktype)
         }
 
     }

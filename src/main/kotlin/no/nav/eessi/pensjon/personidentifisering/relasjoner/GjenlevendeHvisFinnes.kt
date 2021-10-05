@@ -10,12 +10,9 @@ import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : T2000TurboRelasjon(sed, bucType, rinaDocumentId) {
 
-    fun hentRelasjonGjenlevendeFnrHvisFinnes(
-        gjenlevendeBruker: Bruker? = null
-    ) : List<SEDPersonRelasjon> {
-        logger.info("Henter relasjon på SedType: ${sed.type}")
+    fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null, saktype: Saktype? = null) : List<SEDPersonRelasjon> {
+        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
-        val saktype = null //må ryddes vekk da det ikke er i bruk.. .
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
         val sedType = sed.type
 
@@ -31,7 +28,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
 
         //gjenlevendePerson (søker)
         val gjenlevendePerson = gjenlevendeBruker?.person
-
+        logger.debug("Hva er gjenlevendePerson?: ${gjenlevendePerson?.pin}")
         gjenlevendePerson?.let { gjenlevendePerson ->
             val gjenlevendePin = Fodselsnummer.fra(gjenlevendePerson.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)

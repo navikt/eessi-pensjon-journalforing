@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -20,8 +21,8 @@ abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: Buc
 
     abstract fun hentRelasjoner() :List<SEDPersonRelasjon>
 
-    fun hentForsikretPerson() : List<SEDPersonRelasjon> {
-        logger.info("Henter relasjon på SedType: ${sed.type}")
+    fun hentForsikretPerson(saktype: Saktype?): List<SEDPersonRelasjon> {
+        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
         forsikretPerson?.let { person ->
             val sokPersonKriterie =  opprettSokKriterie(person)
@@ -29,7 +30,7 @@ abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: Buc
             val fdato = mapFdatoTilLocalDate(person.foedselsdato)
 
             logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
-            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, null, sed.type, sokPersonKriterie, fdato, rinaDocumentId))
+            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie, fdato, rinaDocumentId))
         }
 
         logger.warn("Ingen forsikret person funnet")

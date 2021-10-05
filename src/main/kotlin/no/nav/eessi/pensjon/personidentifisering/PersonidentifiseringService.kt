@@ -66,7 +66,7 @@ class PersonidentifiseringService(
         erNavCaseOwner: Boolean = false
     ): IdentifisertPerson? {
 
-        val potensiellePersonRelasjoner = RelasjonsHandler().hentRelasjoner(sedListe, bucType)
+        val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(sedListe, bucType)
 
         val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
