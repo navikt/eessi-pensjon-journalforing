@@ -40,7 +40,6 @@ object RelasjonsHandler {
             .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
             .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
             .sortedBy { it.relasjon }
-            .distinctBy { it.fnr }
 
         val res =  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
         logger.debug("*** filter resultat size: ${res.size} ***")

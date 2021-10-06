@@ -346,11 +346,14 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             val expectedForsikretP15000 = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, sokKriterier = sokfor, fdato = LocalDate.of(2015,1,12), rinaDocumentId = "31231231")
             val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22))
             val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000, sokKriterier = sokgjen, fdato = LocalDate.of(1973,11,22), rinaDocumentId = "31231231")
+            val expectedGjenlevP5000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000, sokKriterier = sokgjen, fdato = sokgjen.foedselsdato, rinaDocumentId = "31231233")
 
-            assertEquals(2, actual.size)
+
+            assertEquals(3, actual.size)
 
             assertEquals(expectedForsikretP15000, actual[0])
             assertEquals(expectedGjenlevP15000, actual[1])
+            assertEquals(expectedGjenlevP5000, actual[2])
         }
 
         @Test
