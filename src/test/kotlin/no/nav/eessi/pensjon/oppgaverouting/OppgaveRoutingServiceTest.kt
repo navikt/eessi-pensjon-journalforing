@@ -268,14 +268,14 @@ internal class OppgaveRoutingServiceTest {
             "Testern",
             null,
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
         val avod = IdentifisertPerson(
             "234",
             "Avdod",
             null,
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.AVDOD, rinaDocumentId =  "3123123")
         )
         forsikret.personListe = listOf(forsikret, avod)
 
@@ -320,7 +320,7 @@ internal class OppgaveRoutingServiceTest {
             "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
 
         data class TestArgumentsPBuc02(
@@ -487,7 +487,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -535,7 +535,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -584,7 +584,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100, rinaDocumentId =  "3123123")
         val identifisertPerson = IdentifisertPerson(
             "01010101010",
             "Ole Olsen",
@@ -621,7 +621,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -669,7 +669,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200)
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "SWE", null, personRelasjon, personListe = emptyList())
 
@@ -922,7 +922,7 @@ internal class OppgaveRoutingServiceTest {
         "Testern",
         "NO",
         "010",
-        SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET)
+        SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
     )
 
 }

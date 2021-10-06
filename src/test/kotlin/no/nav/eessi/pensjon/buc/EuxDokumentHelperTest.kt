@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.buc
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class EuxDokumentHelperTest {
 
@@ -46,7 +51,9 @@ internal class EuxDokumentHelperTest {
         val allSedTypes = SedType.values().toList()
         assertEquals(76, allSedTypes.size)
 
-        val bucDocs = allSedTypes.mapIndexed { index, sedType -> Document(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.toLowerCase() ) }
+        val bucDocs = allSedTypes.mapIndexed { index, sedType -> Document(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.lowercase(
+            Locale.getDefault()
+        )) }
         val buc = Buc(id = "1", processDefinitionName = "P_BUC_01", documents = bucDocs)
         assertEquals(allSedTypes.size, buc.documents?.size)
 
@@ -148,7 +155,9 @@ internal class EuxDokumentHelperTest {
 
         val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json").readText()
         val alldocsid = mapJsonToAny(allDocsJson, typeRefs<List<ForenkletSED>>())
-        val bucDocs = alldocsid.mapIndexed { index, docs -> Document(id = "$index", type = docs.type, status = docs.status?.name?.toLowerCase() )  }
+        val bucDocs = alldocsid.mapIndexed { index, docs -> Document(id = "$index", type = docs.type, status = docs.status?.name?.lowercase(
+            Locale.getDefault()
+        ))  }
         val buc = Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocs)
 
         val sedJson = javaClass.getResource("/buc/P2000-NAV.json").readText()

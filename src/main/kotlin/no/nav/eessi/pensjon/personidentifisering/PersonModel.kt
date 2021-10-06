@@ -27,7 +27,8 @@ data class SEDPersonRelasjon(
     val saktype: Saktype? = null,
     val sedType: SedType? = null,
     val sokKriterier: SokKriterier? = null,
-    val fdato: LocalDate? = null
+    val fdato: LocalDate? = null,
+    val rinaDocumentId: String
 ) {
     fun isFnrDnrSinFdatoLikSedFdato(): Boolean {
         //fdato == null and return true validation allow fnr

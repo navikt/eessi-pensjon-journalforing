@@ -36,7 +36,7 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
+//import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -104,9 +104,8 @@ internal open class JournalforingTestBase {
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
-    private val personSok = PersonSok(personService, FnrHelper())
-
-    private val personidentifiseringService = PersonidentifiseringService(personSok, personService, FnrHelper())
+    private val personSok = PersonSok(personService)
+    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
 
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)

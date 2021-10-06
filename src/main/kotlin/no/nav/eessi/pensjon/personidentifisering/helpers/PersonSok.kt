@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
@@ -21,7 +20,6 @@ import javax.annotation.PostConstruct
 @Component
 class PersonSok(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
-    @Autowired private val fnrHelper: FnrHelper,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(PersonSok::class.java)
@@ -41,16 +39,16 @@ class PersonSok(
             .register(metricsHelper.registry)
     }
 
-    fun sokPersonEtterFnr(sedListe: List<Pair<String, SED>>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
+    fun sokPersonEtterFnr(personRelasjoner: List<SEDPersonRelasjon>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-        val sedFraHendelse = sedListe.firstOrNull { it.first == rinaDocumentId }
-        if (sedFraHendelse == null) {
+        val potensiellePersonRelasjoner = personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
+
+        if (potensiellePersonRelasjoner.isEmpty()) {
             logger.info("Ingen gyldig sed for søkPerson")
             return null
         }
-        val potensiellePersonRelasjoner = fnrHelper.getPotensiellePersonRelasjoner(listOf(sedFraHendelse), bucType)
-        logger.info("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner?.mapNotNull { it.relasjon }}, $sedType ")
+        logger.info("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.map { it.relasjon }}, $sedType ")
 
         val personRelasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE }
             ?: potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.FORSIKRET }
