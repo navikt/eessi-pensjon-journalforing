@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
-class R005Relasjon(private val sed: SED, private val bucType: BucType, val rinaDocumentId: String) : T2000TurboRelasjon(sed, bucType,rinaDocumentId) {
+class R005Relasjon(private val sed: SED, private val bucType: BucType, val rinaDocumentId: String) : AbstractRelasjon(sed, bucType,rinaDocumentId) {
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         return filterPinPersonR005(sed as R005)
     }

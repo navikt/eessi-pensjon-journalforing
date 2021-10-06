@@ -10,7 +10,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.FORSORGER
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 
-class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String)  :T2000TurboRelasjon(sed, bucType, rinaDocumentId) {
+class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String): AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val fnrListe = mutableListOf<SEDPersonRelasjon>()

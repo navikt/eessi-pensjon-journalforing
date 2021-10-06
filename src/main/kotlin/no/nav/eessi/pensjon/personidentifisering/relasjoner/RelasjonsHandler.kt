@@ -35,20 +35,15 @@ object RelasjonsHandler {
 
         logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
         relasjonList.onEach { logger.debug("$it") }
-        logger.debug("*".repeat(40))
         val resultat = relasjonList
             .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
             .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
             .sortedBy { it.relasjon }
 
-        val res =  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
-        logger.debug("*** filter resultat size: ${res.size} ***")
-        res.onEach { logger.debug("$it") }
-        logger.debug("*".repeat(40))
-        return res
+        return  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
     }
 
-    private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): T2000TurboRelasjon? {
+    private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): AbstractRelasjon? {
 
         if (sed.type.kanInneholdeIdentEllerFdato()) {
             return when (sed.type) {

@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-val logger: Logger = LoggerFactory.getLogger(T2000TurboRelasjon::class.java)
+val logger: Logger = LoggerFactory.getLogger(Relasjon::class.java)
 
-abstract class T2000TurboRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
+abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
 
     val forsikretPerson = sed.nav?.bruker?.person
 
