@@ -39,6 +39,7 @@ class Norg2Klient(private val norg2OidcRestTemplate: RestTemplate,
                 headers.contentType = MediaType.APPLICATION_JSON
                 val httpEntity = HttpEntity(request.toJson(), headers)
 
+                logger.info("Kaller NORG med : ${request.toJson()}")
                 val responseEntity = norg2OidcRestTemplate.exchange(
                         "/api/v1/arbeidsfordeling",
                         HttpMethod.POST,
