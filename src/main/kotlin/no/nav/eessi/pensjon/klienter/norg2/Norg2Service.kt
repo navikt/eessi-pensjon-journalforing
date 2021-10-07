@@ -61,7 +61,8 @@ class Norg2Service(private val klient: Norg2Klient) {
                 .filter { it.behandlingstype == request.behandlingstype }
                 .filter { it.behandlingstema == request.behandlingstema }
                 .filter { it.tema == request.tema }
-                .map { it.enhetNr }.also { logger.debug("Mapped: $it") }
+                .map { it.enhetNr }
+                .also { logger.info("Funnet enhet(er) etter filtrering fra NORG: $it, velger: ${it.lastOrNull()}") }
                 .lastOrNull()
     }
 }
