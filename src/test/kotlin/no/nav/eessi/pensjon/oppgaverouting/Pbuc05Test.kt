@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
+import no.nav.eessi.pensjon.personoppslag.FodselsnummerGenerator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -14,9 +15,9 @@ internal class Pbuc05Test {
 
     companion object {
         private const val FNR_63 = "05115743432"        // SLAPP DORULL 62
-        private const val FNR_61 = "12105928066"        // STERK UTEDO
         private const val FNR_54 = "11067122781"    // KRAFTIG VEGGPRYD
         private const val FNR_BARN = "12011577847"      // STERK BUSK
+        private val FNR_61 = FodselsnummerGenerator.generateFnrForTest(61)  //"12105928066"        // STERK UTEDO
     }
 
     @Test
@@ -27,7 +28,10 @@ internal class Pbuc05Test {
             every { bucType } returns BucType.P_BUC_05
         }
 
-        every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
+
+        val fnr_61 = FodselsnummerGenerator.generateFnrForTest(61)
+
+        every { request.fdato } returns Fodselsnummer.fra(fnr_61)!!.getBirthDate()
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()

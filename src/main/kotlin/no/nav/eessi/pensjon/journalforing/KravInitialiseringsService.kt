@@ -9,14 +9,10 @@ import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
 class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
-
-    @Value("\${namespace}")
-    lateinit var nameSpace: String
 
     private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
@@ -28,7 +24,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
         when(sedHendelseModel.sedType) {
             SedType.P2000 -> {
-                if ((sed as P2000).validerForKravinit() && nameSpace == "q1" || nameSpace == "q2" || nameSpace == "test") {
+                if ((sed as P2000).validerForKravinit()) {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelseModel.rinaSakId,
