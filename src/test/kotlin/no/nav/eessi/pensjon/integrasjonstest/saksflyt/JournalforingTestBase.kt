@@ -137,7 +137,6 @@ internal open class JournalforingTestBase {
 
         sendtListener.initMetrics()
         mottattListener.initMetrics()
-        kravService.nameSpace = "test"
         journalforingService.initMetrics()
         journalforingService.nameSpace = "test"
         pdfService.initMetrics()
