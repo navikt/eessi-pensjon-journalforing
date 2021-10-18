@@ -597,4 +597,10 @@ internal open class JournalforingTestBase {
         """.trimIndent()
     }
 
+    fun hentEsssisaknr(bestemSak: BestemSakResponse?): String? = if (bestemSak?.sakInformasjonListe?.size == 1) {
+            bestemSak.sakInformasjonListe.first().sakId
+        } else {
+            null
+        }
+
 }
