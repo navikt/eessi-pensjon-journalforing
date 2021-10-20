@@ -35,6 +35,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             val sokPersonKriterie =  opprettSokKriterie(gjenlevendePerson)
 
             val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
+            logger.info("Innhenting av relasjon: $gjenlevendeRelasjon")
 
             if (gjenlevendeRelasjon == null) {
                 fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
@@ -55,10 +56,8 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
     }
 
     fun erGjenlevendeBarn(relasjon: String): Boolean {
-        return (relasjon == "EGET_BARN" ||
-                relasjon =="ADOPTIVBARN" ||
-                relasjon == "FOSTERBARN" ||
-                relasjon =="STEBARN" )
+        val gyldigeBarneRelasjoner = listOf("EGET_BARN", "06", "ADOPTIVBARN", "07", "FOSTERBARN", "08", "STEBARN", "09")
+        return relasjon in gyldigeBarneRelasjoner
     }
 
 

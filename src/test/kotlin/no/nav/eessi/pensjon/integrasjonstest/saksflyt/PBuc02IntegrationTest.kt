@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.personoppslag.FodselsnummerGenerator
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
@@ -458,6 +459,32 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 land = "NOR",
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = HendelseType.SENDT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Enhet.PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis barnep og sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001`() {
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", SedType.P2100, SedStatus.SENT)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = Saktype.BARNEP , sakStatus = SakStatus.LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN,
+                FodselsnummerGenerator.generateFnrForTest(12),
+                bestemsak,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EGET_BARN,
                 hendelseType = HendelseType.SENDT,
                 norg2enhet = null
             ) {
