@@ -479,7 +479,13 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         norg2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = createSedPensjon(SedType.P2100, fnrVoksen, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
+        val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) {
+            bestemSak.sakInformasjonListe.first().sakId
+        } else {
+            null
+        }
+
+        val sed = createSedPensjon(SedType.P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
@@ -500,6 +506,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
+        if (bestemSak != null) {
+            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns bestemSak.sakInformasjonListe
+        }
 
         val (journalpost, _) = initJournalPostRequestSlot()
 

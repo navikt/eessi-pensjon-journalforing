@@ -123,15 +123,42 @@ class SedSendtListner(
     private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: Saktype?, alleSedIBuc: List<SED>): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
+        logger.info("skal hente pensjonsak med bruk av bestemSak")
         val aktoerId = identifisertPerson.aktoerId
         val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, bucType, bestemSaktypeFraSed(ytelsestypeFraSed, identifisertPerson, bucType))
 
-        return if (sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_05 || sakInformasjonFraBestemSak == null && bucType == BucType.P_BUC_10) {
-            logger.info("skal hente pensjonSak for sed kap.1 og validere mot pesys")
-            fagmodulHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
-        } else
-            sakInformasjonFraBestemSak
+        logger.info("skal hente pensjonSak for SED kap.1 og validere mot pesys")
+        val sakInformasjonFraSed = fagmodulHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+
+        return when {
+            sakInformasjonFraSed != null && sakInformasjonFraBestemSak == null -> sakInformasjonFraSedMedLogging(sakInformasjonFraSed)
+            sakInformasjonFraSed == null && sakInformasjonFraBestemSak != null -> sakInformasjonFraBestemSakMedLogging(sakInformasjonFraBestemSak)
+            sakInformasjonFraSed?.sakId != sakInformasjonFraBestemSak?.sakId -> sakInformasjonFraSedUlikBestemSakMedLogging(sakInformasjonFraSed)
+            else -> sakInformasjonBestemsakMedLogging(sakInformasjonFraBestemSak)
+        }
+
     }
+
+    private fun sakInformasjonFraSedMedLogging(sakfrased: SakInformasjon?): SakInformasjon? {
+        logger.info("Sakid fra bestemSak er null, velger sakid fra sed. sakid: ${sakfrased?.sakId}")
+        return sakfrased
+    }
+
+    private fun sakInformasjonFraBestemSakMedLogging(bestemsak: SakInformasjon?): SakInformasjon? {
+        logger.info("Sakid fra sed er null, velger sakid fra bestemsak, sakid: ${bestemsak?.sakId}")
+        return bestemsak
+    }
+
+    private fun sakInformasjonFraSedUlikBestemSakMedLogging(sakfrased: SakInformasjon?): SakInformasjon? {
+        logger.info("Sakid fra sed ulik sakid fra bestemSak, velger sakid fra sed, sakid: ${sakfrased?.sakId}")
+        return sakfrased
+    }
+
+    private fun sakInformasjonBestemsakMedLogging(bestemsak: SakInformasjon?): SakInformasjon? {
+        logger.info("Velger sakid fra bestemSak, sakid: ${bestemsak?.sakId}")
+        return bestemsak
+    }
+
 
     private fun bestemSaktypeFraSed(saktypeFraSed: Saktype?, identifisertPerson: IdentifisertPerson?, bucType: BucType): Saktype? {
         val saktype = identifisertPerson?.personRelasjon?.saktype

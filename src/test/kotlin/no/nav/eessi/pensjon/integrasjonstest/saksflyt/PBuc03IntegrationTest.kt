@@ -363,6 +363,10 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
+        if (bestemSak != null) {
+            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
+        }
+
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
         val hendelse = createHendelseJson(SedType.P2200, BucType.P_BUC_03)
@@ -372,6 +376,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         val kravmeldingSlot = mutableListOf<String>()
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
+
 
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
