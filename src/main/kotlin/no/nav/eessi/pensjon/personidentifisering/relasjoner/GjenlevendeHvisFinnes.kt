@@ -22,7 +22,13 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             val forsikretFnr = Fodselsnummer.fra(forsikretPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato = mapFdatoTilLocalDate(forsikretPerson?.foedselsdato)
 
-            fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie, rinaDocumentId = rinaDocumentId))
+            fnrListe.add(SEDPersonRelasjon(forsikretFnr,
+                Relasjon.FORSIKRET,
+                saktype,
+                sedType,
+                fdato = fdato,
+                sokKriterier = forsikretPersonKriterie,
+                rinaDocumentId = rinaDocumentId))
             logger.debug("Legger til forsikret-person ${Relasjon.FORSIKRET}")
         }
 
@@ -60,5 +66,13 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         return relasjon in gyldigeBarneRelasjoner
     }
 
+    fun bestemSaktype(bucType: BucType): Saktype? {
+        return when(bucType) {
+            BucType.P_BUC_01 -> Saktype.ALDER
+            BucType.P_BUC_02 -> Saktype.GJENLEV
+            BucType.P_BUC_03 -> Saktype.UFOREP
+            else -> null
+        }
+    }
 
 }

@@ -30,7 +30,13 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
             val fdato = mapFdatoTilLocalDate(person.foedselsdato)
 
             logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
-            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie, fdato, rinaDocumentId))
+            return listOf(SEDPersonRelasjon(fodselnummer,
+                Relasjon.FORSIKRET,
+                saktype,
+                sed.type,
+                sokPersonKriterie,
+                fdato,
+                rinaDocumentId))
         }
 
         logger.warn("Ingen forsikret person funnet")
