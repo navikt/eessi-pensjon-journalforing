@@ -4,7 +4,9 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.BARN
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.ETTERLATTE
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.FORSORGER
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 
@@ -26,6 +28,11 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
                     val annenPersonFdato = mapFdatoTilLocalDate(person.foedselsdato)
                     val rolle = person.rolle
                     val annenPersonRelasjon = when (rolle) {
+                            //Rolle barn benyttes ikke i noe journalføring hendelse kun hente ut for...?
+                            BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
+                            //Rolle forsorger benyttes ikke i noe journalføring hendelse...
+                            FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
+                            //etterlatte benyttes i journalføring hendelse..
                             ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
                             else -> null
                         }
@@ -33,6 +40,10 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
                             fnrListe.add(it)
                         }
                 }
+        }
+        if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER} != null) {
+            fnrListe.addAll(forsikret)
+            return fnrListe
         }
         return fnrListe.ifEmpty { forsikret }
     }

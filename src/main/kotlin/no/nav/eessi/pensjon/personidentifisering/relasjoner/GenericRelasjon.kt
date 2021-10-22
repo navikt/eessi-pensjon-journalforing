@@ -19,7 +19,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType, privat
         leggTilAnnenGjenlevendeFnrHvisFinnes()?.let { annenRelasjon ->
             fnrListe.add(annenRelasjon)
         }
-        fnrListe.addAll(hentForsikretPerson(null))
+        fnrListe.addAll(hentForsikretPerson(bestemSaktype(bucType)))
 
         return fnrListe
     }

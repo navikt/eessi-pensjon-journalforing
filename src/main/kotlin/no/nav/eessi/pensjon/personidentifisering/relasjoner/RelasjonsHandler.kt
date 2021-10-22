@@ -3,11 +3,8 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -37,17 +34,15 @@ object RelasjonsHandler {
          logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
 
         relasjonList.onEach { logger.debug("$it") }
-        val resultat = relasjonList
-            .filter { it.sedType in kanInneholdeIdentEllerFdato}
-//            .filterNot { filterUbrukeligeElemeterAvSedPersonRelasjon(it.fnr, it.fdato, it.sokKriterier) }
-            .filter { filterSedUtenFnrMedGjenlevendeRelasjon(it.fnr, it.relasjon) }
-            .sortedBy { it.relasjon }
 
-        logger.debug("hva er lista: $resultat")
-        return  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
+        //filterering av relasjoner med kjent fnr
+        val relasjonerMedFnr = relasjonList.filter { it.fnr != null }.distinctBy { it.fnr }
+        //filtering av relasjoner uten kjent fnr
+        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }.distinctBy { it.sokKriterier }
+
+        return (relasjonerMedFnr + relasjonerUtenFnr).also { logger.debug("$it") }
+
     }
-
-    private fun filterSedUtenFnrMedGjenlevendeRelasjon(fnr: Fodselsnummer?, relasjon: Relasjon?): Boolean = fnr == null && relasjon == Relasjon.GJENLEVENDE
 
     private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): AbstractRelasjon? {
 
