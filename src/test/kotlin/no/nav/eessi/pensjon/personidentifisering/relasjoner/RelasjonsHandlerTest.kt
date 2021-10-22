@@ -58,7 +58,8 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 sedType = SedType.P2000,
                 sokKriterier = sok,
                 fdato = LocalDate.of(1952, 3, 9),
-                rinaDocumentId = "3123134"
+                rinaDocumentId = "3123134",
+                saktype = Saktype.ALDER
             )
         )
         assertEquals(2, actual.size)
@@ -140,7 +141,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, sokKriterier = sok, fdato = sok.foedselsdato, rinaDocumentId = "23123123")
+            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = sok.foedselsdato, rinaDocumentId = "13123123")
 
             assertEquals(1, actual.size)
             assertEquals(forste, actual[0])
