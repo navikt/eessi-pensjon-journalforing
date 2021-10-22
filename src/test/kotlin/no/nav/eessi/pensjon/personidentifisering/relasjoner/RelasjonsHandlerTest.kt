@@ -141,7 +141,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = sok.foedselsdato, rinaDocumentId = "13123123")
+            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.ANNET, sedType = SedType.R005, fdato = sok.foedselsdato, rinaDocumentId = "13123123")
 
             assertEquals(1, actual.size)
             assertEquals(forste, actual[0])
