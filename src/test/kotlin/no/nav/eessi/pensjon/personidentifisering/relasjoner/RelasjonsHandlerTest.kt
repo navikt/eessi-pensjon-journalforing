@@ -1,6 +1,14 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.P15000
+import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
+import no.nav.eessi.pensjon.eux.model.sed.P5000
+import no.nav.eessi.pensjon.eux.model.sed.P8000
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
@@ -9,7 +17,9 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -75,7 +85,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
 
-            assertEquals(1, actual.size)
+            assertEquals(2, actual.size)
             assertTrue(actual.contains(enke))
         }
 
@@ -131,7 +141,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.ANNET, sedType = SedType.R005, fdato = sok.foedselsdato, rinaDocumentId = "13123123")
+            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = sok.foedselsdato, rinaDocumentId = "23123123", saktype = Saktype.GJENLEV, sokKriterier = sok)
 
             assertEquals(1, actual.size)
             assertEquals(forste, actual[0])
@@ -159,12 +169,9 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         @Test
         fun `leter igjennom R_BUC_02 og R005 med kun en person debitor alderpensjon returnerer liste med en Relasjon`() {
             val forventetFnr = KRAFTIG_VEGGPRYD
-
             val actual = RelasjonsHandler.hentRelasjoner(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))), BucType.R_BUC_02)
-            val annen = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
 
-            assertEquals(1, actual.size)
-            assertTrue(actual.contains(annen))
+            assertEquals(0, actual.size)
         }
 
     }
