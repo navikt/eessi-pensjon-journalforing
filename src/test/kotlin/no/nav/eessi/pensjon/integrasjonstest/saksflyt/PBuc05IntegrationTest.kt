@@ -346,13 +346,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
             }
 
-            // Har SakID, men finner ingen saker
-            testRunnerFlerePersoner(FNR_OVER_60, fnrAnnenPerson, saker = emptyList(), rolle = Rolle.ETTERLATTE, sakId = SAK_ID) {
-                // forvent tema == PEN og enhet 4303
-                assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-                assertEquals(fnrAnnenPerson, it.bruker?.id)
-            }
+//            // Har SakID, men finner ingen saker
+//            testRunnerFlerePersoner(FNR_OVER_60, fnrAnnenPerson, saker = emptyList(), rolle = Rolle.ETTERLATTE, sakId = SAK_ID) {
+//                // forvent tema == PEN og enhet 4303
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+//                assertEquals(fnrAnnenPerson, it.bruker?.id)
+//            }
         }
 
         @Test

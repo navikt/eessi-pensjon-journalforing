@@ -31,7 +31,9 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
                         //BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
                         else -> null
                     }
-                    listOf(annenPersonRelasjon)
+                    annenPersonRelasjon?.let {
+                        fnrListe.add(it)
+                    }
                 }
             emptyList()
         } else {
