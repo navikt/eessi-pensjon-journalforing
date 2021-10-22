@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
@@ -10,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
@@ -26,6 +28,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
@@ -322,6 +325,58 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(null, it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
+        }
+
+        @Test
+        fun `Flere sed i buc, mottar en P5000 tidligere mottatt P2000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
+            val pdlPerson = createBrukerWith(FNR_OVER_60, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
+            val sed20000mottatt = SED.generateSedToClass<P2000>( createSedPensjon(SedType.P2000, null, krav = KravType.ALDER, pdlPerson = pdlPerson))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.P5000, null, krav = KravType.ALDER, pdlPerson = pdlPerson))
+
+            val alleDocumenter = listOf(
+                ForenkletSED("10001", SedType.P2000, SedStatus.RECEIVED),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P5000, SedStatus.RECEIVED),
+                ForenkletSED("654654", SedType.P8000, SedStatus.EMPTY)
+            )
+
+            every { euxKlient.hentBuc(any()) } returns bucFrom(BucType.P_BUC_01, alleDocumenter)
+            every { euxKlient.hentSedJson(any(), any()) } returns sed20000mottatt.toJson() andThen sedP5000mottatt.toJson()
+            every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
+            every { personService.sokPerson(any()) } returns setOf(
+                    IdentInformasjon(
+                        FNR_OVER_60,
+                        IdentGruppe.FOLKEREGISTERIDENT
+                    ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
+                )
+            every { personService.hentPerson(NorskIdent(FNR_OVER_60)) } returns pdlPerson
+            every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+
+            val meldingSlot = slot<String>()
+            every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+            val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
+            val hendelse = createHendelseJson(SedType.P5000, BucType.P_BUC_01)
+
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val request = journalpost.captured
+            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+
+            assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
+            assertEquals(Enhet.PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
+            assertEquals("P5000", oppgaveMelding.sedType?.name)
+
+            assertEquals("INNGAAENDE", request.journalpostType.name)
+            assertEquals(PENSJON, request.tema)
+            assertEquals(Enhet.PENSJON_UTLAND, request.journalfoerendeEnhet)
+
+            verify(exactly = 1) { personService.sokPerson(any())}
+            verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
+
+            verify(exactly = 1) { euxKlient.hentBuc(any()) }
+            verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
         }
 
     }

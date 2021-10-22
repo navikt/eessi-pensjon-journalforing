@@ -9,8 +9,12 @@ class P6000Relasjon(private val sed: SED,
                     private val bucType: BucType,
                     val rinaDocumentId: String) : GjenlevendeHvisFinnes(sed,bucType,rinaDocumentId) {
 
-    override fun hentRelasjoner(): List<SEDPersonRelasjon> {
-        return hentRelasjonGjenlevendeFnrHvisFinnes((sed as P6000).p6000Pensjon?.gjenlevende, bestemSaktype(bucType))
-    }
+        override fun hentRelasjoner(): List<SEDPersonRelasjon> {
+            val forsikret = hentForsikretPerson(bestemSaktype(bucType))
+            val gjenlevende =  hentRelasjonGjenlevendeFnrHvisFinnes((sed as P6000).p6000Pensjon?.gjenlevende, bestemSaktype(bucType))
 
-}
+            return gjenlevende.ifEmpty { forsikret }
+
+        }
+
+    }

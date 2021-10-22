@@ -3,8 +3,11 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SedType
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
+import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -31,17 +34,20 @@ object RelasjonsHandler {
     }
 
     private fun filterRleasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
-        val sedMedForsikretPrioritet = listOf(SedType.H121, SedType.H120, SedType.H070)
+         logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
 
-        logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
         relasjonList.onEach { logger.debug("$it") }
         val resultat = relasjonList
-            .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
-            .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
+            .filter { it.sedType in kanInneholdeIdentEllerFdato}
+//            .filterNot { filterUbrukeligeElemeterAvSedPersonRelasjon(it.fnr, it.fdato, it.sokKriterier) }
+            .filter { filterSedUtenFnrMedGjenlevendeRelasjon(it.fnr, it.relasjon) }
             .sortedBy { it.relasjon }
 
+        logger.debug("hva er lista: $resultat")
         return  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
     }
+
+    private fun filterSedUtenFnrMedGjenlevendeRelasjon(fnr: Fodselsnummer?, relasjon: Relasjon?): Boolean = fnr == null && relasjon == Relasjon.GJENLEVENDE
 
     private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): AbstractRelasjon? {
 
@@ -52,7 +58,7 @@ object RelasjonsHandler {
 
                 //Øvrige P-SED vi støtter for innhenting av FNR
                 SedType.P2000 -> P2000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P2200 -> P2000Relasjon(sed, bucType,rinaDocumentId)
+                SedType.P2200 -> P2200Relasjon(sed, bucType,rinaDocumentId)
                 SedType.P2100 -> P2100Relasjon(sed, bucType,rinaDocumentId)
 
                 SedType.P5000 -> P5000Relasjon(sed, bucType, rinaDocumentId)

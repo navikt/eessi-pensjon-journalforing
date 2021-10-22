@@ -38,8 +38,7 @@ data class SEDPersonRelasjon(
         return fnr?.getBirthDate() == fdato
     }
 
-    fun erGyldig(): Boolean = sedType != null && (saktype != null || relasjon == Relasjon.GJENLEVENDE)
-    fun filterUbrukeligeElemeterAvSedPersonRelasjon(): Boolean = fnr == null && fdato == null && sokKriterier == null
+
 }
 
 enum class Relasjon {
