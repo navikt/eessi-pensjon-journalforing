@@ -17,8 +17,12 @@ class R005Relasjon(private val sed: SED, private val bucType: BucType, val rinaD
             ?.mapNotNull { bruker ->
                 val relasjon = mapRBUC02Relasjon(bruker.tilbakekreving?.status?.type)
                 val fdato = mapFdatoTilLocalDate(bruker.person?.foedselsdato)
-                Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-                    ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato, rinaDocumentId = rinaDocumentId) }
+                if(relasjon != Relasjon.ANNET){
+                    Fodselsnummer.fra(bruker.person?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+                        ?.let { SEDPersonRelasjon(it, relasjon, sedType = sed.type, fdato = fdato, rinaDocumentId = rinaDocumentId) }
+                } else {
+                    null
+                }
             } ?: emptyList()
     }
 
