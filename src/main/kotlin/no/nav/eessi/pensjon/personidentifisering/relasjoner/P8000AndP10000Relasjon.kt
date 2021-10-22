@@ -40,7 +40,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
             emptyList()
         }
 
-        return gjenlevende.ifEmpty { forsikret }
+        return fnrListe.ifEmpty { forsikret }
     }
 
 }
