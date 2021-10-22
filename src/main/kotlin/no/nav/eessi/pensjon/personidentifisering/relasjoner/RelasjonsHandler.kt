@@ -38,7 +38,7 @@ object RelasjonsHandler {
         //filterering av relasjoner med kjent fnr
         val relasjonerMedFnr = relasjonList.filter { it.fnr != null }.distinctBy { it.fnr }
         //filtering av relasjoner uten kjent fnr
-        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }.distinctBy { it.sokKriterier }
+        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }//.distinctBy { it.sokKriterier }
 
         return (relasjonerMedFnr + relasjonerUtenFnr).also { logger.debug("$it") }
 
