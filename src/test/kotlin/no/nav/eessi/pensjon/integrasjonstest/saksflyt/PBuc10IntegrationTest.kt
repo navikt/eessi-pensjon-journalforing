@@ -1056,6 +1056,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod))
         initCommonMocks(sed, alleDocs)
 
+
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
 
         if (fnrVoksenSoker != null) {
@@ -1086,7 +1087,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify { personService.hentPerson(any<Ident<*>>()) }
+        if (fnrVoksenSoker != null) {
+            verify { personService.hentPerson(any<Ident<*>>()) }
+        }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
