@@ -162,7 +162,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
             val enke = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971, 6, 11), rinaDocumentId = "3123123")
 
-            assertEquals(1, actual.size)
+            assertEquals(2, actual.size)
             assertEquals(actual[0], enke)
         }
 
