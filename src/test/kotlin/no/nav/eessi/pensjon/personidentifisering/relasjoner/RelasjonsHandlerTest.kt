@@ -58,7 +58,8 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 sedType = SedType.P2000,
                 sokKriterier = sok,
                 fdato = LocalDate.of(1952, 3, 9),
-                rinaDocumentId = "3123134"
+                rinaDocumentId = "3123134",
+                saktype = Saktype.ALDER
             )
         )
         assertEquals(2, actual.size)
@@ -84,7 +85,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
 
-            assertEquals(1, actual.size)
+            assertEquals(2, actual.size)
             assertTrue(actual.contains(enke))
         }
 
@@ -114,20 +115,13 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         fun `Gitt en R_BUC og sed R005 med flere flere personer så returner det en liste med Relasjon`() {
             val forsikretFnr = SLAPP_SKILPADDE
             val annenPersonFnr = KRAFTIG_VEGGPRYD
-
             val actual = RelasjonsHandler.hentRelasjoner(
                 listOf(
                     Pair("3123123", createR005(forsikretFnr = forsikretFnr, forsikretTilbakekreving = "debitor",
                         annenPersonFnr = annenPersonFnr, annenPersonTilbakekreving = "debitor"))
                 ), BucType.R_BUC_02
             )
-
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1952,3,9), rinaDocumentId = "3123123")
-            val andre = SEDPersonRelasjon(Fodselsnummer.fra(annenPersonFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
-
-            assertEquals(2, actual.size)
-            assertTrue(actual.contains(forste))
-            assertTrue(actual.contains(andre))
+            assertEquals(0, actual.size)
         }
 
         @Test
@@ -140,7 +134,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, sokKriterier = sok, fdato = sok.foedselsdato, rinaDocumentId = "23123123")
+            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = sok.foedselsdato, rinaDocumentId = "23123123", saktype = Saktype.GJENLEV, sokKriterier = sok)
 
             assertEquals(1, actual.size)
             assertEquals(forste, actual[0])
@@ -168,12 +162,9 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         @Test
         fun `leter igjennom R_BUC_02 og R005 med kun en person debitor alderpensjon returnerer liste med en Relasjon`() {
             val forventetFnr = KRAFTIG_VEGGPRYD
-
             val actual = RelasjonsHandler.hentRelasjoner(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))), BucType.R_BUC_02)
-            val annen = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.ANNET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
 
-            assertEquals(1, actual.size)
-            assertTrue(actual.contains(annen))
+            assertEquals(0, actual.size)
         }
 
     }
@@ -282,7 +273,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
     }
 
     @Test
-    fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres minst en gjenlevende og en avdød`() {
+    fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres minst en gjenlevende`() {
         val gjenlevFnr = LEALAUS_KAKE
 
         val actual = RelasjonsHandler.hentRelasjoner(
@@ -313,11 +304,11 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             ), BucType.P_BUC_02
         )
 
+        println("*** $actual ***")
         val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22))
-        val expectedPersonRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
 
-        assertEquals(1, actual.size)
+        assertEquals(2, actual.size)
         val actualPersonRelasjon = actual.first()
         assertEquals(gjenlevFnr, actualPersonRelasjon.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, actualPersonRelasjon.relasjon)
@@ -342,18 +333,10 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), BucType.P_BUC_10
             )
 
-            val sokfor = createSokKritere(fdato = LocalDate.of(2015,1,12))
-            val expectedForsikretP15000 = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.GJENLEV, sedType = SedType.P15000, sokKriterier = sokfor, fdato = LocalDate.of(2015,1,12), rinaDocumentId = "31231231")
             val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22))
             val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000, sokKriterier = sokgjen, fdato = LocalDate.of(1973,11,22), rinaDocumentId = "31231231")
-            val expectedGjenlevP5000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, null, sedType = SedType.P5000, sokKriterier = sokgjen, fdato = sokgjen.foedselsdato, rinaDocumentId = "31231233")
-
-
-            assertEquals(3, actual.size)
-
-            assertEquals(expectedForsikretP15000, actual[0])
-            assertEquals(expectedGjenlevP15000, actual[1])
-            assertEquals(expectedGjenlevP5000, actual[2])
+            assertEquals(1, actual.size)
+            assertEquals(expectedGjenlevP15000, actual[0])
         }
 
         @Test
@@ -387,15 +370,9 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
 
-            assertEquals(2, relasjoner.size)
+            assertEquals(1, relasjoner.size)
 
-            val forsikretRelasjon = relasjoner[0]
-            assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
-            assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
-            assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-            assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
-
-            val gjenlevRelasjon = relasjoner[1]
+            val gjenlevRelasjon = relasjoner[0]
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
@@ -414,15 +391,9 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         )
 
         val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
-        assertEquals(2, relasjoner.size)
+        assertEquals(1, relasjoner.size)
 
-        val forsikretRelasjon = relasjoner[0]
-        assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
-        assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
-        assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-        assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
-
-        val gjenlevRelasjon = relasjoner[1]
+        val gjenlevRelasjon = relasjoner[0]
         assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
         assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
         assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
@@ -442,15 +413,9 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
         val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
 
-        assertEquals(2, relasjoner.size)
+        assertEquals(1, relasjoner.size)
 
-        val forsikretRelasjon = relasjoner[0]
-        assertEquals(Relasjon.FORSIKRET, forsikretRelasjon.relasjon)
-        assertEquals(forsikretFnr, forsikretRelasjon.fnr!!.value)
-        assertEquals(SedType.P15000, forsikretRelasjon.sedType)
-        assertEquals(Saktype.GJENLEV, forsikretRelasjon.saktype)
-
-        val gjenlevRelasjon = relasjoner[1]
+        val gjenlevRelasjon = relasjoner[0]
         assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
         assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
         assertEquals(SedType.P15000, gjenlevRelasjon.sedType)

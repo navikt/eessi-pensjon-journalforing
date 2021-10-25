@@ -1,10 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -17,17 +13,8 @@ import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -138,16 +125,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
-
-//            testRunner(FNR_VOKSEN, saker) {
-//                assertEquals(PENSJON, it.tema)
-//                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
-//            }
-//
-//            testRunner(FNR_BARN, saker) {
-//                assertEquals(PENSJON, it.tema)
-//                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-//            }
         }
 
         @Test

@@ -16,38 +16,44 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
-        val personPin = Fodselsnummer.fra(forsikretPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-        val personFdato = mapFdatoTilLocalDate(forsikretPerson?.foedselsdato)
-        val sokForsikretKriterie = forsikretPerson?.let { opprettSokKriterie(it) }
 
-        //kap.2 forsikret person
-        fnrListe.add(SEDPersonRelasjon(personPin, Relasjon.FORSIKRET, sedType = sed.type, sokKriterier = sokForsikretKriterie, fdato = personFdato, rinaDocumentId = rinaDocumentId))
-        logger.debug("Legger til person ${Relasjon.FORSIKRET} relasjon")
+        val forsikret = hentForsikretPerson(bestemSaktype(bucType))
 
-        //Annenperson søker/barn o.l
-        val annenPerson = sed.nav?.annenperson?.person
-        val annenPersonPin = Fodselsnummer.fra(annenPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-        val annenPersonFdato = mapFdatoTilLocalDate(annenPerson?.foedselsdato)
-        val rolle = annenPerson?.rolle
+        hentAnnenpersonRelasjon()?.let { fnrListe.add(it) }
 
-        annenPerson?.let { person ->
-            if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
+        logger.debug("forsikret $forsikret")
+        logger.debug("gjenlevlist: $fnrListe")
+
+        if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER } != null ) {
+            return fnrListe + forsikret
+        }
+        return fnrListe.ifEmpty { forsikret }
+    }
+
+    //Annenperson søker/barn o.l
+    fun hentAnnenpersonRelasjon(): SEDPersonRelasjon? {
+        if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
+            val annenPerson = sed.nav?.annenperson?.person
+
+            logger.debug("annenPerson: $annenPerson")
+            annenPerson?.let { person ->
                 val sokAnnenPersonKriterie =  opprettSokKriterie(person)
+                val annenPersonPin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+                val annenPersonFdato = mapFdatoTilLocalDate(person.foedselsdato)
+                val rolle = person.rolle
                 val annenPersonRelasjon = when (rolle) {
+                    //Rolle barn benyttes ikke i noe journalføring hendelse kun hente ut for...?
+                    BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
+                    //Rolle forsorger benyttes ikke i noe journalføring hendelse...
+                    FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
+                    //etterlatte benyttes i journalføring hendelse..
                     ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
-                    FORSORGER.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.FORSORGER, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato,rinaDocumentId = rinaDocumentId)
-                    BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie, fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
                     else -> null
                 }
-
-                annenPersonRelasjon?.let { annenRelasjon ->
-                    fnrListe.add(annenRelasjon)
-                    logger.debug("Legger til person med relasjon: ${annenPersonRelasjon.relasjon}, sokForsikret: ${sokAnnenPersonKriterie != null}")
-                }
+                return annenPersonRelasjon
             }
         }
-
-        return fnrListe
+        return null
     }
 
 }

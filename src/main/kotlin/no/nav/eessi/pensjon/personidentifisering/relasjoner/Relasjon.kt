@@ -19,7 +19,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
 
     val forsikretPerson = sed.nav?.bruker?.person
 
-    abstract fun hentRelasjoner() :List<SEDPersonRelasjon>
+    abstract fun hentRelasjoner(): List<SEDPersonRelasjon>
 
     fun hentForsikretPerson(saktype: Saktype?): List<SEDPersonRelasjon> {
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
@@ -30,12 +30,21 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
             val fdato = mapFdatoTilLocalDate(person.foedselsdato)
 
             logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
-            return listOf(SEDPersonRelasjon(fodselnummer, Relasjon.FORSIKRET, saktype, sed.type, sokPersonKriterie, fdato, rinaDocumentId))
+            return listOf(
+                SEDPersonRelasjon(
+                    fodselnummer,
+                    Relasjon.FORSIKRET,
+                    saktype,
+                    sed.type,
+                    sokPersonKriterie,
+                    fdato,
+                    rinaDocumentId
+                )
+            )
         }
 
         logger.warn("Ingen forsikret person funnet")
-        return emptyList()
-
+        throw RuntimeException("Ingen forsikret person funnet")
     }
 
     fun opprettSokKriterie(person: Person) : SokKriterier? {
@@ -54,5 +63,14 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
     }
 
     fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? = fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
+
+    fun bestemSaktype(bucType: BucType): Saktype? {
+        return when(bucType) {
+            BucType.P_BUC_01 -> Saktype.ALDER
+            BucType.P_BUC_02 -> Saktype.GJENLEV
+            BucType.P_BUC_03 -> Saktype.UFOREP
+            else -> null
+        }
+    }
 
 }

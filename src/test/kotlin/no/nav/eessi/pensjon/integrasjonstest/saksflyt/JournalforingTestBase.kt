@@ -555,7 +555,14 @@ internal open class JournalforingTestBase {
             )
         )
 
+
         val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen))
+
+        val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
+            Pensjon(gjenlevende = annenPerson)
+        }  else {
+            null
+        }
 
         return SED(
             sedType,
@@ -564,7 +571,7 @@ internal open class JournalforingTestBase {
                 bruker = forsikretBruker,
                 krav = Krav("2019-02-01", krav?.kode)
             ),
-            pensjon = Pensjon(gjenlevende = annenPerson)
+            pensjon = pensjon
         )
     }
     private fun createSivilstand(sivilstand: SivilstandItem?): List<SivilstandItem>? = if (sivilstand != null) listOf(sivilstand) else null

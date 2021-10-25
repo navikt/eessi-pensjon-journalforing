@@ -13,22 +13,11 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
     fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null, saktype: Saktype? = null) : List<SEDPersonRelasjon> {
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
-        val fnrListe = mutableListOf<SEDPersonRelasjon>()
         val sedType = sed.type
-
-        //forsikretPerson (avdød eller søker)
-        forsikretPerson?.let { person ->
-            val forsikretPersonKriterie = opprettSokKriterie(person)
-            val forsikretFnr = Fodselsnummer.fra(forsikretPerson?.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-            val fdato = mapFdatoTilLocalDate(forsikretPerson?.foedselsdato)
-
-            fnrListe.add(SEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, saktype, sedType, fdato = fdato, sokKriterier = forsikretPersonKriterie, rinaDocumentId = rinaDocumentId))
-            logger.debug("Legger til forsikret-person ${Relasjon.FORSIKRET}")
-        }
-
         //gjenlevendePerson (søker)
         val gjenlevendePerson = gjenlevendeBruker?.person
-        logger.debug("Hva er gjenlevendePerson?: ${gjenlevendePerson?.pin}")
+        logger.debug("Hva er gjenlevendePerson pin?: ${gjenlevendePerson?.pin}")
+
         gjenlevendePerson?.let { gjenlevendePerson ->
             val gjenlevendePin = Fodselsnummer.fra(gjenlevendePerson.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)
@@ -38,9 +27,8 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             logger.info("Innhenting av relasjon: $gjenlevendeRelasjon")
 
             if (gjenlevendeRelasjon == null) {
-                fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
                 logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
-                return fnrListe
+                return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
             }
 
             val sakType =  if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
@@ -48,17 +36,17 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
             } else {
                 Saktype.GJENLEV
             }
-            fnrListe.add(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
             logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
+            return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
         }
-
-        return fnrListe
+        return emptyList()
     }
 
     fun erGjenlevendeBarn(relasjon: String): Boolean {
         val gyldigeBarneRelasjoner = listOf("EGET_BARN", "06", "ADOPTIVBARN", "07", "FOSTERBARN", "08", "STEBARN", "09")
         return relasjon in gyldigeBarneRelasjoner
     }
+
 
 
 }

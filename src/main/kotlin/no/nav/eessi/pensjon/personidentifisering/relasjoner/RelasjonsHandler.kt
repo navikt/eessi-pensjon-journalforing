@@ -31,16 +31,17 @@ object RelasjonsHandler {
     }
 
     private fun filterRleasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
-        val sedMedForsikretPrioritet = listOf(SedType.H121, SedType.H120, SedType.H070)
+         logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
 
-        logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
         relasjonList.onEach { logger.debug("$it") }
-        val resultat = relasjonList
-            .filter { it.erGyldig() || it.sedType in sedMedForsikretPrioritet }
-            .filterNot { it.filterUbrukeligeElemeterAvSedPersonRelasjon() }
-            .sortedBy { it.relasjon }
 
-        return  resultat.ifEmpty { relasjonList.distinctBy { it.fnr } }
+        //filterering av relasjoner med kjent fnr
+        val relasjonerMedFnr = relasjonList.filter { it.fnr != null }.distinctBy { it.fnr }
+        //filtering av relasjoner uten kjent fnr
+        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }//.distinctBy { it.sokKriterier }
+
+        return (relasjonerMedFnr + relasjonerUtenFnr).also { logger.debug("$it") }
+
     }
 
     private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): AbstractRelasjon? {
@@ -52,7 +53,7 @@ object RelasjonsHandler {
 
                 //Øvrige P-SED vi støtter for innhenting av FNR
                 SedType.P2000 -> P2000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P2200 -> P2000Relasjon(sed, bucType,rinaDocumentId)
+                SedType.P2200 -> P2200Relasjon(sed, bucType,rinaDocumentId)
                 SedType.P2100 -> P2100Relasjon(sed, bucType,rinaDocumentId)
 
                 SedType.P5000 -> P5000Relasjon(sed, bucType, rinaDocumentId)
