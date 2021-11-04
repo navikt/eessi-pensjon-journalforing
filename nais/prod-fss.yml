@@ -46,7 +46,7 @@ spec:
     - name: KAFKA_OPPGAVE_TOPIC
       value: privat-eessipensjon-oppgave-v1-p
     - name: KAFKA_KRAV_TOPIC
-      value: privat-eessipensjon-krav-initialisering
+      value: eessipensjon.privat-krav-initialisering
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering
   image: {{ image }}
