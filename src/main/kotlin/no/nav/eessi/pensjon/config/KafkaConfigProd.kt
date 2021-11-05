@@ -37,7 +37,8 @@ class KafkaConfigProd(
     @param:Value("\${srvusername}") private val srvusername: String,
     @param:Value("\${srvpassword}") private val srvpassword: String,
     @Autowired private val kafkaErrorHandler: KafkaErrorHandler?,
-    @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String
+    @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String,
+    @Value("\${KAFKA_OPPGAVE_TOPIC}") private val oppgaveTopic: String
 ) {
 
     @Bean
@@ -56,6 +57,13 @@ class KafkaConfigProd(
     fun aivenKafkaTemplate(): KafkaTemplate<String, String> {
         val template = KafkaTemplate(aivenProducerFactory())
         template.defaultTopic = automatiseringTopic
+        return template
+    }
+
+    @Bean("aivenOppgaveKafkaTemplate")
+    fun aivenOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
+        val template = KafkaTemplate(aivenProducerFactory())
+        template.defaultTopic = oppgaveTopic
         return template
     }
 

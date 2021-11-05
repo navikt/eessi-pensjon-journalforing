@@ -8,7 +8,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
@@ -23,6 +22,9 @@ import java.time.Duration
 class IntegrasjonsTestConfig {
     @Value("\${" + EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS + "}")
     private lateinit var brokerAddresses: String
+    @Value("\${KAFKA_OPPGAVE_TOPIC}") private lateinit var oppgaveTopic: String
+    @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private lateinit var automatiseringTopic: String
+
 
     @Bean
     fun producerFactory(): ProducerFactory<String, String> {
@@ -72,8 +74,22 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
-    @Primary
     fun kafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory())
     }
+
+    @Bean
+    fun aivenOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
+        val kafka = KafkaTemplate(producerFactory())
+        kafka.defaultTopic = oppgaveTopic
+        return kafka
+    }
+
+    @Bean
+    fun aivenAutomatiseringKafkaTemplate(): KafkaTemplate<String, String> {
+        val kafka = KafkaTemplate(producerFactory())
+        kafka.defaultTopic = automatiseringTopic
+        return kafka
+    }
+
 }

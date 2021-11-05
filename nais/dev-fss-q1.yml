@@ -46,7 +46,7 @@ spec:
     - name: KAFKA_SEDMOTTATT_TOPIC
       value: eessi-basis-sedMottatt-v1-q1
     - name: KAFKA_OPPGAVE_TOPIC
-      value: privat-eessipensjon-oppgave-v1-q1
+      value: eessipensjon.privat-oppgave-q1
     - name: KAFKA_KRAV_TOPIC
       value: eessipensjon.privat-krav-initialisering-q1
     - name: KAFKA_AUTOMATISERING_TOPIC
