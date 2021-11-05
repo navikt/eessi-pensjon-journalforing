@@ -24,12 +24,7 @@ class OppgaveHandler(private val aivenOppgaveKafkaTemplate: KafkaTemplate<String
         publiserOppgavemelding = metricsHelper.init("publiserOppgavemelding")
     }
 
-//    @Value("\${kafka.oppgave.topic}")
-//    private lateinit var oppgaveTopic: String
-
-    private fun putMeldingPaaKafka(melding: OppgaveMelding) {
-//        aivenOppgaveKafkaTemplate.defaultTopic = oppgaveTopic
-
+    fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()
 
@@ -38,28 +33,4 @@ class OppgaveHandler(private val aivenOppgaveKafkaTemplate: KafkaTemplate<String
             aivenOppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }
-
-    //helper function to put message on kafka, will retry 3 times and wait before fail
-    fun opprettOppgaveMeldingPaaKafkaTopic(melding: OppgaveMelding) {
-        var count = 0
-        val maxTries = 3
-        val waitTime = 8000L
-        var failException : Exception ?= null
-
-        while (count < maxTries) {
-            try {
-                putMeldingPaaKafka(melding)
-                return
-            } catch (ex: Exception) {
-                count++
-                logger.warn("Failed to publish oppgavemelding on kafka, try nr.: $count, Error message: ${ex.message} ")
-                failException = ex
-                Thread.sleep(waitTime)
-            }
-        }
-        logger.error("Failed to publish oppgavemelding on kafka,  meesage: $melding", failException)
-        throw RuntimeException(failException!!.message)
-
-    }
-
 }
