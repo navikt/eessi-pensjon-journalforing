@@ -78,6 +78,12 @@ class IntegrasjonsTestConfig {
         return KafkaTemplate(producerFactory())
     }
 
+    @Bean("aivenKravInitialiseringKafkaTemplate")
+    fun aivenKravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
+        val template = KafkaTemplate(producerFactory())
+        return template
+    }
+
     @Bean
     fun aivenOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
         val kafka = KafkaTemplate(producerFactory())

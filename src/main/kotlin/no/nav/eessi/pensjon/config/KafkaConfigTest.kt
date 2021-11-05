@@ -50,6 +50,11 @@ class KafkaConfigTest(
         return DefaultKafkaProducerFactory(configMap)
     }
 
+    @Bean("aivenKravInitialiseringKafkaTemplate")
+    fun aivenKravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
+        val template = KafkaTemplate(aivenProducerFactory())
+        return template
+    }
 
     @Bean("aivenAutomatiseringKafkaTemplate")
     fun aivenKafkaTemplate(): KafkaTemplate<String, String> {

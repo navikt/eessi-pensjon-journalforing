@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 @Service
-class KravInitialiseringsHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
+class KravInitialiseringsHandler(private val aivenKravInitialiseringKafkaTemplate: KafkaTemplate<String, String>,
                                  @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(KravInitialiseringsHandler::class.java)
@@ -29,15 +29,15 @@ class KravInitialiseringsHandler(private val kafkaTemplate: KafkaTemplate<String
     private lateinit var kravTopic: String
 
     fun putKravInitMeldingPaaKafka(melding: BehandleHendelseModel) {
-        kafkaTemplate.defaultTopic = kravTopic
+        aivenKravInitialiseringKafkaTemplate.defaultTopic = kravTopic
 
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()
 
         publiserKravmelding.measure {
-            logger.info("Oppretter krav initialisering melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $payload")
+            logger.info("Oppretter krav initialisering melding på kafka: ${aivenKravInitialiseringKafkaTemplate.defaultTopic}  melding: $payload")
            try {
-               kafkaTemplate.sendDefault(key, payload).get()
+               aivenKravInitialiseringKafkaTemplate.sendDefault(key, payload).get()
            } catch (ex: Exception) {
                logger.error("Noe gikk galt under opprettelse av krav initialisering melding: $ex")
                throw ex
