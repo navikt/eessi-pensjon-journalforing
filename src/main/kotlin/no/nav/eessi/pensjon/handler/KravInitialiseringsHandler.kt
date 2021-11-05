@@ -35,8 +35,13 @@ class KravInitialiseringsHandler(private val kafkaTemplate: KafkaTemplate<String
         val payload = melding.toJson()
 
         publiserKravmelding.measure {
-            logger.info("Opprette melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $payload")
-            kafkaTemplate.sendDefault(key, payload).get()
+            logger.info("Oppretter krav initialisering melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $payload")
+           try {
+               kafkaTemplate.sendDefault(key, payload).get()
+           } catch (ex: Exception) {
+               logger.error("Noe gikk galt under opprettelse av krav initialisering melding: $ex")
+               throw ex
+           }
         }
     }
 
