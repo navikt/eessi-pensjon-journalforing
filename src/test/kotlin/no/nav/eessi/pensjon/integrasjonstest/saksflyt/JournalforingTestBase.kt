@@ -87,7 +87,7 @@ internal open class JournalforingTestBase {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(kafkaTemplate = oppgaveHandlerKafka)
+    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(aivenOppgaveKafkaTemplate = oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
@@ -132,7 +132,7 @@ internal open class JournalforingTestBase {
     @BeforeEach
     fun setup() {
         ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
-        ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
+//        ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         sendtListener.initMetrics()

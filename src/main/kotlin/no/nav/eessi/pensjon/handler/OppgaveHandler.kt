@@ -6,13 +6,12 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 @Service
-class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
+class OppgaveHandler(private val aivenOppgaveKafkaTemplate: KafkaTemplate<String, String>,
                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
@@ -25,18 +24,18 @@ class OppgaveHandler(private val kafkaTemplate: KafkaTemplate<String, String>,
         publiserOppgavemelding = metricsHelper.init("publiserOppgavemelding")
     }
 
-    @Value("\${kafka.oppgave.topic}")
-    private lateinit var oppgaveTopic: String
+//    @Value("\${kafka.oppgave.topic}")
+//    private lateinit var oppgaveTopic: String
 
     private fun putMeldingPaaKafka(melding: OppgaveMelding) {
-        kafkaTemplate.defaultTopic = oppgaveTopic
+//        aivenOppgaveKafkaTemplate.defaultTopic = oppgaveTopic
 
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()
 
         publiserOppgavemelding.measure {
-            logger.info("Opprette oppgave melding på kafka: ${kafkaTemplate.defaultTopic}  melding: $melding")
-            kafkaTemplate.sendDefault(key, payload).get()
+            logger.info("Opprette oppgave melding på kafka: ${aivenOppgaveKafkaTemplate.defaultTopic}  melding: $melding")
+            aivenOppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }
 
