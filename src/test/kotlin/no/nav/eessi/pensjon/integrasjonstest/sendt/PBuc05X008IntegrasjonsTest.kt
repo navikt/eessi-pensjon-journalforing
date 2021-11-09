@@ -9,9 +9,7 @@ import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
 import no.nav.eessi.pensjon.integrasjonstest.SED_SENDT_TOPIC
 import no.nav.eessi.pensjon.json.toJson
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -21,9 +19,6 @@ import org.springframework.test.context.ActiveProfiles
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC], partitions = 1)
 internal class PBuc05X008IntegrasjonsIntegrasjons : IntegrasjonsBase() {
-
-    @Autowired
-    lateinit var kafkaTemplate: KafkaTemplate<String, String>
 
     @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {

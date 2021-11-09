@@ -45,7 +45,7 @@ class KafkaConfigTest(
         populerAivenCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
         return DefaultKafkaProducerFactory(configMap)
     }
@@ -58,7 +58,15 @@ class KafkaConfigTest(
 
     @Bean("aivenAutomatiseringKafkaTemplate")
     fun aivenKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(aivenProducerFactory())
+        val configMap: MutableMap<String, Any> = HashMap()
+        populerAivenCommonConfig(configMap)
+        configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
+        configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
+        val automatiseringsTemplate: ProducerFactory<String, String> = DefaultKafkaProducerFactory(configMap)
+
+        val template = KafkaTemplate(automatiseringsTemplate)
         template.defaultTopic = automatiseringTopic
         return template
     }
@@ -81,29 +89,6 @@ class KafkaConfigTest(
         return DefaultKafkaProducerFactory(configMap)
     }
 
-    @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(onpremProducerFactory())
-    }
-
-    fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
-        val keyDeserializer: JsonDeserializer<String> = JsonDeserializer(String::class.java)
-        keyDeserializer.setRemoveTypeHeaders(true)
-        keyDeserializer.addTrustedPackages("*")
-        keyDeserializer.setUseTypeHeaders(false)
-
-        val valueDeserializer = StringDeserializer()
-
-        val configMap: MutableMap<String, Any> = HashMap()
-        populerAivenCommonConfig(configMap)
-        configMap[ConsumerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
-        configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
-        configMap[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
-
-
-        return DefaultKafkaConsumerFactory(configMap, keyDeserializer, valueDeserializer)
-    }
-
     fun onpremKafkaConsumerFactory(): ConsumerFactory<String, String> {
         val keyDeserializer: JsonDeserializer<String> = JsonDeserializer(String::class.java)
         keyDeserializer.setUseTypeHeaders(false)
@@ -117,15 +102,6 @@ class KafkaConfigTest(
         configMap[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
 
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
-    }
-
-    @Bean
-    fun aivenKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = aivenKafkaConsumerFactory()
-        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
-        factory.containerProperties.authorizationExceptionRetryInterval =  Duration.ofSeconds(4L)
-        return factory
     }
 
     @Bean

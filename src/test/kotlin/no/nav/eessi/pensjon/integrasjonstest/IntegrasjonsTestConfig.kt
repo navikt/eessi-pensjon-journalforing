@@ -73,11 +73,6 @@ class IntegrasjonsTestConfig {
         configMap[CommonClientConfigs.SECURITY_PROTOCOL_CONFIG] = "PLAINTEXT"
     }
 
-    @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
-    }
-
     @Bean("aivenKravInitialiseringKafkaTemplate")
     fun aivenKravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
         val template = KafkaTemplate(producerFactory())
