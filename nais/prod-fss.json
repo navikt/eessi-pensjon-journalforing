@@ -1,4 +1,5 @@
 {
   "cluster": "prod",
-  "serviceuserkv": "/serviceuser/data/prod/srveessi-pensjon-journalforing"
+  "serviceuserkv": "/serviceuser/data/prod/srveessi-pensjon-journalforing",
+  "appsecrets": "/kv/preprod/fss/eessi-pensjon-journalforing/eessipensjon"
 }

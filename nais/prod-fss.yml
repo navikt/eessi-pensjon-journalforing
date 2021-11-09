@@ -49,6 +49,10 @@ spec:
       value: eessipensjon.privat-krav-initialisering
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering
+    - name: S3_URL
+      value: http://objectstore.rook-ceph.svc.nais.local
+    - name: S3_REGION
+      value: us-east-1
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journalforing.nais.adeo.no
@@ -82,4 +86,6 @@ spec:
         mountPath: /var/run/secrets/nais.io/srveessi-pensjon-journalforing
       - kvPath: /apikey/appdynamics/prod
         mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: {{appsecrets}}
+        mountPath: /var/run/secrets/nais.io/appsecrets
 
