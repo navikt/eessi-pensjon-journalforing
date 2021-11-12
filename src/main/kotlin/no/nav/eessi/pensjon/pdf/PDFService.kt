@@ -63,6 +63,7 @@ class PDFService(
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
                     val filtrertSupportedDokument = supportedDocuments.filterNot { it.innhold == null }
                     mapper.writeValueAsString(filtrertSupportedDokument.map {
+                        logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
                         JournalPostDokument(
                                 brevkode = sedType.name,
                                 dokumentKategori = "SED",
