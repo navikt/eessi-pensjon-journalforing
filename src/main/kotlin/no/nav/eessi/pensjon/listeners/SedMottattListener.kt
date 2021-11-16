@@ -22,7 +22,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import javax.annotation.PostConstruct
 
 @Service
@@ -66,10 +66,10 @@ class SedMottattListener(
                 logger.debug(hendelse)
 
                 //Forsøker med denne en gang til 258088L
-                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L, 206688L, 118452L, 268237L, 268268L, 268280L, 268281L, 268282L, 291953L)
+                val offsetToSkip = listOf(38518L,166333L, 195180L, 195186L, 195187L, 195188L, 195449L, 197341L, 197342L, 197343L, 206688L, 118452L, 268237L, 268268L, 268280L, 268281L, 268282L, 291953L, 299754L)
                 try {
                     val offset = cr.offset()
-                    if (offsetToSkip.contains(offset)) {
+                    if (offset in offsetToSkip) {
                         logger.warn("Hopper over offset: $offset grunnet feil.")
                     } else {
                         logger.info("*** Offset $offset  Partition ${cr.partition()} ***")
