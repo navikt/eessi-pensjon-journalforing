@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SedType.H021
 import no.nav.eessi.pensjon.eux.model.sed.SedType.H070
 import no.nav.eessi.pensjon.eux.model.sed.SedType.H120
 import no.nav.eessi.pensjon.eux.model.sed.SedType.H121
+import no.nav.eessi.pensjon.eux.model.sed.SedType.P1000
 import no.nav.eessi.pensjon.eux.model.sed.SedType.P10000
 import no.nav.eessi.pensjon.eux.model.sed.SedType.P11000
 import no.nav.eessi.pensjon.eux.model.sed.SedType.P12000
@@ -86,7 +87,7 @@ object SedTypeUtils {
         P3000_DE, P3000_DK, P3000_EE, P3000_EL, P3000_ES, P3000_FI, P3000_FR, P3000_HR,
         P3000_HU, P3000_IE, P3000_IS, P3000_IT, P3000_LI, P3000_LT, P3000_LU, P3000_LV,
         P3000_MT, P3000_NL, P3000_NO, P3000_PL, P3000_PT, P3000_RO, P3000_SE, P3000_SI,
-        P3000_SK, P3000_UK, P4000, P5000, P6000, P7000, P8000, P9000, P10000, P11000,
+        P3000_SK, P3000_UK, P4000, P5000, P6000, P7000, P8000, P9000, P1000, P10000, P11000,
         P12000, P14000, P15000, H020, H021, H070, H120, H121, R004, R005, R006,
         X005, X008, X010
     )
