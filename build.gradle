@@ -8,7 +8,7 @@ buildscript {
 		logstashLogbackVersion = '6.6'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.11.2'
-		epMetricsVersion = '0.4.9'
+		epMetricsVersion = '0.4.12'
 		epLoggingVersion = '1.0.9'
 		epSecurityStsVersion = '0.0.17'
 		epPersonoppslagVersion = '8.0.21'
