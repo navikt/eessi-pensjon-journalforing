@@ -1,11 +1,12 @@
 package no.nav.eessi.pensjon.models
 
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.typerMedIdentEllerFDato
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ internal class SedTypeTest {
     fun `Sjekk antall SED-typer som kan inneholde fnr eller dnr`() {
         assertEquals(
             58,
-            kanInneholdeIdentEllerFdato.size,
+            typerMedIdentEllerFDato.size,
             "Antall SEDer som kan inneholde ident har blitt endret."
         )
     }
