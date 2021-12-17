@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -14,7 +15,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.eux.model.sed.SedType
+
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
@@ -103,9 +104,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(HendelseKode.SOKNAD_OM_ALDERSPENSJON, kravMelding?.hendelsesKode)
                 assertEquals("147729", kravMelding?.bucId)
                 assertEquals(SAK_ID, kravMelding?.sakId)
-
             }
-
         }
 
         @Test
@@ -188,7 +187,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
-
             }
         }
 
@@ -304,7 +302,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson som heller ikke finner person Oppgave routes til ID Og Fordeling`() {
 
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
-
 
             testRunnerVoksenSokPerson(
                 FNR_VOKSEN,
