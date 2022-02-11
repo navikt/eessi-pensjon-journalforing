@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
 import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
 import no.nav.eessi.pensjon.integrasjonstest.SED_MOTTATT_TOPIC
 import no.nav.eessi.pensjon.json.toJson
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
@@ -18,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
+@Disabled
 internal class PBuc01UgyldigFNRIntegrasjonsTest : IntegrasjonsBase() {
 
     @Test

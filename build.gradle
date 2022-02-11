@@ -4,7 +4,7 @@ buildscript {
 		kotlinVersion = '1.6.10'
 		springBootVersion = '2.6.1'
 		cxfVersion = '3.4.5'
-		oidcTokenSupportVersion = '0.2.9'
+		oidcTokenSupportVersion = '1.3.9'
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.11.2'
@@ -112,6 +112,13 @@ dependencies {
 	implementation("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
 	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
 	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
+
+	//Auth
+	//Auth
+	implementation("no.nav.security:token-client-spring:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-spring:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-jaxrs:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-test-support:${oidcTokenSupportVersion}")
 
 }
 

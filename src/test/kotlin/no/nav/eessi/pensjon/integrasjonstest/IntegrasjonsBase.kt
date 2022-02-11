@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListner
-import no.nav.eessi.pensjon.security.sts.STSService
 import org.junit.jupiter.api.AfterEach
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Header
@@ -48,9 +47,6 @@ abstract class IntegrasjonsBase() {
 
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
-
-    @Autowired
-    lateinit var stsService: STSService
 
     @Autowired
     lateinit var consumerFactory: ConsumerFactory<String, String>

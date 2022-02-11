@@ -1,10 +1,12 @@
 package no.nav.eessi.pensjon
 
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.retry.annotation.EnableRetry
 
 @SpringBootApplication
+@EnableOAuth2Client(cacheEnabled = true)
 @EnableRetry
 class EessiPensjonJournalforingApplication
 
