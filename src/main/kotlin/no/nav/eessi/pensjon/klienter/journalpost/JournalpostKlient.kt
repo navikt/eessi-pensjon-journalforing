@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct
  */
 @Component
 class JournalpostKlient(
-        private val journalpostOidcRestTemplate: RestTemplate,
+        private val downstreamClientCredentialsResourceRestTemplate: RestTemplate,
         @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
@@ -55,7 +55,7 @@ class JournalpostKlient(
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
-                val response = journalpostOidcRestTemplate.exchange(
+                val response = downstreamClientCredentialsResourceRestTemplate.exchange(
                         path,
                         HttpMethod.POST,
                         HttpEntity(request.toString(), headers),
@@ -86,7 +86,7 @@ class JournalpostKlient(
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
-                journalpostOidcRestTemplate.exchange(
+                downstreamClientCredentialsResourceRestTemplate.exchange(
                         path,
                         HttpMethod.PATCH,
                         HttpEntity(OppdaterDistribusjonsinfoRequest().toString(), headers),
