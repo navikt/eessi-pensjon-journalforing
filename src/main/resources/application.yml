@@ -13,9 +13,6 @@ kafka:
     topic: ${KAFKA_KRAVINIT_TOPIC}
     groupid: eessi-pensjon-group
 
-securityTokenService:
-  discoveryUrl: ${SECURITY_TOKEN_SERVICE_OPENID_CONFIGURATION_URL}
-
 no.nav.security.jwt:
   client:
     registration:
