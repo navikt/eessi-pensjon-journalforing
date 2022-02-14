@@ -103,7 +103,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
 	// Rina Eux API
-	implementation("no.nav.eessi.pensjon:ep-eux:${epeuxVersion}") {
+	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}") {
 		exclude module: 'ep-security-sts'
 	}
 	// PDF box
