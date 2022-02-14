@@ -12,7 +12,7 @@ buildscript {
 		epLoggingVersion = '1.0.15'
 		epSecurityStsVersion = '0.0.21'
 		epPersonoppslagVersion = '9.0.7'
-		epEuxVersion = '1.1.57'
+		epEuxVersion = '1.1.58'
 	}
 
 	repositories {
