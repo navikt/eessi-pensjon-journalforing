@@ -12,6 +12,8 @@ jobs:
       # PULLER REPO
       - name: 'Pull repo'
         uses: actions/checkout@v1
+        with:
+          ref: GCP
 
       # SETTER DATO OG COMMIT VARIABEL
       - name: 'Setter dato og commit variabel'
