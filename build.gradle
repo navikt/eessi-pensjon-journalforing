@@ -102,8 +102,10 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
-	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}")
-
+	// Rina Eux API
+	implementation("no.nav.eessi.pensjon:ep-eux:${epeuxVersion}") {
+		exclude module: 'ep-security-sts'
+	}
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.24")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.8.0")
