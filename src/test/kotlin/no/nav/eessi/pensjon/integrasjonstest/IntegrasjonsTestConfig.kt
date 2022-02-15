@@ -1,5 +1,9 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import io.mockk.mockk
+import no.nav.eessi.pensjon.personoppslag.pdl.PdlToken
+import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenCallBack
+import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenImp
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -8,6 +12,9 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
@@ -16,6 +23,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.test.EmbeddedKafkaBroker
+import org.springframework.web.client.RestTemplate
 import java.time.Duration
 
 @TestConfiguration
@@ -93,4 +101,24 @@ class IntegrasjonsTestConfig {
         return kafka
     }
 
+    @Bean
+    fun euxOAuthRestTemplate(): RestTemplate{
+        return mockk()
+    }
+
+    @Bean
+    fun fagmodulOidcRestTemplate(): RestTemplate {
+        return mockk()
+    }
+
+    @Bean("pdlTokenComponent")
+    @Primary
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    fun pdlTokenComponent(): PdlTokenCallBack {
+        return object : PdlTokenCallBack {
+            override fun callBack(): PdlToken {
+                return PdlTokenImp(systemToken = "Dummytoken", userToken = "DummyToken", isUserToken = false)
+            }
+        }
+    }
 }

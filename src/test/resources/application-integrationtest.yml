@@ -43,3 +43,7 @@ virksomhet.person.v3:
 EESSI_PENSJON_FAGMODUL_URL: http://localhost:${mockServerport}
 NORG2_URL: http://localhost:${mockServerport}
 BestemSak_URL: http://localhost:${mockServerport}
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
