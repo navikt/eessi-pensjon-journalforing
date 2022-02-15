@@ -14,7 +14,7 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 @Component
-class EuxKlient(private val downstreamClientCredentialsResourceRestTemplate: RestTemplate) {
+class EuxKlient(private val euxOAuthRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(EuxKlient::class.java) }
 
@@ -27,7 +27,7 @@ class EuxKlient(private val downstreamClientCredentialsResourceRestTemplate: Res
         logger.info("Henter PDF for SED og tilhørende vedlegg for rinaSakId: $rinaSakId , dokumentId: $dokumentId")
 
         return execute {
-            downstreamClientCredentialsResourceRestTemplate.getForObject(
+            euxOAuthRestTemplate.getForObject(
                 "/buc/$rinaSakId/sed/$dokumentId/filer",
                 SedDokumentfiler::class.java
             )
@@ -43,7 +43,7 @@ class EuxKlient(private val downstreamClientCredentialsResourceRestTemplate: Res
         logger.info("Henter SED for rinaSakId: $rinaSakId , dokumentId: $dokumentId")
 
         val response = execute {
-            downstreamClientCredentialsResourceRestTemplate.exchange(
+            euxOAuthRestTemplate.exchange(
                 "/buc/$rinaSakId/sed/$dokumentId",
                 HttpMethod.GET,
                 null,
@@ -63,7 +63,7 @@ class EuxKlient(private val downstreamClientCredentialsResourceRestTemplate: Res
         logger.info("Henter BUC (RinaSakId: $rinaSakId)")
 
         return execute {
-            downstreamClientCredentialsResourceRestTemplate.getForObject(
+            euxOAuthRestTemplate.getForObject(
                 "/buc/$rinaSakId",
                 Buc::class.java
             )

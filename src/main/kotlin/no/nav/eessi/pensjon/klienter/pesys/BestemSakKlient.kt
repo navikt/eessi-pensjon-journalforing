@@ -22,7 +22,7 @@ import java.util.*
 import javax.annotation.PostConstruct
 
 @Component
-class BestemSakKlient(private val downstreamClientCredentialsResourceRestTemplate: RestTemplate,
+class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
@@ -47,7 +47,7 @@ class BestemSakKlient(private val downstreamClientCredentialsResourceRestTemplat
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
-                val response = downstreamClientCredentialsResourceRestTemplate.exchange(
+                val response = bestemSakOidcRestTemplate.exchange(
                         "/",
                         HttpMethod.POST,
                         HttpEntity(requestBody.toJson(), headers),

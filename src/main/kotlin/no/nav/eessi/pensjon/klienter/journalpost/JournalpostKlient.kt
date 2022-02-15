@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct
  */
 @Component
 class JournalpostKlient(
-        private val downstreamClientCredentialsResourceRestTemplate: RestTemplate,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+    private val journalpostOidcRestTemplate: RestTemplate,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostKlient::class.java) }
@@ -55,7 +55,7 @@ class JournalpostKlient(
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
-                val response = downstreamClientCredentialsResourceRestTemplate.exchange(
+                val response = journalpostOidcRestTemplate.exchange(
                         path,
                         HttpMethod.POST,
                         HttpEntity(request.toString(), headers),
@@ -86,7 +86,7 @@ class JournalpostKlient(
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
-                downstreamClientCredentialsResourceRestTemplate.exchange(
+                journalpostOidcRestTemplate.exchange(
                         path,
                         HttpMethod.PATCH,
                         HttpEntity(OppdaterDistribusjonsinfoRequest().toString(), headers),
