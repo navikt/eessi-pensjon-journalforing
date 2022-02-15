@@ -50,13 +50,13 @@ class RestTemplateConfig(
     lateinit var bestemSakUrl: String
 
     @Bean
-    fun euxOAuthRestTemplate(
-        restTemplateBuilder: RestTemplateBuilder
-    ): RestTemplate? {
-
+    fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
         return restTemplateBuilder
             .rootUri(euxUrl)
-            .additionalInterceptors(bearerTokenInterceptor(clientProperties(), oAuth2AccessTokenService!!))
+            .additionalInterceptors(
+                RequestResponseLoggerInterceptor(),
+                RequestIdHeaderInterceptor(),
+                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!))
             .build()
     }
 
@@ -69,7 +69,7 @@ class RestTemplateConfig(
                 RequestResponseLoggerInterceptor(),
                 RequestIdHeaderInterceptor(),
                 RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(), oAuth2AccessTokenService!!)
+                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
             )
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory()) // Trengs for å kjøre http-method: PATCH
@@ -78,15 +78,13 @@ class RestTemplateConfig(
 
     @Bean
     fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-
         return templateBuilder
             .rootUri(fagmodulUrl)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor(),
-                RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(), oAuth2AccessTokenService!!)
+                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
             )
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
@@ -103,7 +101,7 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor(),
                 RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(), oAuth2AccessTokenService!!)
+                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
             )
         .build().apply {
             requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
@@ -120,15 +118,15 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor(),
                 RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(), oAuth2AccessTokenService!!))
+                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!))
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
             }
     }
 
-    private fun clientProperties(): ClientProperties {
+    private fun clientProperties(oAuthKey: String): ClientProperties {
         val clientProperties =
-            Optional.ofNullable(clientConfigurationProperties.registration["eux-credentials"])
+            Optional.ofNullable(clientConfigurationProperties.registration[oAuthKey])
                 .orElseThrow { RuntimeException("could not find oauth2 client config for example-onbehalfof") }
         return clientProperties
     }

@@ -17,6 +17,7 @@
         <logger name="no.nav.security" level="ERROR"/>
         <logger name="no.nav.eessi" level="INFO"/>
         <logger name="no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor" level="OFF"/>
+        <logger name="no.nav.security.token.support.core.validation" level="ERROR"/>
 
         <root level="info">
             <appender-ref ref="stdout_json"/>
@@ -43,6 +44,7 @@
         <logger name="no.nav" level="DEBUG"/>
         <logger name="no.nav.security" level="DEBUG"/>
         <logger name="no.nav.eessi" level="DEBUG"/>
+        <logger name="no.nav.security.token.support.core.validation" level="ERROR"/>
 
     </springProfile>
 
