@@ -10,6 +10,7 @@ buildscript {
 		mockserverVersion = '5.11.2'
 		epMetricsVersion = '0.4.12'
 		epLoggingVersion = '1.0.15'
+		epSecurityStsVersion = '0.0.21'
 		epPersonoppslagVersion = '8.2.4'
 		epEuxVersion = '1.1.57'
 	}
@@ -99,7 +100,7 @@ dependencies {
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
-//	implementation("no.nav.eessi.pensjon:ep-security-sts:${epSecurityStsVersion}")
+	implementation("no.nav.eessi.pensjon:ep-security-sts:${epSecurityStsVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
 	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}")
 
