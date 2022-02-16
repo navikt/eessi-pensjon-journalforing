@@ -52,6 +52,9 @@ spec:
       value: eessipensjon.privat-krav-initialisering-q2
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering-q2
+    - name: AZURE_APP_EUX_CLIENT_ID
+      value: dev-gcp_eessipensjon_eessi-pensjon-journalforing-q2
+
   image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journaforing-q2.dev.intern.nav.no
