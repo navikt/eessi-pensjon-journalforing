@@ -1,22 +1,21 @@
 package no.nav.eessi.pensjon.integrasjonstest.sendt
 
+import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.integrasjonstest.CustomMockServer
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsBase
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
 import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
 import no.nav.eessi.pensjon.integrasjonstest.SED_SENDT_TOPIC
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC])
-@Disabled
 internal class FBBuc01IntegrasjonsTest : IntegrasjonsBase() {
 
     @Test

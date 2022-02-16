@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest.mottatt
 
+import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.integrasjonstest.CustomMockServer
@@ -8,18 +9,16 @@ import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
 import no.nav.eessi.pensjon.integrasjonstest.OPPGAVE_TOPIC
 import no.nav.eessi.pensjon.integrasjonstest.SED_MOTTATT_TOPIC
 import no.nav.eessi.pensjon.json.toJson
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingApplication::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-@Disabled
 internal class PBuc01UgyldigFNRIntegrasjonsTest : IntegrasjonsBase() {
 
     @Test

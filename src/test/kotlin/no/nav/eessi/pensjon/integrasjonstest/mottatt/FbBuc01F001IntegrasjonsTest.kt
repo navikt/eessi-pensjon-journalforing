@@ -1,8 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest.mottatt
 
-import com.ninjasquad.springmockk.MockkBean
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
-import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.integrasjonstest.CustomMockServer
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsBase
 import no.nav.eessi.pensjon.integrasjonstest.IntegrasjonsTestConfig
@@ -19,9 +17,6 @@ import org.springframework.test.context.ActiveProfiles
 @DirtiesContext
 @EmbeddedKafka( topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC] )
 internal class FbBuc01F001IntegrasjonsIntegrasjons : IntegrasjonsBase(){
-
-    @MockkBean
-    lateinit var euxKlient: EuxKlient
 
     @Test
     fun `Sender 1 Foreldre SED til Kafka`() {

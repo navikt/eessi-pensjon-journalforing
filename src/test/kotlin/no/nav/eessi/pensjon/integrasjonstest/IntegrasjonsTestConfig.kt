@@ -1,9 +1,12 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
 import no.nav.eessi.pensjon.personoppslag.pdl.PdlToken
 import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenCallBack
 import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenImp
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -11,6 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
@@ -33,6 +37,8 @@ class IntegrasjonsTestConfig {
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private lateinit var oppgaveTopic: String
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private lateinit var automatiseringTopic: String
 
+    @MockkBean
+    lateinit var ClientConfigurationProperties: ClientConfigurationProperties
 
     @Bean
     fun producerFactory(): ProducerFactory<String, String> {
@@ -94,17 +100,41 @@ class IntegrasjonsTestConfig {
         return kafka
     }
 
+    fun producerFactoryAiven(): ProducerFactory<String, String> {
+        val configs = HashMap<String, Any>()
+        configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = this.brokerAddresses
+        configs[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+        configs[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        return DefaultKafkaProducerFactory(configs)
+    }
+
     @Bean
     fun aivenAutomatiseringKafkaTemplate(): KafkaTemplate<String, String> {
-        val kafka = KafkaTemplate(producerFactory())
+        val kafka = KafkaTemplate(producerFactoryAiven())
         kafka.defaultTopic = automatiseringTopic
         return kafka
     }
 
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate{
+    fun journalpostOidcRestTemplate(): RestTemplate{
+        val port = System.getProperty("mockServerport")
+        return RestTemplateBuilder()
+            .rootUri("http://localhost:${port}")
+            .build()
+    }
+
+    @Bean
+    fun bestemSakOidcRestTemplate(): RestTemplate{
         return mockk()
     }
+    @Bean
+    fun euxOAuthRestTemplate(): RestTemplate {
+        val port = System.getProperty("mockServerport")
+        return RestTemplateBuilder()
+            .rootUri("http://localhost:${port}")
+            .build()
+    }
+
 
     @Bean
     fun fagmodulOidcRestTemplate(): RestTemplate {
