@@ -18,7 +18,6 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.BufferingClientHttpRequestFactory
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
@@ -29,7 +28,7 @@ import java.util.*
 class RestTemplateConfig(
     private val clientConfigurationProperties: ClientConfigurationProperties,
     private val oAuth2AccessTokenService: OAuth2AccessTokenService?,
-    private val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry,
     ) {
 
     private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
@@ -49,80 +48,56 @@ class RestTemplateConfig(
     @Value("\${BESTEMSAK_URL}")
     lateinit var bestemSakUrl: String
 
+    @Value("\${EESSI_PEN_ONPREM_PROXY_URL}")
+    lateinit var proxyUrl: String
+
+
+
     @Bean
     fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
-        return restTemplateBuilder
-            .rootUri(euxUrl)
-            .additionalInterceptors(
-                RequestResponseLoggerInterceptor(),
-                RequestIdHeaderInterceptor(),
-                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!))
-            .build()
+        return opprettRestTemplate(euxUrl, "eux-credentials")
+    }
+
+    @Bean
+    fun proxyOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
+        return opprettRestTemplate(proxyUrl, "proxy-credentials")
     }
 
     @Bean
     fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-            .rootUri(joarkUrl)
-            .errorHandler(DefaultResponseErrorHandler())
-            .additionalInterceptors(
-                RequestResponseLoggerInterceptor(),
-                RequestIdHeaderInterceptor(),
-                RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
-            )
-            .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory()) // Trengs for å kjøre http-method: PATCH
-            }
+        return opprettRestTemplate(joarkUrl, "eux-credentials")
     }
 
     @Bean
     fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-            .rootUri(fagmodulUrl)
+        return opprettRestTemplate(fagmodulUrl, "eux-credentials")
+    }
+
+//    @Bean
+//    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+//        return opprettRestTemplate(norg2Url, "eux-credentials")
+//    }
+
+    @Bean
+    fun bestemSakOidcRestTemplate(): RestTemplate {
+        return opprettRestTemplate(bestemSakUrl, "pen-credentials")
+    }
+
+    private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
+        return RestTemplateBuilder()
+            .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor(),
-                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
+                RequestCountInterceptor(meterRegistry),
+                bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
             }
     }
 
-    @Bean
-    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-
-        return templateBuilder
-            .rootUri(norg2Url)
-            .errorHandler(DefaultResponseErrorHandler())
-            .additionalInterceptors(
-                RequestIdHeaderInterceptor(),
-                RequestResponseLoggerInterceptor(),
-                RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!)
-            )
-        .build().apply {
-            requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-        }
-    }
-
-    @Bean
-    fun bestemSakOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-
-        return templateBuilder
-            .rootUri(bestemSakUrl)
-            .errorHandler(DefaultResponseErrorHandler())
-            .additionalInterceptors(
-                RequestIdHeaderInterceptor(),
-                RequestResponseLoggerInterceptor(),
-                RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties("eux-credentials"), oAuth2AccessTokenService!!))
-            .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-            }
-    }
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
         val clientProperties =

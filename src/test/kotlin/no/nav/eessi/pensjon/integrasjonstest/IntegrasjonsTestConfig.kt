@@ -127,6 +127,7 @@ class IntegrasjonsTestConfig {
     fun bestemSakOidcRestTemplate(): RestTemplate{
         return mockk()
     }
+
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")
@@ -135,9 +136,13 @@ class IntegrasjonsTestConfig {
             .build()
     }
 
-
     @Bean
     fun fagmodulOidcRestTemplate(): RestTemplate {
+        return mockk()
+    }
+
+    @Bean
+    fun proxyOAuthRestTemplate(): RestTemplate {
         return mockk()
     }
 
