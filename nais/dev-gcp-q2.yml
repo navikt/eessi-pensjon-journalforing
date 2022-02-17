@@ -54,8 +54,10 @@ spec:
       value: eessipensjon.public-automatisering-q2
     - name: AZURE_APP_EUX_CLIENT_ID
       value: dev-fss.eessibasis.eux-rina-api-q2
-    - name: AZURE_APP_PEN_CLIENT_ID
-      value: dev-fss.teampensjon.pensjon-pen-q2
+    - name: AZURE_APP_EUX_CLIENT_ID
+      value: dev-fss.eessibasis.eux-rina-api-q2
+    - name: AZURE_APP_PROXY_CLIENT_ID
+      value: dev-fss.eessipensjon.eessi-pensjon-onprem-proxy-q2
     - name: EESSI_PEN_ONPREM_PROXY_URL
       value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
 

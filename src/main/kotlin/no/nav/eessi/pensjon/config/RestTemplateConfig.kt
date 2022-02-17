@@ -73,11 +73,6 @@ class RestTemplateConfig(
         return opprettRestTemplate(fagmodulUrl, "eux-credentials")
     }
 
-//    @Bean
-//    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-//        return opprettRestTemplate(norg2Url, "eux-credentials")
-//    }
-
     @Bean
     fun bestemSakOidcRestTemplate(): RestTemplate {
         return opprettRestTemplate(bestemSakUrl, "pen-credentials")
