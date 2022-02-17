@@ -53,7 +53,7 @@ spec:
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering-q2
     - name: AZURE_APP_EUX_CLIENT_ID
-      value: dev-gcp_eessipensjon_eessi-pensjon-journalforing-q2
+      value: dev-fss.eessibasis.eux-rina-api-q2
 
   image: {{ image }}
   ingresses:
