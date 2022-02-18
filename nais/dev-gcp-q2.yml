@@ -14,7 +14,8 @@ spec:
     accessPolicy:
       outbound:
         external:
-          - host: https://eessi-pensjon-journalforing-q2.dev.intern.nav.no
+          - host: dokarkiv-q2.dev-fss-pub.nais.io
+
   webproxy: true
 
   kafka:
