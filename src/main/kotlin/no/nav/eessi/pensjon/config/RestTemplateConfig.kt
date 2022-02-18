@@ -65,7 +65,7 @@ class RestTemplateConfig(
 
     @Bean
     fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return opprettRestTemplate(joarkUrl, "eux-credentials")
+        return opprettRestTemplate(joarkUrl, "dokarkiv-credentials")
     }
 
     @Bean
