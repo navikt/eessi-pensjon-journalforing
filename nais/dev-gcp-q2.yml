@@ -59,6 +59,8 @@ spec:
       value: dev-fss.pdl.pdl-api
     - name: EESSI_PEN_ONPREM_PROXY_URL
       value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
+    - name: AZURE_APP_DOKARKIV_CLIENT_ID
+      value: dokarkiv
 
   image: {{ image }}
   ingresses:
