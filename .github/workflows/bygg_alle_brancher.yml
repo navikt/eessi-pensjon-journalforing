@@ -7,7 +7,6 @@ on:
       - '*/*'
       - '!release/*'
       - '!master'
-      - '!GCP'
 
 jobs:
   bygg:

@@ -1,33 +1,37 @@
 package no.nav.eessi.pensjon.config
 
+import com.nimbusds.jwt.JWTClaimsSet
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
 import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
-import no.nav.eessi.pensjon.security.sts.STSService
-import no.nav.eessi.pensjon.security.sts.UsernameToOidcInterceptor
-import org.slf4j.Logger
+import no.nav.security.token.support.client.core.ClientProperties
+import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
-import org.springframework.http.MediaType
-import org.springframework.http.client.*
-import org.springframework.http.client.support.BasicAuthenticationInterceptor
+import org.springframework.http.client.BufferingClientHttpRequestFactory
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Configuration
-class RestTemplateConfig(private val securityTokenExchangeService: STSService, private val meterRegistry: MeterRegistry) {
+@Profile("prod", "test")
+class RestTemplateConfig(
+    private val clientConfigurationProperties: ClientConfigurationProperties,
+    private val oAuth2AccessTokenService: OAuth2AccessTokenService?,
+    private val meterRegistry: MeterRegistry,
+    ) {
 
-    @Value("\${aktoerregister.api.v1.url}")
-    lateinit var aktoerregisterUrl: String
-
-    @Value("\${oppgave.oppgaver.url}")
-    lateinit var oppgaveUrl: String
+    private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
 
     @Value("\${JOURNALPOST_V1_URL}")
     lateinit var joarkUrl: String
@@ -41,156 +45,73 @@ class RestTemplateConfig(private val securityTokenExchangeService: STSService, p
     @Value("\${NORG2_URL}")
     lateinit var norg2Url: String
 
-    @Value("\${BestemSak_URL}")
+    @Value("\${BESTEMSAK_URL}")
     lateinit var bestemSakUrl: String
 
-    @Value("\${srvusername}")
-    lateinit var username: String
+    @Value("\${EESSI_PEN_ONPREM_PROXY_URL}")
+    lateinit var proxyUrl: String
 
-    @Value("\${srvpassword}")
-    lateinit var password: String
 
+
+    @Bean
+    fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
+        return opprettRestTemplate(euxUrl, "eux-credentials")
+    }
+
+    @Bean
+    fun proxyOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
+        return opprettRestTemplate(proxyUrl, "proxy-credentials")
+    }
 
     @Bean
     fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(joarkUrl)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                    FullRequestResponseLoggerInterceptor(),
-                        RequestIdHeaderInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory()) // Trengs for å kjøre http-method: PATCH
-                }
-    }
-
-
-    @Bean
-    fun aktoerregisterRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(aktoerregisterUrl)
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        RequestResponseLoggerInterceptor(),
-                        BasicAuthenticationInterceptor(username, password)
-                )
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
-    }
-
-    @Bean
-    fun oppgaveOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(oppgaveUrl)
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestInterceptor(),
-                        RequestResponseLoggerInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        BasicAuthenticationInterceptor(username, password)
-                )
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
+        return opprettRestTemplate(joarkUrl, "dokarkiv-credentials")
     }
 
     @Bean
     fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(fagmodulUrl)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestResponseLoggerInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
+        return opprettRestTemplate(fagmodulUrl, "eux-credentials")
     }
 
     @Bean
-    fun norg2OidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(norg2Url)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestResponseLoggerInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
+    fun bestemSakOidcRestTemplate(): RestTemplate {
+        return opprettRestTemplate(bestemSakUrl, "pen-credentials")
     }
 
-    @Bean
-    fun bestemSakOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return templateBuilder
-                .rootUri(bestemSakUrl)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        RequestResponseLoggerInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        UsernameToOidcInterceptor(securityTokenExchangeService))
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
+    private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
+        return RestTemplateBuilder()
+            .rootUri(url)
+            .errorHandler(DefaultResponseErrorHandler())
+            .additionalInterceptors(
+                RequestIdHeaderInterceptor(),
+                RequestResponseLoggerInterceptor(),
+                RequestCountInterceptor(meterRegistry),
+                bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
+            )
+            .build().apply {
+                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+            }
     }
 
-    class RequestInterceptor : ClientHttpRequestInterceptor {
-        override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
-            request.headers["X-Correlation-ID"] = UUID.randomUUID().toString()
-            request.headers["Content-Type"] = MediaType.APPLICATION_JSON.toString()
-            return execution.execute(request, body)
-        }
-    }
-}
 
-
-
-class FullRequestResponseLoggerInterceptor : ClientHttpRequestInterceptor {
-    private val log: Logger by lazy { LoggerFactory.getLogger(RequestResponseLoggerInterceptor::class.java) }
-
-    override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
-
-        logRequest(request, body)
-        val response: ClientHttpResponse = execution.execute(request, body)
-        logResponse(response)
-        return response
+    private fun clientProperties(oAuthKey: String): ClientProperties {
+        val clientProperties =
+            Optional.ofNullable(clientConfigurationProperties.registration[oAuthKey])
+                .orElseThrow { RuntimeException("could not find oauth2 client config for example-onbehalfof") }
+        return clientProperties
     }
 
-    private fun logRequest(request: HttpRequest, body: ByteArray) {
-        if (log.isDebugEnabled) {
-            val requestLog = StringBuffer()
-
-            requestLog.append("\n===========================request begin================================================")
-            requestLog.append("\nURI            :  ${request.uri}")
-            requestLog.append("\nMethod         :  ${request.method}")
-            requestLog.append("\nHeaders        :  ${request.headers}")
-            requestLog.append("\nComplete body  :  ${String(body)}")
-            requestLog.append("\n==========================request end================================================")
-            log.debug(requestLog.toString())
-        }
-    }
-
-    private fun logResponse(response: ClientHttpResponse) {
-        if (log.isDebugEnabled) {
-            val responseLog = StringBuilder()
-
-            responseLog.append("\n===========================response begin================================================")
-            responseLog.append("\nStatus code    : ${response.statusCode}")
-            responseLog.append("\nStatus text    : ${response.statusText}")
-            responseLog.append("\nHeaders        : ${response.headers}")
-            responseLog.append("\nComplete body  :  ${String(response.body.readBytes())}")
-            responseLog.append("\n==========================response end================================================")
-            log.debug(responseLog.toString())
+    private fun bearerTokenInterceptor(
+        clientProperties: ClientProperties,
+        oAuth2AccessTokenService: OAuth2AccessTokenService
+    ): ClientHttpRequestInterceptor? {
+        return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray?, execution: ClientHttpRequestExecution ->
+            val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
+            request.headers.setBearerAuth(response.accessToken)
+            val tokenChunks = response.accessToken.split(".")
+            val tokenBody =  tokenChunks[1]
+            logger.info("subject: " + JWTClaimsSet.parse(Base64.getDecoder().decode(tokenBody).decodeToString()).subject)
+            execution.execute(request, body!!)
         }
     }
 }

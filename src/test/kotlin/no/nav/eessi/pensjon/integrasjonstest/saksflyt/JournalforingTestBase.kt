@@ -457,7 +457,8 @@ internal open class JournalforingTestBase {
             kjoenn = Kjoenn(KjoennType.KVINNE, metadata = metadata),
             doedsfall = null,
             forelderBarnRelasjon = emptyList(),
-            sivilstand = emptyList()
+            sivilstand = emptyList(),
+            utenlandskIdentifikasjonsnummer = emptyList()
         )
     }
 

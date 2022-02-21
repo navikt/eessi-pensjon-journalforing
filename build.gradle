@@ -4,16 +4,17 @@ buildscript {
 		kotlinVersion = '1.6.10'
 		springBootVersion = '2.6.1'
 		cxfVersion = '3.4.5'
-		oidcTokenSupportVersion = '0.2.9'
+		oidcTokenSupportVersion = '1.3.9'
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.11.2'
 		epMetricsVersion = '0.4.12'
 		epLoggingVersion = '1.0.15'
 		epSecurityStsVersion = '0.0.21'
-		epPersonoppslagVersion = '8.2.4'
-		epEuxVersion = '1.1.57'
+		epPersonoppslagVersion = '9.0.7'
+		epEuxVersion = '1.1.58'
 	}
+
 	repositories {
 		mavenCentral()
 	}
@@ -100,10 +101,11 @@ dependencies {
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
-	implementation("no.nav.eessi.pensjon:ep-security-sts:${epSecurityStsVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
-	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}")
-
+	// Rina Eux API
+	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}") {
+		exclude module: 'ep-security-sts'
+	}
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.24")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.8.0")
@@ -114,10 +116,21 @@ dependencies {
 	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
 	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
 
+	//Auth
+	//Auth
+	implementation("no.nav.security:token-client-spring:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-spring:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-jaxrs:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-test-support:${oidcTokenSupportVersion}")
+
 }
 
 test {
 	useJUnitPlatform()
+	filter {
+		//exclude all tests from a package.
+		excludeTestsMatching "no.nav.eessi.pensjon.integrasjonstest.*"
+	}
 }
 
 java {

@@ -70,7 +70,8 @@ object PersonMock {
             kjoenn = Kjoenn(KjoennType.KVINNE, null, metadata),
             doedsfall = null,
             forelderBarnRelasjon = emptyList(),
-            sivilstand = emptyList()
+            sivilstand = emptyList(),
+            utenlandskIdentifikasjonsnummer = emptyList()
         )
     }
 }

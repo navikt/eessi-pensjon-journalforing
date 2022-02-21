@@ -3,6 +3,8 @@ KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
 KAFKA_KRAVINIT_TOPIC: 'eessi-pensjon-krav-q'
 KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
+AZURE_APP_JWK: "dummy"
 
 kafka:
   sedSendt:
@@ -43,3 +45,7 @@ virksomhet.person.v3:
 EESSI_PENSJON_FAGMODUL_URL: http://localhost:${mockServerport}
 NORG2_URL: http://localhost:${mockServerport}
 BestemSak_URL: http://localhost:${mockServerport}
+
+spring:
+  main:
+    allow-bean-definition-overriding: true

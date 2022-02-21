@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct
  */
 @Component
 class JournalpostKlient(
-        private val journalpostOidcRestTemplate: RestTemplate,
-        @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+    private val journalpostOidcRestTemplate: RestTemplate,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostKlient::class.java) }
