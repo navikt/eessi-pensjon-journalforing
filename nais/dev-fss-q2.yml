@@ -36,7 +36,7 @@ spec:
     - name: AKTOERREGISTER_API_V1_URL
       value: https://app-q2.adeo.no/aktoerregister/api/v1
     - name: EESSI_PENSJON_FAGMODUL_URL
-      value: https://eessi-pensjon-fagmodul-q2.nais.preprod.local/
+      value: https://eessi-pensjon-fagmodul-q2.dev-fss-pub.nais.io
     - name: NORG2_URL
       value: https://app-q4.adeo.no/norg2/
     - name: BESTEMSAK_URL
