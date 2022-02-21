@@ -1,0 +1,87 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: eessi-pensjon-journalforing
+  namespace: eessipensjon
+  labels:
+    team: eessipensjon
+spec:
+  envFrom:
+    - secret: journalforing-prod
+  azure:
+    application:
+      enabled: true
+    accessPolicy:
+      outbound:
+        external:
+          - host: https://eessi-pensjon-journalforing.intern.nav.no
+  webproxy: true
+
+  kafka:
+    pool: nav-prod
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: NAMESPACE
+      value: p
+    - name: ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
+    - name: EUX_RINA_API_V1_URL
+      value: https://eux-rina-api.nais.adeo.no/cpi
+    - name: PDL_URL
+      value: https://pdl-api.nais.adeo.no/graphql
+    - name: JOURNALPOST_V1_URL
+      value: https://dokarkiv.nais.adeo.no/rest/journalpostapi/v1
+    - name: EESSI_PENSJON_FAGMODUL_URL
+      value: https://eessi-pensjon-fagmodul.nais.adeo.no/
+    - name: NORG2_URL
+      value: https://app.adeo.no/norg2
+    - name: BESTEMSAK_URL
+      value: https://pensjon-pen.nais.adeo.no/pen/api/bestemsak/v1
+    - name: KAFKA_SEDSENDT_TOPIC
+      value: eessi-basis-sedSendt-v1
+    - name: KAFKA_SEDMOTTATT_TOPIC
+      value: eessi-basis-sedMottatt-v1
+    - name: KAFKA_OPPGAVE_TOPIC
+      value: eessipensjon.privat-oppgave
+    - name: KAFKA_KRAV_TOPIC
+      value: eessipensjon.privat-krav-initialisering
+    - name: KAFKA_AUTOMATISERING_TOPIC
+      value: eessipensjon.public-automatisering
+    - name: AZURE_APP_EUX_CLIENT_ID
+      value: prod-fss.eessibasis.eux-rina-api
+    - name: AZURE_APP_PROXY_CLIENT_ID
+      value: prod-fss.eessipensjon.eessi-pensjon-onprem-proxy
+    - name: AZURE_APP_PDL_CLIENT_ID
+      value: prod-fss.pdl.pdl-api
+    - name: EESSI_PEN_ONPREM_PROXY_URL
+      value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io
+    - name: AZURE_APP_DOKARKIV_CLIENT_ID
+      value: dokarkiv
+
+  image: {{ image }}
+  ingresses:
+    - https://eessi-pensjon-journaforing.intern.nav.no
+  liveness:
+    path: /internal/isalive
+    port: 8080
+    initialDelay: 20
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
+  readiness:
+    path: /internal/isready
+    port: 8080
+    initialDelay: 20
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "4"
+      memory: 8096Mi
+    requests:
+      cpu: 400m
+      memory: 4024Mi
