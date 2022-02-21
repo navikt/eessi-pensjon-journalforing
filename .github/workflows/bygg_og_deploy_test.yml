@@ -50,14 +50,14 @@ jobs:
 #          VARS: nais/dev-fss-q2.json
 #          IMAGE: ${{ env.IMAGE }}
 
-#      # DEPLOYER TIL NAIS Q2 team namespace
-#      - name: 'Deploy to NAIS q2 gcp'
-#        uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: dev-gcp
-#          RESOURCE: nais/dev-gcp-q2.yml
-#          IMAGE: ${{ env.IMAGE }}
+      # DEPLOYER TIL NAIS Q2 team namespace
+      - name: 'Deploy to NAIS q2 gcp'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/dev-gcp-q2.yml
+          IMAGE: ${{ env.IMAGE }}
 
       # OPPRETTER GIT TAG
       - name: 'Opprett git tag'
