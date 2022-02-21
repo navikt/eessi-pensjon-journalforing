@@ -70,7 +70,7 @@ class RestTemplateConfig(
 
     @Bean
     fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return opprettRestTemplate(fagmodulUrl, "eux-credentials")
+        return opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
     }
 
     @Bean

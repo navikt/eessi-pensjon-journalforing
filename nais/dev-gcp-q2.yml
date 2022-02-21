@@ -49,6 +49,8 @@ spec:
       value: eessipensjon.privat-krav-initialisering-q2
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering-q2
+    - name: AZURE_APP_FAGMODUL_CLIENT_ID
+      value: dev-fss.eessipensjon.eessi-pensjon-fagmodul-q2
     - name: AZURE_APP_EUX_CLIENT_ID
       value: dev-fss.eessibasis.eux-rina-api-q2
     - name: AZURE_APP_EUX_CLIENT_ID
