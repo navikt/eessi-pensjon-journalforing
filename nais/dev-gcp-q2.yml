@@ -11,10 +11,10 @@ spec:
   azure:
     application:
       enabled: true
-    accessPolicy:
-      outbound:
-        external:
-          - host: https://eessi-pensjon-journalforing-q2.dev.intern.nav.no
+  accessPolicy:
+    outbound:
+      external:
+        - host: https://eessi-pensjon-journalforing-q2.dev.intern.nav.no
 
   webproxy: true
 
