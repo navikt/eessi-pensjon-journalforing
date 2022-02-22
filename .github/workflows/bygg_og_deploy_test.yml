@@ -40,16 +40,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#      # DEPLOYER TIL NAIS Q2 team namespace
-#      - name: 'Deploy to NAIS q2 team namespace'
-#        uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: dev-fss
-#          RESOURCE: nais/dev-fss-q2.yml
-#          VARS: nais/dev-fss-q2.json
-#          IMAGE: ${{ env.IMAGE }}
-
       # DEPLOYER TIL NAIS Q2 team namespace
       - name: 'Deploy to NAIS q2 gcp'
         uses: nais/deploy/actions/deploy@v1
@@ -64,14 +54,14 @@ jobs:
         run: |
           curl -v -s -X POST https://api.github.com/repos/navikt/eessi-pensjon-journalforing/git/refs -H "Authorization: token  ${{ secrets.GITHUB_TOKEN }}" -d '{ "ref": "refs/tags/${{ env.DATE }}---${{ env.COMMIT_HASH }}",  "sha": "${{ env.COMMIT_HASH }}" }'
 
-#      - name: 'Repository Dispatch PROD'
-#        uses: peter-evans/repository-dispatch@v1
-#        with:
-#          token: ${{ secrets.DISPATCH_TOKEN }}
-#          repository: ${{ github.repository }}
-#          event-type: deploy-prod
-#          client-payload: '{"image": "${{ env.IMAGE }}"}'
-#
+      - name: 'Repository Dispatch PROD'
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: deploy-prod
+          client-payload: '{"image": "${{ env.IMAGE }}"}'
+
 #      - name: 'Repository Dispatch Q1'
 #        uses: peter-evans/repository-dispatch@v1
 #        with:

@@ -20,7 +20,6 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: nais/prod-fss.yml
-          VARS: nais/prod-fss.json
+          CLUSTER: prod-gcp
+          RESOURCE: nais/prod-gcp.yml
           IMAGE: ${{ github.event.client_payload.image }}
