@@ -75,7 +75,7 @@ class RestTemplateConfig(
 
     @Bean
     fun bestemSakOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplate(bestemSakUrl, "pen-credentials")
+        return opprettRestTemplate(bestemSakUrl, "proxy-credentials")
     }
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
