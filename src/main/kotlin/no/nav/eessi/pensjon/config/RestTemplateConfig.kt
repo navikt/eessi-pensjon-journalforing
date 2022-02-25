@@ -82,14 +82,12 @@ class RestTemplateConfig(
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
-                RequestResponseLoggerInterceptor(),
+              //  RequestResponseLoggerInterceptor(),
                 RequestCountInterceptor(meterRegistry),
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                val factory = HttpComponentsClientHttpRequestFactory()
-                factory.setBufferRequestBody(false)
-                requestFactory = factory
+                requestFactory = HttpComponentsClientHttpRequestFactory()
             }
     }
 

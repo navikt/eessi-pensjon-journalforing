@@ -45,6 +45,7 @@
         <logger name="no.nav.security" level="DEBUG"/>
         <logger name="no.nav.eessi" level="DEBUG"/>
         <logger name="no.nav.security.token.support.core.validation" level="ERROR"/>
+        <logger name="logging.level.org.springframework.web.client.RestTemplate" level="DEBUG"/>
 
     </springProfile>
 
