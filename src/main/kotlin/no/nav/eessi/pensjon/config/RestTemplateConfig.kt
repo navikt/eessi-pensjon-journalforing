@@ -87,7 +87,9 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = HttpComponentsClientHttpRequestFactory()
+                val factory = HttpComponentsClientHttpRequestFactory()
+                factory.setBufferRequestBody(false)
+                requestFactory = factory
             }
     }
 
