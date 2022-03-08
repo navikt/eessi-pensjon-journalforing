@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "brukere": [
+      {
+        "tilbakekreving": {
+          "status": {
+            "type": "annet"
+          }
+        },
+        "adresse": [
+          {
+            "type": "adrtype",
+            "gate": "gate",
+            "by": "by",
+            "land": "SE"
+          }
+        ],
+        "person": {
+          "pin": [
+            {
+              "institusjonsnavn": "The Swedish Social Insurance Agency",
+              "identifikator": "",
+              "land": "SE",
+              "institusjonsid": "SE:12600"
+            }
+          ],
+          "statsborgerskap": [
+            {
+              "land": "SE"
+            }
+          ],
+          "kjoenn": "M",
+          "foedested": {
+            "by": "by",
+            "land": "SE"
+          },
+          "foedselsdato": "1959-04-27",
+          "etternavn": "",
+          "fornavn": ""
+        }
+      }
+    ],
+    "eessisak": [
+      {
+        "institusjonsnavn": "The Swedish Social Insurance Agency",
+        "saksnummer": "",
+        "institusjonsid": "SE:12600",
+        "land": "SE"
+      }
+    ]
+  },
+  "sedGVer": "4",
+  "tilbakekreving": {
+    "anmodningommotregning": {
+      "bank": {
+        "konto": {
+          "sepa": {
+            "iban": "",
+            "swift": ""
+          },
+          "betalingsreferanse": "",
+          "innehaver": {
+            "navn": "Försäkringskassan"
+          }
+        }
+      }
+    },
+    "anmodning": {
+      "type": "foreløpig"
+    },
+    "feilutbetaling": {
+      "valuta": "SEK",
+      "periode": {
+        "sluttdato": "2020-10-02",
+        "startdato": "2020-01-01"
+      },
+      "beloep": "0",
+      "ytelse": {
+        "type": "uførepensjon"
+      }
+    }
+  },
+  "sedVer": "2",
+  "sed": "R005"
+}

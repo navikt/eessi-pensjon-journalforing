@@ -1,7 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
+import no.nav.eessi.pensjon.eux.model.sed.Navsak
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.X008
+import no.nav.eessi.pensjon.eux.model.sed.XNav
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,6 +94,14 @@ internal class FodselsdatoHelperTest {
     fun `ved henting ved fdato på R005 når kun en person hentes personen` () {
         val sedListe = listOf(getSedFile("/sed/R_BUC_02-R005-IkkePin.json"))
         assertEquals(LocalDate.of(1980, 10, 22), FodselsdatoHelper.fdatoFraSedListe(sedListe, emptyList()))
+    }
+
+    @Test
+    fun `ved henting ved fdato på R005 når kun en person hentes personen test2` () {
+        val x008 = X008(xnav=XNav(Navsak()))
+        val kansellertListe = listOf(getSedFile("/sed/R_BUC_02_R005_SE.json"))
+        val sedListe = listOf(x008)
+        assertEquals(LocalDate.of(1959, 4, 27), FodselsdatoHelper.fdatoFraSedListe(sedListe, kansellertListe))
     }
 
     @Test

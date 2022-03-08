@@ -1,0 +1,1896 @@
+{
+  "id": "2821173",
+  "hashCode": 0,
+  "startDate": "2020-10-02T11:38:40.000+0000",
+  "lastUpdate": "2022-03-08T10:54:36.126+0000",
+  "status": "closed",
+  "sensitive": false,
+  "sensitiveCommitted": false,
+  "creator": {
+    "id": "0",
+    "address": null,
+    "contactMethods": null,
+    "type": "User",
+    "name": "system",
+    "organisation": {
+      "id": "NO:889640782",
+      "address": null,
+      "contactMethods": null,
+      "registryNumber": "",
+      "name": "The Norwegian Labour and Welfare Administration",
+      "acronym": "NAV",
+      "countryCode": "NO",
+      "activeSince": "1994-01-01T00:00:00.000+0000",
+      "accessPoint": null,
+      "location": null,
+      "assignedBUCs": null
+    }
+  },
+  "actions": [
+    {
+      "id": "2821173_226bb84d1c904c15bb3c442e6aba3d31",
+      "name": "Read",
+      "displayName": "Read",
+      "type": "existing.regular",
+      "template": "R005_Read",
+      "typeVersion": "4.2",
+      "documentType": "R005",
+      "isCaseRelated": false,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": false,
+      "isDocumentRelated": true,
+      "documentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "Read",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821174",
+        "DocumentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "R005"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821174",
+        "DocumentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "R005"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Documents",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": true,
+      "bulk": false,
+      "caseRelated": false
+    },
+    {
+      "id": "2821173_1c17400a961d469da25f08186caee1a7",
+      "name": "ReadParticipants",
+      "displayName": "Read Participants",
+      "type": "popup",
+      "template": "Read_Participants",
+      "typeVersion": "1.0",
+      "documentType": "R005",
+      "isCaseRelated": false,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": true,
+      "canClose": false,
+      "isDocumentRelated": true,
+      "documentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "ReadParticipants",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821174",
+        "DocumentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+        "Operation": "ReadParticipants",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "R005"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821174",
+        "DocumentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+        "Operation": "ReadParticipants",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "R005"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Documents",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": true,
+      "bulk": false,
+      "caseRelated": false
+    },
+    {
+      "id": "8d530950-4314-4c21-acf3-266cd969f59d",
+      "name": "Read",
+      "displayName": "Read",
+      "type": "existing.regular",
+      "template": "X008_Read",
+      "typeVersion": "4.2",
+      "documentType": "X008",
+      "isCaseRelated": false,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": false,
+      "isDocumentRelated": true,
+      "documentId": "c917f3ddb51643ada9d1d7a96885d4c7",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "Read",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "c917f3ddb51643ada9d1d7a96885d4c7",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X008"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "c917f3ddb51643ada9d1d7a96885d4c7",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X008"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Documents",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": true,
+      "bulk": false,
+      "caseRelated": false
+    },
+    {
+      "id": "97e2b2fc-0815-44e9-b2ed-2426cbdaa7b6",
+      "name": "ArchiveCase",
+      "displayName": "Archive Case",
+      "type": "popup",
+      "template": "Archive_Case",
+      "typeVersion": "1.0",
+      "documentType": null,
+      "isCaseRelated": true,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": true,
+      "isDocumentRelated": false,
+      "documentId": null,
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "ArchiveCase",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821173",
+        "DocumentId": null,
+        "Operation": "ArchiveCase",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": null
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "2821173",
+        "DocumentId": null,
+        "Operation": "ArchiveCase",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": null
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Case Actions",
+        "type": "admin",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": false,
+      "bulk": false,
+      "caseRelated": true
+    },
+    {
+      "id": "041337c1-171b-496d-bf33-c6f1b9bb97d4",
+      "name": "Create",
+      "displayName": "Reopen Case",
+      "type": "new.regular",
+      "template": "X002",
+      "typeVersion": "4.2",
+      "documentType": "X002",
+      "isCaseRelated": false,
+      "hasBusinessValidation": true,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": true,
+      "isDocumentRelated": true,
+      "documentId": "df43c0ff2edb401cac37b954de87a58e",
+      "subdocumentId": null,
+      "parentDocumentId": "7e2e7e6b63944b4ab66781a63948d858",
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "Create",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "df43c0ff2edb401cac37b954de87a58e",
+        "Operation": "Create",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X002"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "df43c0ff2edb401cac37b954de87a58e",
+        "Operation": "Create",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X002"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Case Actions",
+        "type": "admin",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": true,
+      "bulk": false,
+      "caseRelated": false
+    },
+    {
+      "id": "b24711ed-f2c0-4190-aa60-774232d95df6",
+      "name": "Read",
+      "displayName": "Read",
+      "type": "existing.regular",
+      "template": "X001_Read",
+      "typeVersion": "4.2",
+      "documentType": "X001",
+      "isCaseRelated": false,
+      "hasBusinessValidation": false,
+      "isBulk": false,
+      "requiresValidDocument": false,
+      "canClose": false,
+      "isDocumentRelated": true,
+      "documentId": "7e2e7e6b63944b4ab66781a63948d858",
+      "subdocumentId": null,
+      "parentDocumentId": null,
+      "tempDocumentId": null,
+      "actor": "Authorized",
+      "caseId": "2821173",
+      "operation": "Read",
+      "status": "ACTIVE",
+      "actionGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "7e2e7e6b63944b4ab66781a63948d858",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X001"
+      },
+      "poolGroup": {
+        "activityInstanceId": null,
+        "hasLocalClose": false,
+        "DMProcessId": "null",
+        "DocumentId": "7e2e7e6b63944b4ab66781a63948d858",
+        "Operation": "Read",
+        "ParentDocId": null,
+        "ParentType": null,
+        "Type": "X001"
+      },
+      "hasSendValidationOnBulk": false,
+      "tags": {
+        "category": "Documents",
+        "type": "sectorial",
+        "DMProcessId": null,
+        "dmprocessId": null,
+        "Operation": null
+      },
+      "documentRelated": true,
+      "bulk": false,
+      "caseRelated": false
+    }
+  ],
+  "documents": [
+    {
+      "id": "6ecbe1559e4543de86ca9a855efa2bef",
+      "name": "Forward Case",
+      "mimeType": "json",
+      "lastUpdate": "2020-10-02T11:38:42.000+0000",
+      "creationDate": "2020-10-02T11:38:42.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-10-02T11:38:42.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X007",
+      "typeVersion": "4.2",
+      "displayName": "Forward Case",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 2821186,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "75b4b2374a70495d98d67314c53d6fb1",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": true,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": null
+    },
+    {
+      "id": "24831afc40cd4ee69314da38dae493b8",
+      "name": "Notification/request for information",
+      "mimeType": "json",
+      "lastUpdate": "2020-10-02T11:38:42.000+0000",
+      "creationDate": "2020-10-02T11:38:42.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": true,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-10-02T11:38:42.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": true,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": true,
+      "type": "H001",
+      "typeVersion": "4.2",
+      "displayName": "Notification/request for information",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 2821190,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "cb26bb186d3b42c598bb70bb0b6c7e97",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": false,
+      "allowsAttachments": true,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": null
+    },
+    {
+      "id": "44d6b3aa531f4fcd9cd13d62c16b092b",
+      "name": "Notification of death",
+      "mimeType": "json",
+      "lastUpdate": "2020-10-02T11:38:41.000+0000",
+      "creationDate": "2020-10-02T11:38:41.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": true,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-10-02T11:38:41.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": true,
+      "type": "H070",
+      "typeVersion": "4.2",
+      "displayName": "Notification of death",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 2821184,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "c719041149244e41abd6b0bdb780b818",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": false,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": null
+    },
+    {
+      "id": "49b6b3f46d1c4d00bdf93cdc34ef6d9b",
+      "name": "Request For Close",
+      "mimeType": "json",
+      "lastUpdate": "2020-10-02T11:38:42.000+0000",
+      "creationDate": "2020-10-02T11:38:42.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-10-02T11:38:42.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": true,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X001",
+      "typeVersion": "4.2",
+      "displayName": "Request For Close",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 2821189,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "673399dd18de46b99356457af22e258b",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": true,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": true,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": null
+    },
+    {
+      "id": "5c28eae3de684a1fa4651f331a52c0e7",
+      "name": "Reminder",
+      "mimeType": "json",
+      "lastUpdate": "2020-10-02T11:38:42.000+0000",
+      "creationDate": "2020-10-02T11:38:42.000+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2020-10-02T11:38:42.000+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": true,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X009",
+      "typeVersion": "4.2",
+      "displayName": "Reminder",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": 2821193,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "b62e51afd97e472aa19d7dd67c3f9269",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": false,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": null
+    },
+    {
+      "id": "c917f3ddb51643ada9d1d7a96885d4c7",
+      "name": "Invalidate Sed",
+      "mimeType": "json",
+      "lastUpdate": "2022-03-08T10:02:13.660+0000",
+      "creationDate": "2022-03-08T10:02:13.660+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2022-03-08T10:02:13.660+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": "d6e317d79d3144e1b23eaddcd9f50f8e",
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X008",
+      "typeVersion": "4.2",
+      "displayName": "Invalidate Sed",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "IN",
+      "status": "received",
+      "subProcessId": null,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "c60d7c10d51046a786fa014befe1b504",
+          "versionId": "1",
+          "participants": [
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": [
+            {
+              "id": "fca03d475c174ddcb10dd4a63f012fb1",
+              "receiver": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "sender": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "ack": null,
+              "error": null,
+              "status": "SENT",
+              "sbdh": {
+                "headerVersion": "1.1",
+                "sender": {
+                  "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                  "identifier": "SE:12600",
+                  "contactTypeIdentifier": "CaseOwner"
+                },
+                "receivers": [
+                  {
+                    "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                    "identifier": "NO:889640782",
+                    "contactTypeIdentifier": "Counterparty"
+                  }
+                ],
+                "documentIdentification": {
+                  "id": null,
+                  "relatedDocumentId": null,
+                  "version": "1",
+                  "contentLocation": null,
+                  "creationDate": "2022-03-08T10:02:13.660+0000",
+                  "type": "X008",
+                  "schemaVersion": "4.2",
+                  "identifier": "696a03d2f89e44c3bb4bfbac8404db04",
+                  "setIdentifier": "c917f3ddb51643ada9d1d7a96885d4c7",
+                  "action": "NEW",
+                  "relatedSetIdentifier": "d6e317d79d3144e1b23eaddcd9f50f8e"
+                },
+                "attachments": [],
+                "caseIdentification": {
+                  "identifier": "6ca02bf973324117b63d8767a11d7b7d",
+                  "type": "R_BUC_02",
+                  "version": "4.2",
+                  "isProtectedPerson": false,
+                  "protectedPerson": false
+                }
+              },
+              "action": "NEW",
+              "isSent": false,
+              "sent": false
+            }
+          ],
+          "date": null,
+          "receiveDate": "2022-03-08T10:51:04.152+0000"
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": false,
+      "allowsAttachments": true,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": false,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": "2022-03-08T10:51:04.042+0000",
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": false,
+      "ParentType": "R005"
+    },
+    {
+      "id": "d6e317d79d3144e1b23eaddcd9f50f8e",
+      "name": "Request for deductions from arrears",
+      "mimeType": "json",
+      "lastUpdate": "2022-03-08T10:51:04.162+0000",
+      "creationDate": "2020-10-02T08:55:19.762+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "2",
+          "date": "2020-10-02T08:55:19.762+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": true,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "R005",
+      "typeVersion": "4.2",
+      "displayName": "Request for deductions from arrears",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "IN",
+      "status": "cancelled",
+      "subProcessId": 2821174,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "d952f57d29dc4899b3de2bbbaae6630f",
+          "versionId": "2",
+          "participants": [
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": [
+            {
+              "id": "8775dc9cd4b7462e87fb4711d2f8f80b",
+              "receiver": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "sender": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "ack": null,
+              "error": null,
+              "status": "SENT",
+              "sbdh": {
+                "headerVersion": "1.1",
+                "sender": {
+                  "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                  "identifier": "SE:12600",
+                  "contactTypeIdentifier": "CaseOwner"
+                },
+                "receivers": [
+                  {
+                    "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                    "identifier": "NO:889640782",
+                    "contactTypeIdentifier": "Counterparty"
+                  }
+                ],
+                "documentIdentification": {
+                  "id": null,
+                  "relatedDocumentId": null,
+                  "version": "2",
+                  "contentLocation": null,
+                  "creationDate": "2020-10-02T08:55:19.762+0000",
+                  "type": "R005",
+                  "schemaVersion": "4.2",
+                  "identifier": "e8856d9e9c8d4a449ab1141896b9d59a",
+                  "setIdentifier": "d6e317d79d3144e1b23eaddcd9f50f8e",
+                  "action": "START",
+                  "relatedSetIdentifier": null
+                },
+                "attachments": [],
+                "caseIdentification": {
+                  "identifier": "6ca02bf973324117b63d8767a11d7b7d",
+                  "type": "R_BUC_02",
+                  "version": "4.2",
+                  "isProtectedPerson": false,
+                  "protectedPerson": false
+                }
+              },
+              "action": "START",
+              "isSent": false,
+              "sent": false
+            }
+          ],
+          "date": "2020-10-02T11:38:40.000+0000",
+          "receiveDate": "2020-10-02T11:38:40.000+0000"
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": false,
+      "allowsAttachments": true,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": false,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": "2020-10-02T11:38:40.000+0000",
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": false,
+      "ParentType": null
+    },
+    {
+      "id": "7e2e7e6b63944b4ab66781a63948d858",
+      "name": "Request For Close",
+      "mimeType": "json",
+      "lastUpdate": "2022-03-08T10:04:43.100+0000",
+      "creationDate": "2022-03-08T10:04:43.100+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "2",
+          "date": "2022-03-08T10:04:43.100+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": null,
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": false,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X001",
+      "typeVersion": "4.2",
+      "displayName": "Request For Close",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "IN",
+      "status": "received",
+      "subProcessId": null,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "652144ef8118450497d351aeaae3f23f",
+          "versionId": "2",
+          "participants": [
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": [
+            {
+              "id": "53a03504271f483b8e8ddb396d3cd8c0",
+              "receiver": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "sender": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "ack": null,
+              "error": null,
+              "status": "SENT",
+              "sbdh": {
+                "headerVersion": "1.1",
+                "sender": {
+                  "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                  "identifier": "SE:12600",
+                  "contactTypeIdentifier": "CaseOwner"
+                },
+                "receivers": [
+                  {
+                    "authority": "urn:eu:europa:ec:dgempl:eessi:ir",
+                    "identifier": "NO:889640782",
+                    "contactTypeIdentifier": "Counterparty"
+                  }
+                ],
+                "documentIdentification": {
+                  "id": null,
+                  "relatedDocumentId": null,
+                  "version": "2",
+                  "contentLocation": null,
+                  "creationDate": "2022-03-08T10:04:43.100+0000",
+                  "type": "X001",
+                  "schemaVersion": "4.2",
+                  "identifier": "923dc5f9b5ff4e75bbf8955dfe456d42",
+                  "setIdentifier": "7e2e7e6b63944b4ab66781a63948d858",
+                  "action": "NEW",
+                  "relatedSetIdentifier": null
+                },
+                "attachments": [],
+                "caseIdentification": {
+                  "identifier": "6ca02bf973324117b63d8767a11d7b7d",
+                  "type": "R_BUC_02",
+                  "version": "4.2",
+                  "isProtectedPerson": false,
+                  "protectedPerson": false
+                }
+              },
+              "action": "NEW",
+              "isSent": false,
+              "sent": false
+            }
+          ],
+          "date": null,
+          "receiveDate": "2022-03-08T10:54:36.113+0000"
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": true,
+      "allowsAttachments": true,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": false,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": "2022-03-08T10:54:36.060+0000",
+      "admin": false,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": false,
+      "ParentType": null
+    },
+    {
+      "id": "df43c0ff2edb401cac37b954de87a58e",
+      "name": "Request To Reopen A Closed Case",
+      "mimeType": "json",
+      "lastUpdate": "2022-03-08T10:54:36.176+0000",
+      "creationDate": "2022-03-08T10:54:36.171+0000",
+      "creator": {
+        "id": "0",
+        "address": null,
+        "contactMethods": null,
+        "type": "User",
+        "name": "system",
+        "organisation": {
+          "id": "NO:889640782",
+          "address": null,
+          "contactMethods": null,
+          "registryNumber": "",
+          "name": "The Norwegian Labour and Welfare Administration",
+          "acronym": "NAV",
+          "countryCode": "NO",
+          "activeSince": "1994-01-01T00:00:00.000+0000",
+          "accessPoint": null,
+          "location": null,
+          "assignedBUCs": null
+        }
+      },
+      "hasMultipleVersions": false,
+      "versions": [
+        {
+          "id": "1",
+          "date": "2022-03-08T10:54:36.177+0000",
+          "user": {
+            "id": "0",
+            "address": null,
+            "contactMethods": null,
+            "type": "User",
+            "name": "system",
+            "organisation": {
+              "id": "NO:889640782",
+              "address": null,
+              "contactMethods": null,
+              "registryNumber": "",
+              "name": "The Norwegian Labour and Welfare Administration",
+              "acronym": "NAV",
+              "countryCode": "NO",
+              "activeSince": "1994-01-01T00:00:00.000+0000",
+              "accessPoint": null,
+              "location": null,
+              "assignedBUCs": null
+            }
+          }
+        }
+      ],
+      "parentDocumentId": "7e2e7e6b63944b4ab66781a63948d858",
+      "createTemplate": null,
+      "toSenderOnly": false,
+      "isAdmin": true,
+      "selectParticipants": false,
+      "hasReplyClarify": false,
+      "hasReject": false,
+      "hasLetter": false,
+      "hasClarify": false,
+      "hasCancel": false,
+      "type": "X002",
+      "typeVersion": "4.2",
+      "displayName": "Request To Reopen A Closed Case",
+      "parendDocumentId": null,
+      "starter": false,
+      "direction": "OUT",
+      "status": "empty",
+      "subProcessId": null,
+      "DMProcessId": null,
+      "tags": null,
+      "comments": [],
+      "attachments": [],
+      "conversations": [
+        {
+          "id": "412acd06f8044a0088d8846a4d02da4d",
+          "versionId": null,
+          "participants": [
+            {
+              "role": "Receiver",
+              "organisation": {
+                "id": "SE:12600",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Swedish Social Insurance Agency",
+                "acronym": "FK Sverige",
+                "countryCode": "SE",
+                "activeSince": "2019-01-15T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            },
+            {
+              "role": "Sender",
+              "organisation": {
+                "id": "NO:889640782",
+                "address": null,
+                "contactMethods": null,
+                "registryNumber": "",
+                "name": "The Norwegian Labour and Welfare Administration",
+                "acronym": "NAV",
+                "countryCode": "NO",
+                "activeSince": "1994-01-01T00:00:00.000+0000",
+                "accessPoint": null,
+                "location": null,
+                "assignedBUCs": null
+              },
+              "selected": false
+            }
+          ],
+          "userMessages": null,
+          "date": null,
+          "receiveDate": null
+        }
+      ],
+      "bulk": false,
+      "validation": {
+        "status": "valid",
+        "messages": null
+      },
+      "hasBusinessValidation": true,
+      "allowsAttachments": false,
+      "isDummyDocument": false,
+      "canBeSentWithoutChild": false,
+      "isFirstDocument": false,
+      "isMLC": true,
+      "isSendExecuted": false,
+      "order": 1,
+      "receiveDate": null,
+      "admin": true,
+      "dmprocessId": null,
+      "dummyDocument": false,
+      "firstDocument": false,
+      "sendExecuted": false,
+      "mlc": true,
+      "ParentType": "X001"
+    }
+  ],
+  "participants": [
+    {
+      "role": "CaseOwner",
+      "organisation": {
+        "id": "SE:12600",
+        "address": null,
+        "contactMethods": null,
+        "registryNumber": "",
+        "name": "The Swedish Social Insurance Agency",
+        "acronym": "FK Sverige",
+        "countryCode": "SE",
+        "activeSince": "2019-01-15T00:00:00.000+0000",
+        "accessPoint": null,
+        "location": null,
+        "assignedBUCs": null
+      },
+      "selected": false
+    },
+    {
+      "role": "CounterParty",
+      "organisation": {
+        "id": "NO:889640782",
+        "address": null,
+        "contactMethods": null,
+        "registryNumber": "",
+        "name": "The Norwegian Labour and Welfare Administration",
+        "acronym": "NAV",
+        "countryCode": "NO",
+        "activeSince": "1994-01-01T00:00:00.000+0000",
+        "accessPoint": null,
+        "location": null,
+        "assignedBUCs": null
+      },
+      "selected": false
+    }
+  ],
+  "processDefinitionName": "R_BUC_02",
+  "processDefinitionVersion": "4.2",
+  "applicationRoleId": "CP",
+  "businessId": "2821173",
+  "internationalId": "6ca02bf973324117b63d8767a11d7b7d",
+  "properties": {
+    "importance": "1",
+    "criticality": "1"
+  }
+}
