@@ -91,7 +91,7 @@ class EuxDokumentHelper(
         return documents
             .filter { it.id != null }
             .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
-            .filter { it.harGyldigStatus() }
+            .filterNot { it.status == SedStatus.EMPTY }
     }
 
     fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {

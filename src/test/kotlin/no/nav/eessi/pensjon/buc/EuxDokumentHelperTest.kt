@@ -71,6 +71,33 @@ internal class EuxDokumentHelperTest {
         assertEquals(8, helper.hentAlleGyldigeDokumenter(buc).size)
     }
 
+
+
+    @Test
+    fun `Sjekk at uthenting av gyldige dokumenter fra BUC med gyldig og kansellerte`() {
+        val rinaid = "123123123"
+        val bucJson = javaClass.getResource("/buc/R_BUC_02.json").readText()
+        val r005json = javaClass.getResource("/sed/R_BUC_02_R005_SE.json").readText()
+
+        val buc = mapJsonToAny(bucJson, typeRefs<Buc>())
+
+        every { euxKlient.hentSedJson(eq(rinaid), any()) } returns r005json
+        every { euxKlient.hentSedJson(any(), any()) } returns SED(type = SedType.X008).toJson()
+
+        buc.documents?.filterNot { it.status == "empty" }?.map { println("Doc: ${it.type}, ${it.status}") }
+
+        val alledocs = helper.hentAlleGyldigeDokumenter(buc)
+        println(alledocs.toJson())
+        assertEquals(2, alledocs.size)
+
+        val alleSediBuc =  helper.hentAlleSedIBuc(rinaid, alledocs)
+        assertEquals(1, alleSediBuc.size)
+
+        val kansellertdocs =  helper.hentAlleKansellerteSedIBuc(rinaid, alledocs)
+        assertEquals(1, kansellertdocs.size)
+    }
+
+
     @Test
     fun `Finn korrekt ytelsestype for AP fra sed R005`() {
         val sedR005 = mapJsonToAny(javaClass.getResource("/sed/R_BUC_02-R005-AP.json").readText(), typeRefs<R005>())
