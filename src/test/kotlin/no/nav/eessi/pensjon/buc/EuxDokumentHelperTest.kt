@@ -84,10 +84,7 @@ internal class EuxDokumentHelperTest {
         every { euxKlient.hentSedJson(eq(rinaid), any()) } returns r005json
         every { euxKlient.hentSedJson(any(), any()) } returns SED(type = SedType.X008).toJson()
 
-        buc.documents?.filterNot { it.status == "empty" }?.map { println("Doc: ${it.type}, ${it.status}") }
-
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
-        println(alledocs.toJson())
         assertEquals(2, alledocs.size)
 
         val alleSediBuc =  helper.hentAlleSedIBuc(rinaid, alledocs)
