@@ -101,7 +101,7 @@ class PDFService(
 
     private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: SedVedlegg): String? {
         return if (vedlegg.mimeType != null) {
-            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.toLowerCase()}"
+            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.lowercase()}"
         } else {
             vedlegg.filnavn
         }

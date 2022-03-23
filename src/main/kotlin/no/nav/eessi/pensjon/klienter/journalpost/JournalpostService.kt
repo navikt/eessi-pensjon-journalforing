@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-import com.google.common.annotations.VisibleForTesting
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
@@ -80,7 +79,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         } else bucType.behandlingstema
     }
 
-    @VisibleForTesting
     fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, saktype: Saktype?): Tema {
         logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $saktype")
 

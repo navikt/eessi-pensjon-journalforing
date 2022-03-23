@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
-import com.google.common.annotations.VisibleForTesting
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
@@ -29,7 +28,6 @@ class Norg2Service(private val klient: Norg2Klient) {
         }
     }
 
-    @VisibleForTesting
     internal fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
         if (req.harAdressebeskyttelse) return Norg2ArbeidsfordelingRequest(tema = "ANY", diskresjonskode = "SPSF")
 
@@ -53,7 +51,6 @@ class Norg2Service(private val klient: Norg2Klient) {
         }
     }
 
-    @VisibleForTesting
     internal fun finnArbeidsfordelingEnheter(request: Norg2ArbeidsfordelingRequest, list: List<Norg2ArbeidsfordelingItem>): String? {
         return list
                 .onEach { logger.debug("enheter-tema: ${it.tema} enhetnr: ${it.enhetNr}") }
