@@ -131,11 +131,16 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 listOf(
                     Pair("13123123", createR005(forsikretFnr = KRAFTIG_VEGGPRYD, forsikretTilbakekreving = "debitor")),
                     Pair("23123123", generateSED(SedType.H070, forsikretFnr = KRAFTIG_VEGGPRYD))
-                ), BucType.P_BUC_02
+                ), BucType.R_BUC_02
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
-            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD), Relasjon.FORSIKRET, sedType = SedType.H070, fdato = sok.foedselsdato, rinaDocumentId = "23123123", saktype = Saktype.GJENLEV, sokKriterier = sok)
+            val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD),
+                Relasjon.FORSIKRET,
+                sedType = SedType.H070,
+                fdato = sok.foedselsdato,
+                rinaDocumentId = "23123123",
+                sokKriterier = sok)
 
             assertEquals(1, actual.size)
             assertEquals(forste, actual[0])
