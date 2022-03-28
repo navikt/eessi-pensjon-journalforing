@@ -53,7 +53,7 @@ class PersonSok(
         val personRelasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE }
             ?: potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.FORSIKRET }
 
-        logger.info("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}, relasjon: ${personRelasjon?.relasjon}")
+        logger.debug("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}, relasjon: ${personRelasjon?.relasjon}")
 
         personRelasjon?.sokKriterier?.let {
             pdlSokEtterFnr(it)?.let { fnr ->
