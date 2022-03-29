@@ -4,7 +4,7 @@ buildscript {
 		kotlinVersion = '1.6.10'
 		springBootVersion = '2.6.5'
 		cxfVersion = '3.5.1'
-		oidcTokenSupportVersion = '1.3.9'
+		oidcTokenSupportVersion = '2.0.14'
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.13.0'
@@ -112,7 +112,7 @@ dependencies {
 	implementation("no.nav.security:token-client-spring:${oidcTokenSupportVersion}")
 	implementation("no.nav.security:token-validation-spring:${oidcTokenSupportVersion}")
 	implementation("no.nav.security:token-validation-jaxrs:${oidcTokenSupportVersion}")
-	implementation("no.nav.security:token-validation-test-support:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-validation-test-support:2.0.5")
 
 }
 
