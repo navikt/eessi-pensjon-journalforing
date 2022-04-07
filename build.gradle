@@ -39,8 +39,6 @@ plugins {
 	id "org.openrepose.gradle.plugins.jaxb" version "2.5.0"
 }
 
-assert JavaVersion.current().isJava11Compatible(): "Java 11 or newer is required"
-
 group = 'no.nav.eessi.pensjon'
 
 configurations {
@@ -130,22 +128,24 @@ test {
 	}
 }
 
+assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17): "Java 17 or newer is required"
+
+group = 'no.nav.eessi'
+
 java {
-	sourceCompatibility = JavaVersion.VERSION_11
-	targetCompatibility = JavaVersion.VERSION_11
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 compileKotlin {
 	kotlinOptions {
-		freeCompilerArgs = ["-Xjsr305=strict"]
-		jvmTarget = "11"
+		jvmTarget = "17"
 	}
 }
 
 compileTestKotlin {
 	kotlinOptions {
-		freeCompilerArgs = ['-Xjsr305=strict']
-		jvmTarget = '11'
+		jvmTarget = '17'
 	}
 }
 
