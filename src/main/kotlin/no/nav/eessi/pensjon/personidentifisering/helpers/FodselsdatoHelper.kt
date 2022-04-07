@@ -53,6 +53,7 @@ class FodselsdatoHelper {
             throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
         }
 
+        //Det er noen XSed som mangler FNR
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
             return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == "02" }
         }

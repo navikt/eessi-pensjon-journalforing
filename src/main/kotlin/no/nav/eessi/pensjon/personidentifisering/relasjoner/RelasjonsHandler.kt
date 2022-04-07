@@ -61,6 +61,7 @@ object RelasjonsHandler {
                 SedType.P8000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
                 SedType.P10000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
                 SedType.P15000 -> P15000Relasjon(sed, bucType,rinaDocumentId)
+                SedType.P12000 -> P12000Relasjon(sed, bucType,rinaDocumentId)
 
                 //H-SED vi støtter for innhenting av fnr kun for forsikret
                 SedType.H070, SedType.H120, SedType.H121 -> GenericRelasjon(sed, bucType, rinaDocumentId)

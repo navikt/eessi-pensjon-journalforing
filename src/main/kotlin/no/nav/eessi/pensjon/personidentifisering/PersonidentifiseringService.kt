@@ -254,6 +254,8 @@ class PersonidentifiseringService(
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
+            bucType == BucType.P_BUC_07 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+
             //buc_01,buc_03 hvis flere enn en forsikret person så sendes til id_og_fordeling
             bucType == BucType.P_BUC_01 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
             bucType == BucType.P_BUC_03 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
@@ -317,9 +319,7 @@ class PersonidentifiseringService(
         seder: List<SED>,
         kansellerteSeder: List<SED>
     ): LocalDate? {
-        return identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
-            ?: FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
-
+        return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
     }
 }
 

@@ -78,7 +78,8 @@ class JournalforingService(
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
 
-                val tildeltEnhet = if (fdato == null) {
+                val tildeltEnhet = if (fdato == null ||  fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
+                    logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING}")
                     Enhet.ID_OG_FORDELING
                 } else {
                     oppgaveRoutingService.route(
