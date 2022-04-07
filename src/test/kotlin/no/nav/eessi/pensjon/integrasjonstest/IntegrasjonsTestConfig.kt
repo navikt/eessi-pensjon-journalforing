@@ -152,7 +152,7 @@ class IntegrasjonsTestConfig {
     fun pdlTokenComponent(): PdlTokenCallBack {
         return object : PdlTokenCallBack {
             override fun callBack(): PdlToken {
-                return PdlTokenImp(systemToken = "Dummytoken", userToken = "DummyToken", isUserToken = false)
+                return PdlTokenImp(accessToken = "")
             }
         }
     }

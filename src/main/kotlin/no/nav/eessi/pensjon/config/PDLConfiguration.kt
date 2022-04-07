@@ -22,7 +22,7 @@ class PDLConfiguration(private val clientConfigurationProperties: ClientConfigur
         val clientProperties =  Optional.ofNullable(clientConfigurationProperties.registration["pdl-credentials"]).orElseThrow { RuntimeException("could not find oauth2 client config for pdl-credentials") }
         val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
         val token = response.accessToken
-        return PdlTokenImp(systemToken = token, userToken = token, isUserToken = false)
+        return PdlTokenImp(accessToken = token)
     }
 
 }
