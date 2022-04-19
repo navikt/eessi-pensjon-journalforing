@@ -50,12 +50,11 @@ class SedSendtListner(
     }
 
     @KafkaListener(
-        containerFactory = "onpremKafkaListenerContainerFactory",
+        containerFactory = "aivenKafkaListenerContainerFactory",
         idIsGroup = false,
-        topics = ["\${kafka.sedSendt.topic}"],
-        groupId = "\${kafka.sedSendt.groupid}"
+        topics = ["\${kafka.sedsendt.topic}"],
+        groupId = "\${kafka.sedsendt.groupid}"
     )
-
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
@@ -65,10 +64,12 @@ class SedSendtListner(
                     throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                 }
                 logger.debug(hendelse)
-                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L, 140374L, 140486L, 171963L)
+
+                //TODO når eessibasis topic går til Avien vil disse utgå.. .
+                val offsetToSkip = emptyList<Long>() //  listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L, 140374L, 140486L, 171963L)
                 try {
                     val offset = cr.offset()
-                    if (offsetToSkip.contains(offset)) {
+                    if (offset in offsetToSkip) {
                         logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
                     } else {
 
