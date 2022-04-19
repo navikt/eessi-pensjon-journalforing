@@ -177,7 +177,8 @@ internal open class JournalforingTestBase {
         hendelseType: HendelseType = HendelseType.SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId))
+        val fnrAnnenPersonFraDato = Fodselsnummer.fra(fnr)
+        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fnrAnnenPersonFraDato?.getBirthDateAsIso()))
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
@@ -325,7 +326,7 @@ internal open class JournalforingTestBase {
 
         val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
 
-        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker))
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedsel?.foedselsdato.toString()))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (benyttSokPerson) {

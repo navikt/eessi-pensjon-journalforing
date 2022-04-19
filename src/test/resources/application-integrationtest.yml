@@ -7,10 +7,10 @@ AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
 AZURE_APP_JWK: "dummy"
 
 kafka:
-  sedSendt:
+  sedsendt:
     topic: ${KAFKA_SEDSENDT_TOPIC}
     groupid: eessi-pensjon-group
-  sedMottatt:
+  sedmottatt:
     topic: ${KAFKA_SEDMOTTATT_TOPIC}
     groupid: eessi-pensjon-group
   oppgave:

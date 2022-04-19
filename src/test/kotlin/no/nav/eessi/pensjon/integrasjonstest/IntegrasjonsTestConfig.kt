@@ -116,6 +116,15 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
+    fun aivenKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+        return ConcurrentKafkaListenerContainerFactory<String, String>().apply {
+            consumerFactory = kafkaConsumerFactory()
+            containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+            containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+        }
+    }
+
+    @Bean
     fun journalpostOidcRestTemplate(): RestTemplate{
         val port = System.getProperty("mockServerport")
         return RestTemplateBuilder()
