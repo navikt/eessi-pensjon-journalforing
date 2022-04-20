@@ -16,11 +16,9 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
-
-        val forsikret = hentForsikretPerson(bestemSaktype(bucType))
-
         hentAnnenpersonRelasjon()?.let { fnrListe.add(it) }
 
+        val forsikret = hentForsikretPerson(bestemSaktype(bucType))
         logger.debug("forsikret $forsikret")
         logger.debug("gjenlevlist: $fnrListe")
 

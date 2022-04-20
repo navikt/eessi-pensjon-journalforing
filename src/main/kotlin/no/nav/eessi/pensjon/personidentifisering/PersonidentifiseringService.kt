@@ -74,7 +74,6 @@ class PersonidentifiseringService(
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
             logger.warn("Flere personer funnet i $bucType, returnerer null")
-            //flere personer på buc return null for id og fordeling
             return null
         }
 

@@ -66,24 +66,20 @@ class FodselsdatoHelper {
                     SedType.P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
                     SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
                     SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
-                    SedType.P8000, SedType.P10000 -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.bruker?.person, sed.nav?.annenperson?.person)
+                    SedType.P8000, SedType.P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     SedType.P15000 -> filterP15000(sed as P15000)
                     SedType.H121, SedType.H120, SedType.H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     SedType.X005, SedType.X008, SedType.X010 -> filterPersonFodselsdatoX00Sed(sed)
-                    else -> filterAnnenPersonFodselsdato(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
                 fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }.also {
-                    if (it != null) logger.info("Fant fødselsdato i ${sed.type}")
+                    if (it != null) logger.info("Fant fødselsdato i ${sed.type}, fdato: $it")
                 }
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt ved henting av fødselsdato fra SED", ex)
                 null
             }
-        }
-
-        private fun leggTilAnnenPersonFdatoHvisFinnes(person: Person?, annenPerson: Person?): String? {
-            return filterAnnenPersonFodselsdato(annenPerson) ?: filterPersonFodselsdato(person)
         }
 
         private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Bruker?): String? {
@@ -112,8 +108,8 @@ class FodselsdatoHelper {
          * P10000 - [02] Forsørget/familiemedlem
          * P10000 - [03] Barn
          */
-        private fun filterAnnenPersonFodselsdato(annenPerson: Person?): String? {
-            if (annenPerson?.rolle != Rolle.ETTERLATTE.name) return null
+        private fun leggTilAnnenPersonFdatoHvisFinnes(annenPerson: Person?): String? {
+            if (annenPerson?.rolle != Rolle.ETTERLATTE.kode) return null
             return annenPerson.foedselsdato
         }
 

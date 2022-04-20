@@ -78,8 +78,9 @@ class JournalforingService(
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
 
-                val tildeltEnhet = if (fdato == null ||  fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
-                    logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING}")
+                val tildeltEnhet = if (fdato == null || fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
+                    val annenPersonFdato = identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
+                    logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING}, $fdato=!$annenPersonFdato")
                     Enhet.ID_OG_FORDELING
                 } else {
                     oppgaveRoutingService.route(
