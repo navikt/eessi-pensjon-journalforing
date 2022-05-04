@@ -327,8 +327,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P2000, krav ALDER skal routes til PENSJON_UTLAND 001`() {
             val pdlPerson = createBrukerWith(FNR_OVER_60, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
-            val sed20000mottatt = SED.generateSedToClass<P2000>( createSedPensjon(SedType.P2000, null, krav = KravType.ALDER, pdlPerson = pdlPerson))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.P5000, null, krav = KravType.ALDER, pdlPerson = pdlPerson))
+            val sed20000mottatt = SED.generateSedToClass<P2000>( createSedPensjon(SedType.P2000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.P5000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
 
             val alleDocumenter = listOf(
                 ForenkletSED("10001", SedType.P2000, SedStatus.RECEIVED),
@@ -512,7 +512,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         val fnrSokVoken = null
         val mockPerson = createBrukerWith(fnrVoksen,  "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-        val sed = SED.generateSedToClass<P2000>(createSedPensjon(SedType.P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson))
+        val sed = SED.generateSedToClass<P2000>(createSedPensjon(SedType.P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson, fdato = mockPerson.foedsel?.foedselsdato.toString()))
 
         initCommonMocks(sed, alleDocs, documentFiler)
 

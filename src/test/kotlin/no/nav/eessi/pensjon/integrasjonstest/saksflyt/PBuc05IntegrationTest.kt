@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
@@ -8,17 +12,26 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.Enhet.*
+import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
+import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.models.Enhet.NFP_UTLAND_AALESUND
+import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
+import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.models.SakStatus
+import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
@@ -873,7 +886,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val aktoer = "${fnr}111"
             val sakid = SAK_ID
-            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN)?.getBirthDateAsIso()).toJson(), typeRefs<P8000>())
             val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
 
             val alleDocumenter = listOf(
@@ -1083,7 +1096,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson(), typeRefs<P8000>())
+            val sedP8000recevied = mapJsonToAny(createSed(SedType.P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN)?.getBirthDateAsIso()).toJson(), typeRefs<P8000>())
             val sedP5000sent = mapJsonToAny(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson(), typeRefs<P5000>())
 
             val alleDocumenter = listOf(
@@ -1226,7 +1239,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val mockEttrelatte = createBrukerWith(FNR_VOKSEN, "Voksen", "Etterlatte", "NOR", "1213", aktorId = "123123123123")
 
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte), SAK_ID))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte, fdato = Fodselsnummer.fra(FNR_VOKSEN)?.getBirthDateAsIso()), SAK_ID))
 
             val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
             initCommonMocks(sed, documetAction)
@@ -1264,7 +1277,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
 
             val mockForsikret = createBrukerWith(FNR_VOKSEN, "Voksen", "Etternavn", "NOR", "1213", aktorId = "123123123123")
-            val sed = mapJsonToAny(createSed(SedType.P8000, null, pdlPerson = mockForsikret).toJson(), typeRefs<P8000>())
+            val sed = mapJsonToAny(createSed(SedType.P8000, null, pdlPerson = mockForsikret, fdato = Fodselsnummer.fra(FNR_VOKSEN)?.getBirthDateAsIso()).toJson(), typeRefs<P8000>())
 
             val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
 

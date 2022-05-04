@@ -79,6 +79,27 @@ class KafkaConfigTest(
     }
 
     @Bean
+    fun aivenKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = aivenKafkaConsumerFactory()
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+
+        return factory
+    }
+
+    fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
+        val configMap: MutableMap<String, Any> = HashMap()
+        populerAivenCommonConfig(configMap)
+        configMap[ConsumerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
+        configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
+        configMap[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
+        configMap[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
+
+        return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
+    }
+
+    @Bean
     fun onpremProducerFactory(): ProducerFactory<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
         populerOnpremCommonConfig(configMap)
