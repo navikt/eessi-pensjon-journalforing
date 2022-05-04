@@ -68,7 +68,7 @@ class SedSendtListner(
                 val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L, 140374L, 140486L, 171963L)
                 try {
                     val offset = cr.offset()
-                    if (offsetToSkip.contains(offset)) {
+                    if (offset in offsetToSkip) {
                         logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
                     } else {
 

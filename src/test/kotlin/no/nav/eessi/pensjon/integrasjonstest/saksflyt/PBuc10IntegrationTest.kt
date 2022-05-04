@@ -786,7 +786,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val fnrSokVoken = null
             val mockGjenlevende = createBrukerWith(FNR_VOKSEN,  "Voksen ", "Gjenlevnde", land, aktorId = AKTOER_ID)
 
-            val sedP15000 = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, "12321", gjenlevendeFnr = fnrSokVoken, sivilstand = SivilstandItem("01-30-1980", "01"),  krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE ,  pdlPerson = mockGjenlevende))
+            val sedP15000 = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, "12321", gjenlevendeFnr = fnrSokVoken, sivilstand = SivilstandItem("01-30-1980", "01"),  krav = ETTERLATTE, relasjon = RelasjonTilAvdod.EKTEFELLE ,  pdlPerson = mockGjenlevende, fdatoAnnenPerson = Fodselsnummer.fra(FNR_VOKSEN)?.getBirthDateAsIso()))
 
             val alleDocumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P15000, SedStatus.RECEIVED))
 

@@ -175,9 +175,10 @@ internal open class JournalforingTestBase {
         land: String = "NOR",
         rolle: Rolle?,
         hendelseType: HendelseType = HendelseType.SENDT,
+        fDatoFraAnnenPerson: String? = "1988-07-12",
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId))
+        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
@@ -325,7 +326,7 @@ internal open class JournalforingTestBase {
 
         val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
 
-        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker))
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedsel?.foedselsdato.toString()))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (benyttSokPerson) {
@@ -475,11 +476,12 @@ internal open class JournalforingTestBase {
         fnr: String? = null,
         rolle: Rolle? = Rolle.ETTERLATTE,
         relasjon: RelasjonTilAvdod? = null,
-        pdlPerson: PdlPerson? = null
+        pdlPerson: PdlPerson? = null,
+        fdato: String? ="1962-07-18"
     ): Person {
         if (fnr != null && fnr.isBlank()) {
             return Person(
-                foedselsdato = "1962-07-18",
+                foedselsdato = fdato,
                 rolle = rolle?.kode,
                 relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) }
             )
@@ -488,7 +490,7 @@ internal open class JournalforingTestBase {
 
         return Person(
             validFnr?.let { listOf(PinItem(land = "NO", identifikator = it.value)) },
-            foedselsdato = validFnr?.getBirthDateAsIso() ?: "1962-07-18",
+            foedselsdato = validFnr?.getBirthDateAsIso() ?: fdato,
             rolle = rolle?.kode,
             relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
             fornavn = "${pdlPerson?.navn?.fornavn}",
@@ -537,7 +539,8 @@ internal open class JournalforingTestBase {
         pdlPerson: no.nav.eessi.pensjon.personoppslag.pdl.model.Person? = null,
         sivilstand: SivilstandItem? = null,
         statsborgerskap: StatsborgerskapItem? = null,
-        fdato: String? = null
+        fdato: String? = null,
+        fdatoAnnenPerson: String? = null
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
@@ -558,7 +561,7 @@ internal open class JournalforingTestBase {
         )
 
 
-        val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen))
+        val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen, fdato = fdatoAnnenPerson))
 
         val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
             Pensjon(gjenlevende = annenPerson)
