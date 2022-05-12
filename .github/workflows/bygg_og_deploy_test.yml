@@ -61,11 +61,3 @@ jobs:
           repository: ${{ github.repository }}
           event-type: deploy-prod
           client-payload: '{"image": "${{ env.IMAGE }}"}'
-
-#      - name: 'Repository Dispatch Q1'
-#        uses: peter-evans/repository-dispatch@v1
-#        with:
-#          token: ${{ secrets.DISPATCH_TOKEN }}
-#          repository: ${{ github.repository }}
-#          event-type: deploy-q1
-#          client-payload: '{"image": "${{ env.IMAGE }}"}'
