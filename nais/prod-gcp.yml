@@ -33,7 +33,7 @@ spec:
     - name: JOURNALPOST_V1_URL
       value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1
     - name: EESSI_PENSJON_FAGMODUL_URL
-      value: https://eessi-pensjon-fagmodul.pub.nais.io
+      value: http://eessi-pensjon-fagmodul
     - name: NORG2_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/norg2
     - name: BESTEMSAK_URL
