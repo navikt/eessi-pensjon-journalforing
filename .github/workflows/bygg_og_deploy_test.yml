@@ -46,7 +46,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: nais/dev-gcp-q2.yml
+          RESOURCE: nais/dev-gcp.yml
           IMAGE: ${{ env.IMAGE }}
 
       # OPPRETTER GIT TAG
