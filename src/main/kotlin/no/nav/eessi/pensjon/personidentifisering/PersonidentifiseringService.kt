@@ -110,10 +110,8 @@ class PersonidentifiseringService(
     fun hentIdentifisertPerson(
         personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType
     ): IdentifisertPerson? {
-        logger.debug("Henter ut følgende personRelasjon: ${personRelasjon.toJson()}")
 
         return try {
-            logger.info("Velger fnr med relasjon: ${personRelasjon.relasjon} i SED: ${personRelasjon.sedType}")
             val valgtFnr = personRelasjon.fnr?.value
 
             if (valgtFnr == null) {
@@ -128,12 +126,6 @@ class PersonidentifiseringService(
                         person,
                         personRelasjon,
                         hendelsesType
-                    )
-                }
-                ?.also {
-                    logger.debug(
-                        """IdentifisertPerson hentet fra PDL (aktoerId: ${it.aktoerId}, landkode: ${it.landkode}, 
-                                    navn: ${it.personNavn}, sed: ${it.personRelasjon.sedType?.name})""".trimIndent()
                     )
                 }
         } catch (ex: Exception) {
