@@ -22,7 +22,7 @@ jobs:
 
       # SETTER IMAGE VARIABEL
       - name: 'Setter Image'
-        run: echo "IMAGE=docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
+        run: echo "IMAGE=ghcr.io/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
       # JAVA 17
       - name: 'Java 17'
@@ -35,7 +35,7 @@ jobs:
         run: |
           ./gradlew build
           docker build --tag ${{ env.IMAGE }} .
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ env.IMAGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -28,7 +28,7 @@ jobs:
           echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: 'Setter Image'
-        run: echo "IMAGE=docker.pkg.github.com/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
+        run: echo "IMAGE=ghcr.io/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
 
       - name: 'Bygg og publiser docker image'
@@ -38,5 +38,5 @@ jobs:
           export TZ=CET
           ./gradlew build
           docker build --tag ${{ env.IMAGE }} .
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ env.IMAGE }}
