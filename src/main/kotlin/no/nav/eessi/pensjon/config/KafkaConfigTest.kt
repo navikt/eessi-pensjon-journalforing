@@ -94,9 +94,19 @@ class KafkaConfigTest(
         configMap[ConsumerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
         configMap[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
+        configMap[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         configMap[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
 
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
+    }
+
+    @Bean("sedKafkaListenerContainerFactory")
+    fun aivenSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = aivenKafkaConsumerFactory()
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+        return factory
     }
 
     @Bean
