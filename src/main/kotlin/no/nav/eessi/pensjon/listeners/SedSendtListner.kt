@@ -54,7 +54,6 @@ class SedSendtListner(
         topics = ["\${kafka.sedSendt.topic}"],
         groupId = "\${kafka.sedSendt.groupid}"
     )
-
     fun consumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
@@ -67,43 +66,43 @@ class SedSendtListner(
                 try {
                     val offset = cr.offset()
 
-                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
-                        if (GyldigeHendelser.sendt(sedHendelse)) {
-                            val bucType = sedHendelse.bucType!!
+                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    if (GyldigeHendelser.sendt(sedHendelse)) {
+                        val bucType = sedHendelse.bucType!!
 
-                            logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                            val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                            val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
-                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
-                            val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
+                        logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+                        val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                        val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
+                        val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
+                        val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                        val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
 
-                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                                alleSedIBucPair, bucType, sedHendelse.sedType, HendelseType.SENDT, sedHendelse.rinaDokumentId, erNavCaseOwner
-                            )
+                        val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
+                            alleSedIBucPair, bucType, sedHendelse.sedType, HendelseType.SENDT, sedHendelse.rinaDokumentId, erNavCaseOwner
+                        )
 
-                            val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
-                            val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-                            val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, HendelseType.SENDT,)
-                            val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                        val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
+                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
+                        val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                        val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
+                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, HendelseType.SENDT,)
+                        val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
-                            journalforingService.journalfor(
-                                sedHendelse, HendelseType.SENDT,
-                                identifisertPerson,
-                                fdato,
-                                saktype,
-                                offset,
-                                sakInformasjon,
-                                currentSed,
-                                harAdressebeskyttelse
-                            )
-                        }
-                        acknowledgment.acknowledge()
-                        logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
-                        logger.info("Genererer automatiseringstatistikk")
+                        journalforingService.journalfor(
+                            sedHendelse, HendelseType.SENDT,
+                            identifisertPerson,
+                            fdato,
+                            saktype,
+                            offset,
+                            sakInformasjon,
+                            currentSed,
+                            harAdressebeskyttelse
+                        )
+                    }
+                    acknowledgment.acknowledge()
+                    logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
+                    logger.info("Genererer automatiseringstatistikk")
 
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)

@@ -95,7 +95,7 @@ class KafkaConfigProd(
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
     }
 
-    @Bean
+    @Bean("sedKafkaListenerContainerFactory")
     fun onpremKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = onpremKafkaConsumerFactory()
