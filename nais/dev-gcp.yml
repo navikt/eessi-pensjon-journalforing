@@ -15,7 +15,6 @@ spec:
     outbound:
       external:
         - host: https://eessi-pensjon-journalforing-q2.dev.intern.nav.no
-
   webproxy: true
 
   kafka:
@@ -25,8 +24,6 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
-    - name: ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.dev-fss-pub.nais.io/cpi
     - name: PDL_URL
@@ -51,8 +48,6 @@ spec:
       value: eessipensjon.public-automatisering-q2
     - name: AZURE_APP_FAGMODUL_CLIENT_ID
       value: dev-gcp.eessipensjon.eessi-pensjon-fagmodul-q2
-    - name: AZURE_APP_EUX_CLIENT_ID
-      value: dev-fss.eessibasis.eux-rina-api-q2
     - name: AZURE_APP_EUX_CLIENT_ID
       value: dev-fss.eessibasis.eux-rina-api-q2
     - name: AZURE_APP_PROXY_CLIENT_ID

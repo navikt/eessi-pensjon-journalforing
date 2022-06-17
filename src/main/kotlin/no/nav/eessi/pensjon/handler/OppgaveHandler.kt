@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 @Service
-class OppgaveHandler(private val aivenOppgaveKafkaTemplate: KafkaTemplate<String, String>,
+class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, String>,
                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
 
     private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
@@ -29,8 +29,8 @@ class OppgaveHandler(private val aivenOppgaveKafkaTemplate: KafkaTemplate<String
         val payload = melding.toJson()
 
         publiserOppgavemelding.measure {
-            logger.info("Opprette oppgave melding på kafka: ${aivenOppgaveKafkaTemplate.defaultTopic}  melding: $melding")
-            aivenOppgaveKafkaTemplate.sendDefault(key, payload).get()
+            logger.info("Opprette oppgave melding på kafka: ${oppgaveKafkaTemplate.defaultTopic}  melding: $melding")
+            oppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }
 }

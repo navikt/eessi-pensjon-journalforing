@@ -6,6 +6,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,43 +23,44 @@ import org.springframework.kafka.support.serializer.JsonSerializer
 import java.time.Duration
 
 @EnableKafka
-@Profile("test")
+@Profile("prod", "test")
 @Configuration
-class KafkaConfigTest(
+class KafkaConfig(
     @param:Value("\${kafka.keystore.path}") private val keystorePath: String,
     @param:Value("\${kafka.credstore.password}") private val credstorePassword: String,
     @param:Value("\${kafka.truststore.path}") private val truststorePath: String,
-    @param:Value("\${kafka.brokers}") private val aivenBootstrapServers: String,
+    @param:Value("\${kafka.brokers}") private val bootstrapServers: String,
     @param:Value("\${kafka.security.protocol}") private val securityProtocol: String,
+    @Autowired private val kafkaErrorHandler: KafkaStoppingErrorHandler?,
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String,
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private val oppgaveTopic: String
 ) {
 
     @Bean
-    fun aivenProducerFactory(): ProducerFactory<String, String> {
+    fun producerFactory(): ProducerFactory<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
-        populerAivenCommonConfig(configMap)
+        populerCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
+        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         return DefaultKafkaProducerFactory(configMap)
     }
 
-    @Bean("aivenKravInitialiseringKafkaTemplate")
-    fun aivenKravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(aivenProducerFactory())
+    @Bean
+    fun kravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
+        val template = KafkaTemplate(producerFactory())
         return template
     }
 
-    @Bean("aivenAutomatiseringKafkaTemplate")
-    fun aivenKafkaTemplate(): KafkaTemplate<String, String> {
+    @Bean
+    fun automatiseringKafkaTemplate(): KafkaTemplate<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
-        populerAivenCommonConfig(configMap)
+        populerCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
-        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
+        configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         val automatiseringsTemplate: ProducerFactory<String, String> = DefaultKafkaProducerFactory(configMap)
 
         val template = KafkaTemplate(automatiseringsTemplate)
@@ -66,19 +68,19 @@ class KafkaConfigTest(
         return template
     }
 
-    @Bean("aivenOppgaveKafkaTemplate")
-    fun aivenOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(aivenProducerFactory())
+    @Bean
+    fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
+        val template = KafkaTemplate(producerFactory())
         template.defaultTopic = oppgaveTopic
         return template
     }
 
 
-    fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
+    fun kafkaConsumerFactory(): ConsumerFactory<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
-        populerAivenCommonConfig(configMap)
+        populerCommonConfig(configMap)
         configMap[ConsumerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
-        configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = aivenBootstrapServers
+        configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         configMap[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
         configMap[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         configMap[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
@@ -86,17 +88,20 @@ class KafkaConfigTest(
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
     }
 
-    @Bean("sedKafkaListenerContainerFactory")
-    fun aivenSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+    @Bean
+    fun sedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = aivenKafkaConsumerFactory()
+        factory.consumerFactory = kafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+        if (kafkaErrorHandler != null) {
+            factory.setErrorHandler(kafkaErrorHandler)
+        }
         return factory
     }
 
 
-    private fun populerAivenCommonConfig(configMap: MutableMap<String, Any>) {
+    private fun populerCommonConfig(configMap: MutableMap<String, Any>) {
         configMap[SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG] = keystorePath
         configMap[SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG] = credstorePassword
         configMap[SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG] = credstorePassword

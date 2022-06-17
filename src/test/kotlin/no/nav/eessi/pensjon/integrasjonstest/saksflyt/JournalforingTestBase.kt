@@ -30,7 +30,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
-import no.nav.eessi.pensjon.listeners.SedSendtListner
+import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -88,7 +88,7 @@ internal open class JournalforingTestBase {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(aivenOppgaveKafkaTemplate = oppgaveHandlerKafka)
+    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveKafkaTemplate = oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
@@ -120,7 +120,7 @@ internal open class JournalforingTestBase {
         profile = "test"
     )
 
-    protected val sendtListener: SedSendtListner = SedSendtListner(
+    protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
         dokumentHelper = dokumentHelper,

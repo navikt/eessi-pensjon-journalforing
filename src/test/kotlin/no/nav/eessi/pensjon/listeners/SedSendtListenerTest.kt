@@ -26,7 +26,7 @@ internal class SedSendtListenerTest {
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val fagmodulHelper = mockk<FagmodulHelper>(relaxed = true)
 
-    private val sedListener = SedSendtListner(jouralforingService,
+    private val sedListener = SedSendtListener(jouralforingService,
         personidentifiseringService,
         sedDokumentHelper,
         fagmodulHelper,

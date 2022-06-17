@@ -28,7 +28,7 @@ import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
-class SedSendtListner(
+class SedSendtListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
     private val dokumentHelper: EuxDokumentHelper,
@@ -38,7 +38,7 @@ class SedSendtListner(
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
 ) {
 
-    private val logger = LoggerFactory.getLogger(SedSendtListner::class.java)
+    private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
     private val latch = CountDownLatch(1)
     private lateinit var consumeOutgoingSed: MetricsHelper.Metric
 
@@ -58,11 +58,6 @@ class SedSendtListner(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                if (cr.offset() == 0L && profile == "prod") {
-                    logger.error("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
-                    throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
-                }
-                logger.debug(hendelse)
                 try {
                     val offset = cr.offset()
 
@@ -183,7 +178,7 @@ class SedSendtListner(
      * Se jira-sak: EP-968
      **/
 //    @KafkaListener(
-//        containerFactory = "onpremKafkaListenerContainerFactory",
+//        containerFactory = "sedKafkaListenerContainerFactory",
 //        groupId = "\${kafka.sedSendt.groupid}-recovery",
 //        topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
 //                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "129004")])])
