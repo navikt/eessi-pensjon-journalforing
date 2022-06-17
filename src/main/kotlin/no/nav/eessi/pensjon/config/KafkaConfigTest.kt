@@ -100,6 +100,7 @@ class KafkaConfigTest(
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
     }
 
+    @Profile("test")
     @Bean("sedKafkaListenerContainerFactory")
     fun aivenSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
@@ -135,8 +136,9 @@ class KafkaConfigTest(
         return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
     }
 
-    @Bean
-    fun onpremKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+    @Profile("prod")
+    @Bean("sedKafkaListenerContainerFactory")
+    fun onpremSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = onpremKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL

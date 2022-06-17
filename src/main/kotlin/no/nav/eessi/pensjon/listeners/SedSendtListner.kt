@@ -36,7 +36,7 @@ class SedSendtListner(
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
-)   {
+) {
 
     private val logger = LoggerFactory.getLogger(SedSendtListner::class.java)
     private val latch = CountDownLatch(1)
@@ -64,12 +64,8 @@ class SedSendtListner(
                     throw RuntimeException("Applikasjonen har forsøkt å prosessere sedSendt meldinger fra offset 0, stopper prosessering")
                 }
                 logger.debug(hendelse)
-                val offsetToSkip = listOf(118452L, 139287L, 139333L, 139360L, 139666L, 139684L, 139741L, 139839L, 139944L, 140374L, 140486L, 171963L)
                 try {
                     val offset = cr.offset()
-                    if (offset in offsetToSkip) {
-                        logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
-                    } else {
 
                         val sedHendelse = SedHendelseModel.fromJson(hendelse)
                         if (GyldigeHendelser.sendt(sedHendelse)) {
@@ -109,7 +105,6 @@ class SedSendtListner(
                         logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                         logger.info("Genererer automatiseringstatistikk")
 
-                    }
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)
                     throw SedSendtRuntimeException(ex)
@@ -159,7 +154,11 @@ class SedSendtListner(
     }
 
 
-    private fun bestemSaktypeFraSed(saktypeFraSed: Saktype?, identifisertPerson: IdentifisertPerson?, bucType: BucType): Saktype? {
+    private fun bestemSaktypeFraSed(
+        saktypeFraSed: Saktype?,
+        identifisertPerson: IdentifisertPerson?,
+        bucType: BucType
+    ): Saktype? {
         val saktype = identifisertPerson?.personRelasjon?.saktype
         logger.debug("populerSaktypeFraSed: fraSED $saktypeFraSed  identPersonYtelse: $saktype")
         if (bucType == BucType.P_BUC_10 && saktypeFraSed == Saktype.GJENLEV) {
