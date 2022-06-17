@@ -48,12 +48,11 @@ class SedMottattListener(
     }
 
     @KafkaListener(
-        containerFactory = "onpremKafkaListenerContainerFactory",
+        containerFactory = "sedKafkaListenerContainerFactory",
         idIsGroup = false,
         topics = ["\${kafka.sedMottatt.topic}"],
         groupId = "\${kafka.sedMottatt.groupid}"
     )
-
     fun consumeSedMottatt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeIncomingSed.measure {
