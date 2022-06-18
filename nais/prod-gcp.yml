@@ -24,8 +24,6 @@ spec:
       value: prod
     - name: NAMESPACE
       value: p
-    - name: ONPREM_KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.prod-fss-pub.nais.io/cpi
     - name: PDL_URL
@@ -39,9 +37,9 @@ spec:
     - name: BESTEMSAK_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
-      value: eessi-basis-sedSendt-v1
+      value: eessibasis.sedsendt-v1
     - name: KAFKA_SEDMOTTATT_TOPIC
-      value: eessi-basis-sedMottatt-v1
+      value: eessibasis.sedmottatt-v1
     - name: KAFKA_OPPGAVE_TOPIC
       value: eessipensjon.privat-oppgave
     - name: KAFKA_KRAV_TOPIC

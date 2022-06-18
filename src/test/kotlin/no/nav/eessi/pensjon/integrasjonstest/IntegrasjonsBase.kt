@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedMottattListener
-import no.nav.eessi.pensjon.listeners.SedSendtListner
+import no.nav.eessi.pensjon.listeners.SedSendtListener
 import org.junit.jupiter.api.AfterEach
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Header
@@ -43,7 +43,7 @@ abstract class IntegrasjonsBase() {
     lateinit var mottattListener: SedMottattListener
 
     @Autowired
-    lateinit var sendtListener: SedSendtListner
+    lateinit var sendtListener: SedSendtListener
 
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
@@ -190,7 +190,7 @@ abstract class IntegrasjonsBase() {
             kafkaTemplate.sendDefault(javaClass.getResource(kafkaMsgFromPath).readText())
         }
 
-        fun waitForlatch(sendtListner: SedSendtListner) = sendtListner.getLatch().await(10, TimeUnit.SECONDS)
+        fun waitForlatch(sendtListener: SedSendtListener) = sendtListener.getLatch().await(10, TimeUnit.SECONDS)
         fun waitForlatch(mottattListener: SedMottattListener) = mottattListener.getLatch().await(10, TimeUnit.SECONDS)
 
     }
