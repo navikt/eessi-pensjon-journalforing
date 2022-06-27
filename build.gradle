@@ -9,7 +9,7 @@ buildscript {
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.13.0'
 		epMetricsVersion = '0.4.21'
-		epLoggingVersion = '1.0.19'
+		epLoggingVersion = '1.0.22'
 		epPersonoppslagVersion = '10.1.1'
 		epEuxVersion = '1.1.68'
 	}
