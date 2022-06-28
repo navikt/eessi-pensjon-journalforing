@@ -7,7 +7,7 @@ buildscript {
 		oidcTokenSupportVersion = '2.0.14'
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
-		mockserverVersion = '5.13.0'
+		mockserverVersion = '5.13.2'
 		epMetricsVersion = '0.4.25'
 		epLoggingVersion = '1.0.22'
 		epPersonoppslagVersion = '10.1.1'
