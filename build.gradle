@@ -8,10 +8,10 @@ buildscript {
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.13.2'
-		epMetricsVersion = '0.4.25'
-		epLoggingVersion = '1.0.22'
-		epPersonoppslagVersion = '10.1.1'
-		epEuxVersion = '1.1.68'
+		epMetricsVersion = '0.4.29'
+		epLoggingVersion = '1.0.24'
+		epPersonoppslagVersion = '10.2.7'
+		epEuxVersion = '1.1.76'
 	}
 
 	repositories {
