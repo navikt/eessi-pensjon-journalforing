@@ -5,9 +5,9 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 internal class BucTilEnhetHandlerTest {
 

@@ -5,12 +5,12 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 internal class Pbuc02Test {
 

@@ -41,6 +41,7 @@ import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -48,7 +49,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.util.*
-import kotlin.test.assertNull
 
 val norg2Klient = mockk<Norg2Klient>()
 val norg2Service = Norg2Service(norg2Klient)

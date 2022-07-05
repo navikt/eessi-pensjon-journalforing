@@ -69,11 +69,10 @@ dependencies {
 	}
 	testImplementation 'org.springframework.kafka:spring-kafka-test:2.8.4'
 
+	testImplementation(platform("org.junit:junit-bom:5.8.2"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+
 	//mock - test
-	testImplementation("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}") {
-		exclude module: 'kotlin-test-js'
-		exclude module: 'kotlin-test-testng'
-	}
 	testImplementation("org.mock-server:mockserver-netty:${mockserverVersion}") {
 		exclude module: 'junit'
 	}

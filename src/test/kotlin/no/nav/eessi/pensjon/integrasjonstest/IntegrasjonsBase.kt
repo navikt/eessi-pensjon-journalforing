@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
@@ -31,7 +32,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertTrue
 
 const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"

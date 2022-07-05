@@ -47,12 +47,12 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.test.assertNotNull
 
 @DisplayName("P_BUC_01 – IntegrationTest")
 internal class PBuc01IntegrationTest : JournalforingTestBase() {
@@ -145,9 +145,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
-                assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig.oppgaveType)
-                assertEquals(null, it.oppgaveMeldingUgyldig.journalpostId)
-                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig.filnavn)
+                assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
+                assertEquals(null, it.oppgaveMeldingUgyldig!!.journalpostId)
+                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig!!.filnavn)
 
                 assertEquals(true, it.kravMeldingList?.isNotEmpty())
                 assertEquals(1, it.kravMeldingList?.size)
