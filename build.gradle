@@ -4,6 +4,7 @@ buildscript {
 		kotlinVersion = '1.6.10'
 		springBootVersion = '2.6.6'
 		cxfVersion = '3.5.1'
+		jacksonVersion = '2.13.3'
 		oidcTokenSupportVersion = '2.0.14'
 		logstashLogbackVersion = '7.0.1'
 		pensjonInformasjonVersion = '9.4.10'
@@ -57,8 +58,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}")
 	implementation("org.springframework.boot:spring-boot-actuator:${springBootVersion}")
 
-	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.2'
+	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation 'org.springframework.kafka:spring-kafka:2.8.4'
