@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -38,7 +37,7 @@ class JournalforingService(
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val automatiseringStatistikkPublisher: AutomatiseringStatistikkPublisher,
-    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()),
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)

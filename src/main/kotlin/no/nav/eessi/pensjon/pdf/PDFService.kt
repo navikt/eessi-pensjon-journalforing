@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.pdf
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.MimeType
@@ -26,7 +25,7 @@ val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeatur
 @Service
 class PDFService(
     private val euxService: EuxDokumentHelper,
-    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
     private val logger = LoggerFactory.getLogger(PDFService::class.java)

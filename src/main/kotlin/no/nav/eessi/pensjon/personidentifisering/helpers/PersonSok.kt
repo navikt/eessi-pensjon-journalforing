@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
@@ -20,7 +19,7 @@ import javax.annotation.PostConstruct
 @Component
 class PersonSok(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
-    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry()) ) {
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest() ) {
 
     private val logger = LoggerFactory.getLogger(PersonSok::class.java)
     private lateinit var sokPersonTellerTreff: Counter

@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.klienter.pesys
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -23,7 +22,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
-                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())) {
+                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)

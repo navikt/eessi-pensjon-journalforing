@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +20,7 @@ import javax.annotation.PostConstruct
 @Component
 class JournalpostKlient(
     private val journalpostOidcRestTemplate: RestTemplate,
-    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper(SimpleMeterRegistry())
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostKlient::class.java) }
