@@ -63,13 +63,13 @@ dependencies {
 	implementation(platform("org.jetbrains.kotlin:kotlin-bom:$kotlinVersion"))
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
-	implementation 'org.springframework.kafka:spring-kafka:2.8.4'
+	implementation 'org.springframework.kafka:spring-kafka:2.8.7'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
 		exclude module: "mockito-core"
 		exclude module: "junit-vintage-engine"
 	}
-	testImplementation 'org.springframework.kafka:spring-kafka-test:2.8.4'
+	testImplementation 'org.springframework.kafka:spring-kafka-test:2.8.7'
 
 	testImplementation(platform("org.junit:junit-bom:5.8.2"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
