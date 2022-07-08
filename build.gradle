@@ -6,7 +6,7 @@ buildscript {
 		cxfVersion = '3.5.1'
 		jacksonVersion = '2.13.3'
 		oidcTokenSupportVersion = '2.0.14'
-		logstashLogbackVersion = '7.0.1'
+		logstashLogbackVersion = '7.2'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.13.2'
 		epMetricsVersion = '0.5.1'
