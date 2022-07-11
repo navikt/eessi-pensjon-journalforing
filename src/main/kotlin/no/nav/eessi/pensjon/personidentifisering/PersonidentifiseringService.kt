@@ -145,7 +145,7 @@ class PersonidentifiseringService(
         val aktorId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
         val personFnr = person.identer.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune ?: person.geografiskTilknytning?.gtBydel
-        val landkode = hentLandkode(person)
+        val landkode = person.landkode()
         val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
 
         return IdentifisertPerson(
@@ -168,56 +168,6 @@ class PersonidentifiseringService(
             .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }
 
-    private fun hentLandkode(person: Person): String {
-        val landkodeOppholdKontakt = person.kontaktadresse?.utenlandskAdresseIFrittFormat?.landkode
-        val landkodeUtlandsAdresse = person.kontaktadresse?.utenlandskAdresse?.landkode
-        val landkodeOppholdsadresse = person.oppholdsadresse?.utenlandskAdresse?.landkode
-        val landkodeBostedsadresse = person.bostedsadresse?.utenlandskAdresse?.landkode
-        val geografiskLandkode = person.geografiskTilknytning?.gtLand
-        val landkodeBostedNorge = person.bostedsadresse?.vegadresse
-        val landkodeKontaktNorge = person.kontaktadresse?.postadresseIFrittFormat
-
-        logger.debug("Landkode og person: ${person.toJson()}")
-
-        return when {
-            landkodeOppholdKontakt != null -> {
-                logger.info("Velger landkode fra kontaktadresse.utenlandskAdresseIFrittFormat ")
-                landkodeOppholdKontakt
-            }
-            landkodeUtlandsAdresse != null -> {
-                logger.info("Velger landkode fra kontaktadresse.utenlandskAdresse")
-                landkodeUtlandsAdresse
-            }
-            landkodeOppholdsadresse != null -> {
-                logger.info("Velger landkode fra oppholdsadresse.utenlandskAdresse")
-                landkodeOppholdsadresse
-            }
-            landkodeBostedsadresse != null -> {
-                logger.info("Velger landkode fra bostedsadresse.utenlandskAdresse")
-                landkodeBostedsadresse
-            }
-            geografiskLandkode != null -> {
-                logger.info("Velger landkode fra geografiskTilknytning.gtLand")
-                geografiskLandkode
-            }
-            landkodeBostedNorge != null -> {
-                logger.info("Velger landkode NOR fordi  bostedsadresse.vegadresse ikke er tom")
-                "NOR"
-            }
-            landkodeKontaktNorge != null -> {
-                logger.info("Velger landkode NOR fordi  kontaktadresse.postadresseIFrittFormat ikke er tom")
-                "NOR"
-            }
-            else -> {
-                logger.info("Velger tom landkode siden ingen særregler for adresseutvelger inntraff")
-                ""
-            }
-        }
-    }
-
-    /**
-     * Forsøker å finne om identifisert person er en eller fler med avdød person
-     */
     /**
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
