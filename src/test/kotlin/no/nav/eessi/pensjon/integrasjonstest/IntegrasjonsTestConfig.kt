@@ -18,13 +18,16 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.web.client.RestTemplate
+import java.time.Duration
 
 @TestConfiguration
 class IntegrasjonsTestConfig {
@@ -35,7 +38,6 @@ class IntegrasjonsTestConfig {
 
     @MockkBean
     lateinit var ClientConfigurationProperties: ClientConfigurationProperties
-
 
     @Bean
     fun consumerFactory(): ConsumerFactory<String, String> {
@@ -51,16 +53,13 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
-    fun kravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(producerFactory())
-        return template
-    }
+    fun kravInitialiseringKafkaTemplate(): KafkaTemplate<String, String>  = KafkaTemplate(producerFactory())
 
     @Bean
     fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
-        val kafka = KafkaTemplate(producerFactory())
-        kafka.defaultTopic = oppgaveTopic
-        return kafka
+        return KafkaTemplate(producerFactory()).apply {
+            defaultTopic = oppgaveTopic
+        }
     }
 
     fun producerFactory(): ProducerFactory<String, String> {
@@ -73,40 +72,51 @@ class IntegrasjonsTestConfig {
 
     @Bean
     fun automatiseringKafkaTemplate(): KafkaTemplate<String, String> {
-        val kafka = KafkaTemplate(producerFactory())
-        kafka.defaultTopic = automatiseringTopic
-        return kafka
+        return KafkaTemplate(producerFactory()).apply {
+            defaultTopic = automatiseringTopic
+        }
     }
 
     @Bean
-    fun journalpostOidcRestTemplate(): RestTemplate{
+    fun bestemSakOidcRestTemplate(): RestTemplate = mockk()
+
+    @Bean
+    fun fagmodulOidcRestTemplate(): RestTemplate  = mockk()
+
+    @Bean
+    fun proxyOAuthRestTemplate(): RestTemplate = mockk()
+
+    @Bean
+    fun journalpostOidcRestTemplate(): RestTemplate = mockedRestTemplate()
+
+    @Bean
+    fun euxOAuthRestTemplate(): RestTemplate  = mockedRestTemplate()
+
+    private fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")
         return RestTemplateBuilder()
             .rootUri("http://localhost:${port}")
             .build()
     }
 
-    @Bean
-    fun bestemSakOidcRestTemplate(): RestTemplate{
-        return mockk()
+    fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
+        val configMap: MutableMap<String, Any> = HashMap()
+        configMap[ConsumerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
+        configMap[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = brokerAddresses
+        configMap[ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG] = false
+        configMap[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
+        configMap[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
+
+        return DefaultKafkaConsumerFactory(configMap, StringDeserializer(), StringDeserializer())
     }
 
-    @Bean
-    fun euxOAuthRestTemplate(): RestTemplate {
-        val port = System.getProperty("mockServerport")
-        return RestTemplateBuilder()
-            .rootUri("http://localhost:${port}")
-            .build()
-    }
-
-    @Bean
-    fun fagmodulOidcRestTemplate(): RestTemplate {
-        return mockk()
-    }
-
-    @Bean
-    fun proxyOAuthRestTemplate(): RestTemplate {
-        return mockk()
+    @Bean("sedKafkaListenerContainerFactory")
+    fun aivenSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = aivenKafkaConsumerFactory()
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
+        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+        return factory
     }
 
     @Bean("pdlTokenComponent")

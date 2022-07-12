@@ -115,7 +115,7 @@ test {
 	useJUnitPlatform()
 	filter {
 		//exclude all tests from a package.
-		excludeTestsMatching "no.nav.eessi.pensjon.integrasjonstest.*"
+		//excludeTestsMatching "no.nav.eessi.pensjon.integrasjonstest.*"
 	}
 	failFast = true
 	testLogging {
