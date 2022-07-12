@@ -6,7 +6,7 @@ buildscript {
 		springKafkaVersion = '2.8.7'
 		cxfVersion = '3.5.1'
 		jacksonVersion = '2.13.3'
-		oidcTokenSupportVersion = '2.0.14'
+		tokenSupportVersion = '2.0.14'
 		logstashLogbackVersion = '7.2'
 		pensjonInformasjonVersion = '9.4.10'
 		mockserverVersion = '5.13.2'
@@ -104,9 +104,9 @@ dependencies {
 
 	//Auth
 	//Auth
-	implementation("no.nav.security:token-client-spring:${oidcTokenSupportVersion}")
-	implementation("no.nav.security:token-validation-spring:${oidcTokenSupportVersion}")
-	implementation("no.nav.security:token-validation-jaxrs:${oidcTokenSupportVersion}")
+	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
+	implementation("no.nav.security:token-validation-spring:${tokenSupportVersion}")
+	implementation("no.nav.security:token-validation-jaxrs:${tokenSupportVersion}")
 	implementation("no.nav.security:token-validation-test-support:2.0.5")
 
 }
