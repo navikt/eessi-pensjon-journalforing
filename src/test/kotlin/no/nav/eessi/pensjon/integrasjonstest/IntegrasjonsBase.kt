@@ -27,8 +27,6 @@ import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -119,10 +117,9 @@ abstract class IntegrasjonsBase() {
 
     private fun settOppProducerTemplate(topicNavn: String): KafkaTemplate<String, String> {
         val senderProps = KafkaTestUtils.producerProps(embeddedKafka.brokersAsString)
-        val pf = DefaultKafkaProducerFactory<String, String>(senderProps, StringSerializer(), StringSerializer())
-        val template = KafkaTemplate<String, String>(pf)
-        template.defaultTopic = topicNavn
-        return template
+        return KafkaTemplate(DefaultKafkaProducerFactory(senderProps, StringSerializer(), StringSerializer())).apply {
+            defaultTopic =topicNavn
+        }
     }
 
 
@@ -155,13 +152,13 @@ abstract class IntegrasjonsBase() {
         }
     }
 
-    fun meldingForMottattListener(template: KafkaTemplate<String, String>, messagePath: String) {
-        template.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
+    fun meldingForMottattListener(messagePath: String) {
+        sedMottattTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
         mottattListener.getLatch().await(20, TimeUnit.SECONDS)
         Thread.sleep(5000)
     }
-    fun meldingForSendtListener(template: KafkaTemplate<String, String>, messagePath: String) {
-        template.sendDefault(String(Files.readAllBytes(Paths.get(messagePath)))).get(20L, TimeUnit.SECONDS)
+    fun meldingForSendtListener(messagePath: String) {
+        sedSendttTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
         sendtListener.getLatch().await(20, TimeUnit.SECONDS)
         Thread.sleep(5000)
     }
