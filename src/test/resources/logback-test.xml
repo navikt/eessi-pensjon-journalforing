@@ -17,8 +17,6 @@
     <logger name="kafka" level="WARN"/>
     <logger name="org.apache.kafka" level="WARN"/>
     <logger name="org.apache.zookeeper" level="WARN"/>
-    <logger name="org.springframework.kafka" level="WARN"/>
-    <logger name="org.mockserver.log" level="WARN"/>
     <logger name="com.tngtech.archunit" level="ERROR"/>
 
     <root level="DEBUG">

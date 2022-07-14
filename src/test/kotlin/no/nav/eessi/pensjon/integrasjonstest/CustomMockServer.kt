@@ -5,18 +5,17 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
-import org.springframework.http.HttpMethod
-import java.util.concurrent.*
+import java.util.concurrent.TimeUnit
 
-class CustomMockServer(
-) {
-    val serverPort = CompletableFuture.completedFuture(System.getProperty("mockServerport").toInt()).get().toInt()
+class CustomMockServer {
+
+    var mockServer = MockServerClient("localhost", System.getProperty("mockServerport").toInt())
 
     fun medOppdaterDistribusjonsinfo() = apply {
         // Mocker oppdaterDistribusjonsinfo
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.PATCH.name)
+                .withMethod("PATCH")
                 .withPath("/journalpost/.*/oppdaterDistribusjonsinfo")
         )
             .respond(
@@ -29,9 +28,9 @@ class CustomMockServer(
 
     fun mockBestemSak() = apply {
 
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
+                .withMethod("POST")
                 .withPath("/")
         )
             .respond(
@@ -49,9 +48,9 @@ class CustomMockServer(
      * @param {String} journalpostId, erstatter default id
      * */
     fun medJournalforing(forsoekFerdigstill: Boolean = false, journalpostId: String = "429434378") = apply {
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
+                .withMethod("POST")
                 .withPath("/journalpost")
         )
             .respond(
@@ -69,9 +68,9 @@ class CustomMockServer(
     }
 
     fun medNorg2Tjeneste() = apply {
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.POST.name)
+                .withMethod("POST")
                 .withPath("/api/v1/arbeidsfordeling")
         )
             .respond(
@@ -81,9 +80,9 @@ class CustomMockServer(
 
     fun medEuxGetRequest(bucPath: String, filePath: String) = apply {
 
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.GET.name)
+                .withMethod("GET")
                 .withPath(bucPath)
         )
             .respond(
@@ -93,9 +92,9 @@ class CustomMockServer(
 
     fun medEuxGetRequestWithJson(bucPath: String, jsonAsString: String) = apply {
 
-        MockServerClient("localhost", serverPort).`when`(
+        mockServer.`when`(
             HttpRequest.request()
-                .withMethod(HttpMethod.GET.name)
+                .withMethod("GET")
                 .withPath(bucPath)
         )
             .respond(
@@ -106,7 +105,7 @@ class CustomMockServer(
     private fun withResponse(filePath: String) = HttpResponse.response()
         .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
         .withStatusCode(HttpStatusCode.OK_200.code())
-        .withBody(javaClass.getResource(filePath).readText())
+        .withBody(javaClass.getResource(filePath)!!.readText())
 
     private fun withResponseAsJsonString(jsonString: String) = HttpResponse.response()
         .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
