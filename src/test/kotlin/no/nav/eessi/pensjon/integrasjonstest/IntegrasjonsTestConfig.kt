@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import com.fasterxml.jackson.databind.JsonSerializer
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
 import no.nav.eessi.pensjon.personoppslag.pdl.PdlToken
@@ -66,7 +65,7 @@ class IntegrasjonsTestConfig {
         val configs = HashMap<String, Any>()
         configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = this.brokerAddresses
         configs[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configs[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configs[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = org.springframework.kafka.support.serializer.JsonSerializer::class.java
         return DefaultKafkaProducerFactory(configs)
     }
 
@@ -115,7 +114,7 @@ class IntegrasjonsTestConfig {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = aivenKafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
-        factory.containerProperties.setAuthExceptionRetryInterval(Duration.ofSeconds(4L))
+        factory.containerProperties.authExceptionRetryInterval = Duration.ofSeconds(4L)
         return factory
     }
 
