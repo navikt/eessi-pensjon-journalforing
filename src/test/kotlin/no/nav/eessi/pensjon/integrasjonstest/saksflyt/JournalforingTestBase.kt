@@ -37,7 +37,6 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-//import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
@@ -133,7 +132,6 @@ internal open class JournalforingTestBase {
     @BeforeEach
     fun setup() {
         ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
-//        ReflectionTestUtils.setField(oppgaveHandler, "oppgaveTopic", "oppgaveTopic")
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         sendtListener.initMetrics()

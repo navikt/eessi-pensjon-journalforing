@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.personidentifisering
 
-//import no.nav.eessi.pensjon.personidentifisering.helpers.FnrHelper
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SED
