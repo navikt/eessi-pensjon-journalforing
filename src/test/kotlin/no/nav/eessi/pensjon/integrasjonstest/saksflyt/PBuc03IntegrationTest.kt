@@ -11,7 +11,6 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.SED
-
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.OppgaveMelding
@@ -21,7 +20,6 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
@@ -127,7 +125,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(null, it.oppgaveMelding?.filnavn)
-                assertEquals(Enhet.UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(UFORE_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(OppgaveType.BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
             }
         }
@@ -282,7 +280,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
-                assertEquals(HendelseType.SENDT, it.oppgaveMelding?.hendelseType)
+                assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
                 assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
             }

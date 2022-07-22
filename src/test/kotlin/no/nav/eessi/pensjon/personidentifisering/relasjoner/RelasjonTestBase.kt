@@ -107,8 +107,8 @@ open class RelasjonTestBase {
     private fun createPerson(fnr: String?, rolle: Rolle? = null, navnIfFnr: Pair<String, String>? = null): Person {
         return Person(
             rolle = rolle?.name,
-            fornavn = if (navnIfFnr!=null) "${navnIfFnr.first}" else null ,
-            etternavn = if (navnIfFnr!=null) "${navnIfFnr.second}" else null,
+            fornavn = navnIfFnr?.first,
+            etternavn = navnIfFnr?.second,
             foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
             pin = listOfNotNull(
                 PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
@@ -122,8 +122,8 @@ open class RelasjonTestBase {
         return Pensjon(
             gjenlevende = Bruker(
                 person = Person(
-                    fornavn = if (navnIfFnr!=null) "${navnIfFnr.first}" else null ,
-                    etternavn = if (navnIfFnr!=null) "${navnIfFnr.second}" else null,
+                    fornavn = navnIfFnr?.first,
+                    etternavn = navnIfFnr?.second,
                     foedselsdato = Fodselsnummer.fra(gjenlevFnr)?.getBirthDateAsIso() ?: "1955-09-12",
                     pin = listOf(PinItem(land = "NO", identifikator = gjenlevFnr)),
                     relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },

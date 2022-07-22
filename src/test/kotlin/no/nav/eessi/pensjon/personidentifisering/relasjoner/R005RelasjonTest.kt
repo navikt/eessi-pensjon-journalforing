@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -25,7 +24,7 @@ internal class R005RelasjonTest : RelasjonTestBase(){
             "123123"
         ).hentRelasjoner()
 
-        Assertions.assertEquals(0, actual.size)
+        assertEquals(0, actual.size)
     }
 
     @Test

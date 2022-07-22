@@ -15,7 +15,6 @@ import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
@@ -29,7 +28,6 @@ import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.models.Enhet.PENSJON_UTLAND
@@ -359,13 +357,13 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
 
             assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(Enhet.PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
-            assertEquals(Enhet.PENSJON_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any())}
             verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
@@ -465,7 +463,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
-                assertEquals(HendelseType.SENDT, it.oppgaveMelding?.hendelseType)
+                assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
             }
@@ -484,7 +482,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
-                assertEquals(HendelseType.SENDT, it.oppgaveMelding?.hendelseType)
+                assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
                 val journalpostRequest = it.opprettJournalpostRequest

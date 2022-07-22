@@ -84,7 +84,7 @@ abstract class IntegrasjonsBase() {
 
         mottattContainer = settOppUtitlityConsumer(SED_MOTTATT_TOPIC)
         mottattContainer.start()
-        Thread.sleep(1000); // wait a bit for the container to start
+        Thread.sleep(1000) // wait a bit for the container to start
 
         ContainerTestUtils.waitForAssignment(mottattContainer, embeddedKafka.partitionsPerTopic)
 
