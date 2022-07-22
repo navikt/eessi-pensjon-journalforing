@@ -356,10 +356,10 @@ internal open class JournalforingTestBase {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+            mapJsonToAny(it, typeRefs())
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+            mapJsonToAny(it, typeRefs())
         }
         block(PBuc03IntegrationTest.TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
@@ -392,7 +392,7 @@ internal open class JournalforingTestBase {
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
-        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs<List<ForenkletSED>>())
+        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs())
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         val dokumentFiler = mapJsonToAny(dokumentVedleggJson, typeRefs<SedDokumentfiler>())
         initCommonMocks(sed, docs, dokumentFiler)

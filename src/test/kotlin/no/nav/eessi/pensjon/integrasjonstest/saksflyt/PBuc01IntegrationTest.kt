@@ -407,7 +407,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-                mapJsonToAny(it, typeRefs<OppgaveMelding>())
+                mapJsonToAny(it, typeRefs())
             }
 
             val request = journalpost.captured
@@ -535,10 +535,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+            mapJsonToAny(it, typeRefs())
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+            mapJsonToAny(it, typeRefs())
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
