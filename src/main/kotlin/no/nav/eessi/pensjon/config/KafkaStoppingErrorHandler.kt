@@ -5,37 +5,31 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.kafka.listener.CommonContainerStoppingErrorHandler
-import org.springframework.kafka.listener.ContainerAwareErrorHandler
+import org.springframework.kafka.listener.CommonErrorHandler
 import org.springframework.kafka.listener.MessageListenerContainer
 import org.springframework.stereotype.Component
 import java.io.PrintWriter
 import java.io.StringWriter
 
-
 @Profile("prod")
 @Component
-class KafkaStoppingErrorHandler : ContainerAwareErrorHandler {
+class KafkaStoppingErrorHandler : CommonErrorHandler {
     private val logger = LoggerFactory.getLogger(KafkaStoppingErrorHandler::class.java)
     private val stopper = CommonContainerStoppingErrorHandler()
 
-    override fun handle(
-        thrownException: java.lang.Exception,
-        records: MutableList<ConsumerRecord<*, *>>?,
+    override fun handleRecord(
+        thrownException: Exception,
+        record: ConsumerRecord<*, *>,
         consumer: Consumer<*, *>,
-        container: MessageListenerContainer
-    ) {
+        container: MessageListenerContainer) {
+
         val stacktrace = StringWriter()
         thrownException.printStackTrace(PrintWriter(stacktrace))
 
-        logger.error("En feil oppstod under kafka konsumering av meldinger: \n" +
-                textListingOf(records ?: emptyList()) +
+        logger.error("En feil oppstod under kafka konsumering av meldinger: \n" + textListingOf(record ) +
                 "\nStopper containeren ! Restart er nødvendig for å fortsette konsumering, $stacktrace")
-        stopper.handleRemaining(thrownException, records?: emptyList(), consumer, container)
+        stopper.handleRecord(thrownException, record, consumer, container)
     }
-
-    fun textListingOf(records: List<ConsumerRecord<*, *>>) =
-        records.joinToString(separator = "\n") {
-            "--------------------------------------------------------------------------------\n$it"
-        }
+    fun textListingOf(records: ConsumerRecord<*, *>) = "-" .repeat(20) + records.toString()
 
 }
