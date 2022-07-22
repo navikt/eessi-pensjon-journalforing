@@ -40,8 +40,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
                 val sokAnnenPersonKriterie =  opprettSokKriterie(person)
                 val annenPersonPin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
                 val annenPersonFdato = mapFdatoTilLocalDate(person.foedselsdato)
-                val rolle = person.rolle
-                val annenPersonRelasjon = when (rolle) {
+                val annenPersonRelasjon = when (person.rolle) {
                     //Rolle barn benyttes ikke i noe journalføring hendelse kun hente ut for...?
                     BARN.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.BARN, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
                     //Rolle forsorger benyttes ikke i noe journalføring hendelse...
