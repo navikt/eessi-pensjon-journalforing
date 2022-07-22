@@ -80,7 +80,7 @@ class SedSendtListener(
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                         val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, HendelseType.SENDT,)
+                        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, HendelseType.SENDT)
                         val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                         journalforingService.journalfor(
