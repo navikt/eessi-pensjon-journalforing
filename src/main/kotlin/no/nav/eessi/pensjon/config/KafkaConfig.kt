@@ -92,7 +92,7 @@ class KafkaConfig(
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = kafkaConsumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
-        factory.containerProperties.authExceptionRetryInterval = Duration.ofSeconds(4L)
+        factory.containerProperties.setAuthExceptionRetryInterval( Duration.ofSeconds(4L) )
         if (kafkaErrorHandler != null) {
             factory.setCommonErrorHandler(kafkaErrorHandler)
         }
