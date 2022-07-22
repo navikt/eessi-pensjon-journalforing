@@ -146,8 +146,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
                 assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
-                assertEquals(null, it.oppgaveMeldingUgyldig!!.journalpostId)
-                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig!!.filnavn)
+                assertEquals(null, it.oppgaveMeldingUgyldig.journalpostId)
+                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig.filnavn)
 
                 assertEquals(true, it.kravMeldingList?.isNotEmpty())
                 assertEquals(1, it.kravMeldingList?.size)
