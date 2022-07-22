@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.SedType
-
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
@@ -42,8 +41,6 @@ import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -299,10 +296,7 @@ internal class OppgaveRoutingServiceTest {
 
     }
 
-
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
-    @Nested
-    @DisplayName("Routing_R_BUC_02")
     class Routing_R_BUC_02 {
         private companion object {
             @JvmStatic
@@ -351,9 +345,6 @@ internal class OppgaveRoutingServiceTest {
         }
     }
 
-
-    @Nested
-    @DisplayName("Routing_P_BUC_10")
     class Routing_P_BUC_02 {
         private companion object {
             @JvmStatic
@@ -423,8 +414,6 @@ internal class OppgaveRoutingServiceTest {
         val saktype: Saktype?
     )
 
-    @Nested
-    @DisplayName("Routing_P_BUC_10")
     class Routing_P_BUC_10 {
         private companion object {
             @JvmStatic
@@ -693,8 +682,6 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(UFORE_UTLAND, result)
     }
 
-    @Nested
-    @DisplayName("Routing_P_BUC_10")
     class Routing_vanligeBucs {
         data class TestArgumentsBucs(
             val expectedResult: Enhet,
