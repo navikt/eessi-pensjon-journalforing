@@ -49,8 +49,7 @@ class KafkaConfig(
 
     @Bean
     fun kravInitialiseringKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(producerFactory())
-        return template
+        return KafkaTemplate(producerFactory())
     }
 
     @Bean

@@ -93,10 +93,8 @@ class RestTemplateConfig(
 
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
-        val clientProperties =
-            Optional.ofNullable(clientConfigurationProperties.registration[oAuthKey])
-                .orElseThrow { RuntimeException("could not find oauth2 client config for example-onbehalfof") }
-        return clientProperties
+        return Optional.ofNullable(clientConfigurationProperties.registration[oAuthKey])
+            .orElseThrow { RuntimeException("could not find oauth2 client config for example-onbehalfof") }
     }
 
     private fun bearerTokenInterceptor(
