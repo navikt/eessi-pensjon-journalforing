@@ -47,10 +47,7 @@ class SedFnrSok {
 
             return when {
                 jsonNode.isObject -> {
-                    if (fnrFraNode.isEmpty())
-                        jsonNode.flatMap { traverseNode(it) }
-                    else
-                        fnrFraNode
+                    fnrFraNode.ifEmpty { jsonNode.flatMap { traverseNode(it) } }
                 }
                 jsonNode.isArray -> {
                     jsonNode.flatMap { traverseNode(it) }
