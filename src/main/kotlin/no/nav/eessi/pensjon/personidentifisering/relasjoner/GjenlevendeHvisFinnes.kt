@@ -10,7 +10,7 @@ import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 
 abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
-    fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null, saktype: Saktype? = null) : List<SEDPersonRelasjon> {
+    fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null) : List<SEDPersonRelasjon> {
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
         val sedType = sed.type
@@ -18,28 +18,29 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         val gjenlevendePerson = gjenlevendeBruker?.person
         logger.debug("Hva er gjenlevendePerson pin?: ${gjenlevendePerson?.pin}")
 
-        gjenlevendePerson?.let { gjenlevendePerson ->
-            val gjenlevendePin = Fodselsnummer.fra(gjenlevendePerson.pin?.firstOrNull { it.land == "NO" }?.identifikator)
-            val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)
-            val sokPersonKriterie =  opprettSokKriterie(gjenlevendePerson)
-
-            val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
-            logger.info("Innhenting av relasjon: $gjenlevendeRelasjon")
-
-            if (gjenlevendeRelasjon == null) {
-                logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
-                return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
-            }
-
-            val sakType =  if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
-                Saktype.BARNEP
-            } else {
-                Saktype.GJENLEV
-            }
-            logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
-            return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
+        if (gjenlevendePerson == null) {
+            return emptyList()
         }
-        return emptyList()
+
+        val gjenlevendePin = Fodselsnummer.fra(gjenlevendePerson.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+        val gjenlevendeFdato = mapFdatoTilLocalDate(gjenlevendePerson.foedselsdato)
+        val sokPersonKriterie =  opprettSokKriterie(gjenlevendePerson)
+
+        val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
+        logger.info("Innhenting av relasjon: $gjenlevendeRelasjon")
+
+        if (gjenlevendeRelasjon == null) {
+            logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med ukjente relasjoner")
+            return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
+        }
+
+        val sakType =  if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
+            Saktype.BARNEP
+        } else {
+            Saktype.GJENLEV
+        }
+        logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
+        return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
     }
 
     fun erGjenlevendeBarn(relasjon: String): Boolean {

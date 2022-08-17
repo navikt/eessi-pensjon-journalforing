@@ -98,7 +98,7 @@ internal class BestemSakServiceTest {
     @Test
     fun `R_BUC_02 hvor ytelsestype er null skal kaste exception`() {
         assertThrows<NullPointerException> {
-            bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.R_BUC_02, saktype = null)!!
+            bestemSakService.hentSakInformasjon(AKTOER_ID, BucType.R_BUC_02, saktypeBUC02 = null)!!
         }
 
         verify(exactly = 0) { mockKlient.kallBestemSak(any()) }
