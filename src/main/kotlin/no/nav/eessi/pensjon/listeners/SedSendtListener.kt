@@ -59,8 +59,14 @@ class SedSendtListener(
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
                 try {
                     val offset = cr.offset()
-
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+                    if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
+                        logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+                        acknowledgment.acknowledge()
+                        return@measure
+                    }
+
                     if (GyldigeHendelser.sendt(sedHendelse)) {
                         val bucType = sedHendelse.bucType!!
 
@@ -96,7 +102,6 @@ class SedSendtListener(
                     }
                     acknowledgment.acknowledge()
                     logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
-                    logger.info("Genererer automatiseringstatistikk")
 
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)
