@@ -21,7 +21,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CountDownLatch
 import javax.annotation.PostConstruct
 
 @Service
@@ -62,6 +62,13 @@ class SedMottattListener(
                 try {
                     logger.info("*** Offset ${cr.offset()}  Partition ${cr.partition()} ***")
                     val sedHendelse = SedHendelseModel.fromJson(hendelse)
+
+                    if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
+                        logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+                        acknowledgment.acknowledge()
+                        return@measure
+                    }
+
                     if (GyldigeHendelser.mottatt(sedHendelse)) {
                         val bucType = sedHendelse.bucType!!
 
