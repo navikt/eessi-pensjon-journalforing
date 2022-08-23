@@ -9,7 +9,7 @@ buildscript {
 		tokenSupportVersion = '2.1.3'
 		logstashLogbackVersion = '7.2'
 		pensjonInformasjonVersion = '9.4.10'
-		mockserverVersion = '5.13.2'
+		mockserverVersion = '5.14.0'
 		epMetricsVersion = '0.5.8'
 		epLoggingVersion = '1.0.34'
 		epPersonoppslagVersion = '11.2.14'
