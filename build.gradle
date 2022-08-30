@@ -6,7 +6,7 @@ buildscript {
 		springKafkaVersion = '2.9.0'
 		cxfVersion = '3.5.1'
 		jacksonVersion = '2.13.3'
-		tokenSupportVersion = '2.1.3'
+		tokenSupportVersion = '2.1.4'
 		logstashLogbackVersion = '7.2'
 		imageioVersion = '3.8.3'
 		pensjonInformasjonVersion = '9.4.10'
