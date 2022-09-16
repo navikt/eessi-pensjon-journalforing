@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Pull repo'
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: 'Lager variable'
         run: |
