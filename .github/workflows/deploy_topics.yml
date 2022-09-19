@@ -11,9 +11,8 @@ jobs:
     name: 'Deploy topics'
     runs-on: ubuntu-latest
     steps:
-      # PULLER REPO
       - name: 'Pull repo'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: 'Deploy public-automatisering-q2 to eessipensjon namespace'
         uses: nais/deploy/actions/deploy@v1

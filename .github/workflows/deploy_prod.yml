@@ -2,16 +2,15 @@ name: Deploy PROD
 on:
   repository_dispatch:
     types: [deploy-prod]
+
 jobs:
-  tag_deploy_q1:
+  deploy_prod:
     name: 'Deploy til PROD'
     runs-on: ubuntu-latest
     steps:
-      # GET version
-      - name: 'Get the version'
-        uses: actions/checkout@v2
+      - name: 'Pull repo'
+        uses: actions/checkout@v3
 
-      # Show IMAGE from Q2 deploy
       - name: 'Vise image'
         run: |
           echo "image-tag: ${{ github.event.client_payload.image }}"

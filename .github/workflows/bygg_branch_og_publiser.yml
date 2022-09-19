@@ -1,25 +1,21 @@
-name: Bygg alle brancher
+name: Bygg branch og publiser
 
 on:
   push:
     branches:
       - '*'
       - '*/*'
-      - '!release/*'
       - '!master'
 
 jobs:
-  bygg:
-    name: 'Bygg alle brancher'
+  bygg_og_publiser:
+    name: 'Bygg branch og publiser image'
     runs-on: ubuntu-latest
+    env:
+      package: eessi-pensjon-journalforing
     steps:
       - name: 'Pull repo'
-        uses: actions/checkout@v2
-
-      - name: 'Java 17'
-        uses: actions/setup-java@v1.4.3
-        with:
-          java-version: 17
+        uses: actions/checkout@v3
 
       - name: 'Setter dato og commit variabel'
         run: |
@@ -28,8 +24,13 @@ jobs:
           echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: 'Setter Image'
-        run: echo "IMAGE=ghcr.io/${{ github.repository }}/eessi-pensjon-journalforing:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
+        run: echo "IMAGE=ghcr.io/${{ github.repository }}/${{ env.package }}:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
+      - name: 'Java'
+        uses: actions/setup-java@v2
+        with:
+          java-version: 17
+          distribution: temurin
 
       - name: 'Bygg og publiser docker image'
         env:
