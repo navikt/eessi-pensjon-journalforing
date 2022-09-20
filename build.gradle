@@ -22,7 +22,7 @@ plugins {
 	id "org.openrepose.gradle.plugins.jaxb" version "2.5.0"
 }
 
-apply from: "https://raw.githubusercontent.com/navikt/ep-script-plugins/release-0.2.0/ep-module.gradle"
+apply from: "https://raw.githubusercontent.com/navikt/ep-script-plugins/release-0.3.0/ep-module.gradle"
 
 group = 'no.nav.eessi.pensjon'
 
