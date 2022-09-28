@@ -14,4 +14,15 @@ DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:ActiveProcessorCount=2"
 
 # Beware that you're app might experience throttling if you have low CPU-limits
 
+# G1GC is default on heaps > 1792MB if 2+ CPUs, otherwise SerialGC is used, check DEFAULT using:
+#   kubectl exec -c <container> <pod> -- java -XX:+PrintFlagsFinal -version | egrep "UseG1GC|UseParallelGC|UseSerialGC|UseShenandoahGC|UseZGC"
+# However, ParallelGC outperforms G1GC and SerialGC on smaller heaps (ParallelGC has Stop The World, but gives better throughput)
+# (On large heaps / many processors there are other options, like ZGC and ShenandoahGC)
+# On heaps < 2GB choose Parallel GC. On heaps 2-4GB you might get better throughput with G1GC, but ParallelGC is usually better
+
+DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:+UseParallelGC"
+
+# On heaps over 4GB choose G1GC
+# DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:+UseG1GC"
+
 export DEFAULT_JVM_OPTS
