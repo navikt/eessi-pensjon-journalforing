@@ -1,0 +1,100 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.7.10'
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.42.0"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.4.0.2513"
+        classpath "se.patrikerdes:gradle-use-latest-versions-plugin:0.2.18"
+        classpath "org.owasp:dependency-check-gradle:7.2.1"
+        classpath "com.adarshr:gradle-test-logger-plugin:3.2.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
+    }
+}
+
+apply plugin: org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
+apply plugin: org.jetbrains.kotlin.allopen.gradle.SpringGradleSubplugin
+apply plugin: com.github.benmanes.gradle.versions.VersionsPlugin
+apply plugin: se.patrikerdes.UseLatestVersionsPlugin
+apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
+apply plugin: 'jacoco'
+apply plugin: org.sonarqube.gradle.SonarQubePlugin
+apply plugin: com.adarshr.gradle.testlogger.TestLoggerPlugin
+
+repositories {
+    mavenCentral()
+
+    String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
+    if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/maven-release")
+        credentials {
+            username = "token"
+            password = token
+        }
+    }
+}
+
+dependencies {
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:${kotlinVersion}"))
+}
+
+assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17): "Java 17 or newer is required"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "17"
+        allWarningsAsErrors = true
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ['-Xjsr305=strict']
+        jvmTarget = '17'
+        allWarningsAsErrors = true
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+/* https://github.com/ben-manes/gradle-versions-plugin */
+dependencyUpdates {
+    rejectVersionIf {
+        ['alpha', 'beta', 'b', 'rc', 'cr', 'm', 'preview', 'pr']
+                .any { qualifier -> it.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/}
+    }
+    revision = 'release'
+}
+
+// https://docs.gradle.org/current/userguide/jacoco_plugin.html
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+tasks.sonarqube.dependsOn tasks["jacocoTestReport"]
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
