@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.architecture
 
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption
-import com.tngtech.archunit.core.importer.ImportOptions
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
 import com.tngtech.archunit.library.Architectures.layeredArchitecture
@@ -16,33 +15,31 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ArchitectureTest {
 
-    private val rootDir = EessiPensjonJournalforingApplication::class.qualifiedName!!
+    private val root = EessiPensjonJournalforingApplication::class.qualifiedName!!
             .replace("." + EessiPensjonJournalforingApplication::class.simpleName, "")
 
     // Only include main module. Ignore test module and external deps
     private val classesToAnalyze = ClassFileImporter()
-            .importClasspath(
-                    ImportOptions()
-                            .with(ImportOption.DoNotIncludeJars())
-                            .with(ImportOption.DoNotIncludeArchives())
-                            .with(ImportOption.DoNotIncludeTests())
-            )
+        .withImportOptions(listOf(
+            ImportOption.DoNotIncludeJars(),
+            ImportOption.DoNotIncludeArchives(),
+            ImportOption.DoNotIncludeTests())
+        ).importPackages(root)
 
     @BeforeAll
     fun beforeAll() {
         // Validate number of classes to analyze
-        assertTrue(classesToAnalyze.size > 100, "Sanity check on no. of classes to analyze")
-        assertTrue(classesToAnalyze.size < 250, "Sanity check on no. of classes to analyze")
+        assertTrue(classesToAnalyze.size in 100..250, "Sanity check on no. of classes to analyze (is ${classesToAnalyze.size})")
     }
 
     @Test
     fun `Packages should not have cyclic depenedencies`() {
-        slices().matching("$rootDir.(*)..").should().beFreeOfCycles().check(classesToAnalyze)
+        slices().matching("$root.(*)..").should().beFreeOfCycles().check(classesToAnalyze)
     }
 
     @Test
     fun `Klienter should not depend on eachother`() {
-        slices().matching("..$rootDir.klienter.(**)").should().notDependOnEachOther().check(classesToAnalyze)
+        slices().matching("..$root.klienter.(**)").should().notDependOnEachOther().check(classesToAnalyze)
     }
 
     @Test
@@ -68,22 +65,23 @@ internal class ArchitectureTest {
         val PersonidentifiseringHelpers = "journalforing.personidentifisering.helpers"
 
         layeredArchitecture()
+            .consideringOnlyDependenciesInAnyPackage(root)
                 //Define components
-                .layer(ROOT).definedBy(rootDir)
-                .layer(Buc).definedBy("$rootDir.buc")
-                .layer(Config).definedBy("$rootDir.config")
-                .layer(Handler).definedBy("$rootDir.handler")
-                .layer(Health).definedBy("$rootDir.health")
-                .layer(Journalforing).definedBy("$rootDir.journalforing")
-                .layer(Listeners).definedBy("$rootDir.listeners")
-                .layer(OppgaveRouting).definedBy("$rootDir.oppgaverouting")
-                .layer(PDF).definedBy("$rootDir.pdf")
-                .layer(FagmodulKlient).definedBy("$rootDir.klienter.fagmodul")
-                .layer(JournalpostKlient).definedBy("$rootDir.klienter.journalpost")
-                .layer(PesysKlient).definedBy("$rootDir.klienter.pesys")
-                .layer(Personidentifisering).definedBy("$rootDir.personidentifisering")
-                .layer(PersonidentifiseringHelpers).definedBy("$rootDir.personidentifisering.helpers")
-                .layer(Sed).definedBy("$rootDir.sed")
+                .layer(ROOT).definedBy(root)
+                .layer(Buc).definedBy("$root.buc")
+                .layer(Config).definedBy("$root.config")
+                .layer(Handler).definedBy("$root.handler")
+                .layer(Health).definedBy("$root.health")
+                .layer(Journalforing).definedBy("$root.journalforing")
+                .layer(Listeners).definedBy("$root.listeners")
+                .layer(OppgaveRouting).definedBy("$root.oppgaverouting")
+                .layer(PDF).definedBy("$root.pdf")
+                .layer(FagmodulKlient).definedBy("$root.klienter.fagmodul")
+                .layer(JournalpostKlient).definedBy("$root.klienter.journalpost")
+                .layer(PesysKlient).definedBy("$root.klienter.pesys")
+                .layer(Personidentifisering).definedBy("$root.personidentifisering")
+                .layer(PersonidentifiseringHelpers).definedBy("$root.personidentifisering.helpers")
+                .layer(Sed).definedBy("$root.sed")
                 //define rules
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Buc).mayOnlyBeAccessedByLayers(Listeners, Journalforing, PDF) // Sed
