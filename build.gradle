@@ -79,7 +79,7 @@ dependencies {
 	// Rina Eux API
 	implementation("no.nav.eessi.pensjon:ep-eux:${epEuxVersion}")
 	// PDF box
-	implementation("org.apache.pdfbox:pdfbox-tools:2.0.26")
+	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
 	implementation("com.twelvemonkeys.imageio:imageio-tiff:${imageioVersion}")
 
