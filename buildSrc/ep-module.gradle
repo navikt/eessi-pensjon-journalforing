@@ -71,6 +71,11 @@ compileTestKotlin {
 
 test {
     useJUnitPlatform()
+    failFast = true
+    testLogging {
+        exceptionFormat "full"
+        showStandardStreams false
+    }
 }
 
 /* https://github.com/ben-manes/gradle-versions-plugin */

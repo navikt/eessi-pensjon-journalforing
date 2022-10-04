@@ -96,16 +96,3 @@ dependencies {
 	implementation("no.nav.security:token-validation-test-support:2.0.5")
 
 }
-
-test {
-	filter {
-		//exclude all tests from a package.
-		//excludeTestsMatching "no.nav.eessi.pensjon.integrasjonstest.*"
-	}
-	failFast = true
-	testLogging {
-		exceptionFormat "full"
-		events "started", "skipped", "passed", "failed"
-		showStandardStreams true
-	}
-}
