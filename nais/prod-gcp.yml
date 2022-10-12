@@ -83,5 +83,5 @@ spec:
       cpu: 4000m
       memory: 1Gi
     requests:
-      cpu: 400m
+      cpu: 200m
       memory: 1Gi
