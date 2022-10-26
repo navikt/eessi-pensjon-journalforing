@@ -51,7 +51,7 @@ class RestTemplateConfig(
 
     @Bean
     fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
-        return opprettRestTemplate(euxUrl, "eux-credentials")
+        return opprettRestTemplateWithBuffered(euxUrl, "eux-credentials")
     }
 
     @Bean
@@ -84,10 +84,24 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
-                        .apply { setOutputStreaming(false) }
-                )
+                requestFactory = HttpComponentsClientHttpRequestFactory()
             }
+    }
+
+    private fun opprettRestTemplateWithBuffered(url: String, oAuthKey: String) : RestTemplate {
+        return RestTemplateBuilder()
+                .rootUri(url)
+                .errorHandler(DefaultResponseErrorHandler())
+                .additionalInterceptors(
+                        RequestIdHeaderInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
+                        bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
+                )
+                .build().apply {
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
+                            .apply { setOutputStreaming(false) }
+                    )
+                }
     }
 
 
