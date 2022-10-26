@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
-import org.springframework.http.client.ClientHttpRequestExecution
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.http.client.*
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
@@ -82,12 +80,13 @@ class RestTemplateConfig(
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
-              //  RequestResponseLoggerInterceptor(),
                 RequestCountInterceptor(meterRegistry),
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = HttpComponentsClientHttpRequestFactory()
+                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
+                        .apply { setOutputStreaming(false) }
+                )
             }
     }
 
