@@ -1,28 +1,36 @@
 package no.nav.eessi.pensjon.buc
 
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.clearAllMocks
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.SED
-
 import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
 
-internal class FagmodulHelperTest {
+internal class FagmodulServiceTest {
 
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
 
-    private val helper = FagmodulHelper(fagmodulKlient)
+    private val helper = FagmodulService(fagmodulKlient)
 
     @AfterEach
     fun after() {

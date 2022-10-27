@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
-import no.nav.eessi.pensjon.buc.FagmodulHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.BucType
@@ -30,8 +30,8 @@ import javax.annotation.PostConstruct
 class SedSendtListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
-    private val dokumentHelper: EuxDokumentHelper,
-    private val fagmodulHelper: FagmodulHelper,
+    private val dokumentHelper: EuxService,
+    private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
@@ -115,7 +115,7 @@ class SedSendtListener(
         val sakInformasjonFraBestemSak = bestemSakService.hentSakInformasjon(aktoerId, bucType, bestemSaktypeFraSed(ytelsestypeFraSed, identifisertPerson, bucType))
 
         logger.info("skal hente pensjonSak for SED kap.1 og validere mot pesys")
-        val sakInformasjonFraSed = fagmodulHelper.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
+        val sakInformasjonFraSed = fagmodulService.hentPensjonSakFraSED(aktoerId, alleSedIBuc)
 
         return when {
             sakInformasjonFraSed != null && sakInformasjonFraBestemSak == null -> sakInformasjonFraSedMedLogging(sakInformasjonFraSed)

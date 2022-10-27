@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -28,7 +28,7 @@ import javax.annotation.PostConstruct
 class SedMottattListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
-    private val dokumentHelper: EuxDokumentHelper,
+    private val dokumentHelper: EuxService,
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()

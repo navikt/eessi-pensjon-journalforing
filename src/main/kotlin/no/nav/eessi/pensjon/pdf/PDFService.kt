@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.pdf
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -24,7 +24,7 @@ val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeatur
  */
 @Service
 class PDFService(
-    private val euxService: EuxDokumentHelper,
+    private val euxService: EuxService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 

@@ -28,12 +28,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class EuxDokumentHelperTest {
+internal class EuxServiceTest {
 
     private val euxKlient: EuxKlient = mockk(relaxed = true)
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
 
-    private val helper = EuxDokumentHelper(euxKlient)
+    private val helper = EuxService(euxKlient)
 
     @BeforeEach
     fun before() {

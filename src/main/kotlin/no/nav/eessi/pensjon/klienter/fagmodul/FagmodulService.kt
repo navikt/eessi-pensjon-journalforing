@@ -1,16 +1,15 @@
-package no.nav.eessi.pensjon.buc
+package no.nav.eessi.pensjon.klienter.fagmodul
 
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.models.SakInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class FagmodulHelper(private val fagmodulKlient: FagmodulKlient) {
+class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
-    private val logger = LoggerFactory.getLogger(FagmodulHelper::class.java)
+    private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
 
 
     fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {

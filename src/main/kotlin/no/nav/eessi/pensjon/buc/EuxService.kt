@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 @Service
-class EuxDokumentHelper(
+class EuxService(
     private val euxKlient: EuxKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
-    private val logger = LoggerFactory.getLogger(EuxDokumentHelper::class.java)
+    private val logger = LoggerFactory.getLogger(EuxService::class.java)
 
     private lateinit var hentSed: MetricsHelper.Metric
     private lateinit var sendSed: MetricsHelper.Metric

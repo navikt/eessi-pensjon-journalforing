@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.assertThrows
 
 class PDFServiceTest {
 
-    private val dokumentHelper: EuxDokumentHelper = mockk()
+    private val dokumentHelper: EuxService = mockk()
 
     private val pdfService = PDFService(dokumentHelper)
 

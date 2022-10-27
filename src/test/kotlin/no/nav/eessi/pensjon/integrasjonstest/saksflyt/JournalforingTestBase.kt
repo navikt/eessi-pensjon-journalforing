@@ -2,9 +2,8 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
 import no.nav.eessi.pensjon.buc.EuxKlient
-import no.nav.eessi.pensjon.buc.FagmodulHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Document
@@ -24,6 +23,7 @@ import no.nav.eessi.pensjon.json.mapJsonToAny
 import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
@@ -67,8 +67,8 @@ internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlient = mockk()
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val dokumentHelper = EuxDokumentHelper(euxKlient)
-    private val fagmodulHelper = FagmodulHelper(fagmodulKlient)
+    private val dokumentHelper = EuxService(euxKlient)
+    private val fagmodulService = FagmodulService(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
 
@@ -124,7 +124,7 @@ internal open class JournalforingTestBase {
         personidentifiseringService = personidentifiseringService,
         dokumentHelper = dokumentHelper,
         bestemSakService = bestemSakService,
-        fagmodulHelper = fagmodulHelper,
+        fagmodulService = fagmodulService,
         profile = "test"
     )
 

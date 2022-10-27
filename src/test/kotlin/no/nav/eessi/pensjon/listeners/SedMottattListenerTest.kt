@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.buc.EuxDokumentHelper
+import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -21,7 +21,7 @@ internal class SedMottattListenerTest {
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val jouralforingService = mockk<JournalforingService>(relaxed = true)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
-    private val sedDokumentHelper = mockk<EuxDokumentHelper>(relaxed = true)
+    private val sedDokumentHelper = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
 
     private val sedListener = SedMottattListener(jouralforingService,
