@@ -7,7 +7,7 @@ buildscript {
 		jacksonVersion = '2.13.4'
 		tokenSupportVersion = '2.1.6'
 		logstashLogbackVersion = '7.2'
-		imageioVersion = '3.9.0'
+		imageioVersion = '3.9.3'
 		pensjonInformasjonVersion = '9.4.10'
 		epMetricsVersion = '0.5.26'
 		epLoggingVersion = '1.0.54'
