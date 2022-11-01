@@ -1,7 +1,7 @@
 buildscript {
 
 	ext {
-		springBootVersion = '2.7.4'
+		springBootVersion = '2.7.5'
 		springKafkaVersion = '2.9.2'
 		cxfVersion = '3.5.1'
 		jacksonVersion = '2.13.4'
