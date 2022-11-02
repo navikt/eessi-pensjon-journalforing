@@ -51,7 +51,7 @@ class RestTemplateConfig(
 
     @Bean
     fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
-        return opprettRestTemplateWithBuffered(euxUrl, "eux-credentials")
+        return opprettRestTemplate(euxUrl, "eux-credentials")
     }
 
     @Bean
@@ -61,7 +61,7 @@ class RestTemplateConfig(
 
     @Bean
     fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
-        return opprettRestTemplate(joarkUrl, "dokarkiv-credentials")
+        return opprettRestTemplateForJoark(joarkUrl, "dokarkiv-credentials")
     }
 
     @Bean
@@ -74,7 +74,11 @@ class RestTemplateConfig(
         return opprettRestTemplate(bestemSakUrl, "proxy-credentials")
     }
 
-    private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
+    /**
+     * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse
+     * problemer med HTTP-PATCH – som brukes mot joark.
+     */
+    private fun opprettRestTemplateForJoark(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
@@ -88,7 +92,7 @@ class RestTemplateConfig(
             }
     }
 
-    private fun opprettRestTemplateWithBuffered(url: String, oAuthKey: String) : RestTemplate {
+    private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
                 .rootUri(url)
                 .errorHandler(DefaultResponseErrorHandler())
