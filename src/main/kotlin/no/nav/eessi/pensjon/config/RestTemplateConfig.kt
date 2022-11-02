@@ -15,8 +15,10 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
 import org.springframework.web.client.DefaultResponseErrorHandler
+import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @Configuration
@@ -85,6 +87,7 @@ class RestTemplateConfig(
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
                 RequestCountInterceptor(meterRegistry),
+                ResourceAccessRetryInterceptor(),
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
@@ -99,6 +102,7 @@ class RestTemplateConfig(
                 .additionalInterceptors(
                         RequestIdHeaderInterceptor(),
                         RequestCountInterceptor(meterRegistry),
+                        ResourceAccessRetryInterceptor(),
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
                 .build().apply {
@@ -122,6 +126,30 @@ class RestTemplateConfig(
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
             request.headers.setBearerAuth(response.accessToken)
             execution.execute(request, body!!)
+        }
+    }
+
+    internal class ResourceAccessRetryInterceptor : ClientHttpRequestInterceptor {
+        private val logger = LoggerFactory.getLogger(ResourceAccessRetryInterceptor::class.java)
+
+        override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution) =
+            withRetries { execution.execute(request, body) }
+
+        private fun <T> withRetries(maxAttempts: Int = 3, waitTime: Long = 1L, timeUnit: TimeUnit = TimeUnit.SECONDS, func: () -> T): T {
+            var failException: Throwable? = null
+            var count = 0
+            while (count < maxAttempts) {
+                try {
+                    return func.invoke()
+                } catch (ex: ResourceAccessException) { // Dette bør ta seg av IOException - som typisk skjer der som det er nettverksissues.
+                    count++
+                    logger.warn("Attempt $count failed with ${ex.message} caused by ${ex.cause}")
+                    failException = ex
+                    Thread.sleep(timeUnit.toMillis(waitTime))
+                }
+            }
+            logger.warn("Giving up after $count attempts.")
+            throw failException!!
         }
     }
 
