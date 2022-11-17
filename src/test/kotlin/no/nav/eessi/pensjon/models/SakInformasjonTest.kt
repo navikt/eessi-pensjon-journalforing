@@ -27,7 +27,7 @@ internal class SakInformasjonTest {
                 sakStatus = SakStatus.LOPENDE
         ).toJson()
 
-        JSONAssert.assertEquals(actual, json, false)
+        JSONAssert.assertEquals(actual, json, true)
 
     }
 }
