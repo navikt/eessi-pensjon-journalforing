@@ -7,6 +7,7 @@ enum class Saktype {
     BARNEP,
     UFOREP,
     GENRL,
+    GAM_YRK,
     AFP_PRIVAT,
     AFP
 }
