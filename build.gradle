@@ -71,7 +71,7 @@ dependencies {
 	testImplementation("com.ninja-squad:springmockk:3.1.1")
 
 	// Architecture tests
-	testImplementation 'com.tngtech.archunit:archunit:1.0.0'
+	testImplementation 'com.tngtech.archunit:archunit:1.0.1'
 
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
