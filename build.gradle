@@ -4,7 +4,7 @@ buildscript {
 		springBootVersion = '2.7.5'
 		springKafkaVersion = '2.9.2'
 		cxfVersion = '3.5.1'
-		jacksonVersion = '2.14.0'
+		jacksonVersion = '2.14.1'
 		tokenSupportVersion = '2.1.8'
 		logstashLogbackVersion = '7.2'
 		imageioVersion = '3.9.3'
