@@ -13,7 +13,7 @@ kafka:
     topic: ${KAFKA_KRAVINIT_TOPIC}
     groupid: eessi-pensjon-group
 
-METRICS_REQUESTFILTER_ENABLE: false
+METRICS_REQUESTFILTER_ENABLE: true
 
 no.nav.security.jwt:
   client:
