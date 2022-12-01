@@ -87,8 +87,8 @@ class RestTemplateConfig(
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
-                RequestCountInterceptor(meterRegistry),
                 IOExceptionRetryInterceptor(),
+                RequestCountInterceptor(meterRegistry),
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
@@ -102,8 +102,8 @@ class RestTemplateConfig(
                 .errorHandler(DefaultResponseErrorHandler())
                 .additionalInterceptors(
                         RequestIdHeaderInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
                         IOExceptionRetryInterceptor(),
+                        RequestCountInterceptor(meterRegistry),
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
                 .build().apply {
