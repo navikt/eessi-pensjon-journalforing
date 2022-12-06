@@ -9,7 +9,7 @@ buildscript {
 		logstashLogbackVersion = '7.2'
 		imageioVersion = '3.9.4'
 		pensjonInformasjonVersion = '9.4.10'
-		epMetricsVersion = '1.0.1'
+		epMetricsVersion = '1.0.2'
 		epLoggingVersion = '1.1.6'
 		epPersonoppslagVersion = '12.1.0'
 		epEuxVersion = '1.3.34'
