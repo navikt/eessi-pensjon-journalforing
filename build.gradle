@@ -11,7 +11,7 @@ buildscript {
 		pensjonInformasjonVersion = '9.4.10'
 		epMetricsVersion = '1.0.4'
 		epLoggingVersion = '1.1.8'
-		epPersonoppslagVersion = '12.1.2'
+		epPersonoppslagVersion = '12.1.3'
 		epEuxVersion = '1.3.34'
 	}
 }
