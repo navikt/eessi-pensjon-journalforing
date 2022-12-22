@@ -112,7 +112,7 @@ class SedMottattListener(
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n $hendelse \n", ex)
+                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n ${trimFnrString(hendelse)} \n", ex)
                     throw SedMottattRuntimeException(ex)
                 }
                 latch.countDown()
@@ -141,6 +141,9 @@ class SedMottattListener(
         }
         return sakInformasjon?.sakType
     }
+
+    private fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
+
 
 
     /**
