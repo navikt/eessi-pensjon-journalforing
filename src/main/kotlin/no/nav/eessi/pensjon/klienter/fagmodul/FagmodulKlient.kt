@@ -1,8 +1,7 @@
 package no.nav.eessi.pensjon.klienter.fagmodul
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
@@ -24,7 +23,7 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
                 null,
                 String::class.java).body
             val json = responsebody.orEmpty()
-            return mapJsonToAny(json, typeRefs<List<SakInformasjon>>())
+            return mapJsonToAny(json)
         } catch(ex: HttpStatusCodeException) {
             logger.error("En feil oppstod under henting av pensjonsakliste ex: $ex body: ${ex.responseBodyAsString}", ex)
             throw RuntimeException("En feil oppstod under henting av pensjonsakliste ex: ${ex.message} body: ${ex.responseBodyAsString}")

@@ -10,10 +10,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
-
 import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
@@ -26,6 +23,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personoppslag.FodselsnummerGenerator
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -554,7 +552,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             else -> Assertions.fail()
         }
 
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         Assertions.assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         block(journalpost.captured)

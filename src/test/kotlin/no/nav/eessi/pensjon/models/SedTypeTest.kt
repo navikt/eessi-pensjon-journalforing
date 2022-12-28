@@ -2,11 +2,10 @@ package no.nav.eessi.pensjon.models
 
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
 import no.nav.eessi.pensjon.models.sed.SedTypeUtils.typerMedIdentEllerFDato
+import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -65,6 +64,6 @@ internal class SedTypeTest {
     private fun serde(sedType: SedType): SedType {
         val json = sedType.toJson()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 }

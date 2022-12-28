@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.json.mapAnyToJson
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
 
 /**

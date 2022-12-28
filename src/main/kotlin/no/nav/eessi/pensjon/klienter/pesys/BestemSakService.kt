@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.klienter.pesys
 
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

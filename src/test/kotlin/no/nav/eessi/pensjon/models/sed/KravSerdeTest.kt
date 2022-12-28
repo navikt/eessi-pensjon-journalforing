@@ -2,9 +2,8 @@ package no.nav.eessi.pensjon.models.sed
 
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -32,6 +31,6 @@ internal class KravSerdeTest {
     private fun serde(krav: Krav): Krav {
         val json = krav.toJson()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 }

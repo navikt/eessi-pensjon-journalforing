@@ -10,13 +10,12 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -48,7 +47,7 @@ internal class FagmodulServiceTest {
 
         val sedP5000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P5000-medNorskGjenlevende-NAV.json")))
         val mockAllSediBuc = listOf(
-                mapJsonToAny(sedP5000, typeRefs<SED>())
+                mapJsonToAny<SED>(sedP5000)
         )
 
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
@@ -64,7 +63,7 @@ internal class FagmodulServiceTest {
         val sedP2000 = javaClass.getResource("/sed/P2000-ugyldigFNR-NAV.json").readText()
 
         val mockAllSediBuc = listOf(
-                mapJsonToAny(sedP2000, typeRefs<SED>())
+                mapJsonToAny<SED>(sedP2000)
         )
 
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)

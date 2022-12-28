@@ -15,8 +15,6 @@ import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
@@ -33,6 +31,7 @@ import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
@@ -384,10 +383,10 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+            mapJsonToAny(it)
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+            mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
@@ -404,7 +403,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
+        return mapJsonToAny(dokumentfilerJson)
     }
 
     data class TestResult(

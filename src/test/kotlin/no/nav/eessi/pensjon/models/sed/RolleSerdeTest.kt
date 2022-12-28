@@ -1,9 +1,9 @@
 package no.nav.eessi.pensjon.models.sed
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
+
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -31,6 +31,6 @@ internal class RolleSerdeTest {
     private fun serde(rolle: Rolle): Rolle {
         val json = rolle.toJson()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 }

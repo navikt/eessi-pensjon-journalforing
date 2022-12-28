@@ -3,8 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
@@ -39,6 +37,7 @@ import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.sed.SedHendelseModel
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -519,7 +518,7 @@ internal class OppgaveRoutingServiceTest {
             "gyldigFra": "2017-09-30"
             }
         """.trimIndent()
-        val mappedResponse = mapJsonToAny(json, typeRefs<Norg2ArbeidsfordelingItem>())
+        val mappedResponse = mapJsonToAny<Norg2ArbeidsfordelingItem>(json)
 
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
@@ -568,7 +567,7 @@ internal class OppgaveRoutingServiceTest {
             "gyldigFra": "2017-09-30"
             }
         """.trimIndent()
-        val mappedResponse = mapJsonToAny(json, typeRefs<Norg2ArbeidsfordelingItem>())
+        val mappedResponse = mapJsonToAny<Norg2ArbeidsfordelingItem>(json)
 
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
@@ -654,7 +653,7 @@ internal class OppgaveRoutingServiceTest {
             "gyldigFra": "2017-09-30"
             }
         """.trimIndent()
-        val mappedResponse = mapJsonToAny(json, typeRefs<Norg2ArbeidsfordelingItem>())
+        val mappedResponse = mapJsonToAny<Norg2ArbeidsfordelingItem>(json)
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
@@ -902,7 +901,7 @@ internal class OppgaveRoutingServiceTest {
     private fun fromResource(file: String): List<Norg2ArbeidsfordelingItem> {
         val json = javaClass.getResource(file).readText()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 
     fun mockerEnPerson() = IdentifisertPerson(

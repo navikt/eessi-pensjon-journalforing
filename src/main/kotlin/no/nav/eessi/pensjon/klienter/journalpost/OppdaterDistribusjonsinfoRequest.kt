@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-import no.nav.eessi.pensjon.json.mapAnyToJson
+import no.nav.eessi.pensjon.utils.mapAnyToJson
 
 /**
  *  https://confluence.adeo.no/display/BOA/oppdaterDistribusjonsinfo

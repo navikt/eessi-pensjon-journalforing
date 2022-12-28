@@ -4,9 +4,8 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.Tilbakekreving
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -15,7 +14,7 @@ internal class SEDTest {
 
     @Test
     fun `Test felter på en P8000 deserialiseres korrekt`() {
-        val sed = mapJsonToAny(javaClass.getResource("/sed/P_BUC_05-P8000.json").readText(), typeRefs<P8000>())
+        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P_BUC_05-P8000.json").readText())
 
         val person = sed.nav!!.bruker!!.person
 
@@ -37,7 +36,7 @@ internal class SEDTest {
 
     @Test
     fun `Test felter på en R005 deserialiseres korrekt`() {
-        val sed = mapJsonToAny(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText(), typeRefs<R005>())
+        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText())
 
         val brukere = sed.recoveryNav!!.brukere!!
         val person = brukere.firstOrNull()?.person!!
@@ -95,12 +94,12 @@ internal class SEDTest {
             }
         """.trimIndent()
 
-        val tilbakekreving = mapJsonToAny(json, typeRefs<Tilbakekreving>())
+        val tilbakekreving = mapJsonToAny<Tilbakekreving>(json)
 
         assertEquals("alderspensjon", tilbakekreving.feilutbetaling!!.ytelse!!.type)
     }
 
     private fun createSedFromFile(path: String): SED {
-        return mapJsonToAny(javaClass.getResource(path).readText(), typeRefs())
+        return mapJsonToAny(javaClass.getResource(path).readText())
     }
 }

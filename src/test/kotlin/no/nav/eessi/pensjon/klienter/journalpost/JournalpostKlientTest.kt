@@ -4,8 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
@@ -13,8 +14,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class JournalpostKlientTest {
     private val mockrestTemplate: RestTemplate = mockk(relaxed = true)
@@ -60,7 +59,7 @@ internal class JournalpostKlientTest {
 
         journalpostKlient.oppdaterDistribusjonsinfo(journalPostId)
 
-        val actualRequest = mapJsonToAny(bodySlot.captured.body!!, typeRefs<OppdaterDistribusjonsinfoRequest>())
+        val actualRequest = mapJsonToAny<OppdaterDistribusjonsinfoRequest>(bodySlot.captured.body!!)
 
         assertTrue(actualRequest.settStatusEkspedert)
         assertEquals("EESSI", actualRequest.utsendingsKanal)

@@ -24,8 +24,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 
 import no.nav.eessi.pensjon.eux.model.sed.Status
 import no.nav.eessi.pensjon.eux.model.sed.TilbakekrevingBrukere
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
@@ -41,6 +39,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.KontaktadresseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskAdresseIFrittFormat
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
@@ -569,7 +568,7 @@ class PersonidentifiseringServiceTest {
 
     private fun sedFromJsonFile(file: String): SED {
         val json = javaClass.getResource(file).readText()
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 
     private fun createIdentifisertPerson(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPerson =

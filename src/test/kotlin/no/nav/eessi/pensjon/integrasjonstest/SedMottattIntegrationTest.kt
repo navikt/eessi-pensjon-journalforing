@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
-import no.nav.eessi.pensjon.json.toJson
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory

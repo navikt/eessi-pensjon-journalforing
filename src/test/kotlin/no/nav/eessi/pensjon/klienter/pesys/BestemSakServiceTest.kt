@@ -4,11 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
-import org.junit.jupiter.api.Assertions.*
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -121,7 +122,7 @@ internal class BestemSakServiceTest {
     private fun opprettResponse(file: String): BestemSakResponse {
         val responseBody = javaClass.classLoader.getResource(file)!!.readText()
 
-        return mapJsonToAny(responseBody, typeRefs())
+        return mapJsonToAny(responseBody)
     }
 
 }

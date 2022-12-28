@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.sed
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -19,6 +18,6 @@ internal class BucTypeTest {
     private fun serde(bucType: BucType): BucType {
         val json = bucType.toJson()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 }

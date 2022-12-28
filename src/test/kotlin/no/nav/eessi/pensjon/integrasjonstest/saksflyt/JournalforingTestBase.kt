@@ -19,9 +19,6 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.journalpost.*
@@ -42,6 +39,8 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -220,7 +219,7 @@ internal open class JournalforingTestBase {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
         // forvent tema == PEN og enhet 2103
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         val request = journalpost.captured
@@ -356,10 +355,10 @@ internal open class JournalforingTestBase {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs())
+            mapJsonToAny(it)
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs())
+            mapJsonToAny(it)
         }
         block(PBuc03IntegrationTest.TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
@@ -374,7 +373,7 @@ internal open class JournalforingTestBase {
 
     fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
+        return mapJsonToAny(dokumentfilerJson)
     }
 
     fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler, bucType: BucType = BucType.P_BUC_01, bucLand: String = "NO") {
@@ -392,9 +391,9 @@ internal open class JournalforingTestBase {
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
-        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"), typeRefs())
+        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"))
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
-        val dokumentFiler = mapJsonToAny(dokumentVedleggJson, typeRefs<SedDokumentfiler>())
+        val dokumentFiler = mapJsonToAny<SedDokumentfiler>(dokumentVedleggJson)
         initCommonMocks(sed, docs, dokumentFiler)
     }
 

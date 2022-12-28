@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.handler
 
-import no.nav.eessi.pensjon.json.toJson
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired

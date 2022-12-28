@@ -20,9 +20,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
@@ -45,6 +42,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -597,7 +596,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
@@ -638,7 +637,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
@@ -680,7 +679,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
@@ -722,7 +721,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(Enhet.UFORE_UTLAND, oppgaveMelding.tildeltEnhetsnr)
@@ -759,7 +758,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(ID_OG_FORDELING, oppgaveMelding.tildeltEnhetsnr)
@@ -806,7 +805,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
@@ -920,7 +919,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         sokPerson: Person? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = sedJson?.let { mapJsonToAny(it, typeRefs<P15000>()) }
+        val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
                 ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
 
         initCommonMocks(sed, alleDocs)
@@ -963,7 +962,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
 
 
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         block(journalpost.captured)
@@ -996,7 +995,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         val fnrBarnsok = if (benyttSokPerson) null else fnrBarn
 
-        val sed = sedJson?.let { mapJsonToAny(it, typeRefs<SED>()) }
+        val sed = sedJson?.let { mapJsonToAny(it) }
             ?: createSedPensjon(
                 SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarnsok, krav = krav, relasjon = relasjonAvod, pdlPerson = mockBarn
             )
@@ -1028,7 +1027,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
 
 
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         block(journalpost.captured)
@@ -1083,7 +1082,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             else -> fail()
         }
 
-        val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
         block(journalpost.captured)

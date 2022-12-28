@@ -4,10 +4,9 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.eessi.pensjon.eux.model.buc.Document
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -112,7 +111,7 @@ abstract class IntegrasjonsBase() {
 
     protected fun opprettBucDocuments(file: String): List<Document> {
         val json = javaClass.getResource(file)!!.readText()
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 
     private fun settOppProducerTemplate(topicNavn: String): KafkaTemplate<String, String> {

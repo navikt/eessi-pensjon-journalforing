@@ -1,11 +1,22 @@
 package no.nav.eessi.pensjon.models.sed
 
-import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.*
-import no.nav.eessi.pensjon.json.toJson
-import org.junit.jupiter.api.Test
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.ADOPTIVBARN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.ANNEN_SLEKTNING
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.BARNEBARN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.EGET_BARN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.EKTEFELLE
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.FOSTERBARN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.SAMBOER
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.STEBARN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.SØSKEN
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.TIDLIGERE_EKTEFELLE
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod.TIDLIGERE_PARTNER_I_ET_REGISTRERT_PARTNERSKAP
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 internal class RelasjonTilAvdodTest {
 

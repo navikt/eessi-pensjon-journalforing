@@ -6,8 +6,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
@@ -15,6 +13,7 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -42,7 +41,7 @@ internal class JournalpostServiceTest {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
         val responseBody = getResource("journalpost/opprettJournalpostResponseFalse.json")
-        val expectedResponse = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
@@ -139,10 +138,10 @@ internal class JournalpostServiceTest {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
         val responseJson = getResource("journalpost/opprettJournalpostResponseFalse.json")
-        val expectedResponse = mapJsonToAny(responseJson, typeRefs<OpprettJournalPostResponse>())
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseJson)
 
         val requestJson = getResource("journalpost/opprettJournalpostRequestGB.json")
-        val request = mapJsonToAny(requestJson, typeRefs<OpprettJournalpostRequest>())
+        val request = mapJsonToAny<OpprettJournalpostRequest>(requestJson)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
 
@@ -191,7 +190,7 @@ internal class JournalpostServiceTest {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
         val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
-        val expectedResponse = mapJsonToAny(responseBody, typeRefs<OpprettJournalPostResponse>())
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
 
         val requestBody = """
             {
@@ -218,7 +217,7 @@ internal class JournalpostServiceTest {
               "tittel" : "Utgående P2100"
             }
         """.trimIndent()
-        val expectedRequest = mapJsonToAny(requestBody, typeRefs<OpprettJournalpostRequest>())
+        val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
         every { mockKlient.opprettJournalpost(capture(requestSlot), any()) } returns expectedResponse
 

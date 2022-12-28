@@ -1,11 +1,10 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -34,7 +33,7 @@ internal class OpprettJournalpostModelTest {
         assertTrue(serialized.contains("\"journalpostType\" : \"INNGAAENDE\""))
         assertTrue(serialized.contains("\"tema\" : \"PEN\""))
 
-        val deserialized = mapJsonToAny(serialized, typeRefs<OpprettJournalpostRequest>())
+        val deserialized = mapJsonToAny<OpprettJournalpostRequest>(serialized)
 
         assertEquals(actualRequest.avsenderMottaker, deserialized.avsenderMottaker)
         assertEquals(actualRequest.behandlingstema, deserialized.behandlingstema)
@@ -55,7 +54,7 @@ internal class OpprettJournalpostModelTest {
 
         val opprettJournalpostRequestJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostRequest.json")))
 
-        val opprettJournalpostRequest = mapJsonToAny(opprettJournalpostRequestJson, typeRefs<OpprettJournalpostRequest>())
+        val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequest>((opprettJournalpostRequestJson))
         assertEquals(opprettJournalpostRequest.behandlingstema, Behandlingstema.ALDERSPENSJON)
         assertEquals(opprettJournalpostRequest.bruker?.id, "12345678912")
         assertEquals(opprettJournalpostRequest.bruker?.idType, "FNR")
@@ -73,7 +72,7 @@ internal class OpprettJournalpostModelTest {
     @Test
     fun `Gitt en gyldig journalpostResponse json når mapping så skal alle felter mappes`() {
         val opprettjournalpostResponseJson = String(Files.readAllBytes(Paths.get("src/test/resources/journalpost/opprettJournalpostResponseFalse.json")))
-        val opprettJournalpostResponse = mapJsonToAny(opprettjournalpostResponseJson, typeRefs<OpprettJournalPostResponse>())
+        val opprettJournalpostResponse = mapJsonToAny<OpprettJournalPostResponse>(opprettjournalpostResponseJson)
         assertEquals(opprettJournalpostResponse.journalpostId, "429434378")
         assertEquals(opprettJournalpostResponse.journalstatus, "M")
         assertEquals(opprettJournalpostResponse.melding, "null")

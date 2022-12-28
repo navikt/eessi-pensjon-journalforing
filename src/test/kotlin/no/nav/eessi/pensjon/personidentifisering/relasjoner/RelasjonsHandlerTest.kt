@@ -10,14 +10,13 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -208,7 +207,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
-            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
+            val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
             val sedList = listOf(
                 Pair(
                     "3123123",
@@ -233,7 +232,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             val forsikretFnr = SLAPP_SKILPADDE
             val gjenlevFnr = LEALAUS_KAKE
 
-            val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
+            val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
             val sedList = listOf(
                 Pair("3123123", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon)))
             )
@@ -391,7 +390,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = LEALAUS_KAKE
 
-        val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
+        val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
         val sedList = listOf(
             Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
         )
@@ -412,7 +411,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = LEALAUS_KAKE
 
-        val relasjon = mapJsonToAny("\"$relasjonKode\"", typeRefs<RelasjonTilAvdod>())
+        val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
         val sedList = listOf(
             Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
         )

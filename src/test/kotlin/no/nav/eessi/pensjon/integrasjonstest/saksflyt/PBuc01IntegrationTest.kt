@@ -22,9 +22,6 @@ import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.BucType
@@ -44,6 +41,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.fail
@@ -354,7 +353,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
-            val oppgaveMelding = mapJsonToAny(meldingSlot.captured, typeRefs<OppgaveMelding>())
+            val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
@@ -407,7 +406,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-                mapJsonToAny(it, typeRefs())
+                mapJsonToAny(it)
             }
 
             val request = journalpost.captured
@@ -535,10 +534,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs())
+            mapJsonToAny(it)
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs())
+            mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
@@ -612,10 +611,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
-            mapJsonToAny(it, typeRefs<BehandleHendelseModel>())
+            mapJsonToAny(it)
         }
         val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it, typeRefs<OppgaveMelding>())
+            mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
@@ -632,7 +631,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
         val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson, typeRefs())
+        return mapJsonToAny(dokumentfilerJson)
     }
 
     data class TestResult(

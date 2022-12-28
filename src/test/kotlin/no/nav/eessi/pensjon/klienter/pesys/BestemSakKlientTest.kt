@@ -4,9 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +39,7 @@ internal class BestemSakKlientTest {
 
         bestemSakKlient.kallBestemSak(expectedRequest)
 
-        val actualRequest = mapJsonToAny(requestSlot.captured.body!!, typeRefs<BestemSakRequest>())
+        val actualRequest = mapJsonToAny<BestemSakRequest>(requestSlot.captured.body!!)
 
         assertEquals(expectedRequest, actualRequest)
         verify(exactly = 1) { mockRestTemplate.exchange("/", HttpMethod.POST, any(), String::class.java) }

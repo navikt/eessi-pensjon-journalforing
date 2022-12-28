@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.toJson
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
@@ -45,7 +44,7 @@ class Norg2Klient(private val proxyOAuthRestTemplate: RestTemplate,
                         httpEntity,
                         String::class.java)
 
-                val fordelingEnheter = mapJsonToAny(responseEntity.body!!, typeRefs<List<Norg2ArbeidsfordelingItem>>())
+                val fordelingEnheter = mapJsonToAny<List<Norg2ArbeidsfordelingItem>>(responseEntity.body!!)
                 logger.debug("fordelsingsEnheter: $fordelingEnheter")
 
                 fordelingEnheter

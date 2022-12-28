@@ -5,8 +5,7 @@ import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.X008
 import no.nav.eessi.pensjon.eux.model.sed.XNav
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -106,7 +105,7 @@ internal class FodselsdatoHelperTest {
 
     @Test
     fun `ved henting ved fdato på R005 når det er flere personer og en er avød hentes den avdøde`() {
-        val sed = mapJsonToAny(javaClass.getResource("/sed/R005-avdod-enke-NAV.json").readText(), typeRefs<R005>())
+        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-avdod-enke-NAV.json").readText())
 
         val sedListe = listOf(sed)
         assertEquals(LocalDate.of(2000, 8, 26), FodselsdatoHelper.fdatoFraSedListe(sedListe,emptyList()))
@@ -114,7 +113,7 @@ internal class FodselsdatoHelperTest {
 
     @Test
     fun `ved henting ved fdato på R005 ved den person som debitor og sak er alderpensjon`() {
-        val sed = mapJsonToAny(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText(), typeRefs<R005>())
+        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText())
         assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fdatoFraSedListe(listOf(sed),emptyList()))
     }
 

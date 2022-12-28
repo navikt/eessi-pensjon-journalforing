@@ -3,9 +3,8 @@ package no.nav.eessi.pensjon.klienter.norg2
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
 import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -186,7 +185,7 @@ internal class Norg2ServiceTest {
     private fun getJsonFileFromResource(filename: String): List<Norg2ArbeidsfordelingItem> {
         val json = javaClass.getResource(filename).readText()
 
-        return mapJsonToAny(json, typeRefs())
+        return mapJsonToAny(json)
     }
 
 }

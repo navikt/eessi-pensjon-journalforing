@@ -12,8 +12,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 
 import no.nav.eessi.pensjon.eux.model.sed.X005
 import no.nav.eessi.pensjon.eux.model.sed.XNav
-import no.nav.eessi.pensjon.json.mapJsonToAny
-import no.nav.eessi.pensjon.json.typeRefs
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -24,7 +23,7 @@ internal class SedFnrSokTest {
     fun `Gitt en SED med flere norske fnr i Pin-identifikator feltet når det søkes etter fnr i SED så returner alle norske fnr`() {
         // Gitt
         val sedJson = javaClass.getResource("/sed/P2000-NAV.json").readText()
-        val sed = mapJsonToAny(sedJson, typeRefs<SED>())
+        val sed = mapJsonToAny<SED>(sedJson)
 
         // Når
         val funnedeFnr = SedFnrSok.finnAlleFnrDnrISed(sed)
