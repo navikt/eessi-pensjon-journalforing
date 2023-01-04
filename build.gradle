@@ -10,7 +10,7 @@ buildscript {
 		imageioVersion = '3.9.4'
 		pensjonInformasjonVersion = '9.4.10'
 		epMetricsVersion = '1.0.8'
-		epLoggingVersion = '1.1.11'
+		epLoggingVersion = '1.1.12'
 		epPersonoppslagVersion = '12.1.10'
 		epEuxVersion = '1.3.58'
 	}
