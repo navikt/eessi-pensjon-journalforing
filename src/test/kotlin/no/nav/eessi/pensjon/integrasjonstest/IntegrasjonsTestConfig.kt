@@ -2,9 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
-import no.nav.eessi.pensjon.personoppslag.pdl.PdlToken
-import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenCallBack
-import no.nav.eessi.pensjon.personoppslag.pdl.PdlTokenImp
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -14,9 +11,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
@@ -91,6 +85,9 @@ class IntegrasjonsTestConfig {
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate  = mockedRestTemplate()
 
+    @Bean
+    fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
+
     private fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")
         return RestTemplateBuilder()
@@ -118,7 +115,7 @@ class IntegrasjonsTestConfig {
         return factory
     }
 
-    @Bean("pdlTokenComponent")
+/*    @Bean("pdlTokenComponent")
     @Primary
     @Order(Ordered.HIGHEST_PRECEDENCE)
     fun pdlTokenComponent(): PdlTokenCallBack {
@@ -127,5 +124,5 @@ class IntegrasjonsTestConfig {
                 return PdlTokenImp(accessToken = "")
             }
         }
-    }
+    }*/
 }
