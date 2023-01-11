@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.sed
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 
 @JsonIgnoreProperties(ignoreUnknown = true)

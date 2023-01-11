@@ -1,26 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Brukere
-import no.nav.eessi.pensjon.eux.model.sed.Krav
-import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.Pensjon
-import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.eux.model.sed.PersonR005
-import no.nav.eessi.pensjon.eux.model.sed.PinItem
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.RNav
-import no.nav.eessi.pensjon.eux.model.sed.RelasjonAvdodItem
-import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.eux.model.sed.SED
-
-import no.nav.eessi.pensjon.eux.model.sed.Status
-import no.nav.eessi.pensjon.eux.model.sed.TilbakekrevingBrukere
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
-import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import java.time.LocalDate
 
 open class RelasjonTestBase {

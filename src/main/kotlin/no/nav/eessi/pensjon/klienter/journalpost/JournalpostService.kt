@@ -1,13 +1,8 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.personoppslag.Fodselsnummer
+import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
