@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
@@ -259,67 +260,67 @@ internal class JournalpostServiceTest {
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.BARNEP)
+        val result = journalpostService.hentTema(BucType.P_BUC_02, BARNEP)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.UFOREP)
+        val result = journalpostService.hentTema(BucType.P_BUC_02, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, SedType.P2100, Enhet.PENSJON_UTLAND, Saktype.GJENLEV)
+        val result = journalpostService.hentTema(BucType.P_BUC_02, GJENLEV)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_01, SedType.P6000, Enhet.PENSJON_UTLAND, null)
+        val result = journalpostService.hentTema(BucType.P_BUC_01, null)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R004, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.UFOREP)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
+        val result = journalpostService.hentTema(BucType.R_BUC_02, ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
-        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.GENRL)
+        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, GENRL)
         assertEquals(Tema.PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.OMSORG)
+        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, OMSORG)
         assertEquals(Tema.PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.ALDER)
+        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, ALDER)
         assertEquals(Tema.PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.GJENLEV)
+        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, GJENLEV)
         assertEquals(Tema.PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.BARNEP)
+        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, BARNEP)
         assertEquals(Tema.PENSJON, resultatBARNEP)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_05, SedType.R006, Enhet.OKONOMI_PENSJON, Saktype.UFOREP)
+        val result = journalpostService.hentTema(BucType.P_BUC_05, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 

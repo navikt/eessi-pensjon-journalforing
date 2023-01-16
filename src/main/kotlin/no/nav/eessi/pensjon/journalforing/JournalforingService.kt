@@ -12,11 +12,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService

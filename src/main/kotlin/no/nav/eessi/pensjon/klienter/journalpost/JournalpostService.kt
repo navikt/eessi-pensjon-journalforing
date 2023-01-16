@@ -2,6 +2,8 @@ package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Saktype.*
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -14,7 +16,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     private lateinit var navOrgnummer: String
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
-
 
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
@@ -45,7 +46,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
-            tema = hentTema(bucType, sedType, journalfoerendeEnhet, saktype),
+            tema = hentTema(bucType, saktype),
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedType),
             dokumenter = dokumenter,
@@ -66,21 +67,30 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
     private fun bestemBehandlingsTema(bucType: BucType, saktype: Saktype?): Behandlingstema {
         return if (bucType == BucType.R_BUC_02) {
-            return when (saktype) {
-                Saktype.UFOREP -> Behandlingstema.UFOREPENSJON
-                Saktype.GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
+            when (saktype) {
+                UFOREP -> Behandlingstema.UFOREPENSJON
+                GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
                 else -> Behandlingstema.ALDERSPENSJON
             }
-        } else bucType.behandlingstema
+            Behandlingstema.TILBAKEBETALING
+        } else {
+            return when (bucType) {
+                BucType.P_BUC_02 -> Behandlingstema.GJENLEVENDEPENSJON
+                BucType.P_BUC_03 -> Behandlingstema.UFOREPENSJON
+                else -> Behandlingstema.ALDERSPENSJON
+            }
+        }
+
     }
 
-    fun hentTema(bucType: BucType, sedType: SedType, enhet: Enhet, saktype: Saktype?): Tema {
-        logger.debug("hentTema  bucType: $bucType sedType: $sedType  enhet: $enhet  ytelse: $saktype")
+    /**
+     * Tema er PENSJON såfremt det ikke er en
+     * - uføre buc (P_BUC_03)
+     * - saktype er UFØRETRYGD
+     */
 
-        if (saktype == Saktype.UFOREP) return Tema.UFORETRYGD
-        if(bucType == BucType.R_BUC_02) return Tema.PENSJON
-        return bucType.tema
-    }
+    fun hentTema(bucType: BucType, saktype: Saktype?) : Tema =
+        if (saktype == UFOREP || bucType == BucType.P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
 
     private fun populerAvsenderMottaker(
             avsenderNavn: String?,

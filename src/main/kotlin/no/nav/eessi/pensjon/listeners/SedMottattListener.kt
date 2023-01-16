@@ -103,7 +103,7 @@ class SedMottattListener(
                             cr.offset(),
                             sakInformasjon,
                             currentSed,
-                            harAdressebeskyttelse
+                            harAdressebeskyttelse,
                         )
 
                     }
