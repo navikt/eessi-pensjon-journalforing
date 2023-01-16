@@ -2,7 +2,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
@@ -11,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 internal class Pbuc05Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_05) as Pbuc05
+    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_05) as Pbuc05
 
     companion object {
         private const val FNR_63 = "05115743432"        // SLAPP DORULL 62
@@ -25,7 +26,7 @@ internal class Pbuc05Test {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { bosatt } returns Bosatt.NORGE
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
         }
 
 
@@ -47,7 +48,7 @@ internal class Pbuc05Test {
             every { bosatt } returns Bosatt.NORGE
             every { avsenderLand } returns "DE"
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_61)!!.getBirthDate()
@@ -68,7 +69,7 @@ internal class Pbuc05Test {
             every { bosatt } returns Bosatt.UTLAND
             every { avsenderLand } returns "DE"
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()
@@ -88,7 +89,7 @@ internal class Pbuc05Test {
             every { bosatt } returns Bosatt.NORGE
             every { avsenderLand } returns "DK"
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_63)!!.getBirthDate()

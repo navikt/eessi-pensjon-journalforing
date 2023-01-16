@@ -6,10 +6,11 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
@@ -61,7 +62,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
-        val hendelse = createHendelseJson(SedType.P1000, BucType.P_BUC_04)
+        val hendelse = createHendelseJson(SedType.P1000, P_BUC_04)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

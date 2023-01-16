@@ -2,8 +2,10 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
@@ -28,7 +30,7 @@ class PersonidentifiseringService(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
-    private val brukForikretPersonISed = listOf(SedType.H121, SedType.H120, SedType.H070)
+    private val brukForikretPersonISed = listOf(H121, H120, H070)
 
     fun validateIdentifisertPerson(identifisertPerson: IdentifisertPerson, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPerson? {
         return if (hendelsesType == HendelseType.MOTTATT) {
@@ -184,22 +186,22 @@ class PersonidentifiseringService(
 
         return when {
             identifisertePersoner.isEmpty() -> null
-            bucType == BucType.R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
-            bucType == BucType.P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
-            bucType == BucType.P_BUC_05 -> {
+            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
+            bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+            bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
-            bucType == BucType.P_BUC_10 -> {
+            bucType == P_BUC_10 -> {
                 val erGjenlevendeYtelse = potensielleSEDPersonRelasjoner.any { it.saktype == Saktype.GJENLEV }
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
-            bucType == BucType.P_BUC_07 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
+            bucType == P_BUC_07 -> identifisertePersoner.firstOrNull { it.personRelasjon.relasjon == Relasjon.GJENLEVENDE }
 
             //buc_01,buc_03 hvis flere enn en forsikret person så sendes til id_og_fordeling
-            bucType == BucType.P_BUC_01 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
-            bucType == BucType.P_BUC_03 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
+            bucType == P_BUC_01 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
+            bucType == P_BUC_03 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
 
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {

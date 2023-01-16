@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -147,7 +149,7 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelseModel.bucType
-                if ((bucType == BucType.P_BUC_01 || bucType == BucType.P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
+                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,

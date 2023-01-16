@@ -2,7 +2,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,7 +18,7 @@ internal class Hbuc07Test {
         private const val FNR_BARN = "12011577847"      // STERK BUSK
     }
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.H_BUC_07)
+    private val handler = BucTilEnhetHandlerCreator.getHandler(H_BUC_07)
 
     @Test
     fun `Sjekk diskresjonskode blir behandlet korrekt`() {

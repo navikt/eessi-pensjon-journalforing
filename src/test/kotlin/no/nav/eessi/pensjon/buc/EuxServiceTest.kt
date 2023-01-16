@@ -6,17 +6,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Document
-import no.nav.eessi.pensjon.eux.model.buc.Organisation
-import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -81,7 +79,7 @@ internal class EuxServiceTest {
         val buc = mapJsonToAny<Buc>(bucJson)
 
         every { euxKlient.hentSedJson(eq(rinaid), any()) } returns r005json
-        every { euxKlient.hentSedJson(any(), any()) } returns SED(type = SedType.X008).toJson()
+        every { euxKlient.hentSedJson(any(), any()) } returns SED(type = X008).toJson()
 
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
         assertEquals(2, alledocs.size)
@@ -99,7 +97,7 @@ internal class EuxServiceTest {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-AP.json").readText())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
-        BucType.R_BUC_02, rinaDokumentVersjon = "1")
+        R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
         val actual = helper.hentSaktypeType(sedHendelse, seds)
@@ -112,7 +110,7 @@ internal class EuxServiceTest {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
-        BucType.R_BUC_02, rinaDokumentVersjon = "1")
+        R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
 
@@ -125,7 +123,7 @@ internal class EuxServiceTest {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText())
         val sedP15000 = mapJsonToAny<P15000>(javaClass.getResource("/buc/P15000-NAV.json").readText())
 
-        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = BucType.P_BUC_10, sedType = SedType.P15000, rinaDokumentVersjon = "1")
+        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = P_BUC_10, sedType = P15000, rinaDokumentVersjon = "1")
         val seds: List<SED> = listOf(
             sedR005,
             sedP15000
@@ -194,7 +192,7 @@ internal class EuxServiceTest {
         assertEquals(1, actual.size)
 
         val actualSed = actual.first()
-        assertEquals(SedType.P2000, actualSed.second.type)
+        assertEquals(P2000, actualSed.second.type)
 
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
     }

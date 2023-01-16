@@ -1,7 +1,8 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
@@ -55,18 +56,19 @@ class BucTilEnhetHandlerCreator {
     companion object {
         fun getHandler(type: BucType): BucTilEnhetHandler {
             return when (type) {
-                BucType.P_BUC_01 -> Pbuc01()
-                BucType.P_BUC_02 -> Pbuc02()
-                BucType.P_BUC_03 -> Pbuc03()
-                BucType.P_BUC_04 -> Pbuc04()
-                BucType.P_BUC_05 -> Pbuc05()
-                BucType.P_BUC_06,
-                BucType.P_BUC_07,
-                BucType.P_BUC_08,
-                BucType.P_BUC_09 -> DefaultBucTilEnhetHandler()
-                BucType.P_BUC_10 -> Pbuc10()
-                BucType.H_BUC_07 -> Hbuc07()
-                BucType.R_BUC_02 -> Rbuc02()
+                P_BUC_01 -> Pbuc01()
+                P_BUC_02 -> Pbuc02()
+                P_BUC_03 -> Pbuc03()
+                P_BUC_04 -> Pbuc04()
+                P_BUC_05 -> Pbuc05()
+                P_BUC_06,
+                P_BUC_07,
+                P_BUC_08,
+                P_BUC_09 -> DefaultBucTilEnhetHandler()
+                P_BUC_10 -> Pbuc10()
+                H_BUC_07 -> Hbuc07()
+                R_BUC_02 -> Rbuc02()
+                else -> DefaultBucTilEnhetHandler()
             }
         }
     }

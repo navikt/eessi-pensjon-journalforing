@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
@@ -37,7 +38,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                         )
                     )
                 ), Pair("3123134", SED.generateSedToClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
-            ), BucType.P_BUC_01
+            ), P_BUC_01
         )
 
         val sok = createSokKritere()
@@ -70,7 +71,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                         forsikretFnr = SLAPP_SKILPADDE, forsikretTilbakekreving = "avdød_mottaker_av_ytelser",
                         annenPersonFnr = expectedFnr, annenPersonTilbakekreving = "enke_eller_enkemann"
                     )
-                    )), BucType.R_BUC_02
+                    )), R_BUC_02
             )
 
             val enke = SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123")
@@ -85,7 +86,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             val actual = RelasjonsHandler.hentRelasjoner(
                 listOf(
                     Pair("3123123", createR005(expectedFnr, "forsikret_person")
-                    )), BucType.R_BUC_02
+                    )), R_BUC_02
             )
             assertEquals(1, actual.size)
             assertEquals(SEDPersonRelasjon(Fodselsnummer.fra(expectedFnr), Relasjon.FORSIKRET, sedType = SedType.R005, fdato = LocalDate.of(1971,6,11), rinaDocumentId = "3123123"), actual.first())
@@ -96,7 +97,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             val actual = RelasjonsHandler.hentRelasjoner(
                 listOf(
                     Pair("3123123", createR005(forsikretFnr = null, forsikretTilbakekreving = "forsikret_person")
-                    )), BucType.R_BUC_02
+                    )), R_BUC_02
             )
             assertTrue(actual.isEmpty())
         }
@@ -109,7 +110,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 listOf(
                     Pair("3123123", createR005(forsikretFnr = forsikretFnr, forsikretTilbakekreving = "debitor",
                         annenPersonFnr = annenPersonFnr, annenPersonTilbakekreving = "debitor"))
-                ), BucType.R_BUC_02
+                ), R_BUC_02
             )
             assertEquals(0, actual.size)
         }
@@ -120,7 +121,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 listOf(
                     Pair("13123123", createR005(forsikretFnr = KRAFTIG_VEGGPRYD, forsikretTilbakekreving = "debitor")),
                     Pair("23123123", generateSED(SedType.H070, forsikretFnr = KRAFTIG_VEGGPRYD))
-                ), BucType.R_BUC_02
+                ), R_BUC_02
             )
 
             val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
@@ -146,7 +147,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                             annenPersonFnr = forventetFnr, annenPersonTilbakekreving = "enke_eller_enkemann"
                         )
                     )
-                ), BucType.R_BUC_02
+                ), R_BUC_02
             )
             val enke = SEDPersonRelasjon(Fodselsnummer.fra(forventetFnr), Relasjon.GJENLEVENDE, sedType = SedType.R005, fdato = LocalDate.of(1971, 6, 11), rinaDocumentId = "3123123")
 
@@ -157,7 +158,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         @Test
         fun `leter igjennom R_BUC_02 og R005 med kun en person debitor alderpensjon returnerer liste med en Relasjon`() {
             val forventetFnr = KRAFTIG_VEGGPRYD
-            val actual = RelasjonsHandler.hentRelasjoner(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))), BucType.R_BUC_02)
+            val actual = RelasjonsHandler.hentRelasjoner(listOf(Pair("3123123",createR005(forventetFnr, forsikretTilbakekreving = "debitor"))), R_BUC_02)
 
             assertEquals(0, actual.size)
         }
@@ -180,7 +181,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 )
             )
 
-            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_02)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_02)
 
             assertEquals(1, relasjoner.size)
 
@@ -205,7 +206,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 )
             )
 
-            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_02)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_02)
 
             assertEquals(1, relasjoner.size)
 
@@ -227,7 +228,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 Pair("3123123", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr, gjenlevFnr = gjenlevFnr, gjenlevRelasjon = relasjon)))
             )
 
-            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_02)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_02)
 
             assertEquals(1, relasjoner.size)
 
@@ -248,7 +249,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                     "312312300",
                     SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE))
                 ), Pair("312312301", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = null))
-            ), BucType.P_BUC_02
+            ), P_BUC_02
         )
 
         val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
@@ -296,7 +297,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                         )
                     )
                 )
-            ), BucType.P_BUC_02
+            ), P_BUC_02
         )
 
         println("*** $actual ***")
@@ -325,7 +326,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 listOf(
                     Pair("31231231", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
                     Pair("31231233", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)))
-                ), BucType.P_BUC_10
+                ), P_BUC_10
             )
 
             val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22))
@@ -343,7 +344,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 Pair("3123125", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = null)))
             )
 
-            val actual = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_01)
+            val actual = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_01)
             val sok = createSokKritere(fdato = LocalDate.of(1971,6,11))
             val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, sokKriterier = sok, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "3123123")
 
@@ -363,7 +364,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 )
             )
 
-            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
 
             assertEquals(1, relasjoner.size)
 
@@ -385,7 +386,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
         )
 
-        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
+        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
         assertEquals(1, relasjoner.size)
 
         val gjenlevRelasjon = relasjoner[0]
@@ -406,7 +407,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
         )
 
-        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, BucType.P_BUC_10)
+        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
 
         assertEquals(1, relasjoner.size)
 

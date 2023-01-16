@@ -1,7 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.*
@@ -30,7 +31,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
 
     //Annenperson søker/barn o.l
     fun hentAnnenpersonRelasjon(): SEDPersonRelasjon? {
-        if (bucType == BucType.P_BUC_05 || bucType == BucType.P_BUC_10 || bucType == BucType.P_BUC_02) {
+        if (bucType == P_BUC_05 || bucType == P_BUC_10 || bucType == P_BUC_02) {
             val annenPerson = sed.nav?.annenperson?.person
 
             logger.debug("annenPerson: $annenPerson")

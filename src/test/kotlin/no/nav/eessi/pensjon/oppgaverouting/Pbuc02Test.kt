@@ -2,6 +2,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -14,7 +16,7 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Pbuc02Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_02) as Pbuc02
+    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_02) as Pbuc02
 
     /**
      * Test av HendelseType.SENDT
@@ -252,7 +254,7 @@ internal class Pbuc02Test {
             every { bosatt } returns Bosatt.fraLandkode(landkode)
             every { harAdressebeskyttelse } returns false
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_02
+            every { bucType } returns P_BUC_02
         }
     }
 }

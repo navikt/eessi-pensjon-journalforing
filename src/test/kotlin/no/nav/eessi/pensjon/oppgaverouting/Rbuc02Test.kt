@@ -3,8 +3,9 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
@@ -19,7 +20,7 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Rbuc02Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.R_BUC_02) as Rbuc02
+    private val handler = BucTilEnhetHandlerCreator.getHandler(R_BUC_02) as Rbuc02
 
     @ParameterizedTest
     @EnumSource(HendelseType::class)
@@ -150,7 +151,7 @@ internal class Rbuc02Test {
             every { saktype } returns type
             every { sakInformasjon?.sakId } returns "sakId"
             every { identifisertPerson } returns person
-            every { bucType } returns BucType.R_BUC_02
+            every { bucType } returns R_BUC_02
 
 
             every { this@mockk.sedType } returns sedType

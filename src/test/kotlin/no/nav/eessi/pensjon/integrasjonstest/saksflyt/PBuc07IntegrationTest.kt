@@ -2,6 +2,8 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
@@ -9,7 +11,6 @@ import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
@@ -119,7 +120,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P12000, BucType.P_BUC_07, FNR_VOKSEN)
+        val hendelse = createHendelseJson(SedType.P12000, P_BUC_07, FNR_VOKSEN)
 
         val meldingSlot = slot<String>()
 

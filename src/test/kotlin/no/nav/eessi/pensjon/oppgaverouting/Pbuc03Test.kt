@@ -2,7 +2,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
@@ -14,7 +15,7 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Pbuc03Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_03) as Pbuc03
+    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_03) as Pbuc03
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -39,7 +40,7 @@ internal class Pbuc03Test {
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_03
+            every { bucType } returns P_BUC_03
         }
 
         assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
@@ -55,7 +56,7 @@ internal class Pbuc03Test {
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.NORGE
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_03
+            every { bucType } returns P_BUC_03
         }
 
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
@@ -71,7 +72,7 @@ internal class Pbuc03Test {
             every { sakInformasjon } returns null
             every { bosatt } returns Bosatt.UTLAND
             every { sedType } returns null
-            every { bucType } returns BucType.P_BUC_03
+            every { bucType } returns P_BUC_03
         }
 
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))

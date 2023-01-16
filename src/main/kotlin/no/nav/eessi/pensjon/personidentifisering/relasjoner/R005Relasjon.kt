@@ -1,13 +1,13 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 
-class R005Relasjon(private val sed: SED, private val bucType: BucType, val rinaDocumentId: String) : AbstractRelasjon(sed, bucType,rinaDocumentId) {
+class R005Relasjon(private val sed: SED, bucType: BucType, val rinaDocumentId: String) : AbstractRelasjon(sed, bucType,rinaDocumentId) {
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         return filterPinPersonR005(sed as R005)
     }

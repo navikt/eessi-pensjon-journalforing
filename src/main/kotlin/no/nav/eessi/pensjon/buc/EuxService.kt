@@ -1,14 +1,16 @@
 package no.nav.eessi.pensjon.buc
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -128,14 +130,14 @@ class EuxService(
 
     fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): Saktype? {
         //hent saktype fra R_BUC_02 - R005 sed
-        if (sedHendelse.bucType == BucType.R_BUC_02) {
+        if (sedHendelse.bucType == R_BUC_02) {
             return alleSedIBuc
-                    .firstOrNull { it.type == SedType.R005 }
+                    .firstOrNull { it.type == R005 }
                     ?.let { filterSaktypeR005(it as R005) }
 
         //hent saktype fra P15000 overgang fra papir til rina. (saktype)
-        } else if (sedHendelse.bucType == BucType.P_BUC_10) {
-            val sed = alleSedIBuc.firstOrNull { it.type == SedType.P15000 }
+        } else if (sedHendelse.bucType == P_BUC_10) {
+            val sed = alleSedIBuc.firstOrNull { it.type == P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
                     "02" -> Saktype.GJENLEV

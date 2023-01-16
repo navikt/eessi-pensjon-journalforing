@@ -1,9 +1,11 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
@@ -66,9 +68,9 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
 
     fun bestemSaktype(bucType: BucType): Saktype? {
         return when(bucType) {
-            BucType.P_BUC_01 -> Saktype.ALDER
-            BucType.P_BUC_02 -> Saktype.GJENLEV
-            BucType.P_BUC_03 -> Saktype.UFOREP
+            P_BUC_01 -> ALDER
+            P_BUC_02 -> GJENLEV
+            P_BUC_03 -> UFOREP
             else -> null
         }
     }

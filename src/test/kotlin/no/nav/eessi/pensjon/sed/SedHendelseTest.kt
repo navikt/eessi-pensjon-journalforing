@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.sed
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,14 +17,14 @@ class SedHendelseTest {
         assertEquals(sedHendelse.id, 1869L)
         assertEquals(sedHendelse.sedId, "P2000_b12e06dda2c7474b9998c7139c841646_2")
         assertEquals(sedHendelse.sektorKode, "P")
-        assertEquals(sedHendelse.bucType, BucType.P_BUC_01)
+        assertEquals(sedHendelse.bucType, P_BUC_01)
         assertEquals(sedHendelse.rinaSakId, "147729")
         assertEquals(sedHendelse.avsenderId, "NO:NAVT003")
         assertEquals(sedHendelse.avsenderNavn, "NAVT003")
         assertEquals(sedHendelse.mottakerNavn, "NAV Test 07")
         assertEquals(sedHendelse.rinaDokumentId, "b12e06dda2c7474b9998c7139c841646")
         assertEquals(sedHendelse.rinaDokumentVersjon, "2")
-        assertEquals(sedHendelse.sedType, SedType.P2000)
+        assertEquals(sedHendelse.sedType, P2000)
         assertEquals("09035225916", sedHendelse.navBruker!!.value)
     }
 }

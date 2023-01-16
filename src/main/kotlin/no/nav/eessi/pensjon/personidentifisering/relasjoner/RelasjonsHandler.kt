@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import org.slf4j.Logger
@@ -49,24 +50,24 @@ object RelasjonsHandler {
         if (sed.type.kanInneholdeIdentEllerFdato()) {
             return when (sed.type) {
                 //R005 SED eneste vi leter etter fnr for R_BUC_02
-                SedType.R005 -> R005Relasjon(sed, bucType,rinaDocumentId)
+                R005 -> R005Relasjon(sed, bucType,rinaDocumentId)
 
                 //Øvrige P-SED vi støtter for innhenting av FNR
-                SedType.P2000 -> P2000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P2200 -> P2200Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P2100 -> P2100Relasjon(sed, bucType,rinaDocumentId)
+                P2000 -> P2000Relasjon(sed, bucType,rinaDocumentId)
+                P2200 -> P2200Relasjon(sed, bucType,rinaDocumentId)
+                P2100 -> P2100Relasjon(sed, bucType,rinaDocumentId)
 
-                SedType.P5000 -> P5000Relasjon(sed, bucType, rinaDocumentId)
-                SedType.P6000 -> P6000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P8000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P10000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P15000 -> P15000Relasjon(sed, bucType,rinaDocumentId)
-                SedType.P12000 -> P12000Relasjon(sed, bucType,rinaDocumentId)
+                P5000 -> P5000Relasjon(sed, bucType, rinaDocumentId)
+                P6000 -> P6000Relasjon(sed, bucType,rinaDocumentId)
+                P8000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
+                P10000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
+                P15000 -> P15000Relasjon(sed, bucType,rinaDocumentId)
+                P12000 -> P12000Relasjon(sed, bucType,rinaDocumentId)
 
                 //H-SED vi støtter for innhenting av fnr kun for forsikret
-                SedType.H070, SedType.H120, SedType.H121 -> GenericRelasjon(sed, bucType, rinaDocumentId)
+                H070, H120, H121 -> GenericRelasjon(sed, bucType, rinaDocumentId)
 
-                //resternede gyldige sed med fnr kommer hit.. (P9000, P3000, P4000.. osv.)
+                //resterende gyldige sed med fnr kommer hit.. (P9000, P3000, P4000.. osv.)
                 else -> GenericRelasjon(sed, bucType,rinaDocumentId)
             }
         }

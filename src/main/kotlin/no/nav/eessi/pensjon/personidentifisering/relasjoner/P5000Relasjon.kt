@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 
 class P5000Relasjon(private val sed: SED, private val bucType: BucType, val rinaDocumentId: String) : GjenlevendeHvisFinnes(sed, bucType, rinaDocumentId) {

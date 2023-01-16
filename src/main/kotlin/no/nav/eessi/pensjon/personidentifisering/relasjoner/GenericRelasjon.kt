@@ -1,7 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -19,7 +20,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType, privat
         leggTilAnnenGjenlevendeFnrHvisFinnes()?.let { annenRelasjon ->
             fnrListe.add(annenRelasjon)
         }
-        if(bucType == BucType.P_BUC_02) {
+        if(bucType == P_BUC_02) {
             fnrListe.addAll(hentRelasjonGjenlevendeFnrHvisFinnes())
         } else {
             fnrListe.addAll(hentForsikretPerson(bestemSaktype(bucType)))

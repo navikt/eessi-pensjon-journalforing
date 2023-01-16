@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.handler
 
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -14,7 +15,7 @@ internal class OppgaveMeldingSerdeTest {
     @Test
     fun serde_journalforing() {
         val melding = OppgaveMelding(
-            SedType.P8000,
+            P8000,
             "12345",
             Enhet.ID_OG_FORDELING,
             "aktoerId",
@@ -41,7 +42,7 @@ internal class OppgaveMeldingSerdeTest {
     @Test
     fun serde_behandleSed() {
         val melding = OppgaveMelding(
-            SedType.P8000,
+            P8000,
             null,
             Enhet.ID_OG_FORDELING,
             "aktoerId",

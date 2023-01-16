@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.models.Tema.*
@@ -66,7 +68,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
     private fun bestemBehandlingsTema(bucType: BucType, saktype: Saktype?): Behandlingstema {
-        return if (bucType == BucType.R_BUC_02) {
+        return if (bucType == R_BUC_02) {
             when (saktype) {
                 UFOREP -> Behandlingstema.UFOREPENSJON
                 GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
@@ -75,8 +77,8 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             Behandlingstema.TILBAKEBETALING
         } else {
             return when (bucType) {
-                BucType.P_BUC_02 -> Behandlingstema.GJENLEVENDEPENSJON
-                BucType.P_BUC_03 -> Behandlingstema.UFOREPENSJON
+                P_BUC_02 -> Behandlingstema.GJENLEVENDEPENSJON
+                P_BUC_03 -> Behandlingstema.UFOREPENSJON
                 else -> Behandlingstema.ALDERSPENSJON
             }
         }
@@ -90,7 +92,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
 
     fun hentTema(bucType: BucType, saktype: Saktype?) : Tema =
-        if (saktype == UFOREP || bucType == BucType.P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
+        if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
 
     private fun populerAvsenderMottaker(
             avsenderNavn: String?,

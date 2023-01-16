@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -22,7 +24,7 @@ internal class Pbuc10Test {
         private val DUMMY_FNR = Fodselsnummer.fra("09035225916") // Testbruker SLAPP SKILPADDE
     }
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(BucType.P_BUC_10) as Pbuc10
+    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_10) as Pbuc10
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -51,7 +53,7 @@ internal class Pbuc10Test {
             every { sakInformasjon?.sakStatus } returns SakStatus.AVSLUTTET
             every { sakInformasjon?.sakType } returns Saktype.UFOREP
             every { sedType } returns SedType.P15000
-            every { bucType } returns BucType.P_BUC_10
+            every { bucType } returns P_BUC_10
 
         }
 
@@ -175,7 +177,7 @@ internal class Pbuc10Test {
             every { landkode } returns "NOR"
             every { bosatt } returns land
             every { sakInformasjon } returns null
-            every { bucType } returns BucType.P_BUC_10
+            every { bucType } returns P_BUC_10
             every { sedType } returns SedType.P15000
 
 

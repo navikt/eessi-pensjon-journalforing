@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Saktype
@@ -20,7 +21,7 @@ class Rbuc02 : BucTilEnhetHandler {
                 logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.ID_OG_FORDELING.enhetsNr} på grunn av ingen treff på person")
                 Enhet.ID_OG_FORDELING
             }
-            request.sedType == SedType.R004 -> {
+            request.sedType == R004 -> {
                 logger.info("Router ${request.sedType} i ${request.bucType} til ${Enhet.OKONOMI_PENSJON.enhetsNr} på grunn av SED er R004")
                 Enhet.OKONOMI_PENSJON
             }

@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -122,7 +124,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "2536475861",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.R_BUC_02,
+                bucType = R_BUC_02,
                 sedType = SedType.R004,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.OKONOMI_PENSJON,
@@ -162,7 +164,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "2536475861",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.R_BUC_02,
+                bucType = R_BUC_02,
                 sedType = SedType.R005,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -204,7 +206,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "2536475861",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.R_BUC_02,
+                bucType = R_BUC_02,
                 sedType = SedType.R005,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -254,7 +256,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "2536475861",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.R_BUC_02,
+                bucType = R_BUC_02,
                 sedType = SedType.R005,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -288,7 +290,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147729",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_01,
+                bucType = P_BUC_01,
                 sedType = SedType.P2000,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
@@ -328,7 +330,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = any(),
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_03,
+                bucType = P_BUC_03,
                 sedType = SedType.P2200,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.UFORE_UTLANDSTILSNITT,
@@ -368,7 +370,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147729",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_10,
+                bucType = P_BUC_10,
                 sedType = SedType.P15000,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
@@ -409,7 +411,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147729",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_01,
+                bucType = P_BUC_01,
                 sedType = SedType.P2000,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
@@ -450,7 +452,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = any(),
                 fnr = SLAPP_SKILPADDE,
-                bucType = BucType.P_BUC_01,
+                bucType = P_BUC_01,
                 sedType = SedType.P2000,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
@@ -490,7 +492,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.NFP_UTLAND_AALESUND,
@@ -531,7 +533,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = any(),
                 fnr = SLAPP_SKILPADDE,
-                bucType = BucType.P_BUC_03,
+                bucType = P_BUC_03,
                 sedType = SedType.P2200,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.UFORE_UTLAND,
@@ -572,7 +574,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147729",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_10,
+                bucType = P_BUC_10,
                 sedType = SedType.P15000,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
@@ -615,7 +617,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
@@ -679,7 +681,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "1033470",
                 fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
@@ -723,7 +725,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -760,7 +762,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -794,7 +796,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "147730",
                 fnr = LEALAUS_KAKE,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
@@ -857,7 +859,7 @@ internal class JournalforingServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "1033470",
                 fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
-                bucType = BucType.P_BUC_02,
+                bucType = P_BUC_02,
                 sedType = SedType.P2100,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,

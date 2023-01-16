@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -75,7 +76,7 @@ internal class FagmodulServiceTest {
     @Test
     fun `Gitt at det finnes eessisak der land er Norge og saksnummer er på feil format så skal null returneres`() {
         val mockAlleSedIBuc = listOf(
-                mockSED(SedType.P2000, eessiSakId = "UGYLDIG SAK ID")
+                mockSED(P2000, eessiSakId = "UGYLDIG SAK ID")
         )
 
         val result = helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc)
@@ -89,7 +90,7 @@ internal class FagmodulServiceTest {
         every { fagmodulKlient.hentPensjonSaklist(any()) } throws RuntimeException()
 
         val mockAlleSedIBuc = listOf(
-                mockSED(SedType.P2000, eessiSakId = "12345")
+                mockSED(P2000, eessiSakId = "12345")
         )
 
         assertNull(helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc))
@@ -109,10 +110,10 @@ internal class FagmodulServiceTest {
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(
-                mockSED(SedType.P2000, eessiSakId = "22874955"),
-                mockSED(SedType.P4000, eessiSakId = "22874955"),
-                mockSED(SedType.P5000, eessiSakId = "22874955"),
-                mockSED(SedType.P6000, eessiSakId = "22874955")
+                mockSED(P2000, eessiSakId = "22874955"),
+                mockSED(P4000, eessiSakId = "22874955"),
+                mockSED(P5000, eessiSakId = "22874955"),
+                mockSED(P6000, eessiSakId = "22874955")
         )
 
         val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)!!
@@ -136,10 +137,10 @@ internal class FagmodulServiceTest {
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(
-                mockSED(SedType.P2000, eessiSakId = "22874456"),
-                mockSED(SedType.P4000, eessiSakId = "22874456"),
-                mockSED(SedType.P5000, eessiSakId = "22874456"),
-                mockSED(SedType.P6000, eessiSakId = "22874456")
+                mockSED(P2000, eessiSakId = "22874456"),
+                mockSED(P4000, eessiSakId = "22874456"),
+                mockSED(P5000, eessiSakId = "22874456"),
+                mockSED(P6000, eessiSakId = "22874456")
         )
 
         val result = helper.hentPensjonSakFraSED("aktoerId", mockAllSediBuc)!!
@@ -154,9 +155,9 @@ internal class FagmodulServiceTest {
     @Test
     fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {
         val mockAllSediBuc = listOf(
-                mockSED(SedType.P2000, eessiSakId = "111"),
-                mockSED(SedType.P4000, eessiSakId = "222"),
-                mockSED(SedType.P6000, eessiSakId = "333")
+                mockSED(P2000, eessiSakId = "111"),
+                mockSED(P4000, eessiSakId = "222"),
+                mockSED(P6000, eessiSakId = "333")
         )
 
         assertNull(

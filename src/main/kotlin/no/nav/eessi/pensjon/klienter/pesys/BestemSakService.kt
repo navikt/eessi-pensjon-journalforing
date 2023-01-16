@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.klienter.pesys
 
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.utils.toJson
@@ -24,11 +25,11 @@ class BestemSakService(private val klient: BestemSakKlient) {
      */
     fun hentSakInformasjon(aktoerId: String, bucType: BucType, saktypeBUC02: Saktype? = null): SakInformasjon? {
         val saktype = when (bucType) {
-            BucType.P_BUC_01 -> Saktype.ALDER
-            BucType.P_BUC_02 -> saktypeBUC02 ?: return null
-            BucType.P_BUC_03 -> Saktype.UFOREP
-            BucType.R_BUC_02 -> saktypeBUC02!!
-            BucType.P_BUC_10 -> saktypeBUC02 ?: return null
+            P_BUC_01 -> Saktype.ALDER
+            P_BUC_02 -> saktypeBUC02 ?: return null
+            P_BUC_03 -> Saktype.UFOREP
+            R_BUC_02 -> saktypeBUC02!!
+            P_BUC_10 -> saktypeBUC02 ?: return null
             else -> return null
         }
 

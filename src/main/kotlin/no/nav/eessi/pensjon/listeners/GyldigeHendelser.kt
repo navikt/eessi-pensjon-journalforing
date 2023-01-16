@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 
 class GyldigeHendelser {
     companion object {
         private const val gyldigSektorKode = "P"
 
-        private val gyldigeInnkommendeBucTyper = listOf(BucType.H_BUC_07, BucType.R_BUC_02)
-        private val gyldigUtgaaendeBucType = BucType.R_BUC_02
+        private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02)
+        private val gyldigUtgaaendeBucType = R_BUC_02
 
         fun mottatt(hendelse: SedHendelseModel) =
                 when {

@@ -5,6 +5,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -40,8 +43,8 @@ internal class JournalpostServiceTest {
         val actualResponse = journalpostService.opprettJournalpost(
             rinaSakId = "1111",
             fnr = SLAPP_SKILPADDE,
-            bucType = BucType.P_BUC_01,
-            sedType = SedType.P2000,
+            bucType = P_BUC_01,
+            sedType = P2000,
             sedHendelseType = HendelseType.MOTTATT,
             journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
             arkivsaksnummer = "string",
@@ -99,8 +102,8 @@ internal class JournalpostServiceTest {
             journalpostService.opprettJournalpost(
                 rinaSakId = "1111",
                 fnr = SLAPP_SKILPADDE,
-                bucType = BucType.P_BUC_01,
-                sedType = SedType.P2000,
+                bucType = P_BUC_01,
+                sedType = P2000,
                 sedHendelseType = HendelseType.MOTTATT,
                 journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
                 arkivsaksnummer = "string",
@@ -140,8 +143,8 @@ internal class JournalpostServiceTest {
         val actualResponse = journalpostService.opprettJournalpost(
             rinaSakId = "1111",
             fnr = SLAPP_SKILPADDE,
-            bucType = BucType.P_BUC_01,
-            sedType = SedType.P2000,
+            bucType = P_BUC_01,
+            sedType = P2000,
             sedHendelseType = HendelseType.MOTTATT,
             journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
             arkivsaksnummer = "string",
@@ -216,8 +219,8 @@ internal class JournalpostServiceTest {
         val actualResponse = journalpostService.opprettJournalpost(
             rinaSakId = "147730",
             fnr = LEALAUS_KAKE,
-            bucType = BucType.P_BUC_02,
-            sedType = SedType.P2100,
+            bucType = P_BUC_02,
+            sedType = P2100,
             sedHendelseType = HendelseType.SENDT,
             journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
             arkivsaksnummer = null,
@@ -260,67 +263,67 @@ internal class JournalpostServiceTest {
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, BARNEP)
+        val result = journalpostService.hentTema(P_BUC_02, BARNEP)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, UFOREP)
+        val result = journalpostService.hentTema(P_BUC_02, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_02, GJENLEV)
+        val result = journalpostService.hentTema(P_BUC_02, GJENLEV)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_01, null)
+        val result = journalpostService.hentTema(P_BUC_01, null)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, ALDER)
+        val result = journalpostService.hentTema(R_BUC_02, ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, UFOREP)
+        val result = journalpostService.hentTema(R_BUC_02, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
     fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(BucType.R_BUC_02, ALDER)
+        val result = journalpostService.hentTema(R_BUC_02, ALDER)
         assertEquals(Tema.PENSJON, result)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
-        val resultatGENRL = journalpostService.hentTema(BucType.P_BUC_05, GENRL)
+        val resultatGENRL = journalpostService.hentTema(P_BUC_05, GENRL)
         assertEquals(Tema.PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalpostService.hentTema(BucType.P_BUC_05, OMSORG)
+        val resultatOMSORG = journalpostService.hentTema(P_BUC_05, OMSORG)
         assertEquals(Tema.PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalpostService.hentTema(BucType.P_BUC_05, ALDER)
+        val resultatALDER = journalpostService.hentTema(P_BUC_05, ALDER)
         assertEquals(Tema.PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalpostService.hentTema(BucType.P_BUC_05, GJENLEV)
+        val resultatGJENLEV = journalpostService.hentTema(P_BUC_05, GJENLEV)
         assertEquals(Tema.PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalpostService.hentTema(BucType.P_BUC_05, BARNEP)
+        val resultatBARNEP = journalpostService.hentTema(P_BUC_05, BARNEP)
         assertEquals(Tema.PENSJON, resultatBARNEP)
     }
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(BucType.P_BUC_05, UFOREP)
+        val result = journalpostService.hentTema(P_BUC_05, UFOREP)
         assertEquals(Tema.UFORETRYGD, result)
     }
 

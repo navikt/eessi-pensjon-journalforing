@@ -1,7 +1,8 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +20,7 @@ internal class R005RelasjonTest : RelasjonTestBase(){
                 forsikretFnr = forsikretFnr, forsikretTilbakekreving = "debitor",
                 annenPersonFnr = annenPersonFnr, annenPersonTilbakekreving = "debitor"
             ),
-            BucType.R_BUC_02,
+            R_BUC_02,
             "123123"
         ).hentRelasjoner()
 
@@ -36,7 +37,7 @@ internal class R005RelasjonTest : RelasjonTestBase(){
         ).toJson()
         val sed = mapJsonToAny<R005>(sedjson)
 
-        val relasjon = R005Relasjon(sed, BucType.R_BUC_02, "23123").hentRelasjoner()
+        val relasjon = R005Relasjon(sed, R_BUC_02, "23123").hentRelasjoner()
 
         assertEquals(2, relasjon.size)
     }

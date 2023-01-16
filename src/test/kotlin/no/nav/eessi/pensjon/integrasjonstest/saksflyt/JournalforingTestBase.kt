@@ -5,10 +5,8 @@ import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Document
-import no.nav.eessi.pensjon.eux.model.buc.Organisation
-import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
@@ -28,7 +26,6 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -261,7 +258,7 @@ internal open class JournalforingTestBase {
         hendelseType: HendelseType = HendelseType.SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, eessiSaknr = sakId))
+        val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
@@ -340,7 +337,7 @@ internal open class JournalforingTestBase {
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(SedType.P2200, BucType.P_BUC_03)
+        val hendelse = createHendelseJson(SedType.P2200, P_BUC_03)
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -376,7 +373,7 @@ internal open class JournalforingTestBase {
         return mapJsonToAny(dokumentfilerJson)
     }
 
-    fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler, bucType: BucType = BucType.P_BUC_01, bucLand: String = "NO") {
+    fun initCommonMocks(sed: SED, alleDocs: List<ForenkletSED>, documentFiler: SedDokumentfiler, bucType: BucType = P_BUC_01, bucLand: String = "NO") {
         every { euxKlient.hentBuc(any()) } returns bucFrom(bucType, forenkletSed = alleDocs, bucLand)
         every { euxKlient.hentSedJson(any(), any()) } returns sed.toJson()
         every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns documentFiler
@@ -582,7 +579,7 @@ internal open class JournalforingTestBase {
 
     protected fun createHendelseJson(
         sedType: SedType,
-        bucType: BucType = BucType.P_BUC_05,
+        bucType: BucType = P_BUC_05,
         forsikretFnr: String? = null
     ): String {
         return """

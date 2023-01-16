@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
@@ -43,7 +44,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.debug("enhet: $enhet")
 
-        if (routingRequest.bucType == BucType.P_BUC_01) {
+        if (routingRequest.bucType == P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(
                 routingRequest.harAdressebeskyttelse,
                 routingRequest.landkode,
@@ -69,7 +70,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
     }
 
     fun erGydligBuc10eller02(bucType: BucType, landkode: String?, sakInformasjon: SakInformasjon?): Boolean {
-        if (bucType == BucType.P_BUC_10) return true
-        return bucType == BucType.P_BUC_02 && landkode == "NOR" && sakInformasjon?.sakType == Saktype.ALDER && sakInformasjon.sakStatus == SakStatus.LOPENDE
+        if (bucType == P_BUC_10) return true
+        return bucType == P_BUC_02 && landkode == "NOR" && sakInformasjon?.sakType == Saktype.ALDER && sakInformasjon.sakStatus == SakStatus.LOPENDE
     }
 }

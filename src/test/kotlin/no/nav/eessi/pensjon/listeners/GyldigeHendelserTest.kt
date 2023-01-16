@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -10,21 +11,21 @@ internal class GyldigeHendelserTest {
 
     @Test
     fun `Mottatt hendelse R_BUC_02 er gyldig`() {
-        val hendelse = createDummy("", BucType.R_BUC_02)
+        val hendelse = createDummy("", R_BUC_02)
 
         assertTrue(GyldigeHendelser.mottatt(hendelse))
     }
 
     @Test
     fun `Mottatt hendelse H_BUC_07 er gyldig`() {
-        val hendelse = createDummy("X", BucType.H_BUC_07)
+        val hendelse = createDummy("X", H_BUC_07)
 
         assertTrue(GyldigeHendelser.mottatt(hendelse))
     }
 
     @Test
     fun `Mottatt hendelse som IKKE er R_BUC_02, H_BUC_07, eller sektorkode P er ugyldig`() {
-        val hendelse = createDummy("", BucType.P_BUC_01)
+        val hendelse = createDummy("", P_BUC_01)
 
         assertFalse(GyldigeHendelser.mottatt(hendelse))
     }
@@ -42,14 +43,14 @@ internal class GyldigeHendelserTest {
      */
     @Test
     fun `Sendt hendelse R_BUC_02 er gyldig`() {
-        val hendelse = createDummy("X", BucType.R_BUC_02)
+        val hendelse = createDummy("X", R_BUC_02)
 
         assertTrue(GyldigeHendelser.sendt(hendelse))
     }
 
     @Test
     fun `Sendt hendelse H_BUC_07 er ikke gyldig`() {
-        val hendelse = createDummy("H", BucType.H_BUC_07)
+        val hendelse = createDummy("H", H_BUC_07)
 
         assertFalse(GyldigeHendelser.sendt(hendelse))
     }

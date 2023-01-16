@@ -1,12 +1,13 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
@@ -174,16 +175,16 @@ class SedSendtListener(
     ): Saktype? {
         val saktype = identifisertPerson?.personRelasjon?.saktype
         logger.debug("populerSaktypeFraSed: fraSED $saktypeFraSed  identPersonYtelse: $saktype")
-        if (bucType == BucType.P_BUC_10 && saktypeFraSed == Saktype.GJENLEV) {
+        if (bucType == P_BUC_10 && saktypeFraSed == Saktype.GJENLEV) {
             return saktype
         }
         return saktypeFraSed ?: saktype
     }
 
     private fun populerSaktype(saktypeFraSED: Saktype?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): Saktype? {
-        if (sedHendelseModel.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == Saktype.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == Saktype.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
-        } else if (sedHendelseModel.bucType == BucType.P_BUC_10 && saktypeFraSED == Saktype.GJENLEV) {
+        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == Saktype.GJENLEV) {
             return sakInformasjon?.sakType ?: saktypeFraSED
         } else if (saktypeFraSED != null) {
             return saktypeFraSED

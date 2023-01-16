@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.sed
 
-import no.nav.eessi.pensjon.models.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,7 +13,7 @@ internal class SedHendelseModelSerdeTest {
 
     @Test
     fun `Sjekk at serialisering virker`() {
-        val model = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = BucType.R_BUC_02, rinaDokumentVersjon = "1")
+        val model = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = R_BUC_02, rinaDokumentVersjon = "1")
         val serialized = model.toJson()
 
         val result = SedHendelseModel.fromJson(serialized)

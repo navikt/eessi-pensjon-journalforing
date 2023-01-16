@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.P5000
@@ -55,21 +56,21 @@ class FodselsdatoHelper {
 
         //Det er noen XSed som mangler FNR
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == "02" }
+            return seder.any { it.type == P15000 && it.nav?.krav?.type == "02" }
         }
 
         private fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
                 val fdato = when (sed.type) {
-                    SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
-                    SedType.P2000, SedType.P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedType.P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
-                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
-                    SedType.P8000, SedType.P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedType.P15000 -> filterP15000(sed as P15000)
-                    SedType.H121, SedType.H120, SedType.H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedType.X005, SedType.X008, SedType.X010 -> filterPersonFodselsdatoX00Sed(sed)
+                    R005 -> filterPersonR005Fodselsdato(sed as R005)
+                    P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
+                    P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
+                    P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
+                    P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P15000 -> filterP15000(sed as P15000)
+                    H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    X005, X008, X010 -> filterPersonFodselsdatoX00Sed(sed)
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 

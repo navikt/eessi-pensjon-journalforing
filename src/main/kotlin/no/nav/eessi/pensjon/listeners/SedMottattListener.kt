@@ -1,10 +1,10 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.BucType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
@@ -124,17 +124,17 @@ class SedMottattListener(
         if (identifisertPerson?.aktoerId == null) return null
 
         return when(sedHendelseModel.bucType) {
-            BucType.P_BUC_01 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
-            BucType.P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.saktype)
-            BucType.P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
+            P_BUC_01 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
+            P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.saktype)
+            P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
             else  -> null
         }
     }
 
     private fun populerSaktype(saktypeFraSED: Saktype?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): Saktype? {
-        if (sedHendelseModel.bucType == BucType.P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == Saktype.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == Saktype.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
-        } else if (sedHendelseModel.bucType == BucType.P_BUC_10 && saktypeFraSED == Saktype.GJENLEV) {
+        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == Saktype.GJENLEV) {
             return sakInformasjon?.sakType ?: saktypeFraSED
         } else if (saktypeFraSED != null) {
             return saktypeFraSED
