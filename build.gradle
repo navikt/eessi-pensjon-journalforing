@@ -78,7 +78,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
 	// Rina Eux API
-	implementation("no.nav.eessi.pensjon:ep-eux:1.3.66")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.4.8")
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
