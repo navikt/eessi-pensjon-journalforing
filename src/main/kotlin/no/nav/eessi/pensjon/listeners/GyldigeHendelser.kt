@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 
 class GyldigeHendelser {

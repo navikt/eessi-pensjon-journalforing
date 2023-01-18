@@ -2,8 +2,8 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.BucType
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
@@ -38,7 +38,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             testRunnerVoksen(
                 FNR_VOKSEN,
                 FNR_VOKSEN_2,
-                krav = KravType.ETTERLATTE,
+                krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = HendelseType.MOTTATT,
@@ -59,7 +59,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             testRunnerVoksen(
                 FNR_VOKSEN,
                 FNR_VOKSEN_2,
-                krav = KravType.ETTERLATTE,
+                krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = HendelseType.MOTTATT,
@@ -78,7 +78,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         fnrVoksenSoker: String?,
         bestemSak: BestemSakResponse? = null,
         land: String = "NOR",
-        krav: KravType = KravType.ETTERLATTE,
+        krav: KravType = KravType.GJENLEV,
         alleDocs: List<ForenkletSED>,
         relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
         hendelseType: HendelseType,

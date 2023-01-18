@@ -4,9 +4,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.BucType
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -19,10 +18,7 @@ import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.models.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.models.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -346,7 +342,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         bestemSak: BestemSakResponse? = null,
         sakId: String? = SAK_ID,
         land: String = "NOR",
-        krav: KravType = KravType.UFORE,
+        krav: KravType = KravType.UFOREP,
         alleDocs: List<ForenkletSED>,
         forsokFerdigStilt: Boolean = false,
         documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),

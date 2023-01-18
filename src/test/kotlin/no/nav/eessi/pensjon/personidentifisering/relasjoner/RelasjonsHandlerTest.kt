@@ -1,8 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.BucType
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
@@ -324,7 +323,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val actual = RelasjonsHandler.hentRelasjoner(
                 listOf(
-                    Pair("31231231", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
+                    Pair("31231231", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
                     Pair("31231233", SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr, gjenlevFnr = gjenlevFnr)))
                 ), P_BUC_10
             )
@@ -360,7 +359,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val sedList = listOf(
                 Pair("3123123",
-                    SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = null))
+                    SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = null))
                 )
             )
 
@@ -383,7 +382,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
         val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
         val sedList = listOf(
-            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
+            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
         )
 
         val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
@@ -404,7 +403,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
         val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
         val sedList = listOf(
-            Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.ETTERLATTE, gjenlevRelasjon = relasjon)))
+            Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
         )
 
         val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)

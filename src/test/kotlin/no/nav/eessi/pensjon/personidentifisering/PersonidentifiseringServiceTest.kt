@@ -3,9 +3,8 @@ package no.nav.eessi.pensjon.personidentifisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.BucType
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.models.HendelseType
@@ -569,7 +568,7 @@ class PersonidentifiseringServiceTest {
             nav = Nav(
                 bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                 annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                krav = navKrav?.let { Krav(type = it.kode) }
+                krav = navKrav?.let { Krav(type = it.verdi) }
             ),
             pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )

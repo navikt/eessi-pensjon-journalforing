@@ -4,9 +4,13 @@ import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxKlient
 import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.*
-import no.nav.eessi.pensjon.eux.model.buc.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Document
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
+import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
@@ -308,7 +312,7 @@ internal open class JournalforingTestBase {
         bestemSak: BestemSakResponse? = null,
         sakId: String? = SAK_ID,
         land: String = "NOR",
-        krav: KravType = KravType.UFORE,
+        krav: KravType = KravType.UFOREP,
         alleDocs: List<ForenkletSED>,
         forsokFerdigStilt: Boolean = false,
         documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
@@ -568,7 +572,7 @@ internal open class JournalforingTestBase {
             nav = Nav(
                 eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
                 bruker = forsikretBruker,
-                krav = Krav("2019-02-01", krav?.kode)
+                krav = Krav("2019-02-01", krav?.verdi)
             ),
             pensjon = pensjon
         )

@@ -11,20 +11,20 @@ internal class KravSerdeTest {
 
     @Test
     fun `Serialize KravType`() {
-        assertEquals("\"01\"", KravType.ALDER.toJson())
-        assertEquals("\"02\"", KravType.ETTERLATTE.toJson())
-        assertEquals("\"03\"", KravType.UFORE.toJson())
+        assertEquals("01", KravType.ALDER.verdi)
+        assertEquals("02", KravType.GJENLEV.verdi)
+        assertEquals("03", KravType.UFOREP.verdi)
     }
 
     @Test
     fun `Serde Krav object`() {
-        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER.kode)
+        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER.verdi)
         assertEquals(alder, serde(alder))
 
-        val gjenlev = Krav(dato = "01-01-2020", type = KravType.ETTERLATTE.kode)
+        val gjenlev = Krav(dato = "01-01-2020", type = KravType.GJENLEV.verdi)
         assertEquals(gjenlev, serde(gjenlev))
 
-        val ufore = Krav(dato = "01-01-2020", type = KravType.UFORE.kode)
+        val ufore = Krav(dato = "01-01-2020", type = KravType.UFOREP.verdi)
         assertEquals(ufore, serde(ufore))
     }
 
