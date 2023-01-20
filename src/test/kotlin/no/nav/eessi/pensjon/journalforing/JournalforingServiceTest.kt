@@ -6,6 +6,8 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -113,7 +115,7 @@ internal class JournalforingServiceTest {
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            Saktype.ALDER,
+            ALDER,
             0,
             null,
             SED(type = SedType.R004),
@@ -131,7 +133,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "R004 - Melding om utbetaling",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = Saktype.ALDER
+                saktype = ALDER
             )
         }
     }
@@ -153,7 +155,7 @@ internal class JournalforingServiceTest {
             HendelseType.SENDT,
             identifisertPerson,
             fdato,
-            Saktype.UFOREP,
+            UFOREP,
             0,
             null,
             SED(type = SedType.R005),
@@ -171,7 +173,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = Saktype.UFOREP
+                saktype = UFOREP
             )
         }
     }
@@ -194,7 +196,7 @@ internal class JournalforingServiceTest {
             HendelseType.SENDT,
             identifisertPerson,
             fdato,
-            Saktype.UFOREP,
+            UFOREP,
             0,
             null,
             SED(type = SedType.R005),
@@ -213,7 +215,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = Saktype.UFOREP
+                saktype = UFOREP
             )
         }
     }
@@ -244,7 +246,7 @@ internal class JournalforingServiceTest {
             HendelseType.MOTTATT,
             identifisertPerson,
             fdato,
-            Saktype.ALDER,
+            ALDER,
             0,
             null,
             SED(type = SedType.R005),
@@ -263,7 +265,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = Saktype.ALDER
+                saktype = ALDER
             )
         }
     }
@@ -482,7 +484,7 @@ internal class JournalforingServiceTest {
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            Saktype.ALDER,
+            ALDER,
             0,
             null, SED(type = SedType.P2100),
         )
@@ -499,7 +501,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = Saktype.ALDER
+                saktype = ALDER
             )
         }
     }
@@ -599,14 +601,14 @@ internal class JournalforingServiceTest {
             "",
             personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
-        val sakInformasjon = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val sakInformasjon = SakInformasjon("111111", GJENLEV, SakStatus.LOPENDE, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            Saktype.GJENLEV,
+            GJENLEV,
             0,
             sakInformasjon,
             SED(type = SedType.P2100),
@@ -624,7 +626,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = Saktype.GJENLEV
+                saktype = GJENLEV
             )
             //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
         }
@@ -661,16 +663,16 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, Saktype.GJENLEV, rinaDocumentId =  "3123123")
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, GJENLEV, rinaDocumentId =  "3123123")
         )
-        val saksInfo = SakInformasjon("111111", Saktype.GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val saksInfo = SakInformasjon("111111", GJENLEV, SakStatus.LOPENDE, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
             identifisertGjenlevendePerson,
             LEALAUS_KAKE.getBirthDate(),
-            Saktype.GJENLEV,
+            GJENLEV,
             0,
             saksInfo,
             SED(type = SedType.P2100),
@@ -688,7 +690,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAV ACCEPTANCE TEST 07",
-                saktype = Saktype.GJENLEV
+                saktype = GJENLEV
             )
         }
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -705,9 +707,9 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, Saktype.GJENLEV, rinaDocumentId =  "3123123")
+            personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, GJENLEV, rinaDocumentId =  "3123123")
         )
-        val sakInformasjon = SakInformasjon("111222", Saktype.UFOREP, SakStatus.AVSLUTTET, "4303", false)
+        val sakInformasjon = SakInformasjon("111222", UFOREP, SakStatus.AVSLUTTET, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
@@ -839,16 +841,16 @@ internal class JournalforingServiceTest {
             "Test Testesen",
             "",
             "",
-            personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, Saktype.BARNEP, rinaDocumentId =  "3123123")
+            personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, BARNEP, rinaDocumentId =  "3123123")
         )
-        val saksInfo = SakInformasjon("111111", Saktype.BARNEP, SakStatus.LOPENDE, "4862", false)
+        val saksInfo = SakInformasjon("111111", BARNEP, SakStatus.LOPENDE, "4862", false)
 
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.MOTTATT,
             identifisertGjenlevendePerson,
             STERK_BUSK.getBirthDate(),
-            Saktype.BARNEP,
+            BARNEP,
             0,
             saksInfo,
             SED(type = SedType.P2100),
@@ -866,7 +868,7 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "PL",
                 avsenderNavn = "POLEN",
-                saktype = Saktype.BARNEP
+                saktype = BARNEP
             )
         }
     }

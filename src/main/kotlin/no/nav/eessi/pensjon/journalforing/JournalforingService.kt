@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -55,7 +56,7 @@ class JournalforingService(
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: Saktype?,
+        saktype: SakType?,
         offset: Long,
         sakInformasjon: SakInformasjon?,
         sed: SED?,
@@ -202,7 +203,7 @@ class JournalforingService(
         oppgaveEierEnhet: String?,
         bucType: BucType,
         sedType: SedType,
-        sakType: Saktype?,
+        sakType: SakType?,
         hendelsesType: HendelseType
     ) {
         automatiseringStatistikkPublisher.publiserAutomatiseringStatistikk(AutomatiseringMelding(
@@ -242,7 +243,7 @@ class JournalforingService(
         tildeltEnhet: Enhet,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: Saktype?,
+        saktype: SakType?,
         sedHendelseModel: SedHendelseModel,
         harAdressebeskyttelse: Boolean,
     ): Enhet {

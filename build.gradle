@@ -11,7 +11,6 @@ buildscript {
 		epMetricsVersion = '1.0.10'
 		epLoggingVersion = '1.1.13'
 		epPersonoppslagVersion = '12.2.2'
-		epEuxVersion = '1.4.6'
 	}
 }
 
@@ -77,7 +76,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
 	// Rina Eux API
-	implementation("no.nav.eessi.pensjon:ep-eux:1.4.11")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.4.12")
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")

@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 
 class P15000Relasjon(private val sed: SED, bucType: BucType, rinaDocumentId: String) :
@@ -15,7 +16,7 @@ class P15000Relasjon(private val sed: SED, bucType: BucType, rinaDocumentId: Str
 
         logger.info("${sed.type.name}, krav: $sedKravString,  saktype: $saktype")
 
-        return if (saktype == Saktype.GJENLEV) {
+        return if (saktype == GJENLEV) {
             logger.debug("legger til gjenlevende: ($saktype)")
             hentRelasjonGjenlevendeFnrHvisFinnes((sed as P15000).p15000Pensjon?.gjenlevende)
         } else {
@@ -25,11 +26,11 @@ class P15000Relasjon(private val sed: SED, bucType: BucType, rinaDocumentId: Str
 
     }
 
-    private fun mapKravtypeTilSaktype(krav: String?): Saktype {
+    private fun mapKravtypeTilSaktype(krav: String?): SakType {
         return when (krav) {
-            "02" -> Saktype.GJENLEV
-            "03" -> Saktype.UFOREP
-            else -> Saktype.ALDER
+            "02" -> GJENLEV
+            "03" -> UFOREP
+            else -> ALDER
         }
     }
 

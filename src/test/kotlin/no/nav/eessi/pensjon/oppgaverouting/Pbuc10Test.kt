@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -43,14 +45,14 @@ internal class Pbuc10Test {
         val request = mockk<OppgaveRoutingRequest> {
             every { identifisertPerson } returns IdentifisertPerson(
                 "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
-                    DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
+                    DUMMY_FNR, Relasjon.GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
                 )
             )
             every { harAdressebeskyttelse } returns false
-            every { saktype } returns Saktype.UFOREP
+            every { saktype } returns UFOREP
             every { hendelseType } returns SENDT
             every { sakInformasjon?.sakStatus } returns SakStatus.AVSLUTTET
-            every { sakInformasjon?.sakType } returns Saktype.UFOREP
+            every { sakInformasjon?.sakType } returns UFOREP
             every { sedType } returns SedType.P15000
             every { bucType } returns P_BUC_10
 
@@ -63,7 +65,7 @@ internal class Pbuc10Test {
     fun `Kan automatisk journalføres`() {
         val request = mockk<OppgaveRoutingRequest>(relaxed = true) {
             every { hendelseType } returns SENDT
-            every { saktype } returns Saktype.UFOREP
+            every { saktype } returns UFOREP
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -75,27 +77,27 @@ internal class Pbuc10Test {
     fun `Mottatt sak til manuell behandling, bosatt norge`() {
         assertEquals(
                 Enhet.NFP_UTLAND_AALESUND,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.ALDER, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, ALDER, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.NFP_UTLAND_AALESUND,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.GJENLEV, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, GJENLEV, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.UFORE_UTLANDSTILSNITT,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.UFOREP, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, UFOREP, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.OMSORG, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, OMSORG, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.GENRL, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, GENRL, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, Saktype.BARNEP, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(MOTTATT, BARNEP, Bosatt.NORGE))
         )
     }
 
@@ -103,27 +105,27 @@ internal class Pbuc10Test {
     fun `Sendt sak til manuell behandling, bosatt norge`() {
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.ALDER, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, ALDER, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.GJENLEV, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, GJENLEV, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.UFORE_UTLANDSTILSNITT,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.UFOREP, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, UFOREP, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.OMSORG, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, OMSORG, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.GENRL, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, GENRL, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, Saktype.BARNEP, Bosatt.NORGE))
+                handler.hentEnhet(manuellRequest(SENDT, BARNEP, Bosatt.NORGE))
         )
     }
 
@@ -132,40 +134,40 @@ internal class Pbuc10Test {
     fun `Mottatt sak til manuell behandling, bosatt utland`(hendelse: HendelseType) {
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.ALDER, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, ALDER, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.GJENLEV, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, GJENLEV, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.UFORE_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.UFOREP, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, UFOREP, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.OMSORG, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, OMSORG, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.GENRL, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, GENRL, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, Saktype.BARNEP, Bosatt.UTLAND))
+                handler.hentEnhet(manuellRequest(hendelse, BARNEP, Bosatt.UTLAND))
         )
     }
 
     private fun manuellRequest(
         hendelse: HendelseType,
-        ytelse: Saktype?,
+        ytelse: SakType?,
         land: Bosatt
     ): OppgaveRoutingRequest {
         return mockk {
             if (hendelse == SENDT)
                 every { identifisertPerson } returns IdentifisertPerson(
                     "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
-                        DUMMY_FNR, Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
+                        DUMMY_FNR, Relasjon.GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
                     )
                 )
 

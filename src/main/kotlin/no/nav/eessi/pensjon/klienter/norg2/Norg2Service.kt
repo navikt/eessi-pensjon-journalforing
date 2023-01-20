@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import org.slf4j.LoggerFactory
@@ -41,12 +42,12 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun velgBehandligstype(landkode: String?) = if (landkode === "NOR") BOSATT_NORGE.kode else BOSATT_UTLAND.kode
 
-    fun velgTema(sakType: Saktype?) = if (sakType == Saktype.UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
+    fun velgTema(sakType: SakType?) = if (sakType == UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
     fun velgBehandlingTema(SEDPersonRelasjon: SEDPersonRelasjon?) : String {
         return when (SEDPersonRelasjon?.saktype) {
-            Saktype.BARNEP -> Norg2BehandlingsTema.BARNEP.kode
-            Saktype.GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
+            BARNEP -> Norg2BehandlingsTema.BARNEP.kode
+            GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
             else -> Norg2BehandlingsTema.ANY.kode
         }
     }

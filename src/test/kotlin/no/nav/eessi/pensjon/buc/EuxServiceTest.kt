@@ -9,13 +9,13 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -102,7 +102,7 @@ internal class EuxServiceTest {
         val seds = listOf(sedR005)
         val actual = helper.hentSaktypeType(sedHendelse, seds)
 
-        assertEquals(Saktype.ALDER ,actual)
+        assertEquals(ALDER ,actual)
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class EuxServiceTest {
         val seds = listOf(sedR005)
 
         val actual = helper.hentSaktypeType(sedHendelse, seds)
-        assertEquals(Saktype.UFOREP, actual)
+        assertEquals(UFOREP, actual)
     }
 
     @Test
@@ -130,7 +130,7 @@ internal class EuxServiceTest {
         )
 
         val actual = helper.hentSaktypeType(sedHendelse, seds)
-        assertEquals(Saktype.ALDER, actual)
+        assertEquals(ALDER, actual)
     }
 
     @Test

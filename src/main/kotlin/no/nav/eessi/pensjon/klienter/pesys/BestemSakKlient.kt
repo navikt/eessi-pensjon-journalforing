@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.klienter.pesys
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -63,7 +63,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 }
 
 data class BestemSakRequest(val aktoerId: String,
-                            val ytelseType: Saktype,
+                            val ytelseType: SakType,
                             val callId: UUID,
                             val consumerId: UUID)
 

@@ -5,7 +5,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -32,7 +33,7 @@ internal class BestemSakServiceTest {
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.ALDER, actualRequest.ytelseType)
+        assertEquals(ALDER, actualRequest.ytelseType)
         assertNotNull(actualRequest.callId)
         assertNotNull(actualRequest.consumerId)
 
@@ -53,11 +54,11 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_02, Saktype.GJENLEV)!!
+        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_02, GJENLEV)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.GJENLEV, actualRequest.ytelseType)
+        assertEquals(GJENLEV, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }
@@ -69,11 +70,11 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_03, Saktype.GENRL)!!
+        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_03, GENRL)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.UFOREP, actualRequest.ytelseType)
+        assertEquals(UFOREP, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }
@@ -85,11 +86,11 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, Saktype.GENRL)!!
+        bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, GENRL)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
-        assertEquals(Saktype.GENRL, actualRequest.ytelseType)
+        assertEquals(GENRL, actualRequest.ytelseType)
 
         verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
     }

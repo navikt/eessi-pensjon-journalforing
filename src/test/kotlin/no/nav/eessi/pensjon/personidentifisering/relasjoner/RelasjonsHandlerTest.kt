@@ -2,8 +2,9 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -49,7 +50,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 sokKriterier = sok,
                 fdato = LocalDate.of(1952, 3, 9),
                 rinaDocumentId = "3123134",
-                saktype = Saktype.ALDER
+                saktype = ALDER
             )
         )
         assertEquals(2, actual.size)
@@ -213,7 +214,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P2100, gjenlevRelasjon.sedType)
-            assertEquals(Saktype.BARNEP, gjenlevRelasjon.saktype)
+            assertEquals(BARNEP, gjenlevRelasjon.saktype)
         }
 
         @ParameterizedTest
@@ -235,7 +236,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
             assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
             assertEquals(SedType.P2100, gjenlevRelasjon.sedType)
-            assertEquals(Saktype.GJENLEV, gjenlevRelasjon.saktype)
+            assertEquals(GJENLEV, gjenlevRelasjon.saktype)
         }
 
     @Test
@@ -301,7 +302,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
         println("*** $actual ***")
         val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22))
-        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
+        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
 
         assertEquals(2, actual.size)
         val actualPersonRelasjon = actual.first()
@@ -329,7 +330,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22))
-            val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P15000, sokKriterier = sokgjen, fdato = LocalDate.of(1973,11,22), rinaDocumentId = "31231231")
+            val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, sedType = SedType.P15000, sokKriterier = sokgjen, fdato = LocalDate.of(1973,11,22), rinaDocumentId = "31231231")
             assertEquals(1, actual.size)
             assertEquals(expectedGjenlevP15000, actual[0])
         }
@@ -345,7 +346,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
             val actual = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_01)
             val sok = createSokKritere(fdato = LocalDate.of(1971,6,11))
-            val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, Saktype.ALDER, sedType = SedType.P15000, sokKriterier = sok, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "3123123")
+            val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, ALDER, sedType = SedType.P15000, sokKriterier = sok, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "3123123")
 
             assertEquals(1, actual.size)
             print(expectedPerson)
@@ -392,7 +393,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
         assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
         assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-        assertEquals(Saktype.BARNEP, gjenlevRelasjon.saktype)
+        assertEquals(BARNEP, gjenlevRelasjon.saktype)
     }
 
     @ParameterizedTest
@@ -414,7 +415,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
         assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
         assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-        assertEquals(Saktype.GJENLEV, gjenlevRelasjon.saktype)
+        assertEquals(GJENLEV, gjenlevRelasjon.saktype)
     }
 
     }

@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
@@ -36,8 +38,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(Saktype::class)
-        fun `Sendt hendelse kan automatisk journalføres`(type: Saktype) {
+        @EnumSource(SakType::class)
+        fun `Sendt hendelse kan automatisk journalføres`(type: SakType) {
             // Gyldig sak hvor sakStatus IKKE er AVSLUTTET skal alltid automatisk journalføres
             val requestNorge = SENDT.request(type, "NOR", SakStatus.TIL_BEHANDLING)
             assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestNorge))
@@ -48,7 +50,7 @@ internal class Pbuc02Test {
 
         @Test
         fun `Sendt hendelse med sakType UFOREP og sakStatus AVSLUTTET`() {
-            val requestNorge = SENDT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET)
+            val requestNorge = SENDT.request(UFOREP, "NOR", SakStatus.AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -56,7 +58,7 @@ internal class Pbuc02Test {
                     "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
 
-            val requestUtland = SENDT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET)
+            val requestUtland = SENDT.request(UFOREP, "SWE", SakStatus.AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -82,23 +84,23 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "NOR"))
+                    handler.hentEnhet(SENDT.request(UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(UFOREP, "NOR", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.ALDER, "NOR"))
+                    handler.hentEnhet(SENDT.request(ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.BARNEP, "NOR"))
+                    handler.hentEnhet(SENDT.request(BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.GJENLEV, "NOR"))
+                    handler.hentEnhet(SENDT.request(GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -110,23 +112,23 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "SWE"))
+                    handler.hentEnhet(SENDT.request(UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(UFOREP, "SWE", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.ALDER, "SWE"))
+                    handler.hentEnhet(SENDT.request(ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.BARNEP, "SWE"))
+                    handler.hentEnhet(SENDT.request(BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(Saktype.GJENLEV, "SWE"))
+                    handler.hentEnhet(SENDT.request(GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -154,8 +156,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(Saktype::class)
-        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt NORGE`(type: Saktype) {
+        @EnumSource(SakType::class)
+        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt NORGE`(type: SakType) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(MOTTATT.request(type, "NOR"))
@@ -163,8 +165,8 @@ internal class Pbuc02Test {
         }
 
         @ParameterizedTest
-        @EnumSource(Saktype::class)
-        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt UTLAND`(type: Saktype) {
+        @EnumSource(SakType::class)
+        fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt UTLAND`(type: SakType) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
                     handler.hentEnhet(MOTTATT.request(type, "SWE"))
@@ -183,23 +185,23 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.UFORE_UTLANDSTILSNITT,
-                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.ALDER, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.BARNEP, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.GJENLEV, "NOR"))
+                    handler.hentEnhet(MOTTATT.request(GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -211,23 +213,23 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.UFORE_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(Saktype.UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE", SakStatus.AVSLUTTET))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.ALDER, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.BARNEP, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(Saktype.GJENLEV, "SWE"))
+                    handler.hentEnhet(MOTTATT.request(GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
@@ -237,7 +239,7 @@ internal class Pbuc02Test {
     }
 
     private fun HendelseType.request(
-        type: Saktype?,
+        type: SakType?,
         landkode: String,
         status: SakStatus = SakStatus.TIL_BEHANDLING
     ): OppgaveRoutingRequest {

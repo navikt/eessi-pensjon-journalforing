@@ -3,8 +3,9 @@ package no.nav.eessi.pensjon.klienter.journalpost
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
@@ -39,7 +40,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         dokumenter: String,
         avsenderLand: String?,
         avsenderNavn: String?,
-        saktype: Saktype?
+        saktype: SakType?
     ): OpprettJournalPostResponse? {
 
         val request = OpprettJournalpostRequest(
@@ -67,7 +68,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    private fun bestemBehandlingsTema(bucType: BucType, saktype: Saktype?): Behandlingstema {
+    private fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
         return if (bucType == R_BUC_02) {
             when (saktype) {
                 UFOREP -> Behandlingstema.UFOREPENSJON
@@ -91,7 +92,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - saktype er UFØRETRYGD
      */
 
-    fun hentTema(bucType: BucType, saktype: Saktype?) : Tema =
+    fun hentTema(bucType: BucType, saktype: SakType?) : Tema =
         if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
 
     private fun populerAvsenderMottaker(

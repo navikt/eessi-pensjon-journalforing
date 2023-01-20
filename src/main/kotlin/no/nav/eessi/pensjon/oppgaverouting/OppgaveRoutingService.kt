@@ -2,12 +2,12 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -71,6 +71,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     fun erGydligBuc10eller02(bucType: BucType, landkode: String?, sakInformasjon: SakInformasjon?): Boolean {
         if (bucType == P_BUC_10) return true
-        return bucType == P_BUC_02 && landkode == "NOR" && sakInformasjon?.sakType == Saktype.ALDER && sakInformasjon.sakStatus == SakStatus.LOPENDE
+        return bucType == P_BUC_02 && landkode == "NOR" && sakInformasjon?.sakType == ALDER && sakInformasjon.sakStatus == SakStatus.LOPENDE
     }
 }

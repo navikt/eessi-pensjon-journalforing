@@ -5,6 +5,8 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
@@ -170,7 +172,7 @@ internal class OppgaveRoutingServiceTest {
                     landkode = UTLAND,
                     geografiskTilknytning = dummyTilknytning,
                     bucType = R_BUC_02,
-                    saktype = Saktype.ALDER,
+                    saktype = ALDER,
                     hendelseType = HendelseType.MOTTATT,
                     sakInformasjon = null,
                     identifisertPerson = mockerEnPerson()
@@ -189,7 +191,7 @@ internal class OppgaveRoutingServiceTest {
                     landkode = UTLAND,
                     geografiskTilknytning = dummyTilknytning,
                     bucType = R_BUC_02,
-                    saktype = Saktype.UFOREP,
+                    saktype = UFOREP,
                     hendelseType = HendelseType.MOTTATT,
                     sakInformasjon = null,
                     identifisertPerson = mockerEnPerson()
@@ -208,7 +210,7 @@ internal class OppgaveRoutingServiceTest {
                     landkode = UTLAND,
                     geografiskTilknytning = dummyTilknytning,
                     bucType = R_BUC_02,
-                    saktype = Saktype.UFOREP,
+                    saktype = UFOREP,
                     sedType = SedType.R004,
                     hendelseType = HendelseType.MOTTATT,
                     sakInformasjon = null,
@@ -228,7 +230,7 @@ internal class OppgaveRoutingServiceTest {
                     landkode = UTLAND,
                     geografiskTilknytning = dummyTilknytning,
                     bucType = R_BUC_02,
-                    saktype = Saktype.UFOREP,
+                    saktype = UFOREP,
                     sedType = SedType.R004,
                     hendelseType = HendelseType.MOTTATT,
                     sakInformasjon = null
@@ -262,7 +264,7 @@ internal class OppgaveRoutingServiceTest {
                 landkode = null,
                 geografiskTilknytning = dummyTilknytning,
                 bucType = R_BUC_02,
-                saktype = Saktype.ALDER,
+                saktype = ALDER,
                 sedType = SedType.R005,
                 hendelseType = HendelseType.MOTTATT,
                 sakInformasjon = null,
@@ -329,39 +331,39 @@ internal class OppgaveRoutingServiceTest {
             fun arguments() =
                 Arrays.stream(
                     arrayOf(
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.GJENLEV),
-                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, Saktype.UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, Saktype.UFOREP, SakStatus.AVSLUTTET),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.BARNEP),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, GJENLEV),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
-                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, Saktype.ALDER),
-                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, Saktype.UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, Saktype.UFOREP, SakStatus.AVSLUTTET),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, Saktype.BARNEP),
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
-                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, Saktype.ALDER),
-                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, Saktype.UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, Saktype.UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, SakStatus.AVSLUTTET),
                         TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND),
                         TestArgumentsPBuc02(ID_OG_FORDELING, NORGE),
 
-                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, Saktype.UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, Saktype.UFOREP, SakStatus.AVSLUTTET),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.BARNEP),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.GJENLEV),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, Saktype.ALDER),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, SakStatus.LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, BARNEP),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, GJENLEV),
+                        TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, ALDER),
                     )
                 )
         }
         data class TestArgumentsPBuc02(
             val expectedResult: Enhet,
             val landkode: String?,
-            val saktype: Saktype? = null,
+            val saktype: SakType? = null,
             val sakStatus: SakStatus? = null
         )
 
         private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
-            return SakInformasjon(null, Saktype.UFOREP, sakStatus)
+            return SakInformasjon(null, UFOREP, sakStatus)
         }
 
         @ParameterizedTest
@@ -389,7 +391,7 @@ internal class OppgaveRoutingServiceTest {
         val expectedResult: Enhet,
         val alder: LocalDate,
         val landkode: String?,
-        val saktype: Saktype?
+        val saktype: SakType?
     )
 
     class Routing_P_BUC_10 {
@@ -398,32 +400,32 @@ internal class OppgaveRoutingServiceTest {
             fun arguments() =
                 Arrays.stream(
                     arrayOf(
-                        TestArguments(PENSJON_UTLAND, alder18aar, null, Saktype.ALDER),
-                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder17aar, null, Saktype.ALDER),
-                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder18aar, null, ALDER),
+                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder17aar, null, ALDER),
+                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, ALDER),
 
-                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, Saktype.GJENLEV),
-                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, Saktype.GJENLEV),
-                        TestArguments(PENSJON_UTLAND, alder17aar, null, Saktype.GJENLEV),
-                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, Saktype.GJENLEV),
-                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, Saktype.GJENLEV),
+                        TestArguments(ID_OG_FORDELING, alder18aar, NORGE, GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder18aar, UTLAND, GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder17aar, null, GJENLEV),
+                        TestArguments(ID_OG_FORDELING, alder17aar, NORGE, GJENLEV),
+                        TestArguments(PENSJON_UTLAND, alder17aar, UTLAND, GJENLEV),
 
-                        TestArguments(UFORE_UTLAND, alder18aar, null, Saktype.UFOREP),
-                        TestArguments(UFORE_UTLANDSTILSNITT, alder18aar, NORGE, Saktype.UFOREP),
-                        TestArguments(UFORE_UTLAND, alder18aar, UTLAND, Saktype.UFOREP),
-                        TestArguments(UFORE_UTLAND, alder17aar, null, Saktype.UFOREP),
-                        TestArguments(UFORE_UTLANDSTILSNITT, alder17aar, NORGE, Saktype.UFOREP),
-                        TestArguments(UFORE_UTLAND, alder17aar, UTLAND, Saktype.UFOREP),
+                        TestArguments(UFORE_UTLAND, alder18aar, null, UFOREP),
+                        TestArguments(UFORE_UTLANDSTILSNITT, alder18aar, NORGE, UFOREP),
+                        TestArguments(UFORE_UTLAND, alder18aar, UTLAND, UFOREP),
+                        TestArguments(UFORE_UTLAND, alder17aar, null, UFOREP),
+                        TestArguments(UFORE_UTLANDSTILSNITT, alder17aar, NORGE, UFOREP),
+                        TestArguments(UFORE_UTLAND, alder17aar, UTLAND, UFOREP),
 
-                        TestArguments(PENSJON_UTLAND, alder59aar, null, Saktype.ALDER),
-                        TestArguments(ID_OG_FORDELING, alder59aar, NORGE, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder59aar, UTLAND, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder60aar, null, Saktype.ALDER),
-                        TestArguments(ID_OG_FORDELING, alder60aar, NORGE, Saktype.ALDER),
-                        TestArguments(PENSJON_UTLAND, alder60aar, UTLAND, Saktype.ALDER),
+                        TestArguments(PENSJON_UTLAND, alder59aar, null, ALDER),
+                        TestArguments(ID_OG_FORDELING, alder59aar, NORGE, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder59aar, UTLAND, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder60aar, null, ALDER),
+                        TestArguments(ID_OG_FORDELING, alder60aar, NORGE, ALDER),
+                        TestArguments(PENSJON_UTLAND, alder60aar, UTLAND, ALDER),
                     )
                 )
         }
@@ -455,7 +457,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P15000, rinaDocumentId =  "3123123")
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, ALDER, SedType.P15000, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -468,7 +470,7 @@ internal class OppgaveRoutingServiceTest {
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
-            Saktype.ALDER,
+            ALDER,
             sedHendelseModel,
             HendelseType.MOTTATT,
             null,
@@ -503,7 +505,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.GJENLEV, SedType.P2100, rinaDocumentId =  "3123123")
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, GJENLEV, SedType.P2100, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -516,7 +518,7 @@ internal class OppgaveRoutingServiceTest {
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
-            Saktype.GJENLEV,
+            GJENLEV,
             sedHendelseModel,
             HendelseType.MOTTATT,
             null,
@@ -552,7 +554,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, Saktype.BARNEP, SedType.P2100, rinaDocumentId =  "3123123")
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.GJENLEVENDE, BARNEP, SedType.P2100, rinaDocumentId =  "3123123")
         val identifisertPerson = IdentifisertPerson(
             "01010101010",
             "Ole Olsen",
@@ -571,7 +573,7 @@ internal class OppgaveRoutingServiceTest {
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
-            Saktype.BARNEP,
+            BARNEP,
             sedHendelseModel,
             HendelseType.MOTTATT,
             null,
@@ -589,7 +591,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000, rinaDocumentId =  "3123123")
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, ALDER, SedType.P2000, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
@@ -602,7 +604,7 @@ internal class OppgaveRoutingServiceTest {
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
-            Saktype.ALDER,
+            ALDER,
             sedHendelseModel,
             HendelseType.MOTTATT,
             null,
@@ -637,7 +639,7 @@ internal class OppgaveRoutingServiceTest {
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
         val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, Saktype.UFOREP, SedType.P2200, rinaDocumentId =  "3123123")
+            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), Relasjon.FORSIKRET, UFOREP, SedType.P2200, rinaDocumentId =  "3123123")
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "SWE", null, personRelasjon, personListe = emptyList())
 
@@ -650,7 +652,7 @@ internal class OppgaveRoutingServiceTest {
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
-            Saktype.UFOREP,
+            UFOREP,
             sedHendelseModel,
             HendelseType.SENDT,
             null,
@@ -667,7 +669,7 @@ internal class OppgaveRoutingServiceTest {
             val landkode: String? = null,
             val geografiskTilknytning: String? = null,
             val fdato: LocalDate? = null,
-            val saksType: Saktype? = null,
+            val saksType: SakType? = null,
             val adressebeskyttet: Boolean? = false
         )
 
@@ -746,11 +748,11 @@ internal class OppgaveRoutingServiceTest {
                         TestArgumentsBucs(PENSJON_UTLAND, P_BUC_07, UTLAND, fdato = alder17aar),
                         TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_08, NORGE, fdato = alder17aar),
                         TestArgumentsBucs(PENSJON_UTLAND, P_BUC_09, UTLAND, fdato = alder17aar),
-                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_01, NORGE, fdato = alder60aar, adressebeskyttet = true, saksType = Saktype.ALDER),
-                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_03, NORGE, fdato = alder60aar, saksType = Saktype.UFOREP),
+                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_01, NORGE, fdato = alder60aar, adressebeskyttet = true, saksType = ALDER),
+                        TestArgumentsBucs(UFORE_UTLANDSTILSNITT, P_BUC_03, NORGE, fdato = alder60aar, saksType = UFOREP),
 
-                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_10, UTLAND, fdato = alder60aar, saksType = Saktype.GJENLEV),
-                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_10, UTLAND, fdato = alder60aar, adressebeskyttet = true, saksType = Saktype.GJENLEV),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_10, UTLAND, fdato = alder60aar, saksType = GJENLEV),
+                        TestArgumentsBucs(DISKRESJONSKODE, P_BUC_10, UTLAND, fdato = alder60aar, adressebeskyttet = true, saksType = GJENLEV),
                         )
                 )
         }
@@ -777,7 +779,7 @@ internal class OppgaveRoutingServiceTest {
     }
 
     private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
-        return SakInformasjon(null, Saktype.UFOREP, sakStatus)
+        return SakInformasjon(null, UFOREP, sakStatus)
     }
 
     @Test

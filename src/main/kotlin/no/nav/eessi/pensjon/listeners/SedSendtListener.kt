@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.listeners
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
@@ -11,7 +13,6 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.sed.SedHendelseModel
@@ -128,7 +129,7 @@ class SedSendtListener(
         }
     }
 
-    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: Saktype?, alleSedIBuc: List<SED>): SakInformasjon? {
+    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
         logger.info("skal hente pensjonsak med bruk av bestemSak")
@@ -169,22 +170,22 @@ class SedSendtListener(
 
 
     private fun bestemSaktypeFraSed(
-        saktypeFraSed: Saktype?,
+        saktypeFraSed: SakType?,
         identifisertPerson: IdentifisertPerson?,
         bucType: BucType
-    ): Saktype? {
+    ): SakType? {
         val saktype = identifisertPerson?.personRelasjon?.saktype
         logger.debug("populerSaktypeFraSed: fraSED $saktypeFraSed  identPersonYtelse: $saktype")
-        if (bucType == P_BUC_10 && saktypeFraSed == Saktype.GJENLEV) {
+        if (bucType == P_BUC_10 && saktypeFraSed == GJENLEV) {
             return saktype
         }
         return saktypeFraSed ?: saktype
     }
 
-    private fun populerSaktype(saktypeFraSED: Saktype?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): Saktype? {
-        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == Saktype.UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): SakType? {
+        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == SakStatus.AVSLUTTET) {
             return null
-        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == Saktype.GJENLEV) {
+        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {
             return sakInformasjon?.sakType ?: saktypeFraSED
         } else if (saktypeFraSED != null) {
             return saktypeFraSED

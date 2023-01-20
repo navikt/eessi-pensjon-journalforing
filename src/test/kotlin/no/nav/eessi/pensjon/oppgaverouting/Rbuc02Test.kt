@@ -4,11 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -31,8 +32,8 @@ internal class Rbuc02Test {
     }
 
     @ParameterizedTest
-    @EnumSource(Saktype::class)
-    fun `Sendt sak med kun én person kan automatisk behandles`(saktype: Saktype) {
+    @EnumSource(SakType::class)
+    fun `Sendt sak med kun én person kan automatisk behandles`(saktype: SakType) {
         val person = mockk<IdentifisertPerson> {
             every { aktoerId } returns "111"
             every { flereEnnEnPerson() } returns false
@@ -56,8 +57,8 @@ internal class Rbuc02Test {
     }
 
     @ParameterizedTest
-    @EnumSource(Saktype::class)
-    fun `Mottatt sak skal aldri til automatisk journalføring`(saktype: Saktype) {
+    @EnumSource(SakType::class)
+    fun `Mottatt sak skal aldri til automatisk journalføring`(saktype: SakType) {
         val person = mockk<IdentifisertPerson> {
             every { aktoerId } returns "111"
             every { flereEnnEnPerson() } returns false
@@ -76,7 +77,7 @@ internal class Rbuc02Test {
             every { flereEnnEnPerson() } returns true
         }
 
-        val request = hendelseType.mockRequest(type = Saktype.ALDER, person = person)
+        val request = hendelseType.mockRequest(type = ALDER, person = person)
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
     }
@@ -84,7 +85,7 @@ internal class Rbuc02Test {
     @ParameterizedTest
     @EnumSource(HendelseType::class)
     fun `Sak med ukjent person skal til ID og Fordeling`(hendelseType: HendelseType) {
-        val request = hendelseType.mockRequest(type = Saktype.ALDER, person = null)
+        val request = hendelseType.mockRequest(type = ALDER, person = null)
 
         assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
     }
@@ -122,13 +123,13 @@ internal class Rbuc02Test {
             every { flereEnnEnPerson() } returns false
         }
 
-        val forventPensjonUtland = MOTTATT.mockRequest(type = Saktype.ALDER, person = person)
+        val forventPensjonUtland = MOTTATT.mockRequest(type = ALDER, person = person)
         assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(forventPensjonUtland))
 
-        val forventUforeUtland = MOTTATT.mockRequest(type = Saktype.UFOREP, person = person)
+        val forventUforeUtland = MOTTATT.mockRequest(type = UFOREP, person = person)
         assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(forventUforeUtland))
 
-        listOf(Saktype.OMSORG, Saktype.GJENLEV, Saktype.BARNEP, Saktype.GENRL)
+        listOf(OMSORG, GJENLEV, BARNEP, GENRL)
                 .forEach { saktype ->
                     val request = MOTTATT.mockRequest(type = saktype, person = person)
                     assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
@@ -136,7 +137,7 @@ internal class Rbuc02Test {
     }
 
     private fun HendelseType.mockRequest(
-        type: Saktype? = null,
+        type: SakType? = null,
         harAdressebeskyttelse: Boolean = false,
         sedType: SedType = SedType.R005,
         person: IdentifisertPerson? = null

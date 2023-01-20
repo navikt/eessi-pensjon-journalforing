@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -24,7 +26,6 @@ import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
@@ -48,7 +49,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
+                        sakType = UFOREP,
                         sakStatus = SakStatus.OPPRETTET
                     )
                 )
@@ -91,7 +92,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
+                        sakType = UFOREP,
                         sakStatus = SakStatus.OPPRETTET
                     )
                 )
@@ -133,7 +134,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
+                        sakType = UFOREP,
                         sakStatus = SakStatus.OPPRETTET
                     )
                 )
@@ -254,7 +255,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
+                        sakType = UFOREP,
                         sakStatus = SakStatus.LOPENDE
                     )
                 )
@@ -289,7 +290,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = Saktype.UFOREP,
+                        sakType = UFOREP,
                         sakStatus = SakStatus.LOPENDE
                     )
                 )

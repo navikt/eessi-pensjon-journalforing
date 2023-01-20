@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
@@ -56,7 +58,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -83,7 +85,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -105,12 +107,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @ParameterizedTest
         @EnumSource(
-            Saktype::class, names = [
+            SakType::class, names = [
                 "BARNEP", "GJENLEV"
             ]
         )
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende GjenlevP eller BarneP, Så routes oppgave til NAV Pensjon Utland`(
-            saktype: Saktype
+            saktype: SakType
         ) {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
@@ -145,7 +147,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -173,7 +175,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -195,11 +197,11 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @ParameterizedTest
         @EnumSource(
-            Saktype::class, names = [
+            SakType::class, names = [
                 "BARNEP", "GJENLEV"
             ]
         )
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: Saktype) {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
@@ -259,7 +261,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -286,7 +288,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -308,12 +310,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @ParameterizedTest
         @EnumSource(
-            Saktype::class, names = [
+            SakType::class, names = [
                 "BARNEP", "GJENLEV"
             ]
         )
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende GjenlevP eller BarneP, Så routes oppgave til NAV Pensjon Utland`(
-            saktype: Saktype
+            saktype: SakType
         ) {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.SENT)
@@ -348,7 +350,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -376,7 +378,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -404,7 +406,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
                 )
             )
 
@@ -426,11 +428,11 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @ParameterizedTest
         @EnumSource(
-            Saktype::class, names = [
+            SakType::class, names = [
                 "BARNEP", "GJENLEV"
             ]
         )
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: Saktype) {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.SENT)
@@ -464,7 +466,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = Saktype.BARNEP , sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = BARNEP , sakStatus = SakStatus.LOPENDE)
                 )
             )
 

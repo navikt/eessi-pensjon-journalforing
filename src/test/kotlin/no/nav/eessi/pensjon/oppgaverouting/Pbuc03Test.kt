@@ -2,11 +2,10 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
@@ -31,8 +30,8 @@ internal class Pbuc03Test {
     }
 
     @ParameterizedTest
-    @EnumSource(Saktype::class)
-    fun `Automatisk journalføring, uavhengig av saktype`(type: Saktype) {
+    @EnumSource(SakType::class)
+    fun `Automatisk journalføring, uavhengig av saktype`(type: SakType) {
         val request = mockk<OppgaveRoutingRequest> {
             every { hendelseType } returns HendelseType.SENDT
             every { harAdressebeskyttelse } returns false

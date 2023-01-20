@@ -4,7 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.models.Saktype
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +29,7 @@ internal class BestemSakKlientTest {
 
     @Test
     fun `Verifiser innsendt request ikke endres`() {
-        val expectedRequest = BestemSakRequest("12345678901", Saktype.ALDER, UUID.randomUUID(), UUID.randomUUID())
+        val expectedRequest = BestemSakRequest("12345678901", ALDER, UUID.randomUUID(), UUID.randomUUID())
         val responseBody = javaClass.classLoader.getResource("pen/bestemSakResponse.json")!!.readText()
 
         val requestSlot = slot<HttpEntity<String>>()

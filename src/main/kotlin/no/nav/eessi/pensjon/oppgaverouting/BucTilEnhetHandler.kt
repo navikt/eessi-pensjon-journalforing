@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.oppgaverouting
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Saktype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -37,11 +37,11 @@ interface BucTilEnhetHandler {
         logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av personen er bosatt i norge")
     }
 
-    fun bosattNorgeLogging(sedType: SedType?, bucType: BucType, sakType: Saktype, enhet: Enhet) {
+    fun bosattNorgeLogging(sedType: SedType?, bucType: BucType, sakType: SakType, enhet: Enhet) {
         logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av saktype: $sakType og personen er bosatt i norge")
     }
 
-    fun bosattUtlandLogging(sedType: SedType?, bucType: BucType, sakType: Saktype, enhet: Enhet) {
+    fun bosattUtlandLogging(sedType: SedType?, bucType: BucType, sakType: SakType, enhet: Enhet) {
         logger.info("Router $sedType i $bucType til ${enhet.enhetsNr} på grunn av saktype: $sakType og personen er bosatt i utlandet")
     }
 

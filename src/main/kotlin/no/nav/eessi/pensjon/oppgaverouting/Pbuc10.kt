@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 
 class Pbuc10 : BucTilEnhetHandler {
 
@@ -28,7 +29,7 @@ class Pbuc10 : BucTilEnhetHandler {
     private fun enhetFraLand(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.bosatt == Bosatt.NORGE -> routeNorge(request)
-            request.saktype == Saktype.UFOREP -> {
+            request.saktype == UFOREP -> {
                 logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.UFORE_UTLAND} på grunn av bosatt utland og sak er uføre")
                 Enhet.UFORE_UTLAND
             }
@@ -46,7 +47,7 @@ class Pbuc10 : BucTilEnhetHandler {
         }
 
         return when (request.saktype) {
-            Saktype.UFOREP -> {
+            UFOREP -> {
                 logger.info("Router ${request.hendelseType} ${request.sedType} i ${request.bucType} til ${Enhet.UFORE_UTLANDSTILSNITT} på grunn av, bosatt Norge, uføre-sak")
                 Enhet.UFORE_UTLANDSTILSNITT
             }
@@ -60,10 +61,10 @@ class Pbuc10 : BucTilEnhetHandler {
     private fun erSakUgyldig(request: OppgaveRoutingRequest): Boolean {
         if (request.hendelseType ==  HendelseType.SENDT) {
             return request.run {
-                identifisertPerson?.personRelasjon?.saktype == Saktype.GJENLEV
-                        && saktype == Saktype.UFOREP
+                identifisertPerson?.personRelasjon?.saktype == GJENLEV
+                        && saktype == UFOREP
                         && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET
-                        && sakInformasjon.sakType == Saktype.UFOREP
+                        && sakInformasjon.sakType == UFOREP
             }
         }
         return false
@@ -72,7 +73,7 @@ class Pbuc10 : BucTilEnhetHandler {
     private fun erMottattAlderEllerGjenlev(request: OppgaveRoutingRequest): Boolean {
         return request.run {
             hendelseType == HendelseType.MOTTATT
-                    && (saktype == Saktype.ALDER || request.saktype == Saktype.GJENLEV)
+                    && (saktype == ALDER || request.saktype == GJENLEV)
         }
     }
 }

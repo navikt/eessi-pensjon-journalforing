@@ -5,10 +5,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
@@ -73,9 +74,9 @@ class PersonidentifiseringServiceTest {
         every { personService.hentPerson(NorskIdent("05127921999")) } returns PersonMock.createWith("05127921999", landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
-            SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, null, rinaDocumentId =  "3123123"), HendelseType.SENDT
+            SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, GJENLEV, sedType = SedType.P2100, null, rinaDocumentId =  "3123123"), HendelseType.SENDT
         )
-        val expected = SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, Saktype.GJENLEV, sedType = SedType.P2100, rinaDocumentId =  "3123123")
+        val expected = SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, GJENLEV, sedType = SedType.P2100, rinaDocumentId =  "3123123")
         assertEquals(expected, actual?.personRelasjon)
     }
 
@@ -95,7 +96,7 @@ class PersonidentifiseringServiceTest {
             alleSediBuc, P_BUC_01, potensiellePerson, HendelseType.SENDT, rinaDocumentId = "23123"
         )
         val sokKriterier = SokKriterier("øjøløjøjø","jkljkjl", LocalDate.of(1980, 1, 1))
-        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, sokKriterier = sokKriterier,  fdato = LocalDate.of(1980, 1, 1),rinaDocumentId =  "23123", saktype = Saktype.ALDER)
+        val expected = SEDPersonRelasjon(fnr, Relasjon.FORSIKRET, sedType = SedType.P2000, sokKriterier = sokKriterier,  fdato = LocalDate.of(1980, 1, 1),rinaDocumentId =  "23123", saktype = ALDER)
         assertEquals(expected, actual.first().personRelasjon)
 
         verify(exactly = 1) { personService.hentPerson(NorskIdent(fnr.value)) }
@@ -538,7 +539,7 @@ class PersonidentifiseringServiceTest {
             "Ola Test Testing",
             "NOR",
             "3041",
-            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, Saktype.ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323")
+            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323")
         )
 
     }

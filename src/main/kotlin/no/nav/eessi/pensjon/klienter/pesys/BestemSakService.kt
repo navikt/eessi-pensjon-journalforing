@@ -2,8 +2,9 @@ package no.nav.eessi.pensjon.klienter.pesys
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,11 +24,11 @@ class BestemSakService(private val klient: BestemSakKlient) {
      *
      * @return [SakInformasjon]
      */
-    fun hentSakInformasjon(aktoerId: String, bucType: BucType, saktypeBUC02: Saktype? = null): SakInformasjon? {
+    fun hentSakInformasjon(aktoerId: String, bucType: BucType, saktypeBUC02: SakType? = null): SakInformasjon? {
         val saktype = when (bucType) {
-            P_BUC_01 -> Saktype.ALDER
+            P_BUC_01 -> ALDER
             P_BUC_02 -> saktypeBUC02 ?: return null
-            P_BUC_03 -> Saktype.UFOREP
+            P_BUC_03 -> UFOREP
             R_BUC_02 -> saktypeBUC02!!
             P_BUC_10 -> saktypeBUC02 ?: return null
             else -> return null
@@ -44,7 +45,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
         return null
     }
 
-    private fun kallBestemSak(aktoerId: String, saktype: Saktype): BestemSakResponse? {
+    private fun kallBestemSak(aktoerId: String, saktype: SakType): BestemSakResponse? {
         val randomId = UUID.randomUUID()
         val request = BestemSakRequest(aktoerId, saktype, randomId, randomId)
 

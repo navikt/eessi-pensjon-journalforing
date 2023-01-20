@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.SakStatus
-import no.nav.eessi.pensjon.models.Saktype
 
 /**
  * P_BUC_02: Krav om etterlatteytelser
@@ -27,16 +28,16 @@ class Pbuc02 : BucTilEnhetHandler {
             }
             request.bosatt == Bosatt.NORGE -> {
                 when (request.saktype) {
-                    Saktype.UFOREP -> {
+                    UFOREP -> {
                         bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.UFORE_UTLANDSTILSNITT)
                         Enhet.UFORE_UTLANDSTILSNITT
                     }
-                    Saktype.ALDER -> {
+                    ALDER -> {
                         bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.NFP_UTLAND_AALESUND)
                         Enhet.NFP_UTLAND_AALESUND
                     }
-                    Saktype.BARNEP,
-                    Saktype.GJENLEV -> {
+                    BARNEP,
+                    GJENLEV -> {
                         bosattNorgeLogging(request.sedType, request. bucType, request.saktype, Enhet.PENSJON_UTLAND)
                         Enhet.PENSJON_UTLAND
                     }
@@ -48,13 +49,13 @@ class Pbuc02 : BucTilEnhetHandler {
             }
             else ->
                 when (request.saktype) {
-                    Saktype.UFOREP -> {
+                    UFOREP -> {
                         bosattUtlandLogging(request.sedType, request.bucType, request.saktype, Enhet.UFORE_UTLAND)
                         Enhet.UFORE_UTLAND
                     }
-                    Saktype.ALDER,
-                    Saktype.BARNEP,
-                    Saktype.GJENLEV -> {
+                    ALDER,
+                    BARNEP,
+                    GJENLEV -> {
                         bosattUtlandLogging(request.sedType, request. bucType, request.saktype, Enhet.PENSJON_UTLAND)
                         Enhet.PENSJON_UTLAND
                     }
@@ -68,7 +69,7 @@ class Pbuc02 : BucTilEnhetHandler {
 
     private fun erUforeSakAvsluttet(request: OppgaveRoutingRequest): Boolean {
         val sakInfo = request.sakInformasjon
-        val erUforepensjon = (request.saktype == Saktype.UFOREP || sakInfo?.sakType == Saktype.UFOREP)
+        val erUforepensjon = (request.saktype == UFOREP || sakInfo?.sakType == UFOREP)
 
         return erUforepensjon && sakInfo?.sakStatus == SakStatus.AVSLUTTET
     }

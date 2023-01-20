@@ -2,9 +2,10 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.Saktype
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Gyldig automatisk journalføring`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns "1111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -30,7 +31,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Mottatt hendelse skal ikke få automatisk`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.MOTTATT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns "1111"
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -60,7 +61,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Manglende aktorId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns null
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -75,7 +76,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Tom aktorId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns " "
             every { sakInformasjon?.sakId } returns "555"
         }
@@ -90,7 +91,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Manglende sakId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns null
         }
@@ -104,7 +105,7 @@ internal class BucTilEnhetHandlerTest {
     fun `Tom sakId skal manuelt journalføres`() {
         val req = mockk<OppgaveRoutingRequest> {
             every { hendelseType} returns HendelseType.SENDT
-            every { saktype } returns Saktype.ALDER
+            every { saktype } returns ALDER
             every { aktorId } returns "111"
             every { sakInformasjon?.sakId } returns " "
         }

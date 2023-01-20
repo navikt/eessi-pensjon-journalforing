@@ -2,10 +2,10 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.Saktype
-import no.nav.eessi.pensjon.models.Saktype.*
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
@@ -23,7 +23,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
 
     abstract fun hentRelasjoner(): List<SEDPersonRelasjon>
 
-    fun hentForsikretPerson(saktype: Saktype?): List<SEDPersonRelasjon> {
+    fun hentForsikretPerson(saktype: SakType?): List<SEDPersonRelasjon> {
         logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
 
         forsikretPerson?.let { person ->
@@ -66,7 +66,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
 
     fun mapFdatoTilLocalDate(fdato: String?) : LocalDate? = fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }
 
-    fun bestemSaktype(bucType: BucType): Saktype? {
+    fun bestemSaktype(bucType: BucType): SakType? {
         return when(bucType) {
             P_BUC_01 -> ALDER
             P_BUC_02 -> GJENLEV

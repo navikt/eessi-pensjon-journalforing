@@ -4,13 +4,14 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
@@ -127,7 +128,7 @@ class EuxService(
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
-    fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): Saktype? {
+    fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): SakType? {
         //hent saktype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == R_BUC_02) {
             return alleSedIBuc
@@ -139,9 +140,9 @@ class EuxService(
             val sed = alleSedIBuc.firstOrNull { it.type == P15000 }
             if (sed != null) {
                 return when (sed.nav?.krav?.type) {
-                    "02" -> Saktype.GJENLEV
-                    "03" -> Saktype.UFOREP
-                    else -> Saktype.ALDER
+                    "02" -> GJENLEV
+                    "03" -> UFOREP
+                    else -> ALDER
                 }
             }
         }
@@ -158,12 +159,12 @@ class EuxService(
      * andre_former_for_etterlattepensjon=99
      *
      * */
-    private fun filterSaktypeR005(sed: R005): Saktype {
+    private fun filterSaktypeR005(sed: R005): SakType {
         return when (sed.tilbakekreving?.feilutbetaling?.ytelse?.type) {
-            "alderspensjon" -> Saktype.ALDER
-            "uførepensjon" -> Saktype.UFOREP
-            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> Saktype.GJENLEV
-            "barnepensjon" -> Saktype.BARNEP
+            "alderspensjon" -> ALDER
+            "uførepensjon" -> UFOREP
+            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> GJENLEV
+            "barnepensjon" -> BARNEP
             else -> throw RuntimeException("Klarte ikke å finne saktype for R_BUC_02")
         }
     }

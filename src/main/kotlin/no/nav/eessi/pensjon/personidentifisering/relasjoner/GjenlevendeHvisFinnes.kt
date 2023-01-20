@@ -1,9 +1,10 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.Saktype
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -35,9 +36,9 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         }
 
         val sakType =  if (erGjenlevendeBarn(gjenlevendeRelasjon)) {
-            Saktype.BARNEP
+            BARNEP
         } else {
-            Saktype.GJENLEV
+            GJENLEV
         }
         logger.debug("Legger til person ${Relasjon.GJENLEVENDE} med sakType: $sakType")
         return listOf(SEDPersonRelasjon(gjenlevendePin, Relasjon.GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
