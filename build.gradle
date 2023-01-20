@@ -8,9 +8,6 @@ buildscript {
 		tokenSupportVersion = '2.1.8'
 		logstashLogbackVersion = '7.2'
 		imageioVersion = '3.9.4'
-		epMetricsVersion = '1.0.10'
-		epLoggingVersion = '1.1.13'
-		epPersonoppslagVersion = '12.2.2'
 	}
 }
 
@@ -72,11 +69,11 @@ dependencies {
 	testImplementation 'com.tngtech.archunit:archunit:1.0.1'
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:${epMetricsVersion}")
-	implementation("no.nav.eessi.pensjon:ep-logging:${epLoggingVersion}")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:${epPersonoppslagVersion}")
+	implementation("no.nav.eessi.pensjon:ep-metrics:1.0.10")
+	implementation("no.nav.eessi.pensjon:ep-logging:1.1.13")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:12.2.2")
 	// Rina Eux API
-	implementation("no.nav.eessi.pensjon:ep-eux:1.4.13")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.4.14")
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
