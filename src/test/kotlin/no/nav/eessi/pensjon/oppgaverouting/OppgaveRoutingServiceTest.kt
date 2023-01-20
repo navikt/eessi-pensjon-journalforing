@@ -5,6 +5,8 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
@@ -332,23 +334,23 @@ internal class OppgaveRoutingServiceTest {
                 Arrays.stream(
                     arrayOf(
                         TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, GJENLEV),
-                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
-                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
-                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND),
                         TestArgumentsPBuc02(ID_OG_FORDELING, NORGE),
 
-                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, SakStatus.LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, SakStatus.AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, LOPENDE),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, BARNEP),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, GJENLEV),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, ALDER),

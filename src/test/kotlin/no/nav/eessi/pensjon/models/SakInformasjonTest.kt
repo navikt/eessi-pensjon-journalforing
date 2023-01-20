@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.models
 
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.skyscreamer.jsonassert.JSONAssert
@@ -25,7 +25,7 @@ internal class SakInformasjonTest {
         val actual = SakInformasjon(
                 sakId = "15005679",
                 sakType = type,
-                sakStatus = SakStatus.LOPENDE
+                sakStatus = LOPENDE
         ).toJson()
 
         JSONAssert.assertEquals(actual, json, true)

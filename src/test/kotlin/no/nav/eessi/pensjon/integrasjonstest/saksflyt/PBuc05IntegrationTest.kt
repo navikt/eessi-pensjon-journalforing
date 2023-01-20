@@ -4,7 +4,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -119,9 +119,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes, SakType er GENRL, men finnes flere sakstyper`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "1111", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "2222", sakType = UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "1111", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "2222", sakType = UFOREP, sakStatus = TIL_BEHANDLING)
             )
 
             testRunner(FNR_OVER_60, saker) {
@@ -133,9 +133,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes, SakType er GENRL, men finnes flere sakstyper, bosatt utland`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "1111", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "2222", sakType = UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "1111", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "2222", sakType = UFOREP, sakStatus = TIL_BEHANDLING)
             )
 
             testRunner(FNR_OVER_60, saker, land = "SWE") {
@@ -156,7 +156,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `1 person i SED fnr finnes, SakType er GENRL`() {
-            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
+            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING))
 
             testRunner(FNR_OVER_60, saker) {
                 assertEquals(PENSJON, it.tema)
@@ -176,7 +176,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `1 person i SED fnr finnes, SakType er GENRL, bosatt utland`() {
-            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING))
+            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING))
 
             testRunner(FNR_OVER_60, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
@@ -202,8 +202,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes og SakType er GENRL, med flere sakstyper, person bosatt Norge`() {
             val saker = listOf(
-                    SakInformasjon(SAK_ID, GENRL, SakStatus.TIL_BEHANDLING),
-                    SakInformasjon("1240128", BARNEP, SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(SAK_ID, GENRL, TIL_BEHANDLING),
+                    SakInformasjon("1240128", BARNEP, TIL_BEHANDLING)
             )
 
             testRunner(FNR_VOKSEN, saker) {
@@ -225,8 +225,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes, SakType er GENRL, med flere sakstyper, person bosatt utland`() {
             val saker = listOf(
-                    SakInformasjon(SAK_ID, GENRL, SakStatus.TIL_BEHANDLING),
-                    SakInformasjon("124123", BARNEP, SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(SAK_ID, GENRL, TIL_BEHANDLING),
+                    SakInformasjon("124123", BARNEP, TIL_BEHANDLING)
             )
 
             testRunner(FNR_VOKSEN, saker, land = "SWE") {
@@ -248,8 +248,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED der fnr finnes, rolle er 02, land er Sverige og bestemsak finner flere saker Så journalføres det manuelt på tema PENSJON og enhet PENSJON_UTLAND`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "34234123", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "34234123", sakType = ALDER, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN_2, saker, rolle = Rolle.FORSORGER, sakId = SAK_ID, land = "SWE") {
@@ -261,9 +261,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "34234123", sakType = UFOREP, sakStatus = SakStatus.AVSLUTTET)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "34234123", sakType = UFOREP, sakStatus = AVSLUTTET)
             )
 
             testRunnerFlerePersoner(FNR_OVER_60, FNR_VOKSEN, saker, sakId = SAK_ID, rolle = Rolle.FORSORGER) {
@@ -280,8 +280,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = "2131123123", sakType = GENRL, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = "2131123123", sakType = GENRL, sakStatus = LOPENDE)
             )
 
             testRunner(FNR_OVER_60, saker) {
@@ -292,7 +292,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `1 person i SED fnr finnes og bestemsak finner sak UFORE Så journalføres automatisk på tema UFORETRYGD`() {
-            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = SakStatus.TIL_BEHANDLING))
+            val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = TIL_BEHANDLING))
 
             testRunner(FNR_VOKSEN, saker) {
                 assertEquals(UFORETRYGD, it.tema)
@@ -352,9 +352,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle GJENLEV, fnr finnes, og bestemsak finner sak ALDER`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                    SakInformasjon(sakId = "123", sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = AVSLUTTET),
+                    SakInformasjon(sakId = "123", sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
             val fnrAnnenPerson = FNR_VOKSEN
@@ -369,9 +369,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle GJENLEV, fnr finnes, og bestemsak finner sak UFØRE`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = AVSLUTTET),
+                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
             val fnrAnnenPerson = FNR_VOKSEN
@@ -392,9 +392,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak UFØRE Så journalføres automatisk på tema UFORETRYGD`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = AVSLUTTET),
+                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
             val forsikredeFnr = FNR_OVER_60
@@ -409,9 +409,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = AVSLUTTET),
+                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
             val forsikredeFnr = FNR_OVER_60
@@ -426,9 +426,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak GENRL`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "234123123", sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                    SakInformasjon(sakId = "98989898", sakType = GENRL, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = "234123123", sakType = ALDER, sakStatus = AVSLUTTET),
+                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "98989898", sakType = GENRL, sakStatus = LOPENDE)
             )
 
             val forsikredeFnr = FNR_OVER_60
@@ -449,8 +449,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle barn 03 og sak er ALDER`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN) {
@@ -467,8 +467,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle barn 03 og sak er UFORE`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN) {
@@ -485,8 +485,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle barn 03 og sak er OMSORG`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = OMSORG, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = OMSORG, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN) {
@@ -503,8 +503,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har rolle barn 03 og sak er OMSORG, ignorerer diskresjonskode`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = OMSORG, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = GENRL, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = OMSORG, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = true) {
@@ -526,8 +526,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED fnr finnes og rolle er barn, og SakType er BARNEP`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = BARNEP, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = BARNEP, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN) {
@@ -554,8 +554,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED fnr finnes og rolle er barn, og SakType er GJENLEV`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN) {
@@ -582,8 +582,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED fnr finnes og rolle er barn, og SakType er GJENLEV, ignorerer Diskresjonskode 6`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = true) {
@@ -600,8 +600,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED fnr finnes og rolle er barn, og SakType er GJENLEV, ignorerer Diskresjonskode`() {
             val saker = listOf(
-                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.TIL_BEHANDLING),
-                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = SakStatus.TIL_BEHANDLING)
+                    SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = TIL_BEHANDLING),
+                    SakInformasjon(sakId = SAK_ID, sakType = GJENLEV, sakStatus = TIL_BEHANDLING)
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN, FNR_BARN, saker, rolle = Rolle.BARN, harAdressebeskyttelse = false) {
@@ -710,9 +710,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = saknr, sakType = UFOREP, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET)
+                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = saknr, sakType = UFOREP, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoera) } returns saker
             every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
@@ -884,9 +884,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = sakid, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = sakid, sakType = UFOREP, sakStatus = LOPENDE)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -938,9 +938,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "123123123123123", sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = "123123123123123", sakType = UFOREP, sakStatus = LOPENDE)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -997,9 +997,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "34234234234234", sakType = GENRL, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = UFOREP, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = "34234234234234", sakType = GENRL, sakStatus = LOPENDE)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
 
@@ -1048,9 +1048,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "SWE", aktorId = aktoer)
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = UFOREP, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = "123123123123123123", sakType = GENRL, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = UFOREP, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = "123123123123123123", sakType = GENRL, sakStatus = LOPENDE)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
 
@@ -1099,9 +1099,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = SakStatus.LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = SakStatus.AVSLUTTET),
-                SakInformasjon(sakId = sakid, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = sakid, sakType = UFOREP, sakStatus = LOPENDE)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit

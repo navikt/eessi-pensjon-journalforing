@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
@@ -58,7 +59,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = LOPENDE)
                 )
             )
 
@@ -85,7 +86,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
                 )
             )
 
@@ -119,7 +120,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = LOPENDE)
                 )
             )
 
@@ -147,7 +148,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE)
                 )
             )
 
@@ -175,7 +176,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
                 )
             )
 
@@ -208,7 +209,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = LOPENDE)
                 )
             )
 
@@ -261,7 +262,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = LOPENDE)
                 )
             )
 
@@ -288,7 +289,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
                 )
             )
 
@@ -322,7 +323,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = LOPENDE)
                 )
             )
 
@@ -350,7 +351,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE)
                 )
             )
 
@@ -378,7 +379,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = LOPENDE)
                 )
             )
 
@@ -406,7 +407,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
                 )
             )
 
@@ -439,7 +440,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = saktype, sakStatus = LOPENDE)
                 )
             )
 
@@ -466,7 +467,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
-                    SakInformasjon(sakId = null, sakType = BARNEP , sakStatus = SakStatus.LOPENDE)
+                    SakInformasjon(sakId = null, sakType = BARNEP , sakStatus = LOPENDE)
                 )
             )
 

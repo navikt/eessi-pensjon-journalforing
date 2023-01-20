@@ -1,10 +1,10 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakStatus
 
 class Pbuc10 : BucTilEnhetHandler {
 
@@ -63,7 +63,7 @@ class Pbuc10 : BucTilEnhetHandler {
             return request.run {
                 identifisertPerson?.personRelasjon?.saktype == GJENLEV
                         && saktype == UFOREP
-                        && sakInformasjon?.sakStatus == SakStatus.AVSLUTTET
+                        && sakInformasjon?.sakStatus == AVSLUTTET
                         && sakInformasjon.sakType == UFOREP
             }
         }

@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
@@ -51,7 +52,7 @@ internal class Pbuc10Test {
             every { harAdressebeskyttelse } returns false
             every { saktype } returns UFOREP
             every { hendelseType } returns SENDT
-            every { sakInformasjon?.sakStatus } returns SakStatus.AVSLUTTET
+            every { sakInformasjon?.sakStatus } returns AVSLUTTET
             every { sakInformasjon?.sakType } returns UFOREP
             every { sedType } returns SedType.P15000
             every { bucType } returns P_BUC_10

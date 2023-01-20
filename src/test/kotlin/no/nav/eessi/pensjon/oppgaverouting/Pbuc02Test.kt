@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
@@ -41,16 +43,16 @@ internal class Pbuc02Test {
         @EnumSource(SakType::class)
         fun `Sendt hendelse kan automatisk journalføres`(type: SakType) {
             // Gyldig sak hvor sakStatus IKKE er AVSLUTTET skal alltid automatisk journalføres
-            val requestNorge = SENDT.request(type, "NOR", SakStatus.TIL_BEHANDLING)
+            val requestNorge = SENDT.request(type, "NOR", TIL_BEHANDLING)
             assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestNorge))
 
-            val requestUtland = SENDT.request(type, "SWE", SakStatus.TIL_BEHANDLING)
+            val requestUtland = SENDT.request(type, "SWE", TIL_BEHANDLING)
             assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestUtland))
         }
 
         @Test
         fun `Sendt hendelse med sakType UFOREP og sakStatus AVSLUTTET`() {
-            val requestNorge = SENDT.request(UFOREP, "NOR", SakStatus.AVSLUTTET)
+            val requestNorge = SENDT.request(UFOREP, "NOR", AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -58,7 +60,7 @@ internal class Pbuc02Test {
                     "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
 
-            val requestUtland = SENDT.request(UFOREP, "SWE", SakStatus.AVSLUTTET)
+            val requestUtland = SENDT.request(UFOREP, "SWE", AVSLUTTET)
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -88,7 +90,7 @@ internal class Pbuc02Test {
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(UFOREP, "NOR", AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -116,7 +118,7 @@ internal class Pbuc02Test {
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(SENDT.request(UFOREP, "SWE", AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
@@ -189,7 +191,7 @@ internal class Pbuc02Test {
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR", AVSLUTTET))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
@@ -217,7 +219,7 @@ internal class Pbuc02Test {
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE", SakStatus.AVSLUTTET))
+                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE", AVSLUTTET))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
@@ -241,7 +243,7 @@ internal class Pbuc02Test {
     private fun HendelseType.request(
         type: SakType?,
         landkode: String,
-        status: SakStatus = SakStatus.TIL_BEHANDLING
+        status: SakStatus = TIL_BEHANDLING
     ): OppgaveRoutingRequest {
         val hendelse = this
 

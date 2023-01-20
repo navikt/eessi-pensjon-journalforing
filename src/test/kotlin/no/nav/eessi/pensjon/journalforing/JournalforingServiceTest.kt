@@ -6,7 +6,8 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
@@ -14,7 +15,9 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -601,7 +604,7 @@ internal class JournalforingServiceTest {
             "",
             personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123")
         )
-        val sakInformasjon = SakInformasjon("111111", GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val sakInformasjon = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
@@ -665,7 +668,7 @@ internal class JournalforingServiceTest {
             "",
             personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, GJENLEV, rinaDocumentId =  "3123123")
         )
-        val saksInfo = SakInformasjon("111111", GJENLEV, SakStatus.LOPENDE, "4303", false)
+        val saksInfo = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
@@ -709,7 +712,7 @@ internal class JournalforingServiceTest {
             "",
             personRelasjon = SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, GJENLEV, rinaDocumentId =  "3123123")
         )
-        val sakInformasjon = SakInformasjon("111222", UFOREP, SakStatus.AVSLUTTET, "4303", false)
+        val sakInformasjon = SakInformasjon("111222", UFOREP, AVSLUTTET, "4303", false)
 
         journalforingService.journalfor(
             sedHendelse,
@@ -843,7 +846,7 @@ internal class JournalforingServiceTest {
             "",
             personRelasjon = SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, BARNEP, rinaDocumentId =  "3123123")
         )
-        val saksInfo = SakInformasjon("111111", BARNEP, SakStatus.LOPENDE, "4862", false)
+        val saksInfo = SakInformasjon("111111", BARNEP, LOPENDE, "4862", false)
 
         journalforingService.journalfor(
             sedHendelse,

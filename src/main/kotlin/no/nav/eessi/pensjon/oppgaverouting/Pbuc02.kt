@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.SakStatus
 
 /**
  * P_BUC_02: Krav om etterlatteytelser
@@ -71,6 +70,6 @@ class Pbuc02 : BucTilEnhetHandler {
         val sakInfo = request.sakInformasjon
         val erUforepensjon = (request.saktype == UFOREP || sakInfo?.sakType == UFOREP)
 
-        return erUforepensjon && sakInfo?.sakStatus == SakStatus.AVSLUTTET
+        return erUforepensjon && sakInfo?.sakStatus == AVSLUTTET
     }
 }
