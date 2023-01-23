@@ -1,11 +1,15 @@
 package no.nav.eessi.pensjon.buc
 
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -16,12 +20,16 @@ import no.nav.eessi.pensjon.models.sed.erGyldig
 import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpStatusCodeException
 import javax.annotation.PostConstruct
 
 @Service
 class EuxService(
-    private val euxKlient: EuxKlient,
+    private val euxKlient: EuxKlientLib,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
@@ -54,12 +62,18 @@ class EuxService(
      *
      * @return Objekt av type <T : Any> som spesifisert i param typeRef.
      */
+    @Retryable(
+        include = [HttpStatusCodeException::class],
+        exclude = [HttpClientErrorException.NotFound::class],
+        backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0)
+    )
     fun hentSed(rinaSakId: String, dokumentId: String): SED {
         return hentSed.measure {
             val json = euxKlient.hentSedJson(rinaSakId, dokumentId)
             SED.fromJsonToConcrete(json)
         }
     }
+
 
     /**
      * Henter alle filer/vedlegg tilknyttet en SED fra Rina EUX API.
@@ -69,6 +83,11 @@ class EuxService(
      *
      * @return [SedDokumentfiler] som inneholder hovedfil, samt vedlegg.
      */
+    @Retryable(
+        include = [HttpStatusCodeException::class],
+        exclude = [HttpClientErrorException.NotFound::class],
+        backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0)
+    )
     fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? {
         return hentPdf.measure {
             euxKlient.hentAlleDokumentfiler(rinaSakId, dokumentId)
@@ -78,6 +97,11 @@ class EuxService(
     /**
      * Henter Buc fra Rina.
      */
+    @Retryable(
+        include = [HttpStatusCodeException::class],
+        exclude = [HttpClientErrorException.NotFound::class],
+        backoff = Backoff(delay = 30000L, maxDelay = 3600000L, multiplier = 3.0)
+    )
     fun hentBuc(rinaSakId: String): Buc {
         return hentBuc.measure {
             euxKlient.hentBuc(rinaSakId) ?: throw RuntimeException("Ingen BUC")

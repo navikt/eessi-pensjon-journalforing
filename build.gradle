@@ -48,6 +48,29 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
+
+	// Eessi pensjon biblioteker
+	implementation("no.nav.eessi.pensjon:ep-metrics:1.0.10")
+	implementation("no.nav.eessi.pensjon:ep-logging:1.1.13")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:12.2.2")
+	implementation("no.nav.eessi.pensjon:ep-eux:1.4.15")
+
+	// PDF box
+	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
+	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
+	implementation("com.twelvemonkeys.imageio:imageio-tiff:${imageioVersion}")
+
+	// Logging
+	implementation("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
+	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
+	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
+
+	//Auth
+	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
+	implementation("no.nav.security:token-validation-spring:${tokenSupportVersion}")
+	implementation("no.nav.security:token-validation-jaxrs:${tokenSupportVersion}")
+	implementation("no.nav.security:token-validation-test-support:2.0.5")
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
 		exclude module: "mockito-core"
@@ -68,26 +91,6 @@ dependencies {
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:1.0.1'
 
-	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:1.0.10")
-	implementation("no.nav.eessi.pensjon:ep-logging:1.1.13")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:12.2.2")
-	// Rina Eux API
-	implementation("no.nav.eessi.pensjon:ep-eux:1.4.14")
-	// PDF box
-	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
-	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
-	implementation("com.twelvemonkeys.imageio:imageio-tiff:${imageioVersion}")
 
-	// Logging
-	implementation("net.logstash.logback:logstash-logback-encoder:${logstashLogbackVersion}")
-	configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
-	implementation group: 'org.slf4j', name: 'jcl-over-slf4j'
-
-	//Auth
-	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
-	implementation("no.nav.security:token-validation-spring:${tokenSupportVersion}")
-	implementation("no.nav.security:token-validation-jaxrs:${tokenSupportVersion}")
-	implementation("no.nav.security:token-validation-test-support:2.0.5")
 
 }

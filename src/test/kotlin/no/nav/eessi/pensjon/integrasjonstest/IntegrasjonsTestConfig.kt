@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -86,6 +87,9 @@ class IntegrasjonsTestConfig {
     fun euxOAuthRestTemplate(): RestTemplate  = mockedRestTemplate()
 
     @Bean
+    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+
+    @Bean
     fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
 
     private fun mockedRestTemplate(): RestTemplate {
@@ -114,15 +118,4 @@ class IntegrasjonsTestConfig {
         factory.containerProperties.setAuthExceptionRetryInterval( Duration.ofSeconds(4L) )
         return factory
     }
-
-/*    @Bean("pdlTokenComponent")
-    @Primary
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    fun pdlTokenComponent(): PdlTokenCallBack {
-        return object : PdlTokenCallBack {
-            override fun callBack(): PdlToken {
-                return PdlTokenImp(accessToken = "")
-            }
-        }
-    }*/
 }

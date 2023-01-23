@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.config
 
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import no.nav.eessi.pensjon.shared.retry.IOExceptionRetryInterceptor
@@ -17,9 +18,7 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
-import java.io.IOException
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 @Configuration
@@ -50,25 +49,26 @@ class RestTemplateConfig(
     @Value("\${EESSI_PEN_ONPREM_PROXY_URL}")
     lateinit var proxyUrl: String
 
-
-
     @Bean
-    fun euxOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
+    fun euxOAuthRestTemplate(): RestTemplate {
         return opprettRestTemplate(euxUrl, "eux-credentials")
     }
 
     @Bean
-    fun proxyOAuthRestTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate? {
+    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+
+    @Bean
+    fun proxyOAuthRestTemplate(): RestTemplate? {
         return opprettRestTemplate(proxyUrl, "proxy-credentials")
     }
 
     @Bean
-    fun journalpostOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+    fun journalpostOidcRestTemplate(): RestTemplate {
         return opprettRestTemplateForJoark(joarkUrl, "dokarkiv-credentials")
     }
 
     @Bean
-    fun fagmodulOidcRestTemplate(templateBuilder: RestTemplateBuilder): RestTemplate {
+    fun fagmodulOidcRestTemplate(): RestTemplate {
         return opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
     }
 
