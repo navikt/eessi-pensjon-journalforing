@@ -8,7 +8,7 @@ data class NorgKlientRequest(val harAdressebeskyttelse: Boolean = false,
                              val landkode: String? = null,
                              val geografiskTilknytning: String? = null,
                              val saktype: SakType? = null,
-                             val SEDPersonRelasjon: SEDPersonRelasjon? = null)
+                             val sedPersonRelasjon: SEDPersonRelasjon? = null)
 
 data class Norg2ArbeidsfordelingRequest(
     val tema: String = "PEN",

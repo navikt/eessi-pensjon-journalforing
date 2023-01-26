@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -29,14 +28,14 @@ class Norg2Service(private val klient: Norg2Klient) {
         }
     }
 
-    internal fun opprettNorg2ArbeidsfordelingRequest(req: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
-        if (req.harAdressebeskyttelse) return Norg2ArbeidsfordelingRequest(tema = "ANY", diskresjonskode = "SPSF")
+    internal fun opprettNorg2ArbeidsfordelingRequest(request: NorgKlientRequest): Norg2ArbeidsfordelingRequest {
+        if (request.harAdressebeskyttelse) return Norg2ArbeidsfordelingRequest(tema = "ANY", diskresjonskode = "SPSF")
 
         return Norg2ArbeidsfordelingRequest(
-            tema = velgTema(req.saktype).also { logger.debug("HentTema: $it") },
-            behandlingstema = velgBehandlingTema(req.SEDPersonRelasjon).also { logger.debug("hentBehandlingtema: $it") },
-            geografiskOmraade = req.geografiskTilknytning ?: "ANY",
-            behandlingstype = velgBehandligstype(req.landkode)
+            tema = velgTema(request.saktype).also { logger.debug("HentTema: $it") },
+            behandlingstema = velgBehandlingTema(request.sedPersonRelasjon?.saktype).also { logger.debug("hentBehandlingtema: $it") },
+            geografiskOmraade = request.geografiskTilknytning ?: "ANY",
+            behandlingstype = velgBehandligstype(request.landkode)
         )
     }
 
@@ -44,8 +43,8 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun velgTema(sakType: SakType?) = if (sakType == UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
-    fun velgBehandlingTema(SEDPersonRelasjon: SEDPersonRelasjon?) : String {
-        return when (SEDPersonRelasjon?.saktype) {
+    fun velgBehandlingTema(sakType: SakType?) : String {
+        return when (sakType) {
             BARNEP -> Norg2BehandlingsTema.BARNEP.kode
             GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
             else -> Norg2BehandlingsTema.ANY.kode
