@@ -26,11 +26,11 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.info(
             "Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}), " +
-                    "Buc: ${routingRequest.bucType}, " +
-                    "Landkode: ${routingRequest.landkode}, " +
-                    "Fødselsdato: ${routingRequest.fdato}, " +
-                    "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
-                    "saktype: ${routingRequest.saktype}"
+                "Buc: ${routingRequest.bucType}, " +
+                "Landkode: ${routingRequest.landkode}, " +
+                "Fødselsdato: ${routingRequest.fdato}, " +
+                "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
+                "saktype: ${routingRequest.saktype}"
         )
 
         return tildeltEnhet
@@ -44,18 +44,19 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
         logger.debug("enhet: $enhet")
 
-        return when(oppgave.bucType){
+        return when (oppgave.bucType) {
             P_BUC_01 -> routeTilGeografiskTilknytning(oppgave) ?: enhet
             P_BUC_02 -> {
-                if (lopendeAldersSakINorge(oppgave)) routeTilGeografiskTilknytningMedPerson(oppgave) ?: enhet
-                else enhet
+                if (lopendeAldersSakINorge(oppgave)) {
+                    routeTilGeografiskTilknytningMedPerson(oppgave) ?: enhet
+                } else enhet
             }
             P_BUC_10 -> routeTilGeografiskTilknytningMedPerson(oppgave) ?: enhet
-            else ->  enhet
+            else -> enhet
         }
     }
 
-    private fun lopendeAldersSakINorge( oppgave: OppgaveRoutingRequest) =
+    private fun lopendeAldersSakINorge(oppgave: OppgaveRoutingRequest) =
         oppgave.landkode == "NOR" && oppgave.sakInformasjon?.sakType == ALDER && oppgave.sakInformasjon.sakStatus == LOPENDE
 
     private fun routeTilGeografiskTilknytningMedPerson(oppgave: OppgaveRoutingRequest): Enhet? {
@@ -83,5 +84,4 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private fun finnEnhetFor(oppgave: OppgaveRoutingRequest) =
         EnhetFactory.hentHandlerFor(bucType = oppgave.bucType).finnEnhet(oppgave)
-
 }
