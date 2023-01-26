@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.SedType.R004
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
@@ -10,8 +10,8 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 /**
  * R_BUC_02: Motregning av overskytende utbetaling i etterbetalinger
  */
-class Rbuc02 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+class Rbuc02 : EnhetHandler {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
                 adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)

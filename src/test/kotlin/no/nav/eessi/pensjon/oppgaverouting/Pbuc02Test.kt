@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Pbuc02Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_02) as Pbuc02
+    private val handler = EnhetFactory.hentHandlerFor(P_BUC_02) as Pbuc02
 
     /**
      * Test av HendelseType.SENDT
@@ -32,11 +32,11 @@ internal class Pbuc02Test {
 
             // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
             every { request.harAdressebeskyttelse } returns true
-            assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+            assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
 
             // SPSF er mindre fortrolig og følger vanlig saksflyt
             every { request.harAdressebeskyttelse } returns false
-            assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+            assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
         }
 
         @ParameterizedTest
@@ -44,10 +44,10 @@ internal class Pbuc02Test {
         fun `Sendt hendelse kan automatisk journalføres`(type: SakType) {
             // Gyldig sak hvor sakStatus IKKE er AVSLUTTET skal alltid automatisk journalføres
             val requestNorge = SENDT.request(type, "NOR", TIL_BEHANDLING)
-            assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestNorge))
+            assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(requestNorge))
 
             val requestUtland = SENDT.request(type, "SWE", TIL_BEHANDLING)
-            assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(requestUtland))
+            assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(requestUtland))
         }
 
         @Test
@@ -56,7 +56,7 @@ internal class Pbuc02Test {
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(requestNorge),
+                    handler.finnEnhet(requestNorge),
                     "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
 
@@ -64,7 +64,7 @@ internal class Pbuc02Test {
 
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(requestUtland),
+                    handler.finnEnhet(requestUtland),
                     "Skal aldri automatisk journalføres dersom saktype == UFOREP og SakStatus == AVSLUTTET"
             )
         }
@@ -73,12 +73,12 @@ internal class Pbuc02Test {
         fun `Manglende saktype går til ID_OG_FORDELING`() {
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(type = null, landkode = "NOR"))
+                    handler.finnEnhet(SENDT.request(type = null, landkode = "NOR"))
             )
 
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(type = null, landkode = "SWE"))
+                    handler.finnEnhet(SENDT.request(type = null, landkode = "SWE"))
             )
         }
 
@@ -86,27 +86,27 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "NOR"))
+                    handler.finnEnhet(SENDT.request(UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "NOR", AVSLUTTET))
+                    handler.finnEnhet(SENDT.request(UFOREP, "NOR", AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(ALDER, "NOR"))
+                    handler.finnEnhet(SENDT.request(ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(BARNEP, "NOR"))
+                    handler.finnEnhet(SENDT.request(BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(GJENLEV, "NOR"))
+                    handler.finnEnhet(SENDT.request(GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(null, "NOR"))
+                    handler.finnEnhet(SENDT.request(null, "NOR"))
             )
         }
 
@@ -114,27 +114,27 @@ internal class Pbuc02Test {
         fun `Sendt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "SWE"))
+                    handler.finnEnhet(SENDT.request(UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(UFOREP, "SWE", AVSLUTTET))
+                    handler.finnEnhet(SENDT.request(UFOREP, "SWE", AVSLUTTET))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(ALDER, "SWE"))
+                    handler.finnEnhet(SENDT.request(ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(BARNEP, "SWE"))
+                    handler.finnEnhet(SENDT.request(BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(SENDT.request(GJENLEV, "SWE"))
+                    handler.finnEnhet(SENDT.request(GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(SENDT.request(null, "SWE"))
+                    handler.finnEnhet(SENDT.request(null, "SWE"))
             )
         }
     }
@@ -150,11 +150,11 @@ internal class Pbuc02Test {
 
             // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
             every { request.harAdressebeskyttelse } returns true
-            assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+            assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
 
             // SPSF er mindre fortrolig og følger vanlig saksflyt
             every { request.harAdressebeskyttelse } returns false
-            assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+            assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
         }
 
         @ParameterizedTest
@@ -162,7 +162,7 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt NORGE`(type: SakType) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(MOTTATT.request(type, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(type, "NOR"))
             )
         }
 
@@ -171,7 +171,7 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse skal aldri automatisk journalføres, bosatt UTLAND`(type: SakType) {
             assertNotEquals(
                     Enhet.AUTOMATISK_JOURNALFORING,
-                    handler.hentEnhet(MOTTATT.request(type, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(type, "SWE"))
             )
         }
 
@@ -179,7 +179,7 @@ internal class Pbuc02Test {
         fun `Manglende saktype går til ID_OG_FORDELING`() {
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(type = null, landkode = "NOR"))
+                    handler.finnEnhet(MOTTATT.request(type = null, landkode = "NOR"))
             )
         }
 
@@ -187,27 +187,27 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt NORGE`() {
             assertEquals(
                     Enhet.UFORE_UTLANDSTILSNITT,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(UFOREP, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "NOR", AVSLUTTET))
+                    handler.finnEnhet(MOTTATT.request(UFOREP, "NOR", AVSLUTTET))
             )
             assertEquals(
                     Enhet.NFP_UTLAND_AALESUND,
-                    handler.hentEnhet(MOTTATT.request(ALDER, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(ALDER, "NOR"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(BARNEP, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(BARNEP, "NOR"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(GJENLEV, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(GJENLEV, "NOR"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(null, "NOR"))
+                    handler.finnEnhet(MOTTATT.request(null, "NOR"))
             )
         }
 
@@ -215,27 +215,27 @@ internal class Pbuc02Test {
         fun `Mottatt hendelse som er gyldig, bosatt UTLAND`() {
             assertEquals(
                     Enhet.UFORE_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(UFOREP, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(UFOREP, "SWE", AVSLUTTET))
+                    handler.finnEnhet(MOTTATT.request(UFOREP, "SWE", AVSLUTTET))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(ALDER, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(ALDER, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(BARNEP, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(BARNEP, "SWE"))
             )
             assertEquals(
                     Enhet.PENSJON_UTLAND,
-                    handler.hentEnhet(MOTTATT.request(GJENLEV, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(GJENLEV, "SWE"))
             )
             assertEquals(
                     Enhet.ID_OG_FORDELING,
-                    handler.hentEnhet(MOTTATT.request(null, "SWE"))
+                    handler.finnEnhet(MOTTATT.request(null, "SWE"))
             )
         }
     }

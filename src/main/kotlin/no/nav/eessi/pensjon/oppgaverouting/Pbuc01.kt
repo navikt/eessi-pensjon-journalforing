@@ -5,8 +5,8 @@ import no.nav.eessi.pensjon.models.Enhet
 /**
  * P_BUC_01: Krav om alderspensjon
  */
-class Pbuc01 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+class Pbuc01 : EnhetHandler {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
                 adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)

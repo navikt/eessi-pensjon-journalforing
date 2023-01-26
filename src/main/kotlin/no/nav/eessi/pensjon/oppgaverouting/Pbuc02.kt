@@ -1,7 +1,10 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Enhet
 
 /**
@@ -9,9 +12,9 @@ import no.nav.eessi.pensjon.models.Enhet
  *
  * @see <a href="https://jira.adeo.no/browse/EP-853">Jira-sak EP-853</a>
  */
-class Pbuc02 : BucTilEnhetHandler {
+class Pbuc02 : EnhetHandler {
 
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
                 adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)

@@ -19,16 +19,16 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Rbuc02Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(R_BUC_02) as Rbuc02
+    private val handler = EnhetFactory.hentHandlerFor(R_BUC_02) as Rbuc02
 
     @ParameterizedTest
     @EnumSource(HendelseType::class)
     fun `Verifiser håndtering av diskresjonskode`(hendelseType: HendelseType) {
         val ikkeFortrolig = hendelseType.mockRequest()
-        assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(ikkeFortrolig))
+        assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(ikkeFortrolig))
 
         val strengtFortrolig = hendelseType.mockRequest(harAdressebeskyttelse = true)
-        assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(strengtFortrolig))
+        assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(strengtFortrolig))
     }
 
     @ParameterizedTest
@@ -41,7 +41,7 @@ internal class Rbuc02Test {
 
         val request = SENDT.mockRequest(type = saktype, person = person)
 
-        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
+        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(request))
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class Rbuc02Test {
 
         val request = SENDT.mockRequest(type = mockk(), person = person)
 
-        assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+        assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ internal class Rbuc02Test {
 
         val request = MOTTATT.mockRequest(type = saktype, person = person)
 
-        assertNotEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
+        assertNotEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -79,7 +79,7 @@ internal class Rbuc02Test {
 
         val request = hendelseType.mockRequest(type = ALDER, person = person)
 
-        assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+        assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -87,7 +87,7 @@ internal class Rbuc02Test {
     fun `Sak med ukjent person skal til ID og Fordeling`(hendelseType: HendelseType) {
         val request = hendelseType.mockRequest(type = ALDER, person = null)
 
-        assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+        assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -100,7 +100,7 @@ internal class Rbuc02Test {
 
         val request = hendelseType.mockRequest(sedType = SedType.R004, person = person)
 
-        assertEquals(Enhet.OKONOMI_PENSJON, handler.hentEnhet(request))
+        assertEquals(Enhet.OKONOMI_PENSJON, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -113,7 +113,7 @@ internal class Rbuc02Test {
 
         val request = hendelseType.mockRequest(sedType = SedType.R004, person = person)
 
-        assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+        assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
     }
 
     @Test
@@ -124,15 +124,15 @@ internal class Rbuc02Test {
         }
 
         val forventPensjonUtland = MOTTATT.mockRequest(type = ALDER, person = person)
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(forventPensjonUtland))
+        assertEquals(Enhet.PENSJON_UTLAND, handler.finnEnhet(forventPensjonUtland))
 
         val forventUforeUtland = MOTTATT.mockRequest(type = UFOREP, person = person)
-        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(forventUforeUtland))
+        assertEquals(Enhet.UFORE_UTLAND, handler.finnEnhet(forventUforeUtland))
 
         listOf(OMSORG, GJENLEV, BARNEP, GENRL)
                 .forEach { saktype ->
                     val request = MOTTATT.mockRequest(type = saktype, person = person)
-                    assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+                    assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
                 }
     }
 

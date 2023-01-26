@@ -17,7 +17,7 @@ internal class Hbuc07Test {
         private const val FNR_BARN = "12011577847"      // STERK BUSK
     }
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(H_BUC_07)
+    private val handler = EnhetFactory.hentHandlerFor(H_BUC_07)
 
     @Test
     fun `Sjekk diskresjonskode blir behandlet korrekt`() {
@@ -25,11 +25,11 @@ internal class Hbuc07Test {
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
         every { request.harAdressebeskyttelse } returns true
-        assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
         every { request.harAdressebeskyttelse } returns false
-        assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
     }
 
     @Test
@@ -39,13 +39,13 @@ internal class Hbuc07Test {
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_OVER_60)!!.getBirthDate()
-        assertEquals(Enhet.NFP_UTLAND_OSLO, handler.hentEnhet(request))
+        assertEquals(Enhet.NFP_UTLAND_OSLO, handler.finnEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
-        assertEquals(Enhet.NFP_UTLAND_OSLO, handler.hentEnhet(request))
+        assertEquals(Enhet.NFP_UTLAND_OSLO, handler.finnEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
-        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.finnEnhet(request))
     }
 
     @Test
@@ -55,12 +55,12 @@ internal class Hbuc07Test {
         }
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_OVER_60)!!.getBirthDate()
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
+        assertEquals(Enhet.PENSJON_UTLAND, handler.finnEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_BARN)!!.getBirthDate()
-        assertEquals(Enhet.PENSJON_UTLAND, handler.hentEnhet(request))
+        assertEquals(Enhet.PENSJON_UTLAND, handler.finnEnhet(request))
 
         every { request.fdato } returns Fodselsnummer.fra(FNR_VOKSEN)!!.getBirthDate()
-        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLAND, handler.finnEnhet(request))
     }
 }

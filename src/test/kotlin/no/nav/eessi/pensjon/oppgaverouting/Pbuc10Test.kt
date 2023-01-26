@@ -26,7 +26,7 @@ internal class Pbuc10Test {
         private val DUMMY_FNR = Fodselsnummer.fra("09035225916") // Testbruker SLAPP SKILPADDE
     }
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_10) as Pbuc10
+    private val handler = EnhetFactory.hentHandlerFor(P_BUC_10) as Pbuc10
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -34,11 +34,11 @@ internal class Pbuc10Test {
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
         every { request.harAdressebeskyttelse } returns true
-        assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
         every { request.harAdressebeskyttelse } returns false
-        assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class Pbuc10Test {
 
         }
 
-        assertEquals(Enhet.ID_OG_FORDELING, handler.hentEnhet(request))
+        assertEquals(Enhet.ID_OG_FORDELING, handler.finnEnhet(request))
     }
 
     @Test
@@ -71,34 +71,34 @@ internal class Pbuc10Test {
             every { sakInformasjon?.sakId } returns "555"
         }
 
-        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
+        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(request))
     }
 
     @Test
     fun `Mottatt sak til manuell behandling, bosatt norge`() {
         assertEquals(
                 Enhet.NFP_UTLAND_AALESUND,
-                handler.hentEnhet(manuellRequest(MOTTATT, ALDER, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, ALDER, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.NFP_UTLAND_AALESUND,
-                handler.hentEnhet(manuellRequest(MOTTATT, GJENLEV, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, GJENLEV, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.UFORE_UTLANDSTILSNITT,
-                handler.hentEnhet(manuellRequest(MOTTATT, UFOREP, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, UFOREP, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, OMSORG, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, OMSORG, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, GENRL, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, GENRL, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(MOTTATT, BARNEP, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(MOTTATT, BARNEP, Bosatt.NORGE))
         )
     }
 
@@ -106,27 +106,27 @@ internal class Pbuc10Test {
     fun `Sendt sak til manuell behandling, bosatt norge`() {
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, ALDER, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, ALDER, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, GJENLEV, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, GJENLEV, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.UFORE_UTLANDSTILSNITT,
-                handler.hentEnhet(manuellRequest(SENDT, UFOREP, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, UFOREP, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, OMSORG, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, OMSORG, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, GENRL, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, GENRL, Bosatt.NORGE))
         )
         assertEquals(
                 Enhet.ID_OG_FORDELING,
-                handler.hentEnhet(manuellRequest(SENDT, BARNEP, Bosatt.NORGE))
+                handler.finnEnhet(manuellRequest(SENDT, BARNEP, Bosatt.NORGE))
         )
     }
 
@@ -135,27 +135,27 @@ internal class Pbuc10Test {
     fun `Mottatt sak til manuell behandling, bosatt utland`(hendelse: HendelseType) {
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, ALDER, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, ALDER, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, GJENLEV, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, GJENLEV, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.UFORE_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, UFOREP, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, UFOREP, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, OMSORG, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, OMSORG, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, GENRL, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, GENRL, Bosatt.UTLAND))
         )
         assertEquals(
                 Enhet.PENSJON_UTLAND,
-                handler.hentEnhet(manuellRequest(hendelse, BARNEP, Bosatt.UTLAND))
+                handler.finnEnhet(manuellRequest(hendelse, BARNEP, Bosatt.UTLAND))
         )
     }
 

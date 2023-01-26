@@ -2,8 +2,8 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.models.Enhet
 
-class Hbuc07 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+class Hbuc07 : EnhetHandler {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return if (request.harAdressebeskyttelse)
             Enhet.DISKRESJONSKODE
         else

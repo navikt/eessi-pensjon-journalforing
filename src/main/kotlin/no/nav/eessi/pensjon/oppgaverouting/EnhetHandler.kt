@@ -1,8 +1,19 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.H_BUC_07
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_04
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_07
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_08
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_09
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
@@ -11,10 +22,10 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Period
 
-val logger: Logger = LoggerFactory.getLogger(BucTilEnhetHandler::class.java)
+val logger: Logger = LoggerFactory.getLogger(EnhetHandler::class.java)
 
-interface BucTilEnhetHandler {
-    fun hentEnhet(request: OppgaveRoutingRequest): Enhet
+interface EnhetHandler {
+    fun finnEnhet(request: OppgaveRoutingRequest): Enhet
 
     fun kanAutomatiskJournalfores(request: OppgaveRoutingRequest): Boolean {
         return request.run {
@@ -52,10 +63,10 @@ interface BucTilEnhetHandler {
 
 }
 
-class BucTilEnhetHandlerCreator {
+class EnhetFactory {
     companion object {
-        fun getHandler(type: BucType): BucTilEnhetHandler {
-            return when (type) {
+        fun hentHandlerFor(bucType: BucType): EnhetHandler {
+            return when (bucType) {
                 P_BUC_01 -> Pbuc01()
                 P_BUC_02 -> Pbuc02()
                 P_BUC_03 -> Pbuc03()
@@ -64,11 +75,11 @@ class BucTilEnhetHandlerCreator {
                 P_BUC_06,
                 P_BUC_07,
                 P_BUC_08,
-                P_BUC_09 -> DefaultBucTilEnhetHandler()
+                P_BUC_09 -> DefaultEnhetHandler()
                 P_BUC_10 -> Pbuc10()
                 H_BUC_07 -> Hbuc07()
                 R_BUC_02 -> Rbuc02()
-                else -> DefaultBucTilEnhetHandler()
+                else -> DefaultEnhetHandler()
             }
         }
     }

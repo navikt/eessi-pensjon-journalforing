@@ -5,8 +5,8 @@ import no.nav.eessi.pensjon.models.Enhet
 /**
  * P_BUC_04: Anmodning  om opplysninger om perioder med omsorg for barn
  */
-class Pbuc04 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+class Pbuc04 : EnhetHandler {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
                 adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)

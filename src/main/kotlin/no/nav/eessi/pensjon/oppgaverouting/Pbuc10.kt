@@ -1,14 +1,15 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
 
-class Pbuc10 : BucTilEnhetHandler {
+class Pbuc10 : EnhetHandler {
 
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return when {
             request.harAdressebeskyttelse -> {
                 adresseBeskyttelseLogging(request.sedType, request.bucType, Enhet.DISKRESJONSKODE)

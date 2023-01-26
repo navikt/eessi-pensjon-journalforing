@@ -1,10 +1,11 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.models.Enhet
@@ -37,38 +38,41 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         return tildeltEnhet
     }
 
-    private fun tildelEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
-        val enhet = BucTilEnhetHandlerCreator.getHandler(routingRequest.bucType).hentEnhet(routingRequest)
+    private fun tildelEnhet(oppgave: OppgaveRoutingRequest): Enhet {
+        val enhet = finnEnhetFor(oppgave)
 
         if (enhet == Enhet.AUTOMATISK_JOURNALFORING)
             return enhet
 
         logger.debug("enhet: $enhet")
 
-        if (routingRequest.bucType == P_BUC_01) {
+        if (oppgave.bucType == P_BUC_01) {
             val norgKlientRequest = NorgKlientRequest(
-                routingRequest.harAdressebeskyttelse,
-                routingRequest.landkode,
-                routingRequest.geografiskTilknytning,
-                routingRequest.saktype
+                oppgave.harAdressebeskyttelse,
+                oppgave.landkode,
+                oppgave.geografiskTilknytning,
+                oppgave.saktype
             )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
 
-        if (erGydligBuc10eller02(routingRequest.bucType, routingRequest.landkode, routingRequest.sakInformasjon)) {
-            logger.debug("Benytter norg2 for buctype: ${routingRequest.bucType}")
-            val personRelasjon = routingRequest.identifisertPerson?.personRelasjon
+        if (erGydligBuc10eller02(oppgave.bucType, oppgave.landkode, oppgave.sakInformasjon)) {
+            logger.debug("Benytter norg2 for buctype: ${oppgave.bucType}")
+            val personRelasjon = oppgave.identifisertPerson?.personRelasjon
             val norgKlientRequest = NorgKlientRequest(
-                routingRequest.harAdressebeskyttelse,
-                routingRequest.landkode,
-                routingRequest.geografiskTilknytning,
-                routingRequest.saktype,
+                oppgave.harAdressebeskyttelse,
+                oppgave.landkode,
+                oppgave.geografiskTilknytning,
+                oppgave.saktype,
                 personRelasjon
             )
             return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest) ?: enhet
         }
         return enhet
     }
+
+    private fun finnEnhetFor(oppgave: OppgaveRoutingRequest) =
+        EnhetFactory.hentHandlerFor(bucType = oppgave.bucType).finnEnhet(oppgave)
 
     fun erGydligBuc10eller02(bucType: BucType, landkode: String?, sakInformasjon: SakInformasjon?): Boolean {
         if (bucType == P_BUC_10) return true

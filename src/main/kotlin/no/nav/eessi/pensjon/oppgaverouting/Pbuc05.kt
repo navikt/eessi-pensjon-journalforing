@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.HendelseType
@@ -8,8 +7,8 @@ import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 
-class Pbuc05 : BucTilEnhetHandler {
-    override fun hentEnhet(request: OppgaveRoutingRequest): Enhet {
+class Pbuc05 : EnhetHandler {
+    override fun finnEnhet(request: OppgaveRoutingRequest): Enhet {
         return if (request.hendelseType == HendelseType.SENDT) enhetForSendt(request)
         else enhetForMottatt(request)
     }

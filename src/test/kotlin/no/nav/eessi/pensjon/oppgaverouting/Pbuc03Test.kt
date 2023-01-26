@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource
 
 internal class Pbuc03Test {
 
-    private val handler = BucTilEnhetHandlerCreator.getHandler(P_BUC_03) as Pbuc03
+    private val handler = EnhetFactory.hentHandlerFor(P_BUC_03) as Pbuc03
 
     @Test
     fun `Inneholder diskresjonskode`() {
@@ -22,11 +22,11 @@ internal class Pbuc03Test {
 
         // SPSF er strengt fortrolig og skal returnere Enhet.DISKRESJONSKODE (vikafossen)
         every { request.harAdressebeskyttelse } returns true
-        assertEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
 
         // SPSF er mindre fortrolig og følger vanlig saksflyt
         every { request.harAdressebeskyttelse } returns false
-        assertNotEquals(Enhet.DISKRESJONSKODE, handler.hentEnhet(request))
+        assertNotEquals(Enhet.DISKRESJONSKODE, handler.finnEnhet(request))
     }
 
     @ParameterizedTest
@@ -42,7 +42,7 @@ internal class Pbuc03Test {
             every { bucType } returns P_BUC_03
         }
 
-        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.hentEnhet(request))
+        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, handler.finnEnhet(request))
     }
 
     @Test
@@ -58,7 +58,7 @@ internal class Pbuc03Test {
             every { bucType } returns P_BUC_03
         }
 
-        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLANDSTILSNITT, handler.finnEnhet(request))
     }
 
     @Test
@@ -74,6 +74,6 @@ internal class Pbuc03Test {
             every { bucType } returns P_BUC_03
         }
 
-        assertEquals(Enhet.UFORE_UTLAND, handler.hentEnhet(request))
+        assertEquals(Enhet.UFORE_UTLAND, handler.finnEnhet(request))
     }
 }
