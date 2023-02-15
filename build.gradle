@@ -3,7 +3,6 @@ buildscript {
 	ext {
 		springBootVersion = '3.0.2'
 		springKafkaVersion = '3.0.2'
-		cxfVersion = '3.5.1'
 		jacksonVersion = '2.14.1'
 		tokenSupportVersion = '3.0.3'
 		logstashLogbackVersion = '7.2'
@@ -49,13 +48,11 @@ dependencies {
 
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
-	implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.3"
-
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-metrics:1.0.12")
-	implementation("no.nav.eessi.pensjon:ep-logging:1.1.17")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:12.2.7")
-	implementation("no.nav.eessi.pensjon:ep-eux:1.4.23")
+	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.0")
+	implementation("no.nav.eessi.pensjon:ep-logging:2.0.0")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.0")
+	implementation("no.nav.eessi.pensjon:ep-eux:2.0.1")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")
