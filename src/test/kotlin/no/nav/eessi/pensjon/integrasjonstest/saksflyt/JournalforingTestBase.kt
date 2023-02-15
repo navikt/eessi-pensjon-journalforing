@@ -143,6 +143,7 @@ internal open class JournalforingTestBase {
         kravHandler.initMetrics()
         bestemSakKlient.initMetrics()
         personSok.initMetrics()
+        personService.initMetrics()
         dokumentHelper.initMetrics()
     }
 

@@ -5,6 +5,7 @@ import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.StringBody.subString
 import java.util.concurrent.TimeUnit
 
 class CustomMockServer {
@@ -51,7 +52,7 @@ class CustomMockServer {
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("POST")
-                .withPath("/journalpost")
+                .withBody(subString("journalpostId\": \"$journalpostId\""))
         )
             .respond(
                 when (forsoekFerdigstill) {

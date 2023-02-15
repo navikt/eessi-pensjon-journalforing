@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -12,7 +13,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
-import javax.annotation.PostConstruct
 
 @Component
 class Norg2Klient(private val proxyOAuthRestTemplate: RestTemplate,

@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.klienter.pesys
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SakInformasjon
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
-import javax.annotation.PostConstruct
 
 @Component
 class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,

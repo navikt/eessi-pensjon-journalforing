@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.buc
 
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
@@ -25,8 +26,6 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
-import javax.annotation.PostConstruct
-
 @Service
 class EuxService(
     private val euxKlient: EuxKlientLib,
