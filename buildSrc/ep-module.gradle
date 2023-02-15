@@ -71,7 +71,7 @@ compileTestKotlin {
 
 test {
     useJUnitPlatform()
-    failFast = false
+    failFast = true
     testLogging {
         exceptionFormat "full"
         showStandardStreams false

@@ -47,6 +47,9 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
 
         //setup server
         CustomMockServer()
+            .medJournalforing(false, "429434378")
+            .medNorg2Tjeneste()
+            .mockBestemSak()
             .medEuxGetRequestWithJson(
                 "/buc/147729", Buc(
                     id = "7477291",
@@ -54,13 +57,10 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequestWithJson("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018", javaClass.getResource("/sed/P2000-NAV.json")!!.readText())
-            .medJournalforing(false, "429434378")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-//            .medEuxGetRequest("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer","/pdf/pdfResponseMedVedlegg.json")
+            .medEuxGetRequest("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
+            .medEuxGetRequest("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer","/pdf/pdfResponseMedVedlegg.json")
 
-         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000.json")  // fnr: 09035225916   fdato: 01011980
+        meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000.json")
         //verify route
         OppgaveMeldingVerification("429434378")
             .medHendelsetype("MOTTATT")
