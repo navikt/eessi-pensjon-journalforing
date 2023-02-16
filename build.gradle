@@ -48,6 +48,8 @@ dependencies {
 
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
+	implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.3"
+
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.0")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.0.0")
