@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.handler
 
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -7,7 +8,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
 
 @Service
 class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, String>,

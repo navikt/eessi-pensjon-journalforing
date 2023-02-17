@@ -43,7 +43,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
     }
 
     @Test
-    fun `Gitt en mottatt P2000 så skal den routes til 4303`() {
+    fun `Gitt en mottatt P2000 med en fdato som er lik med fdato i fnr så skal oppgaven routes til 4303`() {
 
         //setup server
         CustomMockServer()

@@ -74,6 +74,7 @@ spec:
     path: /internal/isready
     port: 8080
     initialDelay: 20
+    failureThreshold: 10
   replicas:
     min: 1
     max: 1
@@ -81,7 +82,7 @@ spec:
   resources:
     limits:
       cpu: 4000m
-      memory: 2Gi
+      memory: 512Mi
     requests:
       cpu: 200m
-      memory: 2Gi
+      memory: 512Mi

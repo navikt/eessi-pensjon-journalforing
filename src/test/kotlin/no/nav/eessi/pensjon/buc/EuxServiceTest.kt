@@ -52,7 +52,7 @@ internal class EuxServiceTest {
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt`() {
         val allSedTypes = SedType.values().toList()
-        assertEquals(76, allSedTypes.size)
+        assertEquals(81, allSedTypes.size)
 
         val bucDocs = allSedTypes.mapIndexed { index, sedType -> Document(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.lowercase(
             Locale.getDefault()
@@ -62,12 +62,12 @@ internal class EuxServiceTest {
 
         val dokumenter = helper.hentAlleGyldigeDokumenter(buc)
 
-        assertEquals(55, dokumenter.size)
+        assertEquals(60, dokumenter.size)
     }
 
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt fra mock Buc`() {
-        val json = javaClass.getResource("/eux/buc/buc279020.json").readText()
+        val json = javaClass.getResource("/eux/buc/buc279020.json")!!.readText()
         val buc = mapJsonToAny<Buc>(json)
 
         assertEquals(9, helper.hentBucDokumenter(buc).size)
@@ -79,8 +79,8 @@ internal class EuxServiceTest {
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter fra BUC med gyldig og kansellerte`() {
         val rinaid = "123123123"
-        val bucJson = javaClass.getResource("/buc/R_BUC_02.json").readText()
-        val r005json = javaClass.getResource("/sed/R_BUC_02_R005_SE.json").readText()
+        val bucJson = javaClass.getResource("/buc/R_BUC_02.json")!!.readText()
+        val r005json = javaClass.getResource("/sed/R_BUC_02_R005_SE.json")!!.readText()
 
         val buc = mapJsonToAny<Buc>(bucJson)
 
@@ -100,7 +100,7 @@ internal class EuxServiceTest {
 
     @Test
     fun `Finn korrekt ytelsestype for AP fra sed R005`() {
-        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-AP.json").readText())
+        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-AP.json")!!.readText())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         R_BUC_02, rinaDokumentVersjon = "1")
@@ -113,7 +113,7 @@ internal class EuxServiceTest {
 
     @Test
     fun `Finn korrekt ytelsestype for UT fra sed R005`() {
-        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText())
+        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json")!!.readText())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         R_BUC_02, rinaDokumentVersjon = "1")
@@ -126,8 +126,8 @@ internal class EuxServiceTest {
 
     @Test
     fun `Finn korrekt ytelsestype for AP fra sed P15000`() {
-        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json").readText())
-        val sedP15000 = mapJsonToAny<P15000>(javaClass.getResource("/buc/P15000-NAV.json").readText())
+        val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json")!!.readText())
+        val sedP15000 = mapJsonToAny<P15000>(javaClass.getResource("/buc/P15000-NAV.json")!!.readText())
 
         val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = P_BUC_10, sedType = P15000, rinaDokumentVersjon = "1")
         val seds: List<SED> = listOf(
@@ -180,14 +180,14 @@ internal class EuxServiceTest {
     fun `henter en map av gyldige seds i buc`() {
         val rinaSakId = "123123"
 
-        val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json").readText()
+        val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText()
         val alldocsid = mapJsonToAny<List<ForenkletSED>>(allDocsJson)
         val bucDocs = alldocsid.mapIndexed { index, docs -> Document(id = "$index", type = docs.type, status = docs.status?.name?.lowercase(
             Locale.getDefault()
         ))  }
         val buc = Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocs)
 
-        val sedJson = javaClass.getResource("/buc/P2000-NAV.json").readText()
+        val sedJson = javaClass.getResource("/buc/P2000-NAV.json")!!.readText()
         val sedP2000 = mapJsonToAny<SED>(sedJson)
 
         every { euxKlient.hentSedJson(any(), any()) } returns sedP2000.toJson()
