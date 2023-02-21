@@ -2,11 +2,11 @@ package no.nav.eessi.pensjon.oppgaverouting
 
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import java.time.LocalDate
 
 class OppgaveRoutingRequest(
@@ -30,7 +30,7 @@ class OppgaveRoutingRequest(
             identifisertPerson: IdentifisertPerson?,
             fdato: LocalDate,
             saktype: SakType?,
-            sedHendelseModel: SedHendelseModel,
+            sedHendelseModel: SedHendelse,
             hendelseType: HendelseType,
             sakInformasjon: SakInformasjon?,
             harAdressebeskyttelse: Boolean = false

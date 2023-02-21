@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
-import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -18,17 +17,17 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
     private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
     fun initKrav(
-        sedHendelseModel: SedHendelseModel,
+        sedHendelse: SedHendelse,
         sakInformasjon: SakInformasjon?,
         sed: SED?
     ) {
 
-        when(sedHendelseModel.sedType) {
+        when(sedHendelse.sedType) {
             P2000 -> {
                 if ((sed as P2000).validerForKravinit()) {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
-                        bucId = sedHendelseModel.rinaSakId,
+                        bucId = sedHendelse.rinaSakId,
                         hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
                         beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
                     )
@@ -41,7 +40,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
             P2200 -> {
                 val hendelse = BehandleHendelseModel(
                     sakId = sakInformasjon?.sakId,
-                    bucId = sedHendelseModel.rinaSakId,
+                    bucId = sedHendelse.rinaSakId,
                     hendelsesKode = HendelseKode.SOKNAD_OM_UFORE,
                     beskrivelse = "Det er mottatt søknad om uføretrygd. Kravet er opprettet."
                 )

@@ -56,7 +56,6 @@ internal class ArchitectureTest {
         val OppgaveRouting = "journalforing.oppgaverouting"
         val PDF = "journalforing.pdf"
         val Personidentifisering = "journalforing.personidentifisering"
-        val Sed = "journalforing.sed"
 
         // Sub packages
         val FagmodulKlient = "journalforing.klienter.fagmodul"
@@ -81,7 +80,6 @@ internal class ArchitectureTest {
                 .layer(PesysKlient).definedBy("$root.klienter.pesys")
                 .layer(Personidentifisering).definedBy("$root.personidentifisering")
                 .layer(PersonidentifiseringHelpers).definedBy("$root.personidentifisering.helpers")
-                .layer(Sed).definedBy("$root.sed")
                 //define rules
                 .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
                 .whereLayer(Buc).mayOnlyBeAccessedByLayers(Listeners, Journalforing, PDF) // Sed
@@ -92,7 +90,6 @@ internal class ArchitectureTest {
                 .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT)
                 .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(Sed).mayOnlyBeAccessedByLayers(Listeners, Journalforing, Buc, OppgaveRouting)
                 .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, Buc, PersonidentifiseringHelpers)
                 .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
                 .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing, Listeners, OppgaveRouting)

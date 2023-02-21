@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.sed
 
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,10 +13,10 @@ internal class SedHendelseModelSerdeTest {
 
     @Test
     fun `Sjekk at serialisering virker`() {
-        val model = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = R_BUC_02, rinaDokumentVersjon = "1")
+        val model = SedHendelse(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType = R_BUC_02, rinaDokumentVersjon = "1")
         val serialized = model.toJson()
 
-        val result = SedHendelseModel.fromJson(serialized)
+        val result = SedHendelse.fromJson(serialized)
 
         assertEquals(model, result)
     }
@@ -40,7 +41,7 @@ internal class SedHendelseModelSerdeTest {
             "navBruker" : null
         }""".trimMargin()
 
-        val model = SedHendelseModel.fromJson(json)
+        val model = SedHendelse.fromJson(json)
 
         val result = model.toJson()
         JSONAssert.assertEquals(json, result, JSONCompareMode.LENIENT)
@@ -66,7 +67,7 @@ internal class SedHendelseModelSerdeTest {
             "navBruker" : null
         }""".trimMargin()
 
-        val model = SedHendelseModel.fromJson(json)
+        val model = SedHendelse.fromJson(json)
 
         assertEquals("R", model.sektorKode)
         assertNull(model.bucType)
@@ -92,7 +93,7 @@ internal class SedHendelseModelSerdeTest {
             "navBruker" : "22117320034"
         }""".trimMargin()
 
-        val model = SedHendelseModel.fromJson(json)
+        val model = SedHendelse.fromJson(json)
 
         assertEquals("22117320034", model.navBruker!!.value)
     }
@@ -117,7 +118,7 @@ internal class SedHendelseModelSerdeTest {
             "navBruker" : "1234"
         }""".trimMargin()
 
-        val model = SedHendelseModel.fromJson(json)
+        val model = SedHendelse.fromJson(json)
 
         assertNull(model.navBruker)
     }

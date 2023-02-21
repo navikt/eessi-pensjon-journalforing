@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
@@ -23,7 +24,6 @@ import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -104,7 +104,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -144,7 +144,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed R005 på R_BUC_02`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -184,7 +184,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Gitt en R_BUC_02 og sed med flere personer SENDT Så skal det opprettes Oppgave og enhet 4303`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -226,7 +226,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Gitt en R_BUC_02 og sed med flere personer MOTTATT Så skal det opprettes Oppgave og enhet 4303`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -277,7 +277,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed P2000`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -310,7 +310,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Sendt gyldig Sed P2200`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -350,7 +350,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Sendt Sed i P_BUC_10`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
             "Test Testesen",
@@ -390,7 +390,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2000`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -431,7 +431,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Gitt en SED med ugyldig fnr i SED så søk etter fnr i andre SEDer i samme buc`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -472,7 +472,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2100`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -512,7 +512,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Mottat gyldig Sed P2200`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -553,7 +553,7 @@ internal class JournalforingServiceTest {
     @Test
     fun `Mottat Sed i P_BUC_10`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -595,7 +595,7 @@ internal class JournalforingServiceTest {
     fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen automatisk journalføres`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -659,7 +659,7 @@ internal class JournalforingServiceTest {
             }
         """.trimIndent()
 
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertGjenlevendePerson = IdentifisertPerson(
             "12078945602",
@@ -703,7 +703,7 @@ internal class JournalforingServiceTest {
     fun `Gitt at saksbehandler har opprettet en P2100 med et norsk fnr eller dnr med UFØREP og sakstatus er Avsluttet så skal SED journalføres med oppgave ikke ferdigstille`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -748,7 +748,7 @@ internal class JournalforingServiceTest {
     fun `Gitt at saksbehandler har opprettet en p2100 med mangelfullt fnr eller dnr så skal det opprettes en journalføringsoppgave og settes til enhet 4303`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "",
@@ -783,7 +783,7 @@ internal class JournalforingServiceTest {
     fun `Gitt at saksbehandler har opprettet en P2100 og bestemsak returnerer ALDER og UFOREP som sakstyper så skal det opprettes en journalføringsoppgave og enhet setttes til 4303 NAV Id og fordeling`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = IdentifisertPerson(
             "12078945602",
@@ -837,7 +837,7 @@ internal class JournalforingServiceTest {
             }
         """.trimIndent()
 
-        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertGjenlevendePerson = IdentifisertPerson(
             "12078945602",

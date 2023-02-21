@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
@@ -13,7 +14,6 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -62,7 +62,7 @@ class SedMottattListener(
                 //Forsøker med denne en gang til 258088L
                 try {
                     logger.info("*** Offset ${cr.offset()}  Partition ${cr.partition()} ***")
-                    val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                    val sedHendelse = SedHendelse.fromJson(hendelse)
 
                     if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
                         logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
@@ -121,18 +121,18 @@ class SedMottattListener(
         }
     }
 
-    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelseModel: SedHendelseModel): SakInformasjon? {
+    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelse): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
-        return when(sedHendelseModel.bucType) {
-            P_BUC_01 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
-            P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType, identifisertPerson.personRelasjon.saktype)
-            P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, sedHendelseModel.bucType)
+        return when(sedHendelse.bucType) {
+            P_BUC_01 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_01)
+            P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_02, identifisertPerson.personRelasjon.saktype)
+            P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_03)
             else  -> null
         }
     }
 
-    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): SakType? {
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
         if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
             return null
         } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {

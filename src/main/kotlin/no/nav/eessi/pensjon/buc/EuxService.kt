@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -18,7 +19,6 @@ import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.sed.erGyldig
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.retry.annotation.Backoff
@@ -151,7 +151,7 @@ class EuxService(
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
-    fun hentSaktypeType(sedHendelse: SedHendelseModel, alleSedIBuc: List<SED>): SakType? {
+    fun hentSaktypeType(sedHendelse: SedHendelse, alleSedIBuc: List<SED>): SakType? {
         //hent saktype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == R_BUC_02) {
             return alleSedIBuc

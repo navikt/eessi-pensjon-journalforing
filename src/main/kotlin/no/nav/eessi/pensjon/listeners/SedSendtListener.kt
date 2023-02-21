@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
@@ -16,7 +17,6 @@ import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -66,7 +66,7 @@ class SedSendtListener(
                         logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
                     } else {
 
-                        val sedHendelse = SedHendelseModel.fromJson(hendelse)
+                        val sedHendelse = SedHendelse.fromJson(hendelse)
                         if (GyldigeHendelser.sendt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
 
@@ -182,7 +182,7 @@ class SedSendtListener(
         return saktypeFraSed ?: saktype
     }
 
-    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelseModel, hendelseType: HendelseType): SakType? {
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
         if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
             return null
         } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {

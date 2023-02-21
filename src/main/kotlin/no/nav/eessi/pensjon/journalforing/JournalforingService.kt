@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -21,7 +22,6 @@ import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -52,7 +52,7 @@ class JournalforingService(
     }
 
     fun journalfor(
-        sedHendelseModel: SedHendelseModel,
+        sedHendelseModel: SedHendelse,
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
@@ -174,8 +174,8 @@ class JournalforingService(
                     java.time.LocalDateTime.now(),
                     tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING,
                     tildeltEnhet.enhetsNr,
-                    sedHendelseModel.bucType,
-                    sedHendelseModel.sedType,
+                    sedHendelseModel.bucType!!,
+                    sedHendelseModel.sedType!!,
                     saktype,
                     hendelseType
                 )
@@ -223,7 +223,7 @@ class JournalforingService(
         journalpostId: String? = null,
         oppgaveEnhet: Enhet,
         aktoerId: String? = null,
-        sedHendelseModel: SedHendelseModel,
+        sedHendelseModel: SedHendelse,
         uSupporterteVedlegg: String? = null
     ) {
         val oppgave = OppgaveMelding(
@@ -244,7 +244,7 @@ class JournalforingService(
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
         saktype: SakType?,
-        sedHendelseModel: SedHendelseModel,
+        sedHendelseModel: SedHendelse,
         harAdressebeskyttelse: Boolean,
     ): Enhet {
         return if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {

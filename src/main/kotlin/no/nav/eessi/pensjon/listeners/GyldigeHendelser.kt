@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.sed.SedHendelseModel
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 
 class GyldigeHendelser {
     companion object {
@@ -10,7 +10,7 @@ class GyldigeHendelser {
         private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02)
         private val gyldigUtgaaendeBucType = R_BUC_02
 
-        fun mottatt(hendelse: SedHendelseModel) =
+        fun mottatt(hendelse: SedHendelse) =
                 when {
                     hendelse.bucType == null -> false
                     hendelse.bucType in gyldigeInnkommendeBucTyper -> true
@@ -18,7 +18,7 @@ class GyldigeHendelser {
                     else -> false
                 }
 
-        fun sendt(hendelse: SedHendelseModel) =
+        fun sendt(hendelse: SedHendelse) =
                 when {
                     hendelse.bucType == null -> false
                     hendelse.bucType  == gyldigUtgaaendeBucType -> true

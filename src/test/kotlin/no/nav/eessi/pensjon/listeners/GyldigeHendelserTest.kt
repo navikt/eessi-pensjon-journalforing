@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.sed.SedHendelseModel
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -63,5 +63,5 @@ internal class GyldigeHendelserTest {
     }
 
     private fun createDummy(sektor: String, bucType: BucType?) =
-            SedHendelseModel(sektorKode = sektor, bucType = bucType, rinaSakId = "12345", rinaDokumentId = "654634", rinaDokumentVersjon = "1")
+        SedHendelse(sektorKode = sektor, bucType = bucType, rinaSakId = "12345", rinaDokumentId = "654634", rinaDokumentVersjon = "1")
 }

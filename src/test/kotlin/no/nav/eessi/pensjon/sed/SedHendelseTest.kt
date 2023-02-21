@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.sed
 
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -9,8 +10,8 @@ class SedHendelseTest {
 
     @Test
     fun `Gitt en gyldig SEDSendt json når mapping så skal alle felter mappes`() {
-        val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
-        val sedHendelse = SedHendelseModel.fromJson(sedSendtJson)
+        val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(sedSendtJson)
         assertEquals(sedHendelse.id, 1869L)
         assertEquals(sedHendelse.sedId, "P2000_b12e06dda2c7474b9998c7139c841646_2")
         assertEquals(sedHendelse.sektorKode, "P")

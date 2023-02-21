@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
@@ -22,7 +23,6 @@ import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.AfterEach
@@ -102,7 +102,7 @@ internal class EuxServiceTest {
     fun `Finn korrekt ytelsestype for AP fra sed R005`() {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-AP.json")!!.readText())
 
-        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
+        val sedHendelse = SedHendelse(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
@@ -115,7 +115,7 @@ internal class EuxServiceTest {
     fun `Finn korrekt ytelsestype for UT fra sed R005`() {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json")!!.readText())
 
-        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
+        val sedHendelse = SedHendelse(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "R", bucType =
         R_BUC_02, rinaDokumentVersjon = "1")
 
         val seds = listOf(sedR005)
@@ -129,7 +129,7 @@ internal class EuxServiceTest {
         val sedR005 = mapJsonToAny<R005>(javaClass.getResource("/sed/R_BUC_02-R005-UT.json")!!.readText())
         val sedP15000 = mapJsonToAny<P15000>(javaClass.getResource("/buc/P15000-NAV.json")!!.readText())
 
-        val sedHendelse = SedHendelseModel(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = P_BUC_10, sedType = P15000, rinaDokumentVersjon = "1")
+        val sedHendelse = SedHendelse(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = "P", bucType = P_BUC_10, sedType = P15000, rinaDokumentVersjon = "1")
         val seds: List<SED> = listOf(
             sedR005,
             sedP15000

@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
@@ -18,7 +19,6 @@ import no.nav.eessi.pensjon.models.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
 import no.nav.eessi.pensjon.personidentifisering.Relasjon
 import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
-import no.nav.eessi.pensjon.sed.SedHendelseModel
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -463,7 +463,7 @@ internal class OppgaveRoutingServiceTest {
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
-        val sedHendelseModel = SedHendelseModel(
+        val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_10, "32131", avsenderId = "12313123",
             "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
             SedType.P15000, null
@@ -511,7 +511,7 @@ internal class OppgaveRoutingServiceTest {
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
-        val sedHendelseModel = SedHendelseModel(
+        val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
             "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
             SedType.P2100, null
@@ -566,7 +566,7 @@ internal class OppgaveRoutingServiceTest {
             personListe = emptyList()
         )
 
-        val sedHendelseModel = SedHendelseModel(
+        val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
             "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
             SedType.P2100, null
@@ -597,7 +597,7 @@ internal class OppgaveRoutingServiceTest {
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "NOR", "3005", personRelasjon, personListe = emptyList())
 
-        val sedHendelseModel = SedHendelseModel(
+        val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_01, "32131", avsenderId = "12313123",
             "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
             SedType.P2000, null
@@ -645,7 +645,7 @@ internal class OppgaveRoutingServiceTest {
         val identifisertPerson =
             IdentifisertPerson("01010101010", "Ole Olsen", "SWE", null, personRelasjon, personListe = emptyList())
 
-        val sedHendelseModel = SedHendelseModel(
+        val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_03, "32131", avsenderId = "12313123",
             "NO", "NO", "2312312", "SE", "SE", "23123123", "1",
             SedType.P2200, null
