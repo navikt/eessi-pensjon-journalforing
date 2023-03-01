@@ -62,8 +62,8 @@ internal class SedMottattListenerTest {
 
     @Test
     fun `Mottat og sendt Sed med ugyldige verdier kaster exception`(){
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/BAD_BUC_01.json")))
-        //denne inneholder da ikke guldig P eller H_BUC_07
+        val hendelse = javaClass.getResource("/eux/hendelser/BAD_BUC_01.json")!!.readText()
+        //Bucen inneholder ugyldig buctype og ugyldig sektorkode
         assertThrows<SedMottattRuntimeException> {
             sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
         }
