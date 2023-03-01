@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
@@ -71,16 +72,16 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     private fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
         return if (bucType == R_BUC_02) {
             when (saktype) {
-                UFOREP -> Behandlingstema.UFOREPENSJON
-                GJENLEV -> Behandlingstema.GJENLEVENDEPENSJON
-                else -> Behandlingstema.ALDERSPENSJON
+                UFOREP -> UFOREPENSJON
+                GJENLEV -> GJENLEVENDEPENSJON
+                else -> ALDERSPENSJON
             }
-            Behandlingstema.TILBAKEBETALING
+            TILBAKEBETALING
         } else {
             return when (bucType) {
-                P_BUC_02 -> Behandlingstema.GJENLEVENDEPENSJON
-                P_BUC_03 -> Behandlingstema.UFOREPENSJON
-                else -> Behandlingstema.ALDERSPENSJON
+                P_BUC_02 -> GJENLEVENDEPENSJON
+                P_BUC_03 -> UFOREPENSJON
+                else -> ALDERSPENSJON
             }
         }
 

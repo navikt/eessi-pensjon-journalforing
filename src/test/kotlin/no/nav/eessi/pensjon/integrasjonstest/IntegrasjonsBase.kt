@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.eessi.pensjon.eux.model.buc.Document
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -109,7 +109,7 @@ abstract class IntegrasjonsBase() {
         MockServerClient("localhost", System.getProperty("mockServerport").toInt()).reset()
     }
 
-    protected fun opprettBucDocuments(file: String): List<Document> {
+    protected fun opprettBucDocuments(file: String): List<DocumentsItem> {
         val json = javaClass.getResource(file)!!.readText()
         return mapJsonToAny(json)
     }

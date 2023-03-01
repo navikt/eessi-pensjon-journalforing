@@ -12,7 +12,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Document
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
@@ -54,7 +54,7 @@ internal class EuxServiceTest {
         val allSedTypes = SedType.values().toList()
         assertEquals(81, allSedTypes.size)
 
-        val bucDocs = allSedTypes.mapIndexed { index, sedType -> Document(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.lowercase(
+        val bucDocs = allSedTypes.mapIndexed { index, sedType -> DocumentsItem(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.lowercase(
             Locale.getDefault()
         )) }
         val buc = Buc(id = "1", processDefinitionName = "P_BUC_01", documents = bucDocs)
@@ -182,7 +182,7 @@ internal class EuxServiceTest {
 
         val allDocsJson = javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText()
         val alldocsid = mapJsonToAny<List<ForenkletSED>>(allDocsJson)
-        val bucDocs = alldocsid.mapIndexed { index, docs -> Document(id = "$index", type = docs.type, status = docs.status?.name?.lowercase(
+        val bucDocs = alldocsid.mapIndexed { index, docs -> DocumentsItem(id = "$index", type = docs.type, status = docs.status?.name?.lowercase(
             Locale.getDefault()
         ))  }
         val buc = Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocs)

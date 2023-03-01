@@ -51,7 +51,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.6")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.0.5")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.8")
-	implementation("no.nav.eessi.pensjon:ep-eux:2.0.8")
+	implementation("no.nav.eessi.pensjon:ep-eux:2.1.6")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")

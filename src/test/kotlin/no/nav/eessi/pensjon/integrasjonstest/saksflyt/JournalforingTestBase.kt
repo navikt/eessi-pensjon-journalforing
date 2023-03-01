@@ -8,7 +8,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Document
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.eux.model.buc.Organisation
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
@@ -388,8 +388,8 @@ internal open class JournalforingTestBase {
         val part = if (bucLand != null) listOf(Participant(role = "CaseOwner", organisation = Organisation(name = bucLand, countryCode = bucLand))) else null
         return Buc(id = "2",  processDefinitionName = bucType.name, participants = part ,  documents = bucDocumentsFrom(forenkletSed))
     }
-    fun bucDocumentsFrom(forenkletSed: List<ForenkletSED>): List<Document> {
-        return forenkletSed.map { forenklet -> Document(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.lowercase()) }
+    fun bucDocumentsFrom(forenkletSed: List<ForenkletSED>): List<DocumentsItem> {
+        return forenkletSed.map { forenklet -> DocumentsItem(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.lowercase()) }
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
