@@ -113,7 +113,7 @@ class SedMottattListener(
                     logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n ${trimFnrString(hendelse)} \n", ex)
+                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n", ex)
                     throw SedMottattRuntimeException(ex)
                 }
                 latch.countDown()
