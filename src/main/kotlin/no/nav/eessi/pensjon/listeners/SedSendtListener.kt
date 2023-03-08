@@ -121,7 +121,7 @@ class SedSendtListener(
 
 
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\n $hendelse \n", ex)
+                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse", ex)
                     throw SedSendtRuntimeException(ex)
                 }
                 latch.countDown()
