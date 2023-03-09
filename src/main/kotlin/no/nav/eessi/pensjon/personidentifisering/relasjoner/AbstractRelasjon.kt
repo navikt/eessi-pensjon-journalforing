@@ -6,8 +6,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.Logger

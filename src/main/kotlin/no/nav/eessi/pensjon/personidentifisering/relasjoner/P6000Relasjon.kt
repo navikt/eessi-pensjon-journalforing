@@ -3,7 +3,8 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.sed.P6000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
+
 
 class P6000Relasjon(private val sed: SED,
                     private val bucType: BucType,

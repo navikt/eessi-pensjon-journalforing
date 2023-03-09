@@ -5,9 +5,10 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -35,7 +36,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
     private fun testRunnerP1000(
         fnr: String?,
         land: String = "NOR",
-        hendelseType: HendelseType = HendelseType.SENDT,
+        hendelseType: HendelseType = SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = SED.generateSedToClass<SED>(createSed(SedType.P1000, fnr))
@@ -61,7 +62,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
-        if (hendelseType == HendelseType.SENDT)
+        if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))

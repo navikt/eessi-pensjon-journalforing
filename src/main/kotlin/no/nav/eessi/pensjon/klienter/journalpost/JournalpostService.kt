@@ -8,6 +8,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -35,7 +37,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         fnr: Fodselsnummer?,
         bucType: BucType,
         sedType: SedType,
-        sedHendelseType: HendelseType,
+        sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType,
         journalfoerendeEnhet: Enhet,
         arkivsaksnummer: String?,
         dokumenter: String,
@@ -98,10 +100,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
     private fun populerAvsenderMottaker(
             avsenderNavn: String?,
-            sedHendelseType: HendelseType,
+            sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType,
             avsenderLand: String?): AvsenderMottaker {
 
-        return if (sedHendelseType == HendelseType.SENDT) {
+        return if (sedHendelseType == no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT) {
             AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
         } else {
             val justertAvsenderLand = justerAvsenderLand(avsenderLand)
@@ -116,7 +118,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             if (avsenderLand == "UK") "GB"
             else avsenderLand
 
-    private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
+    private fun bestemJournalpostType(sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType): JournalpostType =
             if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE
             else JournalpostType.INNGAAENDE
 

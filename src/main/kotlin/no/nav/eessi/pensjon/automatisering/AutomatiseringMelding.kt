@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.automatisering
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageHeaders
 import java.time.LocalDateTime

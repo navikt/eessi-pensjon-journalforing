@@ -6,11 +6,8 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
-import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

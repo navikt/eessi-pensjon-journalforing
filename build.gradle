@@ -50,8 +50,9 @@ dependencies {
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.8")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.0.8")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.15")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.17")
 	implementation("no.nav.eessi.pensjon:ep-eux:2.1.8")
+	implementation("no.nav.eessi.pensjon:ep-routing:1.0.0")
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.27")

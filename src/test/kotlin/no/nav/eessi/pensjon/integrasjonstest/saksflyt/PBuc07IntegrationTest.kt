@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -11,9 +10,11 @@ import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -41,12 +42,12 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
-                hendelseType = HendelseType.MOTTATT,
+                hendelseType = MOTTATT,
                 norg2enhet = null,
                 fdatoBruker = Fodselsnummer.fra(FNR_VOKSEN_2)?.getBirthDate().toString()
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(Enhet.UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
 
@@ -62,12 +63,12 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
-                hendelseType = HendelseType.MOTTATT,
+                hendelseType = MOTTATT,
                 norg2enhet = null,
                 fdatoBruker = "1988-01-01"
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
         }
     }
@@ -128,8 +129,8 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns norg2enhet
 
         when (hendelseType) {
-            HendelseType.SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            HendelseType.MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> Assertions.fail()
         }
 

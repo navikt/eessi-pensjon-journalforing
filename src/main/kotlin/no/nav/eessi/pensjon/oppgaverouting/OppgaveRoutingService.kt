@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
-import no.nav.eessi.pensjon.models.Enhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -56,7 +55,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
     }
 
     private fun lopendeAldersSakINorge( oppgave: OppgaveRoutingRequest) =
-        oppgave.landkode == "NOR" && oppgave.sakInformasjon?.sakType == ALDER && oppgave.sakInformasjon.sakStatus == LOPENDE
+        oppgave.landkode == "NOR" && oppgave.sakInformasjon?.sakType == ALDER && oppgave.sakInformasjon!!.sakStatus == LOPENDE
 
     private fun routeTilGeografiskTilknytningMedPerson(oppgave: OppgaveRoutingRequest): Enhet? {
         logger.debug("Benytter norg2 for buctype: ${oppgave.bucType}")

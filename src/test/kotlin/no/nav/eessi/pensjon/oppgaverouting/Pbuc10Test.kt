@@ -8,11 +8,11 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
-import no.nav.eessi.pensjon.models.HendelseType.SENDT
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -46,7 +46,7 @@ internal class Pbuc10Test {
         val request = mockk<OppgaveRoutingRequest> {
             every { identifisertPerson } returns IdentifisertPerson(
                 "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
-                    DUMMY_FNR, Relasjon.GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
+                    DUMMY_FNR, GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
                 )
             )
             every { harAdressebeskyttelse } returns false
@@ -168,7 +168,7 @@ internal class Pbuc10Test {
             if (hendelse == SENDT)
                 every { identifisertPerson } returns IdentifisertPerson(
                     "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
-                        DUMMY_FNR, Relasjon.GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
+                        DUMMY_FNR, GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
                     )
                 )
 

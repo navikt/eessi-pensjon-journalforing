@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.buc
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
@@ -11,7 +10,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*

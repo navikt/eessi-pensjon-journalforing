@@ -6,9 +6,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
@@ -44,8 +47,8 @@ internal class JournalpostServiceTest {
             fnr = SLAPP_SKILPADDE,
             bucType = P_BUC_01,
             sedType = P2000,
-            sedHendelseType = HendelseType.MOTTATT,
-            journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
             arkivsaksnummer = "string",
             dokumenter = """
                 [{
@@ -81,7 +84,7 @@ internal class JournalpostServiceTest {
         assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNull(actualRequest.eksternReferanseId)
-        assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
+        assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
         assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
         assertEquals("string", actualRequest.sak!!.arkivsaksnummer)
@@ -103,8 +106,8 @@ internal class JournalpostServiceTest {
                 fnr = SLAPP_SKILPADDE,
                 bucType = P_BUC_01,
                 sedType = P2000,
-                sedHendelseType = HendelseType.MOTTATT,
-                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                sedHendelseType = MOTTATT,
+                journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
                 arkivsaksnummer = "string",
                 dokumenter = """
                 [{
@@ -144,8 +147,8 @@ internal class JournalpostServiceTest {
             fnr = SLAPP_SKILPADDE,
             bucType = P_BUC_01,
             sedType = P2000,
-            sedHendelseType = HendelseType.MOTTATT,
-            journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
             arkivsaksnummer = "string",
             dokumenter = """
                  [{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""".trimIndent(),
@@ -220,8 +223,8 @@ internal class JournalpostServiceTest {
             fnr = LEALAUS_KAKE,
             bucType = P_BUC_02,
             sedType = P2100,
-            sedHendelseType = HendelseType.SENDT,
-            journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+            sedHendelseType = SENDT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
             arkivsaksnummer = null,
             dokumenter = "[\"P2100\"]",
             avsenderLand = "NO",

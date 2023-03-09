@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.klienter.fagmodul
 
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

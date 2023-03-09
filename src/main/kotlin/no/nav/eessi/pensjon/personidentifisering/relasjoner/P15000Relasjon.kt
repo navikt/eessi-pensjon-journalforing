@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 
 class P15000Relasjon(private val sed: SED, bucType: BucType, rinaDocumentId: String) :
     GjenlevendeHvisFinnes( sed, bucType,rinaDocumentId) {

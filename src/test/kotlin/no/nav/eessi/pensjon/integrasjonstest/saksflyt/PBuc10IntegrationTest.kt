@@ -14,11 +14,13 @@ import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.models.Enhet.*
-import no.nav.eessi.pensjon.models.HendelseType.MOTTATT
-import no.nav.eessi.pensjon.models.HendelseType.SENDT
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -510,12 +512,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             testRunner(FNR_OVER_60, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
             testRunner(FNR_OVER_60, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = NFP_UTLAND_OSLO) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(Enhet.NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
             }
 
         }
@@ -577,13 +579,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(Enhet.NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
-            assertEquals(Enhet.NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+            assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
@@ -660,13 +662,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(Enhet.UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(UFORETRYGD, request.tema)
-            assertEquals(Enhet.UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
+            assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
@@ -702,13 +704,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(Enhet.UFORE_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(UFORE_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(UFORETRYGD, request.tema)
-            assertEquals(Enhet.UFORE_UTLAND, request.journalfoerendeEnhet)
+            assertEquals(UFORE_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
@@ -826,7 +828,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 norg2svar = null
             ) {
                 assertEquals(UFORETRYGD, it.tema)
-                assertEquals(Enhet.UFORE_UTLAND, it.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
     }

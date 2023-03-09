@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import org.junit.jupiter.api.Assertions.assertEquals

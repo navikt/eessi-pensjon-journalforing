@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.HendelseKode
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

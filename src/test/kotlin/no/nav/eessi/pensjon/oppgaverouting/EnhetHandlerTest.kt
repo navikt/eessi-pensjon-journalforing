@@ -3,8 +3,6 @@ package no.nav.eessi.pensjon.oppgaverouting
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

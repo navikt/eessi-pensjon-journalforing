@@ -4,9 +4,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
 import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -44,7 +43,7 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun velgTema(sakType: SakType?) = if (sakType == UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
-    fun velgBehandlingTema(SEDPersonRelasjon: SEDPersonRelasjon?) : String {
+    fun velgBehandlingTema(SEDPersonRelasjon: no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon?) : String {
         return when (SEDPersonRelasjon?.saktype) {
             BARNEP -> Norg2BehandlingsTema.BARNEP.kode
             GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode

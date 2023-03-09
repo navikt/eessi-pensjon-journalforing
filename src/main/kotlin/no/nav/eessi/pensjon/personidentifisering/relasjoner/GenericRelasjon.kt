@@ -3,9 +3,9 @@ package no.nav.eessi.pensjon.personidentifisering.relasjoner
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 
 /**
@@ -42,7 +42,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType, privat
             val sokPersonKriterie = opprettSokKriterie(person)
             val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato =  mapFdatoTilLocalDate(person.foedselsdato)
-            return SEDPersonRelasjon(fodselnummer, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato, rinaDocumentId=rinaDocumentId)
+            return SEDPersonRelasjon(fodselnummer, GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato, rinaDocumentId=rinaDocumentId)
         }
         return null
     }

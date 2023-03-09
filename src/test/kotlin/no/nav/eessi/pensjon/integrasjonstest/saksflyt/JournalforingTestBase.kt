@@ -30,9 +30,10 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
@@ -173,7 +174,7 @@ internal open class JournalforingTestBase {
         harAdressebeskyttelse: Boolean = false,
         land: String = "NOR",
         rolle: Rolle?,
-        hendelseType: HendelseType = HendelseType.SENDT,
+        hendelseType: HendelseType = SENDT,
         fDatoFraAnnenPerson: String? = "1988-07-12",
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
@@ -215,7 +216,7 @@ internal open class JournalforingTestBase {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
-        if (hendelseType == HendelseType.SENDT)
+        if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -231,7 +232,7 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
 
-        if (hendelseType == HendelseType.SENDT) {
+        if (hendelseType == SENDT) {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
 
             val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
@@ -260,7 +261,7 @@ internal open class JournalforingTestBase {
         saker: List<SakInformasjon> = emptyList(),
         sakId: String? = SAK_ID,
         land: String = "NOR",
-        hendelseType: HendelseType = HendelseType.SENDT,
+        hendelseType: HendelseType = SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
@@ -288,7 +289,7 @@ internal open class JournalforingTestBase {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
-        if (hendelseType == HendelseType.SENDT)
+        if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -351,8 +352,8 @@ internal open class JournalforingTestBase {
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
 
         when (hendelseType) {
-            HendelseType.SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            HendelseType.MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> Assertions.fail()
         }
 

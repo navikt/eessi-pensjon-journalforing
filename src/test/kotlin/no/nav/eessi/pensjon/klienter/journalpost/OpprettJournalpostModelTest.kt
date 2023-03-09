@@ -1,8 +1,9 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +20,7 @@ internal class OpprettJournalpostModelTest {
                 Behandlingstema.ALDERSPENSJON,
                 Bruker("brukerId"),
                 "[]",
-                Enhet.ID_OG_FORDELING,
+                ID_OG_FORDELING,
                 JournalpostType.INNGAAENDE,
                 Sak("arkivsaksnummer123", "arksys2"),
                 Tema.PENSJON,
@@ -60,7 +61,7 @@ internal class OpprettJournalpostModelTest {
         assertEquals(opprettJournalpostRequest.bruker?.idType, "FNR")
         assertEquals(opprettJournalpostRequest.dokumenter, """[{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""")
         assertEquals(opprettJournalpostRequest.eksternReferanseId, "string")
-        assertEquals(opprettJournalpostRequest.journalfoerendeEnhet, Enhet.AUTOMATISK_JOURNALFORING)
+        assertEquals(opprettJournalpostRequest.journalfoerendeEnhet, AUTOMATISK_JOURNALFORING)
         assertEquals(opprettJournalpostRequest.journalpostType, JournalpostType.INNGAAENDE)
         assertEquals(opprettJournalpostRequest.kanal, "NAV_NO")
         assertEquals(opprettJournalpostRequest.sak?.arkivsaksnummer, "string")

@@ -16,14 +16,15 @@ import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
-import no.nav.eessi.pensjon.personidentifisering.Relasjon
-import no.nav.eessi.pensjon.personidentifisering.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -115,7 +116,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             ALDER,
@@ -130,7 +131,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = R_BUC_02,
                 sedType = SedType.R004,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.OKONOMI_PENSJON,
                 arkivsaksnummer = null,
                 dokumenter = "R004 - Melding om utbetaling",
@@ -155,7 +156,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             fdato,
             UFOREP,
@@ -170,7 +171,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = R_BUC_02,
                 sedType = SedType.R005,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
@@ -196,7 +197,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             fdato,
             UFOREP,
@@ -212,7 +213,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = R_BUC_02,
                 sedType = SedType.R005,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
@@ -246,7 +247,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             fdato,
             ALDER,
@@ -262,7 +263,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = R_BUC_02,
                 sedType = SedType.R005,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
@@ -287,7 +288,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, HendelseType.SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
+            sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
         )
         verify {
@@ -296,7 +297,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_01,
                 sedType = SedType.P2000,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P2000 Supported Documents",
@@ -321,7 +322,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             null,
@@ -336,7 +337,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_03,
                 sedType = SedType.P2200,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.UFORE_UTLANDSTILSNITT,
                 arkivsaksnummer = null,
                 dokumenter = "P2200 Supported Documents",
@@ -361,7 +362,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             null,
@@ -376,7 +377,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_10,
                 sedType = SedType.P15000,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
@@ -402,7 +403,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             null,
@@ -417,7 +418,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_01,
                 sedType = SedType.P2000,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P2000 Supported Documents",
@@ -443,7 +444,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
             null,
@@ -458,7 +459,7 @@ internal class JournalforingServiceTest {
                 fnr = SLAPP_SKILPADDE,
                 bucType = P_BUC_01,
                 sedType = SedType.P2000,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P2000 Supported Documents",
@@ -484,7 +485,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             ALDER,
@@ -498,7 +499,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.NFP_UTLAND_AALESUND,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -524,7 +525,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
             null,
@@ -539,7 +540,7 @@ internal class JournalforingServiceTest {
                 fnr = SLAPP_SKILPADDE,
                 bucType = P_BUC_03,
                 sedType = SedType.P2200,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.UFORE_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P2200 Supported Documents",
@@ -565,7 +566,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             null,
@@ -580,7 +581,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_10,
                 sedType = SedType.P15000,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
@@ -608,7 +609,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             GJENLEV,
@@ -623,7 +624,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
                 arkivsaksnummer = "111111",
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -672,7 +673,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertGjenlevendePerson,
             LEALAUS_KAKE.getBirthDate(),
             GJENLEV,
@@ -687,7 +688,7 @@ internal class JournalforingServiceTest {
                 fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
                 arkivsaksnummer = "111111",
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -716,7 +717,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.SENDT,
+            SENDT,
             identifisertPerson,
             fdato,
             null,
@@ -731,7 +732,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -759,7 +760,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
         )
 
         verify {
@@ -768,7 +769,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -794,7 +795,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, HendelseType.SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100))
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100))
 
         verify {
             journalpostService.opprettJournalpost(
@@ -802,7 +803,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.SENDT,
+                sedHendelseType = SENDT,
                 journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",
@@ -850,7 +851,7 @@ internal class JournalforingServiceTest {
 
         journalforingService.journalfor(
             sedHendelse,
-            HendelseType.MOTTATT,
+            MOTTATT,
             identifisertGjenlevendePerson,
             STERK_BUSK.getBirthDate(),
             BARNEP,
@@ -865,7 +866,7 @@ internal class JournalforingServiceTest {
                 fnr = identifisertGjenlevendePerson.personRelasjon.fnr,
                 bucType = P_BUC_02,
                 sedType = SedType.P2100,
-                sedHendelseType = HendelseType.MOTTATT,
+                sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",

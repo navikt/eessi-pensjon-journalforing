@@ -1,10 +1,10 @@
 package no.nav.eessi.pensjon.handler
 
 
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.models.Enhet
-import no.nav.eessi.pensjon.models.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +20,7 @@ internal class OppgaveMeldingSerdeTest {
             Enhet.ID_OG_FORDELING,
             "aktoerId",
             "TEST",
-            HendelseType.SENDT,
+            SENDT,
             null,
             OppgaveType.JOURNALFORING
         )
@@ -47,7 +47,7 @@ internal class OppgaveMeldingSerdeTest {
             Enhet.ID_OG_FORDELING,
             "aktoerId",
             "TEST",
-            HendelseType.SENDT,
+            SENDT,
             "filnavn",
             OppgaveType.BEHANDLE_SED
         )

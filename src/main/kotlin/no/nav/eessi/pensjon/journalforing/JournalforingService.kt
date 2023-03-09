@@ -18,10 +18,9 @@ import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.*
 import no.nav.eessi.pensjon.pdf.PDFService
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

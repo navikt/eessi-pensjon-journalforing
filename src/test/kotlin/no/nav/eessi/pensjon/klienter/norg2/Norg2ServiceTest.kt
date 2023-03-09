@@ -3,7 +3,8 @@ package no.nav.eessi.pensjon.klienter.norg2
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.models.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -83,7 +84,7 @@ internal class Norg2ServiceTest {
             NorgKlientRequest(landkode = "NOR", geografiskTilknytning = "0422")
         )
 
-        assertEquals(Enhet.NFP_UTLAND_OSLO, result)
+        assertEquals(NFP_UTLAND_OSLO, result)
     }
 
     @Test
@@ -93,7 +94,7 @@ internal class Norg2ServiceTest {
 
         val result = service.hentArbeidsfordelingEnhet(NorgKlientRequest())
 
-        assertEquals(Enhet.PENSJON_UTLAND, result)
+        assertEquals(PENSJON_UTLAND, result)
     }
 
     @Test
@@ -106,7 +107,7 @@ internal class Norg2ServiceTest {
             NorgKlientRequest(landkode = "NOR", harAdressebeskyttelse = true)
         )
 
-        assertEquals(Enhet.DISKRESJONSKODE, result)
+        assertEquals(DISKRESJONSKODE, result)
     }
 
     @Test

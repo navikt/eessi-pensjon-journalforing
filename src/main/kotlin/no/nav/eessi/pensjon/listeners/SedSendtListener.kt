@@ -13,10 +13,11 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -85,7 +86,7 @@ class SedSendtListener(
                                 alleSedIBucPair,
                                 bucType,
                                 sedHendelse.sedType,
-                                HendelseType.SENDT,
+                                SENDT,
                                 sedHendelse.rinaDokumentId,
                                 erNavCaseOwner
                             )
@@ -99,12 +100,12 @@ class SedSendtListener(
                             val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                             val sakInformasjon =
                                 pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, HendelseType.SENDT)
+                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
                             val currentSed =
                                 alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                             journalforingService.journalfor(
-                                sedHendelse, HendelseType.SENDT,
+                                sedHendelse, SENDT,
                                 identifisertPerson,
                                 fdato,
                                 saktype,
@@ -183,7 +184,7 @@ class SedSendtListener(
     }
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
-        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
+        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
             return null
         } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {
             return sakInformasjon?.sakType ?: saktypeFraSED

@@ -10,10 +10,11 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.HendelseType
-import no.nav.eessi.pensjon.models.SakInformasjon
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPerson
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -85,19 +86,19 @@ class SedMottattListener(
 
                         //identifisere Person hent Person fra PDL valider Person
                         val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                            alleSedIBucPair, bucType, sedHendelse.sedType, HendelseType.MOTTATT, sedHendelse.rinaDokumentId, erNavCaseOwner
+                            alleSedIBucPair, bucType, sedHendelse.sedType, MOTTATT, sedHendelse.rinaDokumentId, erNavCaseOwner
                         )
 
                         val alleSedIBucList = alleSedIBucPair.flatMap{ (_, sed) -> listOf(sed) }
                         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                         val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
                         val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
-                        val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, HendelseType.MOTTATT)
+                        val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
 
                         val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                         journalforingService.journalfor(
                             sedHendelse,
-                            HendelseType.MOTTATT,
+                            MOTTATT,
                             identifisertPerson,
                             fdato,
                             saktype,
@@ -133,7 +134,7 @@ class SedMottattListener(
     }
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
-        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == HendelseType.SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
+        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
             return null
         } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {
             return sakInformasjon?.sakType ?: saktypeFraSED

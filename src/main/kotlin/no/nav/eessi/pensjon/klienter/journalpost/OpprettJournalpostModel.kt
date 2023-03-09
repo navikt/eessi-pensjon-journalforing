@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Enhet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
 
@@ -21,18 +21,18 @@ import java.io.IOException
  * Oppretter en journalpost i fagarkivet, med eller uten dokumenter
  */
 class OpprettJournalpostRequest(
-        val avsenderMottaker: AvsenderMottaker,
-        val behandlingstema: Behandlingstema? = null,
-        val bruker: Bruker? = null,
-        @JsonDeserialize(using = JsonAsStringDeserializer::class)
+    val avsenderMottaker: AvsenderMottaker,
+    val behandlingstema: Behandlingstema? = null,
+    val bruker: Bruker? = null,
+    @JsonDeserialize(using = JsonAsStringDeserializer::class)
         @JsonRawValue
         val dokumenter: String,
-        val journalfoerendeEnhet: Enhet? = null,
-        val journalpostType: JournalpostType,
-        val sak: Sak? = null,
-        val tema: Tema = Tema.PENSJON,
-        val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
-        val tittel: String
+    val journalfoerendeEnhet: Enhet? = null,
+    val journalpostType: JournalpostType,
+    val sak: Sak? = null,
+    val tema: Tema = Tema.PENSJON,
+    val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
+    val tittel: String
 ){
     val kanal: String = "EESSI"
     val eksternReferanseId: String? = null
