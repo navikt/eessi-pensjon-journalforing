@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
@@ -44,10 +45,10 @@ internal class Pbuc10Test {
     @Test
     fun `Sak er ugyldig`() {
         val request = mockk<OppgaveRoutingRequest> {
-            every { identifisertPerson } returns IdentifisertPerson(
-                "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
+            every { identifisertPerson } returns IdentifisertPersonPDL(
+                "1231", "NOR", "1234", SEDPersonRelasjon(
                     DUMMY_FNR, GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
-                )
+                ), personNavn = "ole dunk"
             )
             every { harAdressebeskyttelse } returns false
             every { saktype } returns UFOREP
@@ -166,10 +167,10 @@ internal class Pbuc10Test {
     ): OppgaveRoutingRequest {
         return mockk {
             if (hendelse == SENDT)
-                every { identifisertPerson } returns IdentifisertPerson(
-                    "1231", "ole dunk", "NOR", "1234", SEDPersonRelasjon(
+                every { identifisertPerson } returns IdentifisertPersonPDL(
+                    "1231",  "NOR", "1234", SEDPersonRelasjon(
                         DUMMY_FNR, GJENLEVENDE, GJENLEV, SedType.P15000, rinaDocumentId =  "3123123"
-                    )
+                    ), personNavn = "ole dunk"
                 )
 
             every { harAdressebeskyttelse } returns false

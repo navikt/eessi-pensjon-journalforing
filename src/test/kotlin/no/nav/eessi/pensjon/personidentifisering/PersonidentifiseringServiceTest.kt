@@ -147,7 +147,7 @@ class PersonidentifiseringServiceTest {
         assertEquals(1, identifisertePersoner.size)
 
         val identifisertRelasjon = identifisertePersoner.single().personRelasjon
-        assertEquals(gjenlevende, identifisertRelasjon.fnr!!.value)
+        assertEquals(gjenlevende, identifisertRelasjon?.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, identifisertRelasjon.relasjon)
 
         val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(identifisertePersoner, bucType, SedType.P6000, potensiellePerson)
@@ -180,12 +180,12 @@ class PersonidentifiseringServiceTest {
         )
 
         assertEquals(1, actual.size)
-        assertEquals(gjenlevende, actual.first().personRelasjon.fnr!!.value)
-        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon.relasjon)
+        assertEquals(gjenlevende, actual.first().personRelasjon?.fnr!!.value)
+        assertEquals(Relasjon.GJENLEVENDE, actual.first().personRelasjon?.relasjon)
 
         val gjenlevActual = personidentifiseringService.identifisertPersonUtvelger(actual, bucType, SedType.P10000, potensiellePerson)
         assertEquals(gjenlevende, gjenlevActual?.personRelasjon?.fnr!!.value)
-        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon.relasjon)
+        assertEquals(Relasjon.GJENLEVENDE, gjenlevActual.personRelasjon?.relasjon)
 
         verify(exactly = 1) { personService.hentPerson(NorskIdent(gjenlevende)) }
     }
@@ -230,12 +230,12 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en liste med en identifisert person når velger person så returner personen`(){
-        val identifisertPerson = IdentifisertPerson(
+        val identifisertPerson = IdentifisertPersonPDL(
             "123",
-            "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "123123")
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "123123"),
+            personNavn = "Testern"
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, H_BUC_07)
@@ -245,12 +245,12 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en R_BUC_02 med kun en person når personer identifiseres så returneres første person`(){
-        val gjenlevende = IdentifisertPerson(
+        val gjenlevende = IdentifisertPersonPDL(
             "123",
-            "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "23123")
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "23123"),
+            personNavn = "Testern"
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
@@ -264,20 +264,20 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en R_BUC_02 med to hovedpersoner når personer identifiseres så returneres første person`(){
-        val avdod = IdentifisertPerson(
+        val avdod = IdentifisertPersonPDL(
             "123",
-            "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD, rinaDocumentId = "231231")
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD, rinaDocumentId = "231231"),
+            personNavn = "Testern"
         )
 
-        val gjenlevende = IdentifisertPerson(
+        val gjenlevende = IdentifisertPersonPDL(
             "123",
-            "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231")
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231"),
+            personNavn = "Testern"
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
@@ -292,12 +292,12 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en liste med flere forsikrede på P_BUC_01 så kaster vi en RuntimeException`(){
-        val forsikret = IdentifisertPerson(
+        val forsikret = IdentifisertPersonPDL(
             "123",
-            "Testern",
             "NO",
             "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "23123")
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "23123"),
+            personNavn = "Testern"
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
@@ -311,9 +311,9 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt at det finnes tre personer når en er gjenlevende så skal kun gjenlevende returneres`() {
-        val person1 = createIdentifisertPerson(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
-        val person2 = createIdentifisertPerson(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
-        val person3 = createIdentifisertPerson(Fodselsnummer.fra("4567"), Relasjon.GJENLEVENDE)
+        val person1 = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
+        val person2 = createIdentifisertPersonPDL(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
+        val person3 = createIdentifisertPersonPDL(Fodselsnummer.fra("4567"), Relasjon.GJENLEVENDE)
 
         val list = listOf(person1, person2, person3)
 
@@ -327,9 +327,9 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt at det finnes tre personer når ingen personer er gjenlevende så skal returneres null`() {
-        val person1 = createIdentifisertPerson(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
-        val person2 = createIdentifisertPerson(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
-        val person3 = createIdentifisertPerson(Fodselsnummer.fra("4567"), Relasjon.ANNET)
+        val person1 = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
+        val person2 = createIdentifisertPersonPDL(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
+        val person3 = createIdentifisertPersonPDL(Fodselsnummer.fra("4567"), Relasjon.ANNET)
 
         val list = listOf(person1, person2, person3)
 
@@ -339,9 +339,9 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt personidentifisering identifisere mer enn en person så kastes en runtimeexception`() {
-        val person1 = createIdentifisertPerson(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
-        val person2 = createIdentifisertPerson(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
-        val person3 = createIdentifisertPerson(Fodselsnummer.fra("4567"), Relasjon.ANNET)
+        val person1 = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
+        val person2 = createIdentifisertPersonPDL(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
+        val person3 = createIdentifisertPersonPDL(Fodselsnummer.fra("4567"), Relasjon.ANNET)
 
         val list = listOf(person1, person2, person3)
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(emptyList(), P_BUC_01)
@@ -358,9 +358,9 @@ class PersonidentifiseringServiceTest {
     @Test
 //    Scenario 1 - inngående SED, Scenario 2 - utgående SED, Scenario 3 - ingen saksnummer/feil saksnummer
     fun `Gitt det kommer inn SED på R_BUC_02 med flere enn en person Når personer identifiseres Så skal første person returneres`() {
-        val person1 = createIdentifisertPerson(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
-        val person2 = createIdentifisertPerson(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
-        val person3 = createIdentifisertPerson(Fodselsnummer.fra("4567"), Relasjon.ANNET)
+        val person1 = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
+        val person2 = createIdentifisertPersonPDL(Fodselsnummer.fra("2344"), Relasjon.FORSIKRET)
+        val person3 = createIdentifisertPersonPDL(Fodselsnummer.fra("4567"), Relasjon.ANNET)
 
         val list = listOf(person1, person2, person3)
 
@@ -382,15 +382,22 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val avdodPerson = IdentifisertPerson(
-            "", "avgott Testesen", "NOR", "026123",
-            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123")
+        val avdodPerson = IdentifisertPersonPDL(
+            "",
+            "NOR",
+            "026123",
+            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123"),
+            personNavn = "avgott Testesen"
+
         )
 
         val sokKriterier = SokKriterier("RASK","MULDVARP", LocalDate.of(1969, 11, 28))
-        val gjenlevendePerson = IdentifisertPerson(
-            "", "gjenlevende Testesen", "NOR", "026123",
-            SEDPersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier, rinaDocumentId = "123123")
+        val gjenlevendePerson = IdentifisertPersonPDL(
+            "",
+            "NOR",
+            "026123",
+            SEDPersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier, rinaDocumentId = "123123"),
+            personNavn = "gjenlevende Testesen"
         )
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
@@ -407,6 +414,12 @@ class PersonidentifiseringServiceTest {
             sedListFraBuc, P_BUC_02, potensiellePerson, SENDT, rinaDocumentId = ""
         )
 
+        println("identifisertePersoner: ***")
+        println(identifisertePersoner)
+        println("***************")
+        println("actual: ")
+        println(actual)
+        println("***********")
         assertEquals(identifisertePersoner[1], actual.single())
     }
 
@@ -480,8 +493,8 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `hent ut gjenlevende`() {
-        val gjenlevende = createIdentifisertPerson(Fodselsnummer.fra("1234"), Relasjon.GJENLEVENDE)
-        val avdod = createIdentifisertPerson(Fodselsnummer.fra("5678"), Relasjon.FORSIKRET)
+        val gjenlevende = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.GJENLEVENDE)
+        val avdod = createIdentifisertPersonPDL(Fodselsnummer.fra("5678"), Relasjon.FORSIKRET)
 
         val list = listOf(gjenlevende, avdod)
 
@@ -493,7 +506,7 @@ class PersonidentifiseringServiceTest {
 
     @Nested
     @DisplayName("valider indentifisertPerson")
-    inner class ValiderIdentifisertPerson {
+    inner class ValiderIdentifisertPersonPDL {
 
         @Test
         fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjellig gir null ut`() {
@@ -533,13 +546,13 @@ class PersonidentifiseringServiceTest {
     }
 
 
-    private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPerson {
-        return IdentifisertPerson(
+    private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPersonPDL {
+        return IdentifisertPersonPDL(
             "1231231312",
-            "Ola Test Testing",
             "NOR",
             "3041",
-            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323")
+            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323"),
+            personNavn = "Ola Test Testing"
         )
 
     }
@@ -549,8 +562,14 @@ class PersonidentifiseringServiceTest {
         return mapJsonToAny(json)
     }
 
-    private fun createIdentifisertPerson(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPerson =
-        IdentifisertPerson("", "Dummy", "NO", "", SEDPersonRelasjon(fnr, relasjon, rinaDocumentId = "123123"))
+    private fun createIdentifisertPersonPDL(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPersonPDL =
+        IdentifisertPersonPDL(
+            "",
+            "NO",
+            "",
+            SEDPersonRelasjon(fnr, relasjon, rinaDocumentId = "123123"),
+            personNavn = "Dummy"
+            )
 
     private fun generateSED(
         sedType: SedType,
