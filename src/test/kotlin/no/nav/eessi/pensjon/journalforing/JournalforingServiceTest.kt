@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -31,6 +30,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
+
+private const val AKTOERID = "12078945602"
+private const val RINADOK_ID = "3123123"
 
 internal class JournalforingServiceTest {
 
@@ -105,11 +107,10 @@ internal class JournalforingServiceTest {
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-             "12078945602",
-            "Test Testesen",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
         journalforingService.journalfor(
@@ -144,12 +145,12 @@ internal class JournalforingServiceTest {
     fun `Sendt gyldig Sed R005 på R_BUC_02`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
+
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(),
             "SE",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
         )
 
         journalforingService.journalfor(
@@ -184,12 +185,10 @@ internal class JournalforingServiceTest {
     fun `Gitt en R_BUC_02 og sed med flere personer SENDT Så skal det opprettes Oppgave og enhet 4303`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "SE",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(),
+            "SE"
         )
         identifisertPerson.personListe = listOf(identifisertPerson, identifisertPerson)
 
@@ -226,20 +225,16 @@ internal class JournalforingServiceTest {
     fun `Gitt en R_BUC_02 og sed med flere personer MOTTATT Så skal det opprettes Oppgave og enhet 4303`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "3811",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            null,
-            personNavn = "Test Testesen"
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(),
+            geografiskTilknytning = "3811"
         )
-        val dodPerson = IdentifisertPersonPDL(
+        val dodPerson = identifisertPersonPDL(
             "22078945602",
+            sedPersonRelasjon(),
             "NO",
             "3811",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.AVDOD, rinaDocumentId =  "3123123"),
-            null,
             personNavn = "Dod Begravet",
         )
 
@@ -279,12 +274,9 @@ internal class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2000`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
         journalforingService.journalfor(
@@ -312,12 +304,10 @@ internal class JournalforingServiceTest {
     fun `Sendt gyldig Sed P2200`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "NOR",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            "NOR"
         )
 
         journalforingService.journalfor(
@@ -352,12 +342,9 @@ internal class JournalforingServiceTest {
     fun `Sendt Sed i P_BUC_10`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen"
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
         journalforingService.journalfor(
@@ -393,12 +380,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon()
         )
 
         journalforingService.journalfor(
@@ -434,12 +418,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(SLAPP_SKILPADDE)
         )
 
         journalforingService.journalfor(
@@ -475,12 +456,10 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "NOR",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(),
+            "NOR"
         )
 
         journalforingService.journalfor(
@@ -515,12 +494,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_03_P2200.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(SLAPP_SKILPADDE)
         )
 
         journalforingService.journalfor(
@@ -556,12 +532,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen"
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon()
         )
 
         journalforingService.journalfor(
@@ -598,12 +571,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "Test Testesen",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon()
         )
         val sakInformasjon = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
 
@@ -662,11 +632,11 @@ internal class JournalforingServiceTest {
 
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertGjenlevendePerson = IdentifisertPersonPDL(
-            "12078945602",
+        val identifisertGjenlevendePerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, GJENLEV, rinaDocumentId = RINADOK_ID),
             "Test Testesen",
             "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, GJENLEV, rinaDocumentId =  "3123123"),
             null
         )
         val saksInfo = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
@@ -706,12 +676,9 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            null,
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, GJENLEV, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen"
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon()
         )
         val sakInformasjon = SakInformasjon("111222", UFOREP, AVSLUTTET, "4303", false)
 
@@ -751,12 +718,10 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
+        val identifisertPerson = identifisertPersonPDL(
             "",
-            "NO",
-            null,
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            null,
+            sedPersonRelasjon(),
+            "NO"
         )
 
         journalforingService.journalfor(
@@ -786,13 +751,10 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertPerson = IdentifisertPersonPDL(
-            "12078945602",
-            "NO",
-            "",
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId =  "3123123"),
-            null,
-            personNavn = "Test Testesen",
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(),
+            "NO"
         )
 
         journalforingService.journalfor(
@@ -841,12 +803,9 @@ internal class JournalforingServiceTest {
 
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        val identifisertGjenlevendePerson = IdentifisertPersonPDL(
-            "12078945602",
-            "",
-            "",
-            SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, BARNEP, rinaDocumentId =  "3123123"),
-            personNavn = "Test Testesen",
+        val identifisertGjenlevendePerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(STERK_BUSK, Relasjon.GJENLEVENDE, BARNEP, rinaDocumentId = RINADOK_ID)
         )
         val saksInfo = SakInformasjon("111111", BARNEP, LOPENDE, "4862", false)
 
@@ -877,5 +836,19 @@ internal class JournalforingServiceTest {
             )
         }
     }
+
+    fun identifisertPersonPDL(
+        aktoerId: String = AKTOERID,
+        personRelasjon: SEDPersonRelasjon?,
+        landkode: String? = "",
+        geografiskTilknytning: String? = "",
+        fnr: Fodselsnummer? = null,
+        personNavn: String = "Test Testesen"
+    ): IdentifisertPersonPDL =
+        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+
+    fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
+        SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
+
 
 }
