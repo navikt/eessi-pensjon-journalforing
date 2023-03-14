@@ -32,9 +32,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
     inner class Scenario1Inngaende {
         @Test
         fun `Gjenlevende der fdato er det samme som FNR`() {
-            val allDocuemtActions = listOf(
-                ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
-            )
+            val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -53,9 +51,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Gjenlevende der fdato er forskjellig fra FNR skal sendes til id og fordeling adsdasd`() {
-            val allDocuemtActions = listOf(
-                ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
-            )
+            val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
                 FNR_VOKSEN,
@@ -73,6 +69,10 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         }
     }
 
+    private fun forenkletSEDS() = listOf(
+        ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
+    )
+
 
     private fun testRunnerVoksen(
         fnrVoksen: String,
@@ -87,11 +87,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         fdatoBruker: String? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) {
-            bestemSak.sakInformasjonListe.first().sakId
-        } else {
-            null
-        }
+        val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) bestemSak.sakInformasjonListe.first().sakId else null
 
         val sed = createSedPensjon(SedType.P12000, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod, fdato = fdatoBruker)
         initCommonMocks(sed, alleDocs)
