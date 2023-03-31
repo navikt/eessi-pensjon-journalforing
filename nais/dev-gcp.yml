@@ -13,15 +13,10 @@ spec:
       enabled: true
   accessPolicy:
     outbound:
-      rules:
-        - application: eessi-pensjon-fagmodul-q2
-          namespace: eessipensjon
-          cluster: dev-gcp
-        - application: eessi-pensjon-oppgave-q2
-          namespace: eessipensjon
-          cluster: dev-gcp
       external:
         - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
+        - host: eessi-pensjon-fagmodul-q2.intern.nav.no
+        - host: eessi-pensjon-oppgave-q2.intern.nav.no
         - host: eux-rina-api-q2.dev-fss-pub.nais.io
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
