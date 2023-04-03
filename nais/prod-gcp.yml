@@ -20,7 +20,7 @@ spec:
         - host: eux-rina-api.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
-        - host: kodeverk.prod-fss-pub.nais.io
+        - host: norg2.prod-fss-pub.nais.io
   webproxy: true
 
   kafka:
@@ -39,7 +39,7 @@ spec:
     - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul.intern.nav.no
     - name: NORG2_URL
-      value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/norg2
+      value: https://norg2.prod-fss-pub.nais.ionorg2
     - name: BESTEMSAK_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
