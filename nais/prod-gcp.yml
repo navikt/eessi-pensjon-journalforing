@@ -39,7 +39,7 @@ spec:
     - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul.intern.nav.no
     - name: NORG2_URL
-      value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/norg2
+      value: https://norg2.prod-fss-pub.nais.io/norg2
     - name: BESTEMSAK_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
