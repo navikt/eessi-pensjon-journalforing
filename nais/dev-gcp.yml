@@ -20,7 +20,7 @@ spec:
         - host: eux-rina-api-q2.dev-fss-pub.nais.io
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: app-q4.adeo.no
+        - host: norg2.dev-fss-pub.nais.io
   webproxy: true
   kafka:
     pool: nav-dev
@@ -38,7 +38,7 @@ spec:
     - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul-q2.dev.intern.nav.no
     - name: NORG2_URL
-      value: https://app-q4.adeo.no/norg2/
+      value: https://norg2.dev-fss-pub.nais.io/norg
     - name: BESTEMSAK_URL
       value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: KAFKA_SEDSENDT_TOPIC
@@ -55,6 +55,8 @@ spec:
       value: dev-gcp.eessipensjon.eessi-pensjon-fagmodul-q2
     - name: AZURE_APP_EUX_CLIENT_ID
       value: dev-fss.eessibasis.eux-rina-api-q2
+    - name: AZURE_APP_NORG2_CLIENT_ID
+      value: dev-fss.org.norg2
     - name: AZURE_APP_PROXY_CLIENT_ID
       value: dev-fss.eessipensjon.eessi-pensjon-onprem-proxy-q2
     - name: AZURE_APP_PDL_CLIENT_ID
