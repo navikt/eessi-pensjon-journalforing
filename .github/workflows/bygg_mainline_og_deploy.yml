@@ -8,6 +8,9 @@ on:
 jobs:
   bygg_deploy_dev_publiser_tag:
     name: 'Bygg, publiser, deploy DEV, tag og dispatch deploy til PROD'
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     env:
       package: eessi-pensjon-journalforing
@@ -15,14 +18,14 @@ jobs:
       - name: 'Pull repo'
         uses: actions/checkout@v3
 
-      - name: 'Setter dato og commit variabel'
-        run: |
-          export TZ=CET
-          echo "DATE=$(date "+%Y-%m-%d--%H-%M-%S")" >> $GITHUB_ENV
-          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
+#      - name: 'Setter dato og commit variabel'
+#        run: |
+#          export TZ=CET
+#          echo "DATE=$(date "+%Y-%m-%d--%H-%M-%S")" >> $GITHUB_ENV
+#          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: 'Setter Image'
-        run: echo "IMAGE=ghcr.io/${{ github.repository }}/${{ env.package }}:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
+#      - name: 'Setter Image'
+#        run: echo "IMAGE=ghcr.io/${{ github.repository }}/${{ env.package }}:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
       - name: 'Java'
         uses: actions/setup-java@v3
@@ -30,23 +33,38 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: 'Bygg og publiser docker image'
+      - name: 'Sjekker at bygget kjører'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export TZ=CET
           ./gradlew build --stacktrace
-          docker build --tag ${{ env.IMAGE }} .
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
-          docker push ${{ env.IMAGE }}
 
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: eessipensjon
+          tag: journalforing
+          pull: true
+          dockerfile: Dockerfile
+          docker_context: . # optional, default .a
+          image_suffix: ${{ env.DATE }}${{ env.COMMIT_HASH }} # optional, default empty
+          cache_from: type=gha # optional, default type=gha
+          cache_to: type=gha,mode=max # optional, default type=gha,mode=max
+          build_secrets:
+            | # optional, default empty. See https://docs.docker.com/build/ci/github-actions/secrets/
+            key=string
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # required, but is defined as an organization variable
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # required, but is defined as an organization secret
+
+      - name: 'Deploy image'
+        run: echo "IMAGE=${{ steps.docker-push.outputs.image }}"
       - name: 'Deploy to DEV'
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/dev-gcp.yml
-          IMAGE: ${{ env.IMAGE }}
+          IMAGE: ${{ steps.docker-push.outputs.image }}
 
       - name: 'Opprett git tag'
         run: |
@@ -58,4 +76,4 @@ jobs:
           token: ${{ secrets.DISPATCH_TOKEN }}
           repository: ${{ github.repository }}
           event-type: deploy-prod
-          client-payload: '{"image": "${{ env.IMAGE }}"}'
+          client-payload: '{"image": "${{ steps.docker-push.outputs.image }}"}'
