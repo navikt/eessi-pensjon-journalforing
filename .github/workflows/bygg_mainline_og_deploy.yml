@@ -18,15 +18,6 @@ jobs:
       - name: 'Pull repo'
         uses: actions/checkout@v3
 
-#      - name: 'Setter dato og commit variabel'
-#        run: |
-#          export TZ=CET
-#          echo "DATE=$(date "+%Y-%m-%d--%H-%M-%S")" >> $GITHUB_ENV
-#          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-#      - name: 'Setter Image'
-#        run: echo "IMAGE=ghcr.io/${{ github.repository }}/${{ env.package }}:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
-
       - name: 'Java'
         uses: actions/setup-java@v3
         with:
@@ -37,6 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          export TZ=CET
           ./gradlew build --stacktrace
 
       - uses: nais/docker-build-push@v0
