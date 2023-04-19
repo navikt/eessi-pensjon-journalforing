@@ -15,7 +15,7 @@ import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 @Component
-class Norg2Klient(private val proxyOAuthRestTemplate: RestTemplate,
+class Norg2Klient(private val norg2RestTemplate: RestTemplate,
                   @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()) {
 
     constructor(): this(RestTemplate())
@@ -38,7 +38,7 @@ class Norg2Klient(private val proxyOAuthRestTemplate: RestTemplate,
                 val httpEntity = HttpEntity(request.toJson(), headers)
 
                 logger.info("Kaller NORG med : ${request.toJson()}")
-                val responseEntity = proxyOAuthRestTemplate.exchange(
+                val responseEntity = norg2RestTemplate.exchange(
                         "/api/v1/arbeidsfordeling",
                         HttpMethod.POST,
                         httpEntity,

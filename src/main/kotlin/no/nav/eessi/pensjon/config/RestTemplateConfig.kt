@@ -3,12 +3,12 @@ package no.nav.eessi.pensjon.config
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
+import no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor
 import no.nav.eessi.pensjon.metrics.RequestCountInterceptor
 import no.nav.eessi.pensjon.shared.retry.IOExceptionRetryInterceptor
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -29,8 +29,6 @@ class RestTemplateConfig(
     private val meterRegistry: MeterRegistry,
     ) {
 
-    private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
-
     @Value("\${JOURNALPOST_V1_URL}")
     lateinit var joarkUrl: String
 
@@ -46,42 +44,29 @@ class RestTemplateConfig(
     @Value("\${BESTEMSAK_URL}")
     lateinit var bestemSakUrl: String
 
-    @Value("\${EESSI_PEN_ONPREM_PROXY_URL}")
-    lateinit var proxyUrl: String
-
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate {
-        return opprettRestTemplate(euxUrl, "eux-credentials")
-    }
+    fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
     @Bean
     fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
     @Bean
-    fun proxyOAuthRestTemplate(): RestTemplate? {
-        return opprettRestTemplate(proxyUrl, "proxy-credentials")
-    }
+    fun norg2RestTemplate(): RestTemplate? = buildRestTemplate(norg2Url)
 
     @Bean
-    fun journalpostOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplateForJoark(joarkUrl, "dokarkiv-credentials")
-    }
+    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoark(joarkUrl)
 
     @Bean
-    fun fagmodulOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
-    }
+    fun fagmodulOidcRestTemplate(): RestTemplate = opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
 
     @Bean
-    fun bestemSakOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplate(bestemSakUrl, "proxy-credentials")
-    }
+    fun bestemSakOidcRestTemplate(): RestTemplate = opprettRestTemplate(bestemSakUrl, "proxy-credentials")
 
     /**
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse
      * problemer med HTTP-PATCH – som brukes mot joark.
      */
-    private fun opprettRestTemplateForJoark(url: String, oAuthKey: String) : RestTemplate {
+    private fun opprettRestTemplateForJoark(url: String) : RestTemplate {
         return RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
@@ -89,7 +74,7 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 IOExceptionRetryInterceptor(),
                 RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
+                bearerTokenInterceptor(clientProperties("dokarkiv-credentials"), oAuth2AccessTokenService!!)
             )
             .build().apply {
                 requestFactory = HttpComponentsClientHttpRequestFactory()
@@ -113,6 +98,19 @@ class RestTemplateConfig(
                 }
     }
 
+    private fun buildRestTemplate(url: String): RestTemplate {
+        return RestTemplateBuilder()
+            .rootUri(url)
+            .errorHandler(DefaultResponseErrorHandler())
+            .additionalInterceptors(
+                RequestIdHeaderInterceptor(),
+                RequestResponseLoggerInterceptor()
+            )
+            .build().apply {
+                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+            }
+
+    }
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
         return Optional.ofNullable(clientConfigurationProperties.registration[oAuthKey])

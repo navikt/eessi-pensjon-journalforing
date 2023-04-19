@@ -56,6 +56,8 @@ spec:
       value: prod-gcp.eessipensjon.eessi-pensjon-fagmodul
     - name: AZURE_APP_EUX_CLIENT_ID
       value: prod-fss.eessibasis.eux-rina-api
+    - name: AZURE_APP_NORG2_CLIENT_ID
+      value: prod-fss.org.norg2
     - name: AZURE_APP_PROXY_CLIENT_ID
       value: prod-fss.eessipensjon.eessi-pensjon-onprem-proxy
     - name: AZURE_APP_PDL_CLIENT_ID
