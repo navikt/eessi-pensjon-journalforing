@@ -45,32 +45,22 @@ class RestTemplateConfig(
     lateinit var bestemSakUrl: String
 
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate {
-        return opprettRestTemplate(euxUrl, "eux-credentials")
-    }
+    fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
     @Bean
     fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
     @Bean
-    fun norg2RestTemplate(): RestTemplate? {
-        return buildRestTemplate(norg2Url)
-    }
+    fun norg2RestTemplate(): RestTemplate? = buildRestTemplate(norg2Url)
 
     @Bean
-    fun journalpostOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplateForJoark(joarkUrl)
-    }
+    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoark(joarkUrl)
 
     @Bean
-    fun fagmodulOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
-    }
+    fun fagmodulOidcRestTemplate(): RestTemplate = opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
 
     @Bean
-    fun bestemSakOidcRestTemplate(): RestTemplate {
-        return opprettRestTemplate(bestemSakUrl, "proxy-credentials")
-    }
+    fun bestemSakOidcRestTemplate(): RestTemplate = opprettRestTemplate(bestemSakUrl, "proxy-credentials")
 
     /**
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse
