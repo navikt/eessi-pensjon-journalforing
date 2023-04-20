@@ -1,3 +1,11 @@
+
+# ******************************************************************************************************************
+#
+# Dette er en auto-generert fil; endringer gjøres i templates/.github/workflows/dispatch_issue_comment.yml
+# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekter
+#
+# ******************************************************************************************************************
+
 name: Slash command dispatch
 on:
   issue_comment:
