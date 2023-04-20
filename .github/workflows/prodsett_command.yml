@@ -1,3 +1,11 @@
+
+# ******************************************************************************************************************
+#
+# Dette er en auto-generert fil; endringer gjøres i templates/.github/workflows/prodsett_command.yml
+# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekter
+#
+# ******************************************************************************************************************
+
 name: Manuell deploy
 on:
   repository_dispatch:
@@ -5,18 +13,18 @@ on:
 
 jobs:
   deploy_manuelt:
-    name: 'Deploy manuelt'
+    name: 'Manuell deploy'
     runs-on: ubuntu-latest
     steps:
       - name: 'Pull repo'
         uses: actions/checkout@v3
 
-      - name: 'Lager variable'
+      - name: 'Opprett nais variable'
         run: |
           echo "versjon: ${{ github.event.client_payload.slash_command.arg1 }}"
           echo "cluster: ${{ github.event.client_payload.slash_command.arg2 }}"
-          echo "resource: ${{ github.event.client_payload.slash_command.arg2 }}.yml"
-          echo "image: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/eessipensjon/eessi-pensjon-journalforing:${{ github.event.client_payload.slash_command.arg1 }}"
+          echo "resource: nais/${{ github.event.client_payload.slash_command.arg2 }}.yml"
+          echo "image: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/eessipensjon/${{ github.event.repository.name }}:${{ github.event.client_payload.slash_command.arg1 }}"
 
       - name: 'Deploy to NAIS'
         uses: nais/deploy/actions/deploy@v1
@@ -24,4 +32,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ github.event.client_payload.slash_command.arg2 }}
           RESOURCE: nais/${{ github.event.client_payload.slash_command.arg2 }}.yml
-          IMAGE: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/eessipensjon/eessi-pensjon-journalforing:${{ github.event.client_payload.slash_command.arg1 }}
+          IMAGE: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/eessipensjon/${{ github.event.repository.name }}:${{ github.event.client_payload.slash_command.arg1 }}
