@@ -2,7 +2,7 @@
 # ******************************************************************************************************************
 #
 # Dette er en auto-generert fil; endringer gjøres i templates/.github/workflows/bygg_branch_og_publiser.yml
-# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekt
+# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekter
 #
 # ******************************************************************************************************************
 
