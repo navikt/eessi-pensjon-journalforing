@@ -1,3 +1,11 @@
+
+# ******************************************************************************************************************
+#
+# Dette er en auto-generert fil; endringer gjøres i templates/.github/workflows/bygg_branch_og_publiser.yml
+# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekt
+#
+# ******************************************************************************************************************
+
 name: Bygg branch og publiser
 
 on:
@@ -6,25 +14,16 @@ on:
       - '*'
       - '*/*'
       - '!master'
-
 jobs:
   bygg_og_publiser:
     name: 'Bygg branch og publiser image'
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
-    env:
-      package: eessi-pensjon-journalforing
     steps:
       - name: 'Pull repo'
         uses: actions/checkout@v3
-
-      - name: 'Setter dato og commit variabel'
-        run: |
-          export TZ=CET
-          echo "DATE=$(date "+%Y-%m-%d--%H-%M-%S")" >> $GITHUB_ENV
-          echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: 'Setter Image'
-        run: echo "IMAGE=ghcr.io/${{ github.repository }}/${{ env.package }}:${{ env.DATE }}---${{ env.COMMIT_HASH }}" >> $GITHUB_ENV
 
       - name: 'Java'
         uses: actions/setup-java@v3
@@ -32,12 +31,21 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: 'Bygg og publiser docker image'
+      - name: 'Bygger og tester'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export TZ=CET
           ./gradlew build --stacktrace
-          docker build --tag ${{ env.IMAGE }} .
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${{ secrets.GITHUB_TOKEN }}
-          docker push ${{ env.IMAGE }}
+
+      - name: 'Publiser docker image'
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: eessipensjon
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # required, but is defined as an organization variable
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # required, but is defined as an organization secret
+
+      - name: 'Image navn'
+        run: echo "IMAGE=${{ env.DOCKER_METADATA_OUTPUT_TAGS }}"
+
