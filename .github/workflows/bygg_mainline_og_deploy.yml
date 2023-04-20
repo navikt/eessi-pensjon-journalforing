@@ -1,3 +1,11 @@
+
+# ******************************************************************************************************************
+#
+# Dette er en auto-generert fil; endringer gjøres i templates/.github/workflows/bygg_mainline_og_deploy.yml
+# Kjør deretter ' make generate-files' for oppdatering av workflow hos prosjekter
+#
+# ******************************************************************************************************************
+
 name: Bygg, deploy DEV, publiser, tag og dispatch deploy til PROD
 
 on:
@@ -12,8 +20,6 @@ jobs:
       contents: "read"
       id-token: "write"
     runs-on: ubuntu-latest
-    env:
-      package: eessi-pensjon-journalforing
     steps:
       - name: 'Pull repo'
         uses: actions/checkout@v3
@@ -35,21 +41,15 @@ jobs:
         id: docker-push
         with:
           team: eessipensjon
-          tag: journalforing
+          tag: ${{ github.event.repository.name }}
           pull: true
-          dockerfile: Dockerfile
-          docker_context: . # optional, default .a
           image_suffix: ${{ env.DATE }}${{ env.COMMIT_HASH }} # optional, default empty
-          cache_from: type=gha # optional, default type=gha
-          cache_to: type=gha,mode=max # optional, default type=gha,mode=max
-          build_secrets:
-            | # optional, default empty. See https://docs.docker.com/build/ci/github-actions/secrets/
-            key=string
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # required, but is defined as an organization variable
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # required, but is defined as an organization secret
 
       - name: 'Deploy image'
         run: echo "IMAGE=${{ steps.docker-push.outputs.image }}"
+
       - name: 'Deploy to DEV'
         uses: nais/deploy/actions/deploy@v1
         env:
