@@ -1,14 +1,13 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -181,9 +180,6 @@ class JournalforingService(
 
 
             } catch (ex: MismatchedInputException) {
-                logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
-                throw ex
-            } catch (ex: MissingKotlinParameterException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
                 throw ex
             } catch (ex: Exception) {
