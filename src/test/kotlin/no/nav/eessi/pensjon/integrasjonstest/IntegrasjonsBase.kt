@@ -129,7 +129,7 @@ abstract class IntegrasjonsBase() {
         val logsList: List<ILoggingEvent> = listAppender.list
         val meldingFraLog =
             logsList.find { message ->
-                message.message.contains("Opprette oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") && message.message.contains(
+                message.message.contains("-oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") && message.message.contains(
                     "\"journalpostId\" : \"$journalpostId\""
                 )
             }?.message

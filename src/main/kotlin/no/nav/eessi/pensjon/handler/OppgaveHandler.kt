@@ -28,7 +28,7 @@ class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, Str
         val payload = melding.toJson()
 
         publiserOppgavemelding.measure {
-            logger.info("Opprette oppgave melding på kafka: ${oppgaveKafkaTemplate.defaultTopic}  melding: $melding")
+            logger.info("Opprette ${melding.oppgaveType}-oppgave melding på kafka: ${oppgaveKafkaTemplate.defaultTopic}  melding: $melding")
             oppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }

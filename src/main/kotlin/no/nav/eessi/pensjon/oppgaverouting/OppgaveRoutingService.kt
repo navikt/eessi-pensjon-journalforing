@@ -24,7 +24,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
         val tildeltEnhet = tildelEnhet(routingRequest)
 
         logger.info(
-            "Router oppgave til $tildeltEnhet (${tildeltEnhet.enhetsNr}), " +
+            "Tildelt enhet: $tildeltEnhet (${tildeltEnhet.enhetsNr}), " +
                     "Buc: ${routingRequest.bucType}, " +
                     "Landkode: ${routingRequest.landkode}, " +
                     "Fødselsdato: ${routingRequest.fdato}, " +
