@@ -56,7 +56,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
-        val enhet = routingService.route(
+        val enhet = routingService.hentEnhet(
             OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = MANGLER_LAND,
@@ -70,7 +70,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.route(
+        val enhet = routingService.hentEnhet(
             OppgaveRoutingRequest(
                 aktorId = "010101010101",
                 fdato = irrelevantDato(),
@@ -86,7 +86,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing for mottatt H_BUC_07`() {
         assertEquals(
             UFORE_UTLAND,
-            routingService.route(
+            routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = alder18aar,
@@ -97,7 +97,7 @@ internal class OppgaveRoutingServiceTest {
         )
         assertEquals(
             PENSJON_UTLAND,
-            routingService.route(
+            routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = alder60aar,
@@ -109,7 +109,7 @@ internal class OppgaveRoutingServiceTest {
 
         assertEquals(
             UFORE_UTLANDSTILSNITT,
-            routingService.route(
+            routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = alder18aar,
@@ -121,7 +121,7 @@ internal class OppgaveRoutingServiceTest {
         )
         assertEquals(
             NFP_UTLAND_OSLO,
-            routingService.route(
+            routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = alder60aar,
@@ -134,7 +134,7 @@ internal class OppgaveRoutingServiceTest {
 
         assertEquals(
             ID_OG_FORDELING,
-            routingService.route(
+            routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     fdato = alder60aar,
                     landkode = NORGE,
@@ -149,7 +149,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing av mottatte sed R005 på R_BUC_02 ingen ytelse`() {
         assertEquals(
-            ID_OG_FORDELING, routingService.route(
+            ID_OG_FORDELING, routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
@@ -167,7 +167,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing av mottatte sed R005 på R_BUC_02 alderpensjon ytelse`() {
         assertEquals(
-            PENSJON_UTLAND, routingService.route(
+            PENSJON_UTLAND, routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
@@ -186,7 +186,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing av mottatte sed R005 på R_BUC_02 uforepensjon ytelse`() {
         assertEquals(
-            UFORE_UTLAND, routingService.route(
+            UFORE_UTLAND, routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
@@ -205,7 +205,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing av mottatte sed R004 på R_BUC_02 skal gi en routing til UFORE_UTLAND`() {
         assertEquals(
-            OKONOMI_PENSJON, routingService.route(
+            OKONOMI_PENSJON, routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
@@ -225,7 +225,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing av mottatte sed R004 på R_BUC_02 ukjent ident`() {
         assertEquals(
-            ID_OG_FORDELING, routingService.route(
+            ID_OG_FORDELING, routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = null,
                     fdato = irrelevantDato(),
@@ -260,7 +260,7 @@ internal class OppgaveRoutingServiceTest {
         )
         forsikret.personListe = listOf(forsikret, avod)
 
-        val enhetresult = routingService.route(
+        val enhetresult = routingService.hentEnhet(
             OppgaveRoutingRequest(
                 aktorId = "123123123",
                 fdato = irrelevantDato(),
@@ -311,7 +311,7 @@ internal class OppgaveRoutingServiceTest {
         @MethodSource("arguments")
         fun `Routing for R_BUC_02'er`(arguments: TestArgumentsPBuc02) {
             assertEquals(
-                arguments.expectedResult, routingService.route(
+                arguments.expectedResult, routingService.hentEnhet(
                     OppgaveRoutingRequest(
                         aktorId = "01010101010",
                         fdato = irrelevantDato(),
@@ -375,7 +375,7 @@ internal class OppgaveRoutingServiceTest {
 
             assertEquals(
                 arguments.expectedResult,
-                routingService.route(
+                routingService.hentEnhet(
                     OppgaveRoutingRequest(
                         aktorId = "01010101010",
                         fdato = irrelevantDato(),
@@ -439,7 +439,7 @@ internal class OppgaveRoutingServiceTest {
 
             assertEquals(
                 arguments.expectedResult,
-                routingService.route(
+                routingService.hentEnhet(
                     OppgaveRoutingRequest(
                         aktorId = "01010101010",
                         fdato = arguments.alder,
@@ -479,7 +479,7 @@ internal class OppgaveRoutingServiceTest {
             null,
         )
 
-        val result = routingService.route(oppgaveroutingrequest)
+        val result = routingService.hentEnhet(oppgaveroutingrequest)
         assertEquals(NFP_UTLAND_OSLO, result)
     }
 
@@ -527,7 +527,7 @@ internal class OppgaveRoutingServiceTest {
             null,
         )
 
-        val result = routingService.route(oppgaveroutingrequest)
+        val result = routingService.hentEnhet(oppgaveroutingrequest)
         assertEquals(PENSJON_UTLAND, result)
 
     }
@@ -582,7 +582,7 @@ internal class OppgaveRoutingServiceTest {
             null,
         )
 
-        val result = routingService.route(oppgaveroutingrequest)
+        val result = routingService.hentEnhet(oppgaveroutingrequest)
         assertEquals(PENSJON_UTLAND, result)
 
     }
@@ -613,7 +613,7 @@ internal class OppgaveRoutingServiceTest {
             null,
         )
 
-        val result = routingService.route(oppgaveroutingrequest)
+        val result = routingService.hentEnhet(oppgaveroutingrequest)
         assertEquals(NFP_UTLAND_OSLO, result)
 
     }
@@ -661,7 +661,7 @@ internal class OppgaveRoutingServiceTest {
             null,
         )
 
-        val result = routingService.route(oppgaveroutingrequest)
+        val result = routingService.hentEnhet(oppgaveroutingrequest)
         assertEquals(UFORE_UTLAND, result)
     }
 
@@ -765,7 +765,7 @@ internal class OppgaveRoutingServiceTest {
         fun `Ruting for vanlige BUCer`(arguments: TestArgumentsBucs) {
             assertEquals(
                 arguments.expectedResult,
-                routingService.route(
+                routingService.hentEnhet(
                     OppgaveRoutingRequest(
                         aktorId = "01010101010",
                         fdato = arguments.fdato ?: irrelevantDato(),

@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
@@ -91,12 +90,14 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 forsokFerdigStilt = true,
                 documentFiler = getDokumentfilerUtenGyldigVedlegg(),
-                land = "SWE"
+                land = "SWE",
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+
+                println("************** ${oppgaveMeldingList}")
 
                 assertEquals(2, oppgaveMeldingList.size)
 

@@ -1,8 +1,6 @@
 package no.nav.eessi.pensjon.oppgaverouting
 
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
@@ -15,7 +13,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
 
     private val logger = LoggerFactory.getLogger(OppgaveRoutingService::class.java)
 
-    fun route(routingRequest: OppgaveRoutingRequest): Enhet {
+    fun hentEnhet(routingRequest: OppgaveRoutingRequest): Enhet {
         if (routingRequest.aktorId == null) {
             logger.info("AktørID mangler. Bruker enhet ID_OG_FORDELING.")
             return Enhet.ID_OG_FORDELING

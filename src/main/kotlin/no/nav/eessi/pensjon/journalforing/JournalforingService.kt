@@ -78,7 +78,7 @@ class JournalforingService(
                     logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING}")
                     Enhet.ID_OG_FORDELING
                 } else {
-                    oppgaveRoutingService.route(
+                    oppgaveRoutingService.hentEnhet(
                         OppgaveRoutingRequest.fra(
                             identifisertPerson,
                             fdato,
@@ -128,7 +128,7 @@ class JournalforingService(
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
-                val oppgaveEnhet = hentOppgaveEnhet(
+                val oppgaveEnhet =  hentOppgaveEnhet(
                     tildeltEnhet,
                     identifisertPerson,
                     fdato,
@@ -221,17 +221,19 @@ class JournalforingService(
         sedHendelseModel: SedHendelse,
         uSupporterteVedlegg: String? = null
     ) {
-        val oppgave = OppgaveMelding(
-            sedHendelseModel.sedType,
-            journalpostId,
-            oppgaveEnhet,
-            aktoerId,
-            sedHendelseModel.rinaSakId,
-            HendelseType.MOTTATT,
-            uSupporterteVedlegg,
-            OppgaveType.BEHANDLE_SED
-        )
+        if(sedHendelseModel.avsenderLand != "NO") {
+            val oppgave = OppgaveMelding(
+                sedHendelseModel.sedType,
+                journalpostId,
+                oppgaveEnhet,
+                aktoerId,
+                sedHendelseModel.rinaSakId,
+                HendelseType.MOTTATT,
+                uSupporterteVedlegg,
+                OppgaveType.BEHANDLE_SED
+            )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
+        } else logger.warn("Nå har du forsøt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
 
     private fun hentOppgaveEnhet(
@@ -243,7 +245,7 @@ class JournalforingService(
         harAdressebeskyttelse: Boolean,
     ): Enhet {
         return if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING) {
-            oppgaveRoutingService.route(
+            oppgaveRoutingService.hentEnhet(
                 OppgaveRoutingRequest.fra(
                     identifisertPerson,
                     fdato!!,

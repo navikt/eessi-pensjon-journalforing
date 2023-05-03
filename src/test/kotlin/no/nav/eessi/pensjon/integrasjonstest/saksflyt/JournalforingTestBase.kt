@@ -597,7 +597,7 @@ internal open class JournalforingTestBase {
               "rinaSakId": "147729",
               "avsenderId": "NO:NAVT003",
               "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
+              "avsenderLand": "SE",
               "mottakerId": "NO:NAVT007",
               "mottakerNavn": "NAV Test 07",
               "mottakerLand": "NO",
