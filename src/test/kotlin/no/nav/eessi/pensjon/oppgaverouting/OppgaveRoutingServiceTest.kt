@@ -336,22 +336,19 @@ internal class OppgaveRoutingServiceTest {
                     arrayOf(
                         TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, GJENLEV),
                         TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
                         TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, UFOREP, AVSLUTTET),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
 
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
                         TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, AVSLUTTET),
+                        TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND),
                         TestArgumentsPBuc02(ID_OG_FORDELING, NORGE),
 
                         TestArgumentsPBuc02(UFORE_UTLAND, UTLAND, UFOREP, LOPENDE),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, UFOREP, AVSLUTTET),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, BARNEP),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, GJENLEV),
                         TestArgumentsPBuc02(PENSJON_UTLAND, UTLAND, ALDER),
