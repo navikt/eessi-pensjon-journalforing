@@ -262,10 +262,11 @@ internal open class JournalforingTestBase {
         sakId: String? = SAK_ID,
         land: String = "NOR",
         hendelseType: HendelseType = SENDT,
+        bucType: BucType = P_BUC_01,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
-        initCommonMocks(sed)
+        initCommonMocks(sed, bucType = bucType)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
 
@@ -393,11 +394,11 @@ internal open class JournalforingTestBase {
         return forenkletSed.map { forenklet -> DocumentsItem(id = forenklet.id, type = forenklet.type, status = forenklet.status?.name?.lowercase()) }
     }
 
-    fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null) {
+    fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null, bucType: BucType = P_BUC_01) {
         val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"))
         val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
         val dokumentFiler = mapJsonToAny<SedDokumentfiler>(dokumentVedleggJson)
-        initCommonMocks(sed, docs, dokumentFiler)
+        initCommonMocks(sed, docs, dokumentFiler, bucType = bucType)
     }
 
     private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()

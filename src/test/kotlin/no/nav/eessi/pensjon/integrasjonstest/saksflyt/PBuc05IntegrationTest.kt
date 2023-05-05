@@ -123,7 +123,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes, SakType er GENRL, men finnes flere sakstyper`() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(ALDER), sakInformasjon(UFOREP))
 
-            testRunner(FNR_OVER_60, saker) {
+            testRunner(FNR_OVER_60, saker, bucType = P_BUC_05) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
