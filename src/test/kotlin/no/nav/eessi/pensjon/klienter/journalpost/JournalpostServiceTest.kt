@@ -4,21 +4,22 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedType.P2000
+import no.nav.eessi.pensjon.eux.model.SedType.P2100
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.AUTOMATISK_JOURNALFORING
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
-import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.client.HttpServerErrorException
 
 internal class JournalpostServiceTest {
@@ -66,7 +67,9 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             avsenderLand = "NO",
             avsenderNavn = null,
-            saktype = null
+            saktype = null,
+            AvsenderMottaker(null, null, null, land = "NO")
+
         )
 
         // RESPONSE
@@ -75,10 +78,10 @@ internal class JournalpostServiceTest {
         // REQUEST
         val actualRequest = journalpostSlot.captured
 
-        assertEquals("NO", actualRequest.avsenderMottaker.land)
-        assertNull(actualRequest.avsenderMottaker.id)
-        assertNull(actualRequest.avsenderMottaker.idType)
-        assertNull(actualRequest.avsenderMottaker.navn)
+        assertEquals("NO", actualRequest.avsenderMottaker?.land)
+        assertNull(actualRequest.avsenderMottaker?.id)
+        assertNull(actualRequest.avsenderMottaker?.idType)
+        assertNull(actualRequest.avsenderMottaker?.navn)
 
         assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
         assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
@@ -125,65 +128,14 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
                 avsenderLand = "NO",
                 avsenderNavn = null,
-                saktype = null
+                saktype = null,
+                mockk()
             )
         }
     }
 
     @Test
-    fun `gitt En UK Journalpost Så Bytt Til GB Fordi Pesys Kun Støtter GB`() {
-        val journalpostSlot = slot<OpprettJournalpostRequest>()
-
-        val responseJson = getResource("journalpost/opprettJournalpostResponseFalse.json")
-        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseJson)
-
-        val requestJson = getResource("journalpost/opprettJournalpostRequestGB.json")
-        val request = mapJsonToAny<OpprettJournalpostRequest>(requestJson)
-
-        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any()) } returns expectedResponse
-
-        val actualResponse = journalpostService.opprettJournalpost(
-            rinaSakId = "1111",
-            fnr = SLAPP_SKILPADDE,
-            bucType = P_BUC_01,
-            sedType = P2000,
-            sedHendelseType = MOTTATT,
-            journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
-            arkivsaksnummer = "string",
-            dokumenter = """
-                 [{"brevkode":"NAV 14-05.09","dokumentKategori":"SOK","dokumentvarianter":[{"filtype":"PDF/A","fysiskDokument":"string","variantformat":"ARKIV"}],"tittel":"Søknad om foreldrepenger ved fødsel"}]""".trimIndent(),
-            avsenderLand = "UK",
-            avsenderNavn = null,
-            saktype = null
-        )
-
-        assertEqualResponse(expectedResponse, actualResponse!!)
-
-        val actualRequest = journalpostSlot.captured
-
-        assertEquals(request.behandlingstema, actualRequest.behandlingstema)
-        assertEquals(request.dokumenter, actualRequest.dokumenter)
-        assertNull(actualRequest.eksternReferanseId)
-        assertEquals(request.journalfoerendeEnhet, actualRequest.journalfoerendeEnhet)
-        assertEquals(request.journalpostType, actualRequest.journalpostType)
-        assertEquals("EESSI", actualRequest.kanal)
-        assertEquals(request.tema, actualRequest.tema)
-        assertEquals(1, actualRequest.tilleggsopplysninger!!.size)
-        assertEquals(request.tittel, actualRequest.tittel)
-
-        assertEquals(request.sak!!.arkivsaksnummer, actualRequest.sak!!.arkivsaksnummer)
-        assertEquals(request.sak!!.arkivsaksystem, actualRequest.sak!!.arkivsaksystem)
-
-        assertEquals(request.bruker!!.id, actualRequest.bruker!!.id)
-        assertEquals("GB", actualRequest.avsenderMottaker.land)
-
-        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true) }
-    }
-
-    @Test
     fun `Gitt en P2100 med UFØREP Når den er AVSLUTTET Så opprettes en Journalpost uten saknr og til enhet 4303 og tema Pensjon`() {
-        ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "NAV ORG")
-
         val requestSlot = slot<OpprettJournalpostRequest>()
 
         val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
@@ -193,7 +145,7 @@ internal class JournalpostServiceTest {
             {
               "avsenderMottaker" : {
                 "id" : "NAV ORG",
-                "idType" : "ORGNR",
+                "idType" : "UTL_ORG",
                 "navn" : "NAV",
                 "land" : "NO"
               },
@@ -229,7 +181,8 @@ internal class JournalpostServiceTest {
             dokumenter = "[\"P2100\"]",
             avsenderLand = "NO",
             avsenderNavn = "NAVT003",
-            saktype = null
+            saktype = null,
+            mockk(relaxed = true)
         )
 
         assertEqualResponse(expectedResponse, actualResponse!!)
@@ -247,9 +200,7 @@ internal class JournalpostServiceTest {
         assertEquals(1, actualRequest.tilleggsopplysninger!!.size)
 
         assertEquals(expectedRequest.sak, actualRequest.sak)
-
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
-        assertEquals("NO", actualRequest.avsenderMottaker.land)
 
         verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false) }
     }

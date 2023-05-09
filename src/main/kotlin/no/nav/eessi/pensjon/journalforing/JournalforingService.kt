@@ -14,6 +14,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
+import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
+import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.*
@@ -50,7 +52,7 @@ class JournalforingService(
     }
 
     fun journalfor(
-        sedHendelseModel: SedHendelse,
+        sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
@@ -64,13 +66,13 @@ class JournalforingService(
             try {
                 logger.info(
                     """**********
-                    rinadokumentID: ${sedHendelseModel.rinaDokumentId} rinasakID: ${sedHendelseModel.rinaSakId} sedType: ${sedHendelseModel.sedType?.name} bucType: ${sedHendelseModel.bucType}
+                    rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
                     hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerId: ${identifisertPerson?.aktoerId} sakType: $saktype
                 **********""".trimIndent()
                 )
 
                 // Henter dokumenter
-                val (documents, uSupporterteVedlegg) = sedHendelseModel.run {
+                val (documents, uSupporterteVedlegg) = sedHendelse.run {
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
 
@@ -83,7 +85,7 @@ class JournalforingService(
                             identifisertPerson,
                             fdato,
                             saktype,
-                            sedHendelseModel,
+                            sedHendelse,
                             hendelseType,
                             sakInformasjon,
                             harAdressebeskyttelse
@@ -93,19 +95,26 @@ class JournalforingService(
 
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING }
 
+                val institusjon = if(hendelseType == HendelseType.SENDT) {
+                    AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterMottakerAvsenderLand(sedHendelse.mottakerLand))
+                } else {
+                    AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterMottakerAvsenderLand(sedHendelse.avsenderLand))
+                }
+
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
-                    rinaSakId = sedHendelseModel.rinaSakId,
+                    rinaSakId = sedHendelse.rinaSakId,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
-                    bucType = sedHendelseModel.bucType!!,
-                    sedType = sedHendelseModel.sedType!!,
+                    bucType = sedHendelse.bucType!!,
+                    sedType = sedHendelse.sedType!!,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltEnhet,
                     arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
-                    avsenderLand = sedHendelseModel.avsenderLand,
-                    avsenderNavn = sedHendelseModel.avsenderNavn,
-                    saktype = saktype
+                    avsenderLand = sedHendelse.avsenderLand,
+                    avsenderNavn = sedHendelse.avsenderNavn,
+                    saktype = saktype,
+                    institusjon = institusjon
                 )
 
                 // Oppdaterer distribusjonsinfo
@@ -116,11 +125,11 @@ class JournalforingService(
 
                 if (!journalPostResponse!!.journalpostferdigstilt) {
                     val melding = OppgaveMelding(
-                        sedHendelseModel.sedType,
+                        sedHendelse.sedType,
                         journalPostResponse.journalpostId,
                         tildeltEnhet,
                         aktoerId,
-                        sedHendelseModel.rinaSakId,
+                        sedHendelse.rinaSakId,
                         hendelseType,
                         null,
                         OppgaveType.JOURNALFORING
@@ -133,7 +142,7 @@ class JournalforingService(
                     identifisertPerson,
                     fdato,
                     saktype,
-                    sedHendelseModel,
+                    sedHendelse,
                     harAdressebeskyttelse
                 )
 
@@ -142,43 +151,39 @@ class JournalforingService(
                         null,
                         oppgaveEnhet,
                         aktoerId,
-                        sedHendelseModel,
+                        sedHendelse,
                         usupporterteFilnavn(uSupporterteVedlegg)
                     )
                 }
 
-                val bucType = sedHendelseModel.bucType
+                val bucType = sedHendelse.bucType
                 if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
                         oppgaveEnhet,
                         aktoerId,
-                        sedHendelseModel
+                        sedHendelse
                     )
 
                     kravInitialiseringsService.initKrav(
-                        sedHendelseModel,
+                        sedHendelse,
                         sakInformasjon,
                         sed
                     )
                 }
 
-
-
-                produserAutomatiseringsmelding(sedHendelseModel.rinaSakId,
-                    sedHendelseModel.rinaDokumentId,
-                    sedHendelseModel.rinaDokumentVersjon,
+                produserAutomatiseringsmelding(sedHendelse.rinaSakId,
+                    sedHendelse.rinaDokumentId,
+                    sedHendelse.rinaDokumentVersjon,
                     java.time.LocalDateTime.now(),
                     tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING,
                     tildeltEnhet.enhetsNr,
-                    sedHendelseModel.bucType!!,
-                    sedHendelseModel.sedType!!,
+                    sedHendelse.bucType!!,
+                    sedHendelse.sedType!!,
                     saktype,
                     hendelseType
                 )
-
-
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
                 throw ex
@@ -188,6 +193,13 @@ class JournalforingService(
             }
         }
     }
+
+    /**
+     * PESYS støtter kun GB
+     */
+    private fun konverterMottakerAvsenderLand(mottakerAvsenderLand: String?): String? =
+        if (mottakerAvsenderLand == "UK") "GB"
+        else mottakerAvsenderLand
 
     private fun produserAutomatiseringsmelding(
         bucId: String,

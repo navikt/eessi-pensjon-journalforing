@@ -132,7 +132,6 @@ internal open class JournalforingTestBase {
 
     @BeforeEach
     fun setup() {
-        ReflectionTestUtils.setField(journalpostService, "navOrgnummer", "999999999")
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
 
         sendtListener.initMetrics()

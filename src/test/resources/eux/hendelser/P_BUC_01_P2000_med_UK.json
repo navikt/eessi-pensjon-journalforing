@@ -1,0 +1,17 @@
+{
+  "id": 1869,
+  "sedId": "P2000_b12e06dda2c7474b9998c7139c841646_2",
+  "sektorKode": "P",
+  "bucType": "P_BUC_01",
+  "rinaSakId": "147729",
+  "avsenderId": "UK:UKINST",
+  "avsenderNavn": "UKINST",
+  "avsenderLand": "UK",
+  "mottakerId": "UK:UKINST",
+  "mottakerNavn": "UK INST",
+  "mottakerLand": "UK",
+  "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
+  "rinaDokumentVersjon": "2",
+  "sedType": "P2000",
+  "navBruker": "09035225916"
+}

@@ -1,25 +1,24 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
-import no.nav.eessi.pensjon.models.Tema.*
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(private val journalpostKlient: JournalpostKlient) {
-
-    @Value("\${no.nav.orgnummer}")
-    private lateinit var navOrgnummer: String
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
@@ -37,17 +36,18 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         fnr: Fodselsnummer?,
         bucType: BucType,
         sedType: SedType,
-        sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType,
+        sedHendelseType: HendelseType,
         journalfoerendeEnhet: Enhet,
         arkivsaksnummer: String?,
         dokumenter: String,
         avsenderLand: String?,
         avsenderNavn: String?,
-        saktype: SakType?
+        saktype: SakType?,
+        institusjon: AvsenderMottaker
     ): OpprettJournalPostResponse? {
 
         val request = OpprettJournalpostRequest(
-            avsenderMottaker = populerAvsenderMottaker(avsenderNavn, sedHendelseType, avsenderLand),
+            avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(bucType, saktype),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
@@ -98,27 +98,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     fun hentTema(bucType: BucType, saktype: SakType?) : Tema =
         if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
 
-    private fun populerAvsenderMottaker(
-            avsenderNavn: String?,
-            sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType,
-            avsenderLand: String?): AvsenderMottaker {
-
-        return if (sedHendelseType == no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT) {
-            AvsenderMottaker(navOrgnummer, IdType.ORGNR, "NAV", "NO")
-        } else {
-            val justertAvsenderLand = justerAvsenderLand(avsenderLand)
-            AvsenderMottaker(navn = avsenderNavn, land = justertAvsenderLand)
-        }
-    }
-
-    /**
-     * PESYS støtter kun GB
-     */
-    private fun justerAvsenderLand(avsenderLand: String?): String? =
-            if (avsenderLand == "UK") "GB"
-            else avsenderLand
-
-    private fun bestemJournalpostType(sedHendelseType: no.nav.eessi.pensjon.oppgaverouting.HendelseType): JournalpostType =
+    private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
             if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE
             else JournalpostType.INNGAAENDE
 

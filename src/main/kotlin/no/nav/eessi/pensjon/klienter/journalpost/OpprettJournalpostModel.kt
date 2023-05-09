@@ -21,7 +21,7 @@ import java.io.IOException
  * Oppretter en journalpost i fagarkivet, med eller uten dokumenter
  */
 class OpprettJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker,
+    val avsenderMottaker: AvsenderMottaker?,
     val behandlingstema: Behandlingstema? = null,
     val bruker: Bruker? = null,
     @JsonDeserialize(using = JsonAsStringDeserializer::class)
@@ -63,14 +63,13 @@ data class Sak(
  */
 data class AvsenderMottaker(
     val id: String? = null,
-    val idType: IdType? = null,
+    val idType: IdType? = IdType.UTL_ORG,
     val navn: String? = null,
     val land: String? = null
 )
 
 enum class IdType {
-    FNR,
-    ORGNR
+    UTL_ORG
 }
 
 data class Bruker(

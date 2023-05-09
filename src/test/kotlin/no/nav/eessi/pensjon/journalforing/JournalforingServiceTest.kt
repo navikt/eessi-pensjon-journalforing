@@ -13,16 +13,20 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
+import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
-import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -98,7 +102,8 @@ internal class JournalforingServiceTest {
                 dokumenter = any(),
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                institusjon = any()
             )
         } returns OpprettJournalPostResponse("123", "null", null, false)
     }
@@ -136,7 +141,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "R004 - Melding om utbetaling",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = ALDER
+                saktype = ALDER,
+                institusjon = any()
             )
         }
     }
@@ -176,7 +182,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = UFOREP
+                saktype = UFOREP,
+                institusjon = any()
             )
         }
     }
@@ -216,7 +223,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = UFOREP
+                saktype = UFOREP,
+                institusjon = any()
             )
         }
     }
@@ -264,7 +272,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = ALDER
+                saktype = ALDER,
+                institusjon = any()
             )
         }
     }
@@ -295,7 +304,44 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2000 Supported Documents",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                institusjon = any()
+            )
+        }
+    }
+
+    @Test
+    fun `Sendt gyldig Sed P2000 med UK saa skal landkode konverteres til GB fordi Pesys kun godtar GB`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_med_UK.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        journalforingService.journalfor(
+            sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
+            SED(type = SedType.P2000),
+        )
+        verify {
+            journalpostService.opprettJournalpost(
+                rinaSakId = "147729",
+                fnr = LEALAUS_KAKE,
+                bucType = P_BUC_01,
+                sedType = SedType.P2000,
+                sedHendelseType = SENDT,
+                journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
+                arkivsaksnummer = null,
+                dokumenter = "P2000 Supported Documents",
+                avsenderLand = any(),
+                avsenderNavn = any(),
+                saktype = any(),
+                institusjon = AvsenderMottaker(
+                    id = "UK:UKINST",
+                    idType = IdType.UTL_ORG,
+                    navn = "UK INST",
+                    land = "GB"
+                )
             )
         }
     }
@@ -333,7 +379,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2200 Supported Documents",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                institusjon = any()
             )
         }
     }
@@ -370,7 +417,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                institusjon = any()
             )
         }
     }
@@ -408,7 +456,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2000 Supported Documents",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                institusjon = any()
             )
         }
     }
@@ -446,7 +495,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2000 Supported Documents",
                 avsenderLand = "NO",
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                any()
             )
         }
     }
@@ -484,7 +534,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = ALDER
+                saktype = ALDER,
+                any()
             )
         }
     }
@@ -522,7 +573,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2200 Supported Documents",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                any()
             )
         }
     }
@@ -560,7 +612,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
                 avsenderLand = any(),
                 avsenderNavn = any(),
-                saktype = any()
+                saktype = any(),
+                any()
             )
         }
     }
@@ -600,7 +653,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = GJENLEV
+                saktype = GJENLEV,
+                any()
             )
             //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
         }
@@ -664,7 +718,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAV ACCEPTANCE TEST 07",
-                saktype = GJENLEV
+                saktype = GJENLEV,
+                any()
             )
         }
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -705,7 +760,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = null
+                saktype = null,
+                institusjon = any()
             )
         }
         // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -740,7 +796,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = null
+                saktype = null,
+                institusjon = any()
             )
         }
     }
@@ -772,7 +829,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
-                saktype = null
+                saktype = null,
+                institusjon = any()
             )
         }
     }
@@ -832,7 +890,8 @@ internal class JournalforingServiceTest {
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 avsenderLand = "PL",
                 avsenderNavn = "POLEN",
-                saktype = BARNEP
+                saktype = BARNEP,
+                any()
             )
         }
     }
