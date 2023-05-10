@@ -310,7 +310,53 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
         assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
     }
-}
+
+        @Test
+        fun `Gitt en P4000 med forsikret og gjenlevende så velger vi kun gjenlevende relasjoner`() {
+            val forventetFnr = SLAPP_SKILPADDE
+
+            val actual = RelasjonsHandler.hentRelasjoner(
+                listOf(
+                    Pair("312312300", SED.generateSedToClass<P4000>(generateSED(SedType.P4000, forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = forventetFnr)))
+                ), P_BUC_02
+            )
+
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
+            val expectedPersonRelasjon = SEDPersonRelasjon(
+                Fodselsnummer.fra(forventetFnr),
+                Relasjon.GJENLEVENDE,
+                null,
+                sedType = SedType.P4000,
+                sokKriterier = sok,
+                fdato = sok.foedselsdato,
+                rinaDocumentId = "312312300"
+            )
+            assertEquals(1, actual.size)
+            assertEquals(expectedPersonRelasjon, actual.first())
+        }
+    }
+
+    @Test
+    fun `Gitt en P4000 i P_BUC_02 med forsikret velger vi forsikret relasjon og saksType blir satt til GJENLEV pga buc typen`() {
+        val actual = RelasjonsHandler.hentRelasjoner(listOf(
+                Pair("312312300", SED.generateSedToClass<P4000>(generateSED(SedType.P4000, forsikretFnr = KRAFTIG_VEGGPRYD, gjenlevFnr = null)))
+            ), P_BUC_02
+        )
+
+        val sok = createSokKritere(FORSIKRET_FNAVN, fdato = LocalDate.of(1971, 6, 11))
+        val expectedPersonRelasjon = SEDPersonRelasjon(
+            Fodselsnummer.fra(KRAFTIG_VEGGPRYD),
+            Relasjon.FORSIKRET,
+            GJENLEV,
+            sedType = SedType.P4000,
+            sokKriterier = sok,
+            fdato = sok.foedselsdato,
+            rinaDocumentId = "312312300"
+        )
+        assertEquals(1, actual.size)
+        assertEquals(expectedPersonRelasjon, actual.first())
+    }
+
 
     @Nested
     @DisplayName("Tester for uthenting av fnr i en P15000 og P_BUC_10")

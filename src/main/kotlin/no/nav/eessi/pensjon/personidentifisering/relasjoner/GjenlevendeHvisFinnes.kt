@@ -30,7 +30,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
 
         val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
 
-        logger.info("Innhenting av relasjon: ${gjenlevendeRelasjon?.let { RelasjonTilAvdod.valueOf(it) }}")
+        logger.info("Innhenting av relasjon: ${gjenlevendeRelasjon?.let { RelasjonTilAvdod.values().firstOrNull{it.kode == gjenlevendeRelasjon}}}")
 
         if (gjenlevendeRelasjon == null) {
             logger.debug("Legger til person $GJENLEVENDE med ukjente relasjoner")

@@ -44,7 +44,7 @@ class PersonSok(
         val potensiellePersonRelasjoner = personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
 
         if (potensiellePersonRelasjoner.isEmpty()) {
-            logger.info("Ingen gyldig sed for søkPerson")
+            logger.info("Ingen personrelasjoner funnet i sed (personSøk).")
             return null
         }
         logger.info("Har identifisert følgende personrelasjoner: ${potensiellePersonRelasjoner.map { it.relasjon }}, $sedType ")
@@ -52,6 +52,7 @@ class PersonSok(
         val personRelasjon = potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.GJENLEVENDE }
             ?: potensiellePersonRelasjoner.firstOrNull { it.relasjon == Relasjon.FORSIKRET }
 
+        logger.info("Personrelasjon: ${personRelasjon?.relasjon} (søkPerson).")
         logger.debug("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}, relasjon: ${personRelasjon?.relasjon}")
 
         personRelasjon?.sokKriterier?.let {

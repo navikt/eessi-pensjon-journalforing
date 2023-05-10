@@ -26,11 +26,11 @@ object RelasjonsHandler {
             }
         }
 
-        return filterRleasjoner(fnrListe.toList())
+        return filterRelasjoner(fnrListe.toList())
 
     }
 
-    private fun filterRleasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
+    private fun filterRelasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
          logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
 
         relasjonList.onEach { logger.debug("$it") }
@@ -55,7 +55,7 @@ object RelasjonsHandler {
                 P2000 -> P2000Relasjon(sed, bucType,rinaDocumentId)
                 P2200 -> P2200Relasjon(sed, bucType,rinaDocumentId)
                 P2100 -> P2100Relasjon(sed, bucType,rinaDocumentId)
-
+                P4000 -> P4000Relasjon(sed, bucType, rinaDocumentId)
                 P5000 -> P5000Relasjon(sed, bucType, rinaDocumentId)
                 P6000 -> P6000Relasjon(sed, bucType,rinaDocumentId)
                 P8000 -> P8000AndP10000Relasjon(sed, bucType,rinaDocumentId)
