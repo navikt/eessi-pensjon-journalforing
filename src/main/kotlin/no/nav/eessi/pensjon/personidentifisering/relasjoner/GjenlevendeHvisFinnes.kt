@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
@@ -28,7 +29,8 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         val sokPersonKriterie =  opprettSokKriterie(gjenlevendePerson)
 
         val gjenlevendeRelasjon = gjenlevendePerson.relasjontilavdod?.relasjon
-        logger.info("Innhenting av relasjon: $gjenlevendeRelasjon")
+
+        logger.info("Innhenting av relasjon: ${gjenlevendeRelasjon?.let { RelasjonTilAvdod.valueOf(it) }}")
 
         if (gjenlevendeRelasjon == null) {
             logger.debug("Legger til person $GJENLEVENDE med ukjente relasjoner")
