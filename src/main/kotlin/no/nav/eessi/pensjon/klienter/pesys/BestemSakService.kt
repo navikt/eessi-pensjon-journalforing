@@ -20,17 +20,19 @@ class BestemSakService(private val klient: BestemSakKlient) {
      *
      * @param aktoerId:     Aktøren sin ID
      * @param bucType:      Brukes for å sette riktig [Saktype]
-     * @param saktypeBUC02:   Type ytelse det gjelder. Kun i bruk dersom [BucType] er P_BUC_02 eller R_BUC_02
+     * @param innkommendeSakType:   Type ytelse det gjelder. I brukved følgende bucTyper [BucType]
+     * P_BUC_02, P_BUC_05, P_BUC_10 eller R_BUC_02
      *
      * @return [SakInformasjon]
      */
-    fun hentSakInformasjon(aktoerId: String, bucType: BucType, saktypeBUC02: SakType? = null): SakInformasjon? {
+    fun hentSakInformasjon(aktoerId: String, bucType: BucType, innkommendeSakType: SakType? = null): SakInformasjon? {
         val saktype = when (bucType) {
             P_BUC_01 -> ALDER
-            P_BUC_02 -> saktypeBUC02 ?: return null
+            P_BUC_02 -> innkommendeSakType ?: return null
             P_BUC_03 -> UFOREP
-            R_BUC_02 -> saktypeBUC02!!
-            P_BUC_10 -> saktypeBUC02 ?: return null
+            P_BUC_05 -> innkommendeSakType ?: return null
+            R_BUC_02 -> innkommendeSakType!!
+            P_BUC_10 -> innkommendeSakType ?: return null
             else -> return null
         }
 

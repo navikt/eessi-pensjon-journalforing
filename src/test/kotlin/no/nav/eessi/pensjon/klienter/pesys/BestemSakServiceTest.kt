@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class BestemSakServiceTest {
     private val mockKlient: BestemSakKlient = mockk()
@@ -47,6 +49,23 @@ internal class BestemSakServiceTest {
         verify(exactly = 0) { mockKlient.kallBestemSak(any()) }
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["BARNEP", "GJENLEV", "ALDER", "UFOREP"])
+    fun `P_BUC_05 med valgt saktype, skal sende den valgte ytelsestypen`( saktype: SakType) {
+        val requestSlot = slot<BestemSakRequest>()
+        every {
+            mockKlient.kallBestemSak(capture(requestSlot))
+        } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
+
+        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_05, saktype)!!
+
+        val actualRequest = requestSlot.captured
+        assertEquals(AKTOER_ID, actualRequest.aktoerId)
+        assertEquals(saktype, actualRequest.ytelseType)
+
+        verify(exactly = 1) { mockKlient.kallBestemSak(any()) }
+    }
+
     @Test
     fun `P_BUC_02 med valgt saktype, skal sende den valgte ytelsestypen`() {
         val requestSlot = slot<BestemSakRequest>()
@@ -54,7 +73,7 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_02, GJENLEV)!!
+        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_05, GJENLEV)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
@@ -98,7 +117,7 @@ internal class BestemSakServiceTest {
     @Test
     fun `R_BUC_02 hvor ytelsestype er null skal kaste exception`() {
         assertThrows<NullPointerException> {
-            bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, saktypeBUC02 = null)!!
+            bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, innkommendeSakType = null)!!
         }
 
         verify(exactly = 0) { mockKlient.kallBestemSak(any()) }
