@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.config
 
+import com.fasterxml.jackson.core.StreamReadConstraints
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
@@ -91,6 +93,9 @@ class RestTemplateConfig(
                         RequestCountInterceptor(meterRegistry),
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
+                .messageConverters().apply {
+                    createMappingJacksonHttpMessageConverter()
+                }
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
                             .apply { setOutputStreaming(false) }
@@ -109,7 +114,16 @@ class RestTemplateConfig(
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
             }
-
+    }
+    private fun createMappingJacksonHttpMessageConverter(): MappingJackson2HttpMessageConverter? {
+        return MappingJackson2HttpMessageConverter().apply {
+            objectMapper.factory.setStreamReadConstraints(
+                StreamReadConstraints
+                    .builder()
+                    .maxStringLength(10000000)
+                    .build()
+            )
+        }
     }
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
