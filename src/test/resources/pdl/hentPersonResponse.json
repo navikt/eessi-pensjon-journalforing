@@ -1,0 +1,171 @@
+{
+  "data" : {
+    "hentPerson" : {
+      "adressebeskyttelse" : [ {
+        "gradering" : "UGRADERT"
+      } ],
+      "bostedsadresse" : [ {
+        "gyldigFraOgMed" : [ 2020, 10, 5, 10, 5, 2 ],
+        "gyldigTilOgMed" : [ 2030, 10, 5, 10, 5, 2 ],
+        "vegadresse" : {
+          "adressenavn" : "TESTVEIEN",
+          "husnummer" : "1020",
+          "husbokstav" : "A",
+          "postnummer" : "0234",
+          "kommunenummer" : "231",
+          "bydelsnummer" : null
+        },
+        "utenlandskAdresse" : null,
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "oppholdsadresse" : [ ],
+      "navn" : [ {
+        "fornavn" : "Fornavn",
+        "mellomnavn" : "Mellomnavn",
+        "etternavn" : "Etternavn",
+        "forkortetNavn" : null,
+        "gyldigFraOgMed" : null,
+        "folkeregistermetadata" : null,
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        },
+        "sammensattNavn" : "Fornavn Mellomnavn Etternavn",
+        "sammensattEtterNavn" : "Etternavn Fornavn Mellomnavn"
+      } ],
+      "statsborgerskap" : [ {
+        "land" : "NOR",
+        "gyldigFraOgMed" : [ 2010, 7, 7 ],
+        "gyldigTilOgMed" : [ 2020, 10, 10 ],
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "foedsel" : [ {
+        "foedselsdato" : [ 2000, 10, 3 ],
+        "foedeland" : "NOR",
+        "foedested" : "OSLO",
+        "foedselsaar" : 2020,
+        "folkeregistermetadata" : {
+          "gyldighetstidspunkt" : [ 2020, 10, 5, 10, 5, 2 ],
+          "ajourholdstidspunkt" : null
+        },
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "kjoenn" : [ {
+        "kjoenn" : "KVINNE",
+        "folkeregistermetadata" : {
+          "gyldighetstidspunkt" : [ 2020, 10, 5, 10, 5, 2 ],
+          "ajourholdstidspunkt" : null
+        },
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "doedsfall" : [ {
+        "doedsdato" : [ 2020, 10, 10 ],
+        "folkeregistermetadata" : {
+          "gyldighetstidspunkt" : [ 2020, 10, 5, 10, 5, 2 ],
+          "ajourholdstidspunkt" : null
+        },
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "forelderBarnRelasjon" : [ {
+        "relatertPersonsIdent" : "101010",
+        "relatertPersonsRolle" : "BARN",
+        "minRolleForPerson" : "MOR",
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "sivilstand" : [ {
+        "type" : "GIFT",
+        "gyldigFraOgMed" : [ 2010, 10, 10 ],
+        "relatertVedSivilstand" : "1020203010",
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "TEST",
+            "registrert" : [ 2010, 4, 1, 10, 2, 14 ],
+            "registrertAv" : "Test",
+            "systemkilde" : "Kilde test",
+            "type" : "OPPRETT"
+          } ],
+          "historisk" : false,
+          "master" : "Test",
+          "opplysningsId" : "acbe1a46-e3d1"
+        }
+      } ],
+      "kontaktadresse" : [ ],
+      "kontaktinformasjonForDoedsbo" : [ ]
+    }
+  },
+  "errors" : null
+}

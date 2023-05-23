@@ -133,11 +133,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         //server setup
         CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSakTom()
-            .mockPensjonsinformasjon()
-            .medOppdaterDistribusjonsinfo()
             .medEuxGetRequestWithJson(
                 "/buc/148161", Buc(
                     id = "12312312312452345624355",
@@ -145,10 +140,16 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018","/sed/P5000-medNorskGjenlevende-NAV.json")
-            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_05_P8000.json")
+            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2100-PinNO-NAV.json")
+            .mockHentPersonPdl()
+            .mockHentPersonPdlGet()
+/*            .medJournalforing(false, "429434379")
+            .medNorg2Tjeneste()
+            .mockBestemSakTom()
+            .mockPensjonsinformasjon()
+            .medOppdaterDistribusjonsinfo()
+            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResponseMedTomtVedlegg.json" )
+            meldingForSendtListener( "/eux/hendelser/P_BUC_05_P8000.json")*/
 
         //then route to 4303
 //        OppgaveMeldingVerification("429434379")
@@ -185,5 +186,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medSedtype("X008")
             .medtildeltEnhetsnr("4303")
     }
+
+
 
 }

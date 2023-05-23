@@ -1,10 +1,12 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import org.mockserver.client.MockServerClient
+import org.mockserver.matchers.Times
 import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.StringBody.subString
 import java.util.concurrent.TimeUnit
 
 class CustomMockServer {
@@ -74,6 +76,43 @@ class CustomMockServer {
             )
     }
 
+    fun mockHentPersonPdl() = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("POST")
+                .withPath("/")
+                .withBody(subString("query"))
+
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(javaClass.getResource("/pdl/hentPersonResponse.json").readText())
+                    .withDelay(TimeUnit.SECONDS, 1)
+
+            )
+    }
+
+    fun mockHentPersonPdlGet() = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("GET")
+                .withPath("/")
+                .withBody(subString("query"))
+            ,Times.exactly(1)
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(javaClass.getResource("/pdl/hentPersonResponse.json").readText())
+                    .withDelay(TimeUnit.SECONDS, 1)
+
+            )
+    }
+
+
     /**
      * mocker journalføringresponse
      * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init
@@ -115,7 +154,7 @@ class CustomMockServer {
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("GET")
-                .withPath(bucPath)
+                .withPath(bucPath),Times.exactly(1)
         )
             .respond(
                 withResponse(filePath)
@@ -123,16 +162,12 @@ class CustomMockServer {
     }
 
     fun medEuxGetRequestWithJson(bucPath: String, jsonAsString: String) = apply {
-
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("GET")
                 .withPath(bucPath)
-        )
-            .respond(
-                withResponseAsJsonString(jsonAsString)
-            )
-    }
+            ,Times.exactly(1)
+        ).respond(withResponseAsJsonString(jsonAsString))}
 
     private fun withResponse(filePath: String) = HttpResponse.response()
         .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
