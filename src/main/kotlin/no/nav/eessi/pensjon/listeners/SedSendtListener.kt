@@ -176,7 +176,7 @@ class SedSendtListener(
         bucType: BucType
     ): SakType? {
         val saktype = identifisertPerson?.personRelasjon?.saktype
-        logger.debug("populerSaktypeFraSed: fraSED $saktypeFraSed  identPersonYtelse: $saktype")
+        logger.info("Saktype fra SED: $saktypeFraSed  identPersonYtelse: $saktype")
         if (bucType == P_BUC_10 && saktypeFraSed == GJENLEV) {
             return saktype
         }
