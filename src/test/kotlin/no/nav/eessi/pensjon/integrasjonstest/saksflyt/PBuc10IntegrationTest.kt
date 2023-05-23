@@ -22,7 +22,6 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -913,10 +912,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-//        if (sokPerson != null || fnrBarn != null) {
-//            verify { personService.hentPerson(any<Ident<*>>()) }
-//        }
-
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
@@ -1094,11 +1089,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
-
-        if (bestemSak == null)
-            verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
-        else
-            verify(exactly = 1) { bestemSakKlient.kallBestemSak(any()) }
 
         clearAllMocks()
     }

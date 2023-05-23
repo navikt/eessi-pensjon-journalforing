@@ -126,9 +126,9 @@ class SedMottattListener(
         if (identifisertPerson?.aktoerId == null) return null
 
         return when(sedHendelse.bucType) {
-            P_BUC_01 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_01)
-            P_BUC_02 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_02, identifisertPerson.personRelasjon?.saktype)
-            P_BUC_03 -> bestemSakService.hentSakInformasjon(identifisertPerson.aktoerId, P_BUC_03)
+            P_BUC_01 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_01)
+            P_BUC_02 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_02, identifisertPerson.personRelasjon?.saktype)
+            P_BUC_03 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_03)
             else  -> null
         }
     }

@@ -30,7 +30,7 @@ internal class BestemSakServiceTest {
         val requestSlot = slot<BestemSakRequest>()
         every { mockKlient.kallBestemSak(capture(requestSlot)) } returns response
 
-        val actualResponse = bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_01, null)!!
+        val actualResponse = bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_01, null)!!
         assertEquals("22873157", actualResponse.sakId)
 
         val actualRequest = requestSlot.captured
@@ -44,7 +44,7 @@ internal class BestemSakServiceTest {
 
     @Test
     fun `Gitt en P_BUC_02 med ukjent ytelse og en kjent aktørId så skal det returneres null`() {
-        assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_02, null))
+        assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_02, null))
 
         verify(exactly = 0) { mockKlient.kallBestemSak(any()) }
     }
@@ -57,7 +57,7 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_05, saktype)!!
+        bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_05, saktype)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
@@ -73,7 +73,7 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_05, GJENLEV)!!
+        bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_05, GJENLEV)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
@@ -89,7 +89,7 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_03, GENRL)!!
+        bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_03, GENRL)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
@@ -105,7 +105,7 @@ internal class BestemSakServiceTest {
             mockKlient.kallBestemSak(capture(requestSlot))
         } returns opprettResponse("pen/bestemSakGjenlevendeResponse.json")
 
-        bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, GENRL)!!
+        bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, R_BUC_02, GENRL)!!
 
         val actualRequest = requestSlot.captured
         assertEquals(AKTOER_ID, actualRequest.aktoerId)
@@ -117,7 +117,7 @@ internal class BestemSakServiceTest {
     @Test
     fun `R_BUC_02 hvor ytelsestype er null skal kaste exception`() {
         assertThrows<NullPointerException> {
-            bestemSakService.hentSakInformasjon(AKTOER_ID, R_BUC_02, innkommendeSakType = null)!!
+            bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, R_BUC_02, innkommendeSakType = null)!!
         }
 
         verify(exactly = 0) { mockKlient.kallBestemSak(any()) }
@@ -126,14 +126,14 @@ internal class BestemSakServiceTest {
     @Test
     fun `Ugyldig BucType gir null i returverdi`() {
         assertAll(
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_04)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_05)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_06)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_07)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_08)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_09)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, P_BUC_10)) },
-                { assertNull(bestemSakService.hentSakInformasjon(AKTOER_ID, H_BUC_07)) }
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_04)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_05)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_06)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_07)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_08)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_09)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, P_BUC_10)) },
+                { assertNull(bestemSakService.hentSakInformasjonViaBestemSak(AKTOER_ID, H_BUC_07)) }
         )
     }
 

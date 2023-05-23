@@ -129,6 +129,35 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
+    fun `Når en SED (P8000) hendelse blir konsumert skal det opprettes en journalføringsoppgave`() {
+
+        //server setup
+        CustomMockServer()
+            .medJournalforing(false, "429434379")
+            .medNorg2Tjeneste()
+            .mockBestemSakTom()
+            .mockPensjonsinformasjon()
+            .medOppdaterDistribusjonsinfo()
+            .medEuxGetRequestWithJson(
+                "/buc/148161", Buc(
+                    id = "12312312312452345624355",
+                    participants = emptyList<Participant>(),
+                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
+                ).toJson()
+            )
+            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018","/sed/P5000-medNorskGjenlevende-NAV.json")
+            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
+
+        meldingForSendtListener( "/eux/hendelser/P_BUC_05_P8000.json")
+
+        //then route to 4303
+//        OppgaveMeldingVerification("429434379")
+//            .medHendelsetype("SENDT")
+//            .medSedtype("P8000")
+//            .medtildeltEnhetsnr("4303")
+    }
+
+    @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 
         //server setup
@@ -145,6 +174,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 ).toJson()
             )
             .medEuxGetRequest("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2000-ugyldigFNR-NAV.json")
+            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
             .medEuxGetRequest( "/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_05_X008.json")

@@ -1,0 +1,11 @@
+{
+  "Pensjoninformasjon": [
+    {
+      "sakId": "25595454",
+      "sakType": "GJENLEV",
+      "sakStatus" : "LOPENDE",
+      "saksbehandlendeEnhetId": "",
+      "nyopprettet": false
+    }
+  ]
+}

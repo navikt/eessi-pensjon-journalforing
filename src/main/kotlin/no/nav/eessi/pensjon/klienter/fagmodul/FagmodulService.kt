@@ -12,7 +12,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
 
 
-    fun hentPensjonSakFraSED(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
         return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
             validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
         }

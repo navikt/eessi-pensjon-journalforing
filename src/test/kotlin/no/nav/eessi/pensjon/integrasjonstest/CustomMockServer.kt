@@ -42,6 +42,38 @@ class CustomMockServer {
             )
     }
 
+    fun mockBestemSakTom() = apply {
+
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("POST")
+                .withPath("/")
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(javaClass.getResource("/pen/bestemSakResponseTom.json")!!.readText())
+                    .withDelay(TimeUnit.SECONDS, 1)
+            )
+    }
+
+    fun mockPensjonsinformasjon() = apply {
+
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("GET")
+                .withPath("/pensjon/sakliste/.*")
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(javaClass.getResource("/pen/pensjonsinformasjonResponse.json")!!.readText())
+                    .withDelay(TimeUnit.SECONDS, 1)
+            )
+    }
+
     /**
      * mocker journalføringresponse
      * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init
