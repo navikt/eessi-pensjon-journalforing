@@ -158,6 +158,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 //            .medtildeltEnhetsnr("4303")
     }
 
+
+
+
     @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 

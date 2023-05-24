@@ -52,6 +52,8 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                         HttpEntity(requestBody.toJson(), headers),
                         String::class.java)
 
+                logger.info("Respons kallBestemSak: ${response.body}")
+
                 mapper.readValue(response.body, BestemSakResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
                 throw RuntimeException("En feil oppstod under kall til bestemSak i PESYS ex: ", ex)
