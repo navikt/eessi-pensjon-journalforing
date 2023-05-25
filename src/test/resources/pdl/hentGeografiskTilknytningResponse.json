@@ -1,0 +1,11 @@
+{
+  "data" : {
+    "hentGeografiskTilknytning" : {
+      "gtType" : "KOMMUNE",
+      "gtKommune" : "0301",
+      "gtBydel" : null,
+      "gtLand" : null
+    }
+  },
+  "errors" : null
+}

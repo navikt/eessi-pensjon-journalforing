@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import org.mockserver.client.MockServerClient
-import org.mockserver.matchers.Times
 import org.mockserver.model.Header
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -11,7 +10,9 @@ import java.util.concurrent.TimeUnit
 
 class CustomMockServer {
 
-    var mockServer = MockServerClient("localhost", System.getProperty("mockServerport").toInt())
+    var mockServer = MockServerClient("localhost", System.getProperty("mockServerport").toInt()).also {
+
+    }
 
     fun medOppdaterDistribusjonsinfo() = apply {
         // Mocker oppdaterDistribusjonsinfo
@@ -39,7 +40,7 @@ class CustomMockServer {
                 HttpResponse.response()
                     .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                     .withStatusCode(HttpStatusCode.OK_200.code())
-                    .withBody(javaClass.getResource("/pen/bestemSakResponse.json").readText())
+                    .withBody(javaClass.getResource("/pen/bestemSakGjenlevendeResponse.json").readText())
                     .withDelay(TimeUnit.SECONDS, 1)
             )
     }
@@ -76,37 +77,66 @@ class CustomMockServer {
             )
     }
 
-    fun mockHentPersonPdl() = apply {
+    fun mockHentPersonPdl(response: String) = apply {
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("POST")
-                .withPath("/")
-                .withBody(subString("query"))
-
+                .withBody(subString("hentPerson"))
         )
             .respond(
                 HttpResponse.response()
                     .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                     .withStatusCode(HttpStatusCode.OK_200.code())
-                    .withBody(javaClass.getResource("/pdl/hentPersonResponse.json").readText())
+                    .withBody(response)
+                    .withDelay(TimeUnit.SECONDS, 1)
+
+            )
+    }
+    fun mockHentPersonPdlIdentder(response: String) = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("POST")
+                .withBody(subString("hentIdenter"))
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(response)
                     .withDelay(TimeUnit.SECONDS, 1)
 
             )
     }
 
-    fun mockHentPersonPdlGet() = apply {
+    fun mockHentPersonPdlGeografiskTilknytninger(response: String) = apply {
         mockServer.`when`(
             HttpRequest.request()
-                .withMethod("GET")
-                .withPath("/")
-                .withBody(subString("query"))
-            ,Times.exactly(1)
+                .withMethod("POST")
+                .withBody(subString("hentGeografiskTilknytning"))
         )
             .respond(
                 HttpResponse.response()
                     .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
                     .withStatusCode(HttpStatusCode.OK_200.code())
-                    .withBody(javaClass.getResource("/pdl/hentPersonResponse.json").readText())
+                    .withBody(response)
+                    .withDelay(TimeUnit.SECONDS, 1)
+
+            )
+    }
+
+
+    fun mockHentPersonPdlGet(response: String) = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("GET")
+                .withBody(subString("query"))
+            //,Times.exactly(1)
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody(response)
                     .withDelay(TimeUnit.SECONDS, 1)
 
             )
@@ -154,11 +184,9 @@ class CustomMockServer {
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("GET")
-                .withPath(bucPath),Times.exactly(1)
-        )
-            .respond(
-                withResponse(filePath)
-            )
+                .withPath(bucPath)
+            //,Times.exactly(4)
+        ).respond(withResponse(filePath))
     }
 
     fun medEuxGetRequestWithJson(bucPath: String, jsonAsString: String) = apply {
@@ -166,7 +194,7 @@ class CustomMockServer {
             HttpRequest.request()
                 .withMethod("GET")
                 .withPath(bucPath)
-            ,Times.exactly(1)
+
         ).respond(withResponseAsJsonString(jsonAsString))}
 
     private fun withResponse(filePath: String) = HttpResponse.response()

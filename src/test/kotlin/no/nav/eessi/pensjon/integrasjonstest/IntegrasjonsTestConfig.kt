@@ -72,10 +72,10 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
-    fun bestemSakOidcRestTemplate(): RestTemplate = mockk()
+    fun bestemSakOidcRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
-    fun fagmodulOidcRestTemplate(): RestTemplate  = mockk()
+    fun fagmodulOidcRestTemplate(): RestTemplate  = mockedRestTemplate()
 
     @Bean
     fun proxyOAuthRestTemplate(): RestTemplate = mockk()

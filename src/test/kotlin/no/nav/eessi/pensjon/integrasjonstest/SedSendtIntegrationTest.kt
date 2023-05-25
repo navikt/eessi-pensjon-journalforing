@@ -5,8 +5,10 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Test
+import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
+import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
@@ -21,14 +23,18 @@ import org.springframework.test.context.ActiveProfiles
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
+
     init {
-        if(System.getProperty("mockServerport") == null){
-            mockServer = ClientAndServer(PortFactory.findFreePort())
+        if (System.getProperty("mockServerport") == null) {
+            mockServer = ClientAndServer(Configuration().apply {
+                logLevel(Level.ERROR)
+            }, PortFactory.findFreePort())
                 .also {
                     System.setProperty("mockServerport", it.localPort.toString())
                 }
         }
     }
+
 
     @Test
     fun `Når en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
@@ -129,9 +135,8 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `Når en SED (P8000) hendelse blir konsumert skal det opprettes en journalføringsoppgave`() {
+    fun `En P8000 med saksType, saksId og aktørId skal automatisk journalføres (9999) `() {
 
-        //server setup
         CustomMockServer()
             .medEuxGetRequestWithJson(
                 "/buc/148161", Buc(
@@ -140,26 +145,28 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2100-PinNO-NAV.json")
-            .mockHentPersonPdl()
-            .mockHentPersonPdlGet()
-/*            .medJournalforing(false, "429434379")
+            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2100-PinNO-NAV.json")
+            .medEuxGetRequest(
+                "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",
+                "/pdf/pdfResponseMedTomtVedlegg.json"
+            )
+            .mockHentPersonPdl(javaClass.getResource("/pdl/hentPersonResponse.json")!!.readText())
+            .mockHentPersonPdlIdentder(javaClass.getResource("/pdl/hentIdenterResponse.json")!!.readText())
+            .mockHentPersonPdlGeografiskTilknytninger(emptyResponse())
+            .medJournalforing(false, "429434379")
             .medNorg2Tjeneste()
-            .mockBestemSakTom()
+            .mockBestemSak()
             .mockPensjonsinformasjon()
             .medOppdaterDistribusjonsinfo()
-            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResponseMedTomtVedlegg.json" )
-            meldingForSendtListener( "/eux/hendelser/P_BUC_05_P8000.json")*/
 
-        //then route to 4303
-//        OppgaveMeldingVerification("429434379")
-//            .medHendelsetype("SENDT")
-//            .medSedtype("P8000")
-//            .medtildeltEnhetsnr("4303")
+        meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
+
+        //then route to 9999
+        OppgaveMeldingVerification("429434379")
+            .medHendelsetype("SENDT")
+            .medSedtype("P8000")
+            .medtildeltEnhetsnr("9999")
     }
-
-
-
 
     @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
@@ -190,6 +197,13 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medtildeltEnhetsnr("4303")
     }
 
+    fun emptyResponse(): String {
+        return """
+            {
+              "data" : {},
+              "errors" : null
+            }
 
-
+        """.trimIndent()
+    }
 }

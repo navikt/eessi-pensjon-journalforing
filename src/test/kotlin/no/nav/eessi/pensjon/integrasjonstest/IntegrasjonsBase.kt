@@ -26,6 +26,7 @@ import org.springframework.kafka.listener.MessageListener
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.kafka.test.utils.ContainerTestUtils
 import org.springframework.kafka.test.utils.KafkaTestUtils
+import org.springframework.web.client.RestTemplate
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -56,6 +57,8 @@ abstract class IntegrasjonsBase() {
     lateinit var sedMottattTemplate: KafkaTemplate<String, String>
     lateinit var sedSendttTemplate: KafkaTemplate<String, String>
 
+    @Autowired
+    lateinit var fagmodulOidcRestTemplate : RestTemplate
 
     private fun settOppUtitlityConsumer(topicName: String): KafkaMessageListenerContainer<String, String> {
         val consumerProperties = KafkaTestUtils.consumerProps(
@@ -96,6 +99,7 @@ abstract class IntegrasjonsBase() {
         sedMottattTemplate = settOppProducerTemplate(SED_MOTTATT_TOPIC)
         sedSendttTemplate = settOppProducerTemplate(SED_SENDT_TOPIC)
         oppgaveTemplate = settOppProducerTemplate(OPPGAVE_TOPIC)
+
     }
 
     @AfterEach
@@ -153,12 +157,12 @@ abstract class IntegrasjonsBase() {
 
     fun meldingForMottattListener(messagePath: String) {
         sedMottattTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
-        mottattListener.getLatch().await(20, TimeUnit.SECONDS)
+        mottattListener.getLatch().await(50, TimeUnit.SECONDS)
         Thread.sleep(5000)
     }
     fun meldingForSendtListener(messagePath: String) {
         sedSendttTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
-        sendtListener.getLatch().await(20, TimeUnit.SECONDS)
+        sendtListener.getLatch().await(50, TimeUnit.SECONDS)
         Thread.sleep(5000)
     }
 }

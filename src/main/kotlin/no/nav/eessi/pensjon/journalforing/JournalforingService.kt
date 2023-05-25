@@ -245,7 +245,7 @@ class JournalforingService(
                 OppgaveType.BEHANDLE_SED
             )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
-        } else logger.warn("Nå har du forsøt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
+        } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
 
     private fun hentOppgaveEnhet(
