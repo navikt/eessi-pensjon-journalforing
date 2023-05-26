@@ -28,9 +28,13 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         logger.info("aktoerid: $aktoerId sedSak: $sedSakId Pensjoninformasjon: ${saklist.toJson()}")
 
         val gyldigSak = saklist.firstOrNull { it.sakId == sedSakId }
+        if (gyldigSak == null) {
+            logger.info("Finner ingen sakId i saksliste for aktoer for sedSakId: $sedSakId")
+            return null
+        }
         //noe skjer når det er generell saker
         return if (saklist.size > 1)
-            gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
         else
             gyldigSak
     }
