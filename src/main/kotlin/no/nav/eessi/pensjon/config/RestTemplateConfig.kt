@@ -11,13 +11,13 @@ import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import java.util.*
@@ -93,14 +93,23 @@ class RestTemplateConfig(
                         RequestCountInterceptor(meterRegistry),
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
-                .messageConverters().apply {
-                    createMappingJacksonHttpMessageConverter()
-                }
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
                             .apply { setOutputStreaming(false) }
                     )
                 }
+    }
+
+    @Bean
+    fun jackson2ObjectMapperBuilderCustomizer(): Jackson2ObjectMapperBuilderCustomizer {
+        return Jackson2ObjectMapperBuilderCustomizer { builder ->
+            builder.postConfigurer { objectMapper ->
+                objectMapper.factory
+                    .setStreamReadConstraints(
+                        StreamReadConstraints.builder().maxStringLength(300000000).build()
+                    )
+            }
+        }
     }
 
     private fun buildRestTemplate(url: String): RestTemplate {
@@ -114,16 +123,6 @@ class RestTemplateConfig(
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
             }
-    }
-    private fun createMappingJacksonHttpMessageConverter(): MappingJackson2HttpMessageConverter? {
-        return MappingJackson2HttpMessageConverter().apply {
-            objectMapper.factory.setStreamReadConstraints(
-                StreamReadConstraints
-                    .builder()
-                    .maxStringLength(30000000)
-                    .build()
-            )
-        }
     }
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
