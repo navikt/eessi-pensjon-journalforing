@@ -120,7 +120,7 @@ class RestTemplateConfig(
             objectMapper.factory.setStreamReadConstraints(
                 StreamReadConstraints
                     .builder()
-                    .maxStringLength(30000000)
+                    .maxStringLength(300000000)
                     .build()
             )
         }
