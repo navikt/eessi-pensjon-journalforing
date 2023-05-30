@@ -111,9 +111,8 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor()
             )
-            .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-            }
+            .additionalMessageConverters(createMappingJacksonHttpMessageConverter())
+            .build()
     }
     private fun createMappingJacksonHttpMessageConverter(): MappingJackson2HttpMessageConverter? {
         return MappingJackson2HttpMessageConverter().apply {
