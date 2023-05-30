@@ -60,54 +60,73 @@ class SedMottattListener(
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
-                //Forsøker med denne en gang til 258088L
+                val offsetToSkip = listOf(524914L)
                 try {
-                    logger.info("*** Offset ${cr.offset()}  Partition ${cr.partition()} ***")
-                    val sedHendelse = SedHendelse.fromJson(hendelse)
+                    val offset = cr.offset()
+                    if (offset in offsetToSkip) {
+                        logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
+                    } else {
 
-                    if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
-                        logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
-                        acknowledgment.acknowledge()
-                        return@measure
-                    }
+                        logger.info("*** Offset ${cr.offset()}  Partition ${cr.partition()} ***")
+                        val sedHendelse = SedHendelse.fromJson(hendelse)
 
-                    if (GyldigeHendelser.mottatt(sedHendelse)) {
-                        val bucType = sedHendelse.bucType!!
+                        if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
+                            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+                            acknowledgment.acknowledge()
+                            return@measure
+                        }
 
-                        logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                        val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                        val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
-                        val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
+                        if (GyldigeHendelser.mottatt(sedHendelse)) {
+                            val bucType = sedHendelse.bucType!!
 
-                        val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                        val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+                            val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                            val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
+                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
 
-                        val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
+                            val alleSedIBucPair =
+                                dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val kansellerteSeder =
+                                dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
 
-                        //identifisere Person hent Person fra PDL valider Person
-                        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                            alleSedIBucPair, bucType, sedHendelse.sedType, MOTTATT, sedHendelse.rinaDokumentId, erNavCaseOwner
-                        )
+                            val harAdressebeskyttelse =
+                                personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
 
-                        val alleSedIBucList = alleSedIBucPair.flatMap{ (_, sed) -> listOf(sed) }
-                        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
-                        val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-                        val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
-                        val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
+                            //identifisere Person hent Person fra PDL valider Person
+                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
+                                alleSedIBucPair,
+                                bucType,
+                                sedHendelse.sedType,
+                                MOTTATT,
+                                sedHendelse.rinaDokumentId,
+                                erNavCaseOwner
+                            )
 
-                        val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-                        journalforingService.journalfor(
-                            sedHendelse,
-                            MOTTATT,
-                            identifisertPerson,
-                            fdato,
-                            saktype,
-                            cr.offset(),
-                            sakInformasjon,
-                            currentSed,
-                            harAdressebeskyttelse,
-                        )
+                            val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
+                            val fdato = personidentifiseringService.hentFodselsDato(
+                                identifisertPerson,
+                                alleSedIBucList,
+                                kansellerteSeder
+                            )
+                            val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                            val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
+                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
 
+                            val currentSed =
+                                alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                MOTTATT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                cr.offset(),
+                                sakInformasjon,
+                                currentSed,
+                                harAdressebeskyttelse,
+                            )
+
+                        }
                     }
 
                     acknowledgment.acknowledge()
