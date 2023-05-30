@@ -93,9 +93,6 @@ class RestTemplateConfig(
                         RequestCountInterceptor(meterRegistry),
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
-                .messageConverters().apply {
-                    createMappingJacksonHttpMessageConverter()
-                }
                 .build().apply {
                     requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
                             .apply { setOutputStreaming(false) }
@@ -111,7 +108,6 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 RequestResponseLoggerInterceptor()
             )
-            .additionalMessageConverters(createMappingJacksonHttpMessageConverter())
             .build()
     }
     private fun createMappingJacksonHttpMessageConverter(): MappingJackson2HttpMessageConverter? {
