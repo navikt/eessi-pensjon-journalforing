@@ -4,14 +4,14 @@
   "sektorKode": "P",
   "bucType": "P_BUC_05",
   "rinaSakId": "148161",
-  "avsenderId": "NO:NAVT003",
+  "avsenderId": "FI:NAVT003",
   "avsenderNavn": "NAVT003",
-  "avsenderLand": "NO",
-  "mottakerId": "NO:NAVT002",
+  "avsenderLand": "FI",
+  "mottakerId": "FI:NAVT002",
   "mottakerNavn": "NAVT002",
   "mottakerLand": "NO",
   "rinaDokumentId": "f899bf659ff04d20bc8b978b186f1ecc",
   "rinaDokumentVersjon": "1",
   "sedType": "P8000",
-  "navBruker": "16115038745"
+  "navBruker": "22117320034"
 }
