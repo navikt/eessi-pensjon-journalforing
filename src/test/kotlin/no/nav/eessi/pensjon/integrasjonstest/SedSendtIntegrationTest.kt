@@ -5,9 +5,12 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Test
+import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
+import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -21,9 +24,12 @@ import org.springframework.test.context.ActiveProfiles
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
+
     init {
-        if(System.getProperty("mockServerport") == null){
-            mockServer = ClientAndServer(PortFactory.findFreePort())
+        if (System.getProperty("mockServerport") == null) {
+            mockServer = ClientAndServer(Configuration().apply {
+                logLevel(Level.ERROR)
+            }, PortFactory.findFreePort())
                 .also {
                     System.setProperty("mockServerport", it.localPort.toString())
                 }
@@ -38,7 +44,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medJournalforing(false, "429434378")
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .medEuxGetRequest("/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
+            .mockHttpRequestWithResponseFromFile("/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET,"/sed/P2000-NAV.json")
 
         meldingForSendtListener("/eux/hendelser/FB_BUC_01_F001.json")
     }
@@ -53,15 +59,15 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
-            .medEuxGetRequestWithJson(
-                "/buc/7477291", Buc(
+            .mockHttpRequestWithResponseFromJson(
+                "/buc/7477291", HttpMethod.GET, Buc(
                     id = "7477291",
                     participants = emptyList<Participant>(),
                     documents = opprettBucDocuments("/fagmodul/alldocuments_ugyldigFNR_ids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx","/sed/P2000-ugyldigFNR-NAV.json")
-            .medEuxGetRequest( "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
+            .mockHttpRequestWithResponseFromFile("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
+            .mockHttpRequestWithResponseFromFile( "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
 
@@ -81,15 +87,16 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
-            .medEuxGetRequestWithJson(
-                "/buc/147666", Buc(
+            .mockHttpRequestWithResponseFromJson(
+                "/buc/147666", HttpMethod.GET,
+                Buc(
                     id = "147666",
                     participants = emptyList<Participant>(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2000-NAV.json")
-            .medEuxGetRequest("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer","/pdf/pdfResponseMedUgyldigVedlegg.json")
+            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-NAV.json")
+            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",HttpMethod.GET,"/pdf/pdfResponseMedUgyldigVedlegg.json")
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
 
@@ -109,15 +116,17 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
-            .medEuxGetRequestWithJson(
-                "/buc/148161", Buc(
+            .mockHttpRequestWithResponseFromJson(
+                "/buc/148161",
+                HttpMethod.GET,
+                Buc(
                     id = "12312312312452345624355",
                     participants = emptyList<Participant>(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2000-ugyldigFNR-NAV.json")
-            .medEuxGetRequest( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
+            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
+            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_03_P2200.json")
 
@@ -129,6 +138,40 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
+    fun `En P8000 med saksType, saksId og aktørId skal automatisk journalføres (9999) `() {
+
+        CustomMockServer()
+            .mockHttpRequestWithResponseFromJson(
+                "/buc/148161",
+                HttpMethod.GET,
+                Buc(
+                    id = "12312312312452345624355",
+                    participants = emptyList<Participant>(),
+                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
+                ).toJson()
+            )
+            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET, "/sed/P2100-PinNO-NAV.json")
+            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET, "/pdf/pdfResponseMedTomtVedlegg.json")
+            .mockHttpRequestFromFileWithBodyContains("hentPerson", HttpMethod.POST,"/pdl/hentPersonResponse.json")
+            .mockHttpRequestFromFileWithBodyContains("hentIdenter", HttpMethod.POST,"/pdl/hentIdenterResponse.json")
+            .mockHttpRequestFromJsonWithBodyContains("hentGeografiskTilknytning", HttpMethod.POST, emptyResponse())
+
+            .medJournalforing(false, "429434379")
+            .medNorg2Tjeneste()
+            .mockBestemSak()
+            .mockPensjonsinformasjon()
+            .medOppdaterDistribusjonsinfo()
+
+        meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
+
+        //then route to 9999
+        OppgaveMeldingVerification("429434379")
+            .medHendelsetype("SENDT")
+            .medSedtype("P8000")
+            .medtildeltEnhetsnr("9999")
+    }
+
+    @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 
         //server setup
@@ -137,15 +180,18 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
-            .medEuxGetRequestWithJson(
-                "/buc/161558", Buc(
+            .mockHttpRequestWithResponseFromJson(
+                "/buc/161558",
+                HttpMethod.GET,
+                Buc(
                     id = "12312312312452345624355",
                     participants = emptyList<Participant>(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .medEuxGetRequest("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018","/sed/P2000-ugyldigFNR-NAV.json")
-            .medEuxGetRequest( "/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer","/pdf/pdfResonseMedP2000MedVedlegg.json" )
+            .mockHttpRequestWithResponseFromFile("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
+            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
+            .mockHttpRequestWithResponseFromFile( "/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_05_X008.json")
 
@@ -156,4 +202,13 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medtildeltEnhetsnr("4303")
     }
 
+    fun emptyResponse(): String {
+        return """
+            {
+              "data" : {},
+              "errors" : null
+            }
+
+        """.trimIndent()
+    }
 }

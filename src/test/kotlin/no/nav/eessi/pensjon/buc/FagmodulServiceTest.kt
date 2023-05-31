@@ -3,7 +3,8 @@ package no.nav.eessi.pensjon.buc
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.eux.model.sed.Nav
@@ -43,7 +44,7 @@ internal class FagmodulServiceTest {
                 mapJsonToAny<SED>(sedP5000)
         )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
+        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc)
 
         assertNotNull(result)
         assertEquals(expected.sakId, result?.sakId)
@@ -59,7 +60,7 @@ internal class FagmodulServiceTest {
                 mapJsonToAny<SED>(sedP2000)
         )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)
+        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc)
         assertNull(result)
 
         verify { fagmodulKlient wasNot Called }
@@ -71,7 +72,7 @@ internal class FagmodulServiceTest {
                 mockSED(P2000, eessiSakId = "UGYLDIG SAK ID")
         )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc)
+        val result = helper.hentPensjonSakFraPesys("123123", mockAlleSedIBuc)
         assertNull(result)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -85,7 +86,7 @@ internal class FagmodulServiceTest {
                 mockSED(P2000, eessiSakId = "12345")
         )
 
-        assertNull(helper.hentPensjonSakFraSED("123123", mockAlleSedIBuc))
+        assertNull(helper.hentPensjonSakFraPesys("123123", mockAlleSedIBuc))
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -108,7 +109,7 @@ internal class FagmodulServiceTest {
                 mockSED(P6000, eessiSakId = "22874955")
         )
 
-        val result = helper.hentPensjonSakFraSED("123123", mockAllSediBuc)!!
+        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc)!!
         assertNotNull(result)
         assertEquals(expected.sakType, result.sakType)
         assertEquals(3, result.tilknyttedeSaker.size)
@@ -135,7 +136,7 @@ internal class FagmodulServiceTest {
                 mockSED(P6000, eessiSakId = "22874456")
         )
 
-        val result = helper.hentPensjonSakFraSED("aktoerId", mockAllSediBuc)!!
+        val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc)!!
         assertNotNull(result)
         assertEquals(expected.sakType, result.sakType)
         assertTrue(result.harGenerellSakTypeMedTilknyttetSaker())
@@ -153,7 +154,7 @@ internal class FagmodulServiceTest {
         )
 
         assertNull(
-                helper.hentPensjonSakFraSED("111", mockAllSediBuc),
+                helper.hentPensjonSakFraPesys("111", mockAllSediBuc),
                 "Skal ikke få noe i retur dersom det finnes flere unike EessiSakIDer."
         )
 

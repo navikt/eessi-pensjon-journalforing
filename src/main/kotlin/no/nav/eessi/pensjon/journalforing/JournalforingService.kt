@@ -67,7 +67,7 @@ class JournalforingService(
                 logger.info(
                     """**********
                     rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType} på aktoerId: ${identifisertPerson?.aktoerId} sakType: $saktype
+                    hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType?.name} på aktoerId: ${identifisertPerson?.aktoerId} sakType: ${saktype?.name}
                 **********""".trimIndent()
                 )
 
@@ -77,7 +77,7 @@ class JournalforingService(
                 }
 
                 val tildeltEnhet = if (fdato == null ||  fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
-                    logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING}")
+                    logger.info("Fdato er forskjellig fra SED fnr, sender til ${Enhet.ID_OG_FORDELING} fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fnr?.getBirthDate()}")
                     Enhet.ID_OG_FORDELING
                 } else {
                     oppgaveRoutingService.hentEnhet(
@@ -245,7 +245,7 @@ class JournalforingService(
                 OppgaveType.BEHANDLE_SED
             )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
-        } else logger.warn("Nå har du forsøt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
+        } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
 
     private fun hentOppgaveEnhet(

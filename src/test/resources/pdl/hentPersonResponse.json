@@ -1,0 +1,260 @@
+{
+  "data": {
+    "hentPerson": {
+      "identer": [
+        {
+          "ident": "11067122781",
+          "gruppe": "FOLKEREGISTERIDENT"
+        },        {
+          "ident": "11067122781",
+          "gruppe": "AKTORID"
+        }
+      ],
+      "adressebeskyttelse": [],
+      "bostedsadresse": [],
+      "oppholdsadresse": [
+        {
+          "vegadresse": null,
+          "utenlandskAdresse": {
+            "adressenavnNummer": "1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000",
+            "bygningEtasjeLeilighet": "",
+            "postboksNummerNavn": null,
+            "postkode": null,
+            "bySted": null,
+            "regionDistriktOmraade": "",
+            "landkode": "TUV"
+          },
+          "gyldigFraOgMed": null,
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:06",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "5f03a486-6239-4309-8dde-a2f30e54ea1b",
+            "historisk": false
+          }
+        }
+      ],
+      "kontaktadresse": [
+        {
+          "coAdressenavn": null,
+          "type": "Utland",
+          "gyldigFraOgMed": "2021-02-16T14:53:07",
+          "gyldigTilOgMed": null,
+          "folkeregistermetadata": {
+            "gyldighetstidspunkt": "2021-02-16T14:53:07"
+          },
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:07",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "ea03dc43-4867-4022-9110-d80fef7b21a8",
+            "historisk": false
+          },
+          "vegadresse": null,
+          "utenlandskAdresse": null,
+          "postadresseIFrittFormat": null,
+          "utenlandskAdresseIFrittFormat": {
+            "adresselinje1": "1KOLEJOWA 6/5",
+            "adresselinje2": "18-500 KOLNO",
+            "adresselinje3": "CAPITAL WEST 3000",
+            "byEllerStedsnavn": null,
+            "landkode": "TUV",
+            "postkode": null
+          }
+        }
+      ],
+      "kontaktinformasjonForDoedsbo": [],
+      "navn": [
+        {
+          "fornavn": "TVILSOM",
+          "mellomnavn": null,
+          "etternavn": "KNOTT",
+          "forkortetNavn": "KNOTT TVILSOM",
+          "gyldigFraOgMed": "2021-02-16",
+          "folkeregistermetadata": {
+            "gyldighetstidspunkt": "2021-02-16T14:53:06"
+          },
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:06",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "bf01eebf-2750-464b-bd19-062d4ab3e209",
+            "historisk": false
+          }
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "ABW",
+          "gyldigFraOgMed": "1972-07-29",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:07",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "c1ac4333-3fee-43bb-8158-b94cd63fccd5",
+            "historisk": false
+          }
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1972-07-29",
+          "foedeland": null,
+          "foedested": null,
+          "foedselsaar": null,
+          "folkeregistermetadata": {
+            "gyldighetstidspunkt": "2021-02-16T14:53:06"
+          },
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:06",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "760afef9-21e7-46ff-bd10-b2b45eb4e8d3",
+            "historisk": false
+          }
+        }
+      ],
+      "doedsfall": [],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN",
+          "folkeregistermetadata": {
+            "gyldighetstidspunkt": "2021-02-16T14:53:06"
+          },
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:06",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "5daad70a-0651-4ccd-9a96-c479a1201ba1",
+            "historisk": false
+          }
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "relatertPersonsIdent": "68081299688",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "FAR",
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:07",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "8acd4d57-6197-4d0e-a9c7-9a5483f06a5d",
+            "historisk": false
+          }
+        },
+        {
+          "relatertPersonsIdent": "58100998910",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "FAR",
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:07",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "bc78cdab-0d75-4ea7-a5f2-4bbf35de2258",
+            "historisk": false
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "GIFT",
+          "gyldigFraOgMed": "2005-05-05",
+          "relatertVedSivilstand": "53108148809",
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-16T14:53:07",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "b3623cf3-b2ea-477b-ad5c-e3b7a5bdde41",
+            "historisk": false
+          }
+        }
+      ],
+      "utenlandskIdentifikasjonsnummer": [
+        {
+          "identifikasjonsnummer" : "12312312-234134134-14351345",
+          "utstederland": "SWE",
+          "opphoert": false,
+          "metadata": {
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-02-15T10:41:02",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ],
+            "master": "FREG",
+            "opplysningsId": "497e2bbb-7905-4c59-99c8-0d22316fead1",
+            "historisk": false
+          }
+        }
+      ]
+    }
+  }
+}
