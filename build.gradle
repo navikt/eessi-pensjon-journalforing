@@ -54,7 +54,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.65")
 	implementation("no.nav.eessi.pensjon:ep-eux:2.1.30")
 	implementation("no.nav.eessi.pensjon:ep-routing:1.0.51") {
-x		exclude module: 'ep-personoppslag'
+		exclude module: 'ep-personoppslag'
 	}
 
 	// PDF box
