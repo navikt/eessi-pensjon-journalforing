@@ -16,7 +16,7 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
 
     fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
         val path = "/pensjon/sakliste/$aktoerId"
-        println(path)
+
         try {
             val responsebody = fagmodulOidcRestTemplate.exchange(
                 path,
