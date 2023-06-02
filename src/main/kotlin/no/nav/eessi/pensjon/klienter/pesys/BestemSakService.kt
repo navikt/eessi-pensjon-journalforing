@@ -26,6 +26,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
      * @return [SakInformasjon]
      */
     fun hentSakInformasjonViaBestemSak(aktoerId: String, bucType: BucType, innkommendeSakType: SakType? = null): SakInformasjon? {
+        logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $innkommendeSakType")
         val saktype = when (bucType) {
             P_BUC_01 -> ALDER
             P_BUC_02 -> innkommendeSakType ?: return null
