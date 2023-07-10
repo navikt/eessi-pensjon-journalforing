@@ -13,7 +13,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
     fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null) : List<SEDPersonRelasjon> {
-        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
+        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}, med rinasak: $rinaDocumentId")
 
         val sedType = sed.type
         //gjenlevendePerson (søker)

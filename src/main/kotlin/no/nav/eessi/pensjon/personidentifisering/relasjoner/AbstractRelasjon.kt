@@ -1,9 +1,13 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
@@ -24,7 +28,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
     abstract fun hentRelasjoner(): List<SEDPersonRelasjon>
 
     fun hentForsikretPerson(saktype: SakType?): List<SEDPersonRelasjon> {
-        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
+        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}, med rinasak: $rinaDocumentId")
 
         forsikretPerson?.let { person ->
             val sokPersonKriterie =  opprettSokKriterie(person)
