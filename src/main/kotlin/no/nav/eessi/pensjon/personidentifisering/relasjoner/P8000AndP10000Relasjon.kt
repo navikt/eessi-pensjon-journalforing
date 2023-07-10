@@ -1,9 +1,13 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.*
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.BARN
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.ETTERLATTE
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.FORSORGER
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -12,7 +16,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val fnrListe = mutableListOf<SEDPersonRelasjon>()
-        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}")
+        logger.info("Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}, med rinasak: $rinaDocumentId")
 
 
         val forsikret = hentForsikretPerson(bestemSaktype(bucType))
