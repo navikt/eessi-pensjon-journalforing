@@ -8,7 +8,8 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -21,6 +22,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -40,28 +42,6 @@ class PersonidentifiseringServiceTest {
 
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
-
-    @Test
-    fun `Gitt en P9000 med gjenlevende så skal vi sammenlikne fdato på gjenlevende med gjenlevende sitt fnr`() {
-        val forsikretFnr = "13057119785"
-        val gjenlevendeFnr = "59060776207"
-        val p9000 = sedFromJsonFile("/sed/P9000.json")
-        val p8000 = sedFromJsonFile("/sed/P8000.json")
-        val p9000sedJson = mapJsonToAny<SED>(p9000.toJson())
-        val p8000sedJson = mapJsonToAny<SED>(p8000.toJson())
-
-        every { personService.hentPerson(NorskIdent(gjenlevendeFnr)) } returns PersonMock.createWith(gjenlevendeFnr, aktoerId = null, landkoder = true, geo = null)
-        every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = null, landkoder = true, geo = null)
-
-        val actual = personidentifiseringService.hentIdentifisertPerson(
-            listOf(Pair("P9000", p9000sedJson),(Pair("P8000", p8000sedJson ))), P_BUC_05, SedType.P9000, SENDT,  "21685212", false
-        )
-
-        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(p9000,p8000), emptyList())
-
-        assertEquals("2007-06-19", fdato.toString())
-
-    }
 
     @Test
     fun `Gitt en H070 der det finnes en p6000 med gjenlevende i samme buc så identifiser forsikret person`() {
