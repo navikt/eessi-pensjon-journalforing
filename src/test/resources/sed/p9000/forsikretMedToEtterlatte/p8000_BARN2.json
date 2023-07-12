@@ -1,0 +1,78 @@
+{
+  "sed": "P8000",
+  "nav": {
+    "eessisak": [
+      {
+        "institusjonsid": "PL:ADF88ADS",
+        "institusjonsnavn": "Social Insurance Institution",
+        "saksnummer": "242423424",
+        "land": "PL"
+      }
+    ],
+    "bruker": {
+      "person": {
+        "pin": [
+          {
+            "identifikator": "71061199999",
+            "land": "PL",
+            "institusjon": {
+              "institusjonsid": "PL:ADF88ADS",
+              "institusjonsnavn": "Social Insurance Institution"
+            }
+          }
+        ],
+        "statsborgerskap": [
+          {
+            "land": "PL"
+          }
+        ],
+        "etternavn": "OLSEN",
+        "fornavn": "MARKUS",
+        "kjoenn": "M",
+        "foedested": {
+          "by": "WARZAVA",
+          "land": "PL"
+        },
+        "foedselsdato": "1971-06-11"
+      }
+    },
+    "annenperson": {
+      "person": {
+        "pin": [
+          {
+            "institusjonsnavn": "Social Insurance Institution",
+            "institusjonsid": "PL:242423424",
+            "identifikator": "05232911111",
+            "land": "PL"
+          }
+        ],
+       "etternavn": "ZELDA",
+        "etternavnvedfoedsel": "OLSEN",
+        "fornavn": "ARAON",
+        "kjoenn": "M",
+        "foedested": {
+          "by": "WARZAVA",
+          "land": "PL"
+        },
+        "foedselsdato": "2005-03-29",
+        "rolle": "01"
+      },
+      "adresse": {
+        "gate": "SEILDUKSGATA",
+        "bygning": "66",
+        "by": "WARZAVA",
+        "postnummer": "242342",
+        "land": "PL"
+      }
+    }
+  },
+  "pensjon": {
+    "anmodning": {
+      "referanseTilPerson": null
+    },
+    "ytterligeinformasjon": "",
+    "vedlegg": null
+  },
+  "sedGVer": "4",
+  "sedVer": "2"
+}

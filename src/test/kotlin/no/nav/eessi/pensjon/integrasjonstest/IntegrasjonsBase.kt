@@ -155,6 +155,14 @@ abstract class IntegrasjonsBase() {
         }
     }
 
+    fun isMessageInlog(keyword: String): Boolean {
+        val logsList: List<ILoggingEvent> = listAppender.list
+        return logsList.find { logMelding ->
+            logMelding.message.contains(keyword)
+        }?.message?.isNotEmpty() ?: false
+    }
+
+
     fun meldingForMottattListener(messagePath: String) {
         sedMottattTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
         mottattListener.getLatch().await(50, TimeUnit.SECONDS)
