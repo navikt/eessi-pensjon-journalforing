@@ -76,7 +76,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
             )
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/10000000001", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p8000_BARN1.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/20000000002", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p8000_BARN2.json")
-            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003",HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/P9000.json")
+            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003",HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p9000.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003/filer", HttpMethod.GET, "/pdf/pdfResponseMedTomtVedlegg.json")
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_05_P9000.json")
