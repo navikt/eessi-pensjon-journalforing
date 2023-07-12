@@ -1,0 +1,83 @@
+{
+  "pensjon": {
+    "merinformasjon": {
+      "ytelser": [
+        {
+          "beloep": [
+            {
+              "beloep": "1313",
+              "gjeldendesiden": "2019-01-01",
+              "betalingshyppighetytelse": "03",
+              "valuta": "NOK"
+            }
+          ]
+        }
+      ]
+    },
+    "tilleggsinformasjon": {
+      "p8000": {
+        "henvisningperson": "02",
+        "dato": "2023-04-21"
+      },
+      "yrkesaktivitet": {
+        "tilleggsopplysning": ""
+      }
+    }
+  },
+  "nav": {
+    "bruker": {
+      "person": {
+        "fornavn": "ANTON",
+        "kjoenn": "M",
+        "etternavn": "OLSEN",
+        "foedselsdato": "1971-06-11",
+        "pin": [
+          {
+            "institusjonsnavn": "The Norwegian Labour and Welfare Administration",
+            "identifikator": "71061199999",
+            "land": "NO",
+            "institusjonsid": "NO:242423423"
+          }
+        ],
+        "foedested": {
+          "by": "Unknown",
+          "land": "PL"
+        }
+      }
+    },
+    "eessisak": [
+      {
+        "institusjonsnavn": "The Norwegian Labour and Welfare Administration",
+        "saksnummer": "11111111",
+        "land": "NO",
+        "institusjonsid": "NO:889640782"
+      }
+    ],
+    "annenperson": {
+      "person": {
+        "kjoenn": "K",
+        "fornavn": "ZELDA",
+        "etternavn": "OLSEN",
+        "pin": [
+          {
+            "institusjonsid": "NO:889640782",
+            "identifikator": "59060776207",
+            "land": "NO",
+            "institusjonsnavn": "The Norwegian Labour and Welfare Administration"
+          }
+        ],
+        "rolle": "01",
+        "foedselsdato": "2007-06-19"
+      },
+      "adresse": {
+        "bygning": "3143 Tyrsilgata",
+        "land": "PL",
+        "by": "POLEN",
+        "gate": "29 DSAD"
+      }
+    }
+  },
+  "sedVer": "2",
+  "sedGVer": "4",
+  "sed": "P9000"
+}

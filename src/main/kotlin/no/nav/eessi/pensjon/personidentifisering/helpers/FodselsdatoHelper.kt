@@ -59,7 +59,7 @@ class FodselsdatoHelper {
             return seder.any { it.type == P15000 && it.nav?.krav?.type == "02" }
         }
 
-        private fun filterFodselsdato(sed: SED): LocalDate? {
+        fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
                 val fdato = when (sed.type) {
                     R005 -> filterPersonR005Fodselsdato(sed as R005)
@@ -68,6 +68,7 @@ class FodselsdatoHelper {
                     P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
                     P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
                     P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
                     P15000 -> filterP15000(sed as P15000)
                     H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     X005, X008, X010 -> filterPersonFodselsdatoX00Sed(sed)

@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
@@ -234,9 +235,6 @@ class PersonidentifiseringService(
     /**
      * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
      */
-    /**
-     * Noen Seder kan kun inneholde forsikret person i de tilfeller benyttes den forsikrede selv om andre Sed i Buc inneholder andre personer
-     */
     private fun brukForsikretPerson(
         sedType: SedType?,
         identifisertePersoner: List<IdentifisertPersonPDL>
@@ -249,17 +247,22 @@ class PersonidentifiseringService(
     }
 
     /**
-     * Henter første treff på dato fra listen av SEDer
-     */
-    /**
-     * Henter første treff på dato fra listen av SEDer
+     * Ser første etter fødselsdato som matcher fnr til identifisert person
+     * Sjekker alle SEDer, inkl kansellerte
+     *
      */
     fun hentFodselsDato(
-        identifisertPerson: IdentifisertPerson?,
-        seder: List<SED>,
-        kansellerteSeder: List<SED>
+        identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>
     ): LocalDate? {
-        return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
+
+        if( identifisertPerson?.personRelasjon?.fnr == null ){
+            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
+        }
+
+        return seder.plus(kansellerteSeder)
+            .filter { it.type.kanInneholdeIdentEllerFdato() }
+            .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
+            .firstOrNull { it == identifisertPerson.personRelasjon?.fnr?.getBirthDate() }
     }
 }
 

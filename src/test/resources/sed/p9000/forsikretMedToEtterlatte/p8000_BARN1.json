@@ -1,0 +1,75 @@
+{
+  "nav": {
+    "annenperson": {
+      "person": {
+        "pin": [
+          {
+            "institusjonsid": "PL:PL390050ER",
+            "identifikator": "07261909163",
+            "land": "PL",
+            "institusjonsnavn": "Social Insurance Institution Pension"
+          }
+        ],
+        "foedested": {
+          "by": "Warzava",
+          "land": "PL"
+        },
+        "rolle": "01",
+        "kjoenn": "K",
+        "etternavnvedfoedsel": "Olsen",
+        "etternavn": "Madgda",
+        "fornavn": "Zorro",
+        "foedselsdato": "2007-06-19"
+      },
+      "adresse": {
+        "land": "PL",
+        "by": "Warzawa",
+        "postnummer": "7313213",
+        "bygning": "324230",
+        "gate": "Steinersengata"
+      }
+    },
+    "bruker": {
+      "person": {
+        "pin": [
+          {
+            "identifikator": "71061199999",
+            "land": "PL",
+            "institusjon": {
+              "institusjonsid": "PL:ADF88ADS",
+              "institusjonsnavn": "Social Insurance Institution"
+            }
+          }
+        ],
+        "statsborgerskap": [
+          {
+            "land": "PL"
+          }
+        ],
+        "etternavn": "OLSEN",
+        "fornavn": "MARKUS",
+        "kjoenn": "M",
+        "foedested": {
+          "by": "WARZAVA",
+          "land": "PL"
+        },
+        "foedselsdato": "1971-06-11"
+      }
+    },
+    "eessisak": [
+      {
+        "institusjonsnavn": "Social Insurance Institution",
+        "saksnummer": "24234234234",
+        "institusjonsid": "PL:SADFDS",
+        "land": "PL"
+      }
+    ]
+  },
+  "sed": "P8000",
+  "pensjon": {
+    "anmodning": {
+      "relasjonTilForsikretPerson": "06"
+    },
+    "ytterligeinformasjon": ""
+  }
+}

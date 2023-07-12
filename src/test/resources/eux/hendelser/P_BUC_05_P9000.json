@@ -1,0 +1,17 @@
+{
+  "id": 1880,
+  "sedId": "P9000_f899bf659ff04d20bc8b978b186f1ecc_1",
+  "sektorKode": "P",
+  "bucType": "P_BUC_05",
+  "rinaSakId": "148161",
+  "avsenderId": "NO:NAVT003",
+  "avsenderNavn": "NAVT003",
+  "avsenderLand": "NO",
+  "mottakerId": "NO:NAVT002",
+  "mottakerNavn": "NAVT002",
+  "mottakerLand": "NO",
+  "rinaDokumentId": "30000000003",
+  "rinaDokumentVersjon": "1",
+  "sedType": "P9000",
+  "navBruker": null
+}

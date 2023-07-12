@@ -402,7 +402,7 @@ internal open class JournalforingTestBase {
 
     private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
-    protected fun createBrukerWith(
+    fun createBrukerWith(
         fnr: String?,
         fornavn: String = "Fornavn",
         etternavn: String = "Etternavn",
