@@ -97,7 +97,7 @@ class SedSendtListener(
                                 alleSedIBucList,
                                 kansellerteSeder
                             )
-                            val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+                            val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon =
                                 pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                             val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
