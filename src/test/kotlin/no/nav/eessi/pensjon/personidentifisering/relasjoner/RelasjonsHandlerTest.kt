@@ -238,78 +238,78 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             assertEquals(GJENLEV, gjenlevRelasjon.saktype)
         }
 
-    @Test
-    fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres kun en gjenlevende uten ytelsestype`() {
-        val forventetFnr = SLAPP_SKILPADDE
+        @Test
+        fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres kun en gjenlevende uten ytelsestype`() {
+            val forventetFnr = SLAPP_SKILPADDE
 
-        val actual = RelasjonsHandler.hentRelasjoner(
-            listOf(
-                Pair(
-                    "312312300",
-                    SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE))
-                ), Pair("312312301", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = null))
-            ), P_BUC_02
-        )
+            val actual = RelasjonsHandler.hentRelasjoner(
+                listOf(
+                    Pair(
+                        "312312300",
+                        SED.generateSedToClass<P5000>(generateSED(SedType.P5000, forsikretFnr = null, gjenlevFnr = forventetFnr, gjenlevRolle = Rolle.ETTERLATTE))
+                    ), Pair("312312301", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = null))
+                ), P_BUC_02
+            )
 
-        val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
-        val expectedPersonRelasjon = SEDPersonRelasjon(
-            Fodselsnummer.fra(forventetFnr),
-            Relasjon.GJENLEVENDE,
-            null,
-            sedType = SedType.P5000,
-            sokKriterier = sok,
-            fdato = sok.foedselsdato,
-            rinaDocumentId = "312312300"
-        )
-        assertEquals(1, actual.size)
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
+            val expectedPersonRelasjon = SEDPersonRelasjon(
+                Fodselsnummer.fra(forventetFnr),
+                Relasjon.GJENLEVENDE,
+                null,
+                sedType = SedType.P5000,
+                sokKriterier = sok,
+                fdato = sok.foedselsdato,
+                rinaDocumentId = "312312300"
+            )
+            assertEquals(1, actual.size)
 
-        val actualPersonRelasjon = actual.first()
-        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
-    }
+            val actualPersonRelasjon = actual.first()
+            assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
+        }
 
-    @Test
-    fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres minst en gjenlevende`() {
-        val gjenlevFnr = LEALAUS_KAKE
+        @Test
+        fun `Gitt en P2100 uten gjenlevende når P5000 har en gjenlevende så skal det returneres minst en gjenlevende`() {
+            val gjenlevFnr = LEALAUS_KAKE
 
-        val actual = RelasjonsHandler.hentRelasjoner(
-            listOf(
-                Pair("13123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.SAMBOER)),
-                Pair(
-                    "23123123",
-                    SED.generateSedToClass<P5000>(
-                        generateSED(
-                            SedType.P5000,
-                            forsikretFnr = "25105424704",
-                            gjenlevFnr = gjenlevFnr,
-                            gjenlevRelasjon = RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP
+            val actual = RelasjonsHandler.hentRelasjoner(
+                listOf(
+                    Pair("13123123", generateSED(SedType.P2100, forsikretFnr = null, gjenlevFnr = null, gjenlevRelasjon = RelasjonTilAvdod.SAMBOER)),
+                    Pair(
+                        "23123123",
+                        SED.generateSedToClass<P5000>(
+                            generateSED(
+                                SedType.P5000,
+                                forsikretFnr = "25105424704",
+                                gjenlevFnr = gjenlevFnr,
+                                gjenlevRelasjon = RelasjonTilAvdod.PART_I_ET_REGISTRERT_PARTNERSKAP
+                            )
+                        )
+                    ),
+                    Pair(
+                        "33123123",
+                        SED.generateSedToClass<P8000>(
+                            generateSED(
+                                SedType.P8000,
+                                forsikretFnr = "25105424704",
+                                annenPersonFnr = gjenlevFnr,
+                                forsikretRolle = Rolle.ETTERLATTE
+                            )
                         )
                     )
-                ),
-                Pair(
-                    "33123123",
-                    SED.generateSedToClass<P8000>(
-                        generateSED(
-                            SedType.P8000,
-                            forsikretFnr = "25105424704",
-                            annenPersonFnr = gjenlevFnr,
-                            forsikretRolle = Rolle.ETTERLATTE
-                        )
-                    )
-                )
-            ), P_BUC_02
-        )
+                ), P_BUC_02
+            )
 
-        println("*** $actual ***")
-        val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22))
-        val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
+            println("*** $actual ***")
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22))
+            val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
 
-        assertEquals(2, actual.size)
-        val actualPersonRelasjon = actual.first()
-        assertEquals(gjenlevFnr, actualPersonRelasjon.fnr!!.value)
-        assertEquals(Relasjon.GJENLEVENDE, actualPersonRelasjon.relasjon)
+            assertEquals(2, actual.size)
+            val actualPersonRelasjon = actual.first()
+            assertEquals(gjenlevFnr, actualPersonRelasjon.fnr!!.value)
+            assertEquals(Relasjon.GJENLEVENDE, actualPersonRelasjon.relasjon)
 
-        assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
-    }
+            assertEquals(expectedPersonRelasjon, actualPersonRelasjon)
+        }
 
         @Test
         fun `Gitt en P4000 med forsikret og gjenlevende så velger vi kun gjenlevende relasjoner`() {
@@ -420,48 +420,48 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             assertNull(gjenlevRelasjon.saktype)
         }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["06", "07", "08", "09"])
-    fun `SedType P15000 henter gjenlevende hvis krav er 02, relasjon barn`(relasjonKode: String) {
-        val forsikretFnr = SLAPP_SKILPADDE
-        val gjenlevFnr = LEALAUS_KAKE
+        @ParameterizedTest
+        @ValueSource(strings = ["06", "07", "08", "09"])
+        fun `SedType P15000 henter gjenlevende hvis krav er 02, relasjon barn`(relasjonKode: String) {
+            val forsikretFnr = SLAPP_SKILPADDE
+            val gjenlevFnr = LEALAUS_KAKE
 
-        val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
-        val sedList = listOf(
-            Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
-        )
+            val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
+            val sedList = listOf(
+                Pair("3123123", SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
+            )
 
-        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
-        assertEquals(1, relasjoner.size)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
+            assertEquals(1, relasjoner.size)
 
-        val gjenlevRelasjon = relasjoner[0]
-        assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
-        assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
-        assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-        assertEquals(BARNEP, gjenlevRelasjon.saktype)
-    }
+            val gjenlevRelasjon = relasjoner[0]
+            assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
+            assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
+            assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
+            assertEquals(BARNEP, gjenlevRelasjon.saktype)
+        }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["01", "02", "03", "04", "05"])
-    fun `SedType P15000 henter gjenlevende hvis krav er 02, annen relasjon`(relasjonKode: String) {
-        val forsikretFnr = SLAPP_SKILPADDE
-        val gjenlevFnr = LEALAUS_KAKE
+        @ParameterizedTest
+        @ValueSource(strings = ["01", "02", "03", "04", "05"])
+        fun `SedType P15000 henter gjenlevende hvis krav er 02, annen relasjon`(relasjonKode: String) {
+            val forsikretFnr = SLAPP_SKILPADDE
+            val gjenlevFnr = LEALAUS_KAKE
 
-        val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
-        val sedList = listOf(
-            Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
-        )
+            val relasjon = mapJsonToAny<RelasjonTilAvdod>("\"$relasjonKode\"")
+            val sedList = listOf(
+                Pair("3123123",SED.generateSedToClass<P15000>(generateSED(SedType.P15000, forsikretFnr = forsikretFnr, gjenlevFnr = gjenlevFnr, navKrav = KravType.GJENLEV, gjenlevRelasjon = relasjon)))
+            )
 
-        val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
+            val relasjoner = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_10)
 
-        assertEquals(1, relasjoner.size)
+            assertEquals(1, relasjoner.size)
 
-        val gjenlevRelasjon = relasjoner[0]
-        assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
-        assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
-        assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
-        assertEquals(GJENLEV, gjenlevRelasjon.saktype)
-    }
+            val gjenlevRelasjon = relasjoner[0]
+            assertEquals(Relasjon.GJENLEVENDE, gjenlevRelasjon.relasjon)
+            assertEquals(gjenlevFnr, gjenlevRelasjon.fnr!!.value)
+            assertEquals(SedType.P15000, gjenlevRelasjon.sedType)
+            assertEquals(GJENLEV, gjenlevRelasjon.saktype)
+        }
 
     }
 
