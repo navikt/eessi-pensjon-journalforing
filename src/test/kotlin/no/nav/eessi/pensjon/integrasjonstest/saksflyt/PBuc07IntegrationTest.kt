@@ -69,6 +69,25 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         }
     }
 
+    @Test
+    fun `Gitt en P12000 med forsikret uten gjenlevende saa skal forsikret benyttes som identifisert person`() {
+        val allDocuemtActions = forenkletSEDS()
+
+        testRunnerVoksen(
+            FNR_VOKSEN,
+            fnrVoksenSoker = null,
+            krav = KravType.ALDER,
+            alleDocs = allDocuemtActions,
+            relasjonAvod = null,
+            hendelseType = MOTTATT,
+            norg2enhet = null,
+            fdatoBruker = "1971-06-11"
+        ) {
+            Assertions.assertEquals(Tema.PENSJON, it.tema)
+            Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+        }
+    }
+
     private fun forenkletSEDS() = listOf(
         ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
     )

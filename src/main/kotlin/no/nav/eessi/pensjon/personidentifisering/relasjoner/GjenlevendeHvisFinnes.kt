@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -51,6 +52,23 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         return relasjon in gyldigeBarneRelasjoner
     }
 
+
+    /**
+     * P8000-P10000 - [01] Søker til etterlattepensjon
+     * P8000-P10000 - [02] Forsørget/familiemedlem
+     * P8000-P10000 - [03] Barn
+     */
+    fun leggTilAnnenGjenlevendeFnrHvisFinnes(): SEDPersonRelasjon? {
+        val gjenlevendePerson = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }?.person
+
+        gjenlevendePerson?.let { person ->
+            val sokPersonKriterie = opprettSokKriterie(person)
+            val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
+            val fdato =  mapFdatoTilLocalDate(person.foedselsdato)
+            return SEDPersonRelasjon(fodselnummer, GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato, rinaDocumentId=rinaDocumentId)
+        }
+        return null
+    }
 
 
 }
