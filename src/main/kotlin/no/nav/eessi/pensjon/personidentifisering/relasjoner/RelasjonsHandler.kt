@@ -31,7 +31,7 @@ object RelasjonsHandler {
     }
 
     private fun filterRelasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
-         logger.debug("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
+         logger.info("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
 
         relasjonList.onEach { logger.debug("$it") }
 
@@ -40,8 +40,11 @@ object RelasjonsHandler {
         //filtering av relasjoner uten kjent fnr
         val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }//.distinctBy { it.sokKriterier }
 
-        return (relasjonerMedFnr + relasjonerUtenFnr).also { logger.debug("$it") }
-
+        return (relasjonerMedFnr + relasjonerUtenFnr).also {
+            if(it.size < relasjonList.size){
+                logger.warn("Det gjenstår ${it.size} relasjoner etter filtrering")
+            }
+        }
     }
 
     private fun getRelasjonHandler(sed: SED, bucType: BucType, rinaDocumentId: String): AbstractRelasjon? {
