@@ -145,7 +145,7 @@ class SedSendtListener(
                 return pensjonsinformasjon
             }
         }
-        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, bestemSaktypeFraSed(ytelsestypeFraSed, identifisertPerson, bucType)).let {
+        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ytelsestypeFraSed, identifisertPerson).let {
             if (it?.sakType != null) {
                 logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
                 return it
@@ -153,19 +153,6 @@ class SedSendtListener(
         }
         logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
         return null
-    }
-
-    private fun bestemSaktypeFraSed(
-        saktypeFraSed: SakType?,
-        identifisertPerson: IdentifisertPerson?,
-        bucType: BucType
-    ): SakType? {
-        val saktype = identifisertPerson?.personRelasjon?.saktype
-        logger.info("Saktype fra SED: ${saktypeFraSed?.name} identPersonYtelse: ${saktype?.name}")
-        if (bucType == P_BUC_10 && saktypeFraSed == GJENLEV) {
-            return saktype
-        }
-        return saktypeFraSed ?: saktype
     }
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {

@@ -27,7 +27,12 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
             return null
         }
-        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
+        if(saklist.isEmpty()){
+            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ") 
+        }
+        else{
+            logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
+        }
 
         val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }
         if (gyldigSak?.sakType !in eessipenSakTyper ||gyldigSak == null) {

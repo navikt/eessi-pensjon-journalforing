@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,16 +26,22 @@ class BestemSakService(private val klient: BestemSakKlient) {
      *
      * @return [SakInformasjon]
      */
-    fun hentSakInformasjonViaBestemSak(aktoerId: String, bucType: BucType, innkommendeSakType: SakType? = null): SakInformasjon? {
-        logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $innkommendeSakType")
+    fun hentSakInformasjonViaBestemSak(
+        aktoerId: String,
+        bucType: BucType,
+        aktypeFraSed: SakType? = null,
+        identifisertPerson: IdentifisertPerson? = null
+    ): SakInformasjon? {
+        val saksType = bestemSaktypeFraSed(aktypeFraSed, identifisertPerson, bucType)
+        logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $saksType")
 
         val saktype = when (bucType) {
             P_BUC_01 -> ALDER
-            P_BUC_02 -> innkommendeSakType ?: return null
+            P_BUC_02 -> saksType ?: return null
             P_BUC_03 -> UFOREP
-            P_BUC_05 -> innkommendeSakType ?: return null
-            R_BUC_02 -> innkommendeSakType!!
-            P_BUC_10 -> innkommendeSakType ?: return null
+            P_BUC_05 -> saksType ?: return null
+            R_BUC_02 -> saksType!!
+            P_BUC_10 -> saksType ?: return null
             else -> return null
         }
 
@@ -47,6 +54,15 @@ class BestemSakService(private val klient: BestemSakKlient) {
 
         logger.info("SakInformasjonListe er null eller større enn 1: ${resp?.sakInformasjonListe?.toJson()}")
         return null
+    }
+
+    private fun bestemSaktypeFraSed(saktypeFraSed: SakType?,identifisertPerson: IdentifisertPerson?, bucType: BucType ): SakType? {
+        val saktype = identifisertPerson?.personRelasjon?.saktype
+        logger.info("Saktype fra SED: ${saktypeFraSed?.name} identPersonYtelse: ${saktype?.name}")
+        if (bucType == P_BUC_10 && saktypeFraSed == GJENLEV) {
+            return saktype
+        }
+        return saktypeFraSed ?: saktype
     }
 
     private fun kallBestemSak(aktoerId: String, saktype: SakType): BestemSakResponse? {

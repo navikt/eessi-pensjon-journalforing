@@ -109,7 +109,7 @@ class SedMottattListener(
                                 kansellerteSeder
                             )
                             val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-                            val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse)
+                            val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse, saktypeFraSed)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
 
                             val currentSed =
@@ -141,13 +141,14 @@ class SedMottattListener(
         }
     }
 
-    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelse): SakInformasjon? {
+    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelse, saktypeFraSed: SakType?
+    ): SakInformasjon? {
         if (identifisertPerson?.aktoerId == null) return null
 
         return when(sedHendelse.bucType) {
-            P_BUC_01 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_01)
-            P_BUC_02 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_02, identifisertPerson.personRelasjon?.saktype)
-            P_BUC_03 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_03)
+            P_BUC_01 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_01, saktypeFraSed, identifisertPerson)
+            P_BUC_02 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_02, saktypeFraSed, identifisertPerson)
+            P_BUC_03 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_03, saktypeFraSed, identifisertPerson)
             else  -> null
         }
     }
