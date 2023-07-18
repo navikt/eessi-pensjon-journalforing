@@ -1,8 +1,8 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
@@ -17,12 +17,12 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 @DisplayName("P_BUC_07 – IntegrationTest")
 internal class PBuc07IntegrationTest : JournalforingTestBase() {
@@ -30,41 +30,44 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Inngående")
     inner class Scenario1Inngaende {
-        @Test
-        fun `Gjenlevende der fdato er det samme som FNR`() {
+        @ParameterizedTest
+        @EnumSource(SedType::class, names = ["P12000", "P11000"])
+        fun `Gitt en SED med forsikret uten gjenlevende saa skal forsikret benyttes som identifisert person`(sedType: SedType) {
             val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
                 FNR_VOKSEN,
-                FNR_VOKSEN_2,
-                krav = KravType.GJENLEV,
+                fnrVoksenSoker = null,
+                krav = KravType.ALDER,
                 alleDocs = allDocuemtActions,
-                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
-                norg2enhet = null,
-                fdatoBruker = Fodselsnummer.fra(FNR_VOKSEN_2)?.getBirthDate().toString()
+                fdatoBruker = "1971-06-11",
+                sedType = sedType
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+                Assertions.assertEquals(Tema.PENSJON, it.first.tema)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.first.journalfoerendeEnhet)
+                Assertions.assertEquals(AKTOER_ID, it.second.aktoerId)
             }
         }
 
-        @Test
-        fun `Gjenlevende der fdato er forskjellig fra FNR skal sendes til id og fordeling adsdasd`() {
+        @ParameterizedTest
+        @EnumSource(SedType::class, names = ["P12000", "P11000"])
+        fun `Gitt en SED med forsikret OG gjenlevende saa skal gjenlevende benyttes som identifisert person`(sedType: SedType) {
             val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
-                FNR_VOKSEN_2,
-                krav = KravType.GJENLEV,
+                fnrVoksen = FNR_VOKSEN,
+                fnrVoksenSoker = FNR_VOKSEN_2,
+                krav = KravType.ALDER,
                 alleDocs = allDocuemtActions,
-                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
-                norg2enhet = null,
-                fdatoBruker = "1988-01-01"
+                fdatoBruker = "1971-06-11",
+                sedType = sedType
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(Tema.PENSJON, it.first.tema)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.first.journalfoerendeEnhet)
+                Assertions.assertEquals(AKTOER_ID_2, it.second.aktoerId)
+
             }
         }
     }
@@ -73,10 +76,11 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
     )
 
-
     private fun testRunnerVoksen(
         fnrVoksen: String,
         fnrVoksenSoker: String?,
+        aktor_voksen_1: String = AKTOER_ID,
+        aktor_voksen_2: String = AKTOER_ID_2,
         bestemSak: BestemSakResponse? = null,
         land: String = "NOR",
         krav: KravType = KravType.GJENLEV,
@@ -85,11 +89,12 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         norg2enhet: Enhet? = null,
         fdatoBruker: String? = null,
-        block: (OpprettJournalpostRequest) -> Unit
+        sedType: SedType = SedType.P12000,
+        block: (Pair<OpprettJournalpostRequest, OppgaveMelding>) -> Unit
     ) {
         val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) bestemSak.sakInformasjonListe.first().sakId else null
 
-        val sed = createSedPensjon(SedType.P12000, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod, fdato = fdatoBruker)
+        val sed = createSedPensjon(sedType, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod, fdato = fdatoBruker)
         initCommonMocks(sed, alleDocs)
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
@@ -97,7 +102,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             "Voksen ",
             "Forsikret",
             land,
-            aktorId = AKTOER_ID
+            aktorId = aktor_voksen_1
         )
 
         if (fnrVoksenSoker != null) {
@@ -106,18 +111,18 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 "Voksen",
                 "Gjenlevende",
                 land,
-                aktorId = AKTOER_ID_2
+                aktorId = aktor_voksen_2
             )
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns bestemSak.sakInformasjonListe
+            every { fagmodulKlient.hentPensjonSaklist(aktor_voksen_2) } returns bestemSak.sakInformasjonListe
         }
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P12000, P_BUC_07, FNR_VOKSEN)
+        val hendelse = createHendelseJson(sedType, P_BUC_07, FNR_VOKSEN)
 
         val meldingSlot = slot<String>()
 
@@ -133,7 +138,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         Assertions.assertEquals(hendelseType, oppgaveMelding.hendelseType)
 
-        block(journalpost.captured)
+        block(Pair(journalpost.captured, oppgaveMelding))
 
         verify { personService.hentPerson(any<Ident<*>>()) }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }

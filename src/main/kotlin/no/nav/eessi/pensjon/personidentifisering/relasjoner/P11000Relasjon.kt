@@ -9,7 +9,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
  * Henter person 2 (annen person) om den er tilgjengelig
  * ellers benyttes person 1 (forsikter person)
  */
-class P12000Relasjon(val sed: SED, val bucType: BucType, val rinaDocumentId: String) : GjenlevendeHvisFinnes(sed, bucType,rinaDocumentId) {
+class P11000Relasjon(val sed: SED, val bucType: BucType, val rinaDocumentId: String) : GjenlevendeHvisFinnes(sed, bucType,rinaDocumentId) {
 
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {

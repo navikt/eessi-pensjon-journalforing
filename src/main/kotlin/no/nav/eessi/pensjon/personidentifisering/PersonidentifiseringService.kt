@@ -195,7 +195,10 @@ class PersonidentifiseringService(
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
-            bucType == P_BUC_07 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.GJENLEVENDE }
+            bucType == P_BUC_07 && (identifisertePersoner.size > 1) -> {
+                identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.GJENLEVENDE }
+            }
+            bucType == P_BUC_07 -> identifisertePersoner.firstOrNull()
 
             //buc_01,buc_03 hvis flere enn en forsikret person så sendes til id_og_fordeling
             bucType == P_BUC_01 && (identifisertePersoner.size > 1) -> throw FlerePersonPaaBucException()
