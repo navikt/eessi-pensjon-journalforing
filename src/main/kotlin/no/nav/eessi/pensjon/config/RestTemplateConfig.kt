@@ -33,7 +33,7 @@ class RestTemplateConfig(
 
     init {
         StreamReadConstraints.overrideDefaultStreamReadConstraints(
-            StreamReadConstraints.builder().maxStringLength(50000000).build()
+            StreamReadConstraints.builder().maxStringLength(100000000).build()
         )
     }
 
