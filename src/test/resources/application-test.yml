@@ -1,0 +1,67 @@
+
+SPRING_PROFILES_ACTIVE: test
+
+KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
+KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
+KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
+KAFKA_KRAVINIT_TOPIC: 'eessi-pensjon-krav-q'
+KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
+AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
+AZURE_APP_JWK: "dummy"
+
+kafka:
+  brokers: test
+  keystore:
+    path: test
+  truststore:
+    path: test
+  credstore:
+    password: test
+  sedSendt:
+    topic: ${KAFKA_SEDSENDT_TOPIC}
+    groupid: eessi-pensjon-group
+  sedMottatt:
+    topic: ${KAFKA_SEDMOTTATT_TOPIC}
+    groupid: eessi-pensjon-group
+  oppgave:
+    topic: ${KAFKA_OPPGAVE_TOPIC}
+    groupid: eessi-pensjon-group
+  krav:
+    topic: ${KAFKA_KRAVINIT_TOPIC}
+    groupid: eessi-pensjon-group
+  automatisering:
+    topic: ${KAFKA_AUTOMATISERING_TOPIC}
+    groupid: eessi-pensjon-group
+
+  security.protocol: SSL
+
+namespace: 'test'
+METRICS_REQUESTFILTER_ENABLE: false
+NAIS_APP_NAME: eessi-pensjon-journalforing
+
+EUX_RINA_API_V1_URL: http://localhost
+PDL_URL: http://localhost
+securitytokenservice.url: http://someurl
+srvusername: someuser
+srvpassword: somepass
+oppgave.oppgaver.url: http://localhost
+JOURNALPOST_V1_URL: http://localhost
+aktoerregister.api.v1.url: http://localhost
+virksomhet.person.v3:
+  endpointurl: http://localhost
+EESSI_PENSJON_FAGMODUL_URL: http://localhost
+NORG2_URL: http://localhost
+BESTEMSAK_URL: http://localhost
+
+spring:
+  kafka:
+    listener:
+      ack-mode: manual
+    consumer:
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    properties:
+      security.protocol: PLAINTEXT
+  main:
+    allow-bean-definition-overriding: true

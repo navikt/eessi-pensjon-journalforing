@@ -31,6 +31,12 @@ class RestTemplateConfig(
     private val meterRegistry: MeterRegistry,
     ) {
 
+    init {
+        StreamReadConstraints.overrideDefaultStreamReadConstraints(
+            StreamReadConstraints.builder().maxStringLength(50000000).build()
+        )
+    }
+
     @Value("\${JOURNALPOST_V1_URL}")
     lateinit var joarkUrl: String
 
@@ -109,16 +115,6 @@ class RestTemplateConfig(
                 RequestResponseLoggerInterceptor()
             )
             .build()
-    }
-    private fun createMappingJacksonHttpMessageConverter(): MappingJackson2HttpMessageConverter? {
-        return MappingJackson2HttpMessageConverter().apply {
-            objectMapper.factory.setStreamReadConstraints(
-                StreamReadConstraints
-                    .builder()
-                    .maxStringLength(300000000)
-                    .build()
-            )
-        }
     }
 
     private fun clientProperties(oAuthKey: String): ClientProperties {
