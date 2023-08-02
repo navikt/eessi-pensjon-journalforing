@@ -8,8 +8,6 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -19,10 +17,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -59,6 +55,23 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Sjekker at isFnrDnrSinFdatoLikSedFdato returnerer dfato som validerer mot fnr `() {
+
+        val actual = personidentifiseringService.validateIdentifisertPerson(identifisertPersonPDL(
+            aktoerId = "",
+            fnr = Fodselsnummer.fra(SLAPP_SKILPADDE),
+            personRelasjon = SEDPersonRelasjon(
+                Fodselsnummer.fra(SLAPP_SKILPADDE),
+                Relasjon.GJENLEVENDE,
+                fdato = LocalDate.of(1952,3,9),
+                rinaDocumentId = "12"
+            )),
+                MOTTATT, true)
+
+            assertEquals("1952-03-09", actual?.personRelasjon?.fdato.toString() )
+    }
+
+    @Test
     fun `Gitt en Sed som inneholder gjenlevende som ikke er en del av samlingen av Seds som er forsikret, dette er feks H070, H120, H121 så identifiseres en gjenlevende`() {
         val gjenlevFnr = LEALAUS_KAKE
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, landkoder = true)
@@ -71,8 +84,6 @@ class PersonidentifiseringServiceTest {
         assertEquals(expected, actual?.personRelasjon)
     }
 
-
-
     @Test
     fun `Gitt et gyldig fnr og relasjon gjenlevende så skal det identifiseres en person`() {
         every { personService.hentPerson(NorskIdent("05127921999")) } returns PersonMock.createWith("05127921999", landkoder = true)
@@ -83,8 +94,6 @@ class PersonidentifiseringServiceTest {
         val expected = SEDPersonRelasjon(Fodselsnummer.fra("05127921999"), Relasjon.GJENLEVENDE, GJENLEV, sedType = SedType.P2100, rinaDocumentId =  "3123123")
         assertEquals(expected, actual?.personRelasjon)
     }
-
-
 
     @Test
     fun `Gitt et gyldig fnr og relasjon forsikret så skal det identifiseres en person`() {
@@ -418,12 +427,6 @@ class PersonidentifiseringServiceTest {
             sedListFraBuc, P_BUC_02, potensiellePerson, SENDT, rinaDocumentId = ""
         )
 
-        println("identifisertePersoner: ***")
-        println(identifisertePersoner)
-        println("***************")
-        println("actual: ")
-        println(actual)
-        println("***********")
         assertEquals(identifisertePersoner[1], actual.single())
     }
 
@@ -549,7 +552,6 @@ class PersonidentifiseringServiceTest {
 
     }
 
-
     private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPersonPDL {
         return IdentifisertPersonPDL(
             "1231231312",
@@ -574,6 +576,16 @@ class PersonidentifiseringServiceTest {
             SEDPersonRelasjon(fnr, relasjon, rinaDocumentId = "123123"),
             personNavn = "Dummy"
             )
+
+    fun identifisertPersonPDL(
+        aktoerId: String = "32165469879",
+        personRelasjon: SEDPersonRelasjon?,
+        landkode: String? = "",
+        geografiskTilknytning: String? = "",
+        fnr: Fodselsnummer? = null,
+        personNavn: String = "Test Testesen"
+    ): IdentifisertPersonPDL =
+        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
 
     private fun generateSED(
         sedType: SedType,

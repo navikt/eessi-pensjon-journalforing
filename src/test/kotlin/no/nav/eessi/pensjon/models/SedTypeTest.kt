@@ -19,7 +19,7 @@ internal class SedTypeTest {
         SedType::class, names = [
         "P13000", "X001", "X002", "X003", "X004", "X006", "X007",
         "X009", "X011", "X012", "X013", "X050", "X100",
-        "H001", "H002", "H020", "H021", "H120", "H121", "R004", "R006"
+        "H001", "H002", "H020", "H021", "H120", "H121", "R006"
     ])
     fun `Verifiser ugyldige SED-typer`(type: SedType) {
         assertTrue(
@@ -40,7 +40,7 @@ internal class SedTypeTest {
     @Test
     fun `Sjekk antall ugyldige SED-typer`() {
         assertEquals(
-            21,
+            20,
             ugyldigeTyper.size,
             "Antall ugyldige SED-typer har blitt endret."
         )
