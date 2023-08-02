@@ -25,7 +25,7 @@ object SedTypeUtils {
      */
     val ugyldigeTyper: Set<SedType> = setOf(
         P13000, X001, X002, X003, X004, X006, X007, X009,
-        X011, X012, X013, X050, X100, H001, H002, H020, H021, H120, H121, R004, R006
+        X011, X012, X013, X050, X100, H001, H002, H020, H021, H120, H121, R006
     )
 }
 
