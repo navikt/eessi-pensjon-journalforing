@@ -1,13 +1,18 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
+import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -71,7 +76,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    private fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
+    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
         return if (bucType == R_BUC_02) {
             when (saktype) {
                 UFOREP -> UFOREPENSJON
@@ -95,8 +100,8 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - saktype er UFØRETRYGD
      */
 
-    fun hentTema(bucType: BucType, saktype: SakType?) : Tema =
-        if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
+        fun hentTema(bucType: BucType, saktype: SakType?) : Tema =
+            if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
             if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE

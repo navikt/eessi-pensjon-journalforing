@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
@@ -153,6 +154,11 @@ class JournalforingService(
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
+                //midlertidig for å teste på enhet og forskjellige verdier
+                tildeltOppgaveEnhet(enhet = tildeltEnhet, behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype), identifisertePerson = identifisertPerson ).also {
+                    logger.info("Journalføring: enhet hentet fra behandlingstema: $it")
+                }
+
                 val oppgaveEnhet =  hentOppgaveEnhet(
                     tildeltEnhet,
                     identifisertPerson,
@@ -208,6 +214,33 @@ class JournalforingService(
                 throw ex
             }
         }
+    }
+
+    private fun tildeltOppgaveEnhet(enhet:Enhet, behandlingstema:Behandlingstema?, identifisertePerson: IdentifisertPerson?): Any? {
+
+        try {
+            logger.info("landkode: ${identifisertePerson?.landkode} og behandlingstema: $behandlingstema")
+            if (enhet == Enhet.AUTOMATISK_JOURNALFORING) {
+                return if (identifisertePerson?.landkode == "NOR" ) {
+                    when (behandlingstema) {
+                        Behandlingstema.GJENLEVENDEPENSJON, Behandlingstema.BARNEP -> Enhet.NFP_UTLAND_AALESUND
+                        Behandlingstema.ALDERSPENSJON -> Enhet.NFP_UTLAND_AALESUND
+                        Behandlingstema.UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
+                        else -> logger.warn("Finner ingen verdi for behandlingstema")
+                    }
+                } else when (behandlingstema!!) {
+                    Behandlingstema.UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
+                    Behandlingstema.GJENLEVENDEPENSJON, Behandlingstema.BARNEP, Behandlingstema.ALDERSPENSJON -> Enhet.PENSJON_UTLAND
+                    else -> logger.warn("Finner ingen verdi for behandlingstema")
+
+                }
+            }
+            return enhet
+        }
+        catch (ex :Exception) {
+            logger.warn("Feil under testing av enhet ${ex.stackTrace}")
+        }
+        return null
     }
 
     /**
