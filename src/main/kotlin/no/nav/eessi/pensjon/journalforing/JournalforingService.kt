@@ -5,7 +5,8 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -18,8 +19,11 @@ import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.*
-import no.nav.eessi.pensjon.oppgaverouting.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
@@ -51,6 +55,18 @@ class JournalforingService(
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
     }
 
+    /**
+     * 1.) Henter dokumenter og vedlegg
+     * 2.) Henter enhet
+     * 3.) Oppretter journalpost
+     * 4.) Ved utgpående automatisk journalføring -> oppdater distribusjonsinfo
+     * 5.) Dersom jf.post ikke blir ferdigstilt -> lage jf.oppgave
+     * 6.) Hent oppgave-enhet
+     * 7.) Ved automatisk jf, B_BUC_02, eller P_BUC_03 og mottatt ->
+     *     a) lage BEHANDLE_SED oppgave
+     *     b) og opprette krav automatisk
+     * 8.) Generer statisikk melding
+     */
     fun journalfor(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
@@ -117,7 +133,7 @@ class JournalforingService(
                     institusjon = institusjon
                 )
 
-                // Oppdaterer distribusjonsinfo
+                // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
                 if (tildeltEnhet == Enhet.AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
