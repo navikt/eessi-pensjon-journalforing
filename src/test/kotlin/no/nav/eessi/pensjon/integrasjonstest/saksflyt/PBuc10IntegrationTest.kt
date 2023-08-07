@@ -145,7 +145,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
             ) {
                     assertEquals(PENSJON, it.tema)
-                    assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                    assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                     assertEquals(FNR_BARN, it.bruker?.id!!)
                 }
         }
@@ -206,7 +206,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT
             ) {
                     assertEquals(PENSJON, it.tema)
-                    assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                    assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                     assertEquals(FNR_BARN,it.bruker?.id)
                 }
         }
@@ -292,7 +292,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSEDs()
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
 
@@ -343,7 +343,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT
             ) {
                 assertEquals(UFORETRYGD, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
             testRunnerVoksen(
@@ -356,7 +356,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT
             ) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN, it.bruker?.id!!)
             }
         }
@@ -403,12 +403,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
             ) {
                     assertEquals(PENSJON, it.tema)
-                    assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                    assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 }
 
             testRunnerVoksen(FNR_OVER_60, FNR_VOKSEN, bestemsak, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
     }
@@ -450,12 +450,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
             ) {
                     assertEquals(PENSJON, it.tema)
-                    assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                    assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 }
 
             testRunnerVoksen(FNR_VOKSEN, FNR_VOKSEN_2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
             testRunnerVoksen(FNR_VOKSEN, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {

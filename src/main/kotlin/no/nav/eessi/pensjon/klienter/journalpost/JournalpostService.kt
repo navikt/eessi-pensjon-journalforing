@@ -1,13 +1,10 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
@@ -77,6 +74,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
     fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
+        val bucs = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
         return if (bucType == R_BUC_02) {
             when (saktype) {
                 UFOREP -> UFOREPENSJON
@@ -86,9 +84,20 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             TILBAKEBETALING
         } else {
             return when (bucType) {
-                P_BUC_02 -> GJENLEVENDEPENSJON
+                P_BUC_01 -> ALDERSPENSJON
+                P_BUC_02 -> GJENLEVENDEPENSJON      //Barnepensjon og gjenlvendepensjon behandles på samme enhet(er) derfor generaliserer vi her
                 P_BUC_03 -> UFOREPENSJON
-                else -> ALDERSPENSJON
+                else -> {
+                    if (bucType in bucs) {
+                         when (saktype) {
+                            GJENLEV, BARNEP -> GJENLEVENDEPENSJON
+                            UFOREP -> UFOREPENSJON
+                            else -> {
+                                ALDERSPENSJON
+                            }
+                        }
+                    } else ALDERSPENSJON
+                }
             }
         }
 

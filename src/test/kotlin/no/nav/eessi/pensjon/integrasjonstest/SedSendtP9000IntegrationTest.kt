@@ -49,7 +49,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `gitt en forsikret person i P9000 og to gjenlevende, to P8000, så skal `() {
+    fun `Gitt en forsikret person i P9000 og to gjenlevende, to P8000 med to forskjellige etterlatte, så skal vi finne riktig etterlatte`() {
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
@@ -84,11 +84,11 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         OppgaveMeldingVerification("429434379")
             .medHendelsetype("SENDT")
             .medSedtype("P9000")
-            .medtildeltEnhetsnr("4303")
+            .medtildeltEnhetsnr("4862")
             .medAktorId("0123456789000")
 
         //ser at den feiler pga manglende saksinformasjon og ikke før
-        assertTrue(isMessageInlog("P9000 i P_BUC_05 gir enhet 4303 på grunn av manglende saksinformasjon"))
+        assertTrue(isMessageInlog("Journalpost enhet: ID_OG_FORDELING rutes til -> Saksbehandlende enhet: NFP_UTLAND_AALESUND"))
         //TODO: Vurdere om saksbehandling burde være en del av testen
     }
 }

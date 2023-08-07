@@ -20,16 +20,9 @@ import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.BARNEP
-import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
@@ -102,24 +95,16 @@ class JournalforingService(
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
 
-                val tildeltEnhet = if (fdato == null ||  fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
-                    logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fnr?.getBirthDate()}")
-                    ID_OG_FORDELING
-                } else {
-                    oppgaveRoutingService.hentEnhet(
-                        OppgaveRoutingRequest.fra(
-                            identifisertPerson,
-                            fdato,
-                            saktype,
-                            sedHendelse,
-                            hendelseType,
-                            sakInformasjon,
-                            harAdressebeskyttelse
-                        )
-                    )
-                }
-
-                val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltEnhet == AUTOMATISK_JOURNALFORING }
+                val tildeltJoarkEnhet = journalforingsEnhet(
+                    fdato,
+                    identifisertPerson,
+                    saktype,
+                    sedHendelse,
+                    hendelseType,
+                    sakInformasjon,
+                    harAdressebeskyttelse
+                )
+                val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
 
                 val institusjon = if(hendelseType == HendelseType.SENDT) {
                     AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterMottakerAvsenderLand(sedHendelse.mottakerLand))
@@ -134,7 +119,7 @@ class JournalforingService(
                     bucType = sedHendelse.bucType!!,
                     sedType = sedHendelse.sedType!!,
                     sedHendelseType = hendelseType,
-                    journalfoerendeEnhet = tildeltEnhet,
+                    journalfoerendeEnhet = tildeltJoarkEnhet,
                     arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
                     avsenderLand = sedHendelse.avsenderLand,
@@ -144,7 +129,7 @@ class JournalforingService(
                 )
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
-                if (tildeltEnhet == AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
+                if (tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse!!.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
@@ -153,7 +138,7 @@ class JournalforingService(
                     val melding = OppgaveMelding(
                         sedHendelse.sedType,
                         journalPostResponse.journalpostId,
-                        tildeltEnhet,
+                        tildeltJoarkEnhet,
                         aktoerId,
                         sedHendelse.rinaSakId,
                         hendelseType,
@@ -162,40 +147,38 @@ class JournalforingService(
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
-
-                //midlertidig for å teste på enhet og forskjellige verdier
-                tildeltOppgaveEnhet(enhet = tildeltEnhet, behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype), identifisertePerson = identifisertPerson ).also {
-                    logger.info("Journalføring: enhet: $it hentet fra behandlingstema")
-                }
-
-                val oppgaveEnhet =  hentOppgaveEnhet(
-                    tildeltEnhet,
-                    identifisertPerson,
-                    fdato,
-                    saktype,
-                    sedHendelse,
-                    harAdressebeskyttelse
-                )
+                val oppgaveEnhet = hentOppgaveEnhet(
+                        tildeltJoarkEnhet,
+                        identifisertPerson,
+                        fdato,
+                        saktype,
+                        sedHendelse,
+                        harAdressebeskyttelse
+                    ).takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    opprettBehandleSedOppgave(
-                        null,
-                        oppgaveEnhet,
-                        aktoerId,
-                        sedHendelse,
-                        usupporterteFilnavn(uSupporterteVedlegg)
-                    )
+                    if (oppgaveEnhet != null) {
+                        opprettBehandleSedOppgave(
+                            null,
+                            oppgaveEnhet,
+                            aktoerId,
+                            sedHendelse,
+                            usupporterteFilnavn(uSupporterteVedlegg)
+                        )
+                    }
                 }
 
                 val bucType = sedHendelse.bucType
-                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltEnhet == AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
+                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
-                    opprettBehandleSedOppgave(
-                        journalPostResponse.journalpostId,
-                        oppgaveEnhet,
-                        aktoerId,
-                        sedHendelse
-                    )
+                    if (oppgaveEnhet != null) {
+                        opprettBehandleSedOppgave(
+                            journalPostResponse.journalpostId,
+                            oppgaveEnhet,
+                            aktoerId,
+                            sedHendelse
+                        )
+                    }
 
                     kravInitialiseringsService.initKrav(
                         sedHendelse,
@@ -208,8 +191,8 @@ class JournalforingService(
                     sedHendelse.rinaDokumentId,
                     sedHendelse.rinaDokumentVersjon,
                     java.time.LocalDateTime.now(),
-                    tildeltEnhet == AUTOMATISK_JOURNALFORING,
-                    tildeltEnhet.enhetsNr,
+                    tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING,
+                    tildeltJoarkEnhet.enhetsNr,
                     sedHendelse.bucType!!,
                     sedHendelse.sedType!!,
                     saktype,
@@ -225,31 +208,52 @@ class JournalforingService(
         }
     }
 
-    private fun tildeltOppgaveEnhet(enhet:Enhet, behandlingstema:Behandlingstema?, identifisertePerson: IdentifisertPerson?): Any? {
+    private fun journalforingsEnhet(
+        fdato: LocalDate?,
+        identifisertPerson: IdentifisertPerson?,
+        saktype: SakType?,
+        sedHendelse: SedHendelse,
+        hendelseType: HendelseType,
+        sakInformasjon: SakInformasjon?,
+        harAdressebeskyttelse: Boolean
+    ): Enhet {
+        return if (fdato == null || fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
+            logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fnr?.getBirthDate()}")
+            ID_OG_FORDELING
+        } else {
+            val enhetFraRouting = oppgaveRoutingService.hentEnhet(
+                OppgaveRoutingRequest.fra(
+                    identifisertPerson,
+                    fdato,
+                    saktype,
+                    sedHendelse,
+                    hendelseType,
+                    sakInformasjon,
+                    harAdressebeskyttelse
+                )
+            )
+            if(enhetFraRouting == AUTOMATISK_JOURNALFORING){
+                return AUTOMATISK_JOURNALFORING
+            }
 
-        try {
-            logger.info("landkode: ${identifisertePerson?.landkode} og behandlingstema: $behandlingstema og enhet:$enhet")
-            if (enhet in listOf(ID_OG_FORDELING, AUTOMATISK_JOURNALFORING)) {
-                return if (identifisertePerson?.landkode == "NOR" ) {
+            if (enhetFraRouting == ID_OG_FORDELING ) {
+                val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype)
+                logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
+                return if (identifisertPerson.landkode == "NOR" ) {
                     when (behandlingstema) {
-                        GJENLEVENDEPENSJON, BARNEP -> NFP_UTLAND_AALESUND
-                        ALDERSPENSJON -> NFP_UTLAND_AALESUND
-                        UFOREPENSJON -> UFORE_UTLANDSTILSNITT
-                        else -> logger.warn("Finner ingen verdi for behandlingstema")
+                        GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
+                        UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
                     }
-                } else when (behandlingstema!!) {
-                    UFOREPENSJON -> UFORE_UTLANDSTILSNITT
-                    GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON -> PENSJON_UTLAND
-                    else -> logger.warn("Finner ingen verdi for behandlingstema")
+                } else when (behandlingstema) {
+                    UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
+                    GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
             }
-            return enhet
+            enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
         }
-        catch (ex :Exception) {
-            logger.warn("Feil under testing av enhet ${ex.stackTrace}")
-        }
-        return null
     }
+
+    private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) = logger.info("Journalpost enhet: $enhetFraRouting rutes til -> Saksbehandlende enhet: $it")
 
     /**
      * PESYS støtter kun GB

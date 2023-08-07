@@ -232,8 +232,8 @@ internal class SedSendtJournalforingTest {
         val actualRequest = requestSlot.captured
         val actualRequestOppgave = requestSlotOppgave.captured
 
-        Assertions.assertEquals(Enhet.ID_OG_FORDELING, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(Enhet.ID_OG_FORDELING, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(Enhet.PENSJON_UTLAND, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(Enhet.PENSJON_UTLAND, actualRequestOppgave.tildeltEnhetsnr)
         Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
 
     }

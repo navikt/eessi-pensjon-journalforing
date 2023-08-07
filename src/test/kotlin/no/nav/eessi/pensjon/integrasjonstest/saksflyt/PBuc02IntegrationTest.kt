@@ -52,7 +52,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
         }
@@ -255,7 +255,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
         }
