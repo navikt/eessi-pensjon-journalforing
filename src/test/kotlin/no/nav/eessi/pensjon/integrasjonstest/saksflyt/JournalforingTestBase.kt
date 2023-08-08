@@ -57,8 +57,8 @@ internal open class JournalforingTestBase {
     companion object {
         const val SAK_ID = "12345"
 
-        const val FNR_OVER_60 = "09035225916"   // SLAPP SKILPADDE
-        const val FNR_VOKSEN = "11067122781"    // KRAFTIG VEGGPRYD
+        const val FNR_OVER_62 = "09035225916"   // SLAPP SKILPADDE
+        const val FNR_VOKSEN_UNDER_62 = "11067122781"    // KRAFTIG VEGGPRYD
         const val FNR_VOKSEN_2 = "22117320034"  // LEALAUS KAKE
         const val FNR_BARN = "12011577847"      // STERK BUSK
 

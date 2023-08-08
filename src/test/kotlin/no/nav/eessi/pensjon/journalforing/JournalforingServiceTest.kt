@@ -135,6 +135,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R004),
+            antallIdentifisertePersoner = 1,
         )
 
         verify {
@@ -176,6 +177,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
+            antallIdentifisertePersoner = 1
         )
 
         verify {
@@ -216,7 +218,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-
+            antallIdentifisertePersoner = 1
             )
 
         verify {
@@ -265,7 +267,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-
+            antallIdentifisertePersoner = 1,
             )
 
         verify {
@@ -299,6 +301,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
+            antallIdentifisertePersoner = 1,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -330,6 +333,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
+            antallIdentifisertePersoner = 1,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -373,6 +377,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2200),
+            antallIdentifisertePersoner = 1,
         )
 
         verify {
@@ -411,6 +416,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P15000),
+            antallIdentifisertePersoner = 1,
         )
 
         verify {
@@ -789,7 +795,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100)
         )
 
         verify {
@@ -823,7 +829,8 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100))
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
+        )
 
         verify {
             journalpostService.opprettJournalpost(
