@@ -53,13 +53,28 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @DisplayName("Utgående - Scenario 1")
     inner class Scenario1Utgaende {
         @Test
-        fun `1 person i SED fnr finnes men ingen bestemsak Så journalføres på ID_OG_FORDELING`() {
+        fun `1 person i SED fnr finnes men ingen bestemsak men vi sjekker behandlingstema og at person er bosatt Norge som gir NFP_UTLAND_AALESUND`() {
             testRunner(FNR_OVER_60, saker = emptyList(), sakId = SAK_ID) {
-                // forvent tema == PEN og enhet 4303
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
+//
+//        @Test
+//        fun `Person i SED med gyldig fnr uten sakType fra bestemsak der alder er under 62 aar bosatt Norge saa rutes oppgaven til 4476 UFORE_UTLANDSTILSNITT`() {
+//            testRunner(FNR_OVER_60, saker = emptyList(), sakId = SAK_ID) {
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+//            }
+//        }
+//
+//        @Test
+//        fun `Person i SED med gyldig fnr uten sakType fra bestemsak der alder er under 62 aar bosatt utland saa rutes oppgaven til 4475 UFORE_UTLAND`() {
+//            testRunner(FNR_OVER_60, saker = emptyList(), sakId = SAK_ID) {
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
+//            }
+//        }
 
         @Test
         fun `1 person i SED, men fnr er feil`() {
@@ -990,8 +1005,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Scenario 13 - 4 Sed sendes som svar med fnr utland og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PENSJON UTLAND`() {
-            val fnr = FNR_VOKSEN
+        fun `Scenario 13 - 4 Sed sendes som svar med fnr utland og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave som rutes til PENSJON UTLAND`() {
+            val fnr = FNR_OVER_60
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
             val sedP8000recevied = mapJsonToAny<P8000>((createSed(SedType.P8000, null, fdato = "1955-07-11").toJson()))

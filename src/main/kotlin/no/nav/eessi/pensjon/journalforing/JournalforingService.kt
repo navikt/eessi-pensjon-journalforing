@@ -5,11 +5,11 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.Period
 
 @Service
 class JournalforingService(
@@ -217,6 +218,7 @@ class JournalforingService(
         sakInformasjon: SakInformasjon?,
         harAdressebeskyttelse: Boolean
     ): Enhet {
+        val bucType = sedHendelse.bucType
         return if (fdato == null || fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
             logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fnr?.getBirthDate()}")
             ID_OG_FORDELING
@@ -236,17 +238,33 @@ class JournalforingService(
                 return AUTOMATISK_JOURNALFORING
             }
 
+            val over62Aar = Period.between(fdato, LocalDate.now()).years > 61
+            val barn = Period.between(fdato, LocalDate.now()).years < 18
+            val under62AarIkkeBarn = Period.between(fdato, LocalDate.now()).years < 62 && Period.between(fdato, LocalDate.now()).years < 18
+
+            if (enhetFraRouting == ID_OG_FORDELING && bucType in listOf(P_BUC_05, P_BUC_06)) {
+                if (over62Aar || barn) {
+                    if(identifisertPerson.landkode == "NOR"){
+                        return NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
+                    }
+                    return PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                }
+                if (under62AarIkkeBarn) {
+                    return ID_OG_FORDELING.also { logEnhet(enhetFraRouting, it) }
+                }
+            }
+
             if (enhetFraRouting == ID_OG_FORDELING ) {
-                val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype)
+                val behandlingstema = journalpostService.bestemBehandlingsTema(bucType!!, saktype)
                 logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
                 return if (identifisertPerson.landkode == "NOR" ) {
                     when (behandlingstema) {
-                        GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
+                        GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
                         UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
                     }
                 } else when (behandlingstema) {
                     UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                    GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                    GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
             }
             enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
