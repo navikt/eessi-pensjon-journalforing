@@ -14,7 +14,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
             FNR_OVER_62,
             FNR_BARN, emptyList(), rolle = Rolle.BARN) {
             assertEquals(PENSJON, it.tema)
-            assertEquals(Enhet.AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
+            assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
     }
 
