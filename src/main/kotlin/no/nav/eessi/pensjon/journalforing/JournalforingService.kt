@@ -252,9 +252,14 @@ class JournalforingService(
                     } else PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
                 if (under62AarIkkeBarn) {
-                    return if (identifisertPerson.landkode == "NOR" && antallIdentifisertePersoner == 1) {
-                        UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                    } else UFORE_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                    if (identifisertPerson.landkode == "NOR") {
+                        return if (antallIdentifisertePersoner <= 1) {
+                            UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
+                        } else ID_OG_FORDELING
+                    }
+                    if (antallIdentifisertePersoner <= 1) {
+                        return UFORE_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                    }
                 }
                 ID_OG_FORDELING
             }

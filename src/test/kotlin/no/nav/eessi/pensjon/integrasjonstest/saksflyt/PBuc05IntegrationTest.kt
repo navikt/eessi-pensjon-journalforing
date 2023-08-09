@@ -135,7 +135,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `2 personer i SED, har fnr, mangler rolle og saksnummer`() {
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, fnrAnnenPerson = null, rolle = null, sakId = null) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
 
@@ -963,13 +963,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(UFORE_UTLANDSTILSNITT, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P9000", oppgaveMelding.sedType?.name)
 
             assertEquals("UTGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
-            assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
+            assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
             assertEquals(fnr, request.bruker?.id!!)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -980,11 +980,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Scenario 13 - 3 Sed sendes som svar med fnr og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema NFP UTLAND AALESUND`() {
-            val fnr = FNR_VOKSEN_UNDER_62
+        fun `Scenario 13 - 3 Sed sendes som svar med fnr og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave til UFORE_UTLANDSTILSNITT`() {
+            //En identifisert person, bruker er er over 62 år og bosatt Norge
+            val fnr = FNR_OVER_62
             val sakid = "1231232323"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson())
+            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = "1952-03-09").toJson())
             val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
 
             val alleDocumenter = listOf(
@@ -1015,11 +1016,10 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
-
             assertEquals("UTGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
+            assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
