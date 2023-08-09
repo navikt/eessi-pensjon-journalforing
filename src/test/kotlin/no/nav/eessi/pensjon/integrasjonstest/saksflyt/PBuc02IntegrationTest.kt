@@ -43,7 +43,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -69,7 +69,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -96,7 +96,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -130,7 +130,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -158,7 +158,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.ALDER,
@@ -186,7 +186,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
@@ -219,7 +219,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
@@ -246,7 +246,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -272,7 +272,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -299,7 +299,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -333,7 +333,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.GJENLEV,
@@ -361,7 +361,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.ALDER,
@@ -389,7 +389,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.ALDER,
@@ -417,7 +417,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
@@ -450,7 +450,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
@@ -477,7 +477,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 FodselsnummerGenerator.generateFnrForTest(12),
                 bestemsak,
                 land = "NOR",

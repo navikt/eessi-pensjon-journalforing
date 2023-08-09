@@ -80,7 +80,8 @@ class JournalforingService(
         offset: Long,
         sakInformasjon: SakInformasjon?,
         sed: SED?,
-        harAdressebeskyttelse: Boolean = false
+        harAdressebeskyttelse: Boolean = false,
+        antallIdentifisertePersoner: Int = 0
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -103,7 +104,8 @@ class JournalforingService(
                     sedHendelse,
                     hendelseType,
                     sakInformasjon,
-                    harAdressebeskyttelse
+                    harAdressebeskyttelse,
+                    antallIdentifisertePersoner
                 )
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
 
@@ -216,7 +218,8 @@ class JournalforingService(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         sakInformasjon: SakInformasjon?,
-        harAdressebeskyttelse: Boolean
+        harAdressebeskyttelse: Boolean,
+        antallIdentifisertePersoner: Int
     ): Enhet {
         val bucType = sedHendelse.bucType
         return if (fdato == null || fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
@@ -240,18 +243,25 @@ class JournalforingService(
 
             val over62Aar = Period.between(fdato, LocalDate.now()).years > 61
             val barn = Period.between(fdato, LocalDate.now()).years < 18
-            val under62AarIkkeBarn = Period.between(fdato, LocalDate.now()).years < 62 && Period.between(fdato, LocalDate.now()).years < 18
+            val under62AarIkkeBarn = Period.between(fdato, LocalDate.now()).years in 19..61
 
             if (enhetFraRouting == ID_OG_FORDELING && bucType in listOf(P_BUC_05, P_BUC_06)) {
                 if (over62Aar || barn) {
-                    if(identifisertPerson.landkode == "NOR"){
-                        return NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
-                    }
-                    return PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                    return if(identifisertPerson.landkode == "NOR"){
+                        NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
+                    } else PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
                 if (under62AarIkkeBarn) {
-                    return ID_OG_FORDELING.also { logEnhet(enhetFraRouting, it) }
+                    if (identifisertPerson.landkode == "NOR") {
+                        return if (antallIdentifisertePersoner <= 1) {
+                            UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
+                        } else ID_OG_FORDELING
+                    }
+                    if (antallIdentifisertePersoner <= 1) {
+                        return UFORE_UTLAND.also { logEnhet(enhetFraRouting, it) }
+                    }
                 }
+                ID_OG_FORDELING
             }
 
             if (enhetFraRouting == ID_OG_FORDELING ) {

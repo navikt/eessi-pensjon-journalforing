@@ -25,7 +25,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
         @Test
         fun `1 person i SED fnr finnes Then journalfores On NFP_UTLAND_AALESUND med tema PENSJON`() {
 
-            testRunnerP1000(FNR_VOKSEN) {
+            testRunnerP1000(FNR_VOKSEN_UNDER_62) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
                 Assertions.assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }

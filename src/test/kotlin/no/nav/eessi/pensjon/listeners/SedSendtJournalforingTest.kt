@@ -9,7 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_OVER_60
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -34,10 +35,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.kafka.support.Acknowledgment
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.time.LocalDate
 
 private const val PESYS_SAKID = "25595454"
@@ -134,21 +132,21 @@ internal class SedSendtJournalforingTest {
             landkode = "NO",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
-                fnr = Fodselsnummer.fra("22117320034"),
+                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = Relasjon.GJENLEVENDE,
                 saktype = null,
                 sedType = SedType.P8000,
-                fdato = LocalDate.of(1973, 11, 22),
+                fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
-            fnr = Fodselsnummer.fra("22117320034")
+            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
         every { euxKlient.hentBuc(eq(rinaId)) } returns buc
         every { euxKlient.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1973, 11, 22)
+        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
+        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6,11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -170,14 +168,15 @@ internal class SedSendtJournalforingTest {
         val actualRequest = requestSlot.captured
         val actualRequestOppgave = requestSlotOppgave.captured
 
-        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequestOppgave.tildeltEnhetsnr)
         Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
 
     }
 
     @Test
-    fun `Ved kall til pensjonSakInformasjonSendt ved feil saktype skal det opprettes oppgave`() {
+    fun `Ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
+        // Denne oppgaven blir rutet til UFORE_UTLANDSTILSNITT siden det er en identifisert person under 62 årr (over 18) som er bosatt Norge
         val rinaId = RINA_ID
         val aktoerId = "3216549873212"
         val pesysSakId = PESYS_SAKID
@@ -194,24 +193,25 @@ internal class SedSendtJournalforingTest {
 
         val identifisertPerson = identifisertPersonPDL(
             aktoerId = aktoerId,
-            landkode = "NO",
+            landkode = "NOR",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
-                fnr = Fodselsnummer.fra("22117320034"),
+                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = Relasjon.GJENLEVENDE,
                 saktype = null,
                 sedType = SedType.P8000,
-                fdato = LocalDate.of(1973, 11, 22),
+                fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
-            fnr = Fodselsnummer.fra("22117320034")
+            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
         every { euxKlient.hentBuc(eq(rinaId)) } returns buc
         every { euxKlient.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1973, 11, 22)
+        every { personidentifiseringService.hentIdentifisertePersoner(any(), any(), any(), any(), any()) } returns listOf(identifisertPerson)
+        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -233,8 +233,8 @@ internal class SedSendtJournalforingTest {
         val actualRequest = requestSlot.captured
         val actualRequestOppgave = requestSlotOppgave.captured
 
-        Assertions.assertEquals(Enhet.PENSJON_UTLAND, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(Enhet.PENSJON_UTLAND, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequestOppgave.tildeltEnhetsnr)
         Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
 
     }
@@ -267,22 +267,22 @@ internal class SedSendtJournalforingTest {
             landkode = "NO",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
-                fnr = Fodselsnummer.fra("22117320034"),
+                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = Relasjon.GJENLEVENDE,
                 saktype = null,
                 sedType = SedType.P8000,
-                fdato = LocalDate.of(1973, 11, 22),
+                fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "165sdugh587dfkgjhbkj"
             ),
-            fnr = Fodselsnummer.fra("22117320034")
+            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
         every { euxKlient.hentBuc(any()) } returns buc
         every { euxKlient.hentBucJson(any()) } returns sedJson
         every { euxKlient.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1973, 11, 22)
+        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
+        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -299,7 +299,7 @@ internal class SedSendtJournalforingTest {
         sedListener.consumeSedSendt(sedHendelse, cr, acknowledgment)
         val actualRequest = requestSlot.captured
 
-        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
 
     }
 

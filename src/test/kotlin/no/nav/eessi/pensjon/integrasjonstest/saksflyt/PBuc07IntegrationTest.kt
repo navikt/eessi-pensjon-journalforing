@@ -36,7 +36,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 fnrVoksenSoker = null,
                 krav = KravType.ALDER,
                 alleDocs = allDocuemtActions,
@@ -56,7 +56,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSEDS()
 
             testRunnerVoksen(
-                fnrVoksen = FNR_VOKSEN,
+                fnrVoksen = FNR_VOKSEN_UNDER_62,
                 fnrVoksenSoker = FNR_VOKSEN_2,
                 krav = KravType.ALDER,
                 alleDocs = allDocuemtActions,
@@ -122,7 +122,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(sedType, P_BUC_07, FNR_VOKSEN)
+        val hendelse = createHendelseJson(sedType, P_BUC_07, FNR_VOKSEN_UNDER_62)
 
         val meldingSlot = slot<String>()
 

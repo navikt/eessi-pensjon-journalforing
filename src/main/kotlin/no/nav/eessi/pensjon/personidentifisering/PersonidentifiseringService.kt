@@ -20,7 +20,6 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
-import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -44,16 +43,16 @@ class PersonidentifiseringService(
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(H121, H120, H070)
 
-    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPersonPDL, hendelsesType: HendelseType, erNavCaseOwner: Boolean): IdentifisertPersonPDL? {
+    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPersonPDL, hendelsesType: HendelseType): IdentifisertPersonPDL? {
         return if (hendelsesType == HendelseType.MOTTATT) {
             val isFnrDnrFdatoLikSedFdato =  identifisertPerson.personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
 
             if(isFnrDnrFdatoLikSedFdato == true) {
-                logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+                logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType")
                 validerCounter("successful")
                 identifisertPerson
             } else {
-                logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType, Nav CaseOwner: $erNavCaseOwner")
+                logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType")
                 validerCounter("failed")
                 null
             }
@@ -71,17 +70,13 @@ class PersonidentifiseringService(
     }
 
     fun hentIdentifisertPerson(
-        sedListe: List<Pair<String, SED>>,
         bucType: BucType,
         sedType: SedType?,
         hendelsesType: HendelseType,
         rinaDocumentId: String,
-        erNavCaseOwner: Boolean = false
+        identifisertePersoner: List<IdentifisertPersonPDL>,
+        potensiellePersonRelasjoner: List<SEDPersonRelasjon>
     ): IdentifisertPersonPDL? {
-
-        val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(sedListe, bucType)
-
-        val identifisertePersoner = hentIdentifisertePersoner(sedListe, bucType, potensiellePersonRelasjoner, hendelsesType, rinaDocumentId)
 
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
@@ -92,7 +87,7 @@ class PersonidentifiseringService(
         }
 
         if (identifisertPerson != null) {
-            return validateIdentifisertPerson(identifisertPerson, hendelsesType, erNavCaseOwner)
+            return validateIdentifisertPerson(identifisertPerson, hendelsesType)
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
@@ -113,11 +108,11 @@ class PersonidentifiseringService(
         val distinctByPotensielleSEDPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
         logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
 
-            return distinctByPotensielleSEDPersonRelasjoner
-                .mapNotNull { relasjon ->
-                    hentIdentifisertPerson(relasjon, hendelsesType)
-                }
-                .distinctBy { it.aktoerId }
+        return distinctByPotensielleSEDPersonRelasjoner
+            .mapNotNull { relasjon ->
+                hentIdentifisertPerson(relasjon, hendelsesType)
+            }
+            .distinctBy { it.aktoerId }
     }
 
     fun hentIdentifisertPerson(

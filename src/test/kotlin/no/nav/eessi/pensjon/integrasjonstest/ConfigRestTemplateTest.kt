@@ -79,13 +79,13 @@ internal class ConfigRestTemplateTest {
         every { personService.harAdressebeskyttelse(any(), any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
-                JournalforingTestBase.FNR_VOKSEN,
+                JournalforingTestBase.FNR_VOKSEN_UNDER_62,
                 IdentGruppe.FOLKEREGISTERIDENT
             ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
         )
-        every { personService.hentPerson(NorskIdent(JournalforingTestBase.FNR_VOKSEN)) } returns
+        every { personService.hentPerson(NorskIdent(JournalforingTestBase.FNR_VOKSEN_UNDER_62)) } returns
                 JournalforingTestBase().createBrukerWith(
-                    JournalforingTestBase.FNR_VOKSEN,
+                    JournalforingTestBase.FNR_VOKSEN_UNDER_62,
                     aktorId = JournalforingTestBase.AKTOER_ID
                 )
         every { personService.hentPerson(NorskIdent(JournalforingTestBase.FNR_VOKSEN_2)) } returns

@@ -26,10 +26,10 @@ internal class SEDTest {
 
         val annenPerson = sed.nav?.annenperson
 
-        assertEquals("08075327030", annenPerson!!.person!!.pin!![0].identifikator)
+        assertEquals("11067122781", annenPerson!!.person!!.pin!![0].identifikator)
         assertEquals("NO", annenPerson.person!!.pin!![0].land)
 
-        assertEquals("1953-07-08", annenPerson.person!!.foedselsdato)
+        assertEquals("1971-06-11", annenPerson.person!!.foedselsdato)
         assertEquals(Rolle.ETTERLATTE.kode, annenPerson.person!!.rolle)
         assertNull(annenPerson.person!!.relasjontilavdod)
     }

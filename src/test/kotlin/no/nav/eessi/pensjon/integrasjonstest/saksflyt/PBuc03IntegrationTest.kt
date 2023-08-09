@@ -49,7 +49,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
@@ -84,7 +84,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
@@ -120,7 +120,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
@@ -147,7 +147,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED()
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = MOTTATT,
@@ -197,7 +197,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED("b12e06dda2c7474b9998c7139c841646")
 
             testRunnerVoksenMedSokPerson(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 true,
                 bestemsak,
                 alleDocs = allDocuemtActions,
@@ -229,7 +229,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED(sedStatus = SENT)
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = SENDT
@@ -254,7 +254,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED(sedStatus = SENT)
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 forsokFerdigStilt = true,
@@ -276,7 +276,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSED(sedStatus = SENT)
 
             testRunnerVoksen(
-                FNR_VOKSEN,
+                FNR_VOKSEN_UNDER_62,
                 bestemsak,
                 alleDocs = allDocuemtActions,
                 hendelseType = SENDT

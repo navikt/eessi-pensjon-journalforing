@@ -57,16 +57,18 @@ class PersonidentifiseringServiceTest {
     @Test
     fun `Sjekker at isFnrDnrSinFdatoLikSedFdato returnerer dfato som validerer mot fnr `() {
 
-        val actual = personidentifiseringService.validateIdentifisertPerson(identifisertPersonPDL(
-            aktoerId = "",
-            fnr = Fodselsnummer.fra(SLAPP_SKILPADDE),
-            personRelasjon = SEDPersonRelasjon(
-                Fodselsnummer.fra(SLAPP_SKILPADDE),
-                Relasjon.GJENLEVENDE,
-                fdato = LocalDate.of(1952,3,9),
-                rinaDocumentId = "12"
-            )),
-                MOTTATT, true)
+        val actual = personidentifiseringService.validateIdentifisertPerson(
+            identifisertPersonPDL(
+                aktoerId = "",
+                fnr = Fodselsnummer.fra(SLAPP_SKILPADDE),
+                personRelasjon = SEDPersonRelasjon(
+                    Fodselsnummer.fra(SLAPP_SKILPADDE),
+                    Relasjon.GJENLEVENDE,
+                    fdato = LocalDate.of(1952,3,9),
+                    rinaDocumentId = "12"
+                )),
+            MOTTATT
+        )
 
             assertEquals("1952-03-09", actual?.personRelasjon?.fdato.toString() )
     }
@@ -518,35 +520,35 @@ class PersonidentifiseringServiceTest {
         @Test
         fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjellig gir null ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT, false)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT)
             assertEquals(null, valid)
         }
 
         @Test
         fun `valider identifisertPerson mottatt caseowner ikke norge fdato er null ident returneres`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE, null)
-            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT, false)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT)
             assertNull(valid)
         }
 
         @Test
         fun `valider identifisertPerson mottatt og caseowner ikke norge og fnr og dato er lik gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE, Fodselsnummer.fra(SLAPP_SKILPADDE)?.getBirthDate())
-            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT, false)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT)
             assertEquals(ident, valid)
         }
 
         @Test
         fun `valider identifisertPerson mottatt caseowner norge gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT, true)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, MOTTATT)
             assertEquals(null, valid)
         }
 
         @Test
         fun `valider identifisertPerson sendt gir identifisert person ut`() {
             val ident = mockIdentPerson(SLAPP_SKILPADDE)
-            val valid = personidentifiseringService.validateIdentifisertPerson(ident, SENDT, true)
+            val valid = personidentifiseringService.validateIdentifisertPerson(ident, SENDT)
             assertEquals(ident, valid)
         }
 

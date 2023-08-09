@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -71,9 +72,8 @@ class SedSendtListener(
                         if (GyldigeHendelser.sendt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
 
-                            logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                            val erNavCaseOwner = dokumentHelper.isNavCaseOwner(buc)
+                            logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
                             val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
                             val alleSedIBucPair =
                                 dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
@@ -82,13 +82,17 @@ class SedSendtListener(
 
                             val kansellerteSeder =
                                 dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+
+                            val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedIBucPair, bucType)
+                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedIBucPair, bucType, potensiellePersonRelasjoner, SENDT, sedHendelse.rinaSakId)
+
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                                alleSedIBucPair,
                                 bucType,
                                 sedHendelse.sedType,
                                 SENDT,
                                 sedHendelse.rinaDokumentId,
-                                erNavCaseOwner
+                                identifisertePersoner,
+                                potensiellePersonRelasjoner
                             )
 
                             val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
@@ -112,7 +116,8 @@ class SedSendtListener(
                                 offset,
                                 sakInformasjon,
                                 currentSed,
-                                harAdressebeskyttelse
+                                harAdressebeskyttelse,
+                                identifisertePersoner.count().also { logger.info("Antall identifisertePersoner: $it") }
                             )
                         }
                         acknowledgment.acknowledge()
