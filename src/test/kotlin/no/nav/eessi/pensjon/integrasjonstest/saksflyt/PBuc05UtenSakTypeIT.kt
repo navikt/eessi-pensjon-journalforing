@@ -1,7 +1,11 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.logger
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -23,7 +27,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
         testRunnerFlerePersoner(
             FNR_VOKSEN_UNDER_62,
             FNR_BARN, emptyList(), rolle = Rolle.FORSORGER) {
-            assertEquals(PENSJON, it.tema)
+            assertEquals(UFORETRYGD, it.tema)
             assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
     }
@@ -39,11 +43,13 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
     }
 
     @Test
-    fun `2 personer i SED, har rolle barn 03 `() {
+    fun `2 personer i SED, ingen rolle`() {
         testRunnerFlerePersoner(
             FNR_VOKSEN_UNDER_62,
             FNR_BARN, emptyList(), rolle = null) {
-            assertEquals(PENSJON, it.tema)
+            logger.info("logging: $it")
+            assertEquals(UFORETRYGD, it.tema)
+            assertEquals(UFOREPENSJON, it.behandlingstema)
             assertEquals(Enhet.UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
         }
     }

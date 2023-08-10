@@ -265,7 +265,7 @@ class JournalforingService(
             }
 
             if (enhetFraRouting == ID_OG_FORDELING ) {
-                val behandlingstema = journalpostService.bestemBehandlingsTema(bucType!!, saktype)
+                val behandlingstema = journalpostService.bestemBehandlingsTema(bucType!!, saktype, journalpostService.hentTema(bucType, saktype, identifisertPerson.fnr))
                 logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
                 return if (identifisertPerson.landkode == "NOR" ) {
                     when (behandlingstema) {

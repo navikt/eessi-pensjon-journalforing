@@ -88,7 +88,7 @@ internal class JournalforingServiceTest {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
-        every { journalpostService.bestemBehandlingsTema(any(), any()) } returns Behandlingstema.BARNEP
+        every { journalpostService.bestemBehandlingsTema(any(), any(), any()) } returns Behandlingstema.BARNEP
         //PDF -
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())

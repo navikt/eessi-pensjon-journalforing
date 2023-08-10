@@ -132,7 +132,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Krav om barnepensjon ingen sak - id og fordeling`() {
+        fun `Krav om barnepensjon ingen sak - sak sendes til NFP_UTLAND_AALESUND`() {
             val allDocuemtActions = forenkletSEDs()
 
             testRunnerBarn(

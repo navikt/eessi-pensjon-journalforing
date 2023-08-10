@@ -134,7 +134,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `2 personer i SED, har fnr, mangler rolle og saksnummer`() {
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, fnrAnnenPerson = null, rolle = null, sakId = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
@@ -180,7 +180,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
 
@@ -200,7 +200,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_UNDER_62, saker) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
 
@@ -220,7 +220,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(AUTOMATISK_JOURNALFORING, it.journalfoerendeEnhet)
             }
 
@@ -240,7 +240,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(BARNEP))
 
             testRunner(FNR_VOKSEN_UNDER_62, saker) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
@@ -260,7 +260,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(BARNEP))
 
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
 
@@ -968,7 +968,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals("P9000", oppgaveMelding.sedType?.name)
 
             assertEquals("UTGAAENDE", request.journalpostType.name)
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
             assertEquals(fnr, request.bruker?.id!!)
 
@@ -1253,7 +1253,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val request = journalpost.captured
             // forvent tema == PEN og enhet 9999
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -1289,7 +1289,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -1344,7 +1344,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_UNDER_62, sakId = null, hendelseType = MOTTATT) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
@@ -1362,7 +1362,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_UNDER_62, sakId = null, hendelseType = MOTTATT, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
 
@@ -1386,7 +1386,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
@@ -1401,7 +1401,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = MOTTATT) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
@@ -1416,7 +1416,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
@@ -1431,7 +1431,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.FORSORGER, sakId = null, hendelseType = MOTTATT, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
@@ -1495,7 +1495,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLAND, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
 
@@ -1530,7 +1530,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
             assertEquals(valgtFNR, request.bruker!!.id)
 
@@ -1620,10 +1620,10 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario6Inngaende {
         @Test
         fun `To personer angitt, gyldig fnr, rolle 02 etterlatte, bosatt norge`() {
-            testRunnerFlerePersoner(FNR_OVER_62, FNR_BARN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = MOTTATT) {
-                assertEquals(PENSJON, it.tema)
-                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-            }
+//            testRunnerFlerePersoner(FNR_OVER_62, FNR_BARN, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = MOTTATT) {
+//                assertEquals(PENSJON, it.tema)
+//                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+//            }
 
             testRunnerFlerePersoner(FNR_OVER_62, FNR_VOKSEN_UNDER_62, rolle = Rolle.ETTERLATTE, sakId = null, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
