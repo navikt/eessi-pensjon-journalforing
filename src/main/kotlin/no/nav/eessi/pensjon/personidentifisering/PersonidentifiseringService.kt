@@ -27,6 +27,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
@@ -194,9 +195,9 @@ class PersonidentifiseringService(
         return when {
             identifisertePersoner.isEmpty() -> null
             bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
-            bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.GJENLEVENDE }
+            bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
-                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == Relasjon.GJENLEVENDE }
+                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
             bucType == P_BUC_10 -> {
@@ -205,7 +206,7 @@ class PersonidentifiseringService(
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
             bucType == P_BUC_07 && (identifisertePersoner.size > 1) -> {
-                identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.GJENLEVENDE }
+                identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             }
             bucType == P_BUC_07 -> identifisertePersoner.firstOrNull()
 
@@ -229,8 +230,8 @@ class PersonidentifiseringService(
         identifisertePersoner.forEach {
             logger.debug(it.toJson())
         }
-        val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.FORSIKRET }
-        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.GJENLEVENDE }
+        val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
+        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }  //høre med Anund om dette stemmer
         logger.info("personAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
 
         return when {
@@ -238,7 +239,7 @@ class PersonidentifiseringService(
             erGjenlevende -> null
             else -> {
                 forsikretPerson?.apply {
-                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == Relasjon.FORSIKRET }
+                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == FORSIKRET }
                 }
             }
         }
@@ -253,7 +254,7 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
         if (sedType in brukForikretPersonISed) {
             logger.info("Henter ut forsikret person fra følgende SED $sedType")
-            return identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == Relasjon.FORSIKRET }
+            return identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         }
         return null
     }

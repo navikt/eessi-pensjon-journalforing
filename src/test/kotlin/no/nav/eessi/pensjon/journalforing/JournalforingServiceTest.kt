@@ -4,19 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -88,7 +81,7 @@ internal class JournalforingServiceTest {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
-        every { journalpostService.bestemBehandlingsTema(any(), any(), any()) } returns Behandlingstema.BARNEP
+        every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
         //PDF -
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
@@ -111,7 +104,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         } returns OpprettJournalPostResponse("123", "null", null, false)
     }
@@ -135,7 +129,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R004),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
         )
 
         verify {
@@ -151,7 +145,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = ALDER,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -177,7 +172,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-            antallIdentifisertePersoner = 1
+            identifisertePersoner = 1
         )
 
         verify {
@@ -193,7 +188,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = UFOREP,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -218,7 +214,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-            antallIdentifisertePersoner = 1
+            identifisertePersoner = 1
             )
 
         verify {
@@ -234,7 +230,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = UFOREP,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -267,7 +264,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
             )
 
         verify {
@@ -283,7 +280,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = ALDER,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -301,7 +299,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -316,7 +314,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -333,7 +332,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -353,7 +352,8 @@ internal class JournalforingServiceTest {
                     idType = IdType.UTL_ORG,
                     navn = "UK INST",
                     land = "GB"
-                )
+                ),
+                identifisertePersoner = any()
             )
         }
     }
@@ -377,7 +377,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2200),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
         )
 
         verify {
@@ -393,7 +393,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -416,7 +417,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P15000),
-            antallIdentifisertePersoner = 1,
+            identifisertePersoner = 1,
         )
 
         verify {
@@ -432,7 +433,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -456,6 +458,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2000),
+            identifisertePersoner = 1
         )
 
         verify {
@@ -471,7 +474,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -495,6 +499,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2000),
+            identifisertePersoner = 1
         )
 
         verify {
@@ -510,7 +515,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = any(),
                 saktype = any(),
-                any()
+                institusjon = any(),
+                identifisertePersoner = any(),
             )
         }
     }
@@ -534,6 +540,7 @@ internal class JournalforingServiceTest {
             ALDER,
             0,
             null, SED(type = SedType.P2100),
+            identifisertePersoner = 1
         )
 
         verify {
@@ -549,7 +556,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 saktype = ALDER,
-                any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -573,6 +581,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2200),
+            identifisertePersoner = 1
         )
 
         verify {
@@ -588,7 +597,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                any()
+                institusjon = any(),
+                identifisertePersoner = any()
             )
         }
     }
@@ -612,6 +622,7 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P15000),
+            identifisertePersoner = 1
         )
 
         verify {
@@ -627,7 +638,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = any(),
                 avsenderNavn = any(),
                 saktype = any(),
-                any()
+                institusjon = any(),
+                identifisertePersoner = 1
             )
         }
     }
@@ -653,6 +665,7 @@ internal class JournalforingServiceTest {
             0,
             sakInformasjon,
             SED(type = SedType.P2100),
+            identifisertePersoner = 2
         )
 
         verify {
@@ -668,7 +681,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 saktype = GJENLEV,
-                any()
+                any(),
+                identifisertePersoner = 2
             )
             //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
         }
@@ -718,6 +732,7 @@ internal class JournalforingServiceTest {
             0,
             saksInfo,
             SED(type = SedType.P2100),
+            identifisertePersoner = 2
         )
 
         verify {
@@ -733,7 +748,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAV ACCEPTANCE TEST 07",
                 saktype = GJENLEV,
-                any()
+                any(),
+                identifisertePersoner = 2
             )
         }
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -760,6 +776,7 @@ internal class JournalforingServiceTest {
             0,
             sakInformasjon,
             SED(type = SedType.P2100),
+            identifisertePersoner = 2
         )
 
         verify {
@@ -775,7 +792,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 saktype = null,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = 2
             )
         }
         // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -795,7 +813,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100)
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100), identifisertePersoner = 2
         )
 
         verify {
@@ -811,7 +829,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 saktype = null,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = 2
             )
         }
     }
@@ -829,7 +848,7 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100),
+            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100), identifisertePersoner = 2
         )
 
         verify {
@@ -845,7 +864,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "NO",
                 avsenderNavn = "NAVT003",
                 saktype = null,
-                institusjon = any()
+                institusjon = any(),
+                identifisertePersoner = 2
             )
         }
     }
@@ -891,6 +911,7 @@ internal class JournalforingServiceTest {
             0,
             saksInfo,
             SED(type = SedType.P2100),
+            identifisertePersoner = 2
         )
 
         verify {
@@ -906,7 +927,8 @@ internal class JournalforingServiceTest {
                 avsenderLand = "PL",
                 avsenderNavn = "POLEN",
                 saktype = BARNEP,
-                any()
+                any(),
+                identifisertePersoner = 2
             )
         }
     }

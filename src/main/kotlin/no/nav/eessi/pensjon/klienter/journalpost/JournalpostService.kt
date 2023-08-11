@@ -47,13 +47,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         avsenderLand: String?,
         avsenderNavn: String?,
         saktype: SakType?,
-        institusjon: AvsenderMottaker
+        institusjon: AvsenderMottaker,
+        identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
-        val tema = hentTema(bucType, saktype, fnr)
+        val tema = hentTema(bucType, saktype, fnr, identifisertePersoner)
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(bucType, saktype, tema),
+            behandlingstema = bestemBehandlingsTema(bucType, saktype, tema, identifisertePersoner),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
@@ -76,7 +77,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema): Behandlingstema {
+    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, antallIdentifisertePersoner: Int): Behandlingstema {
         val bucs = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
         return if (bucType == R_BUC_02) {
             when (saktype) {
@@ -88,11 +89,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         } else {
             return when (bucType) {
                 P_BUC_01 -> ALDERSPENSJON
-                P_BUC_02 -> GJENLEVENDEPENSJON      //Barnepensjon og gjenlvendepensjon behandles på samme enhet(er) derfor generaliserer vi her
+                P_BUC_02 -> GJENLEVENDEPENSJON
                 P_BUC_03 -> UFOREPENSJON
                 else -> {
-                    if(tema == UFORETRYGD) {
+                    if(tema == UFORETRYGD && antallIdentifisertePersoner <= 1) {
                         return UFOREPENSJON
+                    }
+                    if(tema == PENSJON && antallIdentifisertePersoner >= 2) {
+                        return GJENLEVENDEPENSJON
                     }
                     if (bucType in bucs) {
                          when (saktype) {
@@ -115,13 +119,18 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - saktype er UFØRETRYGD
      */
 
-        fun hentTema(bucType: BucType, saktype: SakType?, fnr: Fodselsnummer?) : Tema {
+        fun hentTema(
+        bucType: BucType,
+        saktype: SakType?,
+        fnr: Fodselsnummer?,
+        identifisertePersoner: Int
+    ) : Tema {
         val ufoereAlder =  if (fnr != null) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
         return if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) {
             UFORETRYGD
         } else {
             val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
-            if (muligUfoereBuc && ufoereAlder) {
+            if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) {
                 return UFORETRYGD
             } else {
                 return PENSJON

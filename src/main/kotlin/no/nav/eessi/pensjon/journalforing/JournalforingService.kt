@@ -81,7 +81,7 @@ class JournalforingService(
         sakInformasjon: SakInformasjon?,
         sed: SED?,
         harAdressebeskyttelse: Boolean = false,
-        antallIdentifisertePersoner: Int = 0
+        identifisertePersoner: Int
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -105,7 +105,7 @@ class JournalforingService(
                     hendelseType,
                     sakInformasjon,
                     harAdressebeskyttelse,
-                    antallIdentifisertePersoner
+                    identifisertePersoner
                 )
                 val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
 
@@ -128,7 +128,8 @@ class JournalforingService(
                     avsenderLand = sedHendelse.avsenderLand,
                     avsenderNavn = sedHendelse.avsenderNavn,
                     saktype = saktype,
-                    institusjon = institusjon
+                    institusjon = institusjon,
+                    identifisertePersoner = identifisertePersoner
                 )
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
@@ -265,7 +266,16 @@ class JournalforingService(
             }
 
             if (enhetFraRouting == ID_OG_FORDELING ) {
-                val behandlingstema = journalpostService.bestemBehandlingsTema(bucType!!, saktype, journalpostService.hentTema(bucType, saktype, identifisertPerson.fnr))
+                val behandlingstema = journalpostService.bestemBehandlingsTema(
+                    bucType!!, saktype,
+                    journalpostService.hentTema(
+                        bucType,
+                        saktype,
+                        identifisertPerson.fnr,
+                        antallIdentifisertePersoner
+                    ),
+                    antallIdentifisertePersoner,
+                )
                 logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
                 return if (identifisertPerson.landkode == "NOR" ) {
                     when (behandlingstema) {
