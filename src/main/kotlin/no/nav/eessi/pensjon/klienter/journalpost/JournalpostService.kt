@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.eux.model.sed.Norge
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
@@ -14,12 +13,13 @@ import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.oppgaverouting.Bosatt
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.Period
 
 @Service
 class JournalpostService(private val journalpostKlient: JournalpostKlient) {
@@ -47,16 +47,18 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         avsenderLand: String?,
         avsenderNavn: String?,
         saktype: SakType?,
-        institusjon: AvsenderMottaker
+        institusjon: AvsenderMottaker,
+        identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
+        val tema = hentTema(bucType, saktype, fnr, identifisertePersoner)
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(bucType, saktype),
+            behandlingstema = bestemBehandlingsTema(bucType, saktype, tema, identifisertePersoner),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
-            tema = hentTema(bucType, saktype),
+            tema = tema,
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedType),
             dokumenter = dokumenter,
@@ -75,7 +77,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
-    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?): Behandlingstema {
+    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, antallIdentifisertePersoner: Int): Behandlingstema {
         val bucs = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
         return if (bucType == R_BUC_02) {
             when (saktype) {
@@ -87,18 +89,24 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         } else {
             return when (bucType) {
                 P_BUC_01 -> ALDERSPENSJON
-                P_BUC_02 -> GJENLEVENDEPENSJON      //Barnepensjon og gjenlvendepensjon behandles på samme enhet(er) derfor generaliserer vi her
+                P_BUC_02 -> GJENLEVENDEPENSJON
                 P_BUC_03 -> UFOREPENSJON
                 else -> {
+                    if(tema == UFORETRYGD && antallIdentifisertePersoner <= 1) {
+                        return UFOREPENSJON
+                    }
+                    if(tema == PENSJON && antallIdentifisertePersoner >= 2) {
+                        return GJENLEVENDEPENSJON
+                    }
                     if (bucType in bucs) {
                          when (saktype) {
                             GJENLEV, BARNEP -> GJENLEVENDEPENSJON
                             UFOREP -> UFOREPENSJON
                             else -> {
-                                ALDERSPENSJON
+                                return ALDERSPENSJON
                             }
                         }
-                    } else ALDERSPENSJON
+                    } else return ALDERSPENSJON
                 }
             }
         }
@@ -111,8 +119,24 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - saktype er UFØRETRYGD
      */
 
-        fun hentTema(bucType: BucType, saktype: SakType?) : Tema =
-            if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD else PENSJON
+        fun hentTema(
+        bucType: BucType,
+        saktype: SakType?,
+        fnr: Fodselsnummer?,
+        identifisertePersoner: Int
+    ) : Tema {
+        val ufoereAlder =  if (fnr != null) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
+        return if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) {
+            UFORETRYGD
+        } else {
+            val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
+            if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) {
+                return UFORETRYGD
+            } else {
+                return PENSJON
+            }
+        }
+    }
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
             if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE

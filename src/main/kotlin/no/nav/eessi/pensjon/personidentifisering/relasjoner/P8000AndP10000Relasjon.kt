@@ -26,7 +26,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
         logger.debug("forsikret $forsikret")
         logger.debug("gjenlevlist: $fnrListe")
 
-        if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER } != null ) {
+        if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER || it.relasjon == Relasjon.GJENLEVENDE } != null ) {
             return fnrListe + forsikret
         }
         return fnrListe.ifEmpty { forsikret }
