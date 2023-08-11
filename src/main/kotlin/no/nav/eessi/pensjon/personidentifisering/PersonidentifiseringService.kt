@@ -26,8 +26,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.FORSIKRET
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
@@ -231,7 +231,7 @@ class PersonidentifiseringService(
             logger.debug(it.toJson())
         }
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
-        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }  //høre med Anund om dette stemmer
+        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
         logger.info("personAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
 
         return when {
