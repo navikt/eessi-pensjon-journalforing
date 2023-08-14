@@ -105,11 +105,11 @@ class JournalpostKlient(
     }
 
     fun settStatusAvbrutt(journalpostId: String) {
-        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbrutt"
+        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt"
 
         return avbruttStatusInfo.measure {
             try {
-                logger.info("Setter status avbrutt for journalpost: $journalpostId")
+                logger.info("Setter status avbryt for journalpost: $journalpostId")
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 

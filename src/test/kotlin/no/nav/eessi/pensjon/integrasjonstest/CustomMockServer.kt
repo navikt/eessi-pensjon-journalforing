@@ -33,7 +33,7 @@ class CustomMockServer {
         mockServer.`when`(
             HttpRequest.request()
                 .withMethod("PATCH")
-                .withPath("/journalpost/.*/settStatusAvbrutt")
+                .withPath("/journalpost/.*/settStatusAvbryt")
         )
             .respond(
                 HttpResponse.response()
