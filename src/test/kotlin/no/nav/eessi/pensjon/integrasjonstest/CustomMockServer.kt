@@ -28,6 +28,22 @@ class CustomMockServer {
         )
     }
 
+    fun medStatusAvbrutt() = apply {
+        // Mocker sett status avbrutt
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("PATCH")
+                .withPath("/journalpost/.*/settStatusAvbrutt")
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withBody("")
+            )
+    }
+
+
     fun mockBestemSak() = apply {
 
         mockServer.`when`(

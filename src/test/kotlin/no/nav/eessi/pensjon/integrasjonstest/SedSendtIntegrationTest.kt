@@ -58,6 +58,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medJournalforing(false, "429434379")
             .medNorg2Tjeneste()
             .mockBestemSak()
+            .medStatusAvbrutt()
             .medOppdaterDistribusjonsinfo()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/7477291", HttpMethod.GET, Buc(
@@ -86,6 +87,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medJournalforing(false, "429434379")
             .medNorg2Tjeneste()
             .mockBestemSak()
+            .medStatusAvbrutt()
             .medOppdaterDistribusjonsinfo()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/147666", HttpMethod.GET,
@@ -116,6 +118,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
+            .medStatusAvbrutt()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/148161",
                 HttpMethod.GET,
@@ -180,6 +183,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medNorg2Tjeneste()
             .mockBestemSak()
             .medOppdaterDistribusjonsinfo()
+            .medStatusAvbrutt()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/161558",
                 HttpMethod.GET,
