@@ -28,11 +28,14 @@ class JournalpostKlient(
 
     private lateinit var opprettjournalpost: MetricsHelper.Metric
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
+    private lateinit var avbruttStatusInfo: MetricsHelper.Metric
 
     @PostConstruct
     fun initMetrics() {
+        avbruttStatusInfo = metricsHelper.init("avbruttStatusInfo")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
+
     }
 
     /**
@@ -104,7 +107,7 @@ class JournalpostKlient(
     fun settStatusAvbrutt(journalpostId: String) {
         val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbrutt"
 
-        return oppdaterDistribusjonsinfo.measure {
+        return avbruttStatusInfo.measure {
             try {
                 logger.info("Setter status avbrutt for journalpost: $journalpostId")
                 val headers = HttpHeaders()
