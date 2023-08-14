@@ -5,11 +5,9 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
-import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -76,6 +74,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
+    fun settStatusAvbrutt(journalpostId: String) = journalpostKlient.settStatusAvbrutt(journalpostId)
 
     fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, antallIdentifisertePersoner: Int): Behandlingstema {
         val bucs = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)

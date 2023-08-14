@@ -100,4 +100,29 @@ class JournalpostKlient(
             }
         }
     }
+
+    fun settStatusAvbrutt(journalpostId: String) {
+        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbrutt"
+
+        return oppdaterDistribusjonsinfo.measure {
+            try {
+                logger.info("Setter status avbrutt for journalpost: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    path,
+                    HttpMethod.PATCH,
+                    HttpEntity("",headers),
+                    String::class.java)
+
+            } catch (ex: HttpStatusCodeException) {
+                logger.error("En HttpStatusCodeException oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message}")
+            }
+        }
+    }
 }

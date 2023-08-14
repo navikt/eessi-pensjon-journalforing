@@ -218,6 +218,15 @@ internal class JournalpostServiceTest {
     }
 
     @Test
+    fun `Gitt JournalpostId og ukjent bruker så patcher vi journalposten til Avbrutt`() {
+        val journalpostId = "12345"
+
+        journalpostService.settStatusAvbrutt(journalpostId)
+
+        verify(exactly = 1) { mockKlient.settStatusAvbrutt(journalpostId) }
+    }
+
+    @Test
     fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
         val result = journalpostService.hentTema(P_BUC_02, BARNEP, LEALAUS_KAKE, identifisertePersoner = 2)
         assertEquals(Tema.PENSJON, result)
