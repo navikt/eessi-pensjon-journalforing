@@ -129,9 +129,11 @@ class JournalforingService(
                 )
 
                 //Oppdaterer journalposten med status Avbrutt
-                if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT) {
+                val sattStatusAvbrutt = if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT) {
                     journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
-                }
+                    true
+                } else false
+
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
                 if (tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
@@ -139,7 +141,7 @@ class JournalforingService(
                 }
                 val aktoerId = identifisertPerson?.aktoerId
 
-                if (!journalPostResponse!!.journalpostferdigstilt) {
+                if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
                         sedHendelse.sedType,
                         journalPostResponse.journalpostId,

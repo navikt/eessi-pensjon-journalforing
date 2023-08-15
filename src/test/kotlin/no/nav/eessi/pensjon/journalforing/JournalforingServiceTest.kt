@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -136,7 +137,7 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Mottatt sed P2200 med ukjent fnr skal likke sette status avbrutt`() {
+    fun `Mottatt sed P2200 med ukjent fnr skal ikke sette status avbrutt`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPersonPDL(
@@ -158,6 +159,82 @@ internal class JournalforingServiceTest {
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
+
+    }
+
+    @Test
+    fun `Utgaaende sed P2200 med ukjent fnr skal sette status avbrutt og opprette behandle-sed oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            "NOR"
+        )
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 0,
+        )
+
+        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
+
+    }
+
+    @Test
+    fun `Utgaaende sed P2200 med kjent fnr skal status ikke settes til avbrutt og vi skal opprette journalfoerings oppgave`() {
+        val hendelse = """
+            {
+              "id": 1869,
+              "sedId": "P2100_b12e06dda2c7474b9998c7139c841646_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_02",
+              "rinaSakId": "147730",
+              "avsenderId": "NO:NAVT003",
+              "avsenderNavn": "NAVT003",
+              "avsenderLand": "NO",
+              "mottakerId": "NO:NAVT007",
+              "mottakerNavn": "NAV Test 07",
+              "mottakerLand": "NO",
+              "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P2100",
+              "navBruker": "22117320034"
+            }
+        """.trimIndent()
+
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(Fodselsnummer.fra("22117320034"), Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            "NOR"
+        )
+
+        val journalPostResponse = OpprettJournalPostResponse("","","",false)
+
+        every { journalpostService.opprettJournalpost(any(),any(), any(), any(), any(), any(),any(),any(), any(), any(), any(), any(), any()) } returns journalPostResponse
+        every { journalpostService.hentTema(any(),any(), any(), any()) } returns Tema.PENSJON
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LocalDate.of(1973,11,22),
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 1,
+        )
+
+        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
 
     }
 

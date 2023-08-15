@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.*
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -156,7 +157,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val sokBarn = createBrukerWith(FNR_BARN, "Barn", "Gjenlev", "SWE", aktorId = AKTOER_ID_2)
 
-            testRunnerBarn(
+            testRunnerBarnUtenOppgave(
                 FNR_VOKSEN_UNDER_62,
                 null,
                 null,
@@ -458,9 +459,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
-            testRunnerVoksen(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {
+            testRunnerBarnUtenOppgave(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
+                assertEquals(GJENLEVENDEPENSJON, it.behandlingstema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+
             }
         }
     }
@@ -918,6 +921,69 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         clearAllMocks()
     }
+
+    private fun testRunnerBarnUtenOppgave(
+        fnrVoksen: String,
+        fnrBarn: String?,
+        bestemSak: BestemSakResponse? = null,
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        krav: KravType = ALDER,
+        alleDocs: List<ForenkletSED>,
+        relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
+        sedJson: String? = null,
+        hendelseType: HendelseType,
+        sokPerson: Person? = null,
+        block: (OpprettJournalpostRequest) -> Unit
+    ) {
+        val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
+            ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
+
+        initCommonMocks(sed, alleDocs)
+
+        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
+
+        if (fnrBarn != null) {
+            every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
+        }
+        if (sokPerson != null) {
+            every { personService.sokPerson(any()) } returns setOf(
+                IdentInformasjon(
+                    FNR_OVER_62,
+                    IdentGruppe.FOLKEREGISTERIDENT
+                ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
+            )
+            every { personService.hentPerson(any<Ident<*>>()) } returns sokPerson
+
+        }
+
+        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
+        if (bestemSak != null) {
+            every { fagmodulKlient.hentPensjonSaklist(any()) } returns bestemSak.sakInformasjonListe
+        }
+
+        val (journalpost, _) = initJournalPostRequestSlot()
+
+        val forsikretfnr = if (krav == GJENLEV) fnrVoksen else null
+        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10, forsikretfnr)
+
+        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+
+        when (hendelseType) {
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            else -> fail()
+        }
+        block(journalpost.captured)
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
+        clearAllMocks()
+    }
+
 
     private fun bestemSakResponse(sakType: SakType? = SakType.ALDER, sakStatus: SakStatus? = AVSLUTTET) =
         BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = sakType!!, sakStatus = sakStatus!!)))
