@@ -111,6 +111,57 @@ internal class JournalforingServiceTest {
     }
 
     @Test
+    fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            "NOR"
+        )
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 0,
+        )
+
+        verify { journalpostService.settStatusAvbrutt(journalpostId = "123") }
+    }
+
+    @Test
+    fun `Mottatt sed P2200 med ukjent fnr skal likke sette status avbrutt`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            "NOR"
+        )
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            null,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 0,
+        )
+
+        verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
+
+    }
+
+    @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)

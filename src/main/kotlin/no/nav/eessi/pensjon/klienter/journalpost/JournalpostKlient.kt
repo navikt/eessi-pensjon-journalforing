@@ -28,11 +28,14 @@ class JournalpostKlient(
 
     private lateinit var opprettjournalpost: MetricsHelper.Metric
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
+    private lateinit var avbruttStatusInfo: MetricsHelper.Metric
 
     @PostConstruct
     fun initMetrics() {
+        avbruttStatusInfo = metricsHelper.init("avbruttStatusInfo")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
+
     }
 
     /**
@@ -97,6 +100,31 @@ class JournalpostKlient(
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
                 throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message}")
+            }
+        }
+    }
+
+    fun settStatusAvbrutt(journalpostId: String) {
+        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt"
+
+        return avbruttStatusInfo.measure {
+            try {
+                logger.info("Setter status avbryt for journalpost: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    path,
+                    HttpMethod.PATCH,
+                    HttpEntity("",headers),
+                    String::class.java)
+
+            } catch (ex: HttpStatusCodeException) {
+                logger.error("En HttpStatusCodeException oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message}")
             }
         }
     }

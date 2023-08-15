@@ -21,12 +21,8 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
@@ -131,6 +127,11 @@ class JournalforingService(
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner
                 )
+
+                //Oppdaterer journalposten med status Avbrutt
+                if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT) {
+                    journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
+                }
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
                 if (tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING && hendelseType == HendelseType.SENDT) {
