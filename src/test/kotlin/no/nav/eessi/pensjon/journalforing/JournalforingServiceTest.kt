@@ -4,15 +4,23 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
@@ -30,6 +38,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
@@ -277,6 +286,42 @@ internal class JournalforingServiceTest {
                 identifisertePersoner = any()
             )
         }
+    }
+
+    @Test
+    fun `En R004 paa R_BUC_02 hvor relasjon finnes, men mangler fnr saa skal den ikke settes til avbrutt`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            ALDER,
+            0,
+            null,
+            SED(type = SedType.R004),
+            identifisertePersoner = 1,
+        )
+
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "R004",
+              "journalpostId" : "123",
+              "tildeltEnhetsnr" : "4303",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "2536475861",
+              "hendelseType" : "SENDT",
+              "filnavn" : null,
+              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
+        )
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+
     }
 
     @Test
