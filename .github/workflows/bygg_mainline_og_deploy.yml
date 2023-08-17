@@ -69,3 +69,6 @@ jobs:
           repository: ${{ github.repository }}
           event-type: deploy-prod
           client-payload: '{"image": "${{ steps.docker-push.outputs.image }}"}'
+
+      - name: 'Echo Image Name'
+        run: echo "### Image Name ${{ steps.docker-push.outputs.image }}" >> $GITHUB_STEP_SUMMARY
