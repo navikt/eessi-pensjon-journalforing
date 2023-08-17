@@ -71,7 +71,7 @@ compileTestKotlin {
 
 test {
     useJUnitPlatform()
-    failFast = false
+    failFast = true
     testLogging {
         exceptionFormat "full"
         showStandardStreams false
@@ -89,7 +89,7 @@ dependencyUpdates {
 
 // https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
