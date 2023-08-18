@@ -15,6 +15,25 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.H001
+import no.nav.eessi.pensjon.eux.model.SedType.H002
+import no.nav.eessi.pensjon.eux.model.SedType.H020
+import no.nav.eessi.pensjon.eux.model.SedType.H021
+import no.nav.eessi.pensjon.eux.model.SedType.H070
+import no.nav.eessi.pensjon.eux.model.SedType.H120
+import no.nav.eessi.pensjon.eux.model.SedType.H121
+import no.nav.eessi.pensjon.eux.model.SedType.X001
+import no.nav.eessi.pensjon.eux.model.SedType.X002
+import no.nav.eessi.pensjon.eux.model.SedType.X003
+import no.nav.eessi.pensjon.eux.model.SedType.X004
+import no.nav.eessi.pensjon.eux.model.SedType.X005
+import no.nav.eessi.pensjon.eux.model.SedType.X006
+import no.nav.eessi.pensjon.eux.model.SedType.X007
+import no.nav.eessi.pensjon.eux.model.SedType.X008
+import no.nav.eessi.pensjon.eux.model.SedType.X009
+import no.nav.eessi.pensjon.eux.model.SedType.X010
+import no.nav.eessi.pensjon.eux.model.SedType.X013
+import no.nav.eessi.pensjon.eux.model.SedType.X050
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -147,8 +166,11 @@ class JournalforingService(
                 )
 
                 //Oppdaterer journalposten med status Avbrutt
-                val bucsSendesIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
-                val sattStatusAvbrutt = if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT && sedHendelse.bucType !in bucsSendesIkkeTilAvbrutt) {
+                val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
+                val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
+
+                val sattStatusAvbrutt = if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT &&
+                    (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)) {
                     journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                     true
                 } else false

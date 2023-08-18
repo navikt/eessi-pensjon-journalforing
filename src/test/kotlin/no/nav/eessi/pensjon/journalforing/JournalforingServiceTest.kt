@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
@@ -41,6 +42,8 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.kafka.core.KafkaTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -288,10 +291,15 @@ internal class JournalforingServiceTest {
         }
     }
 
-    @Test
-    fun `En R004 paa R_BUC_02 hvor relasjon finnes, men mangler fnr saa skal den ikke settes til avbrutt`() {
+    @ParameterizedTest
+    @EnumSource(
+        BucType::class, names = [
+            "R_BUC_02", "M_BUC_02", "M_BUC_03a", "M_BUC_03b"
+        ]
+    )
+    fun `Buc av denne typen skal ikke journalfores med avbrutt`(bucType: BucType) {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = bucType)
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
@@ -316,6 +324,49 @@ internal class JournalforingServiceTest {
               "tildeltEnhetsnr" : "4303",
               "aktoerId" : "12078945602",
               "rinaSakId" : "2536475861",
+              "hendelseType" : "SENDT",
+              "filnavn" : null,
+              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
+        )
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        SedType::class, names = [
+            "X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008", "X009", "X010",
+            "X013", "X050", "H001", "H002", "H020", "H021", "H070", "H120", "H121"
+        ]
+    )
+    fun `Sed av denne typen skal ikke journalfores med avbrutt`(sedType: SedType) {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")?.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse!!).copy(sedType = sedType)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), sedType) } returns Pair("$sedType supported Documents", emptyList())
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            ALDER,
+            0,
+            null,
+            SED(type = sedType),
+            identifisertePersoner = 1,
+        )
+        verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "$sedType",
+              "journalpostId" : "123",
+              "tildeltEnhetsnr" : "4303",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "147729",
               "hendelseType" : "SENDT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING"}""".trimIndent()
