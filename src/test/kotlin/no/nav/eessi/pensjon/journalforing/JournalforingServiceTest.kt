@@ -2,32 +2,22 @@ package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
-import no.nav.eessi.pensjon.klienter.journalpost.IdType
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
@@ -40,6 +30,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -54,7 +45,8 @@ private const val RINADOK_ID = "3123123"
 
 internal class JournalforingServiceTest {
 
-    private val journalpostService = mockk<JournalpostService>(relaxUnitFun = true)
+    private val journalpostKlient = mockk<JournalpostKlient>(relaxUnitFun = true)
+    private val journalpostService = JournalpostService(journalpostKlient)
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
     private val kravHandeler = mockk<KravInitialiseringsHandler>()
@@ -94,33 +86,67 @@ internal class JournalforingServiceTest {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
-        every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
+//        every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
         //PDF -
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2200) } returns Pair("P2200 Supported Documents", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R004) } returns Pair("R004 - Melding om utbetaling", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P6000) } returns Pair("P6000 Supported Documents", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2200) } returns Pair("P2200 Supported Documents", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R004) } returns Pair("R004 - Melding om utbetaling", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
+//        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
 
         //JOURNALPOST OPPRETT JOURNALPOST
-        every {
-            journalpostService.opprettJournalpost(
-                rinaSakId = any(),
-                fnr = any(),
-                bucType = any(),
-                sedType = any(),
-                sedHendelseType = any(),
-                journalfoerendeEnhet = any(),
-                arkivsaksnummer = any(),
-                dokumenter = any(),
-                avsenderLand = any(),
-                avsenderNavn = any(),
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any()
-            )
-        } returns OpprettJournalPostResponse("123", "null", null, false)
+//        every {
+//            journalpostService.opprettJournalpost(
+//                rinaSakId = any(),
+//                fnr = any(),
+//                bucType = any(),
+//                sedType = any(),
+//                sedHendelseType = any(),
+//                journalfoerendeEnhet = any(),
+//                arkivsaksnummer = any(),
+//                dokumenter = any(),
+//                avsenderLand = any(),
+//                avsenderNavn = any(),
+//                saktype = any(),
+//                institusjon = any(),
+//                identifisertePersoner = any()
+//            )
+//        } returns OpprettJournalPostResponse("123", "null", null, false)
+    }
+
+    @Test
+    fun `Sendt P6000 med all infor for forsoekFerdigstill true skal populere Journalpostresponsen med pesys sakid`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        val saksInformasjon = SakInformasjon(sakId = "22874955", sakType = ALDER, sakStatus = LOPENDE)
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns mockk(relaxed = true)
+
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            ALDER,
+            0,
+            sakInformasjon = saksInformasjon,
+            SED(type = SedType.P6000),
+            identifisertePersoner = 1,
+        )
+        val journalpostRequest = requestSlot.captured
+
+        assertEquals("22874955", journalpostRequest.sak.toString())
+
     }
 
     @Test

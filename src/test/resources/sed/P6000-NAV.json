@@ -1,0 +1,204 @@
+{
+  "sed": "P6000",
+  "nav": {
+    "eessisak": null,
+    "bruker": {
+      "mor": null,
+      "far": null,
+      "person": {
+        "pin": [
+          {
+            "institusjonsnavn": "Arbeids- og velferdsetaten",
+            "institusjonsid": "NO:889640782",
+            "sektor": "pensjoner",
+            "identifikator": "121070 23727",
+            "land": "NO",
+            "institusjon": null
+          },
+          {
+            "institusjonsnavn": "Institusjon",
+            "institusjonsid": "FI:0100222222",
+            "sektor": "alle",
+            "identifikator": "121070-061R",
+            "land": "FI",
+            "institusjon": null
+          },
+          {
+            "institusjonsnavn": "TestPerson",
+            "institusjonsid": "FI:0200000020",
+            "sektor": "alle",
+            "identifikator": "121070-061R",
+            "land": "FI",
+            "institusjon": null
+          }
+        ],
+        "pinland": null,
+        "statsborgerskap": null,
+        "etternavn": "Etternavn",
+        "etternavnvedfoedsel": null,
+        "fornavn": "Fornavn",
+        "fornavnvedfoedsel": null,
+        "tidligerefornavn": null,
+        "tidligereetternavn": null,
+        "kjoenn": "M",
+        "foedested": {
+          "by": "VAASA",
+          "land": "FI",
+          "region": null
+        },
+        "foedselsdato": "1970-10-12",
+        "sivilstand": null,
+        "relasjontilavdod": null,
+        "rolle": null,
+        "kontakt": null
+      },
+      "adresse": {
+        "gate": "Gate 9",
+        "bygning": null,
+        "by": "SEINEN",
+        "postnummer": "60200",
+        "postkode": null,
+        "region": null,
+        "land": "FI",
+        "kontaktpersonadresse": null,
+        "datoforadresseendring": null,
+        "postadresse": null,
+        "startdato": null,
+        "type": null,
+        "annen": null
+      },
+      "arbeidsforhold": null,
+      "bank": null
+    },
+    "ektefelle": null,
+    "barn": null,
+    "verge": null,
+    "krav": null,
+    "annenperson": null
+  },
+  "pensjon": {
+    "gjenlevende": {
+      "mor": null,
+      "far": null,
+      "person": {
+        "pin": [
+          {
+            "institusjonsnavn": null,
+            "institusjonsid": null,
+            "sektor": "alle",
+            "identifikator": "111181-1507",
+            "land": "FI",
+            "institusjon": null
+          }
+        ],
+        "pinland": null,
+        "statsborgerskap": null,
+        "etternavn": "Lever",
+        "etternavnvedfoedsel": null,
+        "fornavn": "Fornavn Lever",
+        "fornavnvedfoedsel": null,
+        "tidligerefornavn": null,
+        "tidligereetternavn": null,
+        "kjoenn": "K",
+        "foedested": null,
+        "foedselsdato": "1981-11-11",
+        "sivilstand": null,
+        "relasjontilavdod": null,
+        "rolle": null,
+        "kontakt": null
+      },
+      "adresse": {
+        "gate": "Gate1 9",
+        "bygning": null,
+        "by": "Senein",
+        "postnummer": "60200",
+        "postkode": null,
+        "region": null,
+        "land": "FI",
+        "kontaktpersonadresse": null,
+        "datoforadresseendring": null,
+        "postadresse": null,
+        "startdato": null,
+        "type": null,
+        "annen": null
+      },
+      "arbeidsforhold": null,
+      "bank": null
+    },
+    "reduksjon": null,
+    "vedtak": [
+      {
+        "grunnlag": {
+          "medlemskap": null,
+          "opptjening": {
+            "forsikredeAnnen": "03"
+          },
+          "framtidigtrygdetid": "1"
+        },
+        "virkningsdato": "2023-07-01",
+        "ukjent": null,
+        "type": "03",
+        "resultat": "01",
+        "beregning": [
+          {
+            "valuta": "EUR",
+            "beloepBrutto": {
+              "ytelseskomponentTilleggspensjon": null,
+              "beloep": "935.02",
+              "ytelseskomponentGrunnpensjon": null,
+              "ytelseskomponentAnnen": null
+            },
+            "beloepNetto": null,
+            "periode": {
+              "fom": "2023-07-01",
+              "tom": "2033-06-30",
+              "extra": null
+            },
+            "utbetalingshyppighet": "maaned_12_per_aar",
+            "utbetalingshyppighetAnnen": null
+          }
+        ],
+        "avslagbegrunnelse": null,
+        "basertPaa": "02",
+        "artikkel": "01",
+        "basertPaaAnnen": null,
+        "delvisstans": null,
+        "kjoeringsdato": null,
+        "begrunnelseAnnen": null
+      }
+    ],
+    "sak": {
+      "artikkel54": "0",
+      "reduksjon": null,
+      "kravtype": null,
+      "enkeltkrav": null
+    },
+    "tilleggsinformasjon": {
+      "dato": "2023-08-17",
+      "andreinstitusjoner": [
+        {
+          "institusjonsid": "FI:0200000020",
+          "institusjonsnavn": "Municipal pensions",
+          "institusjonsadresse": null,
+          "postnummer": "00087",
+          "bygningsnavn": null,
+          "land": "FI",
+          "region": null,
+          "poststed": "Keva"
+        }
+      ],
+      "artikkel48": null,
+      "opphoer": null,
+      "revurderingtidsfrist": null,
+      "annen": null,
+      "person": null,
+      "anneninformation": "(social security number in Finland) is also beneficiary. ",
+      "saksnummerAnnen": null,
+      "saksnummer": null
+    },
+    "ytterligeinformasjon": null,
+    "kravDato": null
+  },
+  "sedGVer": "4",
+  "sedVer": "2"
+}
