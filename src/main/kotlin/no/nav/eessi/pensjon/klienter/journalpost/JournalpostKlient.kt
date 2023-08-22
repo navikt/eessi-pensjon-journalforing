@@ -24,6 +24,7 @@ class JournalpostKlient(
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(JournalpostKlient::class.java) }
+    private val secureLog = LoggerFactory.getLogger("secureLog")
     private val mapper = jacksonObjectMapper()
 
     private lateinit var opprettjournalpost: MetricsHelper.Metric
@@ -54,6 +55,8 @@ class JournalpostKlient(
         return opprettjournalpost.measure {
             return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost: $path")
+                secureLog.info("Journalpostrequesten: $request")
+
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
