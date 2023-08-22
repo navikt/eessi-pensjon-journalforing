@@ -5,35 +5,10 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03a
-import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03b
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.H001
-import no.nav.eessi.pensjon.eux.model.SedType.H002
-import no.nav.eessi.pensjon.eux.model.SedType.H020
-import no.nav.eessi.pensjon.eux.model.SedType.H021
-import no.nav.eessi.pensjon.eux.model.SedType.H070
-import no.nav.eessi.pensjon.eux.model.SedType.H120
-import no.nav.eessi.pensjon.eux.model.SedType.H121
-import no.nav.eessi.pensjon.eux.model.SedType.X001
-import no.nav.eessi.pensjon.eux.model.SedType.X002
-import no.nav.eessi.pensjon.eux.model.SedType.X003
-import no.nav.eessi.pensjon.eux.model.SedType.X004
-import no.nav.eessi.pensjon.eux.model.SedType.X005
-import no.nav.eessi.pensjon.eux.model.SedType.X006
-import no.nav.eessi.pensjon.eux.model.SedType.X007
-import no.nav.eessi.pensjon.eux.model.SedType.X008
-import no.nav.eessi.pensjon.eux.model.SedType.X009
-import no.nav.eessi.pensjon.eux.model.SedType.X010
-import no.nav.eessi.pensjon.eux.model.SedType.X013
-import no.nav.eessi.pensjon.eux.model.SedType.X050
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -45,21 +20,9 @@ import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
-import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.AUTOMATISK_JOURNALFORING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
-import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.oppgaverouting.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
@@ -140,7 +103,7 @@ class JournalforingService(
                     harAdressebeskyttelse,
                     identifisertePersoner
                 )
-                val arkivsaksnummer = sakInformasjon?.sakId.takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
+                val arkivsaksnummer = sakInformasjon?.sakId
 
                 val institusjon = if(hendelseType == HendelseType.SENDT) {
                     AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterMottakerAvsenderLand(sedHendelse.mottakerLand))
