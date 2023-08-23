@@ -35,6 +35,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
         val saksType = bestemSaktypeFraSed(aktypeFraSed, identifisertPerson, bucType)
         logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $saksType")
 
+        //TODO: Sjekke om vi alltid kan returnere GJENLEV på P_BUC_02
         val saktype = when (bucType) {
             P_BUC_01 -> ALDER
             P_BUC_02 -> saksType ?: return null

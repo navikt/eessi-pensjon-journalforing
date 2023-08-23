@@ -63,9 +63,26 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             journalfoerendeEnhet = journalfoerendeEnhet
         )
 
-        val forsokFerdigstill: Boolean = journalfoerendeEnhet == Enhet.AUTOMATISK_JOURNALFORING
+
+        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)
 
         return journalpostKlient.opprettJournalpost(request, forsokFerdigstill)
+    }
+
+    private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
+        listOf(
+            request.bruker,
+            request.journalfoerendeEnhet,
+            request.kanal,
+            request.tema,
+            request.sak,
+            request.avsenderMottaker,
+            request.tittel,
+            request.dokumenter
+        ).any { it == null }.also {
+            if(it) return false
+            return true
+        }
     }
 
     /**
