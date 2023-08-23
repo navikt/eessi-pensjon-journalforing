@@ -83,7 +83,8 @@ internal class JournalforingServiceMedJournalpostTest {
         val saksInformasjon = SakInformasjon(sakId = "22874955", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns mockk(relaxed = true)
+        val forsoekFedrigstillSlot = slot<Boolean>()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot)) } returns mockk(relaxed = true)
 
 
         journalforingService.journalfor(
@@ -98,10 +99,43 @@ internal class JournalforingServiceMedJournalpostTest {
             identifisertePersoner = 1,
         )
         val journalpostRequest = requestSlot.captured
+        val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
 
         println(journalpostRequest)
 
         Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
+        Assertions.assertEquals(true, erMuligAaFerdigstille)
+
+    }
+
+    @Test
+    fun `Sendt P6000 med manglende saksinfo skal returnere false på forsoekFerdigstill`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        val forsoekFerdigstillSlot = slot<Boolean>()
+        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot)) } returns mockk(relaxed = true)
+
+
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            sakInformasjon = null,
+            SED(type = SedType.P6000),
+            identifisertePersoner = 1,
+        )
+        val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
+
+        Assertions.assertEquals(false, erMuligAaFerdigstille)
 
     }
 
