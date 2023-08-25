@@ -40,10 +40,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -145,6 +142,58 @@ internal class JournalforingServiceTest {
         )
 
         verify { journalpostService.settStatusAvbrutt(journalpostId = "123") }
+    }
+
+    @Test
+    fun `Sendt sed P2200 med ukjent fnr med kjent pesys saksId skal ikke settes til status avbrutt`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val sakInfo = SakInformasjon(
+            "32165464",
+            ALDER,
+            LOPENDE,
+            "",
+            false,
+        )
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            null,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            sakInfo,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 0,
+        )
+
+        verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
+    }
+
+    @Test
+    fun `Sendt sed P2200 med ukjent fnr med saksinfo der sakid er null så skal status settes til avbrutt`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val sakInformasjonMock = mockk<SakInformasjon>().apply {
+            every { sakId } returns null
+            every { sakType } returns ALDER
+        }
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            null,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            sakInformasjonMock,
+            SED(type = SedType.P2200),
+            identifisertePersoner = 0,
+        )
+
+        verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
     }
 
     @Test

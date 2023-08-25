@@ -170,7 +170,7 @@ class JournalforingService(
                 val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
 
                 val sattStatusAvbrutt = if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT &&
-                    (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)) {
+                    (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt) && sakInformasjon?.sakId == null) {
                     journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                     true
                 } else false
