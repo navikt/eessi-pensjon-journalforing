@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.journalforing
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -15,6 +16,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -23,8 +25,10 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
 
@@ -68,6 +72,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         journalforingService.nameSpace = "test"
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P6000) } returns Pair("P6000 Supported Documents", emptyList())
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Age Pension", emptyList())
     }
 
     @Test
@@ -136,6 +141,47 @@ internal class JournalforingServiceMedJournalpostTest {
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
         Assertions.assertEquals(false, erMuligAaFerdigstille)
+
+    }
+
+    @Disabled
+    @Test
+    fun `Innkommende P2000 fra Sverige som oppfyller alle krav til automatisk journalføring skal opprette behandle SED oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        val saksInformasjon = SakInformasjon(sakId = "22874955", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        val forsoekFedrigstillSlot = slot<Boolean>()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot)) } returns mockk(relaxed = true)
+
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            SakType.ALDER,
+            0,
+            sakInformasjon = saksInformasjon,
+            SED(type = SedType.P2000),
+            identifisertePersoner = 1,
+        )
+        val journalpostRequest = requestSlot.captured
+        val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
+
+        println(journalpostRequest)
+
+        verify(exactly = 1) { journalforingService.opprettBehandleSedOppgave(any(), any(), any(), any()) }
+
+        Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
+        Assertions.assertEquals(true, erMuligAaFerdigstille)
+        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
 
     }
 

@@ -202,31 +202,27 @@ class JournalforingService(
                         saktype,
                         sedHendelse,
                         harAdressebeskyttelse
-                    ).takeIf { tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING }
+                    )
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
-                    if (oppgaveEnhet != null) {
-                        opprettBehandleSedOppgave(
-                            null,
-                            oppgaveEnhet,
-                            aktoerId,
-                            sedHendelse,
-                            usupporterteFilnavn(uSupporterteVedlegg)
-                        )
-                    }
+                    opprettBehandleSedOppgave(
+                        null,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelse,
+                        usupporterteFilnavn(uSupporterteVedlegg)
+                    )
                 }
 
                 val bucType = sedHendelse.bucType
-                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING && journalPostResponse.journalpostferdigstilt)) {
+                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
-                    if (oppgaveEnhet != null) {
-                        opprettBehandleSedOppgave(
-                            journalPostResponse.journalpostId,
-                            oppgaveEnhet,
-                            aktoerId,
-                            sedHendelse
-                        )
-                    }
+                    opprettBehandleSedOppgave(
+                        journalPostResponse.journalpostId,
+                        oppgaveEnhet,
+                        aktoerId,
+                        sedHendelse
+                    )
 
                     kravInitialiseringsService.initKrav(
                         sedHendelse,
@@ -369,7 +365,7 @@ class JournalforingService(
             hendelsesType))
     }
 
-    private fun opprettBehandleSedOppgave(
+    fun opprettBehandleSedOppgave(
         journalpostId: String? = null,
         oppgaveEnhet: Enhet,
         aktoerId: String? = null,

@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
@@ -11,6 +12,8 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.sed.P2000
+import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -37,7 +40,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.web.client.RestTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -322,6 +328,86 @@ internal class JournalforingServiceTest {
               "oppgaveType" : "JOURNALFORING"}""".trimIndent()
         )
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+    }
+
+    @Test
+    fun `Ved mottatt P2000 som kan automatisk ferdigstilles så skal det opprettes en Behandle SED oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
+        val sed = mapJsonToAny<P2000>(javaClass.getResource("/sed/P2000-NAV.json")!!.readText())
+        val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = P_BUC_01)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns opprettJournalPostResponse
+        justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            ALDER,
+            0,
+            null,
+            sed,
+            identifisertePersoner = 1,
+        )
+
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "P2000",
+              "journalpostId" : "123",
+              "tildeltEnhetsnr" : "0001",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "147729",
+              "hendelseType" : "MOTTATT",
+              "filnavn" : null,
+              "oppgaveType" : "BEHANDLE_SED"}""".trimIndent()
+        )
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+    }
+
+    @Test
+    fun `Ved mottatt P2100 som kan automatisk ferdigstilles så skal det opprettes en Behandle SED oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
+        val sed = mapJsonToAny<P2100>(javaClass.getResource("/sed/P2100.json")!!.readText())
+        val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = P_BUC_02)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns opprettJournalPostResponse
+        justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            GJENLEV,
+            0,
+            null,
+            sed,
+            identifisertePersoner = 2,
+        )
+
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "P2100",
+              "journalpostId" : "123",
+              "tildeltEnhetsnr" : "",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "147729",
+              "hendelseType" : "MOTTATT",
+              "filnavn" : null,
+              "oppgaveType" : "BEHANDLE_SED"}""".trimIndent()
+        )
+        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
 
     @ParameterizedTest
