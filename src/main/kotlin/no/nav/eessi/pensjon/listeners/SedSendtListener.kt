@@ -103,7 +103,7 @@ class SedSendtListener(
                                 kansellerteSeder
                             )
 
-                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty()
+                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty().also { logger.info("pesys sakid finnes i sed: $it") }
                             val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon =
                                 pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
