@@ -1,30 +1,21 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
@@ -43,6 +34,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -146,23 +138,18 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
+            pesysSakId = false,
         )
 
         verify { journalpostService.settStatusAvbrutt(journalpostId = "123") }
     }
 
     @Test
-    fun `Sendt sed P2200 med ukjent fnr med kjent pesys saksId skal ikke settes til status avbrutt`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
+    fun `Sendt sed P2000 med ukjent fnr SED inneholder pesys saksId saa skal ikke status settes til avbrutt og journalpost samt JFR oppgave opprettes`() {
+        val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
 
-        val sakInfo = SakInformasjon(
-            "32165464",
-            ALDER,
-            LOPENDE,
-            "",
-            false,
-        )
+        val oppgaveSlot = slot<OppgaveMelding>()
+        justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
 
         journalforingService.journalfor(
             sedHendelse,
@@ -171,12 +158,37 @@ internal class JournalforingServiceTest {
             LEALAUS_KAKE.getBirthDate(),
             null,
             0,
-            sakInfo,
-            SED(type = SedType.P2200),
+            null,
+            SED(type = SedType.P2000),
             identifisertePersoner = 0,
+            pesysSakId = true,
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
+        verify(exactly = 1) { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
+    }
+
+    @Test
+    fun `Sendt sed P2000 med ukjent fnr SED inneholder IKKE pesys saksId saa skal ikke status settes til avbrutt og journalpost opprettes`() {
+        val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
+
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            null,
+            LEALAUS_KAKE.getBirthDate(),
+            null,
+            0,
+            null,
+            SED(type = SedType.P2000),
+            identifisertePersoner = 0,
+            pesysSakId = false,
+        )
+
+        verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
+        verify(exactly = 1) { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
 
     @Test
@@ -198,6 +210,7 @@ internal class JournalforingServiceTest {
             sakInformasjonMock,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
+            pesysSakId = false,
         )
 
         verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
@@ -223,6 +236,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
+            pesysSakId = false,
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
@@ -249,6 +263,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
+            pesysSakId = false,
         )
 
         verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
@@ -299,6 +314,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
@@ -325,6 +341,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         verify {
@@ -371,6 +388,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -411,6 +429,7 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -451,6 +470,7 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 2,
+            pesysSakId = false,
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -494,6 +514,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = sedType),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -531,7 +552,8 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -573,8 +595,9 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.R005),
-            identifisertePersoner = 1
-            )
+            identifisertePersoner = 1,
+            pesysSakId = false
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -624,6 +647,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
+            pesysSakId = false,
             )
 
         verify {
@@ -659,6 +683,7 @@ internal class JournalforingServiceTest {
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -692,6 +717,7 @@ internal class JournalforingServiceTest {
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, 0, null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -737,6 +763,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         verify {
@@ -777,6 +804,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
 
         verify {
@@ -817,7 +845,8 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2000),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -858,7 +887,8 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2000),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -899,7 +929,8 @@ internal class JournalforingServiceTest {
             ALDER,
             0,
             null, SED(type = SedType.P2100),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -940,7 +971,8 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P2200),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -981,7 +1013,8 @@ internal class JournalforingServiceTest {
             0,
             null,
             SED(type = SedType.P15000),
-            identifisertePersoner = 1
+            identifisertePersoner = 1,
+            pesysSakId = false
         )
 
         verify {
@@ -1024,7 +1057,8 @@ internal class JournalforingServiceTest {
             0,
             sakInformasjon,
             SED(type = SedType.P2100),
-            identifisertePersoner = 2
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {
@@ -1091,7 +1125,8 @@ internal class JournalforingServiceTest {
             0,
             saksInfo,
             SED(type = SedType.P2100),
-            identifisertePersoner = 2
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {
@@ -1135,7 +1170,8 @@ internal class JournalforingServiceTest {
             0,
             sakInformasjon,
             SED(type = SedType.P2100),
-            identifisertePersoner = 2
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {
@@ -1172,7 +1208,16 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100), identifisertePersoner = 2
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2100),
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {
@@ -1207,7 +1252,16 @@ internal class JournalforingServiceTest {
         )
 
         journalforingService.journalfor(
-            sedHendelse, SENDT, identifisertPerson, fdato, null, 0, null, SED(type = SedType.P2100), identifisertePersoner = 2
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            fdato,
+            null,
+            0,
+            null,
+            SED(type = SedType.P2100),
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {
@@ -1270,7 +1324,8 @@ internal class JournalforingServiceTest {
             0,
             saksInfo,
             SED(type = SedType.P2100),
-            identifisertePersoner = 2
+            identifisertePersoner = 2,
+            pesysSakId = false
         )
 
         verify {

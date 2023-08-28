@@ -46,7 +46,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             gyldigSak
     }
 
-    private fun hentSakIdFraSED(sedListe: List<SED>): String? {
+    fun hentSakIdFraSED(sedListe: List<SED>): String? {
         return sedListe
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }

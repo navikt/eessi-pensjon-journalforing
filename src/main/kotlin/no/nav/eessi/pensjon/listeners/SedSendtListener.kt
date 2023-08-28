@@ -3,9 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -104,6 +102,8 @@ class SedSendtListener(
                                 alleSedIBucList,
                                 kansellerteSeder
                             )
+
+                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty()
                             val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon =
                                 pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
@@ -120,7 +120,8 @@ class SedSendtListener(
                                 sakInformasjon,
                                 currentSed,
                                 harAdressebeskyttelse,
-                                identifisertePersoner.count().also { logger.info("Antall identifisertePersoner: $it") }
+                                identifisertePersoner.count().also { logger.info("Antall identifisertePersoner: $it") },
+                                finnesPesysIdISed
                             )
                         }
                         acknowledgment.acknowledge()

@@ -25,7 +25,6 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -102,6 +101,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = saksInformasjon,
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -137,6 +137,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = null,
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -171,6 +172,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = saksInformasjon,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
+            pesysSakId = false,
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
