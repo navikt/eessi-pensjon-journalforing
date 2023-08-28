@@ -142,10 +142,11 @@ class SedSendtListener(
      * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
      */
     private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
+        logger.info("skal hente pensjonsak med bruk av bestemSak")
+
         if (identifisertPerson?.aktoerId == null) return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        logger.info("skal hente pensjonsak med bruk av bestemSak")
         val aktoerId = identifisertPerson.aktoerId
 
         fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc).let { pensjonsinformasjon ->
