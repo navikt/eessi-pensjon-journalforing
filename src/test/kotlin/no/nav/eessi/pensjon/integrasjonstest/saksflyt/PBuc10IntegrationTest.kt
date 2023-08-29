@@ -437,6 +437,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `mangler som fører til manuell oppgave - etterlatteytelser`() {
             val allDocuemtActions = forenkletSEDs()
 
+            testRunnerBarnUtenOppgave(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(GJENLEVENDEPENSJON, it.behandlingstema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
+
             testRunnerBarn(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
@@ -448,7 +454,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = null,
-                hendelseType = SENDT,
+                hendelseType = SENDT
             ) {
                     assertEquals(PENSJON, it.tema)
                     assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
@@ -457,13 +463,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunnerVoksen(FNR_VOKSEN_UNDER_62, FNR_VOKSEN_2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-            }
-
-            testRunnerBarnUtenOppgave(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {
-                assertEquals(PENSJON, it.tema)
-                assertEquals(GJENLEVENDEPENSJON, it.behandlingstema)
-                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
-
             }
         }
     }

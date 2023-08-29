@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
@@ -103,14 +104,13 @@ class SedSendtListener(
                                 kansellerteSeder
                             )
 
-                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty().also { logger.info("pesys sakid finnes i sed: $it") }
+                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty().not().also { logger.info("pesys sakid finnes i sed: $it") }
                             val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon =
                                 pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
                             val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
                             val currentSed =
                                 alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-
                             journalforingService.journalfor(
                                 sedHendelse, SENDT,
                                 identifisertPerson,
@@ -137,6 +137,20 @@ class SedSendtListener(
                 latch.countDown()
             }
         }
+    }
+
+    private fun informasjonOmSak(
+        sedHendelse: SedHendelse,
+        alleSedIBucList: List<SED>,
+        bucType: BucType,
+        identifisertPerson: IdentifisertPersonPDL?
+    ): Pair<SakInformasjon?, SakType?> {
+        val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
+            .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+        val sakInformasjon =
+            pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
+        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
+        return Pair(sakInformasjon, saktype)
     }
 
     /**
