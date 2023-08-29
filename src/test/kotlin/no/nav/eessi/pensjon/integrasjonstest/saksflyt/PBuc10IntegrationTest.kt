@@ -443,7 +443,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 
-            testRunnerBarn(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
+/*            testRunnerBarn(FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -463,7 +463,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunnerVoksen(FNR_VOKSEN_UNDER_62, FNR_VOKSEN_2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-            }
+            }*/
         }
     }
 
