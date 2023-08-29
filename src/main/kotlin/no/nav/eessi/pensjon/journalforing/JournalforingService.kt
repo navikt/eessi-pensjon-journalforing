@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
-import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -24,6 +22,7 @@ import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.oppgaverouting.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
@@ -31,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Period
 
 @Service
@@ -47,6 +47,7 @@ class JournalforingService(
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+    private lateinit var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
 
     @Value("\${namespace}")
     lateinit var nameSpace: String
@@ -54,6 +55,7 @@ class JournalforingService(
     @PostConstruct
     fun initMetrics() {
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
+        journalforOgOpprettOppgaveForSedMedUkjentPerson = metricsHelper.init("journalforOgOpprettOppgaveForSed")
     }
 
     /**
@@ -74,19 +76,17 @@ class JournalforingService(
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
         saktype: SakType?,
-        offset: Long,
         sakInformasjon: SakInformasjon?,
         sed: SED?,
         harAdressebeskyttelse: Boolean = false,
-        identifisertePersoner: Int,
-        pesysSakId: Boolean
+        identifisertePersoner: Int
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info(
                     """**********
                     rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, kafka offset: $offset, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType?.name} på aktoerId: ${identifisertPerson?.aktoerId} sakType: ${saktype?.name}
+                    hendelseType: $hendelseType, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType?.name} på aktoerId: ${identifisertPerson?.aktoerId} sakType: ${saktype?.name}
                 **********""".trimIndent()
                 )
 
@@ -107,39 +107,31 @@ class JournalforingService(
                 )
                 val arkivsaksnummer = sakInformasjon?.sakId
 
-                val institusjon = if(hendelseType == HendelseType.SENDT) {
-                    AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterMottakerAvsenderLand(sedHendelse.mottakerLand))
-                } else {
-                    AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterMottakerAvsenderLand(sedHendelse.avsenderLand))
-                }
+                val institusjon = avsenderMottaker(hendelseType, sedHendelse)
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
-                    rinaSakId = sedHendelse.rinaSakId,
+                    sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
-                    bucType = sedHendelse.bucType!!,
-                    sedType = sedHendelse.sedType!!,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
                     arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
-                    avsenderLand = sedHendelse.avsenderLand,
-                    avsenderNavn = sedHendelse.avsenderNavn,
                     saktype = saktype,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner
                 )
+
                 val sattStatusAvbrutt = sattAvbrutt(
                     identifisertPerson,
                     hendelseType,
                     sedHendelse,
                     journalPostResponse,
-                    pesysSakId
                 )
 
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
-                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == HendelseType.SENDT) {
+                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
@@ -177,7 +169,7 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelse.bucType
-                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == HendelseType.MOTTATT && journalPostResponse.journalpostferdigstilt)) {
+                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
@@ -193,14 +185,10 @@ class JournalforingService(
                     )
                 }
 
-                produserAutomatiseringsmelding(sedHendelse.rinaSakId,
-                    sedHendelse.rinaDokumentId,
-                    sedHendelse.rinaDokumentVersjon,
-                    java.time.LocalDateTime.now(),
+                produserAutomatiseringsmelding(
+                    sedHendelse,
                     tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING,
                     tildeltJoarkEnhet.enhetsNr,
-                    sedHendelse.bucType!!,
-                    sedHendelse.sedType!!,
                     saktype,
                     hendelseType
                 )
@@ -214,20 +202,122 @@ class JournalforingService(
         }
     }
 
+    /**
+     *     Denne metoden blir kun brukt i behandlingen av utgående SEDer der person ikke er identifiserbar, men SEDen inneholder pesys sakId.
+     * 1.) Henter dokumenter og vedlegg
+     * 2.) Henter enhet
+     * 3.) Oppretter journalpost
+     * 4.) Lage journalførings-oppgave
+     * 5.) Hent oppgave-enhet
+     * 6.) Generer statisikk melding
+     */
+    fun journalforUkjentPersonKjentPersysSakId(
+        sedHendelse: SedHendelse,
+        hendelseType: HendelseType,
+        fdato: LocalDate?,
+        saktype: SakType?,
+        pesysSakId: String,
+    ) {
+        journalforOgOpprettOppgaveForSedMedUkjentPerson.measure {
+            try {
+                logger.info(
+                    """**********
+                    rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
+                    hendelseType: $hendelseType, journalføring for ukjent person med pesysSakId: $pesysSakId, sakType: ${saktype?.name}
+                **********""".trimIndent()
+                )
+
+                // Henter dokumenter
+                val (documents, uSupporterteVedlegg) = sedHendelse.run {
+                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
+                }
+
+                val institusjon = avsenderMottaker(hendelseType, sedHendelse)
+
+                // Oppretter journalpost
+                val journalPostResponse = journalpostService.opprettJournalpost(
+                    sedHendelse = sedHendelse,
+                    fnr = null,
+                    sedHendelseType = hendelseType,
+                    journalfoerendeEnhet = ID_OG_FORDELING,
+                    arkivsaksnummer = pesysSakId,
+                    dokumenter = documents,
+                    saktype = saktype,
+                    institusjon = institusjon,
+                    identifisertePersoner = 0
+                )
+
+                oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
+                    OppgaveMelding(
+                        sedHendelse.sedType,
+                        journalPostResponse?.journalpostId,
+                        ID_OG_FORDELING,
+                        null,
+                        sedHendelse.rinaSakId,
+                        hendelseType,
+                        null,
+                        OppgaveType.JOURNALFORING
+                    )
+                )
+
+                if (uSupporterteVedlegg.isNotEmpty()) {
+                    opprettBehandleSedOppgave(
+                        null,
+                        ID_OG_FORDELING,
+                        null,
+                        sedHendelse,
+                        usupporterteFilnavn(uSupporterteVedlegg)
+                    )
+                }
+
+                produserAutomatiseringsmelding(
+                    sedHendelse,
+                    false,
+                    oppgaveEierEnhet = ID_OG_FORDELING.name,
+                    saktype,
+                    hendelseType
+                )
+            } catch (ex: MismatchedInputException) {
+                logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
+                throw ex
+            } catch (ex: Exception) {
+                logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
+                throw ex
+            }
+        }
+    }
+
+    private fun avsenderMottaker(
+        hendelseType: HendelseType,
+        sedHendelse: SedHendelse
+    ): AvsenderMottaker {
+        val institusjon = if (hendelseType == SENDT) AvsenderMottaker(
+            sedHendelse.mottakerId,
+            IdType.UTL_ORG,
+            sedHendelse.mottakerNavn,
+            konverterMottakerAvsenderLand(sedHendelse.mottakerLand)
+        ) else AvsenderMottaker(
+            sedHendelse.avsenderId,
+            IdType.UTL_ORG,
+            sedHendelse.avsenderNavn,
+            konverterMottakerAvsenderLand(sedHendelse.avsenderLand)
+        )
+        return institusjon
+    }
+
     private fun sattAvbrutt(
         identifisertPerson: IdentifisertPerson?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
-        journalPostResponse: OpprettJournalPostResponse?,
-        finnesPesysSakID: Boolean
+        journalPostResponse: OpprettJournalPostResponse?
     ): Boolean {
         //Oppdaterer journalposten med status Avbrutt
         val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
         val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
 
         val sattStatusAvbrutt =
-            if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == HendelseType.SENDT &&
-                (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt) && !finnesPesysSakID
+            if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
+                (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)
             ) {
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                 true
@@ -324,26 +414,21 @@ class JournalforingService(
         else mottakerAvsenderLand
 
     private fun produserAutomatiseringsmelding(
-        bucId: String,
-        sedId: String,
-        sedVersjon: String,
-        opprettetTidspunkt: java.time.LocalDateTime,
+        sedHendelse: SedHendelse,
         bleAutomatisert: Boolean,
         oppgaveEierEnhet: String?,
-        bucType: BucType,
-        sedType: SedType,
         sakType: SakType?,
         hendelsesType: HendelseType
     ) {
         automatiseringStatistikkPublisher.publiserAutomatiseringStatistikk(AutomatiseringMelding(
-            bucId,
-            sedId,
-            sedVersjon,
-            opprettetTidspunkt,
+            sedHendelse.rinaSakId,
+            sedHendelse.rinaDokumentId,
+            sedHendelse.rinaDokumentVersjon,
+            LocalDateTime.now(),
             bleAutomatisert,
             oppgaveEierEnhet,
-            bucType,
-            sedType,
+            sedHendelse.bucType!!,
+            sedHendelse.sedType!!,
             sakType,
             hendelsesType))
     }
@@ -362,7 +447,7 @@ class JournalforingService(
                 oppgaveEnhet,
                 aktoerId,
                 sedHendelseModel.rinaSakId,
-                HendelseType.MOTTATT,
+                MOTTATT,
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED
             )
@@ -385,7 +470,7 @@ class JournalforingService(
                     fdato!!,
                     saktype,
                     sedHendelseModel,
-                    HendelseType.MOTTATT,
+                    MOTTATT,
                     null,
                     harAdressebeskyttelse
                 )

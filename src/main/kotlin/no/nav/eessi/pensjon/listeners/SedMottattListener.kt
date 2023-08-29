@@ -86,13 +86,10 @@ class SedMottattListener(
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
                             val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
 
-                            val alleSedIBucPair =
-                                dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val kansellerteSeder =
-                                dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
 
-                            val harAdressebeskyttelse =
-                                personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
+                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
 
                             //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedIBucPair, bucType)
@@ -125,12 +122,10 @@ class SedMottattListener(
                                 identifisertPerson,
                                 fdato,
                                 saktype,
-                                cr.offset(),
                                 sakInformasjon,
                                 currentSed,
                                 harAdressebeskyttelse,
-                                identifisertePersoner.count(),
-                                false
+                                identifisertePersoner.count()
                             )
 
                         }

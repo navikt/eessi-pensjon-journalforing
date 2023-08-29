@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
@@ -34,35 +35,30 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * @return {@link OpprettJournalPostResponse?} som inneholder
      */
     fun opprettJournalpost(
-        rinaSakId: String,
+        sedHendelse: SedHendelse,
         fnr: Fodselsnummer?,
-        bucType: BucType,
-        sedType: SedType,
         sedHendelseType: HendelseType,
         journalfoerendeEnhet: Enhet,
         arkivsaksnummer: String?,
         dokumenter: String,
-        avsenderLand: String?,
-        avsenderNavn: String?,
         saktype: SakType?,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
-        val tema = hentTema(bucType, saktype, fnr, identifisertePersoner)
+        val tema = hentTema(sedHendelse.bucType!!, saktype, fnr, identifisertePersoner)
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(bucType, saktype, tema, identifisertePersoner),
+            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
             tema = tema,
-            tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, rinaSakId)),
-            tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedType),
+            tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
+            tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
             dokumenter = dokumenter,
             journalfoerendeEnhet = journalfoerendeEnhet
         )
-
 
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)
 

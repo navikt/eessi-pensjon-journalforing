@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
@@ -73,18 +72,14 @@ class SedSendtListener(
                         val sedHendelse = SedHendelse.fromJson(hendelse)
                         if (GyldigeHendelser.sendt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
-
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+
                             val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
-                            val alleSedIBucPair =
-                                dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val harAdressebeskyttelse =
-                                personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
-
-                            val kansellerteSeder =
-                                dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-
+                            val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
+                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedIBucPair, bucType)
                             val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedIBucPair, bucType, potensiellePersonRelasjoner, SENDT, sedHendelse.rinaSakId)
 
@@ -98,38 +93,35 @@ class SedSendtListener(
                             )
 
                             val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
-                            val fdato = personidentifiseringService.hentFodselsDato(
-                                identifisertPerson,
-                                alleSedIBucList,
-                                kansellerteSeder
-                            )
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
+                            val pesysSakId = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
-                            val finnesPesysIdISed = fagmodulService.hentSakIdFraSED(alleSedIBucList).isNullOrEmpty().not().also { logger.info("pesys sakid finnes i sed: $it") }
-                            val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
-                            val sakInformasjon =
-                                pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
-                            val currentSed =
-                                alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-                            journalforingService.journalfor(
-                                sedHendelse, SENDT,
-                                identifisertPerson,
-                                fdato,
-                                saktype,
-                                offset,
-                                sakInformasjon,
-                                currentSed,
-                                harAdressebeskyttelse,
-                                identifisertePersoner.count().also { logger.info("Antall identifisertePersoner: $it") },
-                                finnesPesysIdISed
-                            )
+                            if (identifisertPerson == null && pesysSakId != null)
+                                journalforingService.journalforUkjentPersonKjentPersysSakId(sedHendelse, SENDT, fdato, null, pesysSakId)
+                            else {
+                                val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+                                val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
+                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
+                                val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+
+                                journalforingService.journalfor(
+                                    sedHendelse,
+                                    SENDT,
+                                    identifisertPerson,
+                                    fdato,
+                                    saktype,
+                                    sakInformasjon,
+                                    currentSed,
+                                    harAdressebeskyttelse,
+                                    identifisertePersoner.count()
+                                        .also { logger.info("Antall identifisertePersoner: $it") }
+                                )
+                            }
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                         logger.info("Genererer automatiseringstatistikk")
                     }
-
-
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse", ex)
                     throw SedSendtRuntimeException(ex)
@@ -137,20 +129,7 @@ class SedSendtListener(
                 latch.countDown()
             }
         }
-    }
 
-    private fun informasjonOmSak(
-        sedHendelse: SedHendelse,
-        alleSedIBucList: List<SED>,
-        bucType: BucType,
-        identifisertPerson: IdentifisertPersonPDL?
-    ): Pair<SakInformasjon?, SakType?> {
-        val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList)
-            .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-        val sakInformasjon =
-            pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
-        return Pair(sakInformasjon, saktype)
     }
 
     /**
@@ -190,7 +169,6 @@ class SedSendtListener(
         }
         return sakInformasjon?.sakType
     }
-
 
     /**
      * Ikke slett funksjonene under før vi har et bedre opplegg for tilbakestilling av topic.
