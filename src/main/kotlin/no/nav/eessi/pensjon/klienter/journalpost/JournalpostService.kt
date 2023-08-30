@@ -1,14 +1,27 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_07
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_08
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_09
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
+import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -89,40 +102,26 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
     fun settStatusAvbrutt(journalpostId: String) = journalpostKlient.settStatusAvbrutt(journalpostId)
 
-    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, antallIdentifisertePersoner: Int): Behandlingstema {
-        val bucs = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
-        return if (bucType == R_BUC_02) {
-            when (saktype) {
+    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, identifisertePersoner: Int): Behandlingstema {
+
+        if(bucType == P_BUC_01) return ALDERSPENSJON
+        if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
+        if(bucType == P_BUC_03) return UFOREPENSJON
+
+        if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
+        if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON
+
+        return if (bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)) {
+            return when (saktype) {
+                GJENLEV, BARNEP -> GJENLEVENDEPENSJON
                 UFOREP -> UFOREPENSJON
-                GJENLEV -> GJENLEVENDEPENSJON
-                else -> ALDERSPENSJON
-            }
-            TILBAKEBETALING
-        } else {
-            return when (bucType) {
-                P_BUC_01 -> ALDERSPENSJON
-                P_BUC_02 -> GJENLEVENDEPENSJON
-                P_BUC_03 -> UFOREPENSJON
                 else -> {
-                    if(tema == UFORETRYGD && antallIdentifisertePersoner <= 1) {
-                        return UFOREPENSJON
-                    }
-                    if(tema == PENSJON && antallIdentifisertePersoner >= 2) {
-                        return GJENLEVENDEPENSJON
-                    }
-                    if (bucType in bucs) {
-                         when (saktype) {
-                            GJENLEV, BARNEP -> GJENLEVENDEPENSJON
-                            UFOREP -> UFOREPENSJON
-                            else -> {
-                                return ALDERSPENSJON
-                            }
-                        }
-                    } else return ALDERSPENSJON
+                    if (bucType == R_BUC_02) TILBAKEBETALING
+                    ALDERSPENSJON
                 }
             }
-        }
 
+        } else ALDERSPENSJON
     }
 
     /**
