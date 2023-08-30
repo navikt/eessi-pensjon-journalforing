@@ -29,7 +29,7 @@ internal class KravInitialiseringsServiceTest {
                 )
             )
         )
-        ), pensjon = null)
+        ), p2000pensjon = null)
 
         assertEquals(true, p2000.  validerForKravinit() )
     }
@@ -42,7 +42,7 @@ internal class KravInitialiseringsServiceTest {
                     StatsborgerskapItem("SE")
                 )
             )
-        )), pensjon = null)
+        )), p2000pensjon = null)
         assertEquals(false, p2000.validerForKravinit() )
     }
 
@@ -59,7 +59,7 @@ internal class KravInitialiseringsServiceTest {
                     StatsborgerskapItem("SE")
                 )
             )
-        )), pensjon = null)
+        )), p2000pensjon = null)
         assertEquals(false, p2000.validerForKravinit() )
     }
 }
