@@ -3,7 +3,9 @@ package no.nav.eessi.pensjon.listeners
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -96,7 +98,7 @@ class SedSendtListener(
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                             val pesysSakId = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
-                            if (identifisertPerson == null && pesysSakId != null)
+                            if (identifisertPerson == null && !pesysSakId.isNullOrEmpty())
                                 journalforingService.journalforUkjentPersonKjentPersysSakId(sedHendelse, SENDT, fdato, null, pesysSakId)
                             else {
                                 val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
