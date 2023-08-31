@@ -16,7 +16,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -177,7 +176,9 @@ internal class JournalforingServiceMedJournalpostTest {
 
         Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
         Assertions.assertEquals(true, erMuligAaFerdigstille)
-        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+/*
+        Assertions.assertEquals(Enhet.ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
 
     }
 

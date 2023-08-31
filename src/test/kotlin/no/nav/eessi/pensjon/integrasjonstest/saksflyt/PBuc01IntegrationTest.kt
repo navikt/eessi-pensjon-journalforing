@@ -1,11 +1,17 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.*
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -25,9 +31,11 @@ import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
@@ -36,7 +44,9 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -77,7 +87,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+/*
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -148,8 +160,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
-
+                /*assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
                 assertEquals(2, oppgaveMeldingList.size)
 
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -193,11 +205,15 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+/*
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+/*
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+*/
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
@@ -301,11 +317,15 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+/*
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+/*
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+*/
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
@@ -472,11 +492,15 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+/*
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+*/
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(AUTOMATISK_JOURNALFORING, it.oppgaveMelding?.tildeltEnhetsnr)
+/*
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+*/
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)

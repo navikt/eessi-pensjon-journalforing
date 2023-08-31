@@ -18,6 +18,7 @@
     <logger name="org.apache.kafka" level="WARN"/>
     <logger name="org.apache.zookeeper" level="WARN"/>
     <logger name="com.tngtech.archunit" level="ERROR"/>
+    <logger name="o.m.l.MockServerEventLog " level="ERROR"/>
 
     <appender name="secureLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>build/secure.log</file>

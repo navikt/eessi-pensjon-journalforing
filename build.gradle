@@ -53,9 +53,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-logging:2.1.25")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.0.96")
 	implementation("no.nav.eessi.pensjon:ep-eux:2.1.47")
-	implementation("no.nav.eessi.pensjon:ep-routing:1.0.82") {
-		exclude module: 'ep-personoppslag'
-	}
+	implementation(files("../ep-routing/build/libs/ep-routing-1.0.86.jar"))
 
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:2.0.29")
