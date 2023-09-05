@@ -17,7 +17,7 @@ jobs:
   bygg_deploy_dev_publiser_tag:
     name: 'Bygg, publiser, deploy DEV, tag og dispatch deploy til PROD'
     permissions:
-      contents: "read"
+      contents: "write"
       id-token: "write"
     runs-on: ubuntu-latest
     steps:
