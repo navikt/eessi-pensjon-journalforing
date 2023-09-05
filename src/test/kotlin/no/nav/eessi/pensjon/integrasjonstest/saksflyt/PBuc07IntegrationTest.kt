@@ -140,7 +140,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
 
         block(Pair(journalpost.captured, oppgaveMelding))
 
-        verify { personService.hentPerson(any<Ident<*>>()) }
+        verify { personService.hentPerson(any()) }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }

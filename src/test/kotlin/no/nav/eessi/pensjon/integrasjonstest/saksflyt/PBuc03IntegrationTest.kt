@@ -340,7 +340,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
+        if (fnrVoksen != null) verify { personService.hentPerson(any()) }
 
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }

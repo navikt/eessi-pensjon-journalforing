@@ -368,7 +368,7 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
-        verify { personService.hentPerson(any<Ident<*>>()) }
+        verify { personService.hentPerson(any()) }
 
         clearAllMocks()
     }

@@ -381,7 +381,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any())}
-            verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
+            verify(exactly = 1) { personService.hentPerson(any()) }
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
@@ -634,7 +634,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
 
-        if (fnrVoksen != null) verify { personService.hentPerson(any<Ident<*>>()) }
+        if (fnrVoksen != null) verify { personService.hentPerson(any()) }
 
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
