@@ -767,7 +767,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any()) }
-            verify(exactly = 1) { personService.hentPerson(any<Ident<*>>()) }
+            verify(exactly = 1) { personService.hentPerson(any()) }
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
@@ -882,7 +882,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     IdentGruppe.FOLKEREGISTERIDENT
                 ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
             )
-            every { personService.hentPerson(any<Ident<*>>()) } returns sokPerson
+            every { personService.hentPerson(any()) } returns sokPerson
 
         }
 
@@ -950,7 +950,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     IdentGruppe.FOLKEREGISTERIDENT
                 ), IdentInformasjon("BLÆ", IdentGruppe.AKTORID)
             )
-            every { personService.hentPerson(any<Ident<*>>()) } returns sokPerson
+            every { personService.hentPerson(any()) } returns sokPerson
 
         }
 
@@ -1040,7 +1040,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         block(journalpost.captured)
 
-        verify { personService.hentPerson(any<Ident<*>>()) }
+        verify { personService.hentPerson(any()) }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
@@ -1095,7 +1095,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block(journalpost.captured)
 
         if (fnrVoksenSoker != null) {
-            verify { personService.hentPerson(any<Ident<*>>()) }
+            verify { personService.hentPerson(any()) }
         }
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
