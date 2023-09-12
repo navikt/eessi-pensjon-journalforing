@@ -250,9 +250,6 @@ class PersonidentifiseringService(
         identifisertePersoner: List<IdentifisertPersonPDL>,
         erGjenlevende: Boolean
     ): IdentifisertPersonPDL? {
-        identifisertePersoner.forEach {
-            logger.debug(it.toJson())
-        }
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
         logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
