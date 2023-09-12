@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Kontaktadresse
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.UtenlandskIdentifikasjonsnummer
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import java.time.LocalDate
 
 data class IdentifisertPersonPDL(
     override var aktoerId: String,
@@ -17,6 +18,7 @@ data class IdentifisertPersonPDL(
     val harAdressebeskyttelse: Boolean? = false,
     val erDoed: Boolean = false,
     val kontaktAdresse: Kontaktadresse? = null,
-    val personNavn: String? = null
+    val personNavn: String? = null,
+    val fdato: LocalDate? = null
 
 ) : IdentifisertPerson

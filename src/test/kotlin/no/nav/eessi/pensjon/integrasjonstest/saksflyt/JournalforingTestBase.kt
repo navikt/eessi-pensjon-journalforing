@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
+import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Person as PdlPerson
 
@@ -412,7 +413,11 @@ internal open class JournalforingTestBase {
         aktorId: String? = null
     ): PdlPerson {
 
-        val foedselsdato = fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
+        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.nPID == true)
+            LocalDate.of(1988,7,12)
+        else
+            fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
+
         val utenlandskadresse = if (land == null || land == "NOR") null else UtenlandskAdresse(landkode = land)
 
         val identer = listOfNotNull(
@@ -547,7 +552,12 @@ internal open class JournalforingTestBase {
         val pdlPersonAnnen = if (relasjon != null) pdlPerson else null
         val pdlForsikret = if (relasjon == null) pdlPerson else null
 
-        val foedselsdato = fdato ?: (validFnr?.getBirthDateAsIso() ?: "1988-07-12")
+        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.nPID == true){
+            "1988-07-12"
+        }
+        else {
+            fdato ?: validFnr?.let { Fodselsnummer.fra(fnr)?.getBirthDateAsIso() } ?: "1988-07-12"
+        }
 
         val forsikretBruker = Bruker(
             person = Person(

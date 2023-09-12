@@ -30,10 +30,8 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
-import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
@@ -454,6 +452,61 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
     inner class UtgaaendeP_BUC_01 {
 
         @Test
+        fun `Krav om alderpensjon for utgående P2000 med NPID journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(
+                        sakId = SAK_ID,
+                        sakType = ALDER,
+                        sakStatus = OPPRETTET
+                    )
+                )
+            )
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
+
+            testRunnerVoksen(
+                "01220049651",
+                bestemsak,
+                land = "SWE",
+                krav = KravType.ALDER,
+                alleDocs = allDocuemtActions,
+                forsokFerdigStilt = true,
+                documentFiler = getDokumentfilerUtenGyldigVedlegg(),
+                hendelseType = MOTTATT,
+                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), "ugift"),
+                statsborgerskap = StatsborgerskapItem("SWE")
+            ) {
+                val oppgaveMeldingList = it.oppgaveMeldingList
+                val journalpostRequest = it.opprettJournalpostRequest
+                assertEquals(PENSJON, journalpostRequest.tema)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+
+                assertEquals(2, oppgaveMeldingList.size)
+
+                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
+                assertEquals(null, it.oppgaveMelding?.filnavn)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
+
+                assertNotNull(it.oppgaveMeldingUgyldig)
+                assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
+                assertEquals(null, it.oppgaveMeldingUgyldig.journalpostId)
+                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig.filnavn)
+
+                assertEquals(true, it.kravMeldingList?.isNotEmpty())
+                assertEquals(1, it.kravMeldingList?.size)
+
+                val kravMelding = it.kravMeldingList?.firstOrNull()
+                assertEquals(HendelseKode.SOKNAD_OM_ALDERSPENSJON, kravMelding?.hendelsesKode)
+                assertEquals("147729", kravMelding?.bucId)
+                assertEquals(SAK_ID, kravMelding?.sakId)
+
+            }
+
+        }
+
+
+        @Test
         fun `Krav om alderpensjon for Utgående P2000 journalføres automatisk med bruk av bestemsak uten forsokFerdigStilt oppretter en oppgave type JOURNALFORING`() {
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -585,7 +638,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val mockp = createBrukerWith(
                 fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID
             )
-            every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
+            if (Fodselsnummer.fra(fnrVoksen)?.nPID != true)
+                every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
+            else
+                every { personService.hentPerson(Npid(fnrVoksen)) } returns mockp
             mockp
         } else {
             null
