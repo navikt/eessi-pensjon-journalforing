@@ -258,9 +258,14 @@ class JournalforingService(
         journalforOgOpprettOppgaveForSedMedUkjentPerson.measure {
             try {
                 logger.info(
-                    """**********
-                    rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, journalføring for ukjent person med pesysSakId: $pesysSakId, sakType: ${saktype?.name}
+                    """********** JOURNALFØRING FOR UKJENT PERSON MED KJENT PESYS SAKSID
+                    rinadokumentID: ${sedHendelse.rinaDokumentId} 
+                    rinasakID: ${sedHendelse.rinaSakId} 
+                    sedType: ${sedHendelse.sedType?.name} 
+                    bucType: ${sedHendelse.bucType}
+                    hendelseType: $hendelseType, 
+                    pesysSakId: $pesysSakId, 
+                    sakType: ${saktype?.name}
                 **********""".trimIndent()
                 )
 
