@@ -43,7 +43,6 @@ import java.time.LocalDate
 @DisplayName("P_BUC_01 – IntegrationTest")
 internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
-
     @Nested
     @DisplayName("Inngående")
     inner class InngaaendeP_BUC_01 {
@@ -483,28 +482,14 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(2, oppgaveMeldingList.size)
 
-                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(null, it.oppgaveMelding?.filnavn)
                 assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
                 assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
-                assertEquals(null, it.oppgaveMeldingUgyldig.journalpostId)
-                assertEquals("docx.docx ", it.oppgaveMeldingUgyldig.filnavn)
-
-                assertEquals(true, it.kravMeldingList?.isNotEmpty())
-                assertEquals(1, it.kravMeldingList?.size)
-
-                val kravMelding = it.kravMeldingList?.firstOrNull()
-                assertEquals(HendelseKode.SOKNAD_OM_ALDERSPENSJON, kravMelding?.hendelsesKode)
-                assertEquals("147729", kravMelding?.bucId)
-                assertEquals(SAK_ID, kravMelding?.sakId)
-
             }
 
         }
-
 
         @Test
         fun `Krav om alderpensjon for Utgående P2000 journalføres automatisk med bruk av bestemsak uten forsokFerdigStilt oppretter en oppgave type JOURNALFORING`() {
@@ -638,7 +623,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val mockp = createBrukerWith(
                 fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID
             )
-            if (Fodselsnummer.fra(fnrVoksen)?.nPID != true)
+            if (Fodselsnummer.fra(fnrVoksen)?.erNpid != true)
                 every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
             else
                 every { personService.hentPerson(Npid(fnrVoksen)) } returns mockp

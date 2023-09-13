@@ -15,7 +15,7 @@ object PersonMock {
         geo: String? = "0301"
     ): Person {
 
-        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.nPID == true)
+        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
             LocalDate.now().minusYears(66)
         else fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
 
@@ -23,7 +23,7 @@ object PersonMock {
 
         val identer = listOfNotNull(
             aktoerId?.let { IdentInformasjon(ident = it.id, gruppe = IdentGruppe.AKTORID) },
-            fnr?.let { if (Fodselsnummer.fra(fnr)?.nPID == true){
+            fnr?.let { if (Fodselsnummer.fra(fnr)?.erNpid == true){
                     IdentInformasjon(ident = it, gruppe = IdentGruppe.NPID)
                 }
                 else IdentInformasjon(ident = it, gruppe = IdentGruppe.FOLKEREGISTERIDENT)

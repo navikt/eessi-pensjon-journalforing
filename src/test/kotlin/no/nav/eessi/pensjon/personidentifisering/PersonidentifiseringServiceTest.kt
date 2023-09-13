@@ -55,7 +55,7 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
-    fun `Gitt en H070 der det finnes en p6000 med npid i samme buc så identifiser forsikret person`() {
+    fun `Gitt en H070 der det finnes en p6000 med NPID i samme buc så identifiser forsikret person`() {
         val forsikretFnr = "01220049651"
 
         every { personService.hentPerson(Npid(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)

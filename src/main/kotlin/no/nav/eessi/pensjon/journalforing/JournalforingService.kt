@@ -337,7 +337,7 @@ class JournalforingService(
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon?.fnr
-        return if (fdato == null || personRelasjon?.nPID == true || fdato != personRelasjon?.getBirthDate()) {
+        return if (fdato == null || personRelasjon?.erNpid == true || fdato != personRelasjon?.getBirthDate()) {
             logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fdato}")
             ID_OG_FORDELING
         } else {

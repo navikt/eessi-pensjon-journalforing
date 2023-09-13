@@ -413,7 +413,7 @@ internal open class JournalforingTestBase {
         aktorId: String? = null
     ): PdlPerson {
 
-        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.nPID == true)
+        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
             LocalDate.of(1988,7,12)
         else
             fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
@@ -552,7 +552,7 @@ internal open class JournalforingTestBase {
         val pdlPersonAnnen = if (relasjon != null) pdlPerson else null
         val pdlForsikret = if (relasjon == null) pdlPerson else null
 
-        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.nPID == true){
+        val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true){
             "1988-07-12"
         }
         else {

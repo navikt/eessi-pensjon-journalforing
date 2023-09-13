@@ -60,12 +60,12 @@ class PersonSok(
                 return personRelasjon.copy(fnr = Fodselsnummer.fra(fnr))
             }
         }
-
         return null
+
     }
 
     fun pdlSokEtterFnrEllerNpid(sokeKriterier: SokKriterier): String? {
-        logger.info("Utfører personsøk etter fnr")
+        logger.info("Utfører personsøk etter fnr eller npid")
 
         val sokPersonFnrTreff = sokeKriterier.let { personService.sokPerson(it) }
             .firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident

@@ -46,7 +46,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
-        val tema = if(fnr?.nPID == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
+        val tema = if(fnr?.erNpid == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
         else hentTema(sedHendelse.bucType!!, saktype, fnr, identifisertePersoner)
 
         val request = OpprettJournalpostRequest(
@@ -118,7 +118,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - uføre buc (P_BUC_03)
      * - saktype er UFØRETRYGD
      */
-
+    //TODO: Fikse sånn at denne håndterer både npid og fnr
         fun hentTema(
         bucType: BucType,
         saktype: SakType?,

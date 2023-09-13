@@ -40,32 +40,23 @@ class PersonidentifiseringService(
         val personRelasjon = identifisertPerson.personRelasjon
         val sedFnr = personRelasjon?.fdato
         val pdlFdato = identifisertPerson.fdato
+        val fnr = personRelasjon?.fnr
 
         return if (hendelsesType == MOTTATT) {
-            val isFnrDnrFdatoLikSedFdato = if (Fodselsnummer.fra(personRelasjon?.fnr.toString())?.nPID != true) {
+            val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
                 personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
             } else {
                 pdlFdato == sedFnr
             }
             if (isFnrDnrFdatoLikSedFdato == true) {
                 logger.info(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${
-                        personRelasjon?.fnr?.value?.substring(
-                            0,
-                            6
-                        )
-                    }, sed-fdato: $sedFnr, $hendelsesType"
+                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFnr, $hendelsesType"
                 )
                 validerCounter("successful")
                 identifisertPerson
             } else {
                 logger.warn(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${
-                        personRelasjon?.fnr?.value?.substring(
-                            0,
-                            6
-                        )
-                    }, sed-fdato: $sedFnr, $hendelsesType"
+                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFnr, $hendelsesType"
                 )
                 validerCounter("failed")
                 null
@@ -104,8 +95,6 @@ class PersonidentifiseringService(
             return validateIdentifisertPerson(identifisertPerson, hendelsesType)
         }
 
-//        val pdlPerson = identifisertePersoner.firstOrNull { it.gruppe == NPID }
-
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
             ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
@@ -121,14 +110,11 @@ class PersonidentifiseringService(
         rinaDocumentId: String
     ): List<IdentifisertPersonPDL> {
 
-        val distinctByPotensielleSEDPersonRelasjoner =
-            potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+        val distinctByPotensielleSEDPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
         logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
 
         return distinctByPotensielleSEDPersonRelasjoner
-            .mapNotNull { relasjon ->
-                hentIdentifisertPerson(relasjon, hendelsesType)
-            }
+            .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
             .distinctBy { it.aktoerId }
     }
 
@@ -137,7 +123,7 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
 
         return try {
-            val valgtFnr = personRelasjon.fnr?.value
+            val valgtFnr = personRelasjon.fnr
 
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
@@ -145,8 +131,8 @@ class PersonidentifiseringService(
             }
 
             logger.debug("Henter person med fnr. $valgtFnr fra PDL")
-            val person = if (Fodselsnummer.fra(valgtFnr)?.nPID == true) personService.hentPerson(Npid(valgtFnr))
-            else personService.hentPerson(NorskIdent(valgtFnr))
+            val person = if (valgtFnr.erNpid) personService.hentPerson(Npid(valgtFnr.value))
+            else personService.hentPerson(NorskIdent(valgtFnr.value))
 
             person?.let {
                 populerIdentifisertPerson(
@@ -171,10 +157,10 @@ class PersonidentifiseringService(
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val identer = person.identer
         val aktoerId = identer.firstOrNull { it.gruppe == AKTORID }?.ident ?: ""
-        val personFnr = identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident
+        val personFnrEllerNpid = identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune ?: person.geografiskTilknytning?.gtBydel
         val landkode = person.landkode()
-        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnrEllerNpid))
 
         return IdentifisertPersonPDL(
             aktoerId = aktoerId,
