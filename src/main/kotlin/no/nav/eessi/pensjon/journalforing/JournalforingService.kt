@@ -381,8 +381,9 @@ class JournalforingService(
         antallIdentifisertePersoner: Int
     ): Enhet {
         val bucType = sedHendelse.bucType
-        return if (fdato == null || fdato != identifisertPerson?.personRelasjon?.fnr?.getBirthDate()) {
-            logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${identifisertPerson?.personRelasjon?.fnr?.getBirthDate()}")
+        val personRelasjon = identifisertPerson?.personRelasjon
+        return if (fdato == null || personRelasjon?.fnr?.erNpid == true || fdato != personRelasjon?.fnr?.getBirthDate()) {
+            logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertpersonfnr: ${personRelasjon?.fdato}")
             ID_OG_FORDELING
         } else {
             val enhetFraRouting = oppgaveRoutingService.hentEnhet(

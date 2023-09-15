@@ -33,7 +33,7 @@ class PersonidentifiseringServiceTest {
         private const val STERK_BUSK = "12011577847"
     }
 
-    private val personService = mockk<PersonService>(relaxed = true)
+    private val personService = mockk<PersonService>(relaxed = false)
     private val personSok = mockk<PersonSok>(relaxed = true)
 
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
@@ -46,6 +46,19 @@ class PersonidentifiseringServiceTest {
 
         every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(gjenlevFnr, aktoerId = AktoerId("123213"), landkoder = true)
         every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
+
+        val actual = personidentifiseringService.hentIdentifisertPerson(
+            SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null, rinaDocumentId =  "3123123"), SENDT
+        )
+        val expected = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, sedType = SedType.H070, rinaDocumentId =  "3123123")
+        assertEquals(expected, actual?.personRelasjon)
+    }
+
+    @Test
+    fun `Gitt en H070 der det finnes en p6000 med NPID i samme buc så identifiser forsikret person`() {
+        val forsikretFnr = "01220049651"
+
+        every { personService.hentPerson(Npid(forsikretFnr)) } returns PersonMock.createWith(forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
 
         val actual = personidentifiseringService.hentIdentifisertPerson(
             SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, null, SedType.H070, null, rinaDocumentId =  "3123123"), SENDT
@@ -412,7 +425,8 @@ class PersonidentifiseringServiceTest {
             "NOR",
             "026123",
             SEDPersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier, rinaDocumentId = "123123"),
-            personNavn = "gjenlevende Testesen"
+            personNavn = "gjenlevende Testesen",
+            fdato = LocalDate.of(1969, 11,28)
         )
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)

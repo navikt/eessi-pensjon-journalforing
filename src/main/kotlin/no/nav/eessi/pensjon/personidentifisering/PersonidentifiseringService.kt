@@ -2,33 +2,22 @@ package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_07
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.H070
-import no.nav.eessi.pensjon.eux.model.SedType.H120
-import no.nav.eessi.pensjon.eux.model.SedType.H121
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
-import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
+import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.FORSIKRET
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
-import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -44,16 +33,31 @@ class PersonidentifiseringService(
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val brukForikretPersonISed = listOf(H121, H120, H070)
 
-    fun validateIdentifisertPerson(identifisertPerson: IdentifisertPersonPDL, hendelsesType: HendelseType): IdentifisertPersonPDL? {
-        return if (hendelsesType == HendelseType.MOTTATT) {
-            val isFnrDnrFdatoLikSedFdato =  identifisertPerson.personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
+    fun validateIdentifisertPerson(
+        identifisertPerson: IdentifisertPersonPDL,
+        hendelsesType: HendelseType
+    ): IdentifisertPersonPDL? {
+        val personRelasjon = identifisertPerson.personRelasjon
+        val sedFnr = personRelasjon?.fdato
+        val pdlFdato = identifisertPerson.fdato
+        val fnr = personRelasjon?.fnr
 
-            if(isFnrDnrFdatoLikSedFdato == true) {
-                logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType")
+        return if (hendelsesType == MOTTATT) {
+            val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
+                personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
+            } else {
+                pdlFdato == sedFnr
+            }
+            if (isFnrDnrFdatoLikSedFdato == true) {
+                logger.info(
+                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFnr, $hendelsesType"
+                )
                 validerCounter("successful")
                 identifisertPerson
             } else {
-                logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${identifisertPerson.personRelasjon?.fnr?.getBirthDate()}, sed-fdato: ${identifisertPerson.personRelasjon?.fdato}, $hendelsesType")
+                logger.warn(
+                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFnr, $hendelsesType"
+                )
                 validerCounter("failed")
                 null
             }
@@ -93,7 +97,7 @@ class PersonidentifiseringService(
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
-        ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
+            ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
 
         return null
     }
@@ -110,9 +114,7 @@ class PersonidentifiseringService(
         logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
 
         return distinctByPotensielleSEDPersonRelasjoner
-            .mapNotNull { relasjon ->
-                hentIdentifisertPerson(relasjon, hendelsesType)
-            }
+            .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
             .distinctBy { it.aktoerId }
     }
 
@@ -121,7 +123,7 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
 
         return try {
-            val valgtFnr = personRelasjon.fnr?.value
+            val valgtFnr = personRelasjon.fnr
 
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
@@ -129,14 +131,16 @@ class PersonidentifiseringService(
             }
 
             logger.debug("Henter person med fnr. $valgtFnr fra PDL")
-            personService.hentPerson(NorskIdent(valgtFnr))
-                ?.let { person ->
-                    populerIdentifisertPerson(
-                        person,
-                        personRelasjon,
-                        hendelsesType
-                    )
-                }
+            val person = if (valgtFnr.erNpid) personService.hentPerson(Npid(valgtFnr.value))
+            else personService.hentPerson(NorskIdent(valgtFnr.value))
+
+            person?.let {
+                populerIdentifisertPerson(
+                    person,
+                    personRelasjon,
+                    hendelsesType
+                )
+            }
         } catch (ex: Exception) {
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
@@ -151,23 +155,25 @@ class PersonidentifiseringService(
         logger.debug("Populerer IdentifisertPerson med data fra PDL hendelseType: $hendelsesType")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
-        val aktoerId = person.identer.firstOrNull { it.gruppe == IdentGruppe.AKTORID }?.ident ?: ""
-        val personFnr = person.identer.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }.ident
+        val identer = person.identer
+        val aktoerId = identer.firstOrNull { it.gruppe == AKTORID }?.ident ?: ""
+        val personFnrEllerNpid = identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident
         val geografiskTilknytning = person.geografiskTilknytning?.gtKommune ?: person.geografiskTilknytning?.gtBydel
         val landkode = person.landkode()
-        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnr))
+        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnrEllerNpid))
 
         return IdentifisertPersonPDL(
             aktoerId = aktoerId,
             landkode = landkode,
             geografiskTilknytning = geografiskTilknytning,
             personRelasjon = newPersonRelasjon,
-            personNavn = personNavn
+            personNavn = personNavn,
+            fdato = person.foedsel?.foedselsdato
         )
     }
 
     fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
-        val alleSedTyper = alleSediBuc.map { it.second.type}.toJson()
+        val alleSedTyper = alleSediBuc.map { it.second.type }.toJson()
         logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
         val gradering =
@@ -200,14 +206,17 @@ class PersonidentifiseringService(
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
+
             bucType == P_BUC_10 -> {
                 val erGjenlevendeYtelse = potensielleSEDPersonRelasjoner.any { it.saktype == GJENLEV }
 
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
+
             bucType == P_BUC_07 && (identifisertePersoner.size > 1) -> {
                 identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             }
+
             bucType == P_BUC_07 -> identifisertePersoner.firstOrNull()
 
             //buc_01,buc_03 hvis flere enn en forsikret person så sendes til id_og_fordeling
@@ -227,9 +236,6 @@ class PersonidentifiseringService(
         identifisertePersoner: List<IdentifisertPersonPDL>,
         erGjenlevende: Boolean
     ): IdentifisertPersonPDL? {
-        identifisertePersoner.forEach {
-            logger.debug(it.toJson())
-        }
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
         logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
@@ -274,11 +280,11 @@ class PersonidentifiseringService(
         return seder.plus(kansellerteSeder)
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
-            .firstOrNull { it == identifisertPerson.personRelasjon?.fnr?.getBirthDate() }
+            .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
     }
 }
 
-class FlerePersonPaaBucException(): Exception()
+class FlerePersonPaaBucException() : Exception()
 
 
 

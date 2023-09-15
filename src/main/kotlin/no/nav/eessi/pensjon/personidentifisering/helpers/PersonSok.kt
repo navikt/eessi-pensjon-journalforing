@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
@@ -56,19 +56,19 @@ class PersonSok(
         logger.debug("Personrelasjon sokekriterier: ${personRelasjon?.sokKriterier}, sedtype: ${personRelasjon?.sedType}, relasjon: ${personRelasjon?.relasjon}")
 
         personRelasjon?.sokKriterier?.let {
-            pdlSokEtterFnr(it)?.let { fnr ->
+            pdlSokEtterFnrEllerNpid(it)?.let { fnr ->
                 return personRelasjon.copy(fnr = Fodselsnummer.fra(fnr))
             }
         }
-
         return null
+
     }
 
-    fun pdlSokEtterFnr(sokeKriterier: SokKriterier): String? {
-        logger.info("Utfører personsøk etter fnr")
+    fun pdlSokEtterFnrEllerNpid(sokeKriterier: SokKriterier): String? {
+        logger.info("Utfører personsøk etter fnr eller npid")
 
         val sokPersonFnrTreff = sokeKriterier.let { personService.sokPerson(it) }
-            .firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+            .firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident
         if (sokPersonFnrTreff != null) {
             logger.info("Har gjort et treff på personsøk")
             sokPersonTellerTreff.increment()

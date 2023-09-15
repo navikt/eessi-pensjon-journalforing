@@ -1,27 +1,14 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_07
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_08
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_09
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
-import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -59,7 +46,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
-        val tema = hentTema(sedHendelse.bucType!!, saktype, fnr, identifisertePersoner)
+        val tema = if(fnr?.erNpid == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
+        else hentTema(sedHendelse.bucType!!, saktype, fnr, identifisertePersoner)
+
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner),
@@ -129,7 +118,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      * - uføre buc (P_BUC_03)
      * - saktype er UFØRETRYGD
      */
-
+    //TODO: Fikse sånn at denne håndterer både npid og fnr
         fun hentTema(
         bucType: BucType,
         saktype: SakType?,
