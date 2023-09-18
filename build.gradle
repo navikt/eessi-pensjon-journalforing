@@ -49,11 +49,18 @@ dependencies {
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
 	// Eessi pensjon biblioteker
+	implementation("no.nav.eessi.pensjon:ep-eux:2.1.53")
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.36")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.1.28")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.8")
-	implementation("no.nav.eessi.pensjon:ep-eux:2.1.53")
-	implementation("no.nav.eessi.pensjon:ep-routing:1.0.82") {
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.8"){
+		exclude module: 'ep-eux'
+		exclude module: 'ep-metrics'
+		exclude module: 'ep-logging'
+	}
+	implementation("no.nav.eessi.pensjon:ep-routing:1.0.82"){
+		exclude module: 'ep-eux'
+		exclude module: 'ep-metrics'
+		exclude module: 'ep-logging'
 		exclude module: 'ep-personoppslag'
 	}
 
