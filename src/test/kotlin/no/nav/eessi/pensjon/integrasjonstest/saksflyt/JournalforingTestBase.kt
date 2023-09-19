@@ -117,6 +117,7 @@ internal open class JournalforingTestBase {
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
         dokumentHelper = dokumentHelper,
+        fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
         profile = "test"
     )
@@ -152,7 +153,6 @@ internal open class JournalforingTestBase {
     fun after() {
         clearAllMocks()
     }
-
 
     /**
      * TestRunner for testing av Journalføring med to personer.

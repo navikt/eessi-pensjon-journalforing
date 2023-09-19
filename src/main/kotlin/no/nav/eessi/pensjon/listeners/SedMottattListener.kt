@@ -2,13 +2,16 @@ package no.nav.eessi.pensjon.listeners
 
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -34,6 +37,7 @@ class SedMottattListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
     private val dokumentHelper: EuxService,
+    private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
@@ -81,14 +85,13 @@ class SedMottattListener(
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
-
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
-                            logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
 
+                            logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+
+                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
                             val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-
                             val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
 
                             //identifisere Person hent Person fra PDL valider Person
@@ -105,13 +108,9 @@ class SedMottattListener(
                             )
 
                             val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
-                            val fdato = personidentifiseringService.hentFodselsDato(
-                                identifisertPerson,
-                                alleSedIBucList,
-                                kansellerteSeder
-                            )
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                             val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
-                            val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, sedHendelse, saktypeFraSed)
+                            val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
 
                             val currentSed =
@@ -143,16 +142,25 @@ class SedMottattListener(
         }
     }
 
-    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, sedHendelse: SedHendelse, saktypeFraSed: SakType?
-    ): SakInformasjon? {
-        if (identifisertPerson?.aktoerId == null) return null
+    private fun pensjonSakInformasjonMottatt(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
 
-        return when(sedHendelse.bucType) {
-            P_BUC_01 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_01, saktypeFraSed, identifisertPerson)
-            P_BUC_02 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_02, saktypeFraSed, identifisertPerson)
-            P_BUC_03 -> bestemSakService.hentSakInformasjonViaBestemSak(identifisertPerson.aktoerId, P_BUC_03, saktypeFraSed, identifisertPerson)
-            else  -> null
+        val aktoerId = identifisertPerson?.aktoerId ?: return null
+            .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
+
+        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc).let { pensjonsinformasjon ->
+            if (pensjonsinformasjon?.sakType != null) {
+                logger.info("Velger sakType ${pensjonsinformasjon.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.sakId}")
+                return pensjonsinformasjon
+            }
         }
+        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
+            if (it?.sakType != null) {
+                logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
+                return it
+            }
+        }
+        logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
+        return null
     }
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {

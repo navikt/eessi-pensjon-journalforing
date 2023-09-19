@@ -82,6 +82,8 @@ class SedSendtListener(
                             val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
                             val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
                             val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+
+                            //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedIBucPair, bucType)
                             val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedIBucPair, bucType, potensiellePersonRelasjoner, SENDT, sedHendelse.rinaSakId)
 
@@ -140,10 +142,8 @@ class SedSendtListener(
     private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
         logger.info("skal hente pensjonsak med bruk av bestemSak")
 
-        if (identifisertPerson?.aktoerId == null) return null
-            .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
-
-        val aktoerId = identifisertPerson.aktoerId
+        val aktoerId = identifisertPerson?.aktoerId ?: return null
+                .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
         fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc).let { pensjonsinformasjon ->
             if (pensjonsinformasjon?.sakType != null) {

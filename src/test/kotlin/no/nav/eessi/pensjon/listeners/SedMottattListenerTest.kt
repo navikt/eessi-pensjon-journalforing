@@ -24,11 +24,14 @@ internal class SedMottattListenerTest {
     private val sedDokumentHelper = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
 
-    private val sedListener = SedMottattListener(jouralforingService,
+    private val sedListener = SedMottattListener(
+        jouralforingService,
         personidentifiseringService,
         sedDokumentHelper,
+        fagmodulService = mockk(relaxed = true),
         bestemSakService,
-        "test")
+        "test"
+    )
 
     @BeforeEach
     fun setup() {

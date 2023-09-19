@@ -29,10 +29,10 @@ class BestemSakService(private val klient: BestemSakKlient) {
     fun hentSakInformasjonViaBestemSak(
         aktoerId: String,
         bucType: BucType,
-        aktypeFraSed: SakType? = null,
+        saktypeFraSed: SakType? = null,
         identifisertPerson: IdentifisertPerson? = null
     ): SakInformasjon? {
-        val saksType = bestemSaktypeFraSed(aktypeFraSed, identifisertPerson, bucType)
+        val saksType = bestemSaktypeFraSed(saktypeFraSed, identifisertPerson, bucType)
         logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $saksType")
 
         //TODO: Sjekke om vi alltid kan returnere GJENLEV på P_BUC_02
