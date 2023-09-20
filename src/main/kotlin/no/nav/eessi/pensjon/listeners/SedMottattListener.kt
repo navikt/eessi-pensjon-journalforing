@@ -14,9 +14,7 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
@@ -111,7 +109,7 @@ class SedMottattListener(
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
                             val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
-                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, sedHendelse, MOTTATT)
+                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
 
                             val currentSed =
                                 alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
@@ -163,14 +161,11 @@ class SedMottattListener(
         return null
     }
 
-    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
-        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
-            return null
-        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {
-            return sakInformasjon?.sakType ?: saktypeFraSED
-        } else if (saktypeFraSED != null) {
-            return saktypeFraSED
-        }
+    //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
+        if (bucType == P_BUC_02 && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) return null
+        else if (bucType == P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType ?: saktypeFraSED
+        else if (saktypeFraSED != null) return saktypeFraSED
         return sakInformasjon?.sakType
     }
 
