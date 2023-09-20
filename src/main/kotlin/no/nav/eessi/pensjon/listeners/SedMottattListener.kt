@@ -169,10 +169,6 @@ class SedMottattListener(
         return sakInformasjon?.sakType
     }
 
-    private fun trimFnrString(fnrAsString: String) = fnrAsString.replace("[^0-9]".toRegex(), "")
-
-
-
     /**
      * Ikke slett funksjonene under før vi har et bedre opplegg for tilbakestilling av topic.
      * Se jira-sak: EP-968
