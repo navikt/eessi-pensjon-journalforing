@@ -16,7 +16,6 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -105,7 +104,7 @@ class SedSendtListener(
                             else {
                                 val sakTypeFraSED = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
                                 val sakInformasjon = pensjonSakInformasjonSendt(identifisertPerson, bucType, sakTypeFraSED, alleSedIBucList)
-                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse, SENDT)
+                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse)
                                 val currentSed = alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                                 journalforingService.journalfor(
@@ -127,7 +126,7 @@ class SedSendtListener(
                         logger.info("Genererer automatiseringstatistikk")
                     }
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse", ex)
+                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\\n ${hendelse.replaceAfter("navBruker", "******")}", ex)
                     throw SedSendtRuntimeException(ex)
                 }
                 latch.countDown()
@@ -161,14 +160,10 @@ class SedSendtListener(
         return null
     }
 
-    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse, hendelseType: HendelseType): SakType? {
-        if (sedHendelseModel.bucType == P_BUC_02 && hendelseType == SENDT && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) {
-            return null
-        } else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) {
-            return sakInformasjon?.sakType ?: saktypeFraSED
-        } else if (saktypeFraSED != null) {
-            return saktypeFraSED
-        }
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, sedHendelseModel: SedHendelse): SakType? {
+        if (sedHendelseModel.bucType == P_BUC_02 && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) return null
+        else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType ?: saktypeFraSED
+        else if (saktypeFraSED != null) return saktypeFraSED
         return sakInformasjon?.sakType
     }
 
