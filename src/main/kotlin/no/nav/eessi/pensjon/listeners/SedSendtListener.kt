@@ -138,7 +138,7 @@ class SedSendtListener(
     /**
      * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
      */
-    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, ytelsestypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
+    private fun pensjonSakInformasjonSendt(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
         logger.info("skal hente pensjonsak med bruk av bestemSak")
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
@@ -150,7 +150,7 @@ class SedSendtListener(
                 return pensjonsinformasjon
             }
         }
-        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ytelsestypeFraSed, identifisertPerson).let {
+        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
             if (it?.sakType != null) {
                 logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
                 return it
