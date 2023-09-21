@@ -49,7 +49,6 @@ import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
 import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
@@ -186,19 +185,19 @@ class JournalforingService(
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
-                val oppgaveEnhet = hentOppgaveEnhet(
+/*                val oppgaveEnhet = hentOppgaveEnhet(
                         tildeltJoarkEnhet,
                         identifisertPerson,
                         fdato,
                         saktype,
                         sedHendelse,
                         harAdressebeskyttelse
-                    )
+                    )*/
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     opprettBehandleSedOppgave(
                         null,
-                        oppgaveEnhet,
+                        tildeltJoarkEnhet,
                         aktoerId,
                         sedHendelse,
                         usupporterteFilnavn(uSupporterteVedlegg)
@@ -210,7 +209,7 @@ class JournalforingService(
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
-                        oppgaveEnhet,
+                        tildeltJoarkEnhet,
                         aktoerId,
                         sedHendelse
                     )
@@ -224,7 +223,7 @@ class JournalforingService(
 
                 produserAutomatiseringsmelding(
                     sedHendelse,
-                    tildeltJoarkEnhet == AUTOMATISK_JOURNALFORING,
+                    false,
                     tildeltJoarkEnhet.enhetsNr,
                     saktype,
                     hendelseType
@@ -397,9 +396,9 @@ class JournalforingService(
                     harAdressebeskyttelse
                 )
             )
-            if(enhetFraRouting == AUTOMATISK_JOURNALFORING){
-                return AUTOMATISK_JOURNALFORING
-            }
+/*            if(enhetFraRouting == ID_OG_FORDELING){
+                return ID_OG_FORDELING
+            }*/
 
             val over62Aar = Period.between(fdato, LocalDate.now()).years > 61
             val barn = Period.between(fdato, LocalDate.now()).years < 18
@@ -501,6 +500,7 @@ class JournalforingService(
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
 
+/*
     private fun hentOppgaveEnhet(
         tildeltEnhet: Enhet,
         identifisertPerson: IdentifisertPerson?,
@@ -509,7 +509,8 @@ class JournalforingService(
         sedHendelseModel: SedHendelse,
         harAdressebeskyttelse: Boolean,
     ): Enhet {
-        return if (tildeltEnhet == AUTOMATISK_JOURNALFORING) {
+*/
+/*        return if (tildeltEnhet == ID_OG_FORDELING) {
             oppgaveRoutingService.hentEnhet(
                 OppgaveRoutingRequest.fra(
                     identifisertPerson,
@@ -521,9 +522,11 @@ class JournalforingService(
                     harAdressebeskyttelse
                 )
             )
-        } else
+        } else*//*
+
             tildeltEnhet
     }
+*/
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
         return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }

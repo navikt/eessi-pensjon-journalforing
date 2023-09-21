@@ -1,6 +1,10 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
@@ -9,7 +13,10 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -957,7 +964,7 @@ internal class JournalforingServiceTest {
                 sedHendelse = sedHendelse,
                 fnr = LEALAUS_KAKE,
                 sedHendelseType = SENDT,
-                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = "111111",
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = GJENLEV,
@@ -1019,7 +1026,7 @@ internal class JournalforingServiceTest {
                 sedHendelse = sedHendelse,
                 fnr = identifisertGjenlevendePerson.personRelasjon?.fnr,
                 sedHendelseType = SENDT,
-                journalfoerendeEnhet = Enhet.AUTOMATISK_JOURNALFORING,
+                journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
                 arkivsaksnummer = "111111",
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = GJENLEV,
