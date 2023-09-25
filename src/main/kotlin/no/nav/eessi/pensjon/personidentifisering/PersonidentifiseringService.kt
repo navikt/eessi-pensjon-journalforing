@@ -123,7 +123,7 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
 
         return try {
-            val valgtFnr = personRelasjon.fnr
+            val valgtFnr = personRelasjon.fnr?.value
 
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
@@ -131,8 +131,7 @@ class PersonidentifiseringService(
             }
 
             logger.debug("Henter person med fnr. $valgtFnr fra PDL")
-            val person = if (valgtFnr.erNpid) personService.hentPerson(Npid(valgtFnr.value))
-            else personService.hentPerson(NorskIdent(valgtFnr.value))
+            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr))
 
             person?.let {
                 populerIdentifisertPerson(
