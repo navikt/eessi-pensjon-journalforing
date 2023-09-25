@@ -364,10 +364,9 @@ class JournalforingService(
                 (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)
             ) {
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
-                    .also { logger.info("Journalpost settes til avbrutt") }
                 true
             } else false
-        return sattStatusAvbrutt
+        return sattStatusAvbrutt .also { logger.info("Journalpost settes til avbrutt==$it") }
     }
 
     private fun journalforingsEnhet(
