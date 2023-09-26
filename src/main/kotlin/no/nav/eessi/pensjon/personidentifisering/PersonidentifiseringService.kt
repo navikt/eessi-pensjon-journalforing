@@ -273,13 +273,14 @@ class PersonidentifiseringService(
         identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
 
         if( identifisertPerson?.personRelasjon?.fnr == null ){
-            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
+            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
         }
 
         return seder.plus(kansellerteSeder)
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
+            .also { logger.info("Funnet fdato i sed som matcher identifisert person sin personrelasjon") }
     }
 }
 
