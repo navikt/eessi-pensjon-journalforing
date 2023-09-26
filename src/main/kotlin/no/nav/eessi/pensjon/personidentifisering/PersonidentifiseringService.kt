@@ -280,7 +280,7 @@ class PersonidentifiseringService(
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
-            .also { logger.info("Funnet fdato i sed som matcher identifisert person sin personrelasjon") }
+            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon") }
     }
 }
 
