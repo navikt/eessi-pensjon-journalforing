@@ -57,6 +57,44 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
         assertEquals(expected.first(), actual.firstOrNull { it.sedType == SedType.P2000 })
     }
 
+    @Test
+    fun `Leter igjennom beste Sed i P_BUC_02 etter norsk personnr`() {
+        val forventetFnr = SLAPP_SKILPADDE
+
+        val actual = RelasjonsHandler.hentRelasjoner(
+            listOf(
+                // P2100 som mangler norsk fnr
+                Pair(
+                    "3123131",
+                    SED.generateSedToClass<P8000>(
+                        generateSED(
+                            SedType.P8000,
+                            forsikretFnr = null,
+                            gjenlevFnr = null,
+                            gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE
+                        )
+                    )
+                ), Pair("3123134", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr = forventetFnr)))
+            ), P_BUC_02
+        )
+
+        val sok = createSokKritere()
+        val expected = setOf(
+            SEDPersonRelasjon(
+                Fodselsnummer.fra(forventetFnr),
+                relasjon = Relasjon.FORSIKRET,
+                sedType = SedType.P2100,
+                sokKriterier = sok,
+                fdato = LocalDate.of(1952, 3, 9),
+                rinaDocumentId = "3123134",
+                saktype = GJENLEV
+            )
+        )
+        assertEquals(2, actual.size)
+        assertTrue(actual.containsAll(expected))
+        assertEquals(expected.first(), actual.firstOrNull { it.sedType == SedType.P2100 })
+    }
+
     @Nested
     @DisplayName("Tester for uthenting av fnr i en R005 og R_BUC_02")
     inner class SedTypeR005 {

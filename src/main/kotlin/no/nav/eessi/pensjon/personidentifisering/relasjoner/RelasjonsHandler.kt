@@ -31,7 +31,7 @@ object RelasjonsHandler {
     }
 
     private fun filterRelasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
-         logger.info("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
+         logger.info("*** Filterer relasjonListe, samme oppføringer, ugyldige verdier o.l")
 
         relasjonList.onEach { logger.debug("$it") }
 
