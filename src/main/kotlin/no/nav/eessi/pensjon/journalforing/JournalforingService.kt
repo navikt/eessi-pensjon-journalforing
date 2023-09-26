@@ -170,10 +170,10 @@ class JournalforingService(
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
                 if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
-                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
+                    journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
-
+                logger.info("********** Automatisk journalført:${journalPostResponse?.journalpostferdigstilt}, sattavbrutt: $sattStatusAvbrutt **********")
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
                         sedHendelse.sedType,
@@ -369,8 +369,6 @@ class JournalforingService(
         val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
         val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
 
-        logger.info("Vurderer satt avbrutt, hendelseType: $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
-
         val sattStatusAvbrutt =
             if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
                 (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)
@@ -378,7 +376,9 @@ class JournalforingService(
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                 true
             } else false
-        return sattStatusAvbrutt .also { logger.info("Journalpost settes til avbrutt==$it") }
+        return sattStatusAvbrutt .also {
+            logger.info("Journalpost settes til avbrutt==$it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
+        }
     }
 
     private fun journalforingsEnhet(
