@@ -116,6 +116,7 @@ class PersonidentifiseringService(
         return distinctByPotensielleSEDPersonRelasjoner
             .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
             .distinctBy { it.aktoerId }
+            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
     }
 
     fun hentIdentifisertPerson(
