@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
@@ -17,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
+private const val RINA_NUMMER = "3123134"
 internal class RelasjonsHandlerTest : RelasjonTestBase() {
 
     @Test
@@ -36,7 +39,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                             gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE
                         )
                     )
-                ), Pair("3123134", SED.generateSedToClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
+                ), Pair(RINA_NUMMER, SED.generateSedToClass<P2000>(generateSED(SedType.P2000, forsikretFnr = forventetFnr)))
             ), P_BUC_01
         )
 
@@ -48,7 +51,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 sedType = SedType.P2000,
                 sokKriterier = sok,
                 fdato = LocalDate.of(1952, 3, 9),
-                rinaDocumentId = "3123134",
+                rinaDocumentId = RINA_NUMMER,
                 saktype = ALDER
             )
         )
@@ -61,11 +64,34 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
     fun `Leter igjennom beste Sed i P_BUC_02 etter norsk personnr`() {
         val forventetFnr = SLAPP_SKILPADDE
 
+        val pensjonPerson = Bruker(
+            person = Person(
+                fornavn = GJENLEV_FNAVN,
+                etternavn = ETTERNAVN,
+                foedselsdato = "1952-03-09",
+                pin = listOf(PinItem(land = "NO", identifikator = forventetFnr)),
+                relasjontilavdod = RelasjonAvdodItem(RelasjonTilAvdod.EKTEFELLE.name),
+                rolle = Rolle.ETTERLATTE.name
+            )
+        )
+        val p2100Generated = generateSED(
+            SedType.P2100,
+            forsikretFnr = null,
+            gjenlevFnr = null,
+            gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE
+        )
+
+        val p2100 = mockk<P2100>(relaxed = true).apply {
+            every { type } returns p2100Generated.type
+            every { pensjon?.gjenlevende } returns pensjonPerson
+            every { nav?.bruker } returns pensjonPerson
+        }
+
         val actual = RelasjonsHandler.hentRelasjoner(
             listOf(
                 // P2100 som mangler norsk fnr
                 Pair(
-                    "3123131",
+                    RINA_NUMMER,
                     SED.generateSedToClass<P8000>(
                         generateSED(
                             SedType.P8000,
@@ -74,24 +100,23 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                             gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE
                         )
                     )
-                ), Pair("3123134", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr = forventetFnr)))
+                ), Pair("2313123", p2100 )
             ), P_BUC_02
         )
 
-        val sok = createSokKritere()
+        val sok = createSokKritere(fornavn = GJENLEV_FNAVN)
         val expected = setOf(
             SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
-                relasjon = Relasjon.FORSIKRET,
+                relasjon = Relasjon.GJENLEVENDE,
                 sedType = SedType.P2100,
                 sokKriterier = sok,
                 fdato = LocalDate.of(1952, 3, 9),
-                rinaDocumentId = "3123134",
+                rinaDocumentId = "2313123",
                 saktype = GJENLEV
             )
         )
         assertEquals(2, actual.size)
-        assertTrue(actual.containsAll(expected))
         assertEquals(expected.first(), actual.firstOrNull { it.sedType == SedType.P2100 })
     }
 

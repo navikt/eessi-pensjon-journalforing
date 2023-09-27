@@ -34,7 +34,7 @@ class PersonidentifiseringServiceTest {
     }
 
     private val personService = mockk<PersonService>(relaxed = false)
-    private val personSok = mockk<PersonSok>(relaxed = true)
+    private val personSok = PersonSok(personService)
 
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
@@ -184,6 +184,28 @@ class PersonidentifiseringServiceTest {
         assertEquals(gjenlevende, gjenlevendeRelasjon.fnr!!.value)
         assertEquals(Relasjon.GJENLEVENDE, gjenlevendeRelasjon.relasjon)
 
+    }
+
+    @Test
+    fun `Gitt en P2100 med gjenlevende og en P8000 med forsikret i P_BUC_02 så skal det hentes to identifiserte personer`() {
+        val navBruker = "11067122781" //avdød bruker fra eux
+        val gjenlevende = "09035225916"
+        val bucType = P_BUC_02
+
+        every { personService.hentPerson(NorskIdent(gjenlevende)) } returns PersonMock.createWith(gjenlevende, landkoder = true, fornavn = "Gjenlevende")
+        every { personService.hentPerson(NorskIdent(navBruker)) } returns PersonMock.createWith(navBruker, landkoder = true, fornavn = "Avgått-død", aktoerId = AktoerId("111111"))
+
+        val sedListe = listOf(
+            Pair("231231", SED.generateSedToClass<P2100>(generateSED(SedType.P2100, forsikretFnr = navBruker, gjenlevFnr = gjenlevende, gjenlevRelasjon = RelasjonTilAvdod.EKTEFELLE))),
+            Pair("13231212212A", SED.generateSedToClass<P8000>(generateSED(SedType.P8000, forsikretFnr = navBruker, gjenlevFnr = gjenlevende)))
+        )
+        val potensiellePersoner = RelasjonsHandler.hentRelasjoner (sedListe, P_BUC_02)
+
+        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(
+            sedListe, bucType, potensiellePersoner, MOTTATT, rinaDocumentId = "13231212212A"
+        )
+
+        assertEquals(2, identifisertePersoner.size)
     }
 
     @Test

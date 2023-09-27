@@ -110,12 +110,11 @@ class PersonidentifiseringService(
         rinaDocumentId: String
     ): List<IdentifisertPersonPDL> {
 
-        val distinctByPotensielleSEDPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
+        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
 
-        return distinctByPotensielleSEDPersonRelasjoner
+        return sedPersonRelasjoner
             .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
-            .distinctBy { it.aktoerId }
             .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
     }
 
@@ -124,6 +123,7 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
 
         return try {
+            logger.info("Henter person info fra pdl for relasjon: ${personRelasjon.relasjon}")
             val valgtFnr = personRelasjon.fnr?.value
 
             if (valgtFnr == null) {
@@ -140,7 +140,7 @@ class PersonidentifiseringService(
                     personRelasjon,
                     hendelsesType
                 )
-            }
+            }.also { logger.info("Legger til identifisert person for aktorid: ${it?.aktoerId}") }
         } catch (ex: Exception) {
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
@@ -152,7 +152,7 @@ class PersonidentifiseringService(
         sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType
     ): IdentifisertPersonPDL {
-        logger.debug("Populerer IdentifisertPerson med data fra PDL hendelseType: $hendelsesType")
+        logger.debug("Populerer IdentifisertPerson for ${sedPersonRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val identer = person.identer

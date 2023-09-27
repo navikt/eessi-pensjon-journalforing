@@ -21,7 +21,11 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
 
         val forsikret = hentForsikretPerson(bestemSaktype(bucType))
 
-        hentAnnenpersonRelasjon()?.let { fnrListe.add(it) }.takeIf { bucType in listOf(P_BUC_05, P_BUC_10) }
+        hentAnnenpersonRelasjon().let {
+            if(bucType in listOf(P_BUC_05, P_BUC_10, P_BUC_02) && it != null){
+                fnrListe.add(it)
+            }
+        }
 
         logger.debug("forsikret $forsikret")
         logger.debug("gjenlevlist: $fnrListe")
@@ -39,6 +43,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
         logger.debug("annenPerson: $annenPerson")
         annenPerson?.let { person ->
             val sokAnnenPersonKriterie =  opprettSokKriterie(person)
+            //TODO: håndtere npid
             val annenPersonPin = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val annenPersonFdato = mapFdatoTilLocalDate(person.foedselsdato)
             val annenPersonRelasjon = when (person.rolle) {
