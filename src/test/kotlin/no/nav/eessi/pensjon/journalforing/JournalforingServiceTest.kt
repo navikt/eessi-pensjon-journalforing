@@ -424,7 +424,7 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Ved mottatt P2100 som kan automatisk ferdigstilles så skal det opprettes en Behandle SED oppgave`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100_SE.json")!!.readText()
         val sed = mapJsonToAny<P2100>(javaClass.getResource("/sed/P2100.json")!!.readText())
         val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = P_BUC_02)
 
@@ -451,14 +451,14 @@ internal class JournalforingServiceTest {
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "P2100",
               "journalpostId" : "123",
-              "tildeltEnhetsnr" : "",
+              "tildeltEnhetsnr" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED"}""".trimIndent()
         )
-        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
 
     @ParameterizedTest

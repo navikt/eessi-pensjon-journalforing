@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03a
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03b
@@ -168,10 +169,10 @@ class JournalforingService(
 
                 // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
                 if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
-                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
+                    journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
-
+                logger.info("********** Automatisk journalført:${journalPostResponse?.journalpostferdigstilt}, sattavbrutt: $sattStatusAvbrutt **********")
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
                         sedHendelse.sedType,
@@ -205,7 +206,8 @@ class JournalforingService(
                 }
 
                 val bucType = sedHendelse.bucType
-                if ((bucType == P_BUC_01 || bucType == P_BUC_03) && (hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
+                //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
+                if ((hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: $bucType")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
@@ -219,11 +221,11 @@ class JournalforingService(
                         sakInformasjon,
                         sed
                     )
-                }
+                } else loggDersomIkkeBehSedOppgaveOpprettes(bucType, sedHendelse)
 
                 produserAutomatiseringsmelding(
                     sedHendelse,
-                    false,
+                    bleAutomatisert = false,
                     tildeltJoarkEnhet.enhetsNr,
                     saktype,
                     hendelseType
@@ -237,6 +239,16 @@ class JournalforingService(
             }
         }
     }
+
+    private fun loggDersomIkkeBehSedOppgaveOpprettes(
+        bucType: BucType?,
+        sedHendelse: SedHendelse
+    ) = logger.info(
+        "Oppretter ikke behandleSedOppgave for " +
+                "bucType: $bucType, " +
+                "sedhendelse: ${sedHendelse.sedType}" +
+                "rinanr: ${sedHendelse.rinaSakId}"
+    )
 
     /**
      *     Denne metoden blir kun brukt i behandlingen av utgående SEDer der person ikke er identifiserbar, men SEDen inneholder pesys sakId.
@@ -356,17 +368,16 @@ class JournalforingService(
         val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
         val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
 
-        logger.info("Vurderer satt avbrutt, hendelseType: $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
-
         val sattStatusAvbrutt =
             if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
                 (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)
             ) {
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
-                    .also { logger.info("Journalpost settes til avbrutt") }
                 true
             } else false
-        return sattStatusAvbrutt
+        return sattStatusAvbrutt .also {
+            logger.info("Journalpost settes til avbrutt==$it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
+        }
     }
 
     private fun journalforingsEnhet(

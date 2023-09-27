@@ -1,7 +1,7 @@
 buildscript {
 
 	ext {
-		springBootVersion = '3.1.3'
+		springBootVersion = '3.1.4'
 		springKafkaVersion = '3.0.11'
 		jacksonModuleKotlinVersion = '2.15.2'
 		tokenSupportVersion = '3.1.5'
@@ -52,7 +52,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-eux:2.1.54")
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.36")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.1.29")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.10"){
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.14"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'

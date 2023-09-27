@@ -110,12 +110,12 @@ class PersonidentifiseringService(
         rinaDocumentId: String
     ): List<IdentifisertPersonPDL> {
 
-        val distinctByPotensielleSEDPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${distinctByPotensielleSEDPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
+        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
 
-        return distinctByPotensielleSEDPersonRelasjoner
+        return sedPersonRelasjoner
             .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
-            .distinctBy { it.aktoerId }
+            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
     }
 
     fun hentIdentifisertPerson(
@@ -123,7 +123,8 @@ class PersonidentifiseringService(
     ): IdentifisertPersonPDL? {
 
         return try {
-            val valgtFnr = personRelasjon.fnr
+            logger.info("Henter person info fra pdl for relasjon: ${personRelasjon.relasjon}")
+            val valgtFnr = personRelasjon.fnr?.value
 
             if (valgtFnr == null) {
                 logger.info("Ingen gyldig ident, går ut av hentIdentifisertPerson!")
@@ -131,8 +132,7 @@ class PersonidentifiseringService(
             }
 
             logger.debug("Henter person med fnr. $valgtFnr fra PDL")
-            val person = if (valgtFnr.erNpid) personService.hentPerson(Npid(valgtFnr.value))
-            else personService.hentPerson(NorskIdent(valgtFnr.value))
+            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr))
 
             person?.let {
                 populerIdentifisertPerson(
@@ -140,7 +140,7 @@ class PersonidentifiseringService(
                     personRelasjon,
                     hendelsesType
                 )
-            }
+            }.also { logger.info("Legger til identifisert person for aktorid: ${it?.aktoerId}") }
         } catch (ex: Exception) {
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
@@ -152,7 +152,7 @@ class PersonidentifiseringService(
         sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType
     ): IdentifisertPersonPDL {
-        logger.debug("Populerer IdentifisertPerson med data fra PDL hendelseType: $hendelsesType")
+        logger.debug("Populerer IdentifisertPerson for ${sedPersonRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val identer = person.identer
@@ -274,13 +274,14 @@ class PersonidentifiseringService(
         identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
 
         if( identifisertPerson?.personRelasjon?.fnr == null ){
-            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder)
+            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
         }
 
         return seder.plus(kansellerteSeder)
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
+            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon") }
     }
 }
 

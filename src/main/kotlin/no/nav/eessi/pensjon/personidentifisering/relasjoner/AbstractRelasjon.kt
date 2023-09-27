@@ -35,7 +35,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
             val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato = mapFdatoTilLocalDate(person.foedselsdato)
 
-            logger.debug("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
+            logger.info("Legger til person ${Relasjon.FORSIKRET} og sedType: ${sed.type}")
             return listOf(
                 SEDPersonRelasjon(
                     fodselnummer,
