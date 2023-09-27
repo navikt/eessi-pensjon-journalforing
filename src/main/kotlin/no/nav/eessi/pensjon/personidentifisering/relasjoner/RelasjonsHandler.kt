@@ -31,14 +31,14 @@ object RelasjonsHandler {
     }
 
     private fun filterRelasjoner(relasjonList: List<SEDPersonRelasjon>): List<SEDPersonRelasjon> {
-         logger.info("*** Filterer relasjonListe, samme oppføringer, ufyldige verdier o.l")
+         logger.info("*** Filterer relasjonListe, samme oppføringer, ugyldige verdier o.l")
 
         relasjonList.onEach { logger.debug("$it") }
 
         //filterering av relasjoner med kjent fnr
         val relasjonerMedFnr = relasjonList.filter { it.fnr != null }.distinctBy { it.fnr }
         //filtering av relasjoner uten kjent fnr
-        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }//.distinctBy { it.sokKriterier }
+        val relasjonerUtenFnr = relasjonList.filter { it.fnr == null }
 
         return (relasjonerMedFnr + relasjonerUtenFnr).also {
             if(it.size < relasjonList.size){

@@ -51,6 +51,9 @@ class JournalpostKlient(
      */
     fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean): OpprettJournalPostResponse? {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
+        if (forsokFerdigstill == true) {
+            logger.info("Forsøker å ferdigstille journalpost")
+        }
 
         return opprettjournalpost.measure {
             return@measure try {
