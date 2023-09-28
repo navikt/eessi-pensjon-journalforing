@@ -172,7 +172,10 @@ class JournalforingService(
                     journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
                 }
                 val aktoerId = identifisertPerson?.aktoerId
-                logger.info("********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}, sattavbrutt: $sattStatusAvbrutt **********")
+                logger.info("********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
+                        ", sed: ${sedHendelse.sedType}" +
+                        ", enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
                         sedHendelse.sedType,
