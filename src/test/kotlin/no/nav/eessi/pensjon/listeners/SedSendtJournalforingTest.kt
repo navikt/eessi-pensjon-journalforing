@@ -1,11 +1,19 @@
 package no.nav.eessi.pensjon.listeners
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
 import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
+import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -21,8 +29,8 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -168,8 +176,8 @@ internal class SedSendtJournalforingTest {
         val actualRequest = requestSlot.captured
         val actualRequestOppgave = requestSlotOppgave.captured
 
-        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(UFORE_UTLAND, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(UFORE_UTLAND, actualRequestOppgave.tildeltEnhetsnr)
         Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
 
     }
@@ -299,7 +307,7 @@ internal class SedSendtJournalforingTest {
         sedListener.consumeSedSendt(sedHendelse, cr, acknowledgment)
         val actualRequest = requestSlot.captured
 
-        Assertions.assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(UFORE_UTLAND, actualRequest.journalfoerendeEnhet)
 
     }
 

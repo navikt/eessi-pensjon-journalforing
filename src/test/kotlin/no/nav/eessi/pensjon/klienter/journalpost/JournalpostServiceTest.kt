@@ -5,21 +5,31 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GENRL
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.AUTOMATISK_JOURNALFORING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
@@ -49,7 +59,7 @@ internal class JournalpostServiceTest {
             sedHendelse = sedHendelse,
             fnr = SLAPP_SKILPADDE,
             sedHendelseType = MOTTATT,
-            journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
+            journalfoerendeEnhet = ID_OG_FORDELING,
             arkivsaksnummer = "string",
             dokumenter = """
                 [{
@@ -85,7 +95,7 @@ internal class JournalpostServiceTest {
         assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNull(actualRequest.eksternReferanseId)
-        assertEquals(AUTOMATISK_JOURNALFORING, actualRequest.journalfoerendeEnhet)
+        assertEquals(ID_OG_FORDELING, actualRequest.journalfoerendeEnhet)
         assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
         assertEquals("string", actualRequest.sak!!.arkivsaksnummer)
@@ -106,7 +116,7 @@ internal class JournalpostServiceTest {
                 sedHendelse = sedHendelse(P2000, P_BUC_01, null),
                 fnr = SLAPP_SKILPADDE,
                 sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = AUTOMATISK_JOURNALFORING,
+                journalfoerendeEnhet = ID_OG_FORDELING,
                 arkivsaksnummer = "string",
                 dokumenter = """
                 [{
