@@ -41,7 +41,8 @@ class PersonSok(
     fun sokPersonEtterFnr(personRelasjoner: List<SEDPersonRelasjon>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
         logger.info("PersonUtvelger *** SøkPerson *** ")
 
-        val potensiellePersonRelasjoner = personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
+        val potensiellePersonRelasjoner = if (bucType == BucType.P_BUC_02) personRelasjoner
+        else personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
 
         if (potensiellePersonRelasjoner.isEmpty()) {
             logger.info("Ingen personrelasjoner funnet i sed (personSøk).")

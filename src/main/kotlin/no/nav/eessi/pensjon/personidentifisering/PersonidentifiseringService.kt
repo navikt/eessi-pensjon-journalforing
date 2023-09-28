@@ -97,28 +97,12 @@ class PersonidentifiseringService(
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
-            ?.let { personRelasjon -> return hentIdentifisertPerson(personRelasjon, hendelsesType) }
+            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon, hendelsesType) }
 
         return null
     }
 
-    fun hentIdentifisertePersoner(
-        alleSediBuc: List<Pair<String, SED>>,
-        bucType: BucType,
-        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
-        hendelsesType: HendelseType,
-        rinaDocumentId: String
-    ): List<IdentifisertPersonPDL> {
-
-        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
-
-        return sedPersonRelasjoner
-            .mapNotNull { relasjon -> hentIdentifisertPerson(relasjon, hendelsesType) }
-            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
-    }
-
-    fun hentIdentifisertPerson(
+    fun hentIdentifisertPersonFraPDL(
         personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType
     ): IdentifisertPersonPDL? {
 
@@ -145,6 +129,22 @@ class PersonidentifiseringService(
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
         }
+    }
+
+    fun hentIdentifisertePersoner(
+        alleSediBuc: List<Pair<String, SED>>,
+        bucType: BucType,
+        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
+        hendelsesType: HendelseType,
+        rinaDocumentId: String
+    ): List<IdentifisertPersonPDL> {
+
+        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
+
+        return sedPersonRelasjoner
+            .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon, hendelsesType) }
+            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
     }
 
     private fun populerIdentifisertPerson(
