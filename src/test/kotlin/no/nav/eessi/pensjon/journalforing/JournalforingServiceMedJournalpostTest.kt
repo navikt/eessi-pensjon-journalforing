@@ -177,7 +177,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
         Assertions.assertEquals(true, erMuligAaFerdigstille)
-        Assertions.assertEquals(Enhet.AUTOMATISK_JOURNALFORING, journalpostRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(Enhet.ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
     }
 
