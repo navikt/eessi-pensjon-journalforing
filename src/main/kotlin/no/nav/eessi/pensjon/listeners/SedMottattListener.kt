@@ -72,7 +72,6 @@ class SedMottattListener(
                         logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
                     } else {
 
-                        logger.info("*** Offset ${cr.offset()}  Partition ${cr.partition()} ***")
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
                         if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
@@ -80,6 +79,7 @@ class SedMottattListener(
                             acknowledgment.acknowledge()
                             return@measure
                         }
+                        logger.info("***Innkommet sed: ${sedHendelse.sedType}, buc:${sedHendelse.bucType}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
