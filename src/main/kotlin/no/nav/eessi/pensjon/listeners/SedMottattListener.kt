@@ -81,7 +81,7 @@ class SedMottattListener(
                             acknowledgment.acknowledge()
                             return@measure
                         }
-                        logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(hendelse, listOf("navBruker"))}")
+                        logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
