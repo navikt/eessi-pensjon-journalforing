@@ -7,7 +7,7 @@ class GyldigeHendelser {
     companion object {
         private const val gyldigSektorKode = "P"
 
-        private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02)
+        private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02, M_BUC_03a)
         private val gyldigUtgaaendeBucType = R_BUC_02
 
         fun mottatt(hendelse: SedHendelse) =
