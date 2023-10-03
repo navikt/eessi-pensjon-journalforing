@@ -19,6 +19,8 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.utils.mapAnyToJsonWithoutSensitiveData
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -79,7 +81,7 @@ class SedMottattListener(
                             acknowledgment.acknowledge()
                             return@measure
                         }
-                        logger.info("***Innkommet sed: ${sedHendelse.sedType}, buc:${sedHendelse.bucType}")
+                        logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(hendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
