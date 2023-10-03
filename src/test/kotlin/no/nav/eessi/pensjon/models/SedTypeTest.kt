@@ -49,7 +49,7 @@ internal class SedTypeTest {
     @Test
     fun `Sjekk antall SED-typer som kan inneholde fnr eller dnr`() {
         assertEquals(
-            58,
+            63,
             typerMedIdentEllerFDato.size,
             "Antall SEDer som kan inneholde ident har blitt endret."
         )
