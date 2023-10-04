@@ -8,8 +8,6 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03a
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03b
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
@@ -249,7 +247,7 @@ class JournalforingService(
     ) = logger.info(
         "Oppretter ikke behandleSedOppgave for " +
                 "bucType: $bucType, " +
-                "sedhendelse: ${sedHendelse.sedType}, " +
+                "sedType: ${sedHendelse.sedType}, " +
                 "rinanr: ${sedHendelse.rinaSakId}"
     )
 

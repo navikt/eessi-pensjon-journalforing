@@ -248,6 +248,70 @@ internal class SedSendtJournalforingTest {
     }
 
     @Test
+    fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid M051`() {
+        val aktoerId = "3216549873212"
+        val pesysSakId = PESYS_SAKID
+        val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
+        val sedHendelse = javaClass.getResource("/eux/hendelser/M_BUC_03a_M051.json")!!.readText()
+
+        val sakInformasjon = listOf(
+            SakInformasjon(
+                sakId = "111111",
+                sakType = SakType.UFOREP,
+                sakStatus = SakStatus.LOPENDE,
+                saksbehandlendeEnhetId = "",
+                nyopprettet = false
+            ), SakInformasjon(
+                sakId = pesysSakId,
+                sakType = SakType.GJENLEV,
+                sakStatus = SakStatus.OPPHOR,
+                saksbehandlendeEnhetId = "",
+                nyopprettet = false
+            )
+        )
+
+        val identifisertPerson = identifisertPersonPDL(
+            aktoerId = aktoerId,
+            landkode = "NO",
+            geografiskTilknytning = null,
+            personRelasjon = SEDPersonRelasjon(
+                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
+                relasjon = Relasjon.GJENLEVENDE,
+                saktype = null,
+                sedType = SedType.P8000,
+                fdato = LocalDate.of(1971, 6, 11),
+                rinaDocumentId = "165sdugh587dfkgjhbkj"
+            ),
+            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
+        )
+
+        every { euxKlient.hentBuc(any()) } returns buc
+        every { euxKlient.hentBucJson(any()) } returns sedJson
+        every { euxKlient.hentSedJson(any(), any()) } returns sedJson
+        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
+        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
+        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
+        justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+
+        val opprettJournalPostResponse = OpprettJournalPostResponse(
+            journalpostId = "12345",
+            journalstatus = "EKSPEDERT",
+            melding = "",
+            journalpostferdigstilt = false,
+        )
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
+
+        sedListener.consumeSedSendt(sedHendelse, cr, acknowledgment)
+        val actualRequest = requestSlot.captured
+
+        Assertions.assertEquals(UFORE_UTLAND, actualRequest.journalfoerendeEnhet)
+
+    }
+
+    @Test
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid`() {
         val aktoerId = "3216549873212"
         val pesysSakId = PESYS_SAKID

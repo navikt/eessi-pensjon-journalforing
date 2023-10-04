@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "bruker": {
+      "person": {
+        "kjoenn": "K",
+        "foedested": {
+          "by": "Unknown",
+          "land": "SE"
+        },
+        "etternavn": "BARON",
+        "fornavn": "DYREBAR",
+        "foedselsdato": "1955-08-11",
+        "pin": [
+          {
+            "land": "NO",
+            "institusjonsid": "NO:NAVAT07",
+            "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+            "identifikator": "51485505877"
+          }
+        ],
+        "statsborgerskap": [
+          {
+            "land": "LB"
+          }
+        ]
+      }
+    }
+  },
+  "sedGVer": "4",
+  "sedVer": "2",
+  "sed": "M051"
+}
