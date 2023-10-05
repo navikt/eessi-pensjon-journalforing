@@ -106,7 +106,7 @@ internal class SedSendtJournalforingTest {
     }
 
     @Test
-    fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med automatisk journalforing 9999`() {
+    fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med maskinell journalforing`() {
         val rinaId = RINA_ID
         val buc = Buc(
             id = rinaId,

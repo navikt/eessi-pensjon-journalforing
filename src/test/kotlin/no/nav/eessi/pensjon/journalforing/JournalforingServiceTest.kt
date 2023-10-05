@@ -937,7 +937,7 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen automatisk journalføres`() {
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen journalføres maskinelt`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -976,7 +976,7 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen automatisk journalføres på Gjenlevnde`() {
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen journalføres maskinelt på gjenlevnde`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """

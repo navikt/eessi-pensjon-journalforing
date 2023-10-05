@@ -98,7 +98,7 @@ class JournalforingService(
      * 1.) Henter dokumenter og vedlegg
      * 2.) Henter enhet
      * 3.) Oppretter journalpost
-     * 4.) Ved utgpående automatisk journalføring -> oppdater distribusjonsinfo
+     * 4.) Ved utgpående mskinell journalføring -> oppdateres distribusjonsinfo
      * 5.) Dersom jf.post ikke blir ferdigstilt -> lage jf.oppgave
      * 6.) Hent oppgave-enhet
      * 7.) Ved automatisk jf, B_BUC_02, eller P_BUC_03 og mottatt ->
@@ -165,7 +165,7 @@ class JournalforingService(
                     journalPostResponse,
                 )
 
-                // Oppdaterer distribusjonsinfo for utgående og automatisk journalføring (Ferdigstiller journalposten)
+                // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
                 if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
                 }

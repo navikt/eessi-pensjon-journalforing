@@ -20,7 +20,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             logger.info("AktørID mangler. Bruker enhet ID_OG_FORDELING.")
             return Enhet.ID_OG_FORDELING
         }
-
         val tildeltEnhet = tildelEnhet(routingRequest)
 
         logger.info(
@@ -31,13 +30,13 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                     "Geografisk Tilknytning: ${routingRequest.geografiskTilknytning}, " +
                     "saktype: ${routingRequest.saktype}"
         )
-
         return tildeltEnhet
+
     }
+
 
     private fun tildelEnhet(oppgave: OppgaveRoutingRequest): Enhet {
         val enhet = finnEnhetFor(oppgave)
-
         logger.debug("enhet: $enhet")
 
         return when(oppgave.bucType){
@@ -49,6 +48,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             P_BUC_10 -> routeTilGeografiskTilknytningMedPerson(oppgave) ?: enhet
             else ->  enhet
         }
+
     }
 
     private fun lopendeAldersSakINorge( oppgave: OppgaveRoutingRequest) =

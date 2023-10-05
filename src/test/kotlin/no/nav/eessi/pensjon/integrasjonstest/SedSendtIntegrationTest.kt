@@ -114,7 +114,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `En P8000 med saksType, saksId og aktørId skal automatisk journalføres (9999) `() {
+    fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
         CustomMockServer()
             .mockHttpRequestWithResponseFromJson(
@@ -140,7 +140,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
 
-        //then route to 9999
         OppgaveMeldingVerification("429434379")
             .medHendelsetype("SENDT")
             .medSedtype("P8000")

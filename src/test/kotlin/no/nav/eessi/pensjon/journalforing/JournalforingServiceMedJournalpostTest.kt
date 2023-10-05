@@ -143,7 +143,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
     @Disabled
     @Test
-    fun `Innkommende P2000 fra Sverige som oppfyller alle krav til automatisk journalføring skal opprette behandle SED oppgave`() {
+    fun `Innkommende P2000 fra Sverige som oppfyller alle krav til maskinell journalføring skal opprette behandle SED oppgave`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
