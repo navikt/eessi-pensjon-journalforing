@@ -8,8 +8,6 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03a
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03b
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
@@ -189,14 +187,6 @@ class JournalforingService(
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
-/*                val oppgaveEnhet = hentOppgaveEnhet(
-                        tildeltJoarkEnhet,
-                        identifisertPerson,
-                        fdato,
-                        saktype,
-                        sedHendelse,
-                        harAdressebeskyttelse
-                    )*/
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     opprettBehandleSedOppgave(
@@ -410,9 +400,6 @@ class JournalforingService(
                     harAdressebeskyttelse
                 )
             )
-/*            if(enhetFraRouting == ID_OG_FORDELING){
-                return ID_OG_FORDELING
-            }*/
 
             val over62Aar = Period.between(fdato, LocalDate.now()).years > 61
             val barn = Period.between(fdato, LocalDate.now()).years < 18
@@ -513,34 +500,6 @@ class JournalforingService(
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
-
-/*
-    private fun hentOppgaveEnhet(
-        tildeltEnhet: Enhet,
-        identifisertPerson: IdentifisertPerson?,
-        fdato: LocalDate?,
-        saktype: SakType?,
-        sedHendelseModel: SedHendelse,
-        harAdressebeskyttelse: Boolean,
-    ): Enhet {
-*/
-/*        return if (tildeltEnhet == ID_OG_FORDELING) {
-            oppgaveRoutingService.hentEnhet(
-                OppgaveRoutingRequest.fra(
-                    identifisertPerson,
-                    fdato!!,
-                    saktype,
-                    sedHendelseModel,
-                    MOTTATT,
-                    null,
-                    harAdressebeskyttelse
-                )
-            )
-        } else*//*
-
-            tildeltEnhet
-    }
-*/
 
     private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
         return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }

@@ -38,9 +38,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
     private fun tildelEnhet(oppgave: OppgaveRoutingRequest): Enhet {
         val enhet = finnEnhetFor(oppgave)
 
-/*        if (enhet == Enhet.ID_OG_FORDELING)
-            return enhet*/
-
         logger.debug("enhet: $enhet")
 
         return when(oppgave.bucType){
