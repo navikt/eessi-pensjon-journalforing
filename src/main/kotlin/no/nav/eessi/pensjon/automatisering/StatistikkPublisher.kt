@@ -5,13 +5,13 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
-class StatistikkPublisher(private val automatiseringKafkaTemplate: KafkaTemplate<String, String>) {
+class StatistikkPublisher(private val statistikkKafkaTemplate: KafkaTemplate<String, String>) {
 
     private val logger = LoggerFactory.getLogger(StatistikkPublisher::class.java)
 
     fun publiserStatistikkMelding(statistikkMelding: StatistikkMelding) {
-        logger.info("Produserer melding på kafka: ${automatiseringKafkaTemplate.defaultTopic}  melding: $statistikkMelding")
+        logger.info("Produserer melding på kafka: ${statistikkKafkaTemplate.defaultTopic}  melding: $statistikkMelding")
 
-        automatiseringKafkaTemplate.send(KafkaAutomatiseringMessage(statistikkMelding)).get()
+        statistikkKafkaTemplate.send(KafkaStatistikkMessage(statistikkMelding)).get()
     }
 }
