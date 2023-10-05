@@ -2,8 +2,8 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import jakarta.annotation.PostConstruct
-import no.nav.eessi.pensjon.automatisering.AutomatiseringMelding
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkMelding
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.M_BUC_03a
@@ -42,11 +42,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
-import no.nav.eessi.pensjon.models.Behandlingstema.TILBAKEBETALING
-import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
@@ -76,7 +72,7 @@ class JournalforingService(
     private val pdfService: PDFService,
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
-    private val automatiseringStatistikkPublisher: AutomatiseringStatistikkPublisher,
+    private val statistikkPublisher: StatistikkPublisher,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -141,7 +137,6 @@ class JournalforingService(
                     harAdressebeskyttelse,
                     identifisertePersoner
                 )
-                val arkivsaksnummer = sakInformasjon?.sakId
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
 
@@ -151,7 +146,7 @@ class JournalforingService(
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = arkivsaksnummer,
+                    arkivsaksnummer = sakInformasjon?.sakId,
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,
@@ -169,6 +164,7 @@ class JournalforingService(
                 if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
                 }
+
                 val aktoerId = identifisertPerson?.aktoerId
                 logger.info("********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
                         ", sed: ${sedHendelse.sedType}" +
@@ -198,27 +194,24 @@ class JournalforingService(
                     )
                 }
 
-                val bucType = sedHendelse.bucType
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
                 if ((hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
-                    logger.info("Oppretter BehandleOppgave til bucType: $bucType")
+                    logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
                         tildeltJoarkEnhet,
                         aktoerId,
                         sedHendelse
                     )
-
                     kravInitialiseringsService.initKrav(
                         sedHendelse,
                         sakInformasjon,
                         sed
                     )
-                } else loggDersomIkkeBehSedOppgaveOpprettes(bucType, sedHendelse)
+                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse)
 
-                produserAutomatiseringsmelding(
+                produserStatistikkmelding(
                     sedHendelse,
-                    bleAutomatisert = false,
                     tildeltJoarkEnhet.enhetsNr,
                     saktype,
                     hendelseType
@@ -316,9 +309,8 @@ class JournalforingService(
                     )
                 }
 
-                produserAutomatiseringsmelding(
+                produserStatistikkmelding(
                     sedHendelse,
-                    false,
                     oppgaveEierEnhet = ID_OG_FORDELING.name,
                     saktype,
                     hendelseType
@@ -337,18 +329,14 @@ class JournalforingService(
         hendelseType: HendelseType,
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
-        val institusjon = if (hendelseType == SENDT) AvsenderMottaker(
-            sedHendelse.mottakerId,
-            IdType.UTL_ORG,
-            sedHendelse.mottakerNavn,
-            konverterMottakerAvsenderLand(sedHendelse.mottakerLand)
-        ) else AvsenderMottaker(
-            sedHendelse.avsenderId,
-            IdType.UTL_ORG,
-            sedHendelse.avsenderNavn,
-            konverterMottakerAvsenderLand(sedHendelse.avsenderLand)
-        )
-        return institusjon
+        return when (hendelseType) {
+            SENDT -> AvsenderMottaker(
+                sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand)
+            )
+            else -> AvsenderMottaker(
+                sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand)
+            )
+        }
     }
 
     private fun sattAvbrutt(
@@ -363,13 +351,13 @@ class JournalforingService(
 
         val sattStatusAvbrutt =
             if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
-                (sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt)
+                sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt
             ) {
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                 true
             } else false
         return sattStatusAvbrutt .also {
-            logger.info("Journalpost settes til avbrutt==$it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
+            logger.info("Journalpost settes til avbrutt == $it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
         }
     }
 
@@ -405,14 +393,15 @@ class JournalforingService(
             val barn = Period.between(fdato, LocalDate.now()).years < 18
             val under62AarIkkeBarn = Period.between(fdato, LocalDate.now()).years in 19..61
 
+            val bosattNorge = identifisertPerson.landkode == "NOR"
             if (enhetFraRouting == ID_OG_FORDELING && bucType in listOf(P_BUC_05, P_BUC_06)) {
                 if (over62Aar || barn) {
-                    return if(identifisertPerson.landkode == "NOR"){
+                    return if(bosattNorge){
                         NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
                     } else PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
                 if (under62AarIkkeBarn) {
-                    if (identifisertPerson.landkode == "NOR") {
+                    if (bosattNorge) {
                         return if (antallIdentifisertePersoner <= 1) {
                             UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
                         } else ID_OG_FORDELING
@@ -436,14 +425,14 @@ class JournalforingService(
                     antallIdentifisertePersoner,
                 )
                 logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
-                return if (identifisertPerson.landkode == "NOR" ) {
+                return if (bosattNorge) {
                     when (behandlingstema) {
-                        GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
+                        GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
                         UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
                     }
                 } else when (behandlingstema) {
+                    GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                     UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                    GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
             }
             enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
@@ -455,23 +444,23 @@ class JournalforingService(
     /**
      * PESYS støtter kun GB
      */
-    private fun konverterMottakerAvsenderLand(mottakerAvsenderLand: String?): String? =
-        if (mottakerAvsenderLand == "UK") "GB"
-        else mottakerAvsenderLand
+    private fun konverterGBUKLand(mottakerAvsenderLand: String?): String? =
+        when (mottakerAvsenderLand) {
+            "UK" -> "GB"
+            else -> mottakerAvsenderLand
+        }
 
-    private fun produserAutomatiseringsmelding(
+    private fun produserStatistikkmelding(
         sedHendelse: SedHendelse,
-        bleAutomatisert: Boolean,
         oppgaveEierEnhet: String?,
         sakType: SakType?,
         hendelsesType: HendelseType
     ) {
-        automatiseringStatistikkPublisher.publiserAutomatiseringStatistikk(AutomatiseringMelding(
+        statistikkPublisher.publiserStatistikkMelding(StatistikkMelding(
             sedHendelse.rinaSakId,
             sedHendelse.rinaDokumentId,
             sedHendelse.rinaDokumentVersjon,
             LocalDateTime.now(),
-            bleAutomatisert,
             oppgaveEierEnhet,
             sedHendelse.bucType!!,
             sedHendelse.sedType!!,

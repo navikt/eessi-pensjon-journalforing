@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -65,11 +65,11 @@ internal class SedSendtJournalforingTest {
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
-    private val automatiseringStatistikkPublisher = mockk<AutomatiseringStatistikkPublisher>(relaxed = true)
+    private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), automatiseringStatistikkPublisher)
+        }, oppgaveHandler, mockk(), statistikkPublisher)
 
     private val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
     private val sedListener = SedSendtListener(

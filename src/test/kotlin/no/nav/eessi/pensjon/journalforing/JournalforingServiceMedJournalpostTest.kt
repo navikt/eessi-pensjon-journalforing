@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
@@ -49,7 +49,7 @@ internal class JournalforingServiceMedJournalpostTest {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(automatiseringHandlerKafka)
+    private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(
@@ -58,7 +58,7 @@ internal class JournalforingServiceMedJournalpostTest {
         pdfService,
         oppgaveHandler,
         kravService,
-        automatiseringStatistikkPublisher
+        statistikkPublisher
     )
 
     companion object {

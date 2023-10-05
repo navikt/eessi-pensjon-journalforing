@@ -5,7 +5,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
@@ -70,7 +70,7 @@ internal class JournalforingServiceTest {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(automatiseringHandlerKafka)
+    private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(
@@ -79,7 +79,7 @@ internal class JournalforingServiceTest {
             pdfService,
             oppgaveHandler,
             kravService,
-            automatiseringStatistikkPublisher
+            statistikkPublisher
     )
 
     private val fdato = LocalDate.now()
