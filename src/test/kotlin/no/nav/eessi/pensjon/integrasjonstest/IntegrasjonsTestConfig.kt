@@ -65,7 +65,7 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
-    fun automatiseringKafkaTemplate(): KafkaTemplate<String, String> {
+    fun statistikkKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
             defaultTopic = automatiseringTopic
         }
