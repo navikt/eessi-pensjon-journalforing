@@ -21,7 +21,7 @@ data class StatistikkMelding(
 )
 
 
-class KafkaStatistikkMessage(private val payload: StatistikkMelding): Message<StatistikkMelding> {
+class KafkaAutomatiseringMessage(private val payload: StatistikkMelding): Message<StatistikkMelding> {
     override fun getPayload(): StatistikkMelding = payload
     override fun getHeaders(): MessageHeaders = MessageHeaders(mapOf("hendelsetype" to "JOURNALFORING", "opprettetTidspunkt" to LocalDateTime.now()))
 }
