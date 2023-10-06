@@ -63,7 +63,7 @@ class SedSendtListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                val offsetToSkip = listOf<Long>(133722, 143447)
+                val offsetToSkip = listOf<Long>(133722, 143447, 176379)
                 try {
                     val offset = cr.offset()
                     if (offset in offsetToSkip) {
@@ -71,6 +71,12 @@ class SedSendtListener(
                     } else {
 
                         val sedHendelse = SedHendelse.fromJson(hendelse)
+
+                        if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
+                            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+                            acknowledgment.acknowledge()
+                            return@measure
+                        }
                         if (GyldigeHendelser.sendt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
