@@ -102,7 +102,8 @@ internal open class JournalforingTestBase {
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
-        statistikkPublisher = statistikkPublisher
+        statistikkPublisher = statistikkPublisher,
+        navansattKlient = mockk(relaxed = true)
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -128,7 +129,8 @@ internal open class JournalforingTestBase {
         dokumentHelper = dokumentHelper,
         bestemSakService = bestemSakService,
         fagmodulService = fagmodulService,
-        profile = "test"
+        profile = "test",
+        navansattKlient = mockk(relaxed = true)
     )
 
 

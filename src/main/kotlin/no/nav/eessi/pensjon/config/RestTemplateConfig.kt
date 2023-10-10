@@ -52,6 +52,9 @@ class RestTemplateConfig(
     @Value("\${BESTEMSAK_URL}")
     lateinit var bestemSakUrl: String
 
+    @Value("\${NAVANSATT_URL}")
+    lateinit var navansattUrl: String
+
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
@@ -69,6 +72,9 @@ class RestTemplateConfig(
 
     @Bean
     fun bestemSakOidcRestTemplate(): RestTemplate = opprettRestTemplate(bestemSakUrl, "proxy-credentials")
+
+    @Bean
+    fun navansattRestTemplate(): RestTemplate? = opprettRestTemplate(navansattUrl, "navansatt-credentials")
 
     /**
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse

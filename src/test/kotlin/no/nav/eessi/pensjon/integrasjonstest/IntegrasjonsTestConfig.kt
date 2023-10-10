@@ -92,6 +92,9 @@ class IntegrasjonsTestConfig {
     @Bean
     fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
 
+    @Bean
+    fun navansattRestTemplate(): RestTemplate = mockedRestTemplate()
+
     private fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")
         return RestTemplateBuilder()

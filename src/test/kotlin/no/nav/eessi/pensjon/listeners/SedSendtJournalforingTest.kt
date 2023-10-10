@@ -69,16 +69,16 @@ internal class SedSendtJournalforingTest {
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), statistikkPublisher, mockk())
 
-    private val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
     private val sedListener = SedSendtListener(
         jouralforingService,
         personidentifiseringService,
         euxService,
         fagmodulService,
         bestemSakService,
-        "test"
+        mockk(relaxed = true),
+        "test",
     )
 
     private val buc = Buc(
