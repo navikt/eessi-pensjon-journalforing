@@ -16,9 +16,8 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class])
 @ActiveProfiles("integrationtest")
-@DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]

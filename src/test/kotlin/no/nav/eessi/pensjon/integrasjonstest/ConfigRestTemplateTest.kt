@@ -47,7 +47,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
-@DirtiesContext
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @EmbeddedKafka(
