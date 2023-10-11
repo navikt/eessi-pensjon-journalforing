@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.config
 
 import com.fasterxml.jackson.core.StreamReadConstraints
+import com.nimbusds.jwt.JWTClaimsSet
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.logging.RequestIdHeaderInterceptor
@@ -10,6 +11,7 @@ import no.nav.eessi.pensjon.shared.retry.IOExceptionRetryInterceptor
 import no.nav.security.token.support.client.core.ClientProperties
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
@@ -30,6 +32,7 @@ class RestTemplateConfig(
     private val oAuth2AccessTokenService: OAuth2AccessTokenService?,
     private val meterRegistry: MeterRegistry,
     ) {
+    private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
 
     init {
         StreamReadConstraints.overrideDefaultStreamReadConstraints(
@@ -134,6 +137,10 @@ class RestTemplateConfig(
     ): ClientHttpRequestInterceptor? {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray?, execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
+            val tokenChunks = response.accessToken.split(".")
+            val tokenBody =  tokenChunks[1]
+            logger.debug("subject: " + JWTClaimsSet.parse(Base64.getDecoder().decode(tokenBody).decodeToString()).subject + "/n + $tokenBody")
+
             request.headers.setBearerAuth(response.accessToken)
             execution.execute(request, body!!)
         }
