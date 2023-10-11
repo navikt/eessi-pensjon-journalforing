@@ -23,7 +23,7 @@ spec:
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
-        - host: navansatt.intern.nav.no
+        - host: navansatt.prod-fss-pub.nais.io
   webproxy: true
 
   kafka:
@@ -46,7 +46,7 @@ spec:
     - name: BESTEMSAK_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
-      value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/navansatt
+      value: https://navansatt.prod-fss-pub.nais.io
     - name: EESSI_PEN_ONPREM_PROXY_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io
     - name: KAFKA_SEDSENDT_TOPIC
