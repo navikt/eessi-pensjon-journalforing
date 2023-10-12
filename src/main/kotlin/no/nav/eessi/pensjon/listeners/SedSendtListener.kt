@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
-import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
@@ -181,12 +180,13 @@ class SedSendtListener(
 
     fun navAnsatt(buc: Buc) {
         val navAnsatt = buc.documents?.firstOrNull()?.versions?.firstOrNull()?.user?.name
-//                                val navAnsatt = buc.documents?.firstOrNull { it.status == "sent" }?.versions?.firstOrNull()?.user?.name
+//        val navAnsatt = buc.documents?.firstOrNull { it.status == "sent" }?.versions?.firstOrNull()?.user?.name
+        logger.debug("navAnsatt: $navAnsatt")
         if (navAnsatt == null) {
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
         } else {
-            logger.info("NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id} er: $navAnsatt")
-            navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
+            logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
+            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
         }
 
     }
