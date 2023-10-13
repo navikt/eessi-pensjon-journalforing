@@ -28,7 +28,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
     }
 
     fun hentAnsattEnhet(saksbehandler: String): String? {
-        val path = "/navansatt/$saksbehandler/enhet"
+        val path = "/navansatt/$saksbehandler/enheter"
         try {
             val responsebody = navansattRestTemplate.exchange(
                 path,
