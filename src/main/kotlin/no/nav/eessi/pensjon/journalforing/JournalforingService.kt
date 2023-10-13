@@ -41,6 +41,7 @@ import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -73,6 +74,7 @@ class JournalforingService(
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val statistikkPublisher: StatistikkPublisher,
+    private val navansattKlient: NavansattKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -126,6 +128,8 @@ class JournalforingService(
                 val (documents, uSupporterteVedlegg) = sedHendelse.run {
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
+
+//                val enhetFraNavansatt = navansattKlient.hentAnsattEnhet(saksbehandler)
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,

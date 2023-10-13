@@ -40,6 +40,7 @@ METRICS_REQUESTFILTER_ENABLE: false
 NAIS_APP_NAME: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost
+NAVANSATT_URL: http://localhost
 PDL_URL: http://localhost
 securitytokenservice.url: http://someurl
 srvusername: someuser

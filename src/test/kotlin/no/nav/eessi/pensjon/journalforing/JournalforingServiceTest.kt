@@ -79,7 +79,8 @@ internal class JournalforingServiceTest {
             pdfService,
             oppgaveHandler,
             kravService,
-            statistikkPublisher
+            statistikkPublisher,
+            navansattKlient = mockk(relaxed = true)
     )
 
     private val fdato = LocalDate.now()

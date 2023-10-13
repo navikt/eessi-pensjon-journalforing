@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "bruker": {
+      "person": {
+        "kjoenn": "K",
+        "foedested": {
+          "by": "Unknown",
+          "land": "NO"
+        },
+        "etternavn": "KONSONANT",
+        "fornavn": "MÅTEHOLDEN",
+        "foedselsdato": "1970-10-16",
+        "pin": [
+          {
+            "land": "NO",
+            "institusjonsid": "NO:NAVAT07",
+            "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+            "identifikator": "16507017499"
+          }
+        ],
+        "statsborgerskap": [
+          {
+            "land": "BE"
+          }
+        ]
+      }
+    }
+  },
+  "sedGVer": "4",
+  "sedVer": "2",
+  "diverse": {
+    "bruker": {
+      "anmodningominformasjon": {
+        "inntekt": [
+          {
+            "type": "trygdeytelser",
+            "valuta": "EUR",
+            "startdato": "2023-04-01",
+            "trygdeytelser": "alderspensjon",
+            "beloep": "125"
+          }
+        ]
+      }
+    }
+  },
+  "sed": "M051"
+}

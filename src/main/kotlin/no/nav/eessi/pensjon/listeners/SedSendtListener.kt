@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
@@ -14,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -39,6 +41,7 @@ class SedSendtListener(
     private val dokumentHelper: EuxService,
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
+    private val navansattKlient: NavansattKlient,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
@@ -80,6 +83,8 @@ class SedSendtListener(
                         if (GyldigeHendelser.sendt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+
+                            navAnsatt(buc, sedHendelse)
 
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
@@ -171,6 +176,19 @@ class SedSendtListener(
         else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType ?: saktypeFraSED
         else if (saktypeFraSED != null) return saktypeFraSED
         return sakInformasjon?.sakType
+    }
+
+    fun navAnsatt(buc: Buc, sedHendelse: SedHendelse) : String?  {
+        val navAnsatt = buc.documents?.firstOrNull{it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
+        logger.debug("navAnsatt: $navAnsatt")
+        if (navAnsatt == null) {
+            logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
+        } else {
+            logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
+//            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
+            return navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
+        }
+        return ""
     }
 
     /**
