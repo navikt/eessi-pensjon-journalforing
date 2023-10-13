@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.klienter.navansatt
 
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
@@ -15,14 +14,13 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
     fun hentAnsatt(saksbehandler: String): String{
         val path = "/navansatt/$saksbehandler"
         try {
-            val responsebody = navansattRestTemplate.exchange(
+            val json = navansattRestTemplate.exchange(
                 path,
                 HttpMethod.GET,
                 null,
                 String::class.java
-            ).body
-            val json = responsebody.orEmpty()
-            return mapJsonToAny(json)
+            ).body.orEmpty()
+            return json
         } catch (ex: Exception) {
             logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex", ex)
             throw RuntimeException("En feil oppstod under henting av saksbehandler fra navansatt ex: ${ex.message}")
@@ -38,8 +36,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
                 null,
                 String::class.java
             ).body
-            val json = responsebody.orEmpty()
-            return mapJsonToAny(json)
+            return responsebody.orEmpty()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under henting av enhet for saksbehandler ex: $ex", ex)
             throw RuntimeException("En feil oppstod under henting av enhet for saksbehandler ex: ${ex.message}")
