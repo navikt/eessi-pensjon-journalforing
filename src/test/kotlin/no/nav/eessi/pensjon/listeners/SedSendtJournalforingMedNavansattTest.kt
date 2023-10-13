@@ -1,0 +1,166 @@
+package no.nav.eessi.pensjon.listeners
+
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
+import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
+import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.handler.OppgaveHandler
+import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
+import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.pdf.PDFService
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.kafka.support.Acknowledgment
+import java.time.LocalDate
+
+internal class SedSendtJournalforingMedNavansattTest {
+
+    private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
+    private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
+    private val norg2Klient = mockk<Norg2Klient>()
+    private val norg2Service = Norg2Service(norg2Klient)
+    private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
+    private val euxKlient = mockk<EuxKlientLib>(relaxed = true)
+    private val euxService = EuxService(euxKlient)
+    private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
+    private val bestemSakService = BestemSakService(bestemSakKlient)
+    private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
+    private val fagmodulService = FagmodulService(fagmodulKlient)
+    private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
+    private val journalpostService = JournalpostService(journalpostKlient)
+    private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
+    private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
+    private val journalforingService =
+        JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
+            every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
+        }, oppgaveHandler, mockk(), statistikkPublisher, mockk())
+
+    private val sedListener = SedSendtListener(
+        journalforingService,
+        personidentifiseringService,
+        euxService,
+        fagmodulService,
+        bestemSakService,
+        mockk(relaxed = true),
+        "test",
+    )
+
+    @BeforeEach
+    fun setup() {
+        sedListener.initMetrics()
+        journalforingService.initMetrics()
+        euxService.initMetrics()
+    }
+
+    @Test
+    fun `Navansatt Ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
+        // Denne oppgaven blir rutet til UFORE_UTLANDSTILSNITT siden det er en identifisert person under 62 år (over 18) som er bosatt Norge
+        val aktoerId = "3216549873212"
+        val bucJson = javaClass.getResource("/buc/M_BUC.json")!!.readText()
+        val buc = mapJsonToAny<Buc>(bucJson)
+
+        val sedHendelse = SedHendelse(
+            sedType = SedType.M051,
+            rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
+            bucType = BucType.M_BUC_03a,
+            rinaSakId = "123456789",
+            avsenderId = "NO:noinst002",
+            avsenderNavn = "NOINST002",
+            mottakerId = "SE:123456789",
+            mottakerNavn = "SE INST002",
+            rinaDokumentVersjon = "1",
+            sektorKode = "P",
+        )
+        val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
+
+        val sakInformasjon = SakInformasjon(
+            sakId = "654321",
+            sakType = SakType.ALDER,
+            sakStatus = SakStatus.LOPENDE,
+            saksbehandlendeEnhetId = "",
+            nyopprettet = false
+        )
+
+        val identifisertPerson = identifisertPersonPDL(
+            aktoerId = aktoerId,
+            landkode = "NOR",
+            geografiskTilknytning = null,
+            personRelasjon = SEDPersonRelasjon(
+                fnr = Fodselsnummer.fra(JournalforingTestBase.FNR_VOKSEN_UNDER_62),
+                relasjon = Relasjon.FORSIKRET,
+                saktype = null,
+                sedType = SedType.M051,
+                fdato = LocalDate.of(1971, 6, 11),
+                rinaDocumentId = "19fd5292007e4f6ab0e337e89079aaf4"
+            ),
+            fnr = Fodselsnummer.fra(JournalforingTestBase.FNR_VOKSEN_UNDER_62)
+        )
+
+        every { euxKlient.hentBuc(any()) } returns buc
+        every { euxKlient.hentSedJson(any(), any()) } returns sedJson
+        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
+        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
+        every { personidentifiseringService.hentIdentifisertePersoner(any(), any(), any(), any(), any()) } returns listOf(identifisertPerson)
+        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
+        justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+
+        val opprettJournalPostResponse = OpprettJournalPostResponse(
+            journalpostId = "12345",
+            journalstatus = "",
+            melding = "",
+            journalpostferdigstilt = false,
+        )
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
+
+        val requestSlotOppgave = slot<OppgaveMelding>()
+        justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(requestSlotOppgave)) }
+
+        sedListener.consumeSedSendt(sedHendelse.toJson(), cr, acknowledgment)
+
+    }
+
+    fun identifisertPersonPDL(
+        aktoerId: String = "3216549873215",
+        personRelasjon: SEDPersonRelasjon?,
+        landkode: String? = "",
+        geografiskTilknytning: String? = "",
+        fnr: Fodselsnummer? = null,
+        personNavn: String = "Test Testesen"
+    ): IdentifisertPersonPDL =
+        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+
+}

@@ -84,7 +84,7 @@ class SedSendtListener(
                             val bucType = sedHendelse.bucType!!
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
 
-                            navAnsatt(buc)
+                            navAnsatt(buc, sedHendelse)
 
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
@@ -178,15 +178,15 @@ class SedSendtListener(
         return sakInformasjon?.sakType
     }
 
-    fun navAnsatt(buc: Buc) {
-        val navAnsatt = buc.documents?.firstOrNull()?.versions?.firstOrNull()?.user?.name
-//        val navAnsatt = buc.documents?.firstOrNull { it.status == "sent" }?.versions?.firstOrNull()?.user?.name
+    fun navAnsatt(buc: Buc, sedHendelse: SedHendelse) {
+        val navAnsatt = buc.documents?.firstOrNull{it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
         logger.debug("navAnsatt: $navAnsatt")
         if (navAnsatt == null) {
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
         } else {
             logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
             navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
+            navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
         }
 
     }
