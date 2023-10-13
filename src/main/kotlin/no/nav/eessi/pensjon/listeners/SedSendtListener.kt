@@ -185,7 +185,7 @@ class SedSendtListener(
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
         } else {
             logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
-            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
+//            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
             navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
         }
 

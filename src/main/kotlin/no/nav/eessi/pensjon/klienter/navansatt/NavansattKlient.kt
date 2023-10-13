@@ -11,7 +11,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(NavansattKlient::class.java) }
 
-    fun hentAnsatt(saksbehandler: String): String{
+    fun hentAnsatt(saksbehandler: String): String? {
         val path = "/navansatt/$saksbehandler"
         try {
             val json = navansattRestTemplate.exchange(
@@ -23,11 +23,11 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
             return json
         } catch (ex: Exception) {
             logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex", ex)
-            throw RuntimeException("En feil oppstod under henting av saksbehandler fra navansatt ex: ${ex.message}")
         }
+        return null
     }
 
-    fun hentAnsattEnhet(saksbehandler: String): String{
+    fun hentAnsattEnhet(saksbehandler: String): String? {
         val path = "/navansatt/$saksbehandler/enhet"
         try {
             val responsebody = navansattRestTemplate.exchange(
@@ -39,7 +39,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
             return responsebody.orEmpty()
         } catch (ex: Exception) {
             logger.error("En feil oppstod under henting av enhet for saksbehandler ex: $ex", ex)
-            throw RuntimeException("En feil oppstod under henting av enhet for saksbehandler ex: ${ex.message}")
         }
+        return null
     }
 }
