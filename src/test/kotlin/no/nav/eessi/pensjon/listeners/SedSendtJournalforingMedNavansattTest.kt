@@ -168,7 +168,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             }
         """.trimIndent()
         every { navansattRestTemplate.exchange(
-            "/navansatt/Z990965/enhet",
+            "/navansatt/Z990965/enheter",
             HttpMethod.GET,
             any(),
             String::class.java)
