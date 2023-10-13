@@ -178,7 +178,7 @@ class SedSendtListener(
         return sakInformasjon?.sakType
     }
 
-    fun navAnsatt(buc: Buc, sedHendelse: SedHendelse) {
+    fun navAnsatt(buc: Buc, sedHendelse: SedHendelse) : String?  {
         val navAnsatt = buc.documents?.firstOrNull{it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
         logger.debug("navAnsatt: $navAnsatt")
         if (navAnsatt == null) {
@@ -186,9 +186,9 @@ class SedSendtListener(
         } else {
             logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
 //            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
-            navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
+            return navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
         }
-
+        return ""
     }
 
     /**

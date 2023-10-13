@@ -40,7 +40,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.kafka.support.Acknowledgment
+import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 
 internal class SedSendtJournalforingMedNavansattTest {
@@ -61,6 +64,8 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
+    private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
+    private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val journalforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
@@ -72,7 +77,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         euxService,
         fagmodulService,
         bestemSakService,
-        mockk(relaxed = true),
+        navansattKlient,
         "test",
     )
 
@@ -100,7 +105,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             mottakerId = "SE:123456789",
             mottakerNavn = "SE INST002",
             rinaDokumentVersjon = "1",
-            sektorKode = "P",
+            sektorKode = "M",
         )
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
 
@@ -150,8 +155,46 @@ internal class SedSendtJournalforingMedNavansattTest {
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(requestSlotOppgave)) }
 
         sedListener.consumeSedSendt(sedHendelse.toJson(), cr, acknowledgment)
+    }
+    @Test
+    fun `Sjekker at vi får ut riktig navansatt`() {
+        val response = """
+            {
+                "ident": "Z990965",
+                "navn": "Ola Oleg Olsen",
+                "fornavn": "Ola",
+                "etternavn": "Olsen",
+                "epost": "Ola.O@Norsk.no"
+            }
+        """.trimIndent()
+        every { navansattRestTemplate.exchange(
+            "/navansatt/Z990965/enhet",
+            HttpMethod.GET,
+            any(),
+            String::class.java)
+        } returns ResponseEntity.ok(response)
+
+        val hendelse = SedHendelse(
+            sedType = SedType.M051,
+            rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
+            bucType = BucType.M_BUC_03a,
+            rinaSakId = "123456789",
+            avsenderId = "NO:noinst002",
+            avsenderNavn = "NOINST002, NO INST002, NO",
+            mottakerId = "SE:123456789",
+            mottakerNavn = "SE, SE INST002, SE",
+            rinaDokumentVersjon = "1",
+            sektorKode = "M",
+        )
+        val buc = mapJsonToAny<Buc>(javaClass.getResource("/buc/M_BUC.json")!!.readText())
+
+        val ansatt  = sedListener.navAnsatt(buc, hendelse)
+
+        Assertions.assertEquals(response, ansatt)
+
 
     }
+
 
     fun identifisertPersonPDL(
         aktoerId: String = "3216549873215",
