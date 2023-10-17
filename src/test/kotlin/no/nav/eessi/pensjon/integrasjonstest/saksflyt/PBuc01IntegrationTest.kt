@@ -286,7 +286,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
     inner class InngaaendeSokPersonP_BUC_01 {
 
         @Test
-        fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person automatisk journalføring`() {
+        fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person medfører maskinell journalføring`() {
             val bestemsak = BestemSakResponse(
                 null, listOf(
                     SakInformasjon(

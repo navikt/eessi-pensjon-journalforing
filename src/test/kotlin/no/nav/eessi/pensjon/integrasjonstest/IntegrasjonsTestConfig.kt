@@ -65,7 +65,7 @@ class IntegrasjonsTestConfig {
     }
 
     @Bean
-    fun automatiseringKafkaTemplate(): KafkaTemplate<String, String> {
+    fun statistikkKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
             defaultTopic = automatiseringTopic
         }
@@ -91,6 +91,9 @@ class IntegrasjonsTestConfig {
 
     @Bean
     fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
+
+    @Bean
+    fun navansattRestTemplate(): RestTemplate = mockedRestTemplate()
 
     private fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")

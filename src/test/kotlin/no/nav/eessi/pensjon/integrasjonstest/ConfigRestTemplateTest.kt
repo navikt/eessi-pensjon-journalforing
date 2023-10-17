@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.models.Tema
@@ -47,7 +48,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
-@DirtiesContext
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @EmbeddedKafka(
@@ -73,6 +73,9 @@ internal class ConfigRestTemplateTest {
 
     @MockkBean
     private lateinit var journalpostKlient: JournalpostKlient
+
+    @MockkBean(relaxed = true)
+    private lateinit var navansattKlient: NavansattKlient
 
     @BeforeEach
     fun setup() {
@@ -124,6 +127,10 @@ internal class ConfigRestTemplateTest {
         @Bean
         @Primary
         fun EuxKlientLib(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+
+        @Bean
+        fun navansattRestTemplate(): RestTemplate = mockk(relaxed = true)
+
         fun euxOAuthRestTemplate(): RestTemplate {
             return RestTemplateBuilder().build().apply {
                 val mvc = MockRestServiceServer.bindTo(this).build()

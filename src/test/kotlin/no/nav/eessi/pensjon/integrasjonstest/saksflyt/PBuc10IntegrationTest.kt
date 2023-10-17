@@ -291,7 +291,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Krav om gjenlevendeytelse - GP eller AP - mangler relasjon - sakid fra sed - automatisk journalføring`() {
+        fun `Krav om gjenlevendeytelse - GP eller AP - mangler relasjon - sakid fra sed - maskinell journalføring`() {
             val bestemsak2 = bestemSakResponse(sakStatus = TIL_BEHANDLING)
 
             testRunnerVoksen(FNR_OVER_62, FNR_VOKSEN_UNDER_62, bestemsak2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
@@ -377,7 +377,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario7Utgaende {
 
         @Test
-        fun `Krav om gjenlevendeytelse - flere sakstyper i retur - sakid finnes i sed - automatisk journalføring`() {
+        fun `Krav om gjenlevendeytelse - flere sakstyper i retur - sakid finnes i sed - maskinell journalføring`() {
             val bestemsak = BestemSakResponse(null, listOf(sakInformasjon(), sakInformasjon("123456", SakType.UFOREP)))
 
             testRunnerBarn(

@@ -420,7 +420,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnrAnnenPerson = FNR_VOKSEN_UNDER_62
 
             testRunnerFlerePersoner(FNR_OVER_62, fnrAnnenPerson = fnrAnnenPerson, saker = saker, sakId = SAK_ID, rolle = Rolle.ETTERLATTE) {
-                // forvent tema == PEN og enhet 9999
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
@@ -744,7 +743,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val request = journalpost.captured
 
-            // forvent tema == PEN og enhet 9999
             assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
             assertEquals(afnr, request.bruker?.id)
@@ -1181,7 +1179,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            // forvent tema == PEN og enhet 9999
             assertEquals(PENSJON, request.tema)
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 
@@ -1256,7 +1253,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            // forvent tema == PEN og enhet 9999
             assertEquals(UFORETRYGD, request.tema)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
@@ -1325,7 +1321,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
 
             val request = journalpost.captured
-            // forvent tema == PEN og enhet 9999
             assertEquals(PENSJON, request.tema)
             assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
 

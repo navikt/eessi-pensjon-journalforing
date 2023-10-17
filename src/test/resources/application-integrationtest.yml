@@ -1,3 +1,4 @@
+SPRING_PROFILES_ACTIVE: "integrationtest"
 KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
 KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
@@ -33,6 +34,7 @@ securityTokenService:
 NAIS_APP_NAME: eessi-pensjon-journalforing
 
 EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
+NAVANSATT_URL: http://localhost:${mockServerport}
 PDL_URL: http://localhost:${mockServerport}
 securitytokenservice.url: http://someurl
 srvusername: someuser

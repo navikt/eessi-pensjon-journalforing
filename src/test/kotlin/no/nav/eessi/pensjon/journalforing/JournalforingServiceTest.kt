@@ -5,7 +5,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
@@ -70,7 +70,7 @@ internal class JournalforingServiceTest {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val automatiseringStatistikkPublisher = AutomatiseringStatistikkPublisher(automatiseringHandlerKafka)
+    private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(
@@ -79,7 +79,8 @@ internal class JournalforingServiceTest {
             pdfService,
             oppgaveHandler,
             kravService,
-            automatiseringStatistikkPublisher
+            statistikkPublisher,
+            navansattKlient = mockk(relaxed = true)
     )
 
     private val fdato = LocalDate.now()
@@ -937,7 +938,7 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen automatisk journalføres`() {
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som SAKSEIER så skal SEDen journalføres maskinelt`() {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -976,7 +977,7 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen automatisk journalføres på Gjenlevnde`() {
+    fun `Gitt at saksbhandler oppretter en P2100 med NORGE som DELTAKER så skal SEDen journalføres maskinelt på gjenlevnde`() {
 
         val avdodFnr = "02116921297"
         val hendelse = """

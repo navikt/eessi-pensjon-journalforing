@@ -53,7 +53,7 @@ class KafkaConfig(
     }
 
     @Bean
-    fun automatiseringKafkaTemplate(): KafkaTemplate<String, String> {
+    fun statistikkKafkaTemplate(): KafkaTemplate<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
         populerCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"

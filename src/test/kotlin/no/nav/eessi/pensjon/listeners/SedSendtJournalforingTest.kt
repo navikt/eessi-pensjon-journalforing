@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.eessi.pensjon.automatisering.AutomatiseringStatistikkPublisher
+import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -65,20 +65,20 @@ internal class SedSendtJournalforingTest {
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
-    private val automatiseringStatistikkPublisher = mockk<AutomatiseringStatistikkPublisher>(relaxed = true)
+    private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), automatiseringStatistikkPublisher)
+        }, oppgaveHandler, mockk(), statistikkPublisher, mockk())
 
-    private val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
     private val sedListener = SedSendtListener(
         jouralforingService,
         personidentifiseringService,
         euxService,
         fagmodulService,
         bestemSakService,
-        "test"
+        mockk(relaxed = true),
+        "test",
     )
 
     private val buc = Buc(
@@ -106,7 +106,7 @@ internal class SedSendtJournalforingTest {
     }
 
     @Test
-    fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med automatisk journalforing 9999`() {
+    fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med maskinell journalforing`() {
         val rinaId = RINA_ID
         val buc = Buc(
             id = rinaId,

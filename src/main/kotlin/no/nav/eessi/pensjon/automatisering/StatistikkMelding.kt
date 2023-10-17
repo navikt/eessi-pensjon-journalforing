@@ -8,12 +8,11 @@ import org.springframework.messaging.Message
 import org.springframework.messaging.MessageHeaders
 import java.time.LocalDateTime
 
-data class AutomatiseringMelding(
+data class StatistikkMelding(
     val bucId: String,
     val sedId: String,
     val sedVersjon: String,
     val opprettetTidspunkt: LocalDateTime,
-    val bleAutomatisert: Boolean,
     val oppgaveEierEnhet: String?,
     val bucType: BucType,
     val sedType: SedType,
@@ -22,10 +21,8 @@ data class AutomatiseringMelding(
 )
 
 
-class KafkaAutomatiseringMessage(
-    private val payload: AutomatiseringMelding
-): Message<AutomatiseringMelding> {
-    override fun getPayload(): AutomatiseringMelding = payload
+class KafkaStatistikkMessage(private val payload: StatistikkMelding): Message<StatistikkMelding> {
+    override fun getPayload(): StatistikkMelding = payload
     override fun getHeaders(): MessageHeaders = MessageHeaders(mapOf("hendelsetype" to "JOURNALFORING", "opprettetTidspunkt" to LocalDateTime.now()))
 }
 

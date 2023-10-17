@@ -16,9 +16,8 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class], value = ["SPRING_PROFILES_ACTIVE", "integrationtest"])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class])
 @ActiveProfiles("integrationtest")
-@DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
@@ -114,7 +113,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `En P8000 med saksType, saksId og aktørId skal automatisk journalføres (9999) `() {
+    fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
         CustomMockServer()
             .mockHttpRequestWithResponseFromJson(
@@ -140,7 +139,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
 
-        //then route to 9999
         OppgaveMeldingVerification("429434379")
             .medHendelsetype("SENDT")
             .medSedtype("P8000")

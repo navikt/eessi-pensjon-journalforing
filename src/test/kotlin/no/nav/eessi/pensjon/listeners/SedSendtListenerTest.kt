@@ -31,6 +31,7 @@ internal class SedSendtListenerTest {
         sedDokumentHelper,
         fagmodulService,
         bestemSakService,
+        mockk(relaxed = true),
         "test")
 
     @BeforeEach

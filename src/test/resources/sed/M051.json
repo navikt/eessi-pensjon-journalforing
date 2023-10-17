@@ -10,6 +10,8 @@
         "etternavn": "BARON",
         "fornavn": "DYREBAR",
         "foedselsdato": "1955-08-11",
+          "land": "NO"
+        },
         "pin": [
           {
             "land": "NO",
@@ -28,5 +30,20 @@
   },
   "sedGVer": "4",
   "sedVer": "2",
+  "diverse": {
+    "bruker": {
+      "anmodningominformasjon": {
+        "inntekt": [
+          {
+            "type": "trygdeytelser",
+            "valuta": "EUR",
+            "startdato": "2023-04-01",
+            "trygdeytelser": "alderspensjon",
+            "beloep": "125"
+          }
+        ]
+      }
+    }
+  },
   "sed": "M051"
 }
