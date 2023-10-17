@@ -236,7 +236,7 @@ class JournalforingService(
     ) = logger.info(
         "Oppretter ikke behandleSedOppgave for " +
                 "bucType: $bucType, " +
-                "sedhendelse: ${sedHendelse.sedType}" +
+                "sedType: ${sedHendelse.sedType}, " +
                 "rinanr: ${sedHendelse.rinaSakId}"
     )
 

@@ -7,8 +7,8 @@ class GyldigeHendelser {
     companion object {
         private const val gyldigSektorKode = "P"
 
-        private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02)
-        private val gyldigUtgaaendeBucType = R_BUC_02
+        private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
+        private val gyldigUtgaaendeBucType = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
 
         fun mottatt(hendelse: SedHendelse) =
                 when {
@@ -21,7 +21,7 @@ class GyldigeHendelser {
         fun sendt(hendelse: SedHendelse) =
                 when {
                     hendelse.bucType == null -> false
-                    hendelse.bucType  == gyldigUtgaaendeBucType -> true
+                    hendelse.bucType in gyldigUtgaaendeBucType -> true
                     hendelse.sektorKode == gyldigSektorKode -> true
                     else -> false
                 }
