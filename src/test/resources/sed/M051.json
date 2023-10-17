@@ -5,24 +5,22 @@
         "kjoenn": "K",
         "foedested": {
           "by": "Unknown",
-          "land": "SE"
-        },
-        "etternavn": "BARON",
-        "fornavn": "DYREBAR",
-        "foedselsdato": "1955-08-11",
           "land": "NO"
         },
+        "etternavn": "KONSONANT",
+        "fornavn": "MÅTEHOLDEN",
+        "foedselsdato": "1970-10-16",
         "pin": [
           {
             "land": "NO",
             "institusjonsid": "NO:NAVAT07",
             "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
-            "identifikator": "51485505877"
+            "identifikator": "16507017499"
           }
         ],
         "statsborgerskap": [
           {
-            "land": "LB"
+            "land": "BE"
           }
         ]
       }
