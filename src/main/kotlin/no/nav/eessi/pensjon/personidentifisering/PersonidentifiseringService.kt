@@ -31,6 +31,7 @@ class PersonidentifiseringService(
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
     private val brukForikretPersonISed = listOf(H121, H120, H070)
 
     fun validateIdentifisertPerson(
@@ -42,6 +43,7 @@ class PersonidentifiseringService(
         val pdlFdato = identifisertPerson.fdato
         val fnr = personRelasjon?.fnr
 
+        secureLog.info("Validering av identifisert person $identifisertPerson ")
         return if (hendelsesType == MOTTATT) {
             val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
                 personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
@@ -87,17 +89,18 @@ class PersonidentifiseringService(
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
             logger.warn("Flere personer funnet i $bucType, returnerer null")
-            //flere personer på buc return null for id og fordeling
             return null
         }
-
+        secureLog.info("Identifisert person: $identifisertPerson")
         if (identifisertPerson != null) {
             return validateIdentifisertPerson(identifisertPerson, hendelsesType)
         }
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
-            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon, hendelsesType) }
+            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon, hendelsesType).also {
+                secureLog.info("Henter person fra PDL $it")
+            } }
 
         return null
     }
@@ -115,8 +118,9 @@ class PersonidentifiseringService(
                 return null
             }
 
-            logger.debug("Henter person med fnr. $valgtFnr fra PDL")
-            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr))
+            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {
+                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $it")
+            }
 
             person?.let {
                 populerIdentifisertPerson(
@@ -152,7 +156,7 @@ class PersonidentifiseringService(
         sedPersonRelasjon: SEDPersonRelasjon,
         hendelsesType: HendelseType
     ): IdentifisertPersonPDL {
-        logger.debug("Populerer IdentifisertPerson for ${sedPersonRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType")
+        logger.info("Populerer IdentifisertPerson for ${sedPersonRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType")
 
         val personNavn = person.navn?.run { "$fornavn $etternavn" }
         val identer = person.identer
@@ -198,6 +202,9 @@ class PersonidentifiseringService(
         if (forsikretPerson != null)
             return forsikretPerson
 
+        secureLog.info("Identifiserte personer: $identifisertePersoner")
+        secureLog.info("Potensielle relasjoner: $potensielleSEDPersonRelasjoner")
+
         return when {
             identifisertePersoner.isEmpty() -> null
             bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
@@ -209,7 +216,6 @@ class PersonidentifiseringService(
 
             bucType == P_BUC_10 -> {
                 val erGjenlevendeYtelse = potensielleSEDPersonRelasjoner.any { it.saktype == GJENLEV }
-
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
 
