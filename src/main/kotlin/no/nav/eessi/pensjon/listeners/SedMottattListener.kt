@@ -20,7 +20,6 @@ import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapAnyToJsonWithoutSensitiveData
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -67,7 +66,7 @@ class SedMottattListener(
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
-                val offsetToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L)
+                val offsetToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 745823L)
                 try {
                     val offset = cr.offset()
                     if (offset in offsetToSkip) {

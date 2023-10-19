@@ -3,9 +3,7 @@ package no.nav.eessi.pensjon.listeners
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
@@ -66,7 +64,7 @@ class SedSendtListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                val offsetToSkip = listOf<Long>(133722, 143447, 176379)
+                val offsetToSkip = listOf<Long>(133722, 143447, 176379, 182678)
                 try {
                     val offset = cr.offset()
                     if (offset in offsetToSkip) {
