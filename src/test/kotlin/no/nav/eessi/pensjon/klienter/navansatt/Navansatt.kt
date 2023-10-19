@@ -6,7 +6,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class NavansattTest {
+class Navansatt {
 
     @Test
     fun `Sjekker at vi får ut riktig navansatt`() {
