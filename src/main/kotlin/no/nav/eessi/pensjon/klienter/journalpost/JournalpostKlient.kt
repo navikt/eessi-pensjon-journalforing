@@ -58,7 +58,7 @@ class JournalpostKlient(
         return opprettjournalpost.measure {
             return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost: $path")
-                secureLog.info("Journalpostrequesten: $request")
+                secureLog.info("Journalpostrequesten: ${request.toString().replace(request.dokumenter, "**********")}")
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON

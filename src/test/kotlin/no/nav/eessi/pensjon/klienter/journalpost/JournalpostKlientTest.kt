@@ -37,7 +37,7 @@ internal class JournalpostKlientTest {
                 String::class.java)
         } returns ResponseEntity.ok(dummyResponse)
 
-        journalpostKlient.opprettJournalpost(mockk(), false)
+        journalpostKlient.opprettJournalpost(mockk(relaxed = true), false)
 
         verify(exactly = 1) {
             mockrestTemplate.exchange("/journalpost?forsoekFerdigstill=false", HttpMethod.POST, any(), String::class.java)
