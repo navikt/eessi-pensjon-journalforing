@@ -64,7 +64,7 @@ class SedSendtListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                val offsetToSkip = listOf<Long>(133722, 143447, 176379)
+                val offsetToSkip = listOf<Long>(133722, 143447, 176379, 183457)
                 try {
                     val offset = cr.offset()
                     if (offset in offsetToSkip) {
