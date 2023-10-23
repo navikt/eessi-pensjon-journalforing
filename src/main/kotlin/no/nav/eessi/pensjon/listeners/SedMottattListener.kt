@@ -176,19 +176,19 @@ class SedMottattListener(
      * Se jira-sak: EP-968
      **/
 
-   @KafkaListener(
-           containerFactory = "sedKafkaListenerContainerFactory",
-           groupId = "\${kafka.sedMottatt.groupid}-recovery",
-           topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
-           partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "745823")])])
-   fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-       if (cr.offset() in listOf<Long>(745823, 745854, 748455, 748872)){
-           logger.info("Behandler sedMottatt offset: ${cr.offset()}")
-           consumeSedMottatt(hendelse, cr, acknowledgment)
-       } else {
-           throw java.lang.RuntimeException()
-       }
-   }
+//   @KafkaListener(
+//           containerFactory = "sedKafkaListenerContainerFactory",
+//           groupId = "\${kafka.sedMottatt.groupid}-recovery",
+//           topicPartitions = [TopicPartition(topic = "\${kafka.sedMottatt.topic}",
+//           partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "745823")])])
+//   fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+//       if (cr.offset() in listOf<Long>(745823, 745854, 748455, 748872)){
+//           logger.info("Behandler sedMottatt offset: ${cr.offset()}")
+//           consumeSedMottatt(hendelse, cr, acknowledgment)
+//       } else {
+//           throw java.lang.RuntimeException()
+//       }
+//   }
 
 }
 
