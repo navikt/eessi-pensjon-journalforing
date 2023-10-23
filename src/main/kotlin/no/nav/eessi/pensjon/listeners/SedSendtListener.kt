@@ -27,6 +27,8 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.annotation.PartitionOffset
+import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
@@ -191,17 +193,17 @@ class SedSendtListener(
      * Ikke slett funksjonene under før vi har et bedre opplegg for tilbakestilling av topic.
      * Se jira-sak: EP-968
      **/
-//    @KafkaListener(
-//        containerFactory = "sedKafkaListenerContainerFactory",
-//        groupId = "\${kafka.sedSendt.groupid}-recovery",
-//        topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
-//                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "70196")])])
-//    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-//        if (cr.offset() in listOf(70196L, 70197L, 70768L)) {
-//            logger.info("Behandler sedSendt offset: ${cr.offset()}")
-//            consumeSedSendt(hendelse, cr, acknowledgment)
-//        }
-//    }
+    @KafkaListener(
+        containerFactory = "sedKafkaListenerContainerFactory",
+        groupId = "\${kafka.sedSendt.groupid}-recovery",
+        topicPartitions = [TopicPartition(topic = "\${kafka.sedSendt.topic}",
+                    partitionOffsets = [PartitionOffset(partition = "0", initialOffset = "182678")])])
+    fun recoverConsumeSedSendt(hendelse: String, cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
+        if (cr.offset() in listOf(182678L, 182701L, 183457L, 183585L)) {
+            logger.info("Behandler sedSendt offset: ${cr.offset()}")
+            consumeSedSendt(hendelse, cr, acknowledgment)
+        }
+    }
 }
 
 internal class SedSendtRuntimeException(cause: Throwable) : RuntimeException(cause)
