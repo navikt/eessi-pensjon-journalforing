@@ -91,7 +91,7 @@ class PersonidentifiseringService(
             logger.warn("Flere personer funnet i $bucType, returnerer null")
             return null
         }
-        //secureLog.info("Identifisert person: $identifisertPerson")
+        secureLog.info("Identifisert person: $identifisertPerson")
         if (identifisertPerson != null) {
             return validateIdentifisertPerson(identifisertPerson, hendelsesType)
         }
@@ -207,7 +207,7 @@ class PersonidentifiseringService(
 
         return when {
             identifisertePersoner.isEmpty() -> null
-            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }.also { secureLog.info("Henter identifisert person for R_BUC_02: $it") }
+            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner.filterIndexed{ index, _ -> index != 0 } }
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }

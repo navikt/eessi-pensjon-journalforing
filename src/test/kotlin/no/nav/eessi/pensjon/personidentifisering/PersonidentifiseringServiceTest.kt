@@ -336,7 +336,7 @@ class PersonidentifiseringServiceTest {
         val result = personidentifiseringService.identifisertPersonUtvelger(listOf(gjenlevende), R_BUC_02, SedType.R004, potensiellePerson)
 
         assertEquals(gjenlevende, result)
-        assertEquals(1, result?.personListe?.size)
+        assertEquals(0, result?.personListe?.size)
         assertEquals(false , result?.flereEnnEnPerson())
     }
 
@@ -364,8 +364,8 @@ class PersonidentifiseringServiceTest {
         val result = personidentifiseringService.identifisertPersonUtvelger(listOf(avdod, gjenlevende), R_BUC_02, SedType.R004, potensiellePerson)
 
         assertEquals(avdod, result)
-        assertEquals(2, result?.personListe?.size)
-        assertEquals(true , result?.flereEnnEnPerson())
+        assertEquals(1, result?.personListe?.size)
+        assertEquals(false , result?.flereEnnEnPerson())
     }
 
     @Test
@@ -445,7 +445,7 @@ class PersonidentifiseringServiceTest {
         val result = personidentifiseringService.identifisertPersonUtvelger(list, R_BUC_02, SedType.P2100, emptyList())
 
         assertEquals(person1, result)
-        assertEquals(3, result?.personListe?.size)
+        assertEquals(2, result?.personListe?.size)
         assertEquals(true, result?.flereEnnEnPerson())
     }
 
