@@ -207,7 +207,7 @@ class PersonidentifiseringService(
 
         return when {
             identifisertePersoner.isEmpty() -> null
-            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }
+            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner }.also { logger.info("Henter identifisert person for R_BUC_02") }
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
