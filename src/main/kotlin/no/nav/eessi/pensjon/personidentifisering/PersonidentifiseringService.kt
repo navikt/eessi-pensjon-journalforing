@@ -91,7 +91,7 @@ class PersonidentifiseringService(
             logger.warn("Flere personer funnet i $bucType, returnerer null")
             return null
         }
-        secureLog.info("Identifisert person: $identifisertPerson")
+        //secureLog.info("Identifisert person: $identifisertPerson")
         if (identifisertPerson != null) {
             return validateIdentifisertPerson(identifisertPerson, hendelsesType)
         }
