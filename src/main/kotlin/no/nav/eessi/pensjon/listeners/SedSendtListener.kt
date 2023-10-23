@@ -130,10 +130,9 @@ class SedSendtListener(
                                 )
                             }
                         }
-                        acknowledgment.acknowledge()
-                        logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
-                        logger.info("Genererer automatiseringstatistikk")
                     }
+                    acknowledgment.acknowledge()
+                    logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\\n ${hendelse.replaceAfter("navBruker", "******")}", ex)
                     throw SedSendtRuntimeException(ex)
@@ -141,7 +140,6 @@ class SedSendtListener(
                 latch.countDown()
             }
         }
-
     }
 
     /**
