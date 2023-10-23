@@ -127,10 +127,9 @@ class SedMottattListener(
                             )
 
                         }
+                        acknowledgment.acknowledge()
+                        logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
                     }
-
-                    acknowledgment.acknowledge()
-                    logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
 
                 } catch (ex: Exception) {
                     logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n ${hendelse.replaceAfter("navBruker", "******")}", ex)
