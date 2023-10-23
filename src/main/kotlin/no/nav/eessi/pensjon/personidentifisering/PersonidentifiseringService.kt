@@ -196,7 +196,7 @@ class PersonidentifiseringService(
         sedType: SedType?,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>
     ): IdentifisertPersonPDL? {
-        logger.info("Antall identifisertePersoner : ${identifisertePersoner.size} ")
+        logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}, bucType: $bucType, sedType: $sedType")
 
         val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
         if (forsikretPerson != null)
@@ -231,7 +231,7 @@ class PersonidentifiseringService(
 
             identifisertePersoner.size == 1 -> identifisertePersoner.first()
             else -> {
-                logger.debug("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
+                secureLog.info("BucType: $bucType Personer: ${identifisertePersoner.toJson()}")
                 throw RuntimeException("Stopper grunnet flere personer på bucType: $bucType")
             }
         }
