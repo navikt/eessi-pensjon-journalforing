@@ -49,7 +49,7 @@ dependencies {
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:2.1.68")
+	implementation("no.nav.eessi.pensjon:ep-eux:2.1.69")
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.40")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.1.34")
 	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.27"){
