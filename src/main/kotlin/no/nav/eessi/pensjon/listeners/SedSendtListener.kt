@@ -45,6 +45,7 @@ class SedSendtListener(
 ) {
 
     private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
     private val latch = CountDownLatch(1)
     private lateinit var consumeOutgoingSed: MetricsHelper.Metric
 
@@ -181,8 +182,8 @@ class SedSendtListener(
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
         } else {
             logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
-//            navansattKlient.hentAnsatt(navAnsatt).also { logger.info("hentNavAnsatt: $it") }
-            return navansattKlient.hentAnsattEnhet(navAnsatt).also { logger.info("NavAnsatt enhet: $it") }
+            val hentNavAnsatt = navansattKlient.hentAnsatt(navAnsatt)
+            return navansattKlient.hentAnsattEnhet(navAnsatt).also { secureLog.info("Hent navansatt: $hentNavAnsatt, enheter: $it ") }
         }
         return ""
     }

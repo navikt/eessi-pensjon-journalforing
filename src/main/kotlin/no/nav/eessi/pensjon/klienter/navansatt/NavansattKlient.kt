@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.klienter.navansatt
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -11,6 +12,12 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(NavansattKlient::class.java) }
 
+    /**
+     * Benytter tjenesten navansatt (https://github.com/navikt/navansatt)
+     * Ved henting av saksbehandler fra navansatt
+     * vil blant annet 0000-GO-Enhet samt saksbehandlers ident og navn returneres
+     */
+    @Cacheable("hentNavansatt")
     fun hentAnsatt(saksbehandler: String): String? {
         val path = "/navansatt/$saksbehandler"
         try {
