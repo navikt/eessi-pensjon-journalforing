@@ -13,6 +13,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
+import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
 import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -21,6 +23,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -182,10 +185,28 @@ class SedSendtListener(
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
         } else {
             logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
-            val hentNavAnsatt = navansattKlient.hentAnsatt(navAnsatt)
-            return navansattKlient.hentAnsattEnhet(navAnsatt).also { secureLog.info("Hent navansatt: $hentNavAnsatt, enheter: $it ") }
+            val navAnsattMedEnheter = enhetsInfoTilJoark(navansattKlient.hentAnsatt(navAnsatt))
+            joarkEnhet(navAnsatt, navAnsattMedEnheter)
+
+            return "null"
         }
         return ""
+    }
+
+    fun enhetsInfoTilJoark(enhetsInfo: String?): Pair<String, String?>? {
+        val ansattNavnOgEnhet = enhetsInfo?.let { mapJsonToAny<Navansatt>(it) }
+        if (ansattNavnOgEnhet != null) {
+            return Pair(ansattNavnOgEnhet.navn, ansattNavnOgEnhet.groups.firstOrNull { it.contains("GO-Enhet")}?.replace("-GO-Enhet-", ""))
+        }
+        return null
+    }
+
+    fun joarkEnhet(saksbehandlerIdent: String, enhetsInfo: Pair<String, String?>?): String? {
+        val enhet =  navansattKlient.hentAnsattEnhet(saksbehandlerIdent)
+        val enhetsNavn =  mapJsonToAny<EnheterFraAd>(enhet!!).enheter?.firstOrNull { it.id == enhetsInfo?.second }
+        return "${enhetsNavn?.id} - ${enhetsNavn?.navn}"
+        }
+
     }
 
     /**
@@ -203,6 +224,6 @@ class SedSendtListener(
 //            consumeSedSendt(hendelse, cr, acknowledgment)
 //        }
 //    }
-}
+//}
 
 internal class SedSendtRuntimeException(cause: Throwable) : RuntimeException(cause)
