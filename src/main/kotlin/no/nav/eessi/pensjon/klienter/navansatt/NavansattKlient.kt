@@ -29,7 +29,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
             ).body.orEmpty()
             return json
         } catch (ex: Exception) {
-            logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex", ex)
+            logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex")
         }
         return null
     }
@@ -45,7 +45,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate) {
             ).body
             return responsebody.orEmpty()
         } catch (ex: Exception) {
-            logger.error("En feil oppstod under henting av enhet for saksbehandler ex: $ex", ex)
+            logger.error("En feil oppstod under henting av enhet for saksbehandler ex: $ex")
         }
         return null
     }
