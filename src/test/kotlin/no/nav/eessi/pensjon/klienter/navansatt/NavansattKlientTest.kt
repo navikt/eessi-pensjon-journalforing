@@ -2,7 +2,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.klienter.navansatt.Enheter
+import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
 import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -75,7 +75,7 @@ class NavansattKlientTest {
                 }
             ] 
         """.trimIndent()
-        val enheter = mapJsonToAny<List<Enheter>>(enhetsResponse)
+        val enheter = mapJsonToAny<List<EnheterFraAd>>(enhetsResponse)
         assertEquals("NAV Familie- og pensjonsytelser Utland", enheter[0].navn)
         assertEquals("NAV Arbeid og ytelser Tønsberg", enheter[1].navn)
 

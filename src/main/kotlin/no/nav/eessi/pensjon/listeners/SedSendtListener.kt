@@ -13,7 +13,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.navansatt.Enheter
 import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
 import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
 import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
