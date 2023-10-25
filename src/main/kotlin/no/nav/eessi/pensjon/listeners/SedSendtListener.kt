@@ -86,7 +86,12 @@ class SedSendtListener(
                             val bucType = sedHendelse.bucType!!
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
 
-                            navAnsattMedEnhet(buc, sedHendelse)
+                            try {
+                                secureLog.info("NavAnsatt med enhet:" + navAnsattMedEnhet(buc, sedHendelse))
+                            }
+                            catch (ex: Exception){
+                                logger.warn("Feil med navAnasattMedEnhet \n $ex")
+                            }
 
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
