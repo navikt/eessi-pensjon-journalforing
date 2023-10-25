@@ -9,10 +9,6 @@ data class Navansatt (
 )
 
 data class EnheterFraAd (
-    val enheter: List<Enheter>? = null
-)
-
-data class Enheter (
     val id: String? = null,
     val navn: String? = null,
     val nivaa: String? = null

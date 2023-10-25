@@ -38,6 +38,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
@@ -157,22 +158,53 @@ internal class SedSendtJournalforingMedNavansattTest {
         sedListener.consumeSedSendt(sedHendelse.toJson(), cr, acknowledgment)
     }
     @Test
-    fun `Sjekker at vi får ut riktig navansatt`() {
-        val response = """
+    fun `Sjekker at vi får ut navansatt med enhetsinfo som vi kan opprette journalpost med`() {
+        val responseAnsattMedEnhetsId = """
             {
-                "ident": "Z990965",
-                "navn": "Ola Oleg Olsen",
-                "fornavn": "Ola",
-                "etternavn": "Olsen",
-                "epost": "Ola.O@Norsk.no"
+                "ident":"Z990965",
+                "navn":"Andersen, Anette Christin",
+                "fornavn":"Anette Christin",
+                "etternavn":"Andersen",
+                "epost":"Anette.Christin.Andersen@nav.no",
+                "groups":[
+                    "Group_be80eb75-e270-40ca-a5f9-29ae8b63eecd",
+                    "1209XX-GA-Brukere",
+                    "4407-GO-Enhet",
+                    "0000-GA-EESSI-CLERK-UFORE",
+                    "0000-GA-Person-EndreSprakMalform",
+                    "0000-GA-Person-EndreKommunikasjon",
+                    "0000-ga-eessi-basis",
+                    "0000-GA-Arena","0000-GA-STDAPPS"
+                ]
             }
+        """.trimIndent()
+        every { navansattRestTemplate.exchange(
+            "/navansatt/Z990965",
+            HttpMethod.GET,
+            any(),
+            String::class.java)
+        } returns ResponseEntity.ok(responseAnsattMedEnhetsId)
+
+        val responseHentEnheter = """
+            [
+                {
+                "id":"0001",
+                "navn":"NAV Familie- og pensjonsytelser Utland",
+                "nivaa":"SPESEN"
+                },
+                {
+                "id":"4407",
+                "navn":"NAV Arbeid og ytelser Tønsberg",
+                "nivaa":"EN"
+                }
+            ] 
         """.trimIndent()
         every { navansattRestTemplate.exchange(
             "/navansatt/Z990965/enheter",
             HttpMethod.GET,
             any(),
             String::class.java)
-        } returns ResponseEntity.ok(response)
+        } returns ResponseEntity.ok(responseHentEnheter)
 
         val hendelse = SedHendelse(
             sedType = SedType.M051,
@@ -188,11 +220,11 @@ internal class SedSendtJournalforingMedNavansattTest {
         )
         val buc = mapJsonToAny<Buc>(javaClass.getResource("/buc/M_BUC.json")!!.readText())
 
-        val ansatt  = sedListener.navAnsatt(buc, hendelse)
+        val ansattMedEnhetsInfo  = sedListener.navAnsattMedEnhet(buc, hendelse)
 
-        Assertions.assertEquals(response, ansatt)
-
-
+        assertEquals("Andersen, Anette Christin", ansattMedEnhetsInfo?.first)
+        assertEquals("4407 - NAV Arbeid og ytelser Tønsberg", ansattMedEnhetsInfo?.second)
+        assertEquals("(Andersen, Anette Christin, 4407 - NAV Arbeid og ytelser Tønsberg)", ansattMedEnhetsInfo.toString())
     }
 
 
