@@ -20,7 +20,7 @@ internal class OpprettJournalpostModelTest {
                 Behandlingstema.ALDERSPENSJON,
                 Bruker("brukerId"),
                 "[]",
-                ID_OG_FORDELING,
+                ID_OG_FORDELING.name,
                 JournalpostType.INNGAAENDE,
                 Sak("arkivsaksnummer123", "arksys2"),
                 Tema.PENSJON,
@@ -30,7 +30,7 @@ internal class OpprettJournalpostModelTest {
         val serialized = actualRequest.toJson()
 
         assertTrue(serialized.contains("\"behandlingstema\" : \"ab0254\""))
-        assertTrue(serialized.contains("\"journalfoerendeEnhet\" : \"4303\""))
+        assertTrue(serialized.contains("\"journalfoerendeEnhet\" : \"ID_OG_FORDELING\""))
         assertTrue(serialized.contains("\"journalpostType\" : \"INNGAAENDE\""))
         assertTrue(serialized.contains("\"tema\" : \"PEN\""))
 

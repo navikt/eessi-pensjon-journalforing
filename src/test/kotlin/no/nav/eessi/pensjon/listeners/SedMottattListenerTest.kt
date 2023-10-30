@@ -30,7 +30,7 @@ internal class SedMottattListenerTest {
         sedDokumentHelper,
         fagmodulService = mockk(relaxed = true),
         bestemSakService,
-        "test"
+        "test",
     )
 
     @BeforeEach

@@ -27,7 +27,7 @@ class OpprettJournalpostRequest(
     @JsonDeserialize(using = JsonAsStringDeserializer::class)
         @JsonRawValue
         val dokumenter: String,
-    val journalfoerendeEnhet: Enhet? = null,
+    val journalfoerendeEnhet: String? = null,
     val journalpostType: JournalpostType,
     val sak: Sak? = null,
     val tema: Tema = Tema.PENSJON,

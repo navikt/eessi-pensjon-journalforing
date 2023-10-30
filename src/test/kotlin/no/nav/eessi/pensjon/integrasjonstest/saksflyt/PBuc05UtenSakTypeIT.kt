@@ -18,7 +18,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
             FNR_OVER_62,
             FNR_BARN, emptyList(), rolle = Rolle.BARN) {
             assertEquals(PENSJON, it.tema)
-            assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+            assertEquals(Enhet.NFP_UTLAND_AALESUND.name, it.journalfoerendeEnhet)
         }
     }
 
@@ -28,7 +28,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
             FNR_VOKSEN_UNDER_62,
             FNR_BARN, emptyList(), rolle = Rolle.FORSORGER) {
             assertEquals(PENSJON, it.tema)
-            assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
+            assertEquals(Enhet.ID_OG_FORDELING.name, it.journalfoerendeEnhet)
         }
     }
 
@@ -38,7 +38,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
             FNR_VOKSEN_UNDER_62,
             FNR_BARN, emptyList(), rolle = Rolle.ETTERLATTE) {
             assertEquals(PENSJON, it.tema)
-            assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+            assertEquals(Enhet.NFP_UTLAND_AALESUND.name, it.journalfoerendeEnhet)
         }
     }
 
@@ -50,7 +50,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
             logger.info("logging: $it")
             assertEquals(UFORETRYGD, it.tema)
             assertEquals(UFOREPENSJON, it.behandlingstema)
-            assertEquals(Enhet.UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+            assertEquals(Enhet.UFORE_UTLANDSTILSNITT.name, it.journalfoerendeEnhet)
         }
     }
 

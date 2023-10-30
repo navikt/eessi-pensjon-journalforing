@@ -37,7 +37,6 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -150,7 +149,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         )
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns opprettJournalPostResponse
 
         val requestSlotOppgave = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(requestSlotOppgave)) }
@@ -220,7 +219,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         )
         val buc = mapJsonToAny<Buc>(javaClass.getResource("/buc/M_BUC.json")!!.readText())
 
-        val ansattMedEnhetsInfo  = sedListener.navAnsattMedEnhet(buc, hendelse)
+        val ansattMedEnhetsInfo  = navansattKlient.navAnsattMedEnhetsInfo(buc, hendelse)
 
         assertEquals("Andersen, Anette Christin", ansattMedEnhetsInfo?.first)
         assertEquals("4407 - NAV Arbeid og ytelser Tønsberg", ansattMedEnhetsInfo?.second)

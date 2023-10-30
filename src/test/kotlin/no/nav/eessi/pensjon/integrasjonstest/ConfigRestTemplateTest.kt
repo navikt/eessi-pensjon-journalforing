@@ -39,7 +39,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers
@@ -74,6 +73,9 @@ internal class ConfigRestTemplateTest {
     @MockkBean
     private lateinit var journalpostKlient: JournalpostKlient
 
+    //@MockkBean
+    //private lateinit var journalforingService: JournalforingService
+
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
 
@@ -97,6 +99,7 @@ internal class ConfigRestTemplateTest {
                     aktorId = JournalforingTestBase.AKTOER_ID
                 )
         every { bestemSakKlient.kallBestemSak(any()) } returns mockk(relaxed = true)
+        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
 
 
@@ -108,7 +111,7 @@ internal class ConfigRestTemplateTest {
     fun `Konfigurasjon skal håndtere en pdf med dokumenter større enn 20b`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns mockk(relaxed = true)
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),
@@ -118,7 +121,7 @@ internal class ConfigRestTemplateTest {
 
         //sjekker at denne går gjennom og at det lages en oppgave
         assertEquals(Tema.PENSJON, requestSlot.captured.tema)
-        assertEquals(Enhet.ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
+        assertEquals(Enhet.ID_OG_FORDELING.name, requestSlot.captured.journalfoerendeEnhet)
     }
 
     @TestConfiguration

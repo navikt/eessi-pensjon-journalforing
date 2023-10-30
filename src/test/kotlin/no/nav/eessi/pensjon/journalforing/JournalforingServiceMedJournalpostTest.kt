@@ -59,7 +59,6 @@ internal class JournalforingServiceMedJournalpostTest {
         oppgaveHandler,
         kravService,
         statistikkPublisher,
-        navansattKlient = mockk(relaxed = true)
     )
 
     companion object {
@@ -89,7 +88,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         val forsoekFedrigstillSlot = slot<Boolean>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot)) } returns mockk(relaxed = true)
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot), any()) } returns mockk(relaxed = true)
 
 
         journalforingService.journalfor(
@@ -101,6 +100,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = saksInformasjon,
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo(),
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -111,6 +111,8 @@ internal class JournalforingServiceMedJournalpostTest {
         Assertions.assertEquals(true, erMuligAaFerdigstille)
 
     }
+
+    private fun navAnsattInfo(): Pair<String, String?> = Pair("Z990965", "4407-GO-Enhet")
 
     @Test
     fun `Sendt P6000 med manglende saksinfo skal returnere false på forsoekFerdigstill`() {
@@ -123,7 +125,7 @@ internal class JournalforingServiceMedJournalpostTest {
         )
 
         val forsoekFerdigstillSlot = slot<Boolean>()
-        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot)) } returns mockk(relaxed = true)
+        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
 
 
         journalforingService.journalfor(
@@ -135,6 +137,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = null,
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo()
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -157,7 +160,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         val forsoekFedrigstillSlot = slot<Boolean>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot)) } returns mockk(relaxed = true)
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot), null) } returns mockk(relaxed = true)
 
         journalforingService.journalfor(
             sedHendelse,
@@ -168,6 +171,7 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = saksInformasjon,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo()
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
