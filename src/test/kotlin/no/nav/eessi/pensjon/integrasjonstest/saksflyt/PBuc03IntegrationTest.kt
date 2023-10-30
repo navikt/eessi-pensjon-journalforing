@@ -63,7 +63,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -99,7 +99,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
 
                 println("************** ${oppgaveMeldingList}")
 
@@ -134,7 +134,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -160,7 +160,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -184,7 +184,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -211,7 +211,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(UFORETRYGD, journalpostRequest.tema)
-                assertEquals(UFORE_UTLAND, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(UFORE_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
