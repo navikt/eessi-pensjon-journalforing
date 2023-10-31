@@ -24,7 +24,6 @@ import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.journalpost.*
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
@@ -70,14 +69,11 @@ internal open class JournalforingTestBase {
 
     protected val euxKlient: EuxKlientLib = mockk()
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
-    {
-        every { navAnsattMedEnhetsInfo(any(), any()) } returns null
-    }
     private val dokumentHelper = EuxService(euxKlient)
     private val fagmodulService = FagmodulService(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
+
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
     private val journalpostService = JournalpostService(journalpostKlient)
@@ -107,6 +103,7 @@ internal open class JournalforingTestBase {
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
         statistikkPublisher = statistikkPublisher,
+        navansattKlient = mockk(relaxed = true)
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -123,8 +120,9 @@ internal open class JournalforingTestBase {
         dokumentHelper = dokumentHelper,
         fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
-        profile = "test",
+        profile = "test"
     )
+
     protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
@@ -132,7 +130,7 @@ internal open class JournalforingTestBase {
         bestemSakService = bestemSakService,
         fagmodulService = fagmodulService,
         profile = "test",
-        navansattKlient = navansattKlient
+        navansattKlient = mockk(relaxed = true)
     )
 
 
@@ -476,7 +474,7 @@ internal open class JournalforingTestBase {
         val request = slot<OpprettJournalpostRequest>()
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
-        every { journalpostKlient.opprettJournalpost(capture(request), any(), any()) } returns journalpostResponse
+        every { journalpostKlient.opprettJournalpost(capture(request), any()) } returns journalpostResponse
 
         return request to journalpostResponse
     }

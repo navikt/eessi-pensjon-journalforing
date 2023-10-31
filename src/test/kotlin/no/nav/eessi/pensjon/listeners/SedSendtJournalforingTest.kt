@@ -25,7 +25,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
@@ -67,11 +66,10 @@ internal class SedSendtJournalforingTest {
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
-    private val navansattKlient = mockk<NavansattKlient>(relaxed = true)
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), statistikkPublisher, mockk())
 
     private val sedListener = SedSendtListener(
         jouralforingService,
@@ -79,8 +77,8 @@ internal class SedSendtJournalforingTest {
         euxService,
         fagmodulService,
         bestemSakService,
-        navansattKlient,
-        "test"
+        mockk(relaxed = true),
+        "test",
     )
 
     private val buc = Buc(
@@ -105,8 +103,6 @@ internal class SedSendtJournalforingTest {
         sedListener.initMetrics()
         jouralforingService.initMetrics()
         euxService.initMetrics()
-
-        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
 
     @Test
@@ -170,7 +166,7 @@ internal class SedSendtJournalforingTest {
         )
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns opprettJournalPostResponse
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
 
         val requestSlotOppgave = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(requestSlotOppgave)) }
@@ -230,12 +226,12 @@ internal class SedSendtJournalforingTest {
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "",
-            melding = "Z990965",
+            melding = "",
             journalpostferdigstilt = false,
         )
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns opprettJournalPostResponse
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
 
         val requestSlotOppgave = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(requestSlotOppgave)) }
@@ -245,7 +241,7 @@ internal class SedSendtJournalforingTest {
         val actualRequest = requestSlot.captured
         val actualRequestOppgave = requestSlotOppgave.captured
 
-        Assertions.assertEquals(UFORE_UTLANDSTILSNITT.name, actualRequest.journalfoerendeEnhet)
+        Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequest.journalfoerendeEnhet)
         Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequestOppgave.tildeltEnhetsnr)
         Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
 
@@ -306,7 +302,7 @@ internal class SedSendtJournalforingTest {
         )
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns opprettJournalPostResponse
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
 
         sedListener.consumeSedSendt(sedHendelse, cr, acknowledgment)
         val actualRequest = requestSlot.captured
@@ -370,7 +366,7 @@ internal class SedSendtJournalforingTest {
         )
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns opprettJournalPostResponse
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any()) } returns opprettJournalPostResponse
 
         sedListener.consumeSedSendt(sedHendelse, cr, acknowledgment)
         val actualRequest = requestSlot.captured

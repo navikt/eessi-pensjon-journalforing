@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
@@ -12,6 +13,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
+import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
 import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -20,6 +23,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -82,8 +86,12 @@ class SedSendtListener(
                             val bucType = sedHendelse.bucType!!
                             val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
 
-                            val navAnsattMedEnhet = navansattKlient.navAnsattMedEnhetsInfo(buc, sedHendelse)
-
+                            try {
+                                secureLog.info("NavAnsatt med enhet:" + navAnsattMedEnhet(buc, sedHendelse))
+                            }
+                            catch (ex: Exception){
+                                logger.warn("Feil med navAnasattMedEnhet \n $ex")
+                            }
 
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
@@ -153,8 +161,7 @@ class SedSendtListener(
                                     currentSed,
                                     harAdressebeskyttelse,
                                     identifisertePersoner.count()
-                                        .also { logger.info("Antall identifisertePersoner: $it") },
-                                    navAnsattMedEnhet
+                                        .also { logger.info("Antall identifisertePersoner: $it") }
                                 )
                             }
                         }
@@ -219,6 +226,39 @@ class SedSendtListener(
         return sakInformasjon?.sakType
     }
 
+    //Pair(saksbehandlerNavn, enhetsid - Enhetsnavn)
+    fun navAnsattMedEnhet(buc: Buc, sedHendelse: SedHendelse): Pair<String, String?>? {
+        val navAnsatt = buc.documents?.firstOrNull { it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
+        logger.debug("navAnsatt: $navAnsatt")
+        if (navAnsatt == null) {
+            logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
+            return null
+        } else {
+            logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsatt")
+            val navAnsattMedEnheter = navAnsattMedEnhetsId(navansattKlient.hentAnsatt(navAnsatt)) ?: return null
+            val enhetsInformasjon = joarkEnhet(navAnsatt, navAnsattMedEnheter)
+            return Pair(navAnsattMedEnheter.first, enhetsInformasjon)
+        }
+    }
+
+    //Pair(Saksbehandlers navn, enhetsId)
+    fun navAnsattMedEnhetsId(enhetsInfo: String?): Pair<String, String?>? {
+        enhetsInfo?.let { it ->
+            val navansatt = mapJsonToAny<Navansatt>(it)
+            return Pair(
+                navansatt.navn,
+                navansatt.groups.firstOrNull { it.contains("GO-Enhet") }?.replace("-GO-Enhet", "")
+            )
+        }
+        return null
+    }
+
+    //Pair(enhetsId, Enhetsnavn)
+    fun joarkEnhet(saksbehandlerIdent: String, enhetsInfo: Pair<String, String?>?): String? {
+        val enhet =  navansattKlient.hentAnsattEnhet(saksbehandlerIdent)
+        val enhetsNavn = mapJsonToAny<List<EnheterFraAd>>(enhet!!).firstOrNull { it.id == enhetsInfo?.second }
+        return "${enhetsNavn?.id} - ${enhetsNavn?.navn}"
+    }
 }
 
     /**

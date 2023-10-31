@@ -74,6 +74,7 @@ class JournalforingService(
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val statistikkPublisher: StatistikkPublisher,
+    private val navansattKlient: NavansattKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -112,8 +113,7 @@ class JournalforingService(
         sakInformasjon: SakInformasjon?,
         sed: SED?,
         harAdressebeskyttelse: Boolean = false,
-        identifisertePersoner: Int,
-        navAnsattInfo: Pair<String, String?>? = null
+        identifisertePersoner: Int
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -128,6 +128,8 @@ class JournalforingService(
                 val (documents, uSupporterteVedlegg) = sedHendelse.run {
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
+
+//                val enhetFraNavansatt = navansattKlient.hentAnsattEnhet(saksbehandler)
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
@@ -152,8 +154,7 @@ class JournalforingService(
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,
-                    identifisertePersoner = identifisertePersoner,
-                    saksbehandlerInfo = navAnsattInfo
+                    identifisertePersoner = identifisertePersoner
                 )
 
                 val sattStatusAvbrutt = sattAvbrutt(
@@ -286,8 +287,7 @@ class JournalforingService(
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,
-                    identifisertePersoner = 0,
-                    saksbehandlerInfo = null
+                    identifisertePersoner = 0
                 )
 
                 oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(

@@ -43,8 +43,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         dokumenter: String,
         saktype: SakType?,
         institusjon: AvsenderMottaker,
-        identifisertePersoner: Int,
-        saksbehandlerInfo: Pair<String, String?>? = null
+        identifisertePersoner: Int
     ): OpprettJournalPostResponse? {
 
         val tema = if(fnr?.erNpid == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
@@ -60,12 +59,12 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
             dokumenter = dokumenter,
-            journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet.name
+            journalfoerendeEnhet = journalfoerendeEnhet
         )
 
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)
 
-        return journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first)
+        return journalpostKlient.opprettJournalpost(request, forsokFerdigstill)
     }
 
     private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
