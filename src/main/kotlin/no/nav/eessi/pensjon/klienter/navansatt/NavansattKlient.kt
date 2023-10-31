@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.klienter.navansatt
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,24 +42,8 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
         return null
     }
 
-    fun hentAnsattEnhet(saksbehandler: String): String? {
-        val path = "/navansatt/$saksbehandler/enheter"
-        try {
-            val responsebody = navansattRestTemplate.exchange(
-                path,
-                HttpMethod.GET,
-                null,
-                String::class.java
-            ).body
-            return responsebody.orEmpty()
-        } catch (ex: Exception) {
-            logger.error("En feil oppstod under henting av enhet for saksbehandler ex: $ex")
-        }
-        return null
-    }
-
-    //Pair(saksbehandlerIdent, enhetsId - Enhetsnavn)
-    fun navAnsattMedEnhetsInfo(buc: Buc, sedHendelse: SedHendelse): Pair<String, String?>? {
+    //Pair(saksbehandlerIdent, enhetsId)
+    fun navAnsattMedEnhetsInfo(buc: Buc, sedHendelse: SedHendelse): Pair<String, Enhet?>? {
         val navAnsattIdent = buc.documents?.firstOrNull { it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
         logger.debug("navAnsatt: $navAnsattIdent")
         if (navAnsattIdent == null) {
@@ -71,12 +56,11 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
         }
     }
 
-    fun hentEnhetsInfo(enhetsInfo: String?): String? {
+    fun hentEnhetsInfo(enhetsInfo: String?): Enhet? {
         enhetsInfo?.let { it ->
             val navansatt = mapJsonToAny<Navansatt>(it)
             val enhet = navansatt.groups.firstOrNull { it.contains("GO-Enhet") }?.replace("-GO-Enhet", "")
-            val enhetsNavn = mapJsonToAny<List<EnheterFraAd>>(enhet!!).firstOrNull { it.id == enhetsInfo }
-            return "${enhetsNavn?.id} - ${enhetsNavn?.navn}"
+            return enhet?.let { enhetsNr -> Enhet.getEnhet(enhetsNr) }
         }
         return null
     }

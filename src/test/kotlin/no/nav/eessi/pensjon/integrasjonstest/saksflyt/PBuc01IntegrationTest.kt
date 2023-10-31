@@ -87,7 +87,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(PENSJON_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -121,7 +121,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             ) {
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
@@ -158,7 +158,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(PENSJON_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(2, oppgaveMeldingList.size)
 
@@ -203,7 +203,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(PENSJON_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -224,7 +224,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(PENSJON_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -245,7 +245,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -268,7 +268,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -311,7 +311,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(PENSJON_UTLAND.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -337,7 +337,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
@@ -388,7 +388,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
             assertEquals(PENSJON, request.tema)
-            assertEquals(PENSJON_UTLAND.name, request.journalfoerendeEnhet)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any())}
             verify(exactly = 1) { personService.hentPerson(any()) }
@@ -439,7 +439,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
             // forvent tema == PEN og enhet Pensjon Utland
             assertEquals(PENSJON, request.tema)
-            assertEquals(PENSJON_UTLAND.name, request.journalfoerendeEnhet)
+            assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
             assertEquals(fnr, request.bruker?.id)
 
             assertEquals(1, oppgaveMeldingList.size)
@@ -491,7 +491,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING.name, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(2, oppgaveMeldingList.size)
 

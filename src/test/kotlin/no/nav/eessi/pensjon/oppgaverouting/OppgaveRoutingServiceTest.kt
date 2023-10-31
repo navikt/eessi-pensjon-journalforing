@@ -120,7 +120,7 @@ internal class OppgaveRoutingServiceTest {
             )
         )
         assertEquals(
-            NFP_UTLAND_OSLO,
+            FAMILIE_OG_PENSJONSYTELSER_OSLO,
             routingService.hentEnhet(
                 OppgaveRoutingRequest(
                     aktorId = "01010101010",
@@ -477,7 +477,7 @@ internal class OppgaveRoutingServiceTest {
         )
 
         val result = routingService.hentEnhet(oppgaveroutingrequest)
-        assertEquals(NFP_UTLAND_OSLO, result)
+        assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, result)
     }
 
     @Test
@@ -585,7 +585,7 @@ internal class OppgaveRoutingServiceTest {
     }
 
     @Test
-    fun `Gitt aldersak for P_BUC_01 mottatt når bruk av Norg2 tjeneste benyttes så routes det til NFP_UTLAND_OSLO`() {
+    fun `Gitt aldersak for P_BUC_01 mottatt når bruk av Norg2 tjeneste benyttes så routes det til FAMILIE_OG_PENSJONSYTELSER_OSLO`() {
         val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
@@ -611,7 +611,7 @@ internal class OppgaveRoutingServiceTest {
         )
 
         val result = routingService.hentEnhet(oppgaveroutingrequest)
-        assertEquals(NFP_UTLAND_OSLO, result)
+        assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, result)
 
     }
 
@@ -802,7 +802,7 @@ internal class OppgaveRoutingServiceTest {
         val actual =
             norg2Service.hentArbeidsfordelingEnhet(NorgKlientRequest(geografiskTilknytning = "0322", landkode = "NOR"))
 
-        assertEquals(NFP_UTLAND_OSLO, actual)
+        assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, actual)
     }
 
     @Test
@@ -874,7 +874,7 @@ internal class OppgaveRoutingServiceTest {
     fun testEnumEnhets() {
         assertEquals(PENSJON_UTLAND, Enhet.getEnhet("0001"))
 
-        assertEquals(NFP_UTLAND_OSLO, Enhet.getEnhet("4803"))
+        assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, Enhet.getEnhet("4803"))
 
         assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
     }
