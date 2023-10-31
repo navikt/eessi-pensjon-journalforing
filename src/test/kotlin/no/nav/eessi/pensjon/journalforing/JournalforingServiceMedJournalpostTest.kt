@@ -112,7 +112,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
     }
 
-    private fun navAnsattInfo(): Pair<String, String?> = Pair("Z990965", "4407-GO-Enhet")
+    private fun navAnsattInfo(): Pair<String, Enhet?> = Pair("Z990965",Enhet.NFP_UTLAND_AALESUND)
 
     @Test
     fun `Sendt P6000 med manglende saksinfo skal returnere false på forsoekFerdigstill`() {
