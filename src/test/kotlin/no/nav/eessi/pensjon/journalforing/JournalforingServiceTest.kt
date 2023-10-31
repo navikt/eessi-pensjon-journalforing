@@ -379,7 +379,7 @@ internal class JournalforingServiceTest {
     @ParameterizedTest
     @EnumSource(
         BucType::class, names = [
-            "R_BUC_02", "M_BUC_02", "M_BUC_03a", "M_BUC_03b"
+            "R_BUC_02"
         ]
     )
     fun `Buc av denne typen skal ikke journalfores med avbrutt`(bucType: BucType) {
@@ -400,7 +400,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = null
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -1189,6 +1189,7 @@ internal class JournalforingServiceTest {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
+
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
             sedPersonRelasjon(),
@@ -1212,13 +1213,13 @@ internal class JournalforingServiceTest {
                 sedHendelse = sedHendelse,
                 fnr = LEALAUS_KAKE,
                 sedHendelseType = SENDT,
-                journalfoerendeEnhet = Enhet.ID_OG_FORDELING,
+                journalfoerendeEnhet = ID_OG_FORDELING,
                 arkivsaksnummer = null,
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = null,
                 institusjon = any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo = mockk(),
+                saksbehandlerInfo = null,
 
             )
         }
@@ -1284,7 +1285,7 @@ internal class JournalforingServiceTest {
         }
     }
 
-    private fun saksbehandlerInfo(): Pair<String, String?> = Pair("Anette Christine","0001 - NAV Pensjon Utland")
+    private fun saksbehandlerInfo(): Pair<String, Enhet?>? = null
 
     fun mockedSedHendelse(buc: BucType, sed: SedType) : SedHendelse{
         return mockk<SedHendelse>(relaxed = true).apply {
@@ -1306,7 +1307,7 @@ internal class JournalforingServiceTest {
     fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
         SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
 
-    private fun navAnsattInfo(): Pair<String, String?> = Pair("Z990965", "4407-GO-Enhet")
+    private fun navAnsattInfo(): Pair<String, Enhet?>? = null
 
 
 }

@@ -186,6 +186,8 @@ internal open class JournalforingTestBase {
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
+        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
@@ -285,6 +287,7 @@ internal open class JournalforingTestBase {
         }
 
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
