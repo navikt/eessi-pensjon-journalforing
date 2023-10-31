@@ -26,7 +26,6 @@ import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.pdf.PDFService
@@ -70,7 +69,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val journalforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), statistikkPublisher, mockk())
 
     private val sedListener = SedSendtListener(
         journalforingService,
@@ -222,9 +221,9 @@ internal class SedSendtJournalforingMedNavansattTest {
 
         val ansattMedEnhetsInfo  = navansattKlient.navAnsattMedEnhetsInfo(buc, hendelse)
 
-        assertEquals("Z990965", ansattMedEnhetsInfo?.first)
-        assertEquals(Enhet.ARBEID_OG_YTELSER_TONSBERG, ansattMedEnhetsInfo?.second)
-        assertEquals("(Z990965, ARBEID_OG_YTELSER_TONSBERG)", ansattMedEnhetsInfo.toString())
+        assertEquals("Andersen, Anette Christin", ansattMedEnhetsInfo?.first)
+        assertEquals("4407 - NAV Arbeid og ytelser Tønsberg", ansattMedEnhetsInfo?.second)
+        assertEquals("(Andersen, Anette Christin, 4407 - NAV Arbeid og ytelser Tønsberg)", ansattMedEnhetsInfo.toString())
     }
 
 

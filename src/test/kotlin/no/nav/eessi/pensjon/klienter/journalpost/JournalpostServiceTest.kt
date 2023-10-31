@@ -53,7 +53,7 @@ internal class JournalpostServiceTest {
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
         val sedHendelse = sedHendelse(P2000, P_BUC_01, null)
 
-        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), null) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
             sedHendelse = sedHendelse,
@@ -77,7 +77,7 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null
+            1, saksbehandlerInfo()
         )
 
         // RESPONSE
@@ -104,6 +104,8 @@ internal class JournalpostServiceTest {
 
         verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true, null) }
     }
+
+    private fun saksbehandlerInfo() = Pair("Agatha Christie", "4862 - Nav Aalesund")
 
     @Test
     fun `Gitt ugyldig request når forsøker oprette journalpost så kast exception`() {
@@ -173,7 +175,7 @@ internal class JournalpostServiceTest {
         """.trimIndent()
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
-        every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
+        every { mockKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns expectedResponse
 
         val actualResponse = journalpostService.opprettJournalpost(
             sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003"),
@@ -185,7 +187,7 @@ internal class JournalpostServiceTest {
             saktype = null,
             mockk(relaxed = true),
             1,
-            null
+            saksbehandlerInfo()
         )
 
         assertEqualResponse(expectedResponse, actualResponse!!)

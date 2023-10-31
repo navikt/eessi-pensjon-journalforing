@@ -103,7 +103,7 @@ class JournalforingService(
      *     b) og opprette krav automatisk
      * 8.) Generer statisikk melding
      */
-     fun journalfor(
+    fun journalfor(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
@@ -113,7 +113,7 @@ class JournalforingService(
         sed: SED?,
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
-        navAnsattInfo: Pair<String, Enhet?>? = null
+        navAnsattInfo: Pair<String, String?>? = null
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -142,7 +142,6 @@ class JournalforingService(
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
 
-                // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,

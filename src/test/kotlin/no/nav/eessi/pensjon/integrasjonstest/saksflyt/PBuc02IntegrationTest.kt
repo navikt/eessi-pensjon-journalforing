@@ -24,7 +24,7 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.FAMILIE_OG_PENSJONSYTELSER_OSLO
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_OSLO
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
@@ -64,7 +64,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND.name, it.journalfoerendeEnhet)
             }
 
         }
@@ -89,10 +89,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
-                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+                norg2enhet = NFP_UTLAND_OSLO
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(PENSJON_UTLAND.name, it.journalfoerendeEnhet)
             }
         }
 
@@ -119,7 +119,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
-                Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(UFORE_UTLAND.name, it.journalfoerendeEnhet)
             }
         }
 
@@ -153,7 +153,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(PENSJON_UTLAND.name, it.journalfoerendeEnhet)
             }
         }
 
@@ -178,10 +178,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
-                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+                norg2enhet = NFP_UTLAND_OSLO
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_OSLO.name, it.journalfoerendeEnhet)
             }
         }
 
@@ -209,7 +209,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
-                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT.name, it.journalfoerendeEnhet)
             }
         }
 
@@ -242,7 +242,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(PENSJON_UTLAND.name, it.journalfoerendeEnhet)
             }
         }
     }
@@ -381,10 +381,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT,
-                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+                norg2enhet = NFP_UTLAND_OSLO
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
             }
         }
 
@@ -409,10 +409,10 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT,
-                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+                norg2enhet = NFP_UTLAND_OSLO
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_OSLO, it.journalfoerendeEnhet)
             }
         }
 
@@ -480,7 +480,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Hvis barnep og sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001`() {
 
-            every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+            every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns Pair("Z123456", "2990 - Test Testesen")
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.SENT)
@@ -502,7 +502,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(PENSJON_UTLAND.name, it.journalfoerendeEnhet)
             }
         }
     }

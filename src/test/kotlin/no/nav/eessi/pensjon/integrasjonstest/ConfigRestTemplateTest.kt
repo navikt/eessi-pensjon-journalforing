@@ -121,7 +121,7 @@ internal class ConfigRestTemplateTest {
 
         //sjekker at denne går gjennom og at det lages en oppgave
         assertEquals(Tema.PENSJON, requestSlot.captured.tema)
-        assertEquals(Enhet.ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
+        assertEquals(Enhet.ID_OG_FORDELING.name, requestSlot.captured.journalfoerendeEnhet)
     }
 
     @TestConfiguration

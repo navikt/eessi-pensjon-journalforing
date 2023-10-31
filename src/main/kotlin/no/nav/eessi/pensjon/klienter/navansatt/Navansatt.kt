@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.klienter.navansatt
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Navansatt (

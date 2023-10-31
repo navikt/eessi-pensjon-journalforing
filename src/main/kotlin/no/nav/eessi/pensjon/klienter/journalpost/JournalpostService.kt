@@ -44,7 +44,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saktype: SakType?,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
-        saksbehandlerInfo: Pair<String, Enhet?>? = null
+        saksbehandlerInfo: Pair<String, String?>? = null
     ): OpprettJournalPostResponse? {
 
         val tema = if(fnr?.erNpid == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
@@ -60,7 +60,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
             dokumenter = dokumenter,
-            journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
+            journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet.name
         )
 
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)

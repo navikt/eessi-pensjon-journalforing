@@ -84,7 +84,7 @@ internal class Norg2ServiceTest {
             NorgKlientRequest(landkode = "NOR", geografiskTilknytning = "0422")
         )
 
-        assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, result)
+        assertEquals(NFP_UTLAND_OSLO, result)
     }
 
     @Test

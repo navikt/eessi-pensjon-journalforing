@@ -45,7 +45,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 sedType = sedType
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.first.tema)
-                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.first.journalfoerendeEnhet)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT.name, it.first.journalfoerendeEnhet)
                 Assertions.assertEquals(AKTOER_ID, it.second.aktoerId)
             }
         }
@@ -65,7 +65,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 sedType = sedType
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.first.tema)
-                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.first.journalfoerendeEnhet)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT.name, it.first.journalfoerendeEnhet)
                 Assertions.assertEquals(AKTOER_ID_2, it.second.aktoerId)
 
             }
