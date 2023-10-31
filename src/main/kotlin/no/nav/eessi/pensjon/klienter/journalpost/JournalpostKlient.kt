@@ -62,7 +62,7 @@ class JournalpostKlient(
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
-//                headers["Nav-User-Id"] = saksbehandlerIdent ?: "srveessipensjon"
+                headers["Nav-User-Id"] = saksbehandlerIdent ?: "srveessipensjon"
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
