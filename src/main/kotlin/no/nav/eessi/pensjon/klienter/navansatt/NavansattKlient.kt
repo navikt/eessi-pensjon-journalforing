@@ -61,7 +61,9 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
         enhetsInfo?.let { it ->
             val navansatt = mapJsonToAny<Navansatt>(it)
             val enhet = navansatt.groups.firstOrNull { it.contains("GO-Enhet") }?.replace("-GO-Enhet", "")
-            return enhet?.let { enhetsNr -> Enhet.getEnhet(enhetsNr) }
+            return enhet?.let { enhetsNr -> Enhet.getEnhet(enhetsNr) }.also {
+                logger.info("Henter ${navansatt.groups.size} grupper og hentet ut enhet: $enhet")
+            }
         }
         return null
     }
