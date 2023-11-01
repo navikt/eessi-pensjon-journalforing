@@ -1,9 +1,12 @@
+import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
 import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
+import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -35,25 +38,7 @@ class NavansattKlientTest {
     @Test
     fun `Ved kall til navansatt så skal vi slå sammen enhetsnummer og navn for å sende det som journalførende enhet`() {
         //https://navansatt.dev.adeo.no/navansatt/K105134
-        val navansattInfo = """
-            {
-                "ident":"H562012",
-                "navn":"Andersen, Anette Christin",
-                "fornavn":"Anette Christin",
-                "etternavn":"Andersen",
-                "epost":"Anette.Christin.Andersen@nav.no",
-                "groups":[
-                    "Group_be80eb75-e270-40ca-a5f9-29ae8b63eecd",
-                    "1209XX-GA-Brukere",
-                    "4407-GO-Enhet",
-                    "0000-GA-EESSI-CLERK-UFORE",
-                    "0000-GA-Person-EndreSprakMalform",
-                    "0000-GA-Person-EndreKommunikasjon",
-                    "0000-ga-eessi-basis",
-                    "0000-GA-Arena","0000-GA-STDAPPS"
-                ]
-            }
-        """.trimIndent()
+        val navansattInfo = enhetsInfo()
         val navansatt = mapJsonToAny<Navansatt>(navansattInfo)
         assertEquals("4407-GO-Enhet", navansatt.groups[2])
         assertEquals("Andersen, Anette Christin", navansatt.navn)
@@ -78,7 +63,35 @@ class NavansattKlientTest {
         val enheter = mapJsonToAny<List<EnheterFraAd>>(enhetsResponse)
         assertEquals("NAV Familie- og pensjonsytelser Utland", enheter[0].navn)
         assertEquals("NAV Arbeid og ytelser Tønsberg", enheter[1].navn)
+    }
 
+    @Test
+    fun hentEnhetsInfo(){
+        val enhet: Enhet? = NavansattKlient(mockk(relaxed = true)).hentEnhetsInfo(enhetsInfo())
+        assertEquals(Enhet.ARBEID_OG_YTELSER_TONSBERG, enhet)
+    }
+
+    private fun enhetsInfo(): String {
+        val navansattInfo = """
+                {
+                    "ident":"H562012",
+                    "navn":"Andersen, Anette Christin",
+                    "fornavn":"Anette Christin",
+                    "etternavn":"Andersen",
+                    "epost":"Anette.Christin.Andersen@nav.no",
+                    "groups":[
+                        "Group_be80eb75-e270-40ca-a5f9-29ae8b63eecd",
+                        "1209XX-GA-Brukere",
+                        "4407-GO-Enhet",
+                        "0000-GA-EESSI-CLERK-UFORE",
+                        "0000-GA-Person-EndreSprakMalform",
+                        "0000-GA-Person-EndreKommunikasjon",
+                        "0000-ga-eessi-basis",
+                        "0000-GA-Arena","0000-GA-STDAPPS"
+                    ]
+                }
+            """.trimIndent()
+        return navansattInfo
     }
 
 
