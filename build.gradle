@@ -57,7 +57,7 @@ dependencies {
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.0.15"){
+	implementation("no.nav.eessi.pensjon:ep-routing:2.0.16"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
