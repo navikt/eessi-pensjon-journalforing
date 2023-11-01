@@ -41,7 +41,6 @@ import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
 import no.nav.eessi.pensjon.klienter.journalpost.IdType
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -212,7 +211,7 @@ class JournalforingService(
                         sakInformasjon,
                         sed
                     )
-                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse)
+                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt)
 
                 produserStatistikkmelding(
                     sedHendelse,
@@ -232,9 +231,10 @@ class JournalforingService(
 
     private fun loggDersomIkkeBehSedOppgaveOpprettes(
         bucType: BucType?,
-        sedHendelse: SedHendelse
+        sedHendelse: SedHendelse,
+        journalpostferdigstilt: Boolean
     ) = logger.info(
-        "Oppretter ikke behandleSedOppgave for " +
+        "Oppretter ikke behandleSedOppgave for utgående og ferdigstilt er: $journalpostferdigstilt" +
                 "bucType: $bucType, " +
                 "sedType: ${sedHendelse.sedType}, " +
                 "rinanr: ${sedHendelse.rinaSakId}"
