@@ -58,11 +58,12 @@ class JournalpostKlient(
         return opprettjournalpost.measure {
             return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost: $path")
-                secureLog.info("Journalpostrequesten: $request")
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
                 headers["Nav-User-Id"] = saksbehandlerIdent ?: "srveessipensjon"
+
+                secureLog.info("Journalpostrequesten: $request, /n ${headers.toString()}")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
