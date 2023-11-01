@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -61,7 +60,9 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
         enhetsInfo?.let { it ->
             val navansatt = mapJsonToAny<Navansatt>(it)
             val enhet = navansatt.groups.firstOrNull { it.contains("GO-Enhet") }?.replace("-GO-Enhet", "")
-            return enhet?.let { enhetsNr -> Enhet.getEnhet(enhetsNr) }.also {
+            return enhet?.let { enhetsNr ->
+                (Enhet.getEnhet(enhetsNr) ?: return null).also { logger.error("Det finnes ingen enhet $enhet") }
+            }.also {
                 logger.info("Henter ${navansatt.groups.size} grupper og hentet ut enhet: $enhet")
             }
         }
