@@ -61,7 +61,9 @@ class JournalpostKlient(
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
-                headers["Nav-User-Id"] = saksbehandlerIdent ?: "srveessipensjon"
+                if(!saksbehandlerIdent.isNullOrBlank()) {
+                    headers["Nav-User-Id"] = saksbehandlerIdent
+                }
 
                 secureLog.info("Journalpostrequesten: $request, /n ${headers.toString()}")
 
