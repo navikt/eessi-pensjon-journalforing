@@ -51,7 +51,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
         } else {
             val enhetsInformasjon = hentEnhetsInfo(hentAnsatt(navAnsattIdent)) ?: return null
             return Pair(navAnsattIdent, enhetsInformasjon).also {
-                logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: $navAnsattIdent, gir resulat Pair(saksbehandlerIdent, enhetsId) (${it.first}, ${it.second})")
+                logger.info("Nav ansatt i ${buc.processDefinitionName} med sakId ${buc.id} er: (saksbehandlerIdent:${it.first}, enhetsId:${it.second})")
             }
         }
     }
