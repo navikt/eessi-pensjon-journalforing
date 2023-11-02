@@ -44,7 +44,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
     //Pair(saksbehandlerIdent, enhetsId)
     fun navAnsattMedEnhetsInfo(buc: Buc, sedHendelse: SedHendelse): Pair<String, Enhet?>? {
         val navAnsattIdent = buc.documents?.firstOrNull { it.id == sedHendelse.rinaDokumentId }?.versions?.last()?.user?.name
-        logger.debug("navAnsatt: $navAnsattIdent")
+            .also { logger.debug("navAnsatt: $it") }
         if (navAnsattIdent == null) {
             logger.warn("Fant ingen NAV_ANSATT i BUC: ${buc.processDefinitionName} med sakId: ${buc.id}")
             return null
