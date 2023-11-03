@@ -210,6 +210,7 @@ class SedSendtListener(
         sakInformasjon: SakInformasjon?,
         sedHendelseModel: SedHendelse
     ): SakType? {
+        logger.info("Populerer saktype fra saktypeFraSED: $saktypeFraSED, sakInformasjon: $sakInformasjon, sedHendelseModel: $sedHendelseModel")
         if (sedHendelseModel.bucType == P_BUC_02 && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) return null
         else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType
             ?: saktypeFraSED
