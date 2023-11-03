@@ -15,11 +15,6 @@ internal class Norg2KlientTest {
 
     private val norg2Klient = Norg2Klient(mockrestTemplate)
 
-    @BeforeEach
-    fun setup() {
-        norg2Klient.initMetrics()
-    }
-
     @Test
     fun `hent arbeidsfordeligEnheter fra Norg2 avd Oslo`() {
         val response = getJsonFileFromResource("/norg2/norg2arbeidsfordelig4803result.json")

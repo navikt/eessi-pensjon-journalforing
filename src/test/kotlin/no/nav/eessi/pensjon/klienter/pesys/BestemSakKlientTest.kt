@@ -22,11 +22,6 @@ internal class BestemSakKlientTest {
 
     private val bestemSakKlient: BestemSakKlient = BestemSakKlient(mockRestTemplate)
 
-    @BeforeEach
-    fun setup() {
-        bestemSakKlient.initMetrics()
-    }
-
     @Test
     fun `Verifiser innsendt request ikke endres`() {
         val expectedRequest = BestemSakRequest("12345678901", ALDER, UUID.randomUUID(), UUID.randomUUID())

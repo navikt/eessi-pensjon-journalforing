@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,12 +30,10 @@ class JournalpostKlient(
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
     private lateinit var avbruttStatusInfo: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         avbruttStatusInfo = metricsHelper.init("avbruttStatusInfo")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
-
     }
 
     /**

@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.listeners
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -50,8 +49,7 @@ class SedSendtListener(
 
     fun getLatch() = latch
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         consumeOutgoingSed = metricsHelper.init("consumeOutgoingSed")
     }
 

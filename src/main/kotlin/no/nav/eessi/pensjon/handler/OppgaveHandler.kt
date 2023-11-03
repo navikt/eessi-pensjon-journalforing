@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.handler
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -18,8 +17,7 @@ class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, Str
 
     private lateinit var publiserOppgavemelding: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         publiserOppgavemelding = metricsHelper.init("publiserOppgavemelding")
     }
 

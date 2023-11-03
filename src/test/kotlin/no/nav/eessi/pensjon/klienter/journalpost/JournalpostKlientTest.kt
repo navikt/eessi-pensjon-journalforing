@@ -23,7 +23,6 @@ internal class JournalpostKlientTest {
     @BeforeEach
     fun setup() {
         journalpostKlient = JournalpostKlient(mockrestTemplate)
-        journalpostKlient.initMetrics()
     }
 
     @Test

@@ -67,8 +67,6 @@ internal class JournalforingServiceMedJournalpostTest {
 
     @BeforeEach
     fun setup() {
-        journalforingService.initMetrics()
-
         journalforingService.nameSpace = "test"
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P6000) } returns Pair("P6000 Supported Documents", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Age Pension", emptyList())

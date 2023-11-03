@@ -34,11 +34,6 @@ internal class SedSendtListenerTest {
         mockk(relaxed = true),
         "test")
 
-    @BeforeEach
-    fun setup() {
-        sedListener.initMetrics()
-    }
-
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
