@@ -1,13 +1,13 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import io.micrometer.core.instrument.Counter
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDENT
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.NPID
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
@@ -25,8 +25,7 @@ class PersonSok(
     private lateinit var sokPersonTellerTreff: Counter
     private lateinit var sokPersonTellerMiss: Counter
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         sokPersonTellerTreff = Counter.builder("sokPersonTellerTreff")
             .tag(metricsHelper.configuration.typeTag, metricsHelper.configuration.successTypeTagValue)
             .tag(metricsHelper.configuration.alertTag, metricsHelper.configuration.toggleOffTagValue)

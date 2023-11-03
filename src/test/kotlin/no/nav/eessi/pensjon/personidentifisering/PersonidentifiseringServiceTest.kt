@@ -38,10 +38,8 @@ class PersonidentifiseringServiceTest {
     }
 
     private val personService = mockk<PersonService>(relaxed = false)
-    private val personSok = PersonSok(personService).apply { initMetrics() }
-
+    private val personSok = PersonSok(personService)
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
-
 
     @Test
     fun `Gitt en P_BUC_02 med gjenlevende og en P8000 med forsikret så skal gjenlevende i P2100 returneres`() {

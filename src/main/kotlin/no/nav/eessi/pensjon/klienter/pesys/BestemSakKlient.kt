@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.klienter.pesys
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -29,8 +28,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
 
     private lateinit var hentPesysSaker: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         hentPesysSaker = metricsHelper.init("hentPesysSaker")
     }
 

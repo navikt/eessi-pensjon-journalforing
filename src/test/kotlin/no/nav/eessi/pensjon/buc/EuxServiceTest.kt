@@ -38,11 +38,6 @@ internal class EuxServiceTest {
 
     private val helper = EuxService(euxKlient)
 
-    @BeforeEach
-    fun before() {
-        helper.initMetrics()
-    }
-
     @AfterEach
     fun after() {
         confirmVerified(fagmodulKlient)

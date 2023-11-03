@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.pdf
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.MimeType
@@ -32,8 +31,7 @@ class PDFService(
 
     private lateinit var pdfConverter: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 

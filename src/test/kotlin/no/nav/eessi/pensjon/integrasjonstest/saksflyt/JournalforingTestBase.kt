@@ -139,18 +139,7 @@ internal open class JournalforingTestBase {
     @BeforeEach
     fun setup() {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
-
-        sendtListener.initMetrics()
-        mottattListener.initMetrics()
-        journalforingService.initMetrics()
         journalforingService.nameSpace = "test"
-        pdfService.initMetrics()
-        oppgaveHandler.initMetrics()
-        kravHandler.initMetrics()
-        bestemSakKlient.initMetrics()
-        personSok.initMetrics()
-        personService.initMetrics()
-        dokumentHelper.initMetrics()
     }
 
     @AfterEach

@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.klienter.norg2
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -24,8 +23,7 @@ class Norg2Klient(private val norg2RestTemplate: RestTemplate,
 
     private lateinit var hentArbeidsfordeling: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         hentArbeidsfordeling = metricsHelper.init("hentArbeidsfordeling")
     }
 

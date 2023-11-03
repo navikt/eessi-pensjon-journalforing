@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.buc
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
@@ -8,10 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -26,6 +22,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
+
 @Service
 class EuxService(
     private val euxKlient: EuxKlientLib,
@@ -42,8 +39,7 @@ class EuxService(
     private lateinit var hentBucDeltakere: MetricsHelper.Metric
     private lateinit var hentInstitusjoner: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         hentSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
         sendSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
         hentBuc = metricsHelper.init("hentBuc", alert = MetricsHelper.Toggle.OFF)

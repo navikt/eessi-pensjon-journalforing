@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.handler
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+
 @Service
 class KravInitialiseringsHandler(private val kravInitialiseringKafkaTemplate: KafkaTemplate<String, String>,
                                  @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest() ) {
@@ -18,8 +18,7 @@ class KravInitialiseringsHandler(private val kravInitialiseringKafkaTemplate: Ka
 
     private lateinit var publiserKravmelding: MetricsHelper.Metric
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         publiserKravmelding = metricsHelper.init("publiserKravmelding")
     }
 

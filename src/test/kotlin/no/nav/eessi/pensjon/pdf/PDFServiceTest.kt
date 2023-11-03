@@ -28,11 +28,6 @@ class PDFServiceTest {
 
     private val pdfService = PDFService(dokumentHelper)
 
-    @BeforeEach
-    fun init() {
-        pdfService.initMetrics()
-    }
-
     @Test
     fun `Gitt en json dokument uten vedlegg saa konverter til json dokument med pdf innhold`() {
         val fileContent = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json").readText()

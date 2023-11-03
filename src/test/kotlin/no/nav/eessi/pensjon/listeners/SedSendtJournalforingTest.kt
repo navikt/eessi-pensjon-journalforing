@@ -102,10 +102,6 @@ internal class SedSendtJournalforingTest {
 
     @BeforeEach
     fun setup() {
-        sedListener.initMetrics()
-        jouralforingService.initMetrics()
-        euxService.initMetrics()
-
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
 

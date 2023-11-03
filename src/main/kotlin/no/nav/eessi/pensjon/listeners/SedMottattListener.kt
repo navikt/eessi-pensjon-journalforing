@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.listeners
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -26,8 +25,6 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.annotation.PartitionOffset
-import org.springframework.kafka.annotation.TopicPartition
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.*
@@ -51,8 +48,7 @@ class SedMottattListener(
 
     fun getLatch() = latch
 
-    @PostConstruct
-    fun initMetrics() {
+    init {
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
 

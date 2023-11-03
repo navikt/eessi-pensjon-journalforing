@@ -82,14 +82,6 @@ internal class SedSendtJournalforingMedNavansattTest {
         "test",
     )
 
-    @BeforeEach
-    fun setup() {
-        sedListener.initMetrics()
-        journalforingService.initMetrics()
-        euxService.initMetrics()
-    }
-
-    @Test
     fun `Navansatt Ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
         // Denne oppgaven blir rutet til UFORE_UTLANDSTILSNITT siden det er en identifisert person under 62 år (over 18) som er bosatt Norge
         val aktoerId = "3216549873212"
