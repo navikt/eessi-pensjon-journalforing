@@ -79,8 +79,16 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }.also {
-            if(it) return false
-            return true
+            logger.warn("Journalpost kan ikke ferdigstilles da det mangler data:" +
+                    "sak: ${request.sak}, " +
+                    "tema: ${request.tema}, " +
+                    "kanal: ${request.kanal}, " +
+                    "tittel: ${request.tittel}, " +
+                    "dokumenter: ${request.dokumenter}, "+
+                    "avsenderMottaker: ${request.avsenderMottaker}, " +
+                    "bruker: ${request.bruker?.id ?: "Bruker har ikke ID"}, " +
+                    "journalfoerendeEnhet: ${request.journalfoerendeEnhet}")
+            return !it
         }
     }
 
