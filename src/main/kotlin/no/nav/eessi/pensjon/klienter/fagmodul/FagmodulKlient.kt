@@ -31,13 +31,12 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
 
         // egen try catch for mapping av json der vi ønsker en exception og synlig feil i logging
         responseJson.let {
-            val saklist: List<SakInformasjon> = try {
+            return try {
                 mapJsonToAny(responseJson)
             }
             catch(ex: Exception) {
                 throw RuntimeException("En feil oppstod under mapping av json for pensjonsakliste: $ex")
             }
-            return saklist
         }
     }
 }
