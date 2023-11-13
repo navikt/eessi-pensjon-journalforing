@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.klienter.fagmodul
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.utils.mapAnyToJson
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -12,7 +14,6 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
 
-
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
         return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
             validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
@@ -21,12 +22,8 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakId: String): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
-        val saklist: List<SakInformasjon> = try {
-            fagmodulKlient.hentPensjonSaklist(aktoerId)
-        } catch (e: Exception) {
-            logger.warn("Feil ved henting av saker på aktørId=$aktoerId – Returnerer tom liste. ", e)
-            return null
-        }
+        val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+
         if(saklist.isEmpty()){
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ") 
         }

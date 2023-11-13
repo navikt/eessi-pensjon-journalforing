@@ -17,21 +17,27 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
     fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
         val path = "/pensjon/sakliste/$aktoerId"
 
-        try {
+        val responseJson = try {
             val responsebody = fagmodulOidcRestTemplate.exchange(
                 path,
                 HttpMethod.GET,
                 null,
                 String::class.java).body
-            val json = responsebody.orEmpty()
-            return mapJsonToAny(json)
-        } catch(ex: HttpStatusCodeException) {
-            logger.error("En feil oppstod under henting av pensjonsakliste ex: $ex body: ${ex.responseBodyAsString}", ex)
-            throw RuntimeException("En feil oppstod under henting av pensjonsakliste ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            responsebody.orEmpty()
         } catch(ex: Exception) {
             logger.error("En feil oppstod under henting av pensjonsakliste ex: $ex", ex)
-            throw RuntimeException("En feil oppstod under henting av pensjonsakliste ex: ${ex.message}")
+            return emptyList()
+        }
+
+        // egen try catch for mapping av json der vi ønsker en exception og synlig feil i logging
+        responseJson.let {
+            val saklist: List<SakInformasjon> = try {
+                mapJsonToAny(responseJson)
+            }
+            catch(ex: Exception) {
+                throw RuntimeException("En feil oppstod under mapping av json for pensjonsakliste: $ex")
+            }
+            return saklist
         }
     }
-
 }

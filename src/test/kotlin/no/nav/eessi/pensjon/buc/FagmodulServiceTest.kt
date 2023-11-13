@@ -79,19 +79,6 @@ internal class FagmodulServiceTest {
     }
 
     @Test
-    fun `Gitt at det finnes en aktoerid med eessisak der land er Norge når kall til tjenesten feiler så kastes det en exception`() {
-        every { fagmodulKlient.hentPensjonSaklist(any()) } throws RuntimeException()
-
-        val mockAlleSedIBuc = listOf(
-                mockSED(P2000, eessiSakId = "12345")
-        )
-
-        assertNull(helper.hentPensjonSakFraPesys("123123", mockAlleSedIBuc))
-
-        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
-    }
-
-    @Test
     fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
         val expected = SakInformasjon(sakId = "22874955", sakType = ALDER, sakStatus = LOPENDE)
 
