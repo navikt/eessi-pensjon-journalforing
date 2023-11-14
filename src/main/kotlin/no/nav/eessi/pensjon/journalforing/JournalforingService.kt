@@ -373,7 +373,7 @@ class JournalforingService(
                     } else PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
                 }
                 if (under62AarIkkeBarn) {
-                    if (bosattNorge) {
+                    if (bosattNorge && sakInformasjon?.sakType != SakType.GJENLEV) {
                         return if (antallIdentifisertePersoner <= 1) {
                             UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
                         } else ID_OG_FORDELING
