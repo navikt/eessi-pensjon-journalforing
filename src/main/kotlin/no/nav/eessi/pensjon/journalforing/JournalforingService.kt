@@ -69,7 +69,7 @@ class JournalforingService(
      *     b) og opprette krav automatisk
      * 8.) Generer statisikk melding
      */
-     fun journalfor(
+    fun journalfor(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
@@ -132,13 +132,15 @@ class JournalforingService(
 
                 // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
                 if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
-                    journalpostService.oppdaterDistribusjonsinfo (journalPostResponse.journalpostId)
+                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
 
                 val aktoerId = identifisertPerson?.aktoerId
-                logger.info("********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
-                        ", sed: ${sedHendelse.sedType}" +
-                        ", enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+                logger.info(
+                    "********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
+                            ", sed: ${sedHendelse.sedType}" +
+                            ", enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********"
+                )
 
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
@@ -328,7 +330,7 @@ class JournalforingService(
                 journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
                 true
             } else false
-        return sattStatusAvbrutt .also {
+        return sattStatusAvbrutt.also {
             logger.info("Journalpost settes til avbrutt == $it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
         }
     }
@@ -361,57 +363,65 @@ class JournalforingService(
                 )
             )
 
-            val over62Aar = Period.between(fdato, LocalDate.now()).years > 61
-            val barn = Period.between(fdato, LocalDate.now()).years < 18
-            val under62AarIkkeBarn = Period.between(fdato, LocalDate.now()).years in 19..61
+            if (enhetFraRouting != ID_OG_FORDELING) return enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
 
-            val bosattNorge = identifisertPerson.landkode == "NOR"
-            if (enhetFraRouting == ID_OG_FORDELING && bucType in listOf(P_BUC_05, P_BUC_06)) {
-                if (over62Aar || barn) {
-                    return if(bosattNorge){
-                        NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
-                    } else PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
-                }
-                if (under62AarIkkeBarn) {
-                    if (bosattNorge) {
-                        return if (antallIdentifisertePersoner <= 1) {
-                            UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                        } else ID_OG_FORDELING
-                    }
-                    if (antallIdentifisertePersoner <= 1) {
-                        return UFORE_UTLAND.also { logEnhet(enhetFraRouting, it) }
-                    }
-                }
-                ID_OG_FORDELING
-            }
+            else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
-            if (enhetFraRouting == ID_OG_FORDELING ) {
-                val behandlingstema = journalpostService.bestemBehandlingsTema(
-                    bucType!!, saktype,
-                    journalpostService.hentTema(
-                        bucType,
-                        saktype,
-                        identifisertPerson.fnr,
-                        antallIdentifisertePersoner
-                    ),
-                    antallIdentifisertePersoner,
-                )
-                logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema med enhet:$enhetFraRouting")
-                return if (bosattNorge) {
-                    when (behandlingstema) {
-                        GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND.also { logEnhet(enhetFraRouting, it) }
-                        UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                    }
-                } else when (behandlingstema) {
-                    GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND.also { logEnhet(enhetFraRouting, it) }
-                    UFOREPENSJON -> UFORE_UTLANDSTILSNITT.also { logEnhet(enhetFraRouting, it) }
-                }
-            }
-            enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
+            else return enhetBasertPaaBehandlingstema(bucType, saktype, identifisertPerson, antallIdentifisertePersoner)
+                .also { logEnhet(enhetFraRouting, it) }
         }
     }
 
-    private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) = logger.info("Journalpost enhet: $enhetFraRouting rutes til -> Saksbehandlende enhet: $it")
+    private fun enhetDersomIdOgFordeling(
+        identifisertPerson: IdentifisertPerson,
+        fdato: LocalDate?,
+        antallIdentifisertePersoner: Int
+    ) : Enhet {
+        val bosattNorge = identifisertPerson.landkode == "NOR"
+        val pensjonist = Period.between(fdato, LocalDate.now()).years > 61
+        val barn = Period.between(fdato, LocalDate.now()).years < 18
+        val ufoereAlder = Period.between(fdato, LocalDate.now()).years in 19..61
+
+        if (pensjonist || barn) {
+            return if (bosattNorge) {
+                NFP_UTLAND_AALESUND
+            } else PENSJON_UTLAND
+        }
+        if (ufoereAlder) {
+            if (bosattNorge) {
+                return if (antallIdentifisertePersoner <= 1) {
+                    UFORE_UTLANDSTILSNITT
+                } else ID_OG_FORDELING
+            }
+            if (antallIdentifisertePersoner <= 1) {
+                return UFORE_UTLAND
+            }
+        }
+        return ID_OG_FORDELING
+    }
+
+    private fun enhetBasertPaaBehandlingstema(
+        bucType: BucType?,
+        saktype: SakType?,
+        identifisertPerson: IdentifisertPerson,
+        antallIdentifisertePersoner: Int
+    ): Enhet {
+        val tema = journalpostService.hentTema( bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner)
+        val behandlingstema = journalpostService.bestemBehandlingsTema( bucType, saktype, tema, antallIdentifisertePersoner)
+        logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema")
+        return if (identifisertPerson.landkode == "NOR") {
+            when (behandlingstema) {
+                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND
+                UFOREPENSJON -> UFORE_UTLANDSTILSNITT
+            }
+        } else when (behandlingstema) {
+            GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND
+            UFOREPENSJON -> UFORE_UTLANDSTILSNITT
+        }
+    }
+
+    private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
+        logger.info("Journalpost enhet: $enhetFraRouting rutes til -> Saksbehandlende enhet: $it")
 
     /**
      * PESYS støtter kun GB
@@ -428,16 +438,19 @@ class JournalforingService(
         sakType: SakType?,
         hendelsesType: HendelseType
     ) {
-        statistikkPublisher.publiserStatistikkMelding(StatistikkMelding(
-            sedHendelse.rinaSakId,
-            sedHendelse.rinaDokumentId,
-            sedHendelse.rinaDokumentVersjon,
-            LocalDateTime.now(),
-            oppgaveEierEnhet,
-            sedHendelse.bucType!!,
-            sedHendelse.sedType!!,
-            sakType,
-            hendelsesType))
+        statistikkPublisher.publiserStatistikkMelding(
+            StatistikkMelding(
+                sedHendelse.rinaSakId,
+                sedHendelse.rinaDokumentId,
+                sedHendelse.rinaDokumentVersjon,
+                LocalDateTime.now(),
+                oppgaveEierEnhet,
+                sedHendelse.bucType!!,
+                sedHendelse.sedType!!,
+                sakType,
+                hendelsesType
+            )
+        )
     }
 
     fun opprettBehandleSedOppgave(
@@ -447,7 +460,7 @@ class JournalforingService(
         sedHendelseModel: SedHendelse,
         uSupporterteVedlegg: String? = null
     ) {
-        if(sedHendelseModel.avsenderLand != "NO") {
+        if (sedHendelseModel.avsenderLand != "NO") {
             val oppgave = OppgaveMelding(
                 sedHendelseModel.sedType,
                 journalpostId,
@@ -458,7 +471,7 @@ class JournalforingService(
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED
             )
-        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
+            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
     }
 
