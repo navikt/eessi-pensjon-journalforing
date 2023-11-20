@@ -119,8 +119,6 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             throw IllegalStateException("Ugyldig individnummer: $individnummer")
         }
 
-
-
     companion object {
         @JvmStatic
         @JsonCreator
@@ -132,11 +130,9 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             }
         }
 
-        fun vask11sifre(nummer: String?): String {
-            return if(nummer.isNullOrBlank() || nummer.length != 11) ""
-            else {
-                nummer.replace(Regex("""\b\d{11}\b"""), "***")
-            }
+        fun vaskFnr(nummer: String?): String? {
+            return if(nummer.isNullOrBlank()) null
+            else nummer.replace(Regex("""\b\d{11}\b"""), "***")
         }
 
         fun fraMedValidation(fnr: String?): Fodselsnummer? {

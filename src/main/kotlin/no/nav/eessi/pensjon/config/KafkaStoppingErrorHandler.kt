@@ -29,8 +29,8 @@ class KafkaStoppingErrorHandler : CommonContainerStoppingErrorHandler() {
 
     fun textListingOf(records: List<ConsumerRecord<*, *>>) =
         records.joinToString(separator = "\n") {
-            "-" .repeat(20) + "\n" + vask11sifre(it.toString())
+            "-" .repeat(20) + "\n" + vaskFnr(it.toString())
         }
 
-    private fun vask11sifre(tekst: String) = tekst.replace(Regex("""\b\d{11}\b"""), "***")
+    private fun vaskFnr(tekst: String) = tekst.replace(Regex("""\b\d{11}\b"""), "***")
 }
