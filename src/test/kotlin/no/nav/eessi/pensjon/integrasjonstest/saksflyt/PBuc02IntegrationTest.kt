@@ -219,7 +219,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 "BARNEP", "GJENLEV"
             ]
         )
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: SakType) {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, og burker har gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til NFP_UTLAND_AALESUND`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
@@ -242,7 +242,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
     }
@@ -450,7 +450,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 "BARNEP", "GJENLEV"
             ]
         )
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV Pensjon Utland`(saktype: SakType) {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV NFP_UTLAND_AALESUND`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.SENT)
@@ -473,36 +473,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
-            }
-        }
-
-        @Test
-        fun `Hvis barnep og sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001`() {
-
-            every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-
-            val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.SENT)
-            )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = BARNEP , sakStatus = LOPENDE)
-                )
-            )
-
-            testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
-                FodselsnummerGenerator.generateFnrForTest(12),
-                bestemsak,
-                land = "NOR",
-                alleDocs = allDocuemtActions,
-                relasjonAvod = RelasjonTilAvdod.EGET_BARN,
-                hendelseType = SENDT,
-                norg2enhet = null
-            ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
     }

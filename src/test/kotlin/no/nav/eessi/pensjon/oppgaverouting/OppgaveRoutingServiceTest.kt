@@ -334,10 +334,10 @@ internal class OppgaveRoutingServiceTest {
             fun arguments() =
                 Arrays.stream(
                     arrayOf(
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, GJENLEV),
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, GJENLEV),
                         TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
                         TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, AVSLUTTET),
-                        TestArgumentsPBuc02(PENSJON_UTLAND, NORGE, BARNEP),
+                        TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, BARNEP),
 
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, ALDER),
                         TestArgumentsPBuc02(UFORE_UTLANDSTILSNITT, NORGE, UFOREP, LOPENDE),
@@ -525,7 +525,7 @@ internal class OppgaveRoutingServiceTest {
         )
 
         val result = routingService.hentEnhet(oppgaveroutingrequest)
-        assertEquals(PENSJON_UTLAND, result)
+        assertEquals(NFP_UTLAND_AALESUND, result)
 
     }
 
