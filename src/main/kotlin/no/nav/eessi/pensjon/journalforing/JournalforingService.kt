@@ -202,11 +202,12 @@ class JournalforingService(
         bucType: BucType?,
         sedHendelse: SedHendelse,
         journalpostferdigstilt: Boolean
-    ) = logger.info(
-        "Oppretter ikke behandleSedOppgave for utgående og ferdigstilt er: $journalpostferdigstilt" +
-                "bucType: $bucType, " +
-                "sedType: ${sedHendelse.sedType}, " +
-                "rinanr: ${sedHendelse.rinaSakId}"
+    ) = logger.info("""
+            Oppretter ikke behandleSedOppgave for utgående og ferdigstilt er: $journalpostferdigstilt
+            bucType: $bucType 
+            sedType: ${sedHendelse.sedType}
+            rinanr: ${sedHendelse.rinaSakId}
+        """.trimIndent()
     )
 
     /**
