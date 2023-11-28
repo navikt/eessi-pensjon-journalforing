@@ -85,7 +85,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                     "tema: ${request.tema}, " +
                     "kanal: ${request.kanal}, " +
                     "tittel: ${request.tittel}, " +
-                    "dokumenter: ${request.dokumenter}, "+
                     "avsenderMottaker: ${request.avsenderMottaker}, " +
                     "bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr" }, " +
                     "journalfoerendeEnhet: ${request.journalfoerendeEnhet}")
