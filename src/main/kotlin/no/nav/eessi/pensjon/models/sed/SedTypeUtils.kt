@@ -22,7 +22,7 @@ object SedTypeUtils {
     )
 
     /**
-     * SED-typer vi IKKE behandler i Journalføring.
+     * SED-typer vi IKKE benytter for innhenting av data/meta-data i Journalføring.
      */
     val ugyldigeTyper: Set<SedType> = setOf(
         P13000, X001, X002, X003, X004, X006, X007, X009,
