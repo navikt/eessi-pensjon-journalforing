@@ -2,15 +2,21 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.eux.model.document.MimeType
+import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -19,12 +25,21 @@ import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
 import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers
+import org.springframework.test.web.client.response.MockRestResponseCreators
+import org.springframework.web.client.RestTemplate
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedSendtP9000IntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
@@ -32,19 +47,25 @@ import org.springframework.test.context.ActiveProfiles
 )
 internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
-
     @MockkBean
     private lateinit var personService: PersonService
 
     init {
-        if (System.getProperty("mockServerport") == null) {
-            mockServer = ClientAndServer(Configuration().apply {
-                logLevel(Level.ERROR)
-            }, PortFactory.findFreePort())
+        System.getProperty("mockServerport") ?: run {
+            mockServer = ClientAndServer(Configuration().logLevel(Level.ERROR), PortFactory.findFreePort())
                 .also {
                     System.setProperty("mockServerport", it.localPort.toString())
                 }
         }
+    }
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
+
+        @Bean
+        fun euxKlient(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
     }
 
     @Test
@@ -75,7 +96,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
             )
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/10000000001", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p8000_BARN1.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/20000000002", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p8000_BARN2.json")
-            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003",HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p9000.json")
+            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p9000.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003/filer", HttpMethod.GET, "/pdf/pdfResponseMedTomtVedlegg.json")
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_05_P9000.json")
