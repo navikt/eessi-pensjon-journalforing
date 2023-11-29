@@ -59,10 +59,10 @@ class RestTemplateConfig(
     lateinit var navansattUrl: String
 
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
+    fun euxRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
-    @Bean
-    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+//    @Bean
+//    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
     @Bean
     fun norg2RestTemplate(): RestTemplate? = buildRestTemplate(norg2Url)

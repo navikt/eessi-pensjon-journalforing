@@ -127,14 +127,16 @@ internal class ConfigRestTemplateTest {
     @TestConfiguration
     class TestConfig {
 
-        @Bean
-        @Primary
-        fun EuxKlientLib(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+//        @Bean
+//        @Primary
+//        fun EuxKlientLib(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
         @Bean
         fun navansattRestTemplate(): RestTemplate = mockk(relaxed = true)
 
-        fun euxOAuthRestTemplate(): RestTemplate {
+        @Bean
+        @Primary
+        fun euxRestTemplate(): RestTemplate {
             return RestTemplateBuilder().build().apply {
                 val mvc = MockRestServiceServer.bindTo(this).build()
                 val sedDokumentfiler = SedDokumentfiler(
