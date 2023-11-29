@@ -84,10 +84,10 @@ class IntegrasjonsTestConfig {
     fun journalpostOidcRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate  = mockedRestTemplate()
+    fun euxRestTemplate(): RestTemplate  = mockedRestTemplate()
 
-    @Bean
-    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+//    @Bean
+//    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
     @Bean
     fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
