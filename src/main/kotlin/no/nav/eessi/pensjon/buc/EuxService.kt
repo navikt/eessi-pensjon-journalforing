@@ -22,6 +22,8 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 @Service
 class EuxService(
@@ -120,11 +122,15 @@ class EuxService(
             .also { logger.info("Fant ${it.size} dokumenter i BUC: $it") }
     }
 
+    @OptIn(ExperimentalTime::class)
     fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
-        return documents
-            .filter(ForenkletSED::harGyldigStatus)
-            .map { sed -> Pair(sed.id, hentSed(rinaSakId, sed.id)) }
-            .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
+         return measureTimedValue {
+             documents.filter(ForenkletSED::harGyldigStatus)
+                 .map { sed -> sed.id to hentSed(rinaSakId, sed.id) }
+                 .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
+         }.also {
+             logger.info("hentAlleSedIBuc tid: ${it.duration.inWholeSeconds}")
+         }.value
     }
 
     fun isNavCaseOwner(buc: Buc): Boolean {
