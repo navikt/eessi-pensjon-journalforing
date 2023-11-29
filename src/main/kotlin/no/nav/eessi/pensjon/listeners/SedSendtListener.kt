@@ -71,6 +71,12 @@ class SedSendtListener(
 
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
+                        if(sedHendelse.rinaSakId in listOf("4179656")){
+                            logger.error("Hopper over denne saken grunnet feil ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
+                            acknowledgment.acknowledge()
+                            return@measure
+                        }
+
                         if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
                             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
                             acknowledgment.acknowledge()

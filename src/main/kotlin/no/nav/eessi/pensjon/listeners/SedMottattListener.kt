@@ -74,7 +74,7 @@ class SedMottattListener(
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
                         if(sedHendelse.rinaSakId in listOf("4179656")){
-                            logger.error("Hopper over denne saken grunnet feil ${sedHendelse.rinaSakId}")
+                            logger.error("Hopper over denne saken grunnet feil ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
                             acknowledgment.acknowledge()
                             return@measure
                         }
