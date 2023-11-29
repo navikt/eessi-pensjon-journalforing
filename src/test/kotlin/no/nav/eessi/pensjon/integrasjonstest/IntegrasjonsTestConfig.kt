@@ -84,18 +84,12 @@ class IntegrasjonsTestConfig {
     fun journalpostOidcRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
-    fun euxRestTemplate(): RestTemplate  = mockedRestTemplate()
-
-//    @Bean
-//    fun euxKlient(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
-
-    @Bean
     fun pdlRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
     fun navansattRestTemplate(): RestTemplate = mockedRestTemplate()
 
-    private fun mockedRestTemplate(): RestTemplate {
+    fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")
         return RestTemplateBuilder()
             .rootUri("http://localhost:${port}")

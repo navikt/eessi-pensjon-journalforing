@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.MimeType
@@ -73,9 +72,6 @@ internal class ConfigRestTemplateTest {
     @MockkBean
     private lateinit var journalpostKlient: JournalpostKlient
 
-    //@MockkBean
-    //private lateinit var journalforingService: JournalforingService
-
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
 
@@ -126,10 +122,6 @@ internal class ConfigRestTemplateTest {
 
     @TestConfiguration
     class TestConfig {
-
-//        @Bean
-//        @Primary
-//        fun EuxKlientLib(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
 
         @Bean
         fun navansattRestTemplate(): RestTemplate = mockk(relaxed = true)
