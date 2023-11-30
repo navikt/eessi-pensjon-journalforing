@@ -80,7 +80,7 @@ internal class EuxServiceTest {
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
         assertEquals(2, alledocs.size)
 
-        val alleSediBuc =  helper.hentAlleSedIBuc(rinaid, alledocs)
+        val alleSediBuc =  helper.hentSedMedGyldigStatus(rinaid, alledocs)
         assertEquals(1, alleSediBuc.size)
 
         val kansellertdocs =  helper.hentAlleKansellerteSedIBuc(rinaid, alledocs)
@@ -183,7 +183,7 @@ internal class EuxServiceTest {
         every { euxKlient.hentSedJson(any(), any()) } returns sedP2000.toJson()
 
         val result = helper.hentAlleGyldigeDokumenter(buc)
-        val actual = helper.hentAlleSedIBuc(rinaSakId, result)
+        val actual = helper.hentSedMedGyldigStatus(rinaSakId, result)
 
         assertEquals(1, actual.size)
 

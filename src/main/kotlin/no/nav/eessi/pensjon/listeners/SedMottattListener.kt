@@ -34,7 +34,7 @@ import java.util.concurrent.CountDownLatch
 class SedMottattListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
-    private val dokumentHelper: EuxService,
+    private val euxService: EuxService,
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
@@ -73,11 +73,7 @@ class SedMottattListener(
 
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-//                        if(sedHendelse.rinaSakId in listOf("4179656")){
-//                            logger.error("Hopper over denne saken grunnet feil ${sedHendelse.rinaSakId}, ${sedHendelse.rinaDokumentId}")
-//                            acknowledgment.acknowledge()
-//                            return@measure
-//                        }
+//
 
                         if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
                             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
@@ -88,18 +84,19 @@ class SedMottattListener(
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
                             val bucType = sedHendelse.bucType!!
-                            val buc = dokumentHelper.hentBuc(sedHendelse.rinaSakId)
+                            val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
-                            val alleGyldigeDokumenter = dokumentHelper.hentAlleGyldigeDokumenter(buc)
-                            val alleSedIBucPair = dokumentHelper.hentAlleSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val kansellerteSeder = dokumentHelper.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedIBucPair)
+                            val alleGyldigeDokumenter = euxService.hentAlleGyldigeDokumenter(buc)
+                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+
+                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
 
                             //identifisere Person hent Person fra PDL valider Person
-                            val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedIBucPair, bucType)
-                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedIBucPair, bucType, potensiellePersonRelasjoner, MOTTATT, sedHendelse.rinaSakId)
+                            val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
+                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedMedGyldigStatus, bucType, potensiellePersonRelasjoner, MOTTATT, sedHendelse.rinaSakId)
 
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
                                 bucType,
@@ -110,14 +107,14 @@ class SedMottattListener(
                                 potensiellePersonRelasjoner
                             )
 
-                            val alleSedIBucList = alleSedIBucPair.flatMap { (_, sed) -> listOf(sed) }
+                            val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
-                            val saktypeFraSed = dokumentHelper.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
+                            val saktypeFraSed = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon = pensjonSakInformasjonMottatt(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
 
                             val currentSed =
-                                alleSedIBucPair.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                                alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                             journalforingService.journalfor(
                                 sedHendelse,
                                 MOTTATT,

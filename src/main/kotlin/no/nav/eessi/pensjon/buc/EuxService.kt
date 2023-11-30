@@ -123,13 +123,13 @@ class EuxService(
     }
 
     @OptIn(ExperimentalTime::class)
-    fun hentAlleSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
+    fun hentSedMedGyldigStatus(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
          return measureTimedValue {
              documents.filter(ForenkletSED::harGyldigStatus)
                  .map { sed -> sed.id to hentSed(rinaSakId, sed.id) }
                  .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
          }.also {
-             logger.info("hentAlleSedIBuc for rinasak:$rinaSakId tid: ${it.duration.inWholeSeconds}")
+             logger.info("hentSed for rinasak:$rinaSakId tid: ${it.duration.inWholeSeconds}")
          }.value
     }
 

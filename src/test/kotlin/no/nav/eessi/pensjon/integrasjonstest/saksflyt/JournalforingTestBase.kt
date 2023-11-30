@@ -120,7 +120,7 @@ internal open class JournalforingTestBase {
     protected val mottattListener: SedMottattListener = SedMottattListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
-        dokumentHelper = dokumentHelper,
+        euxService = dokumentHelper,
         fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
         profile = "test",
@@ -128,7 +128,7 @@ internal open class JournalforingTestBase {
     protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
-        dokumentHelper = dokumentHelper,
+        euxService = dokumentHelper,
         bestemSakService = bestemSakService,
         fagmodulService = fagmodulService,
         profile = "test",
