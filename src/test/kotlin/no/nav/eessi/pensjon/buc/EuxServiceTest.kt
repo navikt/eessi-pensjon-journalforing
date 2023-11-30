@@ -1,11 +1,7 @@
 package no.nav.eessi.pensjon.buc
 
-import io.mockk.clearAllMocks
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
+import io.mockk.*
+import no.nav.eessi.pensjon.eux.klient.EuxKlient
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -27,13 +23,12 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
 internal class EuxServiceTest {
 
-    private val euxKlient: EuxKlientLib = mockk(relaxed = true)
+    private val euxKlient: EuxKlient = mockk(relaxed = true)
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
 
     private val helper = EuxService(euxKlient)

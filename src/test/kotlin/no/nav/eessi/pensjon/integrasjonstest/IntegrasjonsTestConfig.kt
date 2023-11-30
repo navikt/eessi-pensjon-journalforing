@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -13,11 +12,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.ConsumerFactory
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory
-import org.springframework.kafka.core.DefaultKafkaProducerFactory
-import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.web.client.RestTemplate

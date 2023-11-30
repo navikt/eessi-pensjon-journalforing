@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.buc
 
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
+import no.nav.eessi.pensjon.eux.klient.EuxKlient
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -27,7 +27,7 @@ import kotlin.time.measureTimedValue
 
 @Service
 class EuxService(
-    private val euxKlient: EuxKlientLib,
+    private val euxKlient: EuxKlient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
