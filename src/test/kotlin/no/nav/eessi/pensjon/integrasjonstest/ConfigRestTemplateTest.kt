@@ -8,7 +8,6 @@ import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -40,9 +39,8 @@ import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.client.MockRestServiceServer
-import org.springframework.test.web.client.match.MockRestRequestMatchers
-import org.springframework.test.web.client.response.MockRestResponseCreators
-import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
@@ -56,9 +54,6 @@ import org.springframework.web.client.RestTemplate
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
 )
 internal class ConfigRestTemplateTest {
-
-    @Autowired
-    private lateinit var mockMvc: MockMvc
 
     @Autowired
     private lateinit var sedSendtListener: SedSendtListener
@@ -135,36 +130,21 @@ internal class ConfigRestTemplateTest {
                     SedVedlegg("", MimeType.PDF, ""),
                     listOf(SedVedlegg("", MimeType.PDF, javaClass.getResource("/25_mb_randomString.txt")!!.readText()))
                 )
-
-                mvc.expect(MockRestRequestMatchers.requestTo("/buc/147666"))
-                    .andRespond(
-                        MockRestResponseCreators
-                            .withSuccess(
-                                Buc(
-                                    id = "147666",
-                                    participants = emptyList<Participant>(),
-                                    documents = mapJsonToAny(
-                                        javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText()
-                                    )
-                                ).toJson(), MediaType.APPLICATION_JSON
-                            )
-                    )
-                mvc.expect(MockRestRequestMatchers.requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018"))
-                    .andRespond(
-                        MockRestResponseCreators
-                            .withSuccess(
-                                javaClass.getResource("/sed/P2000-NAV.json")!!.readText(),
-                                MediaType.APPLICATION_JSON
-                            )
-                    )
-                mvc.expect(MockRestRequestMatchers.requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer"))
-                    .andRespond(
-                        MockRestResponseCreators.withSuccess(
-                            sedDokumentfiler.toJson(),
-                            MediaType.APPLICATION_JSON
-                        )
-                    )
+                val sedP2000 = javaClass.getResource("/sed/P2000-NAV.json")!!.readText()
+                with(mvc) {
+                    expect(requestTo("/buc/147666")).andRespond(withBucResponse())
+                    expect(requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018")).andRespond(withSuccess(sedP2000, MediaType.APPLICATION_JSON))
+                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond( withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
+                }
             }
         }
+
+        private fun withBucResponse() = withSuccess(
+            Buc(
+                id = "147666",
+                participants = emptyList(),
+                documents = mapJsonToAny(javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText())
+            ).toJson(), MediaType.APPLICATION_JSON
+        )
     }
 }
