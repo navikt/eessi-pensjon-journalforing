@@ -129,7 +129,7 @@ class EuxService(
                  .map { sed -> sed.id to hentSed(rinaSakId, sed.id) }
                  .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
          }.also {
-             logger.info("hentAlleSedIBuc tid: ${it.duration.inWholeSeconds}")
+             logger.info("hentAlleSedIBuc for rinasak:$rinaSakId tid: ${it.duration.inWholeSeconds}")
          }.value
     }
 
