@@ -6,11 +6,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
+import no.nav.eessi.pensjon.eux.klient.EuxKlient
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
@@ -38,8 +40,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -55,7 +56,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val norg2Service = Norg2Service(norg2Klient)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
-    private val euxKlient = mockk<EuxKlientLib>(relaxed = true)
+    private val euxKlient = mockk<EuxKlient>(relaxed = true)
     private val euxService = EuxService(euxKlient)
     private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
