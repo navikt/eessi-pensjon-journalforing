@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -123,7 +124,11 @@ internal class ConfigRestTemplateTest {
 
         @Bean
         @Primary
-        fun euxRestTemplate(): RestTemplate {
+        fun euxKlientLab(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+
+        @Bean
+        @Primary
+        fun euxOAuthRestTemplate(): RestTemplate {
             return RestTemplateBuilder().build().apply {
                 val mvc = MockRestServiceServer.bindTo(this).build()
                 val sedDokumentfiler = SedDokumentfiler(

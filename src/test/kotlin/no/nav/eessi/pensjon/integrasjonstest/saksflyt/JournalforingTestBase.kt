@@ -2,8 +2,9 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
+import no.nav.eessi.pensjon.buc.EuxCacheableKlient
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.klient.EuxKlient
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -68,13 +69,14 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID_2 = "0009876543210"
     }
 
-    protected val euxKlient: EuxKlient = mockk()
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
+    protected val euxKlient: EuxKlientLib = mockk()
+    protected val euxCacheableKlient: EuxCacheableKlient = EuxCacheableKlient(euxKlient)
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
     {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
-    private val dokumentHelper = EuxService(euxKlient)
+    private val dokumentHelper = EuxService(euxCacheableKlient)
     private val fagmodulService = FagmodulService(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)

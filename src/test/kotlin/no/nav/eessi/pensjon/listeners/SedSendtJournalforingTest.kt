@@ -5,8 +5,9 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
+import no.nav.eessi.pensjon.buc.EuxCacheableKlient
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.klient.EuxKlient
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -52,8 +53,9 @@ internal class SedSendtJournalforingTest {
     private val norg2Service = Norg2Service(norg2Klient)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
-    private val euxKlient = mockk<EuxKlient>(relaxed = true)
-    private val euxService = EuxService(euxKlient)
+    private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
+    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib)
+    private val euxService = EuxService(euxCacheableKlient)
     private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
@@ -145,8 +147,8 @@ internal class SedSendtJournalforingTest {
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxKlient.hentBuc(eq(rinaId)) } returns buc
-        every { euxKlient.hentSedJson(eq(rinaId), any()) } returns sedJson
+        every { euxService.hentBuc(eq(rinaId)) } returns buc
+        every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
         every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6,11)
@@ -209,8 +211,8 @@ internal class SedSendtJournalforingTest {
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxKlient.hentBuc(eq(rinaId)) } returns buc
-        every { euxKlient.hentSedJson(eq(rinaId), any()) } returns sedJson
+        every { euxService.hentBuc(eq(rinaId)) } returns buc
+        every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentIdentifisertePersoner(any(), any(), any(), any(), any()) } returns listOf(identifisertPerson)
@@ -280,9 +282,9 @@ internal class SedSendtJournalforingTest {
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxKlient.hentBuc(any()) } returns buc
-        every { euxKlient.hentBucJson(any()) } returns sedJson
-        every { euxKlient.hentSedJson(any(), any()) } returns sedJson
+        every { euxService.hentBuc(any()) } returns buc
+        every { euxKlientLib.hentBucJson(any()) } returns sedJson //TODO korrekt?
+        every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
         every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
@@ -344,9 +346,9 @@ internal class SedSendtJournalforingTest {
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxKlient.hentBuc(any()) } returns buc
-        every { euxKlient.hentBucJson(any()) } returns sedJson
-        every { euxKlient.hentSedJson(any(), any()) } returns sedJson
+        every { euxService.hentBuc(any()) } returns buc
+        every { euxKlientLib.hentBucJson(any()) } returns sedJson
+        every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
         every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)

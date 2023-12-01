@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
-import no.nav.eessi.pensjon.eux.klient.EuxKlient
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.utils.toJson
@@ -38,7 +38,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
 
         @Bean
-        fun euxKlient(): EuxKlient = EuxKlient(euxRestTemplate())
+        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
     }
 
     @Test

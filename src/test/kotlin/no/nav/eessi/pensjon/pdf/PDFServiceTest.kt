@@ -6,18 +6,12 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -82,7 +76,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Feil som kastes fra EuxService skal ikke fanges`() {
+    fun `Feil som kastes fra euxService skal ikke fanges`() {
         every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } throws mockk<MismatchedInputException>()
 
         assertThrows<MismatchedInputException> {
@@ -91,7 +85,7 @@ class PDFServiceTest {
     }
 
     @Test
-    fun `Manglende dokument fra EuxService skal kaste exception`() {
+    fun `Manglende dokument fra euxService skal kaste exception`() {
         every { dokumentHelper.hentAlleDokumentfiler(any(), any()) } returns null
 
         assertThrows<RuntimeException> {

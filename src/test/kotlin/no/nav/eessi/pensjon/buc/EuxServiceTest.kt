@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.buc
 
 import io.mockk.*
-import no.nav.eessi.pensjon.eux.klient.EuxKlient
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -28,10 +28,10 @@ import java.util.*
 
 internal class EuxServiceTest {
 
-    private val euxKlient: EuxKlient = mockk(relaxed = true)
+    private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
+    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib)
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-
-    private val helper = EuxService(euxKlient)
+    private val helper = EuxService(euxCacheableKlient)
 
     @AfterEach
     fun after() {
@@ -74,8 +74,8 @@ internal class EuxServiceTest {
 
         val buc = mapJsonToAny<Buc>(bucJson)
 
-        every { euxKlient.hentSedJson(eq(rinaid), any()) } returns r005json
-        every { euxKlient.hentSedJson(any(), any()) } returns SED(type = X008).toJson()
+        every { euxKlientLib.hentSedJson(eq(rinaid), any()) } returns r005json
+        every { euxKlientLib.hentSedJson(any(), any()) } returns SED(type = X008).toJson()
 
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
         assertEquals(2, alledocs.size)
@@ -180,7 +180,7 @@ internal class EuxServiceTest {
         val sedJson = javaClass.getResource("/buc/P2000-NAV.json")!!.readText()
         val sedP2000 = mapJsonToAny<SED>(sedJson)
 
-        every { euxKlient.hentSedJson(any(), any()) } returns sedP2000.toJson()
+        every { euxKlientLib.hentSedJson(any(), any()) } returns sedP2000.toJson()
 
         val result = helper.hentAlleGyldigeDokumenter(buc)
         val actual = helper.hentSedMedGyldigStatus(rinaSakId, result)
@@ -190,6 +190,6 @@ internal class EuxServiceTest {
         val actualSed = actual.first()
         assertEquals(P2000, actualSed.second.type)
 
-        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlientLib.hentSedJson(any(), any()) }
     }
 }

@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
-import no.nav.eessi.pensjon.eux.klient.EuxKlient
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
@@ -53,7 +53,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
 
         @Bean
-        fun euxKlient(): EuxKlient = EuxKlient(euxRestTemplate())
+        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
     }
 
     @Test
