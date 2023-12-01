@@ -4,7 +4,6 @@ import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.buc.EuxCacheableKlient
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -70,13 +69,12 @@ internal open class JournalforingTestBase {
     }
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    protected val euxKlient: EuxKlientLib = mockk()
-    protected val euxCacheableKlient: EuxCacheableKlient = EuxCacheableKlient(euxKlient)
+    protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
     {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
-    private val dokumentHelper = EuxService(euxCacheableKlient)
+    private val euxService = EuxService(euxKlient)
     private val fagmodulService = FagmodulService(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
@@ -85,7 +83,7 @@ internal open class JournalforingTestBase {
     private val journalpostService = JournalpostService(journalpostKlient)
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
-    private val pdfService: PDFService = PDFService(dokumentHelper)
+    private val pdfService: PDFService = PDFService(euxService)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
@@ -122,7 +120,7 @@ internal open class JournalforingTestBase {
     protected val mottattListener: SedMottattListener = SedMottattListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
-        euxService = dokumentHelper,
+        euxService = euxService,
         fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
         profile = "test",
@@ -130,7 +128,7 @@ internal open class JournalforingTestBase {
     protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
         personidentifiseringService = personidentifiseringService,
-        euxService = dokumentHelper,
+        euxService = euxService,
         bestemSakService = bestemSakService,
         fagmodulService = fagmodulService,
         profile = "test",

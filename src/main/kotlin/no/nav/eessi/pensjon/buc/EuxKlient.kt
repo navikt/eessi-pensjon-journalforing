@@ -62,6 +62,10 @@ class EuxCacheableKlient(
         }
     }
 
+    internal fun hentSedJson(rinaSakId: String, dokumentId: String): String? {
+        return euxKlientLib.hentSedJson(rinaSakId, dokumentId)
+    }
+
     /**
      * Henter alle filer/vedlegg tilknyttet en SED fra Rina EUX API.
      *

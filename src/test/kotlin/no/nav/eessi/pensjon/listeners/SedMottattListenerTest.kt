@@ -20,13 +20,13 @@ internal class SedMottattListenerTest {
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val jouralforingService = mockk<JournalforingService>(relaxed = true)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
-    private val sedDokumentHelper = mockk<EuxService>(relaxed = true)
+    private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
 
     private val sedListener = SedMottattListener(
         jouralforingService,
         personidentifiseringService,
-        sedDokumentHelper,
+        euxService,
         fagmodulService = mockk(relaxed = true),
         bestemSakService,
         "test",
