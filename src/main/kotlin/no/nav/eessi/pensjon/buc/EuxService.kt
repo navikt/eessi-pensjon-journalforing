@@ -21,16 +21,16 @@ import kotlin.time.measureTimedValue
 
 @Service
 class EuxService(
-    private val euxService: EuxCacheableKlient
+    private val euxCacheableKlient: EuxCacheableKlient
 ) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(javaClass) }
 
-    fun hentSed(rinaSakId: String, dokumentId: String): SED = euxService.hentSed(rinaSakId, dokumentId)
+    fun hentSed(rinaSakId: String, dokumentId: String): SED = euxCacheableKlient.hentSed(rinaSakId, dokumentId)
 
-    fun hentBuc(rinaSakId: String): Buc = euxService.hentBuc(rinaSakId)
+    fun hentBuc(rinaSakId: String): Buc = euxCacheableKlient.hentBuc(rinaSakId)
 
-    fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
+    fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? = euxCacheableKlient.hentAlleDokumentfiler(rinaSakId, dokumentId)
 
     /**
      * Henter alle dokumenter (SEDer) i en Buc.
@@ -53,7 +53,7 @@ class EuxService(
     fun hentSedMedGyldigStatus(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
          return measureTimedValue {
              documents.filter(ForenkletSED::harGyldigStatus)
-                 .map { sed -> sed.id to euxService.hentSed(rinaSakId, sed.id) }
+                 .map { sed -> sed.id to euxCacheableKlient.hentSed(rinaSakId, sed.id) }
                  .also { logger.info("Fant ${it.size} SED i BUCid: $rinaSakId") }
          }.also {
              logger.info("hentSed for rinasak:$rinaSakId tid: ${it.duration.inWholeSeconds}")
@@ -76,7 +76,7 @@ class EuxService(
     fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
         return documents
             .filter(ForenkletSED::erKansellert)
-            .map { sed -> euxService.hentSed(rinaSakId, sed.id) }
+            .map { sed -> euxCacheableKlient.hentSed(rinaSakId, sed.id) }
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
