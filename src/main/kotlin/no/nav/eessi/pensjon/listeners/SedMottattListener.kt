@@ -64,7 +64,7 @@ class SedMottattListener(
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
-                val offsetToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L)
+                val offsetToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L, 830049L)
                 try {
                     val offset = cr.offset()
                     if (offset in offsetToSkip) {
