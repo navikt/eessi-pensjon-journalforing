@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -19,12 +20,15 @@ import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -40,6 +44,7 @@ class JournalforingService(
     private val pdfService: PDFService,
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
+    private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
@@ -107,6 +112,7 @@ class JournalforingService(
                 )
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
+                val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -120,7 +126,8 @@ class JournalforingService(
                     saktype = saktype,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
-                    saksbehandlerInfo = navAnsattInfo
+                    saksbehandlerInfo = navAnsattInfo,
+                    tema = tema
                 )
 
                 val sattStatusAvbrutt = sattAvbrutt(
@@ -151,7 +158,8 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        OppgaveType.JOURNALFORING
+                        OppgaveType.JOURNALFORING,
+                        tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
@@ -246,6 +254,7 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
+                val tema = hentTema(sedHendelse.bucType!!, saktype, sedHendelse.navBruker, 0, sedHendelse.rinaSakId)
 
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
@@ -258,7 +267,8 @@ class JournalforingService(
                     saktype = saktype,
                     institusjon = institusjon,
                     identifisertePersoner = 0,
-                    saksbehandlerInfo = null
+                    saksbehandlerInfo = null,
+                    tema = tema
                 )
 
                 oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
@@ -270,7 +280,7 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        OppgaveType.JOURNALFORING
+                        OppgaveType.JOURNALFORING,
                     )
                 )
 
@@ -368,7 +378,7 @@ class JournalforingService(
 
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
-            else return enhetBasertPaaBehandlingstema(bucType, saktype, identifisertPerson, antallIdentifisertePersoner)
+            else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
                 .also { logEnhet(enhetFraRouting, it) }
         }
     }
@@ -402,13 +412,13 @@ class JournalforingService(
     }
 
     private fun enhetBasertPaaBehandlingstema(
-        bucType: BucType?,
+        sedHendelse: SedHendelse?,
         saktype: SakType?,
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int
     ): Enhet {
-        val tema = journalpostService.hentTema( bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner)
-        val behandlingstema = journalpostService.bestemBehandlingsTema( bucType, saktype, tema, antallIdentifisertePersoner)
+        val tema = hentTema(sedHendelse?.bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, sedHendelse.rinaSakId)
+        val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, antallIdentifisertePersoner)
         logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema")
         return if (identifisertPerson.landkode == "NOR") {
             when (behandlingstema) {
@@ -418,6 +428,32 @@ class JournalforingService(
         } else when (behandlingstema) {
             GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND
             UFOREPENSJON -> UFORE_UTLANDSTILSNITT
+        }
+    }
+
+
+    /**
+     * Tema er PENSJON såfremt det ikke er en
+     * - uføre buc (P_BUC_03)
+     * - saktype er UFØRETRYGD
+     */
+    //TODO: Fikse sånn at denne håndterer både npid og fnr
+    fun hentTema(
+        bucType: BucType,
+        saktype: SakType?,
+        fnr: Fodselsnummer?,
+        identifisertePersoner: Int,
+        euxCaseId: String
+    ) : Tema {
+        return if (gcpStorageService.eksisterer(euxCaseId)) {
+            if (saktype == SakType.BARNEP) EYBARNEP else OMSTILLING
+        } else {
+            val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
+            if (saktype == SakType.UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD
+            else {
+                val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
+                if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
+            }
         }
     }
 
@@ -470,7 +506,7 @@ class JournalforingService(
                 sedHendelseModel.rinaSakId,
                 MOTTATT,
                 uSupporterteVedlegg,
-                OppgaveType.BEHANDLE_SED
+                OppgaveType.BEHANDLE_SED,
             )
             oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")

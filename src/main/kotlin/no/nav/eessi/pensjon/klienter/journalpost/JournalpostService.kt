@@ -44,11 +44,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saktype: SakType?,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
-        saksbehandlerInfo: Pair<String, Enhet?>? = null
+        saksbehandlerInfo: Pair<String, Enhet?>? = null,
+        tema: Tema
     ): OpprettJournalPostResponse? {
-
-        val tema = if(fnr?.erNpid == true) hentTema(sedHendelse.bucType!!, saktype, null, identifisertePersoner)
-        else hentTema(sedHendelse.bucType!!, saktype, fnr, identifisertePersoner)
 
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
@@ -121,31 +119,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             }
 
         } else ALDERSPENSJON
-    }
-
-    /**
-     * Tema er PENSJON såfremt det ikke er en
-     * - uføre buc (P_BUC_03)
-     * - saktype er UFØRETRYGD
-     */
-    //TODO: Fikse sånn at denne håndterer både npid og fnr
-        fun hentTema(
-        bucType: BucType,
-        saktype: SakType?,
-        fnr: Fodselsnummer?,
-        identifisertePersoner: Int
-    ) : Tema {
-        val ufoereAlder =  if (fnr != null) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
-        return if (saktype == UFOREP || bucType == P_BUC_03 && saktype == null) {
-            UFORETRYGD
-        } else {
-            val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
-            if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) {
-                return UFORETRYGD
-            } else {
-                return PENSJON
-            }
-        }
     }
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
