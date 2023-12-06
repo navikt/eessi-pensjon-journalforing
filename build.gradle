@@ -48,6 +48,9 @@ dependencies {
 
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
+	//GCP
+	implementation("com.google.cloud:google-cloud-storage:2.29.1")
+
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-eux:2.1.86")
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.44")
