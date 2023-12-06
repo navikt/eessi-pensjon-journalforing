@@ -28,6 +28,9 @@ kafka:
 
 namespace: 'test'
 
+GCP_STORAGE_API_URL: "http://some.strange.place"
+GCP_BUCKET_NAME: 'dummyBucket'
+
 securityTokenService:
   discoveryUrl: http://localhost:${mockServerport}/.well-known/openid-configuration
 

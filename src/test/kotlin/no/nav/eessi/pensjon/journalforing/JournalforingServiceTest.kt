@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
@@ -20,14 +21,13 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
-import no.nav.eessi.pensjon.klienter.journalpost.IdType
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.*
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostServiceTest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
@@ -62,6 +62,7 @@ internal class JournalforingServiceTest {
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
     private val kravHandeler = mockk<KravInitialiseringsHandler>()
+    private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     private val kravService = KravInitialiseringsService(kravHandeler)
 
     private val norg2Service = mockk<Norg2Service> {
@@ -80,7 +81,8 @@ internal class JournalforingServiceTest {
             pdfService,
             oppgaveHandler,
             kravService,
-            statistikkPublisher,
+            gcpStorageService,
+            statistikkPublisher
     )
 
     private val fdato = LocalDate.now()
@@ -117,7 +119,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         } returns OpprettJournalPostResponse("123", "null", null, false)
     }
@@ -173,6 +176,7 @@ internal class JournalforingServiceTest {
             any(),
             any(),
             any(),
+            any(),
             any()
         ) }
         assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
@@ -196,6 +200,7 @@ internal class JournalforingServiceTest {
 
         verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
         verify(exactly = 1) { journalpostService.opprettJournalpost(
+            any(),
             any(),
             any(),
             any(),
@@ -317,8 +322,7 @@ internal class JournalforingServiceTest {
 
         val journalPostResponse = OpprettJournalPostResponse("","","",false)
 
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),) } returns journalPostResponse
-        every { journalpostService.hentTema(any(),any(), any(), any()) } returns Tema.PENSJON
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns journalPostResponse
 
         journalforingService.journalfor(
             sedHendelse,
@@ -369,7 +373,8 @@ internal class JournalforingServiceTest {
                 saktype = ALDER,
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -389,7 +394,9 @@ internal class JournalforingServiceTest {
             sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
-        journalforingService.journalfor(
+        every { gcpStorageService.eksisterer(any()) } returns false
+
+        val mox = journalforingService.journalfor(
             sedHendelse,
             SENDT,
             identifisertPerson,
@@ -401,6 +408,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = null
         )
 
+        println(mox)
+
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "R004",
               "journalpostId" : "123",
@@ -409,7 +418,9 @@ internal class JournalforingServiceTest {
               "rinaSakId" : "2536475861",
               "hendelseType" : "SENDT",
               "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
+              "oppgaveType" : "JOURNALFORING",
+              "tema" : "PEN"
+              }""".trimIndent()
         )
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
@@ -426,7 +437,18 @@ internal class JournalforingServiceTest {
         )
 
         val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),) } returns opprettJournalPostResponse
+        every { journalpostService.opprettJournalpost(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()) } returns opprettJournalPostResponse
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
 
         journalforingService.journalfor(
@@ -466,7 +488,18 @@ internal class JournalforingServiceTest {
         )
 
         val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),) } returns opprettJournalPostResponse
+        every { journalpostService.opprettJournalpost(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()) } returns opprettJournalPostResponse
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
 
         journalforingService.journalfor(
@@ -572,7 +605,8 @@ internal class JournalforingServiceTest {
                 saktype = UFOREP,
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -611,7 +645,8 @@ internal class JournalforingServiceTest {
                 saktype = UFOREP,
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -658,7 +693,8 @@ internal class JournalforingServiceTest {
                 saktype = ALDER,
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -689,7 +725,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -724,7 +761,8 @@ internal class JournalforingServiceTest {
                     land = "GB"
                 ),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -762,7 +800,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -799,7 +838,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -837,7 +877,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -875,7 +916,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -913,7 +955,8 @@ internal class JournalforingServiceTest {
                 saktype = ALDER,
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -951,7 +994,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = any(),
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -989,7 +1033,8 @@ internal class JournalforingServiceTest {
                 saktype = any(),
                 institusjon = any(),
                 identifisertePersoner = 1,
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -1029,7 +1074,8 @@ internal class JournalforingServiceTest {
                 saktype = GJENLEV,
                 any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
             //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
         }
@@ -1093,7 +1139,8 @@ internal class JournalforingServiceTest {
                 saktype = GJENLEV,
                 any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -1134,7 +1181,8 @@ internal class JournalforingServiceTest {
                 saktype = null,
                 institusjon = any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
         // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
@@ -1176,7 +1224,8 @@ internal class JournalforingServiceTest {
                 saktype = null,
                 institusjon = any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo()
+                saksbehandlerInfo(),
+                any()
             )
         }
     }
@@ -1218,7 +1267,7 @@ internal class JournalforingServiceTest {
                 institusjon = any(),
                 identifisertePersoner = 2,
                 saksbehandlerInfo = null,
-
+                any()
             )
         }
     }
@@ -1278,9 +1327,78 @@ internal class JournalforingServiceTest {
                 saktype = BARNEP,
                 any(),
                 identifisertePersoner = 2,
-                saksbehandlerInfo = saksbehandlerInfo()
+                saksbehandlerInfo = saksbehandlerInfo(),
+                any()
             )
         }
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
+        val result = journalforingService.hentTema(P_BUC_02, BARNEP, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
+        val result = journalforingService.hentTema(P_BUC_02, UFOREP, LEALAUS_KAKE, 1, RINADOK_ID)
+        assertEquals(Tema.UFORETRYGD, result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
+        val result = journalforingService.hentTema(P_BUC_02, GJENLEV, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
+        val result = journalforingService.hentTema(P_BUC_01, null, LEALAUS_KAKE, 2, RINADOK_ID)
+        val result2 = journalforingService.hentTema(P_BUC_01, null, LEALAUS_KAKE, 1, RINADOK_ID)
+        assertEquals(Tema.PENSJON, result)
+        assertEquals(Tema.PENSJON, result2)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
+        val result = journalforingService.hentTema(BucType.R_BUC_02, ALDER, LEALAUS_KAKE, 1, RINADOK_ID)
+        assertEquals(Tema.PENSJON, result)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
+        val result = journalforingService.hentTema(BucType.R_BUC_02, UFOREP, LEALAUS_KAKE, 1, RINADOK_ID)
+        assertEquals(Tema.UFORETRYGD, result)
+    }
+
+    @Test
+    fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
+        val result = journalforingService.hentTema(BucType.R_BUC_02, ALDER, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, result)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
+        val resultatGENRL = journalforingService.hentTema(BucType.P_BUC_05, SakType.GENRL, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, resultatGENRL)
+
+        val resultatOMSORG = journalforingService.hentTema(BucType.P_BUC_05, SakType.OMSORG, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, resultatOMSORG)
+
+        val resultatALDER = journalforingService.hentTema(BucType.P_BUC_05, ALDER, fnr = SLAPP_SKILPADDE, 1, RINADOK_ID)
+        assertEquals(Tema.PENSJON, resultatALDER)
+
+        val resultatGJENLEV = journalforingService.hentTema(BucType.P_BUC_05, GJENLEV, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, resultatGJENLEV)
+
+        val resultatBARNEP = journalforingService.hentTema(BucType.P_BUC_05, BARNEP, LEALAUS_KAKE, 2, RINADOK_ID)
+        assertEquals(Tema.PENSJON, resultatBARNEP)
+    }
+
+    @Test
+    fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
+        val result = journalforingService.hentTema(BucType.P_BUC_05, UFOREP, LEALAUS_KAKE,  1, RINADOK_ID)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     private fun saksbehandlerInfo(): Pair<String, Enhet?>? = null

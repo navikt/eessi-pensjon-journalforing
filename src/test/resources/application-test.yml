@@ -53,6 +53,8 @@ virksomhet.person.v3:
 EESSI_PENSJON_FAGMODUL_URL: http://localhost
 NORG2_URL: http://localhost
 BESTEMSAK_URL: http://localhost
+GCP_STORAGE_API_URL: "http://some.strange.place"
+GCP_BUCKET_NAME: 'dummyBucket'
 
 spring:
   kafka:

@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
@@ -68,6 +69,9 @@ internal class ConfigRestTemplateTest {
     @MockkBean
     private lateinit var journalpostKlient: JournalpostKlient
 
+    @MockkBean
+    private lateinit var gcpStorageService: GcpStorageService
+
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
 
@@ -92,6 +96,7 @@ internal class ConfigRestTemplateTest {
                 )
         every { bestemSakKlient.kallBestemSak(any()) } returns mockk(relaxed = true)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+        every { gcpStorageService.eksisterer(any())} returns false
     }
 
 

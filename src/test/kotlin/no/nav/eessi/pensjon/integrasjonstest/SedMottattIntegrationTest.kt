@@ -1,13 +1,17 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import io.mockk.every
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.utils.toJson
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -32,6 +36,14 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         }
     }
 
+    @Autowired
+    lateinit var gcpStorageService: GcpStorageService
+
+    @BeforeEach
+    fun setUp() {
+        every { gcpStorageService.eksisterer(any())} returns false
+    }
+
     @TestConfiguration
     class TestConfig {
         @Bean
@@ -39,6 +51,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
 
         @Bean
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
+
     }
 
     @Test
