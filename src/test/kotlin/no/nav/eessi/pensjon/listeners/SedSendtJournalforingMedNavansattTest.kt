@@ -73,7 +73,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val journalforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), mockk(), statistikkPublisher)
 
     private val sedListener = SedSendtListener(
         journalforingService,

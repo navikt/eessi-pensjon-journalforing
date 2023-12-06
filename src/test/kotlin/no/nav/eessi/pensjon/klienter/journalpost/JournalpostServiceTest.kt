@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.GENRL
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
@@ -77,7 +78,7 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null
+            1, null, Tema.PENSJON
         )
 
         // RESPONSE
@@ -135,6 +136,7 @@ internal class JournalpostServiceTest {
                 saktype = null,
                 mockk(),
                 mockk(),
+                mockk(),
                 mockk()
             )
         }
@@ -185,7 +187,8 @@ internal class JournalpostServiceTest {
             saktype = null,
             mockk(relaxed = true),
             1,
-            null
+            null,
+            Tema.PENSJON
         )
 
         assertEqualResponse(expectedResponse, actualResponse!!)
@@ -224,74 +227,6 @@ internal class JournalpostServiceTest {
         journalpostService.settStatusAvbrutt(journalpostId)
 
         verify(exactly = 1) { mockKlient.settStatusAvbrutt(journalpostId) }
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(P_BUC_02, BARNEP, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, result)
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(P_BUC_02, UFOREP,LEALAUS_KAKE, 1)
-        assertEquals(Tema.UFORETRYGD, result)
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(P_BUC_02, GJENLEV, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, result)
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(P_BUC_01, null, LEALAUS_KAKE, 2)
-        val result2 = journalpostService.hentTema(P_BUC_01, null, LEALAUS_KAKE, 1)
-        assertEquals(Tema.PENSJON, result)
-        assertEquals(Tema.PENSJON, result2)
-    }
-
-    @Test
-    fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(R_BUC_02, ALDER, LEALAUS_KAKE, 1)
-        assertEquals(Tema.PENSJON, result)
-    }
-
-    @Test
-    fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(R_BUC_02, UFOREP, LEALAUS_KAKE, 1)
-        assertEquals(Tema.UFORETRYGD, result)
-    }
-
-    @Test
-    fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
-        val result = journalpostService.hentTema(R_BUC_02, ALDER, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, result)
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
-        val resultatGENRL = journalpostService.hentTema(P_BUC_05, GENRL, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatGENRL)
-
-        val resultatOMSORG = journalpostService.hentTema(P_BUC_05, OMSORG, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatOMSORG)
-
-        val resultatALDER = journalpostService.hentTema(P_BUC_05, ALDER, fnr = SLAPP_SKILPADDE, 1)
-        assertEquals(Tema.PENSJON, resultatALDER)
-
-        val resultatGJENLEV = journalpostService.hentTema(P_BUC_05, GJENLEV, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatGJENLEV)
-
-        val resultatBARNEP = journalpostService.hentTema(P_BUC_05, BARNEP, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatBARNEP)
-    }
-
-    @Test
-    fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
-        val result = journalpostService.hentTema(P_BUC_05, UFOREP, LEALAUS_KAKE,  1)
-        assertEquals(Tema.UFORETRYGD, result)
     }
 
     private fun assertEqualResponse(expected: OpprettJournalPostResponse, actual: OpprettJournalPostResponse) {

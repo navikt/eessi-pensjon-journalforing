@@ -58,7 +58,8 @@ internal class JournalforingServiceMedJournalpostTest {
         pdfService,
         oppgaveHandler,
         kravService,
-        statistikkPublisher,
+        mockk(relaxed = true),
+        statistikkPublisher
     )
 
     companion object {

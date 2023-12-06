@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.handler
 
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -22,7 +21,7 @@ internal class OppgaveMeldingSerdeTest {
             "TEST",
             SENDT,
             null,
-            OppgaveType.JOURNALFORING
+            OppgaveType.JOURNALFORING,
         )
 
         val serialized = melding.toJson()
@@ -49,7 +48,7 @@ internal class OppgaveMeldingSerdeTest {
             "TEST",
             SENDT,
             "filnavn",
-            OppgaveType.BEHANDLE_SED
+            OppgaveType.BEHANDLE_SED,
         )
 
         val serialized = melding.toJson()

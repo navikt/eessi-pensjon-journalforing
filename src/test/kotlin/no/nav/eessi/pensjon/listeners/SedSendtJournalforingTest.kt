@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.*
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
@@ -61,6 +62,7 @@ internal class SedSendtJournalforingTest {
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
     private val fagmodulService = FagmodulService(fagmodulKlient)
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
+    private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
@@ -68,7 +70,7 @@ internal class SedSendtJournalforingTest {
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher)
 
     private val sedListener = SedSendtListener(
         jouralforingService,
@@ -217,6 +219,7 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentIdentifisertePersoner(any(), any(), any(), any(), any()) } returns listOf(identifisertPerson)
         every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { gcpStorageService.eksisterer(rinaId) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -226,6 +229,8 @@ internal class SedSendtJournalforingTest {
             melding = "Z990965",
             journalpostferdigstilt = false,
         )
+
+        every { gcpStorageService.eksisterer(any()) } returns false
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns opprettJournalPostResponse

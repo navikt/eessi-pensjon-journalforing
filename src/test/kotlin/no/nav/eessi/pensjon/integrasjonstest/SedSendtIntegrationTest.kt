@@ -1,16 +1,21 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.utils.toJson
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
 import org.slf4j.event.Level
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -27,6 +32,9 @@ import org.springframework.web.client.RestTemplate
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
+    @Autowired
+    private lateinit var gcpStorageService: GcpStorageService
+
     init {
         if (System.getProperty("mockServerport") == null) {
             mockServer = ClientAndServer(Configuration().apply {
@@ -38,6 +46,11 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         }
     }
 
+    @BeforeEach
+    fun myBeforeEach() {
+        every { gcpStorageService.eksisterer(any()) } returns false
+    }
+
     @TestConfiguration
     class TestConfig {
         @Bean
@@ -45,6 +58,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
+
+        @Bean
+        fun gcpStorageService(): GcpStorageService = mockk<GcpStorageService>()
     }
 
     @Test
