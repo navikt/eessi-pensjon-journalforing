@@ -1,10 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
@@ -14,10 +10,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -26,8 +19,10 @@ import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.*
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostServiceTest
+import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
+import no.nav.eessi.pensjon.klienter.journalpost.IdType
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
@@ -144,7 +139,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify { journalpostService.settStatusAvbrutt(journalpostId = "123") }
@@ -195,7 +191,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2000),
             identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
@@ -233,7 +230,8 @@ internal class JournalforingServiceTest {
             sakInformasjonMock,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
@@ -258,7 +256,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
@@ -284,7 +283,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
@@ -333,7 +333,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
@@ -359,7 +360,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -405,7 +407,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
-            navAnsattInfo = null
+            navAnsattInfo = null,
+            gjennySakId = null
         )
 
         println(mox)
@@ -460,7 +463,8 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -511,7 +515,8 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -554,7 +559,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = sedType),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
         verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -591,7 +597,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -631,7 +638,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -679,8 +687,9 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
-            )
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
+        )
 
         verify {
             journalpostService.opprettJournalpost(
@@ -712,7 +721,8 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -743,7 +753,8 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
         verify {
             journalpostService.opprettJournalpost(
@@ -786,7 +797,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -824,7 +836,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -863,7 +876,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -902,7 +916,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -941,7 +956,8 @@ internal class JournalforingServiceTest {
             ALDER,
             null,
             SED(type = SedType.P2100), identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -980,7 +996,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1019,7 +1036,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1060,7 +1078,8 @@ internal class JournalforingServiceTest {
             sakInformasjon,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1125,7 +1144,8 @@ internal class JournalforingServiceTest {
             saksInfo,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1167,7 +1187,8 @@ internal class JournalforingServiceTest {
             sakInformasjon,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1210,7 +1231,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1252,7 +1274,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
@@ -1313,7 +1336,8 @@ internal class JournalforingServiceTest {
             saksInfo,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
 
         verify {
