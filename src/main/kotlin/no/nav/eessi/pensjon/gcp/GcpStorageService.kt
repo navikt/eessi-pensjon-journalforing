@@ -1,12 +1,10 @@
 package no.nav.eessi.pensjon.gcp
 
 import com.google.cloud.storage.BlobId
-import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.nio.ByteBuffer
 
 @Component
 class GcpStorageService(
@@ -26,11 +24,11 @@ class GcpStorageService(
     }
 
     fun eksisterer(storageKey: String): Boolean{
-        logger.debug("sjekker om $storageKey finnes i bucket: $bucketname")
+
         val obj = gcpStorage.get(BlobId.of(bucketname, storageKey))
 
         kotlin.runCatching {
-            obj.exists()
+            obj.exists().also {logger.debug("sjekker om $storageKey finnes i bucket: $bucketname") }
         }.onFailure {
         }.onSuccess {
             return true
