@@ -149,7 +149,8 @@ class SedSendtListener(
                                     harAdressebeskyttelse,
                                     identifisertePersoner.count()
                                         .also { logger.info("Antall identifisertePersoner: $it") },
-                                    navAnsattMedEnhet
+                                    navAnsattMedEnhet,
+                                    null
                                 )
                             }
                         }

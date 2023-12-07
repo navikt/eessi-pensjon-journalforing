@@ -100,6 +100,7 @@ internal class JournalforingServiceMedJournalpostTest {
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null,
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -136,7 +137,8 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = null,
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -170,7 +172,8 @@ internal class JournalforingServiceMedJournalpostTest {
             sakInformasjon = saksInformasjon,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo()
+            navAnsattInfo = navAnsattInfo(),
+            gjennySakId = null
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured

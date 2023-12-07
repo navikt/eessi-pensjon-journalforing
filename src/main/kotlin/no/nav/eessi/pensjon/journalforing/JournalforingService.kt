@@ -84,7 +84,8 @@ class JournalforingService(
         sed: SED?,
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
-        navAnsattInfo: Pair<String, Enhet?>? = null
+        navAnsattInfo: Pair<String, Enhet?>? = null,
+        gjennySakId: String? = null
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -121,7 +122,7 @@ class JournalforingService(
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = sakInformasjon?.sakId,
+                    arkivsaksnummer = gjennySakId ?: sakInformasjon?.sakId,
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,

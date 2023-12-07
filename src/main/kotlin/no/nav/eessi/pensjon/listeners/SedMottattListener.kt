@@ -124,7 +124,8 @@ class SedMottattListener(
                                 sakInformasjon,
                                 currentSed,
                                 harAdressebeskyttelse,
-                                identifisertePersoner.count()
+                                identifisertePersoner.count(),
+                                gjennySakId = null
                             )
 
                         }
