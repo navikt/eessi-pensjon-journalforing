@@ -107,7 +107,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         println(journalpostRequest)
 
-        Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
+        Assertions.assertEquals("22874955", journalpostRequest.sak?.fagsakid)
         Assertions.assertEquals(true, erMuligAaFerdigstille)
 
     }
@@ -182,7 +182,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
         verify(exactly = 1) { journalforingService.opprettBehandleSedOppgave(any(), any(), any(), any()) }
 
-        Assertions.assertEquals("22874955", journalpostRequest.sak?.arkivsaksnummer)
+        Assertions.assertEquals("22874955", journalpostRequest.sak?.fagsakid)
         Assertions.assertEquals(true, erMuligAaFerdigstille)
         Assertions.assertEquals(Enhet.ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 

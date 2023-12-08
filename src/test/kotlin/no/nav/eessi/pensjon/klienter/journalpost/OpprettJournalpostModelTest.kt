@@ -22,7 +22,7 @@ internal class OpprettJournalpostModelTest {
                 "[]",
                 ID_OG_FORDELING,
                 JournalpostType.INNGAAENDE,
-                Sak("arkivsaksnummer123", "arksys2"),
+                Sak("FAGSAK", "11111", "PEN"),
                 Tema.PENSJON,
                 emptyList(),
                 "tittel på sak")
@@ -64,8 +64,9 @@ internal class OpprettJournalpostModelTest {
         assertEquals(opprettJournalpostRequest.journalfoerendeEnhet, UFORE_UTLAND)
         assertEquals(opprettJournalpostRequest.journalpostType, JournalpostType.INNGAAENDE)
         assertEquals(opprettJournalpostRequest.kanal, "NAV_NO")
-        assertEquals(opprettJournalpostRequest.sak?.arkivsaksnummer, "string")
-        assertEquals(opprettJournalpostRequest.sak?.arkivsaksystem, "PSAK")
+        assertEquals(opprettJournalpostRequest.sak?.sakstype, "FAGSAK")
+        assertEquals(opprettJournalpostRequest.sak?.fagsakid, "11111")
+        assertEquals(opprettJournalpostRequest.sak?.fagsaksystem, "PEN")
         assertEquals(opprettJournalpostRequest.tema, Tema.PENSJON)
         assertEquals(opprettJournalpostRequest.tittel, "Inngående P2000 - Krav om alderspensjon")
     }

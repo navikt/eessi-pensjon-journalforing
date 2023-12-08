@@ -19,10 +19,7 @@ import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
-import no.nav.eessi.pensjon.klienter.journalpost.IdType
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
@@ -1088,7 +1085,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 sedHendelseType = SENDT,
                 journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = "111111",
+                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = GJENLEV,
                 any(),
@@ -1154,7 +1151,7 @@ internal class JournalforingServiceTest {
                 fnr = identifisertGjenlevendePerson.personRelasjon?.fnr,
                 sedHendelseType = SENDT,
                 journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = "111111",
+                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = GJENLEV,
                 any(),
@@ -1197,7 +1194,7 @@ internal class JournalforingServiceTest {
                 fnr = LEALAUS_KAKE,
                 sedHendelseType = SENDT,
                 journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = "111222",
+                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = null,
                 institusjon = any(),
@@ -1346,7 +1343,7 @@ internal class JournalforingServiceTest {
                 fnr = identifisertGjenlevendePerson.personRelasjon?.fnr,
                 sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = "111111",
+                arkivsaksnummer = Sak("FAGSAK", "1033470", "PEN" ),
                 dokumenter = "P2100 Krav om etterlattepensjon",
                 saktype = BARNEP,
                 any(),
