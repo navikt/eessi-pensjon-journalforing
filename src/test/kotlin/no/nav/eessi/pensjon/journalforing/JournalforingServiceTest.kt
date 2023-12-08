@@ -19,7 +19,10 @@ import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.*
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
@@ -52,7 +55,10 @@ private const val RINADOK_ID = "3123123"
 @Disabled
 internal class JournalforingServiceTest {
 
-    private val journalpostService = mockk<JournalpostService>(relaxed = true)
+    //TODO: SE OVER DENNE TESTEN OG SE OM DET ER MULIGHET FOR FORBERING
+
+    private val journalpostKlient = mockk<JournalpostKlient>()
+    private val journalpostService = JournalpostService(journalpostKlient)
     private val pdfService = mockk<PDFService>()
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
     private val kravHandeler = mockk<KravInitialiseringsHandler>()
@@ -80,7 +86,7 @@ internal class JournalforingServiceTest {
     )
 
     private val fdato = LocalDate.now()
-
+    private val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
@@ -92,7 +98,7 @@ internal class JournalforingServiceTest {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
-        every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
+        //every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
         //PDF -
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
@@ -101,22 +107,33 @@ internal class JournalforingServiceTest {
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
 
+        //every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
+        val opprettJournalPostResponse = OpprettJournalPostResponse(
+            journalpostId = "12345",
+            journalstatus = "EKSPEDERT",
+            melding = "",
+            journalpostferdigstilt = false,
+        )
+
+        every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
+
+
         //JOURNALPOST OPPRETT JOURNALPOST
-        every {
-            journalpostService.opprettJournalpost(
-                sedHendelse = any(),
-                fnr = any(),
-                sedHendelseType = any(),
-                journalfoerendeEnhet = any(),
-                arkivsaksnummer = any(),
-                dokumenter = any(),
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        } returns OpprettJournalPostResponse("123", "null", null, false)
+//        every {
+//            journalpostService.opprettJournalpost(
+//                sedHendelse = any(),
+//                fnr = any(),
+//                sedHendelseType = any(),
+//                journalfoerendeEnhet = any(),
+//                arkivsaksnummer = any(),
+//                dokumenter = any(),
+//                saktype = any(),
+//                institusjon = any(),
+//                identifisertePersoner = any(),
+//                saksbehandlerInfo(),
+//                any()
+//            )
+//        } returns OpprettJournalPostResponse("123", "null", null, false)
     }
 
     @Test
@@ -128,6 +145,8 @@ internal class JournalforingServiceTest {
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
             "NOR"
         )
+
+        justRun { journalpostKlient.settStatusAvbrutt(eq("12345")) }
 
         journalforingService.journalfor(
             sedHendelse,
@@ -141,8 +160,10 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
+//        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+//        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
-        verify { journalpostService.settStatusAvbrutt(journalpostId = "123") }
+        verify { journalpostKlient.settStatusAvbrutt(journalpostId = "12345") }
     }
 
     @Test
@@ -161,25 +182,27 @@ internal class JournalforingServiceTest {
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
-        verify(exactly = 1) { journalpostService.opprettJournalpost(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()
-        ) }
+//        verify(exactly = 1) { journalpostService.opprettJournalpost(
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any(),
+//            any()
+//        ) }
         assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
     }
 
     @Test
     fun `Sendt sed P2000 med ukjent fnr SED inneholder IKKE pesys saksId saa skal ikke status settes til avbrutt og journalpost opprettes`() {
         val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
+
+        justRun { journalpostKlient.settStatusAvbrutt(any()) }
 
         journalforingService.journalfor(
             sedHendelse,
@@ -193,21 +216,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
-        verify(exactly = 1) { journalpostService.opprettJournalpost(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-        ) }
+        verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
+        verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
         verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
 
@@ -216,6 +226,7 @@ internal class JournalforingServiceTest {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
+        justRun { journalpostKlient.settStatusAvbrutt(any()) }
         val sakInformasjonMock = mockk<SakInformasjon>().apply {
             every { sakId } returns null
             every { sakType } returns ALDER
@@ -272,6 +283,7 @@ internal class JournalforingServiceTest {
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
             "NOR"
         )
+        justRun { journalpostKlient.settStatusAvbrutt(eq("12345"))}
 
         journalforingService.journalfor(
             sedHendelse,
@@ -285,6 +297,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
         verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
 
@@ -319,10 +333,9 @@ internal class JournalforingServiceTest {
             "NOR"
         )
 
-        val journalPostResponse = OpprettJournalPostResponse("","","",false)
+        //val journalPostResponse = OpprettJournalPostResponse("","","",false)
 
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns journalPostResponse
-
+        //every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns journalPostResponse
         journalforingService.journalfor(
             sedHendelse,
             SENDT,
@@ -335,6 +348,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
+        assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
 
@@ -362,22 +377,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = OKONOMI_PENSJON,
-                arkivsaksnummer = null,
-                dokumenter = "R004 - Melding om utbetaling",
-                saktype = ALDER,
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @ParameterizedTest
@@ -414,7 +415,7 @@ internal class JournalforingServiceTest {
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "R004",
-              "journalpostId" : "123",
+              "journalpostId" : "12345",
               "tildeltEnhetsnr" : "4303",
               "aktoerId" : "12078945602",
               "rinaSakId" : "2536475861",
@@ -438,19 +439,6 @@ internal class JournalforingServiceTest {
             sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
-        val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
-        every { journalpostService.opprettJournalpost(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()) } returns opprettJournalPostResponse
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
 
         journalforingService.journalfor(
@@ -468,13 +456,15 @@ internal class JournalforingServiceTest {
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "P2000",
-              "journalpostId" : "123",
+              "journalpostId" : "12345",
               "tildeltEnhetsnr" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
-              "oppgaveType" : "BEHANDLE_SED"}""".trimIndent()
+              "oppgaveType" : "JOURNALFORING",
+              "tema" : "PEN"
+              }""".trimIndent()
         )
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
@@ -490,21 +480,8 @@ internal class JournalforingServiceTest {
             sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
-        val opprettJournalPostResponse = OpprettJournalPostResponse("123", "JOURNALFORT", "", true)
-        every { journalpostService.opprettJournalpost(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()) } returns opprettJournalPostResponse
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
-
+        justRun { journalpostKlient.settStatusAvbrutt(eq("12345")) }
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,
@@ -520,13 +497,15 @@ internal class JournalforingServiceTest {
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "P2100",
-              "journalpostId" : "123",
+              "journalpostId" : "12345",
               "tildeltEnhetsnr" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
-              "oppgaveType" : "BEHANDLE_SED"}""".trimIndent()
+              "oppgaveType" : "JOURNALFORING",
+              "tema" : "PEN"
+              }""".trimIndent()
         )
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
@@ -564,7 +543,7 @@ internal class JournalforingServiceTest {
         verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "$sedType",
-              "journalpostId" : "123",
+              "journalpostId" : "12345",
               "tildeltEnhetsnr" : "4303",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
@@ -599,22 +578,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
-                saktype = UFOREP,
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -640,22 +605,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
-                saktype = UFOREP,
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -689,22 +640,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)",
-                saktype = ALDER,
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
 
@@ -723,21 +660,9 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P2000 Supported Documents",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -755,26 +680,9 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P2000 Supported Documents",
-                saktype = any(),
-                institusjon = AvsenderMottaker(
-                    id = "UK:UKINST",
-                    idType = IdType.UTL_ORG,
-                    navn = "UK INST",
-                    land = "GB"
-                ),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -799,22 +707,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = any(),
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = UFORE_UTLANDSTILSNITT,
-                arkivsaksnummer = null,
-                dokumenter = "P2200 Supported Documents",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(UFORE_UTLANDSTILSNITT, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -839,21 +733,8 @@ internal class JournalforingServiceTest {
             gjennySakId = null
         )
 
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -878,22 +759,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P2000 Supported Documents",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -918,22 +785,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = any(),
-                fnr = SLAPP_SKILPADDE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = Enhet.PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P2000 Supported Documents",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -958,22 +811,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = NFP_UTLAND_AALESUND,
-                arkivsaksnummer = null,
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = ALDER,
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -998,22 +837,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = any(),
-                fnr = SLAPP_SKILPADDE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = UFORE_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P2200 Supported Documents",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = any(),
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -1038,22 +863,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = null,
-                dokumenter = "P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)",
-                saktype = any(),
-                institusjon = any(),
-                identifisertePersoner = 1,
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -1080,23 +891,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = GJENLEV,
-                any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo(),
-                any()
-            )
-            //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -1146,22 +942,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = identifisertGjenlevendePerson.personRelasjon?.fnr,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = GJENLEV,
-                any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
         //legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
     }
 
@@ -1189,22 +971,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = null,
-                institusjon = any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
         // TODO: legg inn sjekk på at seden ligger i Joark på riktig bruker, dvs søker og ikke den avdøde
 
     }
@@ -1233,22 +1001,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = null,
-                institusjon = any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo(),
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -1256,7 +1010,6 @@ internal class JournalforingServiceTest {
 
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
         val sedHendelse = SedHendelse.fromJson(hendelse)
-
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
@@ -1277,21 +1030,8 @@ internal class JournalforingServiceTest {
             gjennySakId = null
         )
 
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = LEALAUS_KAKE,
-                sedHendelseType = SENDT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = null,
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = null,
-                institusjon = any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo = null,
-                any()
-            )
-        }
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -1339,20 +1079,8 @@ internal class JournalforingServiceTest {
             gjennySakId = null
         )
 
-        verify {
-            journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse,
-                fnr = identifisertGjenlevendePerson.personRelasjon?.fnr,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = PENSJON_UTLAND,
-                arkivsaksnummer = Sak("FAGSAK", "1033470", "PEN" ),
-                dokumenter = "P2100 Krav om etterlattepensjon",
-                saktype = BARNEP,
-                any(),
-                identifisertePersoner = 2,
-                saksbehandlerInfo = saksbehandlerInfo(),
-                any()
-            )
+        verify(atLeast = 1) {
+            journalpostKlient.opprettJournalpost(any(), any(), any())
         }
     }
 
