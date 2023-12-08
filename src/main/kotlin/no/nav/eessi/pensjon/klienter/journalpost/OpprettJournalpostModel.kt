@@ -51,9 +51,15 @@ enum class JournalpostType: Code {
     }
 }
 
+//data class Sak(
+//    val arkivsaksnummer: String,
+//    val arkivsaksystem: String
+//)
+
 data class Sak(
-    val arkivsaksnummer: String,
-    val arkivsaksystem: String
+    val sakstype: String,
+    val fagsakid: String,
+    val fagsaksystem: String,
 )
 
 /**

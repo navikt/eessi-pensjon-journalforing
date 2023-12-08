@@ -17,8 +17,6 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.Period
 
 @Service
 class JournalpostService(private val journalpostKlient: JournalpostKlient) {
@@ -39,7 +37,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         fnr: Fodselsnummer?,
         sedHendelseType: HendelseType,
         journalfoerendeEnhet: Enhet,
-        arkivsaksnummer: String?,
+        arkivsaksnummer: Sak?,
         dokumenter: String,
         saktype: SakType?,
         institusjon: AvsenderMottaker,
@@ -53,7 +51,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
-            sak = arkivsaksnummer?.let { Sak(it, "PSAK")},
+            sak = arkivsaksnummer,
             tema = tema,
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),

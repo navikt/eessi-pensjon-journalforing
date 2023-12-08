@@ -14,10 +14,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.handler.OppgaveHandler
 import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.AvsenderMottaker
-import no.nav.eessi.pensjon.klienter.journalpost.IdType
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
@@ -113,7 +110,8 @@ class JournalforingService(
                 )
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner, sedHendelse.rinaSakId)
+                val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
+                fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -122,7 +120,7 @@ class JournalforingService(
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = gjennySakId ?: sakInformasjon?.sakId,
+                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, gjennySakId, sakInformasjon),
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,
@@ -263,7 +261,7 @@ class JournalforingService(
                     fnr = null,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = ID_OG_FORDELING,
-                    arkivsaksnummer = pesysSakId,
+                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, pesysSakId, null),
                     dokumenter = documents,
                     saktype = saktype,
                     institusjon = institusjon,
@@ -456,6 +454,18 @@ class JournalforingService(
                 if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
             }
         }
+    }
+
+    fun hentSak(
+        euxCaseId: String,
+        sakIdFraSed: String? = null,
+        sakInformasjon: SakInformasjon? = null
+    ): Sak? {
+        return if (gcpStorageService.eksisterer(euxCaseId) && sakIdFraSed != null)
+            Sak("FAGSAK", sakIdFraSed, "EY")
+        else if (sakInformasjon?.sakId != null)
+            Sak("FAGSAK", sakInformasjon.sakId!!, "PEN")
+        else null
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
