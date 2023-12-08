@@ -26,8 +26,9 @@
   "journalpostType": "INNGAAENDE",
   "kanal": "NAV_NO",
   "sak": {
-    "arkivsaksnummer": "string",
-    "arkivsaksystem": "PSAK"
+    "sakstype": "FAGSAK",
+    "fagsakid": "11111",
+    "fagsaksystem": "PEN"
   },
   "tema": "PEN",
   "tilleggsopplysninger": [

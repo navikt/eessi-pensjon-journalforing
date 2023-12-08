@@ -7,19 +7,10 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GENRL
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
-import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
@@ -61,7 +52,7 @@ internal class JournalpostServiceTest {
             fnr = SLAPP_SKILPADDE,
             sedHendelseType = MOTTATT,
             journalfoerendeEnhet = ID_OG_FORDELING,
-            arkivsaksnummer = "string",
+            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
             dokumenter = """
                 [{
                     "brevkode": "NAV 14-05.09",
@@ -99,8 +90,8 @@ internal class JournalpostServiceTest {
         assertEquals(ID_OG_FORDELING, actualRequest.journalfoerendeEnhet)
         assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
-        assertEquals("string", actualRequest.sak!!.arkivsaksnummer)
-        assertEquals("PSAK", actualRequest.sak!!.arkivsaksystem)
+        assertEquals("11111", actualRequest.sak!!.fagsakid)
+        assertEquals("PEN", actualRequest.sak!!.fagsaksystem)
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
         verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true, null) }
@@ -118,7 +109,7 @@ internal class JournalpostServiceTest {
                 fnr = SLAPP_SKILPADDE,
                 sedHendelseType = MOTTATT,
                 journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = "string",
+                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
                 dokumenter = """
                 [{
                     "brevkode": "NAV 14-05.09",
