@@ -40,7 +40,6 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -52,7 +51,6 @@ import java.time.LocalDate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 
-@Disabled
 internal class JournalforingServiceTest {
 
     //TODO: SE OVER DENNE TESTEN OG SE OM DET ER MULIGHET FOR FORBERING
