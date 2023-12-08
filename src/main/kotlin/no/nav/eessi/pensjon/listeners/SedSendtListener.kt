@@ -115,15 +115,15 @@ class SedSendtListener(
                                 alleSedIBucList,
                                 kansellerteSeder
                             )
-                            val pesysSakId = fagmodulService.hentSakIdFraSED(alleSedIBucList)
+                            val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
-                            if (identifisertPerson == null && !pesysSakId.isNullOrEmpty())
+                            if (identifisertPerson == null && !saksIdFraSed.isNullOrEmpty())
                                 journalforingService.journalforUkjentPersonKjentPersysSakId(
                                     sedHendelse,
                                     SENDT,
                                     fdato,
                                     null,
-                                    pesysSakId
+                                    saksIdFraSed
                                 )
                             else {
                                 val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
@@ -150,7 +150,7 @@ class SedSendtListener(
                                     identifisertePersoner.count()
                                         .also { logger.info("Antall identifisertePersoner: $it") },
                                     navAnsattMedEnhet,
-                                    null
+                                    saksIdFraSed
                                 )
                             }
                         }
