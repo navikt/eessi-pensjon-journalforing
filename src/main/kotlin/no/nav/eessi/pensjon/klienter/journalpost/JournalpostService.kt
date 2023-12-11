@@ -65,7 +65,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     }
 
     private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
-        val manglerVerdier = listOf(
+        val alleVerdierErSatt = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
             request.kanal,
@@ -75,7 +75,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }
-        if(!manglerVerdier)
+        if(!alleVerdierErSatt)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
             logger.warn("""
@@ -91,7 +91,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 """)
 
         }
-        return !manglerVerdier
+        return !alleVerdierErSatt
     }
 
     /**
