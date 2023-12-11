@@ -74,9 +74,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.avsenderMottaker,
             request.tittel,
             request.dokumenter
-        ).any { it == null }.also {
-            !it
-        }
+        ).any { it == null }
         if(!manglerVerdier)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
@@ -93,7 +91,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 """)
 
         }
-        return manglerVerdier
+        return !manglerVerdier
     }
 
     /**
