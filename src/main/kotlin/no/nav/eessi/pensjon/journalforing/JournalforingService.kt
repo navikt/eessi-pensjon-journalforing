@@ -113,6 +113,10 @@ class JournalforingService(
                 val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
                 fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
+                val identifisertPersonSakType =  if(gcpStorageService.eksisterer(sedHendelse.rinaSakId) && identifisertPerson?.personRelasjon?.saktype != null){
+                    identifisertPerson.personRelasjon?.saktype
+                } else saktype
+
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
                 val journalPostResponse = journalpostService.opprettJournalpost(
@@ -122,7 +126,7 @@ class JournalforingService(
                     journalfoerendeEnhet = tildeltJoarkEnhet,
                     arkivsaksnummer = hentSak(sedHendelse.rinaSakId, gjennySakId, sakInformasjon),
                     dokumenter = documents,
-                    saktype = saktype,
+                    saktype = identifisertPersonSakType,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
