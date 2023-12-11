@@ -33,6 +33,8 @@ spec:
       value: prod
     - name: NAMESPACE
       value: p
+    - name: GCP_BUCKET_NAME
+      value: eessi-pensjon-gjenny
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.prod-fss-pub.nais.io/cpi
     - name: PDL_URL

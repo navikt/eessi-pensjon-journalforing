@@ -32,6 +32,8 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
+    - name: GCP_BUCKET_NAME
+      value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.dev-fss-pub.nais.io/cpi
     - name: PDL_URL

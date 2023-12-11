@@ -76,15 +76,17 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.dokumenter
         ).any { it == null }.also {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
-            logger.warn("""Journalpost kan ikke ferdigstilles da det mangler data:" +
-                    "sak: ${request.sak}, " +
-                    "tema: ${request.tema}, " +
-                    "kanal: ${request.kanal}, " +
-                    "tittel: ${request.tittel}, " +
-                    "dokumenter.str: ${request.dokumenter.length}, " +
-                    "avsenderMottaker: ${request.avsenderMottaker}, " +
-                    "bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr" }, " +
-                    "journalfoerendeEnhet: ${request.journalfoerendeEnhet}""")
+            logger.warn("""
+                Journalpost kan ikke ferdigstilles da det mangler data:
+                    sak: ${request.sak}, 
+                    tema: ${request.tema}
+                    kanal: ${request.kanal}
+                    tittel: ${request.tittel}
+                    dokumenter.str: ${request.dokumenter.length}
+                    avsenderMottaker: ${request.avsenderMottaker}
+                    bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr" }
+                    journalfoerendeEnhet: ${request.journalfoerendeEnhet}
+                """)
             return !it
         }
     }
