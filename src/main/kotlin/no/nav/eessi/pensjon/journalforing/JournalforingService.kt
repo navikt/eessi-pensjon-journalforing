@@ -464,7 +464,7 @@ class JournalforingService(
         return if (gcpStorageService.eksisterer(euxCaseId) && sakIdFraSed != null)
             Sak("FAGSAK", sakIdFraSed, "EY")
         else if (sakInformasjon?.sakId != null)
-            Sak("FAGSAK", sakInformasjon.sakId!!, "PEN")
+            Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")
         else null
     }
 
