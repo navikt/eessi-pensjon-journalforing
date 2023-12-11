@@ -65,7 +65,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     }
 
     private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
-        listOf(
+        val manglerVerdier = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
             request.kanal,
@@ -75,6 +75,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }.also {
+            !it
+        }
+        if(!manglerVerdier)
+        {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
             logger.warn("""
                 Journalpost kan ikke ferdigstilles da det mangler data:
@@ -87,8 +91,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                     bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr" }
                     journalfoerendeEnhet: ${request.journalfoerendeEnhet}
                 """)
-            return !it
+
         }
+        return manglerVerdier
     }
 
     /**
