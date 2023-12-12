@@ -113,6 +113,7 @@ class FodselsdatoHelper {
          * P10000 - [03] Barn
          */
         private fun leggTilAnnenPersonFdatoHvisFinnes(annenPerson: Person?): String? {
+            logger.info("Annen persons rolle er: ${annenPerson?.rolle}")
             if (annenPerson?.rolle != Rolle.ETTERLATTE.kode) return null
             return annenPerson.foedselsdato
         }
