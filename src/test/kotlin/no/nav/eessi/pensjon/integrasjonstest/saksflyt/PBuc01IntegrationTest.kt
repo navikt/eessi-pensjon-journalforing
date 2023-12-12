@@ -66,7 +66,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 )
             )
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
-            every { gcpStorageService.eksisterer(any()) } returns false
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
@@ -104,8 +103,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost og journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
-            every { gcpStorageService.eksisterer(any()) } returns false
-
             testRunnerVoksen(
                 null,
                 null,
@@ -139,8 +136,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 )
             )
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
-
-            every { gcpStorageService.eksisterer(any()) } returns false
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
@@ -196,8 +191,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             )
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
 
-            every { gcpStorageService.eksisterer(any()) } returns false
-
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, forsokFerdigStilt = false, hendelseType = MOTTATT
             ) {
@@ -240,8 +233,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
             val fdato = "1970-06-20"
 
-            every { gcpStorageService.eksisterer(any()) } returns false
-
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT, fdato = fdato
             ) {
@@ -264,8 +255,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om Alder P2000 uten gyldig fnr sendes til ID og Fordeling`() {
             val bestemsak = BestemSakResponse(null, emptyList())
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
-
-            every { gcpStorageService.eksisterer(any()) } returns false
 
             testRunnerVoksen(
                 null, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT
@@ -420,7 +409,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val dokumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P8000, SedStatus.RECEIVED),
                 ForenkletSED("b12e06dda2c7474b9998c7139c841647", P8000, SedStatus.SENT),
                 ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED))
-            every { gcpStorageService.eksisterer(any()) } returns false
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
