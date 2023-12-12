@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.relasjoner
 
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.BARN
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.ETTERLATTE
@@ -22,7 +20,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
         val forsikret = hentForsikretPerson(bestemSaktype(bucType))
 
         hentAnnenpersonRelasjon().let {
-            if(bucType in listOf(P_BUC_05, P_BUC_10, P_BUC_02) && it != null){
+            if(bucType in listOf(P_BUC_05, P_BUC_10, P_BUC_02, P_BUC_06) && it != null){
                 fnrListe.add(it)
             }
         }
