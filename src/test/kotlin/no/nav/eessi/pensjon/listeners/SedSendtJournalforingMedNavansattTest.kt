@@ -82,6 +82,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         fagmodulService,
         bestemSakService,
         navansattKlient,
+        mockk(),
         "test",
     )
 

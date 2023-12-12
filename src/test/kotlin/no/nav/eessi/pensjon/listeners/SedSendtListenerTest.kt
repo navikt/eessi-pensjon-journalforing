@@ -1,14 +1,17 @@
 package no.nav.eessi.pensjon.listeners
 
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.kafka.support.Acknowledgment
@@ -24,6 +27,7 @@ internal class SedSendtListenerTest {
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val fagmodulService = mockk<FagmodulService>(relaxed = true)
+    private val gcpStorageService = mockk<GcpStorageService>()
 
     private val sedListener = SedSendtListener(jouralforingService,
         personidentifiseringService,
@@ -31,7 +35,14 @@ internal class SedSendtListenerTest {
         fagmodulService,
         bestemSakService,
         mockk(relaxed = true),
+        gcpStorageService,
         "test")
+
+    @BeforeEach
+    fun setup() {
+        every { gcpStorageService.eksisterer(any()) } returns false
+    }
+
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {

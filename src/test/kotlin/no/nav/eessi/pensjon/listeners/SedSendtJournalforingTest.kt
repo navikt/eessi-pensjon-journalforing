@@ -62,11 +62,11 @@ internal class SedSendtJournalforingTest {
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
     private val fagmodulService = FagmodulService(fagmodulKlient)
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
-    private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     private val journalpostService = JournalpostService(journalpostKlient)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
     private val navansattKlient = mockk<NavansattKlient>(relaxed = true)
+    private val gcpStorageService = mockk<GcpStorageService>()
     private val jouralforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
@@ -79,6 +79,7 @@ internal class SedSendtJournalforingTest {
         fagmodulService,
         bestemSakService,
         navansattKlient,
+        gcpStorageService = gcpStorageService,
         "test"
     )
 
@@ -102,6 +103,7 @@ internal class SedSendtJournalforingTest {
     @BeforeEach
     fun setup() {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+        every { gcpStorageService.eksisterer(any()) } returns false
     }
 
     @Test

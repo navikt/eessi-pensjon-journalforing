@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.handler.BehandleHendelseModel
 import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.handler.OppgaveHandler
@@ -100,6 +101,9 @@ internal open class JournalforingTestBase {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
     private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
+
+    protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
+
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
@@ -107,7 +111,7 @@ internal open class JournalforingTestBase {
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
         statistikkPublisher = statistikkPublisher,
-        gcpStorageService = mockk(relaxed = true)
+        gcpStorageService = gcpStorageService
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -132,6 +136,7 @@ internal open class JournalforingTestBase {
         euxService = euxService,
         bestemSakService = bestemSakService,
         fagmodulService = fagmodulService,
+        gcpStorageService = gcpStorageService,
         profile = "test",
         navansattKlient = navansattKlient
     )
@@ -141,6 +146,7 @@ internal open class JournalforingTestBase {
     fun setup() {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
+        every { gcpStorageService.eksisterer(any()) } returns false
     }
 
     @AfterEach

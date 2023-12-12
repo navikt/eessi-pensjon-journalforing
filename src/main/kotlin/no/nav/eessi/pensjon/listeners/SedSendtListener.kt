@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
@@ -38,6 +39,7 @@ class SedSendtListener(
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     private val navansattKlient: NavansattKlient,
+    private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
@@ -126,14 +128,16 @@ class SedSendtListener(
                                     saksIdFraSed
                                 )
                             else {
-                                val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
-                                    .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-                                val sakInformasjon = pensjonSakInformasjonSendt(
-                                    identifisertPerson,
-                                    bucType,
-                                    sakTypeFraSED,
-                                    alleSedIBucList
-                                )
+                                val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+                                val gjennySak = gcpStorageService.eksisterer(sedHendelse.rinaSakId)
+                                val sakInformasjon = if (gjennySak) null else {
+                                    pensjonSakInformasjonSendt(
+                                        identifisertPerson,
+                                        bucType,
+                                        sakTypeFraSED,
+                                        alleSedIBucList
+                                    )
+                                }
                                 val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse)
                                 val currentSed =
                                     alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
