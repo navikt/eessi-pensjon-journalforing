@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.gcp
 
+import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.Storage
 import org.slf4j.LoggerFactory
@@ -34,6 +35,20 @@ class GcpStorageService(
             return true
         }
         return false
+    }
+
+    fun hent(storageKey: String): String? {
+        val jsonHendelse: Blob
+        try {
+            jsonHendelse =  gcpStorage.get(BlobId.of(bucketname, storageKey))
+            if(jsonHendelse.exists()){
+                logger.info("Blob med key:$storageKey funnet")
+                return jsonHendelse.getContent().decodeToString()
+            }
+        } catch ( ex: Exception) {
+            logger.warn("En feil oppstod under henting av objekt: $storageKey i bucket")
+        }
+        return null
     }
 
     fun list(keyPrefix: String) : List<String> {

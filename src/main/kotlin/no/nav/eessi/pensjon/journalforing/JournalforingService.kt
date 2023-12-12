@@ -445,7 +445,8 @@ class JournalforingService(
         euxCaseId: String
     ) : Tema {
         return if (gcpStorageService.eksisterer(euxCaseId)) {
-            if (saktype == SakType.BARNEP) EYBARNEP else OMSTILLING
+            val blob = gcpStorageService.hent(euxCaseId)
+            if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         } else {
             val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
             if (saktype == SakType.UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD

@@ -85,7 +85,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 |    tittel: ${request.tittel},
                 |    dokumenter.str: ${request.dokumenter.length},
                 |    avsenderMottaker: ${request.avsenderMottaker},
-                |    bruker: ${if (vasketFnr) "*******" else "Mangler fnr"},
+                |    bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr"},
                 |    journalfoerendeEnhet: ${request.journalfoerendeEnhet}""".trimMargin()
 
         }
