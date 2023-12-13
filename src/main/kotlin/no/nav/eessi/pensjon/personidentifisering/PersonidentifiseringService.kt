@@ -16,8 +16,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.FORSIKRET
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -211,6 +210,11 @@ class PersonidentifiseringService(
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
+                utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
+            }
+
+            bucType == P_BUC_06 -> {
+                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon in listOf(GJENLEVENDE, ANNET, BARN, FORSORGER) }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
 
