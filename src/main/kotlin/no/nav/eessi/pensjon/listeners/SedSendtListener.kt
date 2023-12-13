@@ -1,14 +1,9 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.buc.EuxService
-import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
-import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
@@ -16,10 +11,8 @@ import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
-import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -42,7 +35,7 @@ class SedSendtListener(
     private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
-) {
+) : SedListenerBase(fagmodulService, bestemSakService) {
 
     private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
@@ -131,14 +124,14 @@ class SedSendtListener(
                                 val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
                                 val gjennySak = gcpStorageService.eksisterer(sedHendelse.rinaSakId)
                                 val sakInformasjon = if (gjennySak) null else {
-                                    pensjonSakInformasjonSendt(
+                                    pensjonSakInformasjon(
                                         identifisertPerson,
                                         bucType,
                                         sakTypeFraSED,
                                         alleSedIBucList
                                     )
                                 }
-                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, sedHendelse)
+                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
                                 val currentSed =
                                     alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
@@ -176,50 +169,6 @@ class SedSendtListener(
             }
         }
     }
-
-    /**
-     * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
-     */
-    private fun pensjonSakInformasjonSendt(
-        identifisertPerson: IdentifisertPerson?,
-        bucType: BucType,
-        saktypeFraSed: SakType?,
-        alleSedIBuc: List<SED>
-    ): SakInformasjon? {
-        logger.info("skal hente pensjonsak med bruk av bestemSak")
-
-        val aktoerId = identifisertPerson?.aktoerId ?: return null
-            .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
-
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc).let { pensjonsinformasjon ->
-            if (pensjonsinformasjon?.sakType != null) {
-                logger.info("Velger sakType ${pensjonsinformasjon.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.sakId}")
-                return pensjonsinformasjon
-            }
-        }
-        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
-            if (it?.sakType != null) {
-                logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
-                return it
-            }
-        }
-        logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
-        return null
-    }
-
-    private fun populerSaktype(
-        saktypeFraSED: SakType?,
-        sakInformasjon: SakInformasjon?,
-        sedHendelseModel: SedHendelse
-    ): SakType? {
-        secureLog.info("Populerer saktype fra saktypeFraSED: $saktypeFraSED, sakInformasjon: $sakInformasjon, sedHendelseModel: $sedHendelseModel")
-        if (sedHendelseModel.bucType == P_BUC_02 && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) return null
-        else if (sedHendelseModel.bucType == P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType
-            ?: saktypeFraSED
-        else if (saktypeFraSED != null) return saktypeFraSED
-        return sakInformasjon?.sakType
-    }
-
 }
 
     /**
