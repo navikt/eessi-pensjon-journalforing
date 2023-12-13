@@ -16,7 +16,7 @@ open class SedListenerBase(
     private val bestemSakService: BestemSakService
 ) {
 
-    private val logger = LoggerFactory.getLogger(SedMottattListener::class.java)
+    private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
 
     /**
      * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
