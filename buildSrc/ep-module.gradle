@@ -1,7 +1,4 @@
 buildscript {
-    ext {
-        kotlinVersion = '1.9.10'
-    }
     repositories {
         mavenCentral()
         maven {
@@ -14,13 +11,9 @@ buildscript {
         classpath "se.patrikerdes:gradle-use-latest-versions-plugin:0.2.18"
         classpath "org.owasp:dependency-check-gradle:8.1.0"
         classpath "com.adarshr:gradle-test-logger-plugin:4.0.0"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
     }
 }
 
-apply plugin: org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
-apply plugin: org.jetbrains.kotlin.allopen.gradle.SpringGradleSubplugin
 apply plugin: com.github.benmanes.gradle.versions.VersionsPlugin
 apply plugin: se.patrikerdes.UseLatestVersionsPlugin
 apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
@@ -54,19 +47,15 @@ java {
 }
 
 compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = ["-Xjsr305=strict"]
-        jvmTarget = "17"
-        allWarningsAsErrors = true
-    }
+    kotlinOptions.jvmTarget =  "17"
+    kotlinOptions.allWarningsAsErrors = true
+    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
 
 compileTestKotlin {
-    kotlinOptions {
-        freeCompilerArgs = ['-Xjsr305=strict']
-        jvmTarget = '17'
-        allWarningsAsErrors = true
-    }
+    kotlinOptions.jvmTarget =  "17"
+    kotlinOptions.allWarningsAsErrors = true
+    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
 
 test {
