@@ -38,7 +38,7 @@ class OpprettJournalpostRequest(
     val eksternReferanseId: String? = null
 
     override fun toString(): String {
-        return mapAnyToJson(this,true)
+        return mapAnyToJson(this)
     }
 }
 
@@ -50,11 +50,6 @@ enum class JournalpostType: Code {
         override fun decode() = "Inngående"
     }
 }
-
-//data class Sak(
-//    val arkivsaksnummer: String,
-//    val arkivsaksystem: String
-//)
 
 data class Sak(
     val sakstype: String,

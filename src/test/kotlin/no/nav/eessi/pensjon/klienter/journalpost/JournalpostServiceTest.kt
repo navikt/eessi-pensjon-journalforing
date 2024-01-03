@@ -18,10 +18,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
@@ -35,6 +32,34 @@ internal class JournalpostServiceTest {
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
+    }
+
+    @Test
+    fun kanSakFerdigstillesTest() {
+        assertFalse(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+            null,
+            Behandlingstema.ALDERSPENSJON,
+            Bruker("brukerId"),
+            "[]",
+            ID_OG_FORDELING,
+            JournalpostType.INNGAAENDE,
+            Sak("FAGSAK", "11111", "PEN"),
+            Tema.PENSJON,
+            emptyList(),
+            "tittel på sak")))
+
+        assertTrue(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+            AvsenderMottaker(land = "GB"),
+            Behandlingstema.ALDERSPENSJON,
+            Bruker("brukerId"),
+            "[]",
+            ID_OG_FORDELING,
+            JournalpostType.INNGAAENDE,
+            Sak("FAGSAK", "11111", "PEN"),
+            Tema.PENSJON,
+            emptyList(),
+            "tittel på sak")
+        ))
     }
 
     @Test

@@ -64,7 +64,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         return journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first)
     }
 
-    private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
+    fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
         val detFinnesNull = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
