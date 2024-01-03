@@ -65,7 +65,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     }
 
     private fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
-        val alleVerdierErSatt = listOf(
+        val detFinnesNull = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
             request.kanal,
@@ -75,7 +75,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }
-        if(!alleVerdierErSatt)
+        if(detFinnesNull)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
             logger.info("""Journalpost kan ikke ferdigstilles da det mangler data:
@@ -87,9 +87,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 |    avsenderMottaker: ${request.avsenderMottaker},
                 |    bruker: ${if (vasketFnr == true) "*******" else "Mangler fnr"},
                 |    journalfoerendeEnhet: ${request.journalfoerendeEnhet}""".trimMargin())
-
+            return false
         }
-        return !alleVerdierErSatt
+        return true
     }
 
     /**
