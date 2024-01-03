@@ -142,7 +142,7 @@ internal class JournalforingServiceMedJournalpostTest {
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
-        Assertions.assertEquals(false, erMuligAaFerdigstille)
+        Assertions.assertEquals(true, erMuligAaFerdigstille)
 
     }
 

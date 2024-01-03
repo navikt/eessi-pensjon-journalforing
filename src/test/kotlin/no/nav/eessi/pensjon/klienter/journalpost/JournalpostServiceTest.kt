@@ -159,7 +159,7 @@ internal class JournalpostServiceTest {
     }
 
     @Test
-    fun `Gitt en P2100 med GJENLEV når den er AVSLUTTET Så opprettes en Journalpost uten saknr og til enhet 4303 og tema Pensjon`() {
+    fun `Gitt en P2100 med GJENLEV når den er AVSLUTTET Så opprettes og ferdigstilles en Journalpost uten saknr som sendes til enhet 4303 og tema Pensjon`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
         val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
@@ -224,7 +224,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false, null) }
+        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, true, null) }
     }
 
     @Test

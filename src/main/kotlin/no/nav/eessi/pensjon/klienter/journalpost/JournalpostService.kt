@@ -18,6 +18,12 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
+
+/**
+ * opprettJournalpost tjeneste som oppretter en journalpost i Joark.
+ *
+ * https://confluence.adeo.no/display/BOA/opprettJournalpost
+ */
 @Service
 class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
@@ -65,12 +71,16 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
+        // Siden joark godtar sak == null men må ha saktype dersom vi skal kunne ferdigstille journalposten
+        val sakType = if (request.sak != null) {
+            request.sak.sakstype
+        } else "Mangler sak, men kan ferdigstilles uten"
         val detFinnesNull = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
             request.kanal,
             request.tema,
-            request.sak,
+            sakType,
             request.avsenderMottaker,
             request.tittel,
             request.dokumenter
