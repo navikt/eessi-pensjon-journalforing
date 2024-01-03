@@ -88,11 +88,11 @@ abstract class IntegrasjonsBase() {
         mottattContainer.start()
         Thread.sleep(1000) // wait a bit for the container to start
 
-        ContainerTestUtils.waitForAssignment(mottattContainer, embeddedKafka.partitionsPerTopic)
+//        ContainerTestUtils.waitForAssignment(mottattContainer, 1)
 
         oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
         oppgaveContainer.start()
-        ContainerTestUtils.waitForAssignment(oppgaveContainer, embeddedKafka.partitionsPerTopic)
+        ContainerTestUtils.waitForAssignment(oppgaveContainer, 2)
 
         println("*************************  BeforeEach DONE *****************************")
 

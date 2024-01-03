@@ -108,9 +108,7 @@ class RestTemplateConfig(
                         bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
                 )
                 .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()
-                            .apply { setOutputStreaming(false) }
-                    )
+                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
                 }
     }
 
