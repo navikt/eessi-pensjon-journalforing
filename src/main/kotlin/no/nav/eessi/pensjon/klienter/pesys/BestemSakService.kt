@@ -38,12 +38,8 @@ class BestemSakService(private val klient: BestemSakKlient) {
         //TODO: Sjekke om vi alltid kan returnere GJENLEV på P_BUC_02
         val saktype = when (bucType) {
             P_BUC_01 -> ALDER
-            P_BUC_02 -> saksType ?: return null
             P_BUC_03 -> UFOREP
-            P_BUC_05 -> saksType ?: return null
-            R_BUC_02 -> saksType!!
-            P_BUC_10 -> saksType ?: return null
-            else -> return null
+            else -> saksType?: return null
         }
 
         val resp = kallBestemSak(aktoerId, saktype)
