@@ -38,7 +38,7 @@ class PersonSok(
     }
 
     fun sokPersonEtterFnr(personRelasjoner: List<SEDPersonRelasjon>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
-        logger.info("PersonUtvelger *** SøkPerson *** ")
+        logger.info("PersonUtvelger *** SøkPerson *** rinadokumentId: $rinaDocumentId sedType: $sedType bucType: $bucType personrelasjoner: ${personRelasjoner.map { it.relasjon }} hendelsesType")
 
         val potensiellePersonRelasjoner = if (bucType == BucType.P_BUC_02) personRelasjoner
         else personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
