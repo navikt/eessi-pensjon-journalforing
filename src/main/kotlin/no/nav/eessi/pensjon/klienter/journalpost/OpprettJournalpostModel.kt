@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
+import java.util.*
 
 /**
  * /rest/journalpostapi/v1/journalpost
@@ -35,7 +36,7 @@ class OpprettJournalpostRequest(
     val tittel: String
 ){
     val kanal: String = "EESSI"
-    val eksternReferanseId: String? = null
+    val eksternReferanseId: String = UUID.randomUUID().toString()
 
     override fun toString(): String {
         return mapAnyToJson(this)
