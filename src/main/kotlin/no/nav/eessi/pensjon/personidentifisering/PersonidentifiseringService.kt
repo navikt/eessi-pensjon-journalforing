@@ -296,7 +296,7 @@ class PersonidentifiseringService(
     }
 }
 
-class FlerePersonPaaBucException() : Exception()
+class FlerePersonPaaBucException : Exception()
 
 
 

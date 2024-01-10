@@ -34,7 +34,7 @@ const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
 
-abstract class IntegrasjonsBase() {
+abstract class IntegrasjonsBase {
 
     @Autowired
     lateinit var mottattListener: SedMottattListener

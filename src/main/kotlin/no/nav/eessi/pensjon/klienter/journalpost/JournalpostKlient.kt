@@ -62,7 +62,7 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                secureLog.info("Journalpostrequesten: $request, /n ${headers.toString()}")
+                secureLog.info("Journalpostrequesten: $request, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,

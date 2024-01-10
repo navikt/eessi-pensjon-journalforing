@@ -99,10 +99,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             }
 
             val c2 = checksum(kontrollsiffer2, value)
-            if(c2 == 10 || c2 != ks2) {
-                return false
-            }
-            return true
+            return !(c2 == 10 || c2 != ks2)
         }
 
     private val foedselsaar: Int

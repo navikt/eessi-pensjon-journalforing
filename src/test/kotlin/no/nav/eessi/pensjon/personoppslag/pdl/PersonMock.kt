@@ -49,7 +49,7 @@ object PersonMock {
             identer = identer,
             navn = Navn(fornavn, null, etternavn, metadata = metadata),
             adressebeskyttelse = listOf(AdressebeskyttelseGradering.UGRADERT),
-            bostedsadresse = no.nav.eessi.pensjon.personoppslag.pdl.model.Bostedsadresse(
+            bostedsadresse = Bostedsadresse(
                 gyldigFraOgMed = LocalDateTime.now(),
                 gyldigTilOgMed = LocalDateTime.now(),
                 vegadresse = Vegadresse("Oppoverbakken", "66", null, "1920"),

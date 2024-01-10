@@ -1128,10 +1128,10 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
-        val resultatGENRL = journalforingService.hentTema(BucType.P_BUC_05, SakType.GENRL, LEALAUS_KAKE, 2, RINADOK_ID)
+        val resultatGENRL = journalforingService.hentTema(BucType.P_BUC_05, GENRL, LEALAUS_KAKE, 2, RINADOK_ID)
         assertEquals(Tema.PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalforingService.hentTema(BucType.P_BUC_05, SakType.OMSORG, LEALAUS_KAKE, 2, RINADOK_ID)
+        val resultatOMSORG = journalforingService.hentTema(BucType.P_BUC_05, OMSORG, LEALAUS_KAKE, 2, RINADOK_ID)
         assertEquals(Tema.PENSJON, resultatOMSORG)
 
         val resultatALDER = journalforingService.hentTema(BucType.P_BUC_05, ALDER, fnr = SLAPP_SKILPADDE, 1, RINADOK_ID)
