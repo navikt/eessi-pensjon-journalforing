@@ -59,12 +59,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
         )
 
-        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)
+        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType)
 
         return journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first)
     }
 
-    fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
+    fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType?): Boolean {
+        //Journalfører ikke maskinelt for Gjenlevende buc, da gjenny skal ta se av dette
+        if(bucType == P_BUC_02) return false
         val detFinnesNull = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
