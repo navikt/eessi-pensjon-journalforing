@@ -111,7 +111,7 @@ internal class JournalpostServiceTest {
         assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
         assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
-        assertNull(actualRequest.eksternReferanseId)
+        assertNotNull(actualRequest.eksternReferanseId)
         assertEquals(ID_OG_FORDELING, actualRequest.journalfoerendeEnhet)
         assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
@@ -186,7 +186,8 @@ internal class JournalpostServiceTest {
                 "nokkel" : "eessi_pensjon_bucid",
                 "verdi" : "147730"
               } ],
-              "tittel" : "Utgående P2100"
+              "tittel" : "Utgående P2100",
+              "eksternReferanseId" : "647e2336-112f-462f-9f9d-bbfa859fa3ac"
             }
         """.trimIndent()
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
@@ -211,9 +212,12 @@ internal class JournalpostServiceTest {
 
         val actualRequest = requestSlot.captured
 
+        //eksternReferanseId blir auto generert og vil ikke være den samme da dette er forskjellige objekter
+        assertNotNull(expectedRequest.eksternReferanseId, actualRequest.eksternReferanseId)
+        assertNotEquals(expectedRequest.eksternReferanseId, actualRequest.eksternReferanseId)
+
         assertEquals(expectedRequest.behandlingstema, actualRequest.behandlingstema)
         assertEquals(expectedRequest.dokumenter, actualRequest.dokumenter)
-        assertEquals(expectedRequest.eksternReferanseId, actualRequest.eksternReferanseId)
         assertEquals(expectedRequest.journalfoerendeEnhet, actualRequest.journalfoerendeEnhet)
         assertEquals(expectedRequest.journalpostType, actualRequest.journalpostType)
         assertEquals(expectedRequest.kanal, actualRequest.kanal)

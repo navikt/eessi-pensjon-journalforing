@@ -107,7 +107,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medtildeltEnhetsnr("4303")
     }
 
-    @Disabled // Her opprettes det ikke oppgave lenger da person er ukjent og journalpost status settes til avbrutt
     @Test
     fun `Når en SED (P2200) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 
