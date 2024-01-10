@@ -68,6 +68,41 @@ internal class JournalpostServiceTest {
     }
 
     @Test
+    fun `kanSakFerdigstillesTest skal returnere false dersom det er P_BUC_02`() {
+        assertFalse(journalpostService.kanSakFerdigstilles(
+            OpprettJournalpostRequest(
+                null,
+                Behandlingstema.GJENLEVENDEPENSJON,
+                Bruker("brukerId"),
+                "[]",
+                ID_OG_FORDELING,
+                JournalpostType.INNGAAENDE,
+                Sak("FAGSAK", "11111", "PEN"),
+                Tema.PENSJON,
+                emptyList(),
+                "tittel på sak"),
+                P_BUC_02
+            )
+        )
+
+        assertFalse(journalpostService.kanSakFerdigstilles(
+            OpprettJournalpostRequest(
+                null,
+                Behandlingstema.GJENLEVENDEPENSJON,
+                Bruker("brukerId"),
+                "[]",
+                ID_OG_FORDELING,
+                JournalpostType.UTGAAENDE,
+                Sak("FAGSAK", "11111", "PEN"),
+                Tema.PENSJON,
+                emptyList(),
+                "tittel på sak"),
+                P_BUC_02
+            )
+        )
+    }
+
+    @Test
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter`() {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
