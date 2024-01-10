@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 import io.micrometer.core.instrument.Counter
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
@@ -40,7 +41,7 @@ class PersonSok(
     fun sokPersonEtterFnr(personRelasjoner: List<SEDPersonRelasjon>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
         logger.info("PersonUtvelger *** SøkPerson *** rinadokumentId: $rinaDocumentId sedType: $sedType bucType: $bucType personrelasjoner: ${personRelasjoner.map { it.relasjon }} hendelsesType")
 
-        val potensiellePersonRelasjoner = if (bucType == BucType.P_BUC_02) personRelasjoner
+        val potensiellePersonRelasjoner = if (bucType == BucType.P_BUC_02 || sedType in listOf(H070, H120, H121)) personRelasjoner
         else personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
 
         if (potensiellePersonRelasjoner.isEmpty()) {
