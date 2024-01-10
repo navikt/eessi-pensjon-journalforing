@@ -74,6 +74,7 @@ object RelasjonsHandler {
                 else -> GenericRelasjon(sed, bucType,rinaDocumentId)
             }
         }
+        logger.debug("Her kommer vi dersom getRelasjonsHandler returnerer null")
         return null
     }
 }
