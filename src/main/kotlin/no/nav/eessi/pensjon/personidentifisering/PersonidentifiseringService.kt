@@ -9,7 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
@@ -271,6 +271,7 @@ class PersonidentifiseringService(
         if (sedType in brukForikretPersonISed) {
             logger.info("Henter ut forsikret person fra følgende SED $sedType")
             return identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
+                .also { logger.debug("Identifisert person sin forsikret relasjon: {}", it) }
         }
         return null
     }
