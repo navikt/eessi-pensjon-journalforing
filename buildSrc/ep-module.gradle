@@ -39,21 +39,21 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:${kotlinVersion}"))
 }
 
-assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17): "Java 17 or newer is required"
+assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21): "Java 21 or newer is required"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget =  "17"
+    kotlinOptions.jvmTarget =  "21"
     kotlinOptions.allWarningsAsErrors = true
     kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget =  "17"
+    kotlinOptions.jvmTarget =  "21"
     kotlinOptions.allWarningsAsErrors = true
     kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
