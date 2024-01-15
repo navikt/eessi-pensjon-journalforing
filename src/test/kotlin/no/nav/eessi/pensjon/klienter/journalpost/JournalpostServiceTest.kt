@@ -36,34 +36,29 @@ internal class JournalpostServiceTest {
 
     @Test
     fun kanSakFerdigstillesTest() {
-        assertFalse(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-                null,
-                Behandlingstema.ALDERSPENSJON,
-                Bruker("brukerId"),
-                "[]",
-                ID_OG_FORDELING,
-                JournalpostType.INNGAAENDE,
-                Sak("FAGSAK", "11111", "PEN"),
-                Tema.PENSJON,
-                emptyList(),
-                "tittel på sak"),
-                P_BUC_01
-        ))
+        assertFalse(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+            null,
+            Behandlingstema.ALDERSPENSJON,
+            Bruker("brukerId"),
+            "[]",
+            ID_OG_FORDELING,
+            JournalpostType.INNGAAENDE,
+            Sak("FAGSAK", "11111", "PEN"),
+            Tema.PENSJON,
+            emptyList(),
+            "tittel på sak")))
 
-        assertTrue(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-                AvsenderMottaker(land = "GB"),
-                Behandlingstema.ALDERSPENSJON,
-                Bruker("brukerId"),
-                "[]",
-                ID_OG_FORDELING,
-                JournalpostType.INNGAAENDE,
-                Sak("FAGSAK", "11111", "PEN"),
-                Tema.PENSJON,
-                emptyList(),
-                "tittel på sak"),
-                P_BUC_01
+        assertTrue(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+            AvsenderMottaker(land = "GB"),
+            Behandlingstema.ALDERSPENSJON,
+            Bruker("brukerId"),
+            "[]",
+            ID_OG_FORDELING,
+            JournalpostType.INNGAAENDE,
+            Sak("FAGSAK", "11111", "PEN"),
+            Tema.PENSJON,
+            emptyList(),
+            "tittel på sak")
         ))
     }
 
