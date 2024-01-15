@@ -59,12 +59,12 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
         )
 
-        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request)
+        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
         return journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first)
     }
 
-    fun kanSakFerdigstilles(request: OpprettJournalpostRequest): Boolean {
+    fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {
         val detFinnesNull = listOf(
             request.bruker,
             request.journalfoerendeEnhet,
@@ -75,6 +75,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }
+        if (bucType == P_BUC_02 && sedHendelseType == HendelseType.MOTTATT) return false
         if(detFinnesNull)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()

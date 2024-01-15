@@ -46,7 +46,10 @@ internal class JournalpostServiceTest {
             Sak("FAGSAK", "11111", "PEN"),
             Tema.PENSJON,
             emptyList(),
-            "tittel på sak")))
+            "tittel på sak"),
+            P_BUC_01,
+            SENDT)
+        )
 
         assertTrue(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
             AvsenderMottaker(land = "GB"),
@@ -58,12 +61,14 @@ internal class JournalpostServiceTest {
             Sak("FAGSAK", "11111", "PEN"),
             Tema.PENSJON,
             emptyList(),
-            "tittel på sak")
+            "tittel på sak"),
+            P_BUC_01,
+            SENDT
         ))
     }
 
     @Test
-    fun `kanSakFerdigstillesTest skal returnere false dersom det er P_BUC_02`() {
+    fun `kanSakFerdigstillesTest skal returnere false dersom det er innkommende P_BUC_02`() {
         assertFalse(journalpostService.kanSakFerdigstilles(
             OpprettJournalpostRequest(
                 null,
@@ -76,7 +81,8 @@ internal class JournalpostServiceTest {
                 Tema.PENSJON,
                 emptyList(),
                 "tittel på sak"),
-                P_BUC_02
+                P_BUC_02,
+                MOTTATT
             )
         )
 
@@ -92,9 +98,9 @@ internal class JournalpostServiceTest {
                 Tema.PENSJON,
                 emptyList(),
                 "tittel på sak"),
-                P_BUC_02
-            )
-        )
+                P_BUC_02,
+                MOTTATT
+            ))
     }
 
     @Test
@@ -131,6 +137,7 @@ internal class JournalpostServiceTest {
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, Tema.PENSJON
         )
+        println("actualresponse: $actualResponse")
 
         // RESPONSE
         assertEqualResponse(expectedResponse, actualResponse!!)
