@@ -137,7 +137,6 @@ internal class JournalpostServiceTest {
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, Tema.PENSJON
         )
-        println("actualresponse: $actualResponse")
 
         // RESPONSE
         assertEqualResponse(expectedResponse, actualResponse!!)
