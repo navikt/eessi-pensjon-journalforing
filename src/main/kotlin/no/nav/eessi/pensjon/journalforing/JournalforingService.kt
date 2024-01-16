@@ -187,7 +187,7 @@ class JournalforingService(
                         sakInformasjon,
                         sed
                     )
-                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt)
+                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt, hendelseType)
 
                 produserStatistikkmelding(
                     sedHendelse,
@@ -208,9 +208,10 @@ class JournalforingService(
     private fun loggDersomIkkeBehSedOppgaveOpprettes(
         bucType: BucType?,
         sedHendelse: SedHendelse,
-        journalpostferdigstilt: Boolean
+        journalpostferdigstilt: Boolean,
+        hendelseType: HendelseType
     ) = logger.info("""
-            Oppretter ikke behandleSedOppgave for utgående og ferdigstilt er: $journalpostferdigstilt
+            Oppretter ikke behandleSedOppgave for $hendelseType hendelse og ferdigstilt er: $journalpostferdigstilt
             bucType: $bucType 
             sedType: ${sedHendelse.sedType}
             rinanr: ${sedHendelse.rinaSakId}
