@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.journalpost
+package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*

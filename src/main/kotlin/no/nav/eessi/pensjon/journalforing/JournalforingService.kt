@@ -16,7 +16,6 @@ import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.klienter.journalpost.*
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema

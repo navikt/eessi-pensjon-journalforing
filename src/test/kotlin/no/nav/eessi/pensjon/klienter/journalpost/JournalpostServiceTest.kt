@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
@@ -36,7 +37,8 @@ internal class JournalpostServiceTest {
 
     @Test
     fun kanSakFerdigstillesTest() {
-        assertFalse(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+        assertFalse(journalpostService.kanSakFerdigstilles(
+            OpprettJournalpostRequest(
             null,
             Behandlingstema.ALDERSPENSJON,
             Bruker("brukerId"),
@@ -51,7 +53,8 @@ internal class JournalpostServiceTest {
             SENDT)
         )
 
-        assertTrue(journalpostService.kanSakFerdigstilles(OpprettJournalpostRequest(
+        assertTrue(journalpostService.kanSakFerdigstilles(
+            OpprettJournalpostRequest(
             AvsenderMottaker(land = "GB"),
             Behandlingstema.ALDERSPENSJON,
             Bruker("brukerId"),

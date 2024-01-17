@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.journalpost
+package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.metrics.MetricsHelper
