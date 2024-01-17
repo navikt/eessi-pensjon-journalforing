@@ -44,55 +44,55 @@ internal class ArchitectureTest {
 
     @Test
     fun `Check architecture`() {
-        val ROOT = "journalforing"
+        val root = "journalforing"
 
         // Root packages
-        val Buc = "journalforing.buc"
-        val Config = "journalforing.config"
-        val Handler = "journalforing.handler"
-        val Health = "journalforing.health"
-        val Journalforing = "journalforing.journalforing"
-        val Listeners = "journalforing.listeners"
-        val OppgaveRouting = "journalforing.oppgaverouting"
-        val PDF = "journalforing.pdf"
-        val Personidentifisering = "journalforing.personidentifisering"
+        val buc = "journalforing.buc"
+        val config = "journalforing.config"
+        val handler = "journalforing.handler"
+        val health = "journalforing.health"
+        val journalforing = "journalforing.journalforing"
+        val listeners = "journalforing.listeners"
+        val oppgaveRouting = "journalforing.oppgaverouting"
+        val pdf = "journalforing.pdf"
+        val personidentifisering = "journalforing.personidentifisering"
 
         // Sub packages
-        val FagmodulKlient = "journalforing.klienter.fagmodul"
-        val JournalpostKlient = "journalforing.klienter.journalpost"
-        val PesysKlient = "journalforing.klienter.pesys"
-        val PersonidentifiseringHelpers = "journalforing.personidentifisering.helpers"
+        val fagmodulKlient = "journalforing.klienter.fagmodul"
+        val journalpostKlient = "journalforing.klienter.journalpost"
+        val pesysKlient = "journalforing.klienter.pesys"
+        val personidentifiseringHelpers = "journalforing.personidentifisering.helpers"
 
         layeredArchitecture()
-            .consideringOnlyDependenciesInAnyPackage(root)
+            .consideringOnlyDependenciesInAnyPackage(this.root)
                 //Define components
-                .layer(ROOT).definedBy(root)
-                .layer(Buc).definedBy("$root.buc")
-                .layer(Config).definedBy("$root.config")
-                .layer(Handler).definedBy("$root.handler")
-                .layer(Health).definedBy("$root.health")
-                .layer(Journalforing).definedBy("$root.journalforing")
-                .layer(Listeners).definedBy("$root.listeners")
-                .layer(OppgaveRouting).definedBy("$root.oppgaverouting")
-                .layer(PDF).definedBy("$root.pdf")
-                .layer(FagmodulKlient).definedBy("$root.klienter.fagmodul")
-                .layer(JournalpostKlient).definedBy("$root.klienter.journalpost")
-                .layer(PesysKlient).definedBy("$root.klienter.pesys")
-                .layer(Personidentifisering).definedBy("$root.personidentifisering")
-                .layer(PersonidentifiseringHelpers).definedBy("$root.personidentifisering.helpers")
+                .layer(root).definedBy(this.root)
+                .layer(buc).definedBy("${this.root}.buc")
+                .layer(config).definedBy("${this.root}.config")
+                .layer(handler).definedBy("${this.root}.handler")
+                .layer(health).definedBy("${this.root}.health")
+                .layer(journalforing).definedBy("${this.root}.journalforing")
+                .layer(listeners).definedBy("${this.root}.listeners")
+                .layer(oppgaveRouting).definedBy("${this.root}.oppgaverouting")
+                .layer(pdf).definedBy("${this.root}.pdf")
+                .layer(fagmodulKlient).definedBy("${this.root}.klienter.fagmodul")
+                .layer(journalpostKlient).definedBy("${this.root}.klienter.journalpost")
+                .layer(pesysKlient).definedBy("${this.root}.klienter.pesys")
+                .layer(personidentifisering).definedBy("${this.root}.personidentifisering")
+                .layer(personidentifiseringHelpers).definedBy("${this.root}.personidentifisering.helpers")
                 //define rules
-                .whereLayer(ROOT).mayNotBeAccessedByAnyLayer()
-                .whereLayer(Buc).mayOnlyBeAccessedByLayers(Listeners, Journalforing, PDF) // Sed
-                .whereLayer(Config).mayNotBeAccessedByAnyLayer()
-                .whereLayer(Handler).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(Health).mayNotBeAccessedByAnyLayer()
-                .whereLayer(Journalforing).mayOnlyBeAccessedByLayers(Listeners)
-                .whereLayer(Listeners).mayOnlyBeAccessedByLayers(ROOT)
-                .whereLayer(OppgaveRouting).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(PDF).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(FagmodulKlient).mayOnlyBeAccessedByLayers(Journalforing, Buc, PersonidentifiseringHelpers)
-                .whereLayer(JournalpostKlient).mayOnlyBeAccessedByLayers(Journalforing)
-                .whereLayer(PesysKlient).mayOnlyBeAccessedByLayers(Journalforing, Listeners, OppgaveRouting)
+                .whereLayer(root).mayNotBeAccessedByAnyLayer()
+                .whereLayer(buc).mayOnlyBeAccessedByLayers(listeners, journalforing, pdf) // Sed
+                .whereLayer(config).mayNotBeAccessedByAnyLayer()
+                .whereLayer(handler).mayOnlyBeAccessedByLayers(journalforing)
+                .whereLayer(health).mayNotBeAccessedByAnyLayer()
+                .whereLayer(journalforing).mayOnlyBeAccessedByLayers(listeners)
+                .whereLayer(listeners).mayOnlyBeAccessedByLayers(root)
+                .whereLayer(oppgaveRouting).mayOnlyBeAccessedByLayers(journalforing)
+                .whereLayer(pdf).mayOnlyBeAccessedByLayers(journalforing)
+                .whereLayer(fagmodulKlient).mayOnlyBeAccessedByLayers(journalforing, buc, personidentifiseringHelpers)
+                .whereLayer(journalpostKlient).mayOnlyBeAccessedByLayers(journalforing)
+                .whereLayer(pesysKlient).mayOnlyBeAccessedByLayers(journalforing, listeners, oppgaveRouting)
                 //Verify rules
                 .check(classesToAnalyze)
     }

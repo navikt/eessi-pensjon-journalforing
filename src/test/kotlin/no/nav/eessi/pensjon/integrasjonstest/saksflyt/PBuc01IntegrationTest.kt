@@ -52,7 +52,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Inngående")
-    inner class InngaaendeP_BUC_01 {
+    inner class InngaaendePBuc01 {
 
         @Test
         fun `Krav om alderpensjon for inngående P2000 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {

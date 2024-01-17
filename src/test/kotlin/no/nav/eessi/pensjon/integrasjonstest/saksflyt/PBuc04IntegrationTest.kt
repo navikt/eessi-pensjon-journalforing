@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_04
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test
 internal class PBuc04IntegrationTest: JournalforingTestBase() {
 
     @Nested
-    @DisplayName("Utgående")
-    inner class UtgaaendeP_BUC_04 {
+    @DisplayName("Utgående P Buc 04")
+    inner class UtgaaendePBuc04 {
 
         @Test
         fun `1 person i SED fnr finnes Then journalfores On NFP_UTLAND_AALESUND med tema PENSJON`() {

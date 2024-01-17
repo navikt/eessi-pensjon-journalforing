@@ -21,8 +21,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig
 import org.springframework.web.client.RestTemplate
 
-@SpringJUnitConfig(classes = [euxServiceCacheTest.Config::class, EuxCacheConfig::class])
-class euxServiceCacheTest {
+@SpringJUnitConfig(classes = [EuxServiceCacheTest.Config::class, EuxCacheConfig::class])
+class EuxServiceCacheTest {
 
     @Autowired
     lateinit var euxService: EuxService

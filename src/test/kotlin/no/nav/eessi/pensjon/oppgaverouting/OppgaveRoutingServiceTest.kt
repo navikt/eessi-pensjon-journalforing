@@ -7,14 +7,14 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
-import no.nav.eessi.pensjon.models.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
@@ -28,18 +28,20 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.util.*
+import java.util.stream.Stream
 
 val norg2Klient = mockk<Norg2Klient>()
 val norg2Service = Norg2Service(norg2Klient)
 val routingService = OppgaveRoutingService(norg2Service)
 
-fun irrelevantDato() = LocalDate.MIN
+fun irrelevantDato(): LocalDate = LocalDate.MIN
+
 internal class OppgaveRoutingServiceTest {
 
     companion object {
         private const val DUMMY_FNR = "09035225916" // Testbruker SLAPP SKILPADDE
 
-        const val dummyTilknytning = "032342"
+        const val DUMMY_TILKNYTNING = "032342"
         val MANGLER_LAND = null as String?
         const val NORGE: String = "NOR"
         const val UTLAND: String = "SE"
@@ -60,7 +62,7 @@ internal class OppgaveRoutingServiceTest {
             OppgaveRoutingRequest(
                 fdato = irrelevantDato(),
                 landkode = MANGLER_LAND,
-                geografiskTilknytning = dummyTilknytning,
+                geografiskTilknytning = DUMMY_TILKNYTNING,
                 bucType = P_BUC_01,
                 hendelseType = HendelseType.SENDT
             )
@@ -154,7 +156,7 @@ internal class OppgaveRoutingServiceTest {
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
                     landkode = NORGE,
-                    geografiskTilknytning = dummyTilknytning,
+                    geografiskTilknytning = DUMMY_TILKNYTNING,
                     bucType = R_BUC_02,
                     hendelseType = HendelseType.MOTTATT,
                     sakInformasjon = null,
@@ -172,7 +174,7 @@ internal class OppgaveRoutingServiceTest {
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
                     landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
+                    geografiskTilknytning = DUMMY_TILKNYTNING,
                     bucType = R_BUC_02,
                     saktype = ALDER,
                     hendelseType = HendelseType.MOTTATT,
@@ -191,7 +193,7 @@ internal class OppgaveRoutingServiceTest {
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
                     landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
+                    geografiskTilknytning = DUMMY_TILKNYTNING,
                     bucType = R_BUC_02,
                     saktype = UFOREP,
                     hendelseType = HendelseType.MOTTATT,
@@ -210,7 +212,7 @@ internal class OppgaveRoutingServiceTest {
                     aktorId = "01010101010",
                     fdato = irrelevantDato(),
                     landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
+                    geografiskTilknytning = DUMMY_TILKNYTNING,
                     bucType = R_BUC_02,
                     saktype = UFOREP,
                     sedType = SedType.R004,
@@ -230,7 +232,7 @@ internal class OppgaveRoutingServiceTest {
                     aktorId = null,
                     fdato = irrelevantDato(),
                     landkode = UTLAND,
-                    geografiskTilknytning = dummyTilknytning,
+                    geografiskTilknytning = DUMMY_TILKNYTNING,
                     bucType = R_BUC_02,
                     saktype = UFOREP,
                     sedType = SedType.R004,
@@ -265,7 +267,7 @@ internal class OppgaveRoutingServiceTest {
                 aktorId = "123123123",
                 fdato = irrelevantDato(),
                 landkode = null,
-                geografiskTilknytning = dummyTilknytning,
+                geografiskTilknytning = DUMMY_TILKNYTNING,
                 bucType = R_BUC_02,
                 saktype = ALDER,
                 sedType = SedType.R005,
@@ -280,10 +282,10 @@ internal class OppgaveRoutingServiceTest {
     }
 
     // ved bruk av fil kan jeg bruke denne: R_BUC_02-R005-AP.json
-    class Routing_R_BUC_02 {
+    class RoutingRBuc02 {
         private companion object {
             @JvmStatic
-            fun arguments() =
+            fun arguments(): Stream<TestArgumentsPBuc02> =
                 Arrays.stream(
                     arrayOf(
                         TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R005),
@@ -316,7 +318,7 @@ internal class OppgaveRoutingServiceTest {
                         aktorId = "01010101010",
                         fdato = irrelevantDato(),
                         landkode = arguments.landkode,
-                        geografiskTilknytning = dummyTilknytning,
+                        geografiskTilknytning = DUMMY_TILKNYTNING,
                         bucType = R_BUC_02,
                         sedType = arguments.sedType,
                         hendelseType = HendelseType.SENDT,
@@ -328,7 +330,7 @@ internal class OppgaveRoutingServiceTest {
         }
     }
 
-    class Routing_P_BUC_02 {
+    class RoutingPBuc02 {
         private companion object {
             @JvmStatic
             fun arguments() =
@@ -394,7 +396,7 @@ internal class OppgaveRoutingServiceTest {
         val saktype: SakType?
     )
 
-    class Routing_P_BUC_10 {
+    class RoutingPBuc10 {
         private companion object {
             @JvmStatic
             fun arguments() =
@@ -662,7 +664,7 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(UFORE_UTLAND, result)
     }
 
-    class Routing_vanligeBucs {
+    class RoutingStandardBucs {
         data class TestArgumentsBucs(
             val expectedResult: Enhet,
             val bucType: BucType,
@@ -678,9 +680,9 @@ internal class OppgaveRoutingServiceTest {
             fun arguments() =
                 Arrays.stream(
                     arrayOf(
-                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01,  dummyTilknytning, fdato = irrelevantDato()),
-                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_01, NORGE, dummyTilknytning, fdato = irrelevantDato()),
-                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01, UTLAND, dummyTilknytning, fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01,  DUMMY_TILKNYTNING, fdato = irrelevantDato()),
+                        TestArgumentsBucs(NFP_UTLAND_AALESUND, P_BUC_01, NORGE, DUMMY_TILKNYTNING, fdato = irrelevantDato()),
+                        TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01, UTLAND, DUMMY_TILKNYTNING, fdato = irrelevantDato()),
                         TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01, UTLAND,  fdato = irrelevantDato()),
                         TestArgumentsBucs(UFORE_UTLAND, P_BUC_03,   fdato = irrelevantDato()),
 

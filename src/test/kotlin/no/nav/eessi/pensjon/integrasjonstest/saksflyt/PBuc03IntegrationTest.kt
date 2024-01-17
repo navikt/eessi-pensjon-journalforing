@@ -25,9 +25,7 @@ import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -44,8 +42,8 @@ import org.junit.jupiter.api.Test
 internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
     @Nested
-    @DisplayName("Inngående")
-    inner class InngaaendeP_BUC_03 {
+    @DisplayName("Inngående P Buc 03")
+    inner class InngaaendePBuc03 {
 
         @Test
         fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
@@ -224,8 +222,8 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     }
 
     @Nested
-    @DisplayName("Utgående")
-    inner class UtgaaendeP_BUC_03 {
+    @DisplayName("Utgående P Buc 03")
+    inner class UtgaaendePBuc03 {
 
         @Test
         fun `Krav om uføre for Utgående P2200 journalføres automatisk med bruk av bestemsak uten forsokFerdigStilt oppretter en oppgave type JOURNALFORING`() {

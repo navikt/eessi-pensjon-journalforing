@@ -43,8 +43,8 @@ class Norg2Service(private val klient: Norg2Klient) {
 
     fun velgTema(sakType: SakType?) = if (sakType == UFOREP) Tema.UFORETRYGD.kode else Tema.PENSJON.kode
 
-    fun velgBehandlingTema(SEDPersonRelasjon: no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon?) : String {
-        return when (SEDPersonRelasjon?.saktype) {
+    fun velgBehandlingTema(sedPersonRelasjon: no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon?) : String {
+        return when (sedPersonRelasjon?.saktype) {
             BARNEP -> Norg2BehandlingsTema.BARNEP.kode
             GJENLEV -> Norg2BehandlingsTema.GJENLEV.kode
             else -> Norg2BehandlingsTema.ANY.kode

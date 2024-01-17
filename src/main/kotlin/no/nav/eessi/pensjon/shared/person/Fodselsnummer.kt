@@ -2,8 +2,8 @@ package no.nav.eessi.pensjon.shared.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.tabeller.kontrollsiffer1
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.tabeller.kontrollsiffer2
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.Tabeller.kontrollsiffer1
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.Tabeller.kontrollsiffer2
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -107,7 +107,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             val fnrYear = value.slice(4 until 6)
             val individnummer = value.slice(6 until 9).toInt()
 
-            for((individSerie, aarSerie) in tabeller.serier) {
+            for((individSerie, aarSerie) in Tabeller.serier) {
                 val kandidat = (aarSerie.start.toString().slice(0 until 2) + fnrYear).toInt()
                 if(individSerie.contains(individnummer) && aarSerie.contains(kandidat)) {
                     return kandidat
@@ -139,7 +139,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
                 throw e
             }
         }
-        object tabeller {
+        object Tabeller {
             // https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer/
             val serier: List<Pair<ClosedRange<Int>, ClosedRange<Int>>> = listOf(
                 500..749 to 1854..1899,

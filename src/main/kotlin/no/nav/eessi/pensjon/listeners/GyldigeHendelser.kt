@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 
 class GyldigeHendelser {
     companion object {
-        private const val gyldigSektorKode = "P"
+        private const val GYLDIG_SEKTOR_KODE = "P"
 
         private val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
         private val gyldigUtgaaendeBucType = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
@@ -14,7 +14,7 @@ class GyldigeHendelser {
                 when {
                     hendelse.bucType == null -> false
                     hendelse.bucType in gyldigeInnkommendeBucTyper -> true
-                    hendelse.sektorKode == gyldigSektorKode -> true
+                    hendelse.sektorKode == GYLDIG_SEKTOR_KODE -> true
                     else -> false
                 }
 
@@ -22,7 +22,7 @@ class GyldigeHendelser {
                 when {
                     hendelse.bucType == null -> false
                     hendelse.bucType in gyldigUtgaaendeBucType -> true
-                    hendelse.sektorKode == gyldigSektorKode -> true
+                    hendelse.sektorKode == GYLDIG_SEKTOR_KODE -> true
                     else -> false
                 }
     }
