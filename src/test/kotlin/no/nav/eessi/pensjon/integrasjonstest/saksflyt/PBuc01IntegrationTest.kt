@@ -18,11 +18,11 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.HendelseKode
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
-import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
+import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
+import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType.BEHANDLE_SED
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType.JOURNALFORING
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON

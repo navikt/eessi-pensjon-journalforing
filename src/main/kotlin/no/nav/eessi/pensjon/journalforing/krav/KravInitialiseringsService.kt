@@ -1,12 +1,9 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.journalforing.krav
 
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.HendelseKode
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

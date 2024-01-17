@@ -1,21 +1,21 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
-import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_07
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.handler.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions

@@ -16,12 +16,13 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
+import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.journalpost.*
@@ -36,7 +37,6 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle

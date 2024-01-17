@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.handler
+package no.nav.eessi.pensjon.journalforing.krav
 
 data class BehandleHendelseModel(
     var sakId: String? = null,

@@ -14,10 +14,11 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
@@ -32,7 +33,6 @@ import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
