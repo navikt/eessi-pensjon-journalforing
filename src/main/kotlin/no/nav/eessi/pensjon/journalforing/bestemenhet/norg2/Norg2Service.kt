@@ -1,9 +1,9 @@
-package no.nav.eessi.pensjon.klienter.norg2
+package no.nav.eessi.pensjon.journalforing.bestemenhet.norg2
 
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_NORGE
-import no.nav.eessi.pensjon.klienter.norg2.BehandlingType.BOSATT_UTLAND
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.BehandlingType.BOSATT_NORGE
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.BehandlingType.BOSATT_UTLAND
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import org.slf4j.LoggerFactory

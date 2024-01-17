@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.oppgave
+package no.nav.eessi.pensjon.journalforing.opprettoppgave
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.eessi.pensjon.eux.model.SedType

@@ -11,10 +11,11 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.klienter.norg2.Norg2ArbeidsfordelingItem
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
+import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2ArbeidsfordelingItem
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.norg2
+package no.nav.eessi.pensjon.journalforing.bestemenhet.norg2
 
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
