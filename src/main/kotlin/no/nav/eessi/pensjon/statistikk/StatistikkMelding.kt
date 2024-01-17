@@ -1,7 +1,7 @@
-package no.nav.eessi.pensjon.automatisering
+package no.nav.eessi.pensjon.statistikk
 
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import org.springframework.messaging.Message

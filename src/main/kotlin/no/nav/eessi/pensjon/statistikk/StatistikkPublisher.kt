@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.automatisering
+package no.nav.eessi.pensjon.statistikk
 
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
