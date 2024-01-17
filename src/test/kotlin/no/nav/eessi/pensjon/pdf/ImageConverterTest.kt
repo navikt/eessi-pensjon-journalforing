@@ -1,12 +1,13 @@
 package no.nav.eessi.pensjon.pdf
 
+import no.nav.eessi.pensjon.journalforing.pdf.ImageConverter
 import org.apache.commons.io.FileUtils
-import org.junit.jupiter.api.Test
-import java.util.*
-import java.io.File
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.io.File
+import java.util.*
 
 
 class ImageConverterTest {

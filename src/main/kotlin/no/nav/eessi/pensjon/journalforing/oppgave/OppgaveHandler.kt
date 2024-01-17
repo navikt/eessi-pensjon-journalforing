@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.handler
+package no.nav.eessi.pensjon.journalforing.oppgave
 
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson

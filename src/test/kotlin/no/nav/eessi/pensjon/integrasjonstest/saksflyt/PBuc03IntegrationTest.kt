@@ -18,10 +18,10 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus.SENT
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.HendelseKode
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
+import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
+import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType
 import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.pdf
+package no.nav.eessi.pensjon.journalforing.pdf
 
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage

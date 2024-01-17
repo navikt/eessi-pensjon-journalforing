@@ -1,10 +1,10 @@
-package no.nav.eessi.pensjon.pdf
+package no.nav.eessi.pensjon.journalforing.pdf
 
 class JournalPostDokument(
-        val brevkode: String? = null,
-        val dokumentKategori: String? = "SED",
-        val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
-        val tittel: String? = null
+    val brevkode: String? = null,
+    val dokumentKategori: String? = "SED",
+    val dokumentvarianter: List<Dokumentvarianter>, //REQUIRED
+    val tittel: String? = null
 )
 
 class Dokumentvarianter(

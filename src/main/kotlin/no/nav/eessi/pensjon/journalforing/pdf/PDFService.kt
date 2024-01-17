@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.pdf
+package no.nav.eessi.pensjon.journalforing.pdf
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -70,7 +70,8 @@ class PDFService(
                                                         ?: throw RuntimeException("MimeType is null after being converted to PDF, $it"),
                                                 fysiskDokument = it.innhold!!,
                                                 variantformat = Variantformat.ARKIV
-                                        )),
+                                        )
+                                ),
                                 tittel = it.filnavn)
                     })
                 } else {
