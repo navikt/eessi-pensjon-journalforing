@@ -12,8 +12,8 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON

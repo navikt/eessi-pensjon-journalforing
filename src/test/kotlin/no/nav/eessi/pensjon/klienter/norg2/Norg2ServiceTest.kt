@@ -3,7 +3,7 @@ package no.nav.eessi.pensjon.klienter.norg2
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals

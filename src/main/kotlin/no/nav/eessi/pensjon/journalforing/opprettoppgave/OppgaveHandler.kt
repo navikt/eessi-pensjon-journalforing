@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.oppgave
+package no.nav.eessi.pensjon.journalforing.opprettoppgave
 
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson

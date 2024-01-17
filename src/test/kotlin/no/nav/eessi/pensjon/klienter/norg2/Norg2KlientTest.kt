@@ -2,8 +2,9 @@ package no.nav.eessi.pensjon.klienter.norg2
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2ArbeidsfordelingRequest
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity

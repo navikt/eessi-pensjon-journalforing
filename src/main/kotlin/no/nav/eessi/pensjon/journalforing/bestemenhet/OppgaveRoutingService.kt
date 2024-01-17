@@ -1,12 +1,13 @@
-package no.nav.eessi.pensjon.oppgaverouting
+package no.nav.eessi.pensjon.journalforing.bestemenhet
 
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.klienter.norg2.NorgKlientRequest
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.EnhetFactory
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -31,9 +32,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
                     "saktype: ${routingRequest.saktype}"
         )
         return tildeltEnhet
-
     }
-
 
     private fun tildelEnhet(oppgave: OppgaveRoutingRequest): Enhet {
         val enhet = finnEnhetFor(oppgave)
@@ -48,7 +47,6 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             P_BUC_10 -> routeTilGeografiskTilknytningMedPerson(oppgave) ?: enhet
             else ->  enhet
         }
-
     }
 
     private fun lopendeAldersSakINorge( oppgave: OppgaveRoutingRequest) =
