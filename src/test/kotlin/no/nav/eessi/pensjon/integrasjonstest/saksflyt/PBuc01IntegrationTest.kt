@@ -23,7 +23,7 @@ import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType.JOURNALFORING
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD

@@ -20,10 +20,6 @@ import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema

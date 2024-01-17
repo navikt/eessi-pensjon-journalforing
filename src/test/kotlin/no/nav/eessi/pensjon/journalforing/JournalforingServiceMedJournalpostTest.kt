@@ -14,9 +14,6 @@ import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.oppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
