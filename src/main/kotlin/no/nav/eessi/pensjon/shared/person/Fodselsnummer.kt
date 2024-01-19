@@ -2,8 +2,9 @@ package no.nav.eessi.pensjon.shared.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.Tabeller.kontrollsiffer1
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.Tabeller.kontrollsiffer2
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.tabeller.kontrollsiffer1
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer.Companion.tabeller.kontrollsiffer2
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -17,6 +18,7 @@ import java.time.temporal.ChronoUnit
  * @see <a href="https://github.com/navikt/nav-foedselsnummer">nav-foedselsnummer</a>
  */
 class Fodselsnummer private constructor(@JsonValue val value: String) {
+    private val logger = LoggerFactory.getLogger(Fodselsnummer::class.java)
     init {
         require("""\d{11}""".toRegex().matches(value)) { "Ikke et gyldig fødselsnummer: $value" }
         require(!erFnr) { "Impelemntasjonen støtter ikke H-nummer og FH-nummer" }
@@ -24,7 +26,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
     }
 
     fun getAge(): Int = ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
-    fun getBirthDate(): LocalDate = foedselsdato
+    fun getBirthDate(): LocalDate? = foedselsdato
     fun isUnder18Year(): Boolean {
         val resultAge = ChronoUnit.YEARS.between(foedselsdato, LocalDate.now()).toInt()
         return resultAge < 18
@@ -69,8 +71,12 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             }
         }
 
-    private val foedselsdato: LocalDate
+    private val foedselsdato: LocalDate?
         get() {
+            if (erNpid) {
+                logger.warn("Ugyldig fødselsnummer, fnr er Npid: ${vaskFnr(value)}")
+                return null
+            }
             val fnrMonth = value.slice(2 until 4).toInt()
 
             val dayFelt = value.slice(0 until 2).toInt()
@@ -107,7 +113,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
             val fnrYear = value.slice(4 until 6)
             val individnummer = value.slice(6 until 9).toInt()
 
-            for((individSerie, aarSerie) in Tabeller.serier) {
+            for((individSerie, aarSerie) in tabeller.serier) {
                 val kandidat = (aarSerie.start.toString().slice(0 until 2) + fnrYear).toInt()
                 if(individSerie.contains(individnummer) && aarSerie.contains(kandidat)) {
                     return kandidat
@@ -139,7 +145,7 @@ class Fodselsnummer private constructor(@JsonValue val value: String) {
                 throw e
             }
         }
-        object Tabeller {
+        object tabeller {
             // https://www.skatteetaten.no/person/folkeregister/fodsel-og-navnevalg/barn-fodt-i-norge/fodselsnummer/
             val serier: List<Pair<ClosedRange<Int>, ClosedRange<Int>>> = listOf(
                 500..749 to 1854..1899,
