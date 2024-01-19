@@ -456,7 +456,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_07
             )
 
-            val sok = createSokKritere(FORSIKRET_FNAVN, fdato = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)!!.getBirthDate())
+            val sok = createSokKritere(FORSIKRET_FNAVN, fdato = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)!!.getBirthDate()!!)
             val expectedPersonRelasjon = SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
                 Relasjon.FORSIKRET,
