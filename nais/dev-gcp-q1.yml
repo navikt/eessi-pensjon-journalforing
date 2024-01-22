@@ -45,11 +45,11 @@ spec:
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg
     - name: BESTEMSAK_URL
-      value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
+      value: https://eessi-pensjon-onprem-proxy-q1.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
       value: https://navansatt.dev-fss-pub.nais.io
     - name: EESSI_PEN_ONPREM_PROXY_URL
-      value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
+      value: https://eessi-pensjon-onprem-proxy-q1.dev-fss-pub.nais.io
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1-q1
     - name: KAFKA_SEDMOTTATT_TOPIC
@@ -69,7 +69,7 @@ spec:
     - name: AZURE_APP_NAVANSATT_CLIENT_ID
       value: dev-fss.teampensjon.navansatt
     - name: AZURE_APP_PROXY_CLIENT_ID
-      value: dev-fss.eessipensjon.eessi-pensjon-onprem-proxy-q2
+      value: dev-fss.eessipensjon.eessi-pensjon-onprem-proxy-q1
     - name: AZURE_APP_PDL_CLIENT_ID
       value: dev-fss.pdl.pdl-api
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
