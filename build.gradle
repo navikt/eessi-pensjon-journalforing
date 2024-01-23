@@ -107,7 +107,4 @@ dependencies {
 
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:1.2.1'
-
-
-
 }
