@@ -20,9 +20,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @Service
-class EuxService(
-    private val euxCacheableKlient: EuxCacheableKlient
-) {
+class EuxService( private val euxCacheableKlient: EuxCacheableKlient) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(javaClass) }
 
