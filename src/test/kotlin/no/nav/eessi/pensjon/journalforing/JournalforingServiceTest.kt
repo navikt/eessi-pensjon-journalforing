@@ -92,8 +92,6 @@ internal class JournalforingServiceTest {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
-        //every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
-        //PDF -
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2200) } returns Pair("P2200 Supported Documents", emptyList())
@@ -101,7 +99,6 @@ internal class JournalforingServiceTest {
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
 
-        //every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "EKSPEDERT",
@@ -110,35 +107,13 @@ internal class JournalforingServiceTest {
         )
 
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
-
-
-        //JOURNALPOST OPPRETT JOURNALPOST
-//        every {
-//            journalpostService.opprettJournalpost(
-//                sedHendelse = any(),
-//                fnr = any(),
-//                sedHendelseType = any(),
-//                journalfoerendeEnhet = any(),
-//                arkivsaksnummer = any(),
-//                dokumenter = any(),
-//                saktype = any(),
-//                institusjon = any(),
-//                identifisertePersoner = any(),
-//                saksbehandlerInfo(),
-//                any()
-//            )
-//        } returns OpprettJournalPostResponse("123", "null", null, false)
     }
 
     @Test
     fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
-            "NOR"
-        )
+        val identifisertPerson = identifisertPersonPDL(AKTOERID, SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID), "NOR")
 
         justRun { journalpostKlient.settStatusAvbrutt(eq("12345")) }
 
@@ -154,8 +129,8 @@ internal class JournalforingServiceTest {
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null
         )
-//        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-//        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
         verify { journalpostKlient.settStatusAvbrutt(journalpostId = "12345") }
     }
