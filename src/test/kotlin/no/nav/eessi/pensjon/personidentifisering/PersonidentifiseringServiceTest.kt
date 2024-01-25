@@ -5,20 +5,19 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_OVER_62
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonMock
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDENT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -306,7 +305,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en liste med en identifisert person når velger person så returner personen`(){
-        val identifisertPerson = IdentifisertPersonPDL(
+        val identifisertPerson = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -321,7 +320,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en R_BUC_02 med kun en person når personer identifiseres så returneres første person`(){
-        val gjenlevende = IdentifisertPersonPDL(
+        val gjenlevende = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -340,7 +339,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en R_BUC_02 med to hovedpersoner når personer identifiseres så returneres første person`(){
-        val avdod = IdentifisertPersonPDL(
+        val avdod = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -348,7 +347,7 @@ class PersonidentifiseringServiceTest {
             personNavn = "Testern"
         )
 
-        val gjenlevende = IdentifisertPersonPDL(
+        val gjenlevende = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -368,7 +367,7 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en liste med flere forsikrede på P_BUC_01 så kaster vi en RuntimeException`(){
-        val forsikret = IdentifisertPersonPDL(
+        val forsikret = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -458,7 +457,7 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
 
-        val avdodPerson = IdentifisertPersonPDL(
+        val avdodPerson = IdentifisertPDLPerson(
             "",
             "NOR",
             "026123",
@@ -468,7 +467,7 @@ class PersonidentifiseringServiceTest {
         )
 
         val sokKriterier = SokKriterier("RASK","MULDVARP", LocalDate.of(1969, 11, 28))
-        val gjenlevendePerson = IdentifisertPersonPDL(
+        val gjenlevendePerson = IdentifisertPDLPerson(
             "",
             "NOR",
             "026123",
@@ -577,7 +576,7 @@ class PersonidentifiseringServiceTest {
 
     @Nested
     @DisplayName("valider indentifisertPerson")
-    inner class ValiderIdentifisertPersonPDL {
+    inner class ValiderIdentifisertPDLPerson {
 
         @Test
         fun `valider identifisertPerson mottatt caseowner ikke norge fnr og fdato forskjellig gir null ut`() {
@@ -616,8 +615,8 @@ class PersonidentifiseringServiceTest {
 
     }
 
-    private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPersonPDL {
-        return IdentifisertPersonPDL(
+    private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPDLPerson {
+        return IdentifisertPDLPerson(
             "1231231312",
             "NOR",
             "3041",
@@ -632,8 +631,8 @@ class PersonidentifiseringServiceTest {
         return mapJsonToAny(json)
     }
 
-    private fun createIdentifisertPersonPDL(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPersonPDL =
-        IdentifisertPersonPDL(
+    private fun createIdentifisertPersonPDL(fnr: Fodselsnummer?, relasjon: Relasjon): IdentifisertPDLPerson =
+        IdentifisertPDLPerson(
             "",
             "NO",
             "",
@@ -648,8 +647,8 @@ class PersonidentifiseringServiceTest {
         geografiskTilknytning: String? = "",
         fnr: Fodselsnummer? = null,
         personNavn: String = "Test Testesen"
-    ): IdentifisertPersonPDL =
-        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+    ): IdentifisertPDLPerson =
+        IdentifisertPDLPerson(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
 
     private fun generateSED(
         sedType: SedType,

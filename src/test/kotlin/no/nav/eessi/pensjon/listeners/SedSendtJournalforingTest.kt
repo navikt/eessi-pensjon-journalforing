@@ -27,7 +27,7 @@ import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
@@ -382,7 +382,7 @@ internal class SedSendtJournalforingTest {
         geografiskTilknytning: String? = "",
         fnr: Fodselsnummer? = null,
         personNavn: String = "Test Testesen"
-    ): IdentifisertPersonPDL =
-        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+    ): IdentifisertPDLPerson =
+        IdentifisertPDLPerson(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
 
 }
