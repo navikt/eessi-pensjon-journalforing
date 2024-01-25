@@ -49,7 +49,7 @@ private const val RINADOK_ID = "3123123"
 
 internal class JournalforingServiceTest {
 
-    //TODO: SE OVER DENNE TESTEN OG SE OM DET ER MULIGHET FOR FORBERING
+    //TODO: SE OVER DENNE TESTEN OG SE OM DET ER MULIGHET FOR FORBEDRING
 
     private val journalpostKlient = mockk<JournalpostKlient>()
     private val journalpostService = JournalpostService(journalpostKlient)
@@ -151,20 +151,11 @@ internal class JournalforingServiceTest {
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
-//        verify(exactly = 1) { journalpostService.opprettJournalpost(
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any()
-//        ) }
+        verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
+
         assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
+        assertEquals(Tema.PENSJON, oppgaveSlot.captured.tema)
     }
 
     @Test
