@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.klienter.fagmodul
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.pesys
+package no.nav.eessi.pensjon.pesys
 
 import io.mockk.every
 import io.mockk.mockk
@@ -7,7 +7,10 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakRequest
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

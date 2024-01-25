@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.buc
+package no.nav.eessi.pensjon.eux
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -18,7 +18,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P15000
 import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.AfterEach

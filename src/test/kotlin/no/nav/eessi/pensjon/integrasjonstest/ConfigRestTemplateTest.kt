@@ -16,9 +16,9 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService

@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler

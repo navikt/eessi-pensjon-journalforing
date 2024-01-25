@@ -4,11 +4,11 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach

@@ -3,10 +3,10 @@ package no.nav.eessi.pensjon.klienter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.buc.EuxCacheableKlient
-import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.config.EuxCacheConfig
 import no.nav.eessi.pensjon.config.SED_CACHE
+import no.nav.eessi.pensjon.eux.EuxCacheableKlient
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED

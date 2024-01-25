@@ -24,7 +24,7 @@ import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.BEHANDLE_SED
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING

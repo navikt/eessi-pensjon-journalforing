@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService

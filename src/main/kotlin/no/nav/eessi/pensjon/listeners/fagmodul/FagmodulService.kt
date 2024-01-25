@@ -1,10 +1,8 @@
-package no.nav.eessi.pensjon.klienter.fagmodul
+package no.nav.eessi.pensjon.listeners.fagmodul
 
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.utils.mapAnyToJson
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

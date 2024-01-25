@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.eessi.pensjon.buc.EuxCacheableKlient
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxCacheableKlient
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.*
@@ -19,11 +19,11 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
