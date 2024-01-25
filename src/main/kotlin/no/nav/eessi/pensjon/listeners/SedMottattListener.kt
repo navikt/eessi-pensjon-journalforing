@@ -66,8 +66,6 @@ class SedMottattListener (
 
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-//
-
                         if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
                             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
                             acknowledgment.acknowledge()

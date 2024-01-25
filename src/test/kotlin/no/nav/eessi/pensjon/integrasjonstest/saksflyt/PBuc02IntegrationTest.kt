@@ -512,11 +512,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns bestemSak.sakInformasjonListe
         }
 
-//        every { journalpostService }
         val (journalpost, _) = initJournalPostRequestSlot()
-
         val hendelse = createHendelseJson(P2100, P_BUC_02)
-
         val meldingSlot = slot<String>()
 
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
