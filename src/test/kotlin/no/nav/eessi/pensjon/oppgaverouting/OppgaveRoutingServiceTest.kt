@@ -17,7 +17,7 @@ import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -246,14 +246,14 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing av mottatte sed R_BUC_02 med mer enn én person routes til ID_OG_FORDELING`() {
-        val forsikret = IdentifisertPersonPDL(
+        val forsikret = IdentifisertPDLPerson(
             "123",
             null,
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, rinaDocumentId =  "3123123"),
             personNavn = "Testern"
         )
-        val avod = IdentifisertPersonPDL(
+        val avod = IdentifisertPDLPerson(
             "234",
             null,
             "010",
@@ -296,7 +296,7 @@ internal class OppgaveRoutingServiceTest {
                     )
                 )
         }
-        private fun mockerEnPerson() = IdentifisertPersonPDL(
+        private fun mockerEnPerson() = IdentifisertPDLPerson(
             "123",
             "NO",
             "010",
@@ -462,7 +462,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, ALDER, SedType.P15000, rinaDocumentId =  "3123123")
         val identifisertPerson =
-            IdentifisertPersonPDL("01010101010",  "NOR", "3005", personRelasjon,  personNavn = "Ole Olsen", personListe = emptyList())
+            IdentifisertPDLPerson("01010101010",  "NOR", "3005", personRelasjon,  personNavn = "Ole Olsen", personListe = emptyList())
 
         val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_10, "32131", avsenderId = "12313123",
@@ -510,7 +510,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), GJENLEVENDE, GJENLEV, SedType.P2100, rinaDocumentId =  "3123123")
         val identifisertPerson =
-            IdentifisertPersonPDL("01010101010",  "NOR", "3005", personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
+            IdentifisertPDLPerson("01010101010",  "NOR", "3005", personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
 
         val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
@@ -558,7 +558,7 @@ internal class OppgaveRoutingServiceTest {
 
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), GJENLEVENDE, BARNEP, SedType.P2100, rinaDocumentId =  "3123123")
-        val identifisertPerson = IdentifisertPersonPDL(
+        val identifisertPerson = IdentifisertPDLPerson(
             "01010101010",
             "SWE",
             "3005",
@@ -596,7 +596,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, ALDER, SedType.P2000, rinaDocumentId =  "3123123")
         val identifisertPerson =
-            IdentifisertPersonPDL("01010101010",  "NOR", "3005", personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
+            IdentifisertPDLPerson("01010101010",  "NOR", "3005", personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
 
         val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_01, "32131", avsenderId = "12313123",
@@ -644,7 +644,7 @@ internal class OppgaveRoutingServiceTest {
         val personRelasjon =
             SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, UFOREP, SedType.P2200, rinaDocumentId =  "3123123")
         val identifisertPerson =
-            IdentifisertPersonPDL("01010101010",  "SWE", null, personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
+            IdentifisertPDLPerson("01010101010",  "SWE", null, personRelasjon, personNavn = "Ole Olsen", personListe = emptyList())
 
         val sedHendelseModel = SedHendelse(
             1232312L, "2321313", "P", P_BUC_03, "32131", avsenderId = "12313123",
@@ -888,7 +888,7 @@ internal class OppgaveRoutingServiceTest {
         return mapJsonToAny(json)
     }
 
-    fun mockerEnPerson() = IdentifisertPersonPDL(
+    fun mockerEnPerson() = IdentifisertPDLPerson(
         "123",
         "NO",
         "010",
