@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.fagmodul
+package no.nav.eessi.pensjon.listeners.fagmodul
 
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -6,7 +6,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
 @Component

@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.buc
+package no.nav.eessi.pensjon.eux
 
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02

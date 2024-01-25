@@ -3,9 +3,9 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.klienter.navansatt.EnheterFraAd
-import no.nav.eessi.pensjon.klienter.navansatt.Navansatt
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.navansatt.EnheterFraAd
+import no.nav.eessi.pensjon.listeners.navansatt.Navansatt
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals

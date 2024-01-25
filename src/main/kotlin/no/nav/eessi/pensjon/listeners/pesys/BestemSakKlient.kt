@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.pesys
+package no.nav.eessi.pensjon.listeners.pesys
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

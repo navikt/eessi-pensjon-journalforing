@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.navansatt
+package no.nav.eessi.pensjon.listeners.navansatt
 
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.Buc

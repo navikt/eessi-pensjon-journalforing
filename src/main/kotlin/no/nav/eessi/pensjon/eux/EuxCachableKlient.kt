@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.buc
+package no.nav.eessi.pensjon.eux
 
 import no.nav.eessi.pensjon.config.SED_CACHE
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib

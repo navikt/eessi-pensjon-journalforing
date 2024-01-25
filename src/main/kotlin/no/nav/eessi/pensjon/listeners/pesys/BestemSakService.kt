@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.klienter.pesys
+package no.nav.eessi.pensjon.listeners.pesys
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*

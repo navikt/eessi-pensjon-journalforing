@@ -14,7 +14,7 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType.*
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON
@@ -997,17 +997,17 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         SakInformasjon(sakId = sakId, sakType = sakType!!, sakStatus = sakStatus!!)
 
     protected fun testRunnerBarnmedSokPerson(fnrVoksen: String,
-                               fnrBarn: String,
-                               benyttSokPerson: Boolean = true,
-                               bestemSak: BestemSakResponse? = null,
-                               sakId: String? = SAK_ID,
-                               land: String = "NOR",
-                               krav: KravType = ALDER,
-                               alleDocs: List<ForenkletSED>,
-                               relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
-                               sedJson: String? = null,
-                               hendelseType: HendelseType,
-                               block: (OpprettJournalpostRequest) -> Unit
+                                             fnrBarn: String,
+                                             benyttSokPerson: Boolean = true,
+                                             bestemSak: BestemSakResponse? = null,
+                                             sakId: String? = SAK_ID,
+                                             land: String = "NOR",
+                                             krav: KravType = ALDER,
+                                             alleDocs: List<ForenkletSED>,
+                                             relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
+                                             sedJson: String? = null,
+                                             hendelseType: HendelseType,
+                                             block: (OpprettJournalpostRequest) -> Unit
     ) {
         val mockBarn = createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
 
