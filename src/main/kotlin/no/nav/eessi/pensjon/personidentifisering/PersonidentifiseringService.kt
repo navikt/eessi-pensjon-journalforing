@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
@@ -40,32 +41,30 @@ class PersonidentifiseringService(
         hendelsesType: HendelseType
     ): IdentifisertPDLPerson? {
         val personRelasjon = identifisertPerson.personRelasjon
-        val sedFnr = personRelasjon?.fdato
+        val sedFdato = personRelasjon?.fdato
         val pdlFdato = identifisertPerson.fdato
         val fnr = personRelasjon?.fnr
 
         secureLog.info("Validering av identifisert person $identifisertPerson ")
-        return if (hendelsesType == MOTTATT) {
-            val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
-                personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
-            } else {
-                pdlFdato == sedFnr
+        return when (hendelsesType) {
+            MOTTATT -> {
+                val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
+                    personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
+                } else pdlFdato == sedFdato
+
+                if (isFnrDnrFdatoLikSedFdato == true) {
+                    logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFdato, $hendelsesType")
+                    validerCounter("successful")
+                    identifisertPerson
+                } else {
+                    logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFdato, $hendelsesType")
+                    validerCounter("failed")
+                    null
+                }
             }
-            if (isFnrDnrFdatoLikSedFdato == true) {
-                logger.info(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFnr, $hendelsesType"
-                )
-                validerCounter("successful")
+            SENDT -> {
                 identifisertPerson
-            } else {
-                logger.warn(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFnr, $hendelsesType"
-                )
-                validerCounter("failed")
-                null
             }
-        } else {
-            identifisertPerson
         }
     }
 
