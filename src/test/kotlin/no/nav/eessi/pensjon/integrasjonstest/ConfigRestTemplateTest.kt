@@ -77,7 +77,7 @@ internal class ConfigRestTemplateTest {
 
     @BeforeEach
     fun setup() {
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
                 JournalforingTestBase.FNR_VOKSEN_UNDER_62,

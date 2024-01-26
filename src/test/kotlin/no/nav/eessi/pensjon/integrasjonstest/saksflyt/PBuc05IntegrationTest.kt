@@ -702,7 +702,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-            every { personService.harAdressebeskyttelse(any(), any()) } returns false
+            every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(afnr)) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR", aktorId = aktoera)
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Død", "Helt Død", "NOR", aktorId = aktoerf)
 

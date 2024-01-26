@@ -14,7 +14,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AdressebeskyttelseGradering
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
@@ -100,16 +99,14 @@ class PersonidentifiseringService(
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
-            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon, hendelsesType).also {
+            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon).also {
                 secureLog.info("Henter person fra PDL $it")
             } }
 
         return null
     }
 
-    fun hentIdentifisertPersonFraPDL(
-        personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType
-    ): IdentifisertPDLPerson? {
+    fun hentIdentifisertPersonFraPDL( personRelasjon: SEDPersonRelasjon ): IdentifisertPDLPerson? {
 
         return try {
             logger.info("Henter person info fra pdl for relasjon: ${personRelasjon.relasjon}")
@@ -125,7 +122,7 @@ class PersonidentifiseringService(
             }
 
             person?.let { pdlPerson ->
-                logger.info("Populerer IdentifisertPerson for ${personRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType ")
+                logger.info("Populerer IdentifisertPerson for ${personRelasjon.relasjon} med data fra PDL sedType: ${personRelasjon.sedType}")
 
                 IdentifisertPDLPerson(
                     aktoerId = pdlPerson.identer.firstOrNull { it.gruppe == AKTORID }?.ident ?: "",
@@ -142,30 +139,16 @@ class PersonidentifiseringService(
         }
     }
 
-    fun hentIdentifisertePersoner(
-        alleSediBuc: List<Pair<String, SED>>,
-        bucType: BucType,
-        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
-        hendelsesType: HendelseType,
-        rinaDocumentId: String
-    ): List<IdentifisertPDLPerson> {
-
-        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
-
-        return sedPersonRelasjoner
-            .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon, hendelsesType) }
-            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
-    }
+    fun hentIdentifisertePersoner(sedPersonRelasjoner: List<SEDPersonRelasjon>): List<IdentifisertPDLPerson> =
+        sedPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+            .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon) }
+            .also { logger.info("liste over identifiserte personer etter filterering. Før:${sedPersonRelasjoner.size}, etter: ${it.size}") }
 
     fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
-        val alleSedTyper = alleSediBuc.map { it.second.type }.toJson()
-        logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
+        logger.info("Leter etter personer med adressebeskyttelse i : ${alleSediBuc.map { it.second.type }.toJson()}")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
-        val gradering =
-            listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        return personService.harAdressebeskyttelse(fnr, gradering)
+        return personService.harAdressebeskyttelse(fnr)
             .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }
 

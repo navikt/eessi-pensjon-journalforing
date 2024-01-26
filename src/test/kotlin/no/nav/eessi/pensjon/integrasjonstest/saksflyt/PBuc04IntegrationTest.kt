@@ -42,7 +42,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
         val sed = SED.generateSedToClass<SED>(createSed(SedType.P1000, fnr))
         initCommonMocks(sed)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(

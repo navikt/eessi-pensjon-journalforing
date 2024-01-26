@@ -413,7 +413,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-            every { personService.harAdressebeskyttelse(any(), any()) } returns false
+            every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 

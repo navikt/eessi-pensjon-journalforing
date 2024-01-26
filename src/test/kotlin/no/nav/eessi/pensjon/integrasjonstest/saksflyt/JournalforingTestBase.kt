@@ -181,7 +181,7 @@ internal open class JournalforingTestBase {
         val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
         initCommonMocks(sed)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
+        every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
 
 
@@ -270,7 +270,7 @@ internal open class JournalforingTestBase {
         val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
         initCommonMocks(sed, bucType = bucType)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(

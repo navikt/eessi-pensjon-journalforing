@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
@@ -70,7 +69,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
     @Test
     fun `Skal finne fødselsdato for 3 personer gitt en forsikret person i P9000 og to gjenlevende (P8000) `() {
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
                 FNR_VOKSEN_UNDER_62,

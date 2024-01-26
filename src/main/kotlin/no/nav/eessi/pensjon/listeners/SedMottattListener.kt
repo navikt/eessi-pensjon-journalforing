@@ -87,7 +87,7 @@ class SedMottattListener (
 
                             //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
-                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedMedGyldigStatus, bucType, potensiellePersonRelasjoner, MOTTATT, sedHendelse.rinaSakId)
+                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
 
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
                                 bucType,
