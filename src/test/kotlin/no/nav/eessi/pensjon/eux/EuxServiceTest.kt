@@ -60,11 +60,8 @@ internal class EuxServiceTest {
         val json = javaClass.getResource("/eux/buc/buc279020.json")!!.readText()
         val buc = mapJsonToAny<Buc>(json)
 
-        assertEquals(9, helper.hentBucDokumenter(buc).size)
         assertEquals(8, helper.hentAlleGyldigeDokumenter(buc).size)
     }
-
-
 
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter fra BUC med gyldig og kansellerte`() {
@@ -80,10 +77,10 @@ internal class EuxServiceTest {
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
         assertEquals(2, alledocs.size)
 
-        val alleSediBuc =  helper.hentSedMedGyldigStatus(rinaid, alledocs)
+        val alleSediBuc =  helper.hentSedMedGyldigStatus(rinaid, buc)
         assertEquals(1, alleSediBuc.size)
 
-        val kansellertdocs =  helper.hentAlleKansellerteSedIBuc(rinaid, alledocs)
+        val kansellertdocs =  helper.hentAlleKansellerteSedIBuc(rinaid, buc)
         assertEquals(1, kansellertdocs.size)
     }
 
@@ -182,8 +179,7 @@ internal class EuxServiceTest {
 
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedP2000.toJson()
 
-        val result = helper.hentAlleGyldigeDokumenter(buc)
-        val actual = helper.hentSedMedGyldigStatus(rinaSakId, result)
+        val actual = helper.hentSedMedGyldigStatus(rinaSakId, buc)
 
         assertEquals(1, actual.size)
 

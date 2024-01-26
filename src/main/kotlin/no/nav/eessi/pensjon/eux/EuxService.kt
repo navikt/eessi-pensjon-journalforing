@@ -35,22 +35,19 @@ class EuxService(
     /**
      * Henter alle dokumenter (SEDer) i en Buc.
      */
-    fun hentBucDokumenter(buc: Buc): List<ForenkletSED> {
+    fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {
         val documents = buc.documents ?: return emptyList()
         return documents
             .filter { it.id != null }
             .map { ForenkletSED(it.id!!, it.type, SedStatus.fra(it.status)) }
             .filterNot { it.status == SedStatus.EMPTY }
-    }
-
-    fun hentAlleGyldigeDokumenter(buc: Buc): List<ForenkletSED> {
-        return hentBucDokumenter(buc)
             .filter { it.type.erGyldig() }
             .also { logger.info("Fant ${it.size} dokumenter i BUC: $it") }
     }
 
     @OptIn(ExperimentalTime::class)
-    fun hentSedMedGyldigStatus(rinaSakId: String, documents: List<ForenkletSED>): List<Pair<String, SED>> {
+    fun hentSedMedGyldigStatus(rinaSakId: String, buc: Buc): List<Pair<String, SED>> {
+         val documents = hentAlleGyldigeDokumenter(buc)
          return measureTimedValue {
              documents.filter(ForenkletSED::harGyldigStatus)
                  .map { sed -> sed.id to euxCacheableKlient.hentSed(rinaSakId, sed.id) }
@@ -73,7 +70,8 @@ class EuxService(
         }
     }
 
-    fun hentAlleKansellerteSedIBuc(rinaSakId: String, documents: List<ForenkletSED>): List<SED> {
+    fun hentAlleKansellerteSedIBuc(rinaSakId: String, buc: Buc): List<SED> {
+        val documents = hentAlleGyldigeDokumenter(buc)
         return documents
             .filter(ForenkletSED::erKansellert)
             .map { sed -> euxCacheableKlient.hentSed(rinaSakId, sed.id) }
