@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
@@ -66,10 +67,11 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
+    private val gcpStorageService = mockk<GcpStorageService>()
     private val journalforingService =
         JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), mockk(), statistikkPublisher)
+        }, oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher)
 
     private val sedListener = SedSendtListener(
         journalforingService,
@@ -78,11 +80,12 @@ internal class SedSendtJournalforingMedNavansattTest {
         fagmodulService,
         bestemSakService,
         navansattKlient,
-        mockk(),
+        gcpStorageService,
         "test",
     )
 
-    fun `Navansatt Ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
+    @Test
+    fun `Navansatt ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
         // Denne oppgaven blir rutet til UFORE_UTLANDSTILSNITT siden det er en identifisert person under 62 år (over 18) som er bosatt Norge
         val aktoerId = "3216549873212"
         val bucJson = javaClass.getResource("/buc/M_BUC.json")!!.readText()
@@ -100,6 +103,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             rinaDokumentVersjon = "1",
             sektorKode = "M",
         )
+
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
 
         val sakInformasjon = SakInformasjon(
@@ -132,6 +136,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
         every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
+        every { gcpStorageService.eksisterer(any())} returns false
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(

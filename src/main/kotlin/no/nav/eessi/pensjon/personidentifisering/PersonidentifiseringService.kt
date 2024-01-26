@@ -30,7 +30,7 @@ import java.time.LocalDate
 @Component
 class PersonidentifiseringService(
     @Autowired private val personSok: PersonSok,
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
+    private val personService: PersonService
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")

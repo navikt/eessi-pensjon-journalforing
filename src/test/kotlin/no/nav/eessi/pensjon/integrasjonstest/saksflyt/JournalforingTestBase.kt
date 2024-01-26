@@ -379,7 +379,7 @@ internal open class JournalforingTestBase {
 
 
     fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        val dokumentfilerJson = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json")!!.readText()
         return mapJsonToAny(dokumentfilerJson)
     }
 
@@ -398,13 +398,11 @@ internal open class JournalforingTestBase {
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null, bucType: BucType = P_BUC_01) {
-        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"))
-        val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        val docs = documents ?: mapJsonToAny(javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText())
+        val dokumentVedleggJson = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json")!!.readText()
         val dokumentFiler = mapJsonToAny<SedDokumentfiler>(dokumentVedleggJson)
         initCommonMocks(sed, docs, dokumentFiler, bucType = bucType)
     }
-
-    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
     fun createBrukerWith(
         fnr: String?,
@@ -621,11 +619,5 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
-
-    fun hentEsssisaknr(bestemSak: BestemSakResponse?): String? = if (bestemSak?.sakInformasjonListe?.size == 1) {
-            bestemSak.sakInformasjonListe.first().sakId
-        } else {
-            null
-        }
 
 }

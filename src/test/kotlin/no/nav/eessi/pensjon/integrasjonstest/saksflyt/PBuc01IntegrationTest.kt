@@ -691,12 +691,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
-
-    private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson)
-    }
+    private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler =
+        mapJsonToAny(javaClass.getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")!!.readText())
 
     data class TestResult(
         val opprettJournalpostRequest: OpprettJournalpostRequest,

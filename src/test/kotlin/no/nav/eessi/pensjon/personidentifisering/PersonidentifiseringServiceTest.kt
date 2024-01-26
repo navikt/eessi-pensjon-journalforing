@@ -626,7 +626,7 @@ class PersonidentifiseringServiceTest {
     }
 
     private fun sedFromJsonFile(file: String): SED {
-        val json = javaClass.getResource(file).readText()
+        val json = javaClass.getResource(file)!!.readText()
         return mapJsonToAny(json)
     }
 
@@ -669,48 +669,6 @@ class PersonidentifiseringServiceTest {
                 krav = navKrav?.let { Krav(type = it.verdi) }
             ),
             pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
-        )
-    }
-
-    /**
-     * R005 har "annenPerson" som en sekundær-bruker under Nav-objektet
-     */
-    private fun createR005(forsikretFnr: String?,
-                           forsikretTilbakekreving: String?,
-                           annenPersonFnr: String? = null,
-                           annenPersonTilbakekreving: String? = null): SED {
-
-        val annenPerson = annenPersonFnr?.let {
-            Brukere(
-                person = createPersonR005(it),
-                tilbakekreving = annenPersonTilbakekreving?.let { type ->
-                    TilbakekrevingBrukere(status = Status(type))
-                }
-            )
-        }
-
-        return R005(
-            type = SedType.R005,
-            recoveryNav = RNav (brukere = listOfNotNull(
-                Brukere(
-                    person = createPersonR005(forsikretFnr),
-                    tilbakekreving = forsikretTilbakekreving?.let {
-                        TilbakekrevingBrukere(status = Status(it))
-                    }
-                ),
-                annenPerson
-            ))
-        )
-    }
-
-    private fun createPersonR005(fnr: String?, rolle: Rolle? = null): PersonR005 {
-        return PersonR005(
-            rolle = rolle?.name,
-            foedselsdato = Fodselsnummer.fra(fnr)?.getBirthDateAsIso() ?: "1955-09-12",
-            pin = listOfNotNull(
-                PinItem(land = "DE", identifikator = "1234567"), // Ugyldig utland
-                fnr?.let { PinItem(land = "NO", identifikator = fnr) }
-            )
         )
     }
 

@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
@@ -41,7 +40,7 @@ internal class EuxServiceTest {
 
     @Test
     fun `Sjekk at uthenting av gyldige dokumenter filtrerer korrekt`() {
-        val allSedTypes = SedType.values().toList()
+        val allSedTypes = entries
         assertEquals(81, allSedTypes.size)
 
         val bucDocs = allSedTypes.mapIndexed { index, sedType -> DocumentsItem(id = "$index", type = sedType, status = SedStatus.RECEIVED.name.lowercase(
