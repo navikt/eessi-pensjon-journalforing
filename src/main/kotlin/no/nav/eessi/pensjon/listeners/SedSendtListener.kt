@@ -80,10 +80,9 @@ class SedSendtListener(
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
                             val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
-                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
                             val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
 
-                            //identifisere Person hent Person fra PDL valider Person
+                            // identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
                             val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
 
@@ -109,8 +108,7 @@ class SedSendtListener(
                                     sedHendelse,
                                     SENDT,
                                     fdato,
-                                    null,
-                                    saksIdFraSed
+                                    pesysSakId = saksIdFraSed
                                 )
                             else {
                                 val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
@@ -135,11 +133,11 @@ class SedSendtListener(
                                     saktype,
                                     sakInformasjon,
                                     currentSed,
-                                    harAdressebeskyttelse,
                                     identifisertePersoner.count()
                                         .also { logger.info("Antall identifisertePersoner: $it") },
                                     navAnsattMedEnhet,
-                                    saksIdFraSed
+                                    saksIdFraSed,
+                                    alleSedMedGyldigStatus
                                 )
                             }
                         }

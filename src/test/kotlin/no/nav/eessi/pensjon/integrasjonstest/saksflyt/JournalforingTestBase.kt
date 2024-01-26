@@ -104,19 +104,20 @@ internal open class JournalforingTestBase {
 
     protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
 
+    protected val personService: PersonService = mockk(relaxed = true)
+    private val personSok = PersonSok(personService)
+    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
+
     private val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
+        gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        gcpStorageService = gcpStorageService
+        personidentifiseringService = personidentifiseringService
     )
-
-    protected val personService: PersonService = mockk(relaxed = true)
-    private val personSok = PersonSok(personService)
-    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
 
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)

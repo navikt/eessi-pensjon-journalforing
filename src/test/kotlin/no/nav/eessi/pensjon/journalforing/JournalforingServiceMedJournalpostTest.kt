@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -49,6 +50,7 @@ internal class JournalforingServiceMedJournalpostTest {
 
     private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    private val personidentifiseringService :PersonidentifiseringService = mockk(relaxed = true)
 
     private val journalforingService = JournalforingService(
         journalpostService,
@@ -57,7 +59,8 @@ internal class JournalforingServiceMedJournalpostTest {
         oppgaveHandler,
         kravService,
         mockk(relaxed = true),
-        statistikkPublisher
+        statistikkPublisher,
+        personidentifiseringService
     )
 
     companion object {
@@ -87,7 +90,6 @@ internal class JournalforingServiceMedJournalpostTest {
         val forsoekFedrigstillSlot = slot<Boolean>()
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot), any()) } returns mockk(relaxed = true)
 
-
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
@@ -99,6 +101,7 @@ internal class JournalforingServiceMedJournalpostTest {
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             gjennySakId = null,
+            mockk()
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -136,7 +139,8 @@ internal class JournalforingServiceMedJournalpostTest {
             SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -171,7 +175,8 @@ internal class JournalforingServiceMedJournalpostTest {
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured

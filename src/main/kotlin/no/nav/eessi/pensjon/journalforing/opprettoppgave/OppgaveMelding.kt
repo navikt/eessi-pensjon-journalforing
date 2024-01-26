@@ -12,10 +12,10 @@ data class OppgaveMelding(
     val sedType: SedType?,
     val journalpostId: String? = null,
     val tildeltEnhetsnr: Enhet,
-    val aktoerId: String?,
+    val aktoerId: String? = null,
     val rinaSakId: String,
     val hendelseType: HendelseType,
-    var filnavn: String?,
+    var filnavn: String? = null,
     val oppgaveType: OppgaveType,
     val tema: Tema? = Tema.PENSJON
 )  {

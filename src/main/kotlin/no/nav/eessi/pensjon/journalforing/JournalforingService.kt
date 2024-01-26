@@ -26,6 +26,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
@@ -47,6 +48,7 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
+    private val personidentifiseringService: PersonidentifiseringService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -83,10 +85,10 @@ class JournalforingService(
         saktype: SakType?,
         sakInformasjon: SakInformasjon?,
         sed: SED?,
-        harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        gjennySakId: String? = null
+        gjennySakId: String? = null,
+        alleSedMedGyldigStatus: List<Pair<String, SED>>
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -101,6 +103,8 @@ class JournalforingService(
                 val (documents, uSupporterteVedlegg) = sedHendelse.run {
                     pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
+
+                val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
@@ -235,7 +239,7 @@ class JournalforingService(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         fdato: LocalDate?,
-        saktype: SakType?,
+        saktype: SakType? = null,
         pesysSakId: String,
     ) {
         journalforOgOpprettOppgaveForSedMedUkjentPerson.measure {
@@ -277,24 +281,20 @@ class JournalforingService(
 
                 oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
                     OppgaveMelding(
-                        sedHendelse.sedType,
-                        journalPostResponse?.journalpostId,
-                        ID_OG_FORDELING,
-                        null,
-                        sedHendelse.rinaSakId,
-                        hendelseType,
-                        null,
-                        OppgaveType.JOURNALFORING,
+                        sedType = sedHendelse.sedType,
+                        journalpostId = journalPostResponse?.journalpostId,
+                        tildeltEnhetsnr = ID_OG_FORDELING,
+                        rinaSakId = sedHendelse.rinaSakId,
+                        hendelseType = hendelseType,
+                        oppgaveType = OppgaveType.JOURNALFORING,
                     )
                 )
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     opprettBehandleSedOppgave(
-                        null,
-                        ID_OG_FORDELING,
-                        null,
-                        sedHendelse,
-                        usupporterteFilnavn(uSupporterteVedlegg)
+                        oppgaveEnhet = ID_OG_FORDELING,
+                        sedHendelseModel = sedHendelse,
+                        uSupporterteVedlegg = usupporterteFilnavn(uSupporterteVedlegg)
                     )
                 }
 

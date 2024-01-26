@@ -29,6 +29,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
+import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -68,15 +69,17 @@ internal class JournalforingServiceTest {
 
     private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
 
     private val journalforingService = JournalforingService(
-            journalpostService,
-            oppgaveRoutingService,
-            pdfService,
-            oppgaveHandler,
-            kravService,
-            gcpStorageService,
-            statistikkPublisher
+        journalpostService,
+        oppgaveRoutingService,
+        pdfService,
+        oppgaveHandler,
+        kravService,
+        gcpStorageService,
+        statistikkPublisher,
+        personidentifiseringService
     )
 
     private val fdato = LocalDate.now()
@@ -127,7 +130,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -174,7 +178,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2000),
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
         verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
@@ -201,7 +206,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
@@ -227,7 +233,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
@@ -255,7 +262,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -306,7 +314,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -335,7 +344,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.R004),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -368,7 +378,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.R004),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         println(mox)
@@ -411,7 +422,8 @@ internal class JournalforingServiceTest {
             sed,
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -452,7 +464,8 @@ internal class JournalforingServiceTest {
             sed,
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -498,7 +511,8 @@ internal class JournalforingServiceTest {
             SED(type = sedType),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -536,7 +550,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -563,7 +578,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -598,7 +614,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -618,7 +635,8 @@ internal class JournalforingServiceTest {
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -638,7 +656,8 @@ internal class JournalforingServiceTest {
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -665,7 +684,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(UFORE_UTLANDSTILSNITT, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -690,7 +710,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -717,7 +738,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -743,7 +765,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -769,7 +792,8 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2100), identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -795,7 +819,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -821,7 +846,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -849,7 +875,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -900,7 +927,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -929,7 +957,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -959,7 +988,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -987,7 +1017,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -1036,7 +1067,8 @@ internal class JournalforingServiceTest {
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
+            gjennySakId = null,
+            mockk()
         )
 
         verify(atLeast = 1) {

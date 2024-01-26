@@ -82,8 +82,6 @@ class SedMottattListener (
                             val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
                             val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
 
-                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
-
                             //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
                             val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
@@ -103,8 +101,7 @@ class SedMottattListener (
                             val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
 
-                            val currentSed =
-                                alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                             journalforingService.journalfor(
                                 sedHendelse,
                                 MOTTATT,
@@ -113,9 +110,8 @@ class SedMottattListener (
                                 saktype,
                                 sakInformasjon,
                                 currentSed,
-                                harAdressebeskyttelse,
                                 identifisertePersoner.count(),
-                                gjennySakId = null
+                                alleSedMedGyldigStatus = alleSedMedGyldigStatus
                             )
 
                         }
