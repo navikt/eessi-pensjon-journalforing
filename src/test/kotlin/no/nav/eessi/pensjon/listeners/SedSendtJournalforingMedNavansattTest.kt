@@ -39,6 +39,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -74,7 +75,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, mockk()
+            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, personidentifiseringService
         )
 
     private val sedListener = SedSendtListener(
@@ -87,6 +88,11 @@ internal class SedSendtJournalforingMedNavansattTest {
         gcpStorageService,
         "test",
     )
+
+    @BeforeEach
+    fun setup() {
+        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
+    }
 
     @Test
     fun `Navansatt ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {

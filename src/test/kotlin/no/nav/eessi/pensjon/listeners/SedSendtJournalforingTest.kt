@@ -69,7 +69,7 @@ internal class SedSendtJournalforingTest {
             mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, mockk()
+            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, personidentifiseringService
         )
 
     private val sedListener = SedSendtListener(
@@ -104,6 +104,7 @@ internal class SedSendtJournalforingTest {
     fun setup() {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { gcpStorageService.eksisterer(any()) } returns false
+        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
     }
 
     @Test
