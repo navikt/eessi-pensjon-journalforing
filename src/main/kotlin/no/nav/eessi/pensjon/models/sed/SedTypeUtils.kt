@@ -32,4 +32,4 @@ object SedTypeUtils {
 
 fun SedType.kanInneholdeIdentEllerFdato(): Boolean = this in typerMedIdentEllerFDato
 
-fun SedType?.erGyldig(): Boolean = this != null && this !in ugyldigeTyper
+fun SedType?.erGyldig(): Boolean = (this != null) && (this !in ugyldigeTyper)
