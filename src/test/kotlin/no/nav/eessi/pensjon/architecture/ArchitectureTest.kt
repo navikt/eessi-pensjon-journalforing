@@ -9,12 +9,10 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Midlertidig disablet under bygging av ny arkitektur")
 internal class ArchitectureTest {
 
     private val root = EessiPensjonJournalforingApplication::class.qualifiedName!!
@@ -40,59 +38,51 @@ internal class ArchitectureTest {
     }
 
     @Test
-    fun `Klienter should not depend on eachother`() {
-        slices().matching("..$root.klienter.(**)").should().notDependOnEachOther().check(classesToAnalyze)
-    }
-
-    @Test
     fun `Check architecture`() {
         val root = "journalforing"
 
         // Root packages
-        val buc = "journalforing.buc"
-        val config = "journalforing.config"
-        val handler = "journalforing.handler"
-        val health = "journalforing.health"
-        val journalforing = "journalforing.journalforing"
-        val listeners = "journalforing.listeners"
-        val oppgaveRouting = "journalforing.oppgaverouting"
-        val pdf = "journalforing.pdf"
-        val personidentifisering = "journalforing.personidentifisering"
+        val eux = "eux"
+        val config = "config"
+        val health = "health"
+        val listeners = "listeners"
+        val oppgaveRouting = "journalforing bestemenhet"
 
         // Sub packages
-        val fagmodulKlient = "journalforing.klienter.fagmodul"
-        val journalpostKlient = "journalforing.klienter.journalpost"
-        val pesysKlient = "journalforing.klienter.pesys"
-        val personidentifiseringHelpers = "journalforing.personidentifisering.helpers"
+        val pdf = "journalforing pdf"
+        val pesysKlient = "listener pesys"
+        val journalforing = "journalforing"
+        val fagmodulKlient = "listener fagmodul"
+        val journalpostKlient = "journalforing journalpost"
+        val personidentifisering = "personidentifisering"
+        val personidentifiseringHelpers = "personidentifisering helpers"
 
         layeredArchitecture()
             .consideringOnlyDependenciesInAnyPackage(this.root)
                 //Define components
                 .layer(root).definedBy(this.root)
-                .layer(buc).definedBy("${this.root}.buc")
+                .layer(eux).definedBy("${this.root}.eux")
                 .layer(config).definedBy("${this.root}.config")
-                .layer(handler).definedBy("${this.root}.handler")
                 .layer(health).definedBy("${this.root}.health")
                 .layer(journalforing).definedBy("${this.root}.journalforing")
                 .layer(listeners).definedBy("${this.root}.listeners")
-                .layer(oppgaveRouting).definedBy("${this.root}.oppgaverouting")
-                .layer(pdf).definedBy("${this.root}.pdf")
-                .layer(fagmodulKlient).definedBy("${this.root}.klienter.fagmodul")
-                .layer(journalpostKlient).definedBy("${this.root}.klienter.journalpost")
-                .layer(pesysKlient).definedBy("${this.root}.klienter.pesys")
+                .layer(oppgaveRouting).definedBy("${this.root}.journalforing.bestemenhet")
+                .layer(pdf).definedBy("${this.root}.journalforing.pdf")
+                .layer(fagmodulKlient).definedBy("${this.root}.listeners.fagmodul")
+                .layer(journalpostKlient).definedBy("${this.root}.journalforing.journalpost")
+                .layer(pesysKlient).definedBy("${this.root}.listeners.pesys")
                 .layer(personidentifisering).definedBy("${this.root}.personidentifisering")
                 .layer(personidentifiseringHelpers).definedBy("${this.root}.personidentifisering.helpers")
                 //define rules
                 .whereLayer(root).mayNotBeAccessedByAnyLayer()
-                .whereLayer(buc).mayOnlyBeAccessedByLayers(listeners, journalforing, pdf) // Sed
+                .whereLayer(eux).mayOnlyBeAccessedByLayers(listeners, journalforing, pdf) // Sed
                 .whereLayer(config).mayNotBeAccessedByAnyLayer()
-                .whereLayer(handler).mayOnlyBeAccessedByLayers(journalforing)
                 .whereLayer(health).mayNotBeAccessedByAnyLayer()
                 .whereLayer(journalforing).mayOnlyBeAccessedByLayers(listeners)
                 .whereLayer(listeners).mayOnlyBeAccessedByLayers(root)
                 .whereLayer(oppgaveRouting).mayOnlyBeAccessedByLayers(journalforing)
                 .whereLayer(pdf).mayOnlyBeAccessedByLayers(journalforing)
-                .whereLayer(fagmodulKlient).mayOnlyBeAccessedByLayers(journalforing, buc, personidentifiseringHelpers)
+                .whereLayer(fagmodulKlient).mayOnlyBeAccessedByLayers(journalforing, eux, personidentifiseringHelpers)
                 .whereLayer(journalpostKlient).mayOnlyBeAccessedByLayers(journalforing)
                 .whereLayer(pesysKlient).mayOnlyBeAccessedByLayers(journalforing, listeners, oppgaveRouting)
                 //Verify rules
