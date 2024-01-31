@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.oppgaverouting
+package no.nav.eessi.pensjon.journalforing.oppgaverouting
 
 import io.mockk.every
 import io.mockk.mockk
@@ -16,7 +16,11 @@ import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Arbeidsfordelin
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
