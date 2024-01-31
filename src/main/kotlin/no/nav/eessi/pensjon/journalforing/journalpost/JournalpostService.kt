@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.journalforing.journalpost
 
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema

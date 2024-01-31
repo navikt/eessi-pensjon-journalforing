@@ -12,6 +12,8 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
 import no.nav.eessi.pensjon.journalforing.*
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING

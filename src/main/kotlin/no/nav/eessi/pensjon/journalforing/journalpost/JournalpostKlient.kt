@@ -1,6 +1,9 @@
-package no.nav.eessi.pensjon.journalforing
+package no.nav.eessi.pensjon.journalforing.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

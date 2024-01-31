@@ -18,6 +18,8 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService

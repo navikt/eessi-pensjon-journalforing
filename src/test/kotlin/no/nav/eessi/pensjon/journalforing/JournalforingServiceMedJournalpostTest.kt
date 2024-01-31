@@ -11,6 +11,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler

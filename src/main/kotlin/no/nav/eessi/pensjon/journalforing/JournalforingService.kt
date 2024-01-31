@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
