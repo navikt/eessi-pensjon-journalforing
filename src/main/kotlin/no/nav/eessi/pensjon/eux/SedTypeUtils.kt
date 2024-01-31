@@ -1,9 +1,9 @@
-package no.nav.eessi.pensjon.models.sed
+package no.nav.eessi.pensjon.eux
 
+import no.nav.eessi.pensjon.eux.SedTypeUtils.typerMedIdentEllerFDato
+import no.nav.eessi.pensjon.eux.SedTypeUtils.ugyldigeTyper
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils.typerMedIdentEllerFDato
-import no.nav.eessi.pensjon.models.sed.SedTypeUtils.ugyldigeTyper
 
 object SedTypeUtils {
 
