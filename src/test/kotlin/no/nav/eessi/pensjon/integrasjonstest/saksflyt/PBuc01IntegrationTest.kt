@@ -277,7 +277,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Inngående sokPerson")
-    inner class InngaaendeSokPersonP_BUC_01 {
+    inner class InngaaendeSokPersonPBUC01 {
 
         @Test
         fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person medfører maskinell journalføring`() {
@@ -402,7 +402,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
 
@@ -411,7 +411,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED))
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
-            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
@@ -455,7 +455,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Utgående")
-    inner class UtgaaendeP_BUC_01 {
+    inner class UtgaaendePbuc01 {
 
         @Test
         fun `Krav om alderpensjon for utgående P2000 med NPID journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {

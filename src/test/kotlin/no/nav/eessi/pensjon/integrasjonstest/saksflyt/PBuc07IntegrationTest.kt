@@ -79,8 +79,8 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
     private fun testRunnerVoksen(
         fnrVoksen: String,
         fnrVoksenSoker: String?,
-        aktor_voksen_1: String = AKTOER_ID,
-        aktor_voksen_2: String = AKTOER_ID_2,
+        aktorVoksen1: String = AKTOER_ID,
+        aktorVoksen2: String = AKTOER_ID_2,
         bestemSak: BestemSakResponse? = null,
         land: String = "NOR",
         krav: KravType = KravType.GJENLEV,
@@ -102,7 +102,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
             "Voksen ",
             "Forsikret",
             land,
-            aktorId = aktor_voksen_1
+            aktorId = aktorVoksen1
         )
 
         if (fnrVoksenSoker != null) {
@@ -111,13 +111,13 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
                 "Voksen",
                 "Gjenlevende",
                 land,
-                aktorId = aktor_voksen_2
+                aktorId = aktorVoksen2
             )
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
         if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(aktor_voksen_2) } returns bestemSak.sakInformasjonListe
+            every { fagmodulKlient.hentPensjonSaklist(aktorVoksen2) } returns bestemSak.sakInformasjonListe
         }
 
         val (journalpost, _) = initJournalPostRequestSlot()

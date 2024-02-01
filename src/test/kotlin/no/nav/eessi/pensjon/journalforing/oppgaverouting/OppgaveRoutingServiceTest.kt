@@ -338,7 +338,7 @@ internal class OppgaveRoutingServiceTest {
     class RoutingPBuc02 {
         private companion object {
             @JvmStatic
-            fun arguments() =
+            fun arguments(): Stream<TestArgumentsPBuc02> =
                 Arrays.stream(
                     arrayOf(
                         TestArgumentsPBuc02(NFP_UTLAND_AALESUND, NORGE, GJENLEV),
@@ -404,7 +404,7 @@ internal class OppgaveRoutingServiceTest {
     class RoutingPBuc10 {
         private companion object {
             @JvmStatic
-            fun arguments() =
+            fun arguments(): Stream<TestArguments> =
                 Arrays.stream(
                     arrayOf(
                         TestArguments(PENSJON_UTLAND, alder18aar, null, ALDER),
@@ -682,7 +682,7 @@ internal class OppgaveRoutingServiceTest {
 
         private companion object {
             @JvmStatic
-            fun arguments() =
+            fun arguments(): Stream<TestArgumentsBucs> =
                 Arrays.stream(
                     arrayOf(
                         TestArgumentsBucs(PENSJON_UTLAND, P_BUC_01,  DUMMY_TILKNYTNING, fdato = irrelevantDato()),
