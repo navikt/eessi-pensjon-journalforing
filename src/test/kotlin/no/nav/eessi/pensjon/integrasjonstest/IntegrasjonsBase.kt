@@ -130,26 +130,21 @@ abstract class IntegrasjonsBase {
     inner class OppgaveMeldingVerification(journalpostId: String) {
         val logsList: List<ILoggingEvent> = listAppender.list
         val meldingFraLog =
-            logsList.find { message ->
-                message.message.contains("-oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") && message.message.contains(
-                    "\"journalpostId\" : \"$journalpostId\""
-                )
-            }?.message
+            logsList.filter { message ->
+                message.message.contains("-oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") &&
+                        message.message.contains("\"journalpostId\" : \"$journalpostId\"")
+            }.map { it.message }
 
         fun medtildeltEnhetsnr(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"tildeltEnhetsnr\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"tildeltEnhetsnr\" : \"$melding\""))
         }
 
         fun medSedtype(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"sedType\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"sedType\" : \"$melding\""))
         }
 
         fun medHendelsetype(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"hendelseType\" : \"$melding\""))
-        }
-
-        fun medAktorId(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"aktoerId\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"hendelseType\" : \"$melding\""))
         }
     }
 
