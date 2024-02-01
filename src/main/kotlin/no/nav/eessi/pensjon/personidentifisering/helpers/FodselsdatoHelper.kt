@@ -41,9 +41,7 @@ class FodselsdatoHelper {
             }
 
             val kansellertfdato = kansellerteSeder
-                    .filter { it.type.kanInneholdeIdentEllerFdato() }
-                    .mapNotNull { filterFodselsdato(it) }
-                    .firstOrNull()
+                .filter { it.type.kanInneholdeIdentEllerFdato() }.firstNotNullOfOrNull { filterFodselsdato(it) }
 
             if (kansellertfdato != null) {
                 return kansellertfdato
