@@ -439,7 +439,7 @@ internal class OppgaveRoutingServiceTest {
 
         @ParameterizedTest
         @MethodSource("arguments")
-        fun `Routing_P_BUC_10`(arguments: TestArguments) {
+        fun Routing_P_BUC_10(arguments: TestArguments) {
 
             assertEquals(
                 arguments.expectedResult,
@@ -459,7 +459,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -593,7 +593,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt aldersak for P_BUC_01 mottatt når bruk av Norg2 tjeneste benyttes så routes det til FAMILIE_OG_PENSJONSYTELSER_OSLO`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -785,13 +785,9 @@ internal class OppgaveRoutingServiceTest {
         }
     }
 
-    private fun opprettSakInfo(sakStatus: SakStatus): SakInformasjon {
-        return SakInformasjon(null, UFOREP, sakStatus)
-    }
-
     @Test
     fun `hentNorg2Enhet for bosatt utland`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig0001result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig0001result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -802,7 +798,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4803result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4803result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -814,7 +810,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt nord-Norge`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordelig4862result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4862result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -826,7 +822,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for diskresjonkode`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordeling2103result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordeling2103result.json")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
@@ -867,7 +863,7 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `hentNorg2Enhet for bosatt Norge med diskresjon`() {
-        val enhetlist = fromResource("/norg2/norg2arbeidsfordeling2103result.json")
+        val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordeling2103result.json")
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
 
         val actual = norg2Service.hentArbeidsfordelingEnhet(
@@ -886,9 +882,8 @@ internal class OppgaveRoutingServiceTest {
         assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
     }
 
-    private fun fromResource(file: String): List<Norg2ArbeidsfordelingItem> {
-        val json = javaClass.getResource(file).readText()
-
+    private fun norg2ArbeidsfordelingItemListe(file: String): List<Norg2ArbeidsfordelingItem> {
+        val json = javaClass.getResource(file)!!.readText()
         return mapJsonToAny(json)
     }
 
