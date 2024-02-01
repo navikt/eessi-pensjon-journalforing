@@ -9,7 +9,4 @@ enum class Behandlingstema(@JsonValue val kode: String) {
     UFOREPENSJON("ab0194"),
     BARNEP("ab0255"),
     TILBAKEBETALING("ab0007");
-    companion object {
-        fun hentKode(kode: String): Behandlingstema? = Behandlingstema.values().firstOrNull { it.kode == kode }
-    }
 }
