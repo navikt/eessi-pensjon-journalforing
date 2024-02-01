@@ -28,8 +28,11 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_05 - IntegrationTest")
 internal class PBuc05IntegrationTest : JournalforingTestBase() {
@@ -121,7 +124,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Utgående - Scenario 2")
     inner class Scenario2Utgaende {
-        @Disabled
         @Test
         fun `2 personer i SED, fnr og rolle mangler, men saksnummer finnes`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = SAK_ID) {
@@ -138,7 +140,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `2 personer i SED, mangler fnr og saksnummer, men rolle finnes`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = null) {
@@ -147,7 +148,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `2 personer i SED, mangler fnr, rolle, og sakId`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = null, sakId = null) {
@@ -693,14 +693,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null))
 
             val dokumenter = mapJsonToAny<List<ForenkletSED>>(javaClass.getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")!!.readText())
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
-            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(afnr)) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR", aktorId = aktoera)

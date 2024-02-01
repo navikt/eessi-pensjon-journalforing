@@ -222,12 +222,11 @@ internal open class JournalforingTestBase {
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else
+        else {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
-        // forvent tema == PEN og enhet 2103
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
-        assertEquals(hendelseType, oppgaveMelding.hendelseType)
+            // forvent tema == PEN og enhet 2103
+            assertEquals(hendelseType, mapJsonToAny<OppgaveMelding>(meldingSlot.captured).hendelseType)
+        }
 
         val request = journalpost.captured
 
