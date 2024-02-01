@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
@@ -75,38 +74,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         meldingForSendtListener("/eux/hendelser/FB_BUC_01_F001.json")
     }
 
-    @Test
-    @Disabled
-    fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medStatusAvbrutt()
-            .medOppdaterDistribusjonsinfo()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/147666", HttpMethod.GET,
-                Buc(
-                    id = "147666",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-NAV.json")
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",HttpMethod.GET,"/pdf/pdfResponseMedUgyldigVedlegg.json")
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
-
-        //verify route
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
-    }
-
-    @Test
+     @Test
     fun `Når en SED (P2200) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 
         //server setup
@@ -170,7 +138,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medtildeltEnhetsnr("4475")
     }
 
-    @Disabled
     @Test
     fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
 
