@@ -1,3 +1,5 @@
+package no.nav.eessi.pensjon.klienter.navansatt
+
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
