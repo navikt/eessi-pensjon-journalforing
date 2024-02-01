@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -91,7 +90,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 "/buc/147666", HttpMethod.GET,
                 Buc(
                     id = "147666",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -122,7 +121,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 HttpMethod.GET,
                 Buc(
                     id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -147,7 +146,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 HttpMethod.GET,
                 Buc(
                     id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -187,7 +186,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 HttpMethod.GET,
                 Buc(
                     id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )

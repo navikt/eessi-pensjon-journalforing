@@ -4,7 +4,6 @@ import io.mockk.every
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -80,7 +79,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 HttpMethod.GET,
                 Buc(
                     id = "7477291",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -107,7 +106,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 "/buc/7477291",
                 HttpMethod.GET,Buc(
                     id = "7477291",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocuments_ugyldigFNR_ids.json")
                 ).toJson()
             )
@@ -142,7 +141,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 "/buc/147666",
                 HttpMethod.GET,Buc(
                     id = "147666",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
