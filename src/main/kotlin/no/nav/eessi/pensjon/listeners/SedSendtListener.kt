@@ -99,8 +99,7 @@ class SedSendtListener(
                             val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
                             val fdato = personidentifiseringService.hentFodselsDato(
                                 identifisertPerson,
-                                alleSedIBucList,
-                                kansellerteSeder
+                                alleSedIBucList.plus(kansellerteSeder)
                             )
                             val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
