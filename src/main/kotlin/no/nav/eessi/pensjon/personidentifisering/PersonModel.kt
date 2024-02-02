@@ -19,6 +19,6 @@ data class IdentifisertPDLPerson(
     val erDoed: Boolean = false,
     val kontaktAdresse: Kontaktadresse? = null,
     val personNavn: String? = null,
-    val fdato: LocalDate? = null
-
-) : IdentifisertPerson
+    val fdato: LocalDate? = null,
+    val identer: List<String>? = null
+    ) : IdentifisertPerson

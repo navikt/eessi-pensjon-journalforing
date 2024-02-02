@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -129,7 +128,8 @@ class PersonidentifiseringService(
                     geografiskTilknytning = pdlPerson.geografiskTilknytning?.gtKommune ?: pdlPerson.geografiskTilknytning?.gtBydel,
                     personRelasjon = personRelasjon.copy(fnr = Fodselsnummer.fra(pdlPerson.identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident)),
                     personNavn = pdlPerson.navn?.run { "$fornavn $etternavn" },
-                    fdato = pdlPerson.foedsel?.foedselsdato
+                    fdato = pdlPerson.foedsel?.foedselsdato,
+                    identer = pdlPerson.identer.map { it.ident},
                 )
             }.also { logger.info("Legger til identifisert person for aktorid: ${it?.aktoerId}") }
         } catch (ex: Exception) {
@@ -246,13 +246,20 @@ class PersonidentifiseringService(
      * Sjekker alle SEDer, inkl kansellerte
      *
      */
-    fun hentFodselsDato(identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
+    fun hentFodselsDato(identifisertPerson: IdentifisertPDLPerson?, seder: List<SED>): LocalDate? {
 
         if( identifisertPerson?.personRelasjon?.fnr == null ){
-            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
+            return FodselsdatoHelper.fdatoFraSedListe(seder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
         }
 
-        return seder.plus(kansellerteSeder)
+        identifisertPerson.personRelasjon?.fnr?.value?.let {
+            if(identifisertPerson.identer?.contains(it) == true){
+                logger.info("Fødselsdato funnet i identifisert person sin personrelasjon")
+            }
+            else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
+        }
+
+        return seder
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
