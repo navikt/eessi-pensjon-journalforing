@@ -161,7 +161,7 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.hentIdentifisertPersonFraPDL(
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.H070, null, rinaDocumentId = "23123")
         )
-        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed), emptyList())
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed))
         assertEquals("1958-07-11", fdato.toString())
     }
 
@@ -171,7 +171,7 @@ class PersonidentifiseringServiceTest {
         val actual = personidentifiseringService.hentIdentifisertPersonFraPDL(
             SEDPersonRelasjon(null, Relasjon.FORSIKRET, null, SedType.P10000, null, rinaDocumentId = "312321")
         )
-        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed1), emptyList())
+        val fdato = personidentifiseringService.hentFodselsDato(actual, listOf(sed1))
 
         assertEquals("1958-07-11", fdato.toString())
 
@@ -269,7 +269,7 @@ class PersonidentifiseringServiceTest {
         val personidentifiseringService2 = PersonidentifiseringService(personSok, personService)
 
         val sed = sedFromJsonFile("/buc/P10000-superenkel.json")
-        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed), emptyList())
+        val actual = personidentifiseringService2.hentFodselsDato(null, listOf(sed))
 
         assertEquals("1958-07-11", actual.toString())
     }
@@ -279,7 +279,7 @@ class PersonidentifiseringServiceTest {
         val sed1 = sedFromJsonFile("/buc/P10000-enkel.json")
         val sed2 = sedFromJsonFile("/buc/P2000-NAV.json")
 
-        val actual = personidentifiseringService.hentFodselsDato(null, listOf(sed2, sed1), emptyList())
+        val actual = personidentifiseringService.hentFodselsDato(null, listOf(sed2, sed1))
         assertEquals("1980-01-01", actual.toString())
     }
 
@@ -309,7 +309,8 @@ class PersonidentifiseringServiceTest {
             "NO",
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "123123"),
-            personNavn = "Testern"
+            personNavn = "Testern",
+            identer = null
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, H_BUC_07)
@@ -324,7 +325,8 @@ class PersonidentifiseringServiceTest {
             "NO",
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "23123"),
-            personNavn = "Testern"
+            personNavn = "Testern",
+            identer = null
         )
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
@@ -343,7 +345,8 @@ class PersonidentifiseringServiceTest {
             "NO",
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD, rinaDocumentId = "231231"),
-            personNavn = "Testern"
+            personNavn = "Testern",
+            identer = null
         )
 
         val gjenlevende = IdentifisertPDLPerson(
@@ -351,7 +354,8 @@ class PersonidentifiseringServiceTest {
             "NO",
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231"),
-            personNavn = "Testern"
+            personNavn = "Testern",
+            identer = null
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
@@ -371,7 +375,8 @@ class PersonidentifiseringServiceTest {
             "NO",
             "010",
             SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "23123"),
-            personNavn = "Testern"
+            personNavn = "Testern",
+            identer = null
         )
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
@@ -461,7 +466,8 @@ class PersonidentifiseringServiceTest {
             "NOR",
             "026123",
             SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123"),
-            personNavn = "avgott Testesen"
+            personNavn = "avgott Testesen",
+            identer = null
 
         )
 
@@ -472,7 +478,8 @@ class PersonidentifiseringServiceTest {
             "026123",
             SEDPersonRelasjon(gjenlevendeFnr, Relasjon.GJENLEVENDE, sedType = SedType.P2100, fdato = LocalDate.of(1969, 11, 28), sokKriterier = sokKriterier, rinaDocumentId = "123123"),
             personNavn = "gjenlevende Testesen",
-            fdato = LocalDate.of(1969, 11,28)
+            fdato = LocalDate.of(1969, 11,28),
+            identer = gjenlevendeFnr?.let { listOf(it.value) }
         )
 
         val identifisertePersoner = listOf(avdodPerson, gjenlevendePerson)
@@ -620,7 +627,8 @@ class PersonidentifiseringServiceTest {
             "NOR",
             "3041",
             SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, ALDER, SedType.P2000, null, fdato, rinaDocumentId = "12323"),
-            personNavn = "Ola Test Testing"
+            personNavn = "Ola Test Testing",
+            identer = null
         )
 
     }
@@ -636,8 +644,9 @@ class PersonidentifiseringServiceTest {
             "NO",
             "",
             SEDPersonRelasjon(fnr, relasjon, rinaDocumentId = "123123"),
-            personNavn = "Dummy"
-            )
+            personNavn = "Dummy",
+            identer = null
+        )
 
     fun identifisertPersonPDL(
         aktoerId: String = "32165469879",
@@ -647,7 +656,15 @@ class PersonidentifiseringServiceTest {
         fnr: Fodselsnummer? = null,
         personNavn: String = "Test Testesen"
     ): IdentifisertPDLPerson =
-        IdentifisertPDLPerson(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+        IdentifisertPDLPerson(
+            aktoerId,
+            landkode,
+            geografiskTilknytning,
+            personRelasjon,
+            fnr,
+            personNavn = personNavn,
+            identer = null
+        )
 
     private fun generateSED(
         sedType: SedType,

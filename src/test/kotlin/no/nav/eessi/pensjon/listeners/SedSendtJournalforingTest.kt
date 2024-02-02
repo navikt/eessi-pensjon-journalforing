@@ -155,7 +155,7 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6,11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -220,7 +220,7 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { gcpStorageService.eksisterer(rinaId) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
@@ -294,7 +294,7 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
@@ -358,7 +358,7 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
 
