@@ -1131,7 +1131,15 @@ internal class JournalforingServiceTest {
         fnr: Fodselsnummer? = null,
         personNavn: String = "Test Testesen"
     ): IdentifisertPDLPerson =
-        IdentifisertPDLPerson(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+        IdentifisertPDLPerson(
+            aktoerId,
+            landkode,
+            geografiskTilknytning,
+            personRelasjon,
+            fnr,
+            personNavn = personNavn,
+            identer = null
+        )
 
     fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
         SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
