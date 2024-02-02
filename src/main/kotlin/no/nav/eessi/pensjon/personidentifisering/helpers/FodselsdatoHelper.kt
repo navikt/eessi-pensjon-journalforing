@@ -41,6 +41,7 @@ class FodselsdatoHelper {
             }
 
             if (sederUtenFdato(seder)) {
+                logger.warn("Fant ingen fødselsdato i listen av SEDer (P15000 uten FNR)")
                 return null
             }
             throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")
