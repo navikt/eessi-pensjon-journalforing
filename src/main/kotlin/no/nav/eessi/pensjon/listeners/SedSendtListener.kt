@@ -72,6 +72,9 @@ class SedSendtListener(
                             return@measure
                         }
                         if (GyldigeHendelser.sendt(sedHendelse)) {
+                            if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                                logger.info("Utgående ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
+                            }
                             val bucType = sedHendelse.bucType!!
                             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 

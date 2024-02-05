@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
@@ -24,12 +25,13 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 
 @Service
-class SedMottattListener (
+class SedMottattListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
     private val euxService: EuxService,
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
+    val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) : SedListenerBase(fagmodulService, bestemSakService) {
@@ -74,6 +76,9 @@ class SedMottattListener (
                         logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
+                            if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                                logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
+                            }
                             val bucType = sedHendelse.bucType!!
                             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 

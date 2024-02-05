@@ -135,6 +135,7 @@ class JournalforingService(
                 ).also { logger.info("JournalpostResponse: $it")}
 
                 val journalPostResponse = journalPostResponseOgRequest.first
+
                 if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
                     logger.info("RinasakId: ${sedHendelse.rinaSakId} finnes i bucket fra før av")
                 } else {

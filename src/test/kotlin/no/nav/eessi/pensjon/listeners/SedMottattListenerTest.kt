@@ -29,7 +29,8 @@ internal class SedMottattListenerTest {
         euxService,
         fagmodulService = mockk(relaxed = true),
         bestemSakService,
-        "test",
+        gcpStorageService = mockk(relaxed = true),
+        "test"
     )
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
