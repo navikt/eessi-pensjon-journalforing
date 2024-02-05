@@ -26,8 +26,8 @@ class OpprettJournalpostRequest(
     val behandlingstema: Behandlingstema? = null,
     val bruker: Bruker? = null,
     @JsonDeserialize(using = JsonAsStringDeserializer::class)
-        @JsonRawValue
-        val dokumenter: String,
+    @JsonRawValue
+    val dokumenter: String,
     val journalfoerendeEnhet: Enhet? = null,
     val journalpostType: JournalpostType,
     val sak: Sak? = null,
@@ -101,7 +101,9 @@ class OpprettJournalPostResponse(
         val journalpostId: String,
         val journalstatus: String,
         val melding: String? = null,
-        val journalpostferdigstilt: Boolean
+        val journalpostferdigstilt: Boolean,
+        val dokumentInfoId: String? = null
+
 ){
     override fun toString(): String {
         val mapper = jacksonObjectMapper()

@@ -1,8 +1,12 @@
 package no.nav.eessi.pensjon.gcp
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobId
+import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -54,4 +58,25 @@ class GcpStorageService(
     fun list(keyPrefix: String) : List<String> {
         return gcpStorage.list(bucketname , Storage.BlobListOption.prefix(keyPrefix))?.values?.map { v -> v.name}  ?:  emptyList()
     }
+
+    fun lagreJournalpostDetaljer(journalpostId: String?, rinaSakId: String, rinaDokumentId: String, sedType: SedType?, eksternReferanseId: String) {
+        val journalpostDetaljer = JournalpostDetaljer(journalpostId, rinaSakId, rinaDokumentId, sedType, eksternReferanseId)
+        val blob = gcpStorage.create(
+            BlobInfo.newBuilder(bucketname, rinaSakId)
+                .setContentType("application/json")
+                .build(),
+            journalpostDetaljer.toJson().toByteArray()
+        )
+        logger.info("Journalpostdetaljer lagret i bucket: $bucketname, med key: ${blob.name}")
+
+    }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class JournalpostDetaljer(
+    val journalpostId: String?,
+    val rinaSakId: String,
+    val rinaDokumentId: String,
+    val sedType: SedType?,
+    val eksternReferanseId: String
+)

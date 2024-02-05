@@ -45,7 +45,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema
-    ): OpprettJournalPostResponse? {
+    ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
 
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
@@ -62,7 +62,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
-        return journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first)
+        return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {

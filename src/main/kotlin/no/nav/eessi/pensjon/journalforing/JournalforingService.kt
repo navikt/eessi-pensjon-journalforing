@@ -120,7 +120,7 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
-                val journalPostResponse = journalpostService.opprettJournalpost(
+                val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
@@ -132,7 +132,20 @@ class JournalforingService(
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
                     tema = tema
-                )
+                ).also { logger.info("JournalpostResponse: $it")}
+
+                val journalPostResponse = journalPostResponseOgRequest.first
+                if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                    logger.info("RinasakId: ${sedHendelse.rinaSakId} finnes i bucket fra før av")
+                } else {
+                    gcpStorageService.lagreJournalpostDetaljer(
+                        journalPostResponse?.journalpostId,
+                        sedHendelse.rinaSakId,
+                        sedHendelse.rinaDokumentId,
+                        sedHendelse.sedType,
+                        journalPostResponseOgRequest.second.eksternReferanseId
+                    )
+                }
 
                 val sattStatusAvbrutt = sattAvbrutt(
                     identifisertPerson,
@@ -279,7 +292,7 @@ class JournalforingService(
                 oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
                     OppgaveMelding(
                         sedHendelse.sedType,
-                        journalPostResponse?.journalpostId,
+                        journalPostResponse.first?.journalpostId,
                         ID_OG_FORDELING,
                         null,
                         sedHendelse.rinaSakId,
