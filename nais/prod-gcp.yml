@@ -25,7 +25,16 @@ spec:
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
   webproxy: true
-
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journal
+        retentionPeriodDays: 40
+        lifecycleCondition:
+          age: 365
+          createdBefore: 2020-01-01
+          numNewerVersions: 2
+          withState: ANY
+        uniformBucketLevelAccess: true
   kafka:
     pool: nav-prod
   env:
@@ -34,7 +43,7 @@ spec:
     - name: NAMESPACE
       value: p
     - name: GCP_BUCKET_NAME
-      value: eessi-pensjon-gjenny
+      value: eessi-pensjon-journal
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.prod-fss-pub.nais.io/cpi
     - name: PDL_URL

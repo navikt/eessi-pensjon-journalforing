@@ -24,6 +24,16 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journal-dev-q1
+        retentionPeriodDays: 40
+        lifecycleCondition:
+          age: 365
+          createdBefore: 2020-01-01
+          numNewerVersions: 2
+          withState: ANY
+        uniformBucketLevelAccess: true
   webproxy: true
   kafka:
     pool: nav-dev
@@ -33,7 +43,7 @@ spec:
     - name: NAMESPACE
       value: q1
     - name: GCP_BUCKET_NAME
-      value: eessi-pensjon-gjenny-dev-q1
+      value: eessi-pensjon-journal-dev-q1
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q1.dev-fss-pub.nais.io/cpi
     - name: PDL_URL
