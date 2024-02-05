@@ -142,6 +142,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         every { gcpStorageService.eksisterer(any())} returns false
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",

@@ -144,7 +144,7 @@ internal class JournalpostServiceTest {
         )
 
         // RESPONSE
-        assertEqualResponse(expectedResponse, actualResponse!!)
+        assertEqualResponse(expectedResponse, actualResponse.first!!)
 
         // REQUEST
         val actualRequest = journalpostSlot.captured
@@ -254,7 +254,7 @@ internal class JournalpostServiceTest {
             Tema.PENSJON
         )
 
-        assertEqualResponse(expectedResponse, actualResponse!!)
+        assertEqualResponse(expectedResponse, actualResponse.first!!)
 
         val actualRequest = requestSlot.captured
 

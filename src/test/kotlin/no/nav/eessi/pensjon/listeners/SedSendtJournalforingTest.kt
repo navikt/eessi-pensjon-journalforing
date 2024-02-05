@@ -158,6 +158,7 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -224,6 +225,7 @@ internal class SedSendtJournalforingTest {
         every { gcpStorageService.eksisterer(rinaId) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -297,6 +299,7 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -361,6 +364,7 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",

@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -47,6 +48,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     @BeforeEach
     fun myBeforeEach() {
         every { gcpStorageService.eksisterer(any()) } returns false
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
     }
 
     @TestConfiguration
