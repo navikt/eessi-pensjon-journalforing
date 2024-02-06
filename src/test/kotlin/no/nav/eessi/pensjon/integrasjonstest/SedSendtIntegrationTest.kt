@@ -47,7 +47,8 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun myBeforeEach() {
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
     }
 

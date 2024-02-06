@@ -103,7 +103,8 @@ internal class SedSendtJournalforingTest {
     @BeforeEach
     fun setup() {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
     }
 
     @Test
@@ -222,7 +223,8 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
-        every { gcpStorageService.eksisterer(rinaId) } returns false
+        every { gcpStorageService.gjennyFinnes(rinaId) } returns false
+        every { gcpStorageService.journalFinnes(rinaId) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
@@ -234,7 +236,7 @@ internal class SedSendtJournalforingTest {
             journalpostferdigstilt = false,
         )
 
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns opprettJournalPostResponse
