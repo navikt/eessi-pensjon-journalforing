@@ -53,6 +53,7 @@ class JournalforingService(
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
 
+    private lateinit var enhetBasertPaaTema: MetricsHelper.Metric
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
     private lateinit var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
 
@@ -60,6 +61,7 @@ class JournalforingService(
     lateinit var nameSpace: String
 
     init {
+        enhetBasertPaaTema = metricsHelper.init("enhetBasertPaaTema")
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
         journalforOgOpprettOppgaveForSedMedUkjentPerson = metricsHelper.init("journalforOgOpprettOppgaveForSed")
     }
@@ -374,30 +376,30 @@ class JournalforingService(
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int
     ): Enhet {
-        val bucType = sedHendelse.bucType
-        val personRelasjon = identifisertPerson?.personRelasjon
-        return if (fdato == null || personRelasjon?.fnr?.erNpid == true || fdato != personRelasjon?.fnr?.getBirthDate()) {
-            logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertperson sin fdato: ${personRelasjon?.fnr?.getBirthDate()}")
-            ID_OG_FORDELING
-        } else {
-            val enhetFraRouting = oppgaveRoutingService.hentEnhet(
-                OppgaveRoutingRequest.fra(
-                    identifisertPerson,
-                    fdato,
-                    saktype,
-                    sedHendelse,
-                    hendelseType,
-                    sakInformasjon,
-                    harAdressebeskyttelse
+        return enhetBasertPaaTema.measure {
+            val bucType = sedHendelse.bucType
+            val personRelasjon = identifisertPerson?.personRelasjon
+            return@measure if (fdato == null || personRelasjon?.fnr?.erNpid == true || fdato != personRelasjon?.fnr?.getBirthDate()) {
+                logger.info("Fdato er forskjellig fra SED fnr, sender til $ID_OG_FORDELING fdato: $fdato identifisertperson sin fdato: ${personRelasjon?.fnr?.getBirthDate()}")
+                ID_OG_FORDELING
+            } else {
+                val enhetFraRouting = oppgaveRoutingService.hentEnhet(
+                    OppgaveRoutingRequest.fra(
+                        identifisertPerson,
+                        fdato,
+                        saktype,
+                        sedHendelse,
+                        hendelseType,
+                        sakInformasjon,
+                        harAdressebeskyttelse
+                    )
                 )
-            )
 
-            if (enhetFraRouting != ID_OG_FORDELING) return enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
-
-            else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
-
-            else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
-                .also { logEnhet(enhetFraRouting, it) }
+                if (enhetFraRouting != ID_OG_FORDELING) return@measure enhetFraRouting.also { logEnhet(enhetFraRouting, it) }
+                else if(bucType in listOf(P_BUC_05, P_BUC_06)) return@measure enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
+                else return@measure enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
+                    .also { logEnhet(enhetFraRouting, it) }
+            }
         }
     }
 
