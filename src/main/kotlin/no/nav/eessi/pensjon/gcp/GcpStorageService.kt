@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class GcpStorageService(
-    @param:Value("\${GCP_BUCKET_NAME_GJENNY}") var bucketnameGjenny: String,
-    @param:Value("\${GCP_BUCKET_NAME_JOURNAL}") var bucketnameJournal: String,
+    @param:Value("\${GCP_BUCKET_NAME_GJENNY}") var gjennyBucket: String,
+    @param:Value("\${GCP_BUCKET_NAME_JOURNAL}") var journalBucket: String,
     private val gcpStorage: Storage) {
     private val logger = LoggerFactory.getLogger(GcpStorageService::class.java)
 
     init {
-        ensureBucketExists(bucketnameGjenny)
-        ensureBucketExists(bucketnameJournal)
+        ensureBucketExists(gjennyBucket)
+        ensureBucketExists(journalBucket)
     }
 
     private fun ensureBucketExists(bucketName: String) {
@@ -31,10 +31,10 @@ class GcpStorageService(
     }
 
     fun gjennyFinnes(storageKey: String) : Boolean{
-        return eksisterer(storageKey, bucketnameGjenny)
+        return eksisterer(storageKey, gjennyBucket)
     }
     fun journalFinnes(storageKey: String) : Boolean{
-        return eksisterer(storageKey, bucketnameJournal)
+        return eksisterer(storageKey, journalBucket)
     }
 
     private fun eksisterer(storageKey: String, bucketName: String): Boolean{
@@ -53,10 +53,10 @@ class GcpStorageService(
     }
 
     fun hentFraGjenny(storageKey: String): String? {
-        return hent(storageKey, bucketnameGjenny)
+        return hent(storageKey, gjennyBucket)
     }
     fun hentFraJournal(storageKey: String): String? {
-        return hent(storageKey, bucketnameJournal)
+        return hent(storageKey, journalBucket)
     }
 
     private fun hent(storageKey: String, bucketName: String): String? {
@@ -76,12 +76,12 @@ class GcpStorageService(
     fun lagreJournalpostDetaljer(journalpostId: String?, rinaSakId: String, rinaDokumentId: String, sedType: SedType?, eksternReferanseId: String) {
         val journalpostDetaljer = JournalpostDetaljer(journalpostId, rinaSakId, rinaDokumentId, sedType, eksternReferanseId)
         val blob = gcpStorage.create(
-            BlobInfo.newBuilder(bucketnameJournal, rinaSakId)
+            BlobInfo.newBuilder(journalBucket, rinaSakId)
                 .setContentType("application/json")
                 .build(),
             journalpostDetaljer.toJson().toByteArray()
         )
-        logger.info("Journalpostdetaljer lagret i bucket: $bucketnameJournal, med key: ${blob.name}")
+        logger.info("Journalpostdetaljer lagret i bucket: $journalBucket, med key: ${blob.name}")
 
     }
 }
