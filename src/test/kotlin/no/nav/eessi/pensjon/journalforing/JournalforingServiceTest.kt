@@ -358,7 +358,7 @@ internal class JournalforingServiceTest {
             sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
 
         val mox = journalforingService.journalfor(
             sedHendelse,

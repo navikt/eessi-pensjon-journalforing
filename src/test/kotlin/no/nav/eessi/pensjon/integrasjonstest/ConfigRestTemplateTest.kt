@@ -97,7 +97,8 @@ internal class ConfigRestTemplateTest {
                 )
         every { bestemSakKlient.kallBestemSak(any()) } returns mockk(relaxed = true)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { gcpStorageService.eksisterer(any())} returns false
+        every { gcpStorageService.gjennyFinnes(any())} returns false
+        every { gcpStorageService.journalFinnes(any())} returns false
     }
 
 

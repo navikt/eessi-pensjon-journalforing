@@ -151,7 +151,7 @@ internal open class JournalforingTestBase {
     fun setup() {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
     }
 
     @AfterEach

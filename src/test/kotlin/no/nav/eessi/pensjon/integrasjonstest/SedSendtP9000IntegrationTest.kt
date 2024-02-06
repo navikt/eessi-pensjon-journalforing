@@ -55,7 +55,8 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun setupTest(){
-        every { gcpStorageService.eksisterer(any())} returns false
+        every { gcpStorageService.gjennyFinnes(any())} returns false
+        every { gcpStorageService.journalFinnes(any())} returns false
     }
 
     @TestConfiguration
