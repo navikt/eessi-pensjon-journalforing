@@ -136,9 +136,8 @@ class JournalforingService(
 
                 val journalPostResponse = journalPostResponseOgRequest.first
 
-                if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
-                    logger.info("RinasakId: ${sedHendelse.rinaSakId} finnes i bucket fra før av")
-                } else {
+                //Lagrer alle journalførte posteringer
+                if (!gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
                     gcpStorageService.lagreJournalpostDetaljer(
                         journalPostResponse?.journalpostId,
                         sedHendelse.rinaSakId,
