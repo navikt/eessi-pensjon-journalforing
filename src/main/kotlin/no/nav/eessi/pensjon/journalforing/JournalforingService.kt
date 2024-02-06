@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -397,7 +398,18 @@ class JournalforingService(
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
             else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
-                .also { logEnhet(enhetFraRouting, it) }
+                .also {
+                    logEnhet(enhetFraRouting, it)
+                    metricsCounterForEnhet(it)
+                }
+        }
+    }
+
+    fun metricsCounterForEnhet(enhet: Enhet) {
+        try {
+            Metrics.counter("journalforingsEnhet_fra_tema", "type", enhet.name).increment()
+        } catch (e: Exception) {
+            logger.warn("Metrics feilet på enhet: $enhet")
         }
     }
 
