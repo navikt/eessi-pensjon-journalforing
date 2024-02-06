@@ -72,7 +72,7 @@ class SedSendtListener(
                             return@measure
                         }
                         if (GyldigeHendelser.sendt(sedHendelse)) {
-                            if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                            if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
                                 logger.info("Utgående ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
                             }
                             val bucType = sedHendelse.bucType!!
@@ -116,7 +116,7 @@ class SedSendtListener(
                                 )
                             else {
                                 val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-                                val gjennySak = gcpStorageService.eksisterer(sedHendelse.rinaSakId)
+                                val gjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
                                 val sakInformasjon = if (gjennySak) null else {
                                     pensjonSakInformasjon(
                                         identifisertPerson,
