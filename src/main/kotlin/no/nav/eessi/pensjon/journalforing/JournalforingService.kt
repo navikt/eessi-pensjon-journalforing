@@ -136,7 +136,7 @@ class JournalforingService(
 
                 val journalPostResponse = journalPostResponseOgRequest.first
 
-                if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
                     logger.info("RinasakId: ${sedHendelse.rinaSakId} finnes i bucket fra før av")
                 } else {
                     gcpStorageService.lagreJournalpostDetaljer(
@@ -464,8 +464,8 @@ class JournalforingService(
         identifisertePersoner: Int,
         euxCaseId: String
     ) : Tema {
-        return if (gcpStorageService.eksisterer(euxCaseId)) {
-            val blob = gcpStorageService.hent(euxCaseId)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
+            val blob = gcpStorageService.hentFraGjenny(euxCaseId,)
             if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         } else {
             val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
@@ -482,7 +482,7 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return if (gcpStorageService.eksisterer(euxCaseId) && sakIdFraSed != null)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId,) && sakIdFraSed != null)
             Sak("FAGSAK", sakIdFraSed, "EY")
         else if (sakInformasjon?.sakId != null)
             Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")

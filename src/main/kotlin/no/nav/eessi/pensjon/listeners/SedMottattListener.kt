@@ -76,7 +76,7 @@ class SedMottattListener(
                         logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
-                            if (gcpStorageService.eksisterer(sedHendelse.rinaSakId)) {
+                            if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId,)) {
                                 logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
                             }
                             val bucType = sedHendelse.bucType!!
