@@ -449,7 +449,8 @@ class JournalforingService(
     ): Enhet {
         val tema = hentTema(sedHendelse?.bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, sedHendelse.rinaSakId)
         val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, antallIdentifisertePersoner)
-        logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema")
+        logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
+
         return if (identifisertPerson.landkode == "NOR") {
             when (behandlingstema) {
                 GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND
