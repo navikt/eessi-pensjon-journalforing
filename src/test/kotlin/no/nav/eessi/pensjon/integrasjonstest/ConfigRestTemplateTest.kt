@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
@@ -54,7 +55,9 @@ import org.springframework.web.client.RestTemplate
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
 )
 @MockkBeans(
+    MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
+    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
 )
 internal class ConfigRestTemplateTest {
 
@@ -75,6 +78,10 @@ internal class ConfigRestTemplateTest {
 
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
+
+    @MockkBean(relaxed = true)
+    private lateinit var safClient: SafClient
+
 
     @BeforeEach
     fun setup() {
@@ -126,9 +133,6 @@ internal class ConfigRestTemplateTest {
 
     @TestConfiguration
     class TestConfig {
-
-        @Bean
-        fun navansattRestTemplate(): RestTemplate = mockk(relaxed = true)
 
         @Bean
         @Primary
