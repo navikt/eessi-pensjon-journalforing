@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,6 +63,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun gcpStorageService(): GcpStorageService = mockk<GcpStorageService>()
+
+        @Bean
+        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
     }
 
     @Test
