@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.gcp
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
@@ -60,9 +59,8 @@ class GcpStorageService(
     }
 
     private fun hent(storageKey: String, bucketName: String): String? {
-        val jsonHendelse: Blob
         try {
-            jsonHendelse =  gcpStorage.get(BlobId.of(bucketName, storageKey))
+            val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
             if(jsonHendelse.exists()){
                 logger.info("Blob med key:$storageKey funnet")
                 return jsonHendelse.getContent().decodeToString()
