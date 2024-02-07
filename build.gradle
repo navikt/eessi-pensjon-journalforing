@@ -57,9 +57,9 @@ dependencies {
 
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-eux:2.2.14")
-	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.52")
-	implementation("no.nav.eessi.pensjon:ep-logging:2.1.49")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.77"){
+	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.55")
+	implementation("no.nav.eessi.pensjon:ep-logging:2.1.52")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.81"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
@@ -80,7 +80,7 @@ dependencies {
 	implementation("net.logstash.logback:logstash-logback-encoder:7.4")
     testImplementation project(path: ':')
     configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
-	implementation("org.slf4j:jcl-over-slf4j:2.0.11")
+	implementation("org.slf4j:jcl-over-slf4j:2.0.12")
 
 	//Auth
 	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
