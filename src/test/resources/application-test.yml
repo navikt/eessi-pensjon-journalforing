@@ -38,7 +38,7 @@ kafka:
 namespace: 'test'
 METRICS_REQUESTFILTER_ENABLE: false
 NAIS_APP_NAME: eessi-pensjon-journalforing
-
+SAF_GRAPHQL_URL: http://localhost
 EUX_RINA_API_V1_URL: http://localhost
 NAVANSATT_URL: http://localhost
 PDL_URL: http://localhost
