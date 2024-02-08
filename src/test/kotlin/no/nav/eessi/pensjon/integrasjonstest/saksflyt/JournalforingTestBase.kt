@@ -114,8 +114,9 @@ internal open class JournalforingTestBase {
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
+        gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        gcpStorageService = gcpStorageService
+        mockk()
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

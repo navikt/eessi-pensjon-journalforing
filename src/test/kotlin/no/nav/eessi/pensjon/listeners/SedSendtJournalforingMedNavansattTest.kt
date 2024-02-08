@@ -73,9 +73,13 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
     private val journalforingService =
-        JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
-            every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher)
+        JournalforingService(
+            journalpostService, oppgaveRoutingService,
+            mockk<PDFService>(relaxed = true).also {
+                every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
+            },
+            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, mockk()
+        )
 
     private val sedListener = SedSendtListener(
         journalforingService,

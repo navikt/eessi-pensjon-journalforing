@@ -72,13 +72,14 @@ internal class JournalforingServiceTest {
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val journalforingService = JournalforingService(
-            journalpostService,
-            oppgaveRoutingService,
-            pdfService,
-            oppgaveHandler,
-            kravService,
-            gcpStorageService,
-            statistikkPublisher
+        journalpostService,
+        oppgaveRoutingService,
+        pdfService,
+        oppgaveHandler,
+        kravService,
+        gcpStorageService,
+        statistikkPublisher,
+        mockk(relaxed = true)
     )
 
     private val fdato = LocalDate.now()
@@ -319,7 +320,7 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = identifisertPersonPDL(
@@ -350,7 +351,7 @@ internal class JournalforingServiceTest {
         ]
     )
     fun `Buc av denne typen skal ikke journalfores med avbrutt`(bucType: BucType) {
-        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = bucType)
 
         val identifisertPerson = identifisertPersonPDL(
@@ -609,7 +610,7 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
@@ -1113,8 +1114,6 @@ internal class JournalforingServiceTest {
         val result = journalforingService.hentTema(BucType.P_BUC_05, UFOREP, LEALAUS_KAKE,  1, RINADOK_ID)
         assertEquals(Tema.UFORETRYGD, result)
     }
-
-    private fun saksbehandlerInfo(): Pair<String, Enhet?>? = null
 
     fun mockedSedHendelse(buc: BucType, sed: SedType) : SedHendelse{
         return mockk<SedHendelse>(relaxed = true).apply {
