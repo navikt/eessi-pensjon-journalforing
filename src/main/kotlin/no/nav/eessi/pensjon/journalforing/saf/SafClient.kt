@@ -40,7 +40,7 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
 
                 val path = "/$journalpostId"
                 val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_PDF
+                headers.contentType = MediaType.APPLICATION_JSON
                 val response = safGraphQlOidcRestTemplate.exchange(
                     path,
                     HttpMethod.POST,
