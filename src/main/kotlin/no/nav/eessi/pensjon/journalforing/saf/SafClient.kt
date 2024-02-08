@@ -12,7 +12,7 @@ import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
-class SafClient(private val safRestOidcRestTemplate: RestTemplate,
+class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                 @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()) {
 
     private val logger = LoggerFactory.getLogger(SafClient::class.java)
@@ -41,7 +41,7 @@ class SafClient(private val safRestOidcRestTemplate: RestTemplate,
                 val path = "/$journalpostId"
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_PDF
-                val response = safRestOidcRestTemplate.exchange(
+                val response = safGraphQlOidcRestTemplate.exchange(
                     path,
                     HttpMethod.POST,
                     HttpEntity(SafRequest(journalpostId), headers),
