@@ -8,7 +8,6 @@ import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
@@ -51,7 +50,6 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
 
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av dokumentInnhold fra SAF: $ex")
-                throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "En feil oppstod under henting av dokumentinnhold fra SAF")
             }
         }
     }
