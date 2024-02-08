@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -54,8 +55,8 @@ class GcpStorageService(
     fun hentFraGjenny(storageKey: String): String? {
         return hent(storageKey, gjennyBucket)
     }
-    fun hentFraJournal(storageKey: String): String? {
-        return hent(storageKey, journalBucket)
+    fun hentFraJournal(storageKey: String): JournalpostDetaljer? {
+        return hent(storageKey, journalBucket)?.let { mapJsonToAny<JournalpostDetaljer>(it) }
     }
 
     private fun hent(storageKey: String, bucketName: String): String? {

@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
@@ -49,6 +50,7 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
+    private val safClient: SafClient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -119,6 +121,18 @@ class JournalforingService(
                 val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
                 fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
+                val tidligereJournalfortPaaBuc = gcpStorageService.journalFinnes(sedHendelse.rinaSakId)
+                if (tidligereJournalfortPaaBuc) {
+                    try {
+                        logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: ${sedHendelse.rinaSakId}")
+                        val lagretHendelse = gcpStorageService.hentFraJournal(sedHendelse.rinaSakId)
+                        val journalpostDetaljer = lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
+                        logger.debug("Journalpost fra SAF: " + journalpostDetaljer.toString())
+                    } catch (e: Exception) {
+                        logger.error("Feiler under henting fra SAF" + e.message)
+                    }
+                }
+
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
@@ -138,7 +152,7 @@ class JournalforingService(
                 val journalPostResponse = journalPostResponseOgRequest.first
 
                 //Lagrer alle journalførte posteringer
-                if (!gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
+                if (!tidligereJournalfortPaaBuc) {
                     gcpStorageService.lagreJournalpostDetaljer(
                         journalPostResponse?.journalpostId,
                         sedHendelse.rinaSakId,
