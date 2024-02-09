@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 
 @Component
@@ -39,10 +41,18 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                     HttpEntity(SafRequest(journalpostId).toJson(), headers),
                     String::class.java
                 )
+
                 return@measure mapJsonToAny<JournalpostResponse>(response.body!!)
 
+            }  catch (ce: HttpClientErrorException) {
+                if(ce.statusCode == HttpStatus.FORBIDDEN) {
+                    logger.error("En feil oppstod under henting av dokument metadata fra SAF for ikke tilgang", ce)
+                }
+                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${ce.responseBodyAsString}")
+            } catch (se: HttpServerErrorException) {
+                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${se.responseBodyAsString}", se)
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under henting av dokumentInnhold fra SAF: $ex")
+                logger.error("En feil oppstod under henting av dokument metadata fra SAF: $ex")
             }
             null
         }
