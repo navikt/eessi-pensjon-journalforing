@@ -44,9 +44,9 @@ class GcpStorageService(
         kotlin.runCatching {
             obj.exists().also { logger.debug("Sjekker om $storageKey finnes i bucket: $bucketName") }
         }.onFailure {
-            logger.info("Blob $storageKey eksiterer ikke for $bucketName")
+            logger.info("Blob $storageKey finnes ikke for $bucketName")
         }.onSuccess {
-            logger.info("Blob $storageKey eksiterer for $bucketName")
+            logger.info("Blob $storageKey finnes for $bucketName")
             return true
         }
         return false
