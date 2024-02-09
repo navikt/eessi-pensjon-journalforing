@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.journalforing.saf
 
+import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
@@ -23,7 +25,7 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
         HentRinaSakIderFraDokumentMetadata = metricsHelper.init("HentRinaSakIderFraDokumentMetadata", ignoreHttpCodes = listOf(HttpStatus.FORBIDDEN))
     }
 
-    fun hentJournalpost(journalpostId: String) {
+    fun hentJournalpost(journalpostId: String) : JournalpostDetaljer? {
 
         return HentDokumentInnhold.measure {
             try {
@@ -38,11 +40,12 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                     HttpEntity(SafRequest(journalpostId), headers),
                     String::class.java
                 )
-                logger.debug(response.body.toString())
+                response.body?.let { mapJsonToAny<JournalpostDetaljer>(it) }
 
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av dokumentInnhold fra SAF: $ex")
             }
+            null
         }
     }
 }
