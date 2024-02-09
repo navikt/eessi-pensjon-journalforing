@@ -9,7 +9,7 @@ import no.nav.eessi.pensjon.utils.mapAnyToJson
 
 data class SafRequest(
     val journalpostId: String,
-    val query: String = """query journalpost(journalpostId:  \"$journalpostId\") {              
+    val query: String = """query journalpost(journalpostId:  "$journalpostId") {              
                   journalpostId
                   bruker {
                     id
