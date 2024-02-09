@@ -31,13 +31,12 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
             try {
                 logger.info("Henter dokumentinnhold for journalpostId:$journalpostId")
 
-                val path = "/$journalpostId"
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
                 val response = safGraphQlOidcRestTemplate.exchange(
-                    path,
+                    "/",
                     HttpMethod.POST,
-                    HttpEntity(SafRequest(journalpostId), headers),
+                    HttpEntity(SafRequest(journalpostId).toJson(), headers),
                     String::class.java
                 )
                 return@measure mapJsonToAny<JournalpostResponse>(response.body!!)
