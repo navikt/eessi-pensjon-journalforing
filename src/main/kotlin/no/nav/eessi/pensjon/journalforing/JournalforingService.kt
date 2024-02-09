@@ -126,13 +126,12 @@ class JournalforingService(
                     try {
                         logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: ${sedHendelse.rinaSakId}")
                         val lagretHendelse = gcpStorageService.hentFraJournal(sedHendelse.rinaSakId)
-                        val journalpostDetaljer = lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
-                        logger.debug("Journalpost fra SAF: " + journalpostDetaljer.toString())
+                        val journalpostResponse = lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
+                        logger.info("Hentet journalpost fra SAF: $journalpostResponse")
                     } catch (e: Exception) {
                         logger.error("Feiler under henting fra SAF" + e.message)
                     }
                 }
-
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
@@ -238,7 +237,18 @@ class JournalforingService(
         }
     }
 
-    private fun loggDersomIkkeBehSedOppgaveOpprettes(
+    fun hentJournalPostFraS3ogSaf(rinaSakId: String) : JournalpostResponse? {
+        return try {
+            logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: $rinaSakId")
+            val lagretHendelse = gcpStorageService.hentFraJournal(rinaSakId)
+            lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
+        } catch (e: Exception) {
+            logger.error("Feiler under henting fra SAF" + e.message)
+            null
+        }
+    }
+
+    fun loggDersomIkkeBehSedOppgaveOpprettes(
         bucType: BucType?,
         sedHendelse: SedHendelse,
         journalpostferdigstilt: Boolean,

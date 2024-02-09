@@ -95,6 +95,32 @@ private class JsonAsStringDeserializer : JsonDeserializer<String>() {
         return tree.toString()
     }
 }
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class JournalpostResponse(
+    val journalpostId: String,
+    val journalstatus: Journalstatus,
+    val journalpostferdigstilt: Boolean,
+    val avsenderMottaker: AvsenderMottaker,
+    val behandlingstema: String,
+    val journalfoerendeEnhet: String,
+    val temanavn: String,
+    val bruker: Bruker
+)
+data class Journalstatus (
+    val UKJENT: String,
+    val OPPLASTING_DOKUMENT: String,
+    val RESERVERT: String,
+    val UKJENT_BRUKER: String,
+    val AVBRUTT: String,
+    val UTGAAR: String,
+    val FEILREGISTRERT: String,
+    val UNDER_ARBEI: String,
+    val EKSPEDERT: String,
+    val FERDIGSTILT: String,
+    val JOURNALFOERT: String,
+    val MOTTATT: String
+)
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class OpprettJournalPostResponse(
