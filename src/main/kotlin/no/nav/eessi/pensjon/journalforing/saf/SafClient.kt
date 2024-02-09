@@ -38,7 +38,7 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                     HttpEntity(SafRequest(journalpostId), headers),
                     String::class.java
                 )
-                logger.debug(response.body.toString())
+                logger.info(response.body.toString())
 
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av dokumentInnhold fra SAF: $ex")
