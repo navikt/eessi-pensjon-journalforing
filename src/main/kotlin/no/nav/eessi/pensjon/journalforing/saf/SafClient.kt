@@ -48,9 +48,9 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                 if(ce.statusCode == HttpStatus.FORBIDDEN) {
                     logger.error("En feil oppstod under henting av dokument metadata fra SAF for ikke tilgang", ce)
                 }
-                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${ce.responseBodyAsString}")
+                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${ce.responseBodyAsString}, ${ce.statusCode}")
             } catch (se: HttpServerErrorException) {
-                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${se.responseBodyAsString}", se)
+                logger.error("En feil oppstod under henting av dokument metadata fra SAF: ${se.responseBodyAsString}")
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av dokument metadata fra SAF: $ex")
             }
