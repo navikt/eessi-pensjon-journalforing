@@ -90,6 +90,8 @@ spec:
       value: dokarkiv
     - name: AZURE_APP_NAVANSATT_CLIENT_ID
       value: prod-fss.pensjondeployer.navansatt
+    - name: AZURE_APP_SAF_CLIENT_ID
+      value: prod-fss.teamdokumenthandtering.saf
 
   image: {{ image }}
   ingresses:
