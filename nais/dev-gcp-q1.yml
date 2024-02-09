@@ -24,6 +24,8 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
+        - host: saf-q1.dev-fss-pub.nais.io
+
   gcp:
     buckets:
       - name: eessi-pensjon-journal-dev-q1

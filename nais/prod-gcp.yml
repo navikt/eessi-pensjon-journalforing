@@ -24,6 +24,8 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
+        - host: saf.prod-fss-pub.nais.io
+
   webproxy: true
   gcp:
     buckets:
