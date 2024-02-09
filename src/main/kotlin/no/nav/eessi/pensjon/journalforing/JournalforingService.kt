@@ -10,7 +10,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -34,7 +33,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -124,11 +122,16 @@ class JournalforingService(
                 fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
                 val tidligereJournalfortPaaBuc = gcpStorageService.journalFinnes(sedHendelse.rinaSakId)
-                val lagretJournalPost = tidligereJournalfortPaaBuc.takeIf { it }.apply {
-                    hentJournalPostFraS3(sedHendelse.rinaSakId)
+                if (tidligereJournalfortPaaBuc) {
+                    try {
+                        logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: ${sedHendelse.rinaSakId}")
+                        val lagretHendelse = gcpStorageService.hentFraJournal(sedHendelse.rinaSakId)
+                        val journalpostDetaljer = lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
+                        logger.debug("Journalpost fra SAF: " + journalpostDetaljer.toString())
+                    } catch (e: Exception) {
+                        logger.error("Feiler under henting fra SAF" + e.message)
+                    }
                 }
-                if(lagretJournalPost != null)
-                    logger.debug("Lagret journalpost :${lagretJournalPost.toJson()}")
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -232,17 +235,6 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
-        }
-    }
-
-    private fun hentJournalPostFraS3(rinaSakId: String) : JournalpostDetaljer? {
-        return try {
-            logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: $rinaSakId")
-            val lagretHendelse = gcpStorageService.hentFraJournal(rinaSakId)
-            lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
-        } catch (e: Exception) {
-            logger.error("Feiler under henting fra SAF" + e.message)
-            null
         }
     }
 
