@@ -146,7 +146,7 @@ class JournalforingService(
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
                     tema = tema
-                ).also { logger.info("JournalpostResponse: $it")}
+                )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
 
