@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -121,10 +122,6 @@ class JournalforingService(
                 val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
                 fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
-                val tidligereJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
-                if (tidligereJournalPost != null) {
-                        logger.info("Hentet journalpost fra SAF: ${tidligereJournalPost.journalpostId}")
-                }
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
@@ -142,9 +139,19 @@ class JournalforingService(
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
+                val tidligereJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.first
 
-                //Lagrer alle journalførte posteringer
-                if (tidligereJournalPost == null) {
+                if (tidligereJournalPost != null) {
+                    //henter lagret journalpost for å hente sed informasjon
+                    val lagretHJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.second
+
+                    logger.info("Hentet journalpost fra SAF: ${tidligereJournalPost.journalpostId} " +
+                            "lagret sed: ${lagretHJournalPost?.sedType} : ${sedHendelse.sedType}" +
+                            "lagret enhet ${tidligereJournalPost.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet} " +
+                            "lagret tema: ${tidligereJournalPost.tema} : ${journalPostResponseOgRequest.second.tema}" +
+                            "lagret behandlingstema: ${tidligereJournalPost.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}")
+                }
+                else {
                     gcpStorageService.lagreJournalpostDetaljer(
                         journalPostResponse?.journalpostId,
                         sedHendelse.rinaSakId,
@@ -230,11 +237,11 @@ class JournalforingService(
         }
     }
 
-    fun hentJournalPostFraS3ogSaf(rinaSakId: String) : JournalpostResponse? {
+    fun hentJournalPostFraS3ogSaf(rinaSakId: String) : Pair<JournalpostResponse?, JournalpostDetaljer>? {
         return try {
             logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: $rinaSakId")
             val lagretHendelse = gcpStorageService.hentFraJournal(rinaSakId)
-            lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
+            lagretHendelse?.journalpostId?.let { Pair(safClient.hentJournalpost(it), lagretHendelse) }
         } catch (e: Exception) {
             logger.error("Feiler under henting fra SAF" + e.message)
             null
