@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Component
 class GcpStorageService(
@@ -92,5 +93,5 @@ data class JournalpostDetaljer(
     val rinaDokumentId: String,
     val sedType: SedType?,
     val eksternReferanseId: String,
-    val opprettet: LocalDateTime? = LocalDateTime.now()
+    val opprettet: LocalDateTime? = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 )
