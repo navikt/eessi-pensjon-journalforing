@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -98,29 +99,20 @@ private class JsonAsStringDeserializer : JsonDeserializer<String>() {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class JournalpostResponse(
     val journalpostId: String?,
+    val tema: Tema?,
     val journalstatus: Journalstatus?,
     val journalpostferdigstilt: Boolean?,
     val avsenderMottaker: AvsenderMottaker?,
-    val behandlingstema: String?,
-    val journalfoerendeEnhet: String?,
+    val behandlingstema: Behandlingstema?,
+    val journalforendeEnhet: String?,
     val temanavn: String?,
-    val bruker: Bruker?
-)
-data class Journalstatus (
-    val UKJENT: String,
-    val OPPLASTING_DOKUMENT: String,
-    val RESERVERT: String,
-    val UKJENT_BRUKER: String,
-    val AVBRUTT: String,
-    val UTGAAR: String,
-    val FEILREGISTRERT: String,
-    val UNDER_ARBEI: String,
-    val EKSPEDERT: String,
-    val FERDIGSTILT: String,
-    val JOURNALFOERT: String,
-    val MOTTATT: String
+    val bruker: Bruker?,
+    val datoOpprettet: LocalDateTime? = null
 )
 
+enum class Journalstatus {
+    UKJENT, OPPLASTING_DOKUMENT, RESERVERT, UKJENT_BRUKER, AVBRUTT, UTGAAR, FEILREGISTRERT, UNDER_ARBEI, EKSPEDERT, FERDIGSTILT, JOURNALFOERT, MOTTATT
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class OpprettJournalPostResponse(
