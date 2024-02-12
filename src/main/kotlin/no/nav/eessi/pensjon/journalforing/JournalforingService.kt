@@ -121,16 +121,9 @@ class JournalforingService(
                 val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
                 fnr, identifisertePersoner, sedHendelse.rinaSakId)
 
-                val tidligereJournalfortPaaBuc = gcpStorageService.journalFinnes(sedHendelse.rinaSakId)
-                if (tidligereJournalfortPaaBuc) {
-                    try {
-                        logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: ${sedHendelse.rinaSakId}")
-                        val lagretHendelse = gcpStorageService.hentFraJournal(sedHendelse.rinaSakId)
-                        val journalpostResponse = lagretHendelse?.journalpostId?.let { safClient.hentJournalpost(it) }
-                        logger.info("Hentet journalpost fra SAF: $journalpostResponse")
-                    } catch (e: Exception) {
-                        logger.error("Feiler under henting fra SAF" + e.message)
-                    }
+                val tidligereJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
+                if (tidligereJournalPost != null) {
+                        logger.info("Hentet journalpost fra SAF: ${tidligereJournalPost.journalpostId}")
                 }
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -151,7 +144,7 @@ class JournalforingService(
                 val journalPostResponse = journalPostResponseOgRequest.first
 
                 //Lagrer alle journalførte posteringer
-                if (!tidligereJournalfortPaaBuc) {
+                if (tidligereJournalPost == null) {
                     gcpStorageService.lagreJournalpostDetaljer(
                         journalPostResponse?.journalpostId,
                         sedHendelse.rinaSakId,

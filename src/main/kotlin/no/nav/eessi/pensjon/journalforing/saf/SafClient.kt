@@ -44,8 +44,6 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                     HttpEntity(SafRequest(journalpostId).toJson(), headers),
                     String::class.java
                 )
-                logger.info(response.body)
-
                 val journalPostReponse = mapJsonToAny<Response>(response.body!!).takeIf { true }
                 return@measure journalPostReponse?.data?.journalpost
 
