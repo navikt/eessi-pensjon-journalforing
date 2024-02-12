@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class GcpStorageService(
@@ -81,7 +82,6 @@ class GcpStorageService(
             journalpostDetaljer.toJson().toByteArray()
         )
         logger.info("Journalpostdetaljer lagret i bucket: $journalBucket, med key: ${blob.name}")
-
     }
 }
 
@@ -91,5 +91,6 @@ data class JournalpostDetaljer(
     val rinaSakId: String,
     val rinaDokumentId: String,
     val sedType: SedType?,
-    val eksternReferanseId: String
+    val eksternReferanseId: String,
+    val opprettet: LocalDateTime? = LocalDateTime.now()
 )

@@ -146,10 +146,11 @@ class JournalforingService(
                     val lagretHJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.second
 
                     logger.info("""Hentet journalpost fra SAF: ${tidligereJournalPost.journalpostId} 
-                            lagret SED: ${lagretHJournalPost?.sedType} : ny SED: ${sedHendelse.sedType}
+                            lagret SED: ${lagretHJournalPost?.sedType} : ${sedHendelse.sedType}
                             lagret enhet ${tidligereJournalPost.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
                             lagret tema: ${tidligereJournalPost.tema} : ${journalPostResponseOgRequest.second.tema}
                             lagret behandlingstema: ${tidligereJournalPost.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
+                            lagret opprettetDato: ${lagretHJournalPost?.opprettet} : 
                     """)
                 }
                 else {
