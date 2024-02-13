@@ -232,14 +232,13 @@ class JournalforingService(
             val journalPostFraS3 = lagretJournalPost.second
 
             logger.info(
-                """Hentet journalpost for ${sedHendelse.rinaSakId} 
-                                lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalPostResponse?.journalpostId}
-                                lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
-                                lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
-                                lagret tema:            ${journalPostFraSaf?.tema} : ${journalPostResponseOgRequest.second.tema}
-                                lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
-                                lagret opprettetDato:   ${journalPostFraS3.opprettet} : 
-                        """
+            """Hentet journalpost for ${sedHendelse.rinaSakId} 
+                    lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalPostResponse?.journalpostId}
+                    lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
+                    lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
+                    lagret tema:            ${journalPostFraSaf?.tema} : ${journalPostResponseOgRequest.second.tema}
+                    lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
+                    lagret opprettetDato:   ${journalPostFraS3.opprettet}"""
             )
         } else {
             gcpStorageService.lagreJournalpostDetaljer(
