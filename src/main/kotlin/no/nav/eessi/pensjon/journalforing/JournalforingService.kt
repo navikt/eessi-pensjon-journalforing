@@ -262,8 +262,11 @@ class JournalforingService(
     fun hentJournalPostFraS3ogSaf(rinaSakId: String) : Pair<JournalpostResponse?, JournalpostDetaljer>? {
         return try {
             logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: $rinaSakId")
-            val lagretHendelse = gcpStorageService.hentFraJournal(rinaSakId)
-            lagretHendelse?.journalpostId?.let { Pair(safClient.hentJournalpost(it), lagretHendelse) }
+            gcpStorageService.hentFraJournal(rinaSakId)?.let { lagretHendelse ->
+                lagretHendelse.journalpostId?.let { journalpostId ->
+                    safClient.hentJournalpost(journalpostId) to lagretHendelse
+                }
+            }
         } catch (e: Exception) {
             logger.error("Feiler under henting fra SAF" + e.message)
             null
