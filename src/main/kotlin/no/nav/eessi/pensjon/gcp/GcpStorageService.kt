@@ -44,13 +44,13 @@ class GcpStorageService(
         val obj = gcpStorage.get(BlobId.of(bucketName, storageKey))
 
         kotlin.runCatching {
-            obj.exists().also { logger.debug("Sjekker om $storageKey finnes i bucket: $bucketName") }
+            obj.exists()
         }.onFailure {
-            logger.info("Blob $storageKey finnes ikke for $bucketName")
         }.onSuccess {
-            logger.info("Blob $storageKey finnes for $bucketName")
+            logger.info("Henter melding for $storageKey fra $bucketName")
             return true
         }
+        logger.info("Melding for $storageKey finnes ikke for $bucketName")
         return false
     }
 
@@ -65,7 +65,7 @@ class GcpStorageService(
         try {
             val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
             if(jsonHendelse.exists()){
-                logger.info("Blob med key:$storageKey funnet")
+                logger.info("Henter journalpost med rinanr $storageKey")
                 return jsonHendelse.getContent().decodeToString()
             }
         } catch ( ex: Exception) {
