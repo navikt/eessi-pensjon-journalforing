@@ -145,7 +145,7 @@ class JournalforingService(
                     //henter lagret journalpost for å hente sed informasjon
                     val lagretHJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.second
 
-                    logger.info("""Hentet journalpost fra SAF: ${tidligereJournalPost.journalpostId} 
+                    logger.info("""Hentet journalpost: ${tidligereJournalPost.journalpostId} for ${sedHendelse.rinaSakId} fra SAF
                             lagret SED: ${lagretHJournalPost?.sedType} : ${sedHendelse.sedType}
                             lagret enhet ${tidligereJournalPost.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
                             lagret tema: ${tidligereJournalPost.tema} : ${journalPostResponseOgRequest.second.tema}
