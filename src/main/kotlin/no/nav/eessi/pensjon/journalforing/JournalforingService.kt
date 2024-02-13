@@ -139,29 +139,9 @@ class JournalforingService(
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
-                val tidligereJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.first
 
-                if (tidligereJournalPost != null) {
-                    //henter lagret journalpost for å hente sed informasjon
-                    val lagretHJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)?.second
-
-                    logger.info("""Hentet journalpost: ${tidligereJournalPost.journalpostId} for ${sedHendelse.rinaSakId} fra SAF
-                            lagret SED: ${lagretHJournalPost?.sedType} : ${sedHendelse.sedType}
-                            lagret enhet ${tidligereJournalPost.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
-                            lagret tema: ${tidligereJournalPost.tema} : ${journalPostResponseOgRequest.second.tema}
-                            lagret behandlingstema: ${tidligereJournalPost.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
-                            lagret opprettetDato: ${lagretHJournalPost?.opprettet} : 
-                    """)
-                }
-                else {
-                    gcpStorageService.lagreJournalpostDetaljer(
-                        journalPostResponse?.journalpostId,
-                        sedHendelse.rinaSakId,
-                        sedHendelse.rinaDokumentId,
-                        sedHendelse.sedType,
-                        journalPostResponseOgRequest.second.eksternReferanseId
-                    )
-                }
+                // vurdere om det er mulig å benytte info fra en tidligere journalpost
+                skalJournalpostGjenbrukes(sedHendelse, journalPostResponse, journalPostResponseOgRequest)
 
                 val sattStatusAvbrutt = sattAvbrutt(
                     identifisertPerson,
@@ -236,6 +216,39 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
+        }
+    }
+
+    private fun skalJournalpostGjenbrukes(
+        sedHendelse: SedHendelse,
+        journalPostResponse: OpprettJournalPostResponse?,
+        journalPostResponseOgRequest: Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest>
+    ) {
+        //henter lagret journalpost fra samme eux-rina-id hvis den eksisterer
+        val lagretJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
+
+        if (lagretJournalPost != null) {
+            val journalPostFraSaf = lagretJournalPost.first
+            val journalPostFraS3 = lagretJournalPost.second
+
+            logger.info(
+                """Hentet journalpost for ${sedHendelse.rinaSakId} 
+                                lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalPostResponse?.journalpostId}
+                                lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
+                                lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
+                                lagret tema:            ${journalPostFraSaf?.tema} : ${journalPostResponseOgRequest.second.tema}
+                                lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
+                                lagret opprettetDato:   ${journalPostFraS3.opprettet} : 
+                        """
+            )
+        } else {
+            gcpStorageService.lagreJournalpostDetaljer(
+                journalPostResponse?.journalpostId,
+                sedHendelse.rinaSakId,
+                sedHendelse.rinaDokumentId,
+                sedHendelse.sedType,
+                journalPostResponseOgRequest.second.eksternReferanseId
+            )
         }
     }
 
