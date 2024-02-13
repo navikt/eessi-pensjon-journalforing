@@ -227,6 +227,7 @@ class JournalforingService(
         //henter lagret journalpost fra samme eux-rina-id hvis den eksisterer
         val lagretJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
 
+        // buc har en tidligere lagret journalpost som er ferdigstilt og kan benyttes for neste
         if (lagretJournalPost != null) {
             val journalPostFraSaf = lagretJournalPost.first
             val journalPostFraS3 = lagretJournalPost.second
@@ -240,14 +241,21 @@ class JournalforingService(
                     lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
                     lagret opprettetDato:   ${journalPostFraS3.opprettet}"""
             )
-        } else {
+        }
+        // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
+        else if (journalPostResponse?.journalpostferdigstilt == true){
             gcpStorageService.lagreJournalpostDetaljer(
-                journalPostResponse?.journalpostId,
+                journalPostResponse.journalpostId,
                 sedHendelse.rinaSakId,
                 sedHendelse.rinaDokumentId,
                 sedHendelse.sedType,
                 journalPostResponseOgRequest.second.eksternReferanseId
             )
+        }
+        // buc har ingen lagret JP, og heller ingen ferdgstilt
+        else {
+            logger.info("Journalpost ${journalPostResponse?.journalpostId} er ikke lagret, " +
+                    "men mangler info da ferdigstilt: ${journalPostResponse?.journalpostferdigstilt}")
         }
     }
 
