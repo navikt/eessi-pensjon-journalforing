@@ -100,7 +100,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost og journalføringsoppgave`() {
+        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
             testRunnerVoksen(
@@ -117,10 +117,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
-                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
-
+                verify { journalpostKlient.settStatusAvbrutt("429434378") }
             }
         }
 

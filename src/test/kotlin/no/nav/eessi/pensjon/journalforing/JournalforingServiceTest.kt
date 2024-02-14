@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
@@ -139,11 +138,12 @@ internal class JournalforingServiceTest {
     }
 
     @Test
-    fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal ikke status settes til avbrutt og journalpost samt JFR oppgave opprettes`() {
+    fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal status settes til avbrutt og journalpost`() {
         val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
 
         val oppgaveSlot = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
+        justRun {journalpostKlient.settStatusAvbrutt(any()) }
 
         journalforingService.journalforUkjentPersonKjentPersysSakId(
             sedHendelse,
@@ -153,12 +153,8 @@ internal class JournalforingServiceTest {
             "123456"
         )
 
-        verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
+        verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
         verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
-        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
-
-        assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
-        assertEquals(Tema.PENSJON, oppgaveSlot.captured.tema)
     }
 
     @Test

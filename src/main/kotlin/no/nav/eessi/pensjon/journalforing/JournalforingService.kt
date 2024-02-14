@@ -344,19 +344,15 @@ class JournalforingService(
                     saksbehandlerInfo = null,
                     tema = tema
                 )
-
-                oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
-                    OppgaveMelding(
-                        sedHendelse.sedType,
-                        journalPostResponse.first?.journalpostId,
-                        ID_OG_FORDELING,
-                        null,
-                        sedHendelse.rinaSakId,
-                        hendelseType,
-                        null,
-                        OppgaveType.JOURNALFORING,
-                    )
+                // Alle journalposter skal settes til avbrutt der det mangler bruker, https://trello.com/c/7m8Uyn0t
+                sattAvbrutt(
+                    null,
+                    hendelseType,
+                    sedHendelse,
+                    journalPostResponse.first,
                 )
+
+                logger.info("Oppretter ikke journaløringsoppgave for jp: ${journalPostResponse.first?.journalpostId} ved utgående sed og ukjent bruker")
 
                 if (uSupporterteVedlegg.isNotEmpty()) {
                     opprettBehandleSedOppgave(

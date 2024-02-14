@@ -51,6 +51,8 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.journalFinnes(any()) } returns false
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+        every { gcpStorageService.hentFraJournal(any()) } returns null
+
     }
 
     @TestConfiguration
@@ -105,11 +107,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         meldingForSendtListener( "/eux/hendelser/P_BUC_03_P2200.json")
 
-        //then route to 4303
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("P2200")
-            .medtildeltEnhetsnr("4303")
+        assert(isMessageInlog("Journalpost settes til avbrutt == true"))
     }
 
     @Test
