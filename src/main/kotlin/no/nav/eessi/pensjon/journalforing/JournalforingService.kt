@@ -228,19 +228,25 @@ class JournalforingService(
         val lagretJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
 
         // buc har en tidligere lagret journalpost som er ferdigstilt og kan benyttes for neste
+        val opprettJournalpostRequest = journalPostResponseOgRequest.second
         if (lagretJournalPost != null) {
             val journalPostFraSaf = lagretJournalPost.first
             val journalPostFraS3 = lagretJournalPost.second
 
-            logger.info(
-            """Hentet journalpost for ${sedHendelse.rinaSakId} 
+            if(journalPostFraSaf?.journalforendeEnhet != opprettJournalpostRequest.journalfoerendeEnhet?.enhetsNr ||
+                journalPostFraSaf?.tema != opprettJournalpostRequest.tema ||
+                journalPostFraSaf.behandlingstema != opprettJournalpostRequest.behandlingstema)  {
+
+                logger.info(
+                    """Hentet journalpost for ${sedHendelse.rinaSakId} 
                     lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalPostResponse?.journalpostId}
                     lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
-                    lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${journalPostResponseOgRequest.second.journalfoerendeEnhet?.enhetsNr} 
-                    lagret tema:            ${journalPostFraSaf?.tema} : ${journalPostResponseOgRequest.second.tema}
-                    lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalPostResponseOgRequest.second.behandlingstema}
+                    lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${opprettJournalpostRequest.journalfoerendeEnhet?.enhetsNr} 
+                    lagret tema:            ${journalPostFraSaf?.tema} : ${opprettJournalpostRequest.tema}
+                    lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${opprettJournalpostRequest.behandlingstema}
                     lagret opprettetDato:   ${journalPostFraS3.opprettet}""".trimIndent()
-            )
+                )
+            }
         }
         // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
         else if (journalPostResponse?.journalpostferdigstilt == true){
@@ -249,7 +255,7 @@ class JournalforingService(
                 sedHendelse.rinaSakId,
                 sedHendelse.rinaDokumentId,
                 sedHendelse.sedType,
-                journalPostResponseOgRequest.second.eksternReferanseId
+                opprettJournalpostRequest.eksternReferanseId
             )
         }
         // buc har ingen lagret JP, og heller ingen ferdgstilt
