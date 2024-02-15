@@ -140,8 +140,8 @@ class JournalforingService(
 
                 val journalPostResponse = journalPostResponseOgRequest.first
 
-                // vurdere om det er mulig å benytte info fra en tidligere journalpost
-                skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
+                // ved utgående kan det være mulig å benytte info fra en tidligere journalpost
+                hendelseType.takeIf { it == SENDT }?.let { skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest) }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = sattAvbrutt(
