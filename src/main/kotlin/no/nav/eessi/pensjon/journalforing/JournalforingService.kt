@@ -143,6 +143,7 @@ class JournalforingService(
                 // vurdere om det er mulig å benytte info fra en tidligere journalpost
                 skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
 
+                // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = sattAvbrutt(
                     identifisertPerson,
                     hendelseType,
@@ -396,13 +397,17 @@ class JournalforingService(
         }
     }
 
-    private fun sattAvbrutt(
-        identifisertPerson: IdentifisertPerson?,
-        hendelseType: HendelseType,
-        sedHendelse: SedHendelse,
-        journalPostResponse: OpprettJournalPostResponse?
-    ): Boolean {
-        //Oppdaterer journalposten med status Avbrutt
+
+    /**
+     * Journalposten skal settes til avbrutt ved manglende fnr, sed er sendt og buc/sed er ikke i listen med unntak
+     *
+     * @param identifisertPerson identifisert person.
+     * @param hendelseType Sendt eller mottatt.
+     * @param sedHendelse sed hendelse.
+     * @param journalPostResponse journalpost det skal vurderes mot.
+     * @return true om journalpost settes til avbrutt
+     */
+    private fun sattAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
         val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
         val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
 
