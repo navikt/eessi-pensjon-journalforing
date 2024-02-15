@@ -519,7 +519,6 @@ class JournalforingService(
      * - uføre buc (P_BUC_03)
      * - saktype er UFØRETRYGD
      */
-    //TODO: Fikse sånn at denne håndterer både npid og fnr
     fun hentTema(
         bucType: BucType,
         saktype: SakType?,
@@ -528,7 +527,7 @@ class JournalforingService(
         euxCaseId: String
     ) : Tema {
         return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
-            val blob = gcpStorageService.hentFraGjenny(euxCaseId,)
+            val blob = gcpStorageService.hentFraGjenny(euxCaseId)
             if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         } else {
             val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
