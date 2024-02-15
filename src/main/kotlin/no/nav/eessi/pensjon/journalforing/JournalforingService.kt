@@ -141,7 +141,7 @@ class JournalforingService(
                 val journalPostResponse = journalPostResponseOgRequest.first
 
                 // vurdere om det er mulig å benytte info fra en tidligere journalpost
-                skalJournalpostGjenbrukes(sedHendelse, journalPostResponse, journalPostResponseOgRequest)
+                skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
 
                 val sattStatusAvbrutt = sattAvbrutt(
                     identifisertPerson,
@@ -221,47 +221,49 @@ class JournalforingService(
 
     private fun skalJournalpostGjenbrukes(
         sedHendelse: SedHendelse,
-        journalPostResponse: OpprettJournalPostResponse?,
         journalPostResponseOgRequest: Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest>
     ) {
-        //henter lagret journalpost fra samme eux-rina-id hvis den eksisterer
+        // henter lagret journalpost fra samme eux-rina-id hvis den eksisterer
         val lagretJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
 
-        // buc har en tidligere lagret journalpost som er ferdigstilt og kan benyttes for neste
-        val opprettJournalpostRequest = journalPostResponseOgRequest.second
+        val journalpostResponse = journalPostResponseOgRequest.first
+        val journalpostRequest = journalPostResponseOgRequest.second
+
+        // buc har en tidligere lagret journalpost som er ferdigstilt og skal benyttes som mal for neste
         if (lagretJournalPost != null) {
             val journalPostFraSaf = lagretJournalPost.first
             val journalPostFraS3 = lagretJournalPost.second
 
-            if(journalPostFraSaf?.journalforendeEnhet != opprettJournalpostRequest.journalfoerendeEnhet?.enhetsNr ||
-                journalPostFraSaf?.tema != opprettJournalpostRequest.tema ||
-                journalPostFraSaf.behandlingstema != opprettJournalpostRequest.behandlingstema)  {
+            // todo: ersattes med ny journalpost som bruker tidligere lagret data
+            if(journalPostFraSaf?.journalforendeEnhet != journalpostRequest.journalfoerendeEnhet?.enhetsNr ||
+                journalPostFraSaf?.tema != journalpostRequest.tema ||
+                journalPostFraSaf.behandlingstema != journalpostRequest.behandlingstema)  {
 
                 logger.info(
                     """Hentet journalpost for ${sedHendelse.rinaSakId} 
-                    lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalPostResponse?.journalpostId}
+                    lagret JournalPostID:   ${journalPostFraSaf?.journalpostId} : ${journalpostResponse?.journalpostId}
                     lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
-                    lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${opprettJournalpostRequest.journalfoerendeEnhet?.enhetsNr} 
-                    lagret tema:            ${journalPostFraSaf?.tema} : ${opprettJournalpostRequest.tema}
-                    lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${opprettJournalpostRequest.behandlingstema}
+                    lagret enhet:           ${journalPostFraSaf?.journalforendeEnhet} : ${journalpostRequest.journalfoerendeEnhet?.enhetsNr} 
+                    lagret tema:            ${journalPostFraSaf?.tema} : ${journalpostRequest.tema}
+                    lagret behandlingstema: ${journalPostFraSaf?.behandlingstema} : ${journalpostRequest.behandlingstema}
                     lagret opprettetDato:   ${journalPostFraS3.opprettet}""".trimIndent()
                 )
             }
         }
         // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
-        else if (journalPostResponse?.journalpostferdigstilt == true){
+        else if (journalpostResponse?.journalpostferdigstilt == true){
             gcpStorageService.lagreJournalpostDetaljer(
-                journalPostResponse.journalpostId,
+                journalpostResponse.journalpostId,
                 sedHendelse.rinaSakId,
                 sedHendelse.rinaDokumentId,
                 sedHendelse.sedType,
-                opprettJournalpostRequest.eksternReferanseId
+                journalpostRequest.eksternReferanseId
             )
         }
         // buc har ingen lagret JP, og heller ingen ferdgstilt
         else {
-            logger.info("Journalpost ${journalPostResponse?.journalpostId} er ikke lagret, " +
-                    "men mangler info da ferdigstilt: ${journalPostResponse?.journalpostferdigstilt}")
+            logger.info("Journalpost ${journalpostResponse?.journalpostId} er ikke lagret, " +
+                    "men mangler info da ferdigstilt: ${journalpostResponse?.journalpostferdigstilt}")
         }
     }
 
