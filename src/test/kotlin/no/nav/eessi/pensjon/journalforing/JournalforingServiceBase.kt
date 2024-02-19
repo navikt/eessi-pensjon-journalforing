@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
@@ -24,8 +23,6 @@ import org.springframework.kafka.core.KafkaTemplate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
-private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
-private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
 abstract class JournalforingServiceBase {
 
     val journalpostKlient = mockk<JournalpostKlient>()
@@ -95,7 +92,5 @@ abstract class JournalforingServiceBase {
 
     fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
         SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
-
-    private fun navAnsattInfo(): Pair<String, Enhet?>? = null
 
 }
