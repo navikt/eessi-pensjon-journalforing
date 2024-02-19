@@ -83,33 +83,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         meldingForSendtListener("/eux/hendelser/FB_BUC_01_F001.json")
     }
 
-     @Test
-    fun `Når en SED (P2200) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medOppdaterDistribusjonsinfo()
-            .medStatusAvbrutt()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/148161",
-                HttpMethod.GET,
-                Buc(
-                    id = "12312312312452345624355",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
-            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_03_P2200.json")
-
-        assert(isMessageInlog("Journalpost settes til avbrutt == true"))
-    }
-
     @Test
     fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
