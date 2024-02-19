@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -13,6 +12,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.journalpost.VurderAvbrutt
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
@@ -85,11 +85,11 @@ class JournalforingService(
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: SakType?,
-        sakInformasjon: SakInformasjon?,
-        sed: SED?,
+        saktype: SakType? = null,
+        sakInformasjon: SakInformasjon? = null,
+        sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
-        identifisertePersoner: Int,
+            identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
         gjennySakId: String? = null
     ) {
@@ -407,19 +407,11 @@ class JournalforingService(
      * @return true om journalpost settes til avbrutt
      */
     private fun sattAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
-        val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
-
-        val sattStatusAvbrutt =
-            if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
-                sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt
-            ) {
-                journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
-                true
-            } else false
-        return sattStatusAvbrutt.also {
-            logger.info("Journalpost settes til avbrutt == $it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
+        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType, sedHendelse)){
+            journalpostService.settStatusAvbrutt(journalPostResponse.journalpostId)
+            return true
         }
+        return false
     }
 
     private fun journalforingsEnhet(
