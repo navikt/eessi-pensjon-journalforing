@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.journalpost.VurderAvbrutt
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
@@ -144,7 +143,7 @@ class JournalforingService(
                 hendelseType.takeIf { it == SENDT }?.let { skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest) }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
-                val sattStatusAvbrutt = sattAvbrutt(
+                val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
                     identifisertPerson,
                     hendelseType,
                     sedHendelse,
@@ -347,7 +346,7 @@ class JournalforingService(
                     tema = tema
                 )
                 // Alle journalposter skal settes til avbrutt der det mangler bruker, https://trello.com/c/7m8Uyn0t
-                sattAvbrutt(
+                journalpostService.settStatusAvbrutt(
                     null,
                     hendelseType,
                     sedHendelse,
@@ -394,24 +393,6 @@ class JournalforingService(
                 sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand)
             )
         }
-    }
-
-
-    /**
-     * Journalposten skal settes til avbrutt ved manglende fnr, sed er sendt og buc/sed er ikke i listen med unntak
-     *
-     * @param identifisertPerson identifisert person.
-     * @param hendelseType Sendt eller mottatt.
-     * @param sedHendelse sed hendelse.
-     * @param journalPostResponse journalpost det skal vurderes mot.
-     * @return true om journalpost settes til avbrutt
-     */
-    private fun sattAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType, sedHendelse)){
-            journalpostService.settStatusAvbrutt(journalPostResponse.journalpostId)
-            return true
-        }
-        return false
     }
 
     private fun journalforingsEnhet(

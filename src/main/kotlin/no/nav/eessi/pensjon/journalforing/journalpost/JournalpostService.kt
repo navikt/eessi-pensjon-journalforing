@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -100,7 +101,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
-    fun settStatusAvbrutt(journalpostId: String) = journalpostKlient.settStatusAvbrutt(journalpostId)
+    fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
+        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType, sedHendelse)){
+            journalpostKlient.settStatusAvbrutt(journalPostResponse.journalpostId)
+            return true
+        }
+        return false
+    }
+
 
     fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, identifisertePersoner: Int): Behandlingstema {
 

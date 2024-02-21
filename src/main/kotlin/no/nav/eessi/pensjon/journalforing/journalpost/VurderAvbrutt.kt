@@ -18,7 +18,8 @@ class VurderAvbrutt {
      * @param hendelseType Sendt eller mottatt.
      * @param sedHendelse sed hendelse.
      * @return true om journalpost settes til avbrutt
-     */fun skalKanselleres(
+     */
+    fun skalKanselleres(
         identifiedPerson: IdentifisertPerson?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse
