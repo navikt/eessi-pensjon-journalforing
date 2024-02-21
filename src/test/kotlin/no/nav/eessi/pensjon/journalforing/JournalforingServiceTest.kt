@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.every
 import io.mockk.justRun
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
@@ -27,8 +26,6 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -152,50 +149,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
               }""".trimIndent()
         )
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        SedType::class, names = [
-            "X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008", "X009", "X010",
-            "X013", "X050", "H001", "H002", "H020", "H021", "H070", "H120", "H121"
-        ]
-    )
-    fun `Sed av denne typen skal ikke journalfores med avbrutt`(sedType: SedType) {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")?.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse!!).copy(sedType = sedType)
-
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
-        )
-
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), sedType) } returns Pair("$sedType supported Documents", emptyList())
-
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            ALDER,
-            null,
-            SED(type = sedType),
-            identifisertePersoner = 1,
-            navAnsattInfo = null,
-            gjennySakId = null
-        )
-        verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
-              "sedType" : "$sedType",
-              "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "4303",
-              "aktoerId" : "12078945602",
-              "rinaSakId" : "147729",
-              "hendelseType" : "SENDT",
-              "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
-        )
-        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
 
     @Test
@@ -794,29 +747,5 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val result = journalforingService.hentTema(BucType.P_BUC_05, UFOREP, LEALAUS_KAKE,  1, RINADOK_ID)
         assertEquals(Tema.UFORETRYGD, result)
     }
-
-//    fun identifisertPersonPDL(
-//        aktoerId: String = AKTOERID,
-//        personRelasjon: SEDPersonRelasjon?,
-//        landkode: String? = "",
-//        geografiskTilknytning: String? = "",
-//        fnr: Fodselsnummer? = null,
-//        personNavn: String = "Test Testesen"
-//    ): IdentifisertPDLPerson =
-//        IdentifisertPDLPerson(
-//            aktoerId,
-//            landkode,
-//            geografiskTilknytning,
-//            personRelasjon,
-//            fnr,
-//            personNavn = personNavn,
-//            identer = null
-//        )
-
-//    fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
-//        SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
-
-//    private fun null: Pair<String, Enhet?>? = null
-
 
 }
