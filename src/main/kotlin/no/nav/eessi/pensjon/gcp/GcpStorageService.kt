@@ -84,7 +84,7 @@ class GcpStorageService(
         )
         logger.info("""Journalpostdetaljer lagret i bucket: 
             | $journalBucket, med key: ${blob.name}
-            | innhold: ${journalpostDetaljer.toJson()}""".trimMargin())
+            | innhold""".trimMargin() + journalpostDetaljer.toJson())
     }
 }
 
