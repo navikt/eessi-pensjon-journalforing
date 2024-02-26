@@ -251,7 +251,7 @@ class JournalforingService(
             }
         }
         // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
-        else if (journalpostResponse?.journalpostferdigstilt == true){
+        else if (journalpostResponse?.journalpostferdigstilt == true  && journalpostRequest.journalpostType == JournalpostType.UTGAAENDE){
             gcpStorageService.lagreJournalpostDetaljer(
                 journalpostResponse.journalpostId,
                 sedHendelse.rinaSakId,
