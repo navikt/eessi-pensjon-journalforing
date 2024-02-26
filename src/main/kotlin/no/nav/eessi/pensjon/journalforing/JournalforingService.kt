@@ -246,7 +246,8 @@ class JournalforingService(
                     lagret enhet:           ${journalPostFraSaf.journalforendeEnhet} : ${journalpostRequest.journalfoerendeEnhet?.enhetsNr} 
                     lagret tema:            ${journalPostFraSaf.tema} : ${journalpostRequest.tema}
                     lagret behandlingstema: ${journalPostFraSaf.behandlingstema} : ${journalpostRequest.behandlingstema}
-                    lagret opprettetDato:   ${journalPostFraS3.opprettet}""".trimIndent()
+                    lagret opprettetDato:   ${journalPostFraS3.opprettet}
+                    retning:                ${journalpostRequest.journalpostType}""".trimIndent()
                 )
             }
         }
