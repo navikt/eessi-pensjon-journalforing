@@ -55,6 +55,7 @@ class JournalforingService(
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
     private lateinit var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
@@ -140,7 +141,7 @@ class JournalforingService(
                 val journalPostResponse = journalPostResponseOgRequest.first
 
                 // ved utgående kan det være mulig å benytte info fra en tidligere journalpost
-                hendelseType.takeIf { it == SENDT }?.let { skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest) }
+                skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
@@ -235,11 +236,13 @@ class JournalforingService(
             val journalPostFraS3 = lagretJournalPost.second
 
             // todo: ersattes med ny journalpost som bruker tidligere lagret data
-            val brukOrginalJournalPost = (journalPostFraSaf.journalforendeEnhet != journalpostRequest.journalfoerendeEnhet?.enhetsNr ||
-                        journalPostFraSaf.tema != journalpostRequest.tema ||
-                        journalPostFraSaf.behandlingstema != journalpostRequest.behandlingstema)
-            logger.info(
-                """Hentet journalpost for ${sedHendelse.rinaSakId}. Journalpost gjenbrukes: $brukOrginalJournalPost
+            if(journalPostFraSaf.journalforendeEnhet != journalpostRequest.journalfoerendeEnhet?.enhetsNr ||
+                journalPostFraSaf.tema != journalpostRequest.tema ||
+                journalPostFraSaf.behandlingstema != journalpostRequest.behandlingstema)  {
+
+                secureLog.info(
+                    """Hentet journalpost for ${sedHendelse.rinaSakId}
+                    lagret bruker:          ${journalPostFraSaf.bruker} : ${journalpostRequest.bruker}
                     lagret JournalPostID:   ${journalPostFraSaf.journalpostId} : ${journalpostResponse?.journalpostId}
                     lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
                     lagret enhet:           ${journalPostFraSaf.journalforendeEnhet} : ${journalpostRequest.journalfoerendeEnhet?.enhetsNr} 
@@ -247,8 +250,8 @@ class JournalforingService(
                     lagret behandlingstema: ${journalPostFraSaf.behandlingstema} : ${journalpostRequest.behandlingstema}
                     lagret opprettetDato:   ${journalPostFraS3.opprettet}
                     retning:                ${journalpostRequest.journalpostType}""".trimIndent()
-
-            )
+                )
+            }
         }
         // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
         else if (journalpostResponse?.journalpostferdigstilt == true  && journalpostRequest.journalpostType == JournalpostType.UTGAAENDE){
