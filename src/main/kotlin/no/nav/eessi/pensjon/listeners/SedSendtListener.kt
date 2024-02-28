@@ -106,44 +106,34 @@ class SedSendtListener(
                             )
                             val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
-                            if (identifisertPerson == null && !saksIdFraSed.isNullOrEmpty())
-                                journalforingService.journalforUkjentPersonKjentPersysSakId(
-                                    sedHendelse,
-                                    SENDT,
-                                    fdato,
-                                    null,
-                                    saksIdFraSed
-                                )
-                            else {
-                                val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-                                val gjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
-                                val sakInformasjon = if (gjennySak) null else {
-                                    pensjonSakInformasjon(
-                                        identifisertPerson,
-                                        bucType,
-                                        sakTypeFraSED,
-                                        alleSedIBucList
-                                    )
-                                }
-                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
-                                val currentSed =
-                                    alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-
-                                journalforingService.journalfor(
-                                    sedHendelse,
-                                    SENDT,
+                            val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+                            val gjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
+                            val sakInformasjon = if (gjennySak) null else {
+                                pensjonSakInformasjon(
                                     identifisertPerson,
-                                    fdato,
-                                    saktype,
-                                    sakInformasjon,
-                                    currentSed,
-                                    harAdressebeskyttelse,
-                                    identifisertePersoner.count()
-                                        .also { logger.info("Antall identifisertePersoner: $it") },
-                                    navAnsattMedEnhet,
-                                    saksIdFraSed
+                                    bucType,
+                                    sakTypeFraSED,
+                                    alleSedIBucList
                                 )
                             }
+                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
+                            val currentSed =
+                                alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                SENDT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                sakInformasjon,
+                                currentSed,
+                                harAdressebeskyttelse,
+                                identifisertePersoner.count()
+                                    .also { logger.info("Antall identifisertePersoner: $it") },
+                                navAnsattMedEnhet,
+                                saksIdFraSed
+                            )
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")

@@ -116,38 +116,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medtildeltEnhetsnr("4475")
     }
 
-    @Test
-    fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medOppdaterDistribusjonsinfo()
-            .medStatusAvbrutt()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/161558",
-                HttpMethod.GET,
-                Buc(
-                    id = "12312312312452345624355",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
-            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-            .mockHttpRequestWithResponseFromFile( "/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_05_X008.json")
-
-        //verify route
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("X008")
-            .medtildeltEnhetsnr("4303")
-    }
-
     fun emptyResponse(): String {
         return """
             {

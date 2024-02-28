@@ -4,6 +4,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.journalpost.VurderAvbrutt
@@ -16,7 +17,6 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -100,12 +100,15 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
         justRun {journalpostKlient.settStatusAvbrutt(any()) }
 
-        journalforingService.journalforUkjentPersonKjentPersysSakId(
-            sedHendelse,
-            HendelseType.SENDT,
-            null,
-            null,
-            "123456"
+        journalforingService.journalfor(
+            sedHendelse = sedHendelse,
+            hendelseType = HendelseType.SENDT,
+            identifisertPerson = null,
+            fdato = null,
+            saktype = null,
+            sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE),
+            sed = null,
+            identifisertePersoner = 0
         )
 
         verify(exactly = 1) { journalpostKlient.settStatusAvbrutt(any()) }
@@ -278,50 +281,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             sed = SED(type = sedType),
             identifisertePersoner = identer.size
         )
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        SedType::class, names = [
-            "X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008", "X009", "X010",
-            "X013", "X050", "H001", "H002", "H020", "H021", "H070", "H120", "H121"
-        ]
-    )
-    fun `Sed av denne typen skal ikke journalfores med avbrutt`(sedType: SedType) {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")?.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse!!).copy(sedType = sedType)
-
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
-        )
-
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), sedType) } returns Pair("$sedType supported Documents", emptyList())
-
-        journalforingService.journalfor(
-            sedHendelse,
-            HendelseType.SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            SakType.ALDER,
-            null,
-            SED(type = sedType),
-            identifisertePersoner = 1,
-            navAnsattInfo = null,
-            gjennySakId = null
-        )
-        verify(exactly = 0) { journalpostKlient.settStatusAvbrutt("12345") }
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
-              "sedType" : "$sedType",
-              "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "4303",
-              "aktoerId" : "12078945602",
-              "rinaSakId" : "147729",
-              "hendelseType" : "SENDT",
-              "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
-        )
-        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
 
     private fun identifisertPDLPerson(): IdentifisertPDLPerson {

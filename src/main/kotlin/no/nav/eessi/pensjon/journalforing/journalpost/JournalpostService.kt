@@ -102,7 +102,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
     fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType, sedHendelse)){
+        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType)){
             journalpostKlient.settStatusAvbrutt(journalPostResponse.journalpostId)
             return true
         }

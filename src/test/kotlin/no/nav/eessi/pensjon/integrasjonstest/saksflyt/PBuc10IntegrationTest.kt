@@ -15,7 +15,6 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -425,7 +424,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunnerBarnUtenOppgave(FNR_VOKSEN_2, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = RelasjonTilAvdod.EKTEFELLE, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 //TODO: Kan vi finne en smartere måte å finne behandlingstema for tilfeller der person ikke er identifiserbar og SED har pesysSakid i seg
-                assertEquals(ALDERSPENSJON, it.behandlingstema)
+                assertEquals(GJENLEVENDEPENSJON, it.behandlingstema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
 

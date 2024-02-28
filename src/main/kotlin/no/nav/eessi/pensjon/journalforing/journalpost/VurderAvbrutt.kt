@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing.journalpost
 import no.nav.eessi.pensjon.eux.model.BucType.*
-import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -19,16 +18,6 @@ class VurderAvbrutt {
      * @param sedHendelse sed hendelse.
      * @return true om journalpost settes til avbrutt
      */
-    fun skalKanselleres(
-        identifiedPerson: IdentifisertPerson?,
-        hendelseType: HendelseType,
-        sedHendelse: SedHendelse
-    ): Boolean {
-        val statusToBeCanceled = identifiedPerson?.personRelasjon?.fnr == null &&
-                    hendelseType == SENDT &&
-                    sedHendelse.bucType !in bucsIkkeTilAvbrutt &&
-                    sedHendelse.sedType !in sedsIkkeTilAvbrutt
-
-        return statusToBeCanceled
-    }
+    fun skalKanselleres(identifiedPerson: IdentifisertPerson?, hendelseType: HendelseType)
+    = identifiedPerson?.personRelasjon?.fnr == null && hendelseType == SENDT
 }
