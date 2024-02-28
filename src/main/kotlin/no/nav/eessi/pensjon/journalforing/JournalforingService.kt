@@ -242,7 +242,8 @@ class JournalforingService(
 
                 secureLog.info(
                     """Hentet journalpost for ${sedHendelse.rinaSakId}
-                    lagret bruker:          ${journalPostFraSaf.bruker} : ${journalpostRequest.bruker}
+                    lagret bruker saf:      ${journalPostFraSaf.bruker} : 
+                                  sed:      ${journalpostRequest.bruker}
                     lagret JournalPostID:   ${journalPostFraSaf.journalpostId} : ${journalpostResponse?.journalpostId}
                     lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
                     lagret enhet:           ${journalPostFraSaf.journalforendeEnhet} : ${journalpostRequest.journalfoerendeEnhet?.enhetsNr} 
