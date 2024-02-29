@@ -18,6 +18,7 @@ class GcpStorageService(
     @param:Value("\${GCP_BUCKET_NAME_GJENNY}") var gjennyBucket: String,
     @param:Value("\${GCP_BUCKET_NAME_JOURNAL}") var journalBucket: String,
     private val gcpStorage: Storage) {
+    private val JOURNALPOST_DIR = journalBucket.plus("/MASKINELT-LAGRET-JOURNALPOSTER")
     private val logger = LoggerFactory.getLogger(GcpStorageService::class.java)
 
     init {
@@ -58,7 +59,7 @@ class GcpStorageService(
         return hent(storageKey, gjennyBucket)
     }
     fun hentFraJournal(storageKey: String): JournalpostDetaljer? {
-        return hent(storageKey, journalBucket)?.let { mapJsonToAny<JournalpostDetaljer>(it) }
+        return hent(storageKey, JOURNALPOST_DIR)?.let { mapJsonToAny<JournalpostDetaljer>(it) }
     }
 
     private fun hent(storageKey: String, bucketName: String): String? {
@@ -77,7 +78,7 @@ class GcpStorageService(
     fun lagreJournalpostDetaljer(journalpostId: String?, rinaSakId: String, rinaDokumentId: String, sedType: SedType?, eksternReferanseId: String) {
         val journalpostDetaljer = JournalpostDetaljer(journalpostId, rinaSakId, rinaDokumentId, sedType, eksternReferanseId)
         val blob = gcpStorage.create(
-            BlobInfo.newBuilder(journalBucket, rinaSakId)
+            BlobInfo.newBuilder(JOURNALPOST_DIR, rinaSakId)
                 .setContentType("application/json")
                 .build(),
             journalpostDetaljer.toJson().toByteArray()
