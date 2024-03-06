@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -117,6 +118,7 @@ class PersonidentifiseringService(
 
             val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {
                 secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $it")
+                validerResultatPdlMotSokeKriterier(it, personRelasjon)
             }
 
             person?.let { pdlPerson ->
@@ -135,6 +137,26 @@ class PersonidentifiseringService(
         } catch (ex: Exception) {
             logger.warn("Feil ved henting av person fra PDL (ep-personoppslag), fortsetter uten", ex)
             null
+        }
+    }
+
+    /**
+     * Validerer person fra PDL mot søkekriterer
+     */
+    private fun validerResultatPdlMotSokeKriterier( it: Person?, personRelasjon: SEDPersonRelasjon ) {
+        it?.navn?.fornavn?.let { fornavn ->
+            personRelasjon.sokKriterier?.fornavn?.let { sokFornavn ->
+                if (fornavn != sokFornavn) {
+                    logger.error("SøkPerson fra PDL gir forskjellig fornavn, sokKriterier: ${personRelasjon.sokKriterier!!.fornavn} : ${it.navn!!.fornavn}")
+                }
+            }
+        }
+        it?.navn?.etternavn?.let { etternavn ->
+            personRelasjon.sokKriterier?.etternavn?.let { sokEtternavn ->
+                if (etternavn != sokEtternavn) {
+                    logger.error("SøkPerson fra PDL gir forskjellig etternavn, sokKriterier: ${personRelasjon.sokKriterier!!.etternavn} : ${it.navn!!.etternavn}")
+                }
+            }
         }
     }
 
