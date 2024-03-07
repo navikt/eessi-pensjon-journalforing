@@ -17,9 +17,10 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -116,9 +117,9 @@ class PersonidentifiseringService(
                 return null
             }
 
-            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {
-                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $it")
-                validerResultatPdlMotSokeKriterier(it, personRelasjon)
+            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {pdlPerson ->
+                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $pdlPerson")
+                personRelasjon.sokKriterier?.let { sokKriteriePerson -> validerResultatPdlMotSokeKriterier(pdlPerson?.navn, sokKriteriePerson) }
             }
 
             person?.let { pdlPerson ->
@@ -143,22 +144,25 @@ class PersonidentifiseringService(
     /**
      * Validerer person fra PDL mot søkekriterer
      */
-    private fun validerResultatPdlMotSokeKriterier( it: Person?, personRelasjon: SEDPersonRelasjon ) {
-        it?.navn?.fornavn?.let { fornavn ->
-            personRelasjon.sokKriterier?.fornavn?.let { sokFornavn ->
-                if (fornavn != sokFornavn) {
-                    logger.error("SøkPerson fra PDL gir forskjellig fornavn, sokKriterier: ${personRelasjon.sokKriterier!!.fornavn} : ${it.navn!!.fornavn}")
-                }
-            }
-        }
-        it?.navn?.etternavn?.let { etternavn ->
-            personRelasjon.sokKriterier?.etternavn?.let { sokEtternavn ->
-                if (etternavn != sokEtternavn) {
-                    logger.error("SøkPerson fra PDL gir forskjellig etternavn, sokKriterier: ${personRelasjon.sokKriterier!!.etternavn} : ${it.navn!!.etternavn}")
-                }
+    fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
+        personNavn?.let { navn ->
+            if (erSokKriererOgPdlNavnLikt(sokKriterier, navn)) {
+                secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
+                        "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
+                )
             }
         }
     }
+
+
+    fun erSokKriererOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
+        val sokKriterieFornavn = sokKriterier.fornavn.contains(pdlPersonNavn.fornavn, ignoreCase = true)
+        val pdlPersonFornavn = pdlPersonNavn.fornavn.contains(sokKriterier.fornavn, ignoreCase = true)
+        val sokKriterieEtternavn = sokKriterier.etternavn.contains(pdlPersonNavn.etternavn, ignoreCase = true)
+        val pdlPersonEtternavn = pdlPersonNavn.etternavn.contains(sokKriterier.etternavn, ignoreCase = true)
+        return sokKriterieFornavn == pdlPersonFornavn && sokKriterieEtternavn == pdlPersonEtternavn
+    }
+
 
     fun hentIdentifisertePersoner(sedPersonRelasjoner: List<SEDPersonRelasjon>): List<IdentifisertPDLPerson> =
         sedPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
