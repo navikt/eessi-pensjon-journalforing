@@ -20,8 +20,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDENT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -619,7 +618,29 @@ class PersonidentifiseringServiceTest {
             assertEquals(ident, valid)
         }
 
+        @Test
+        fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`() {
+            val sokKriterier = SokKriterier("Ola", "Testing", LocalDate.of(1960, 3, 11))
+            val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
+
+            assertTrue(personidentifiseringService.erSokKriererOgPdlNavnLikt(sokKriterier, navn))
+        }
+
+        @Test
+        fun `Dersom fornavn og eller etternavn fra søkkriterie ikke stemmer overens med pdlperson sitt fornavn og eller etternavn saa returneres false`() {
+            val sokKriterier = SokKriterier("Ola", "Testinga", LocalDate.of(1960, 3, 11))
+            val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
+
+            assertFalse(personidentifiseringService.erSokKriererOgPdlNavnLikt(sokKriterier, navn))
+        }
     }
+
+    private fun metadata() = Metadata(
+        endringer = emptyList(),
+        historisk = false,
+        master = "PDL",
+        opplysningsId = "321654987"
+    )
 
     private fun mockIdentPerson(fnr: String = SLAPP_SKILPADDE, fdato: LocalDate? = LocalDate.of(1960, 3, 11)) : IdentifisertPDLPerson {
         return IdentifisertPDLPerson(
