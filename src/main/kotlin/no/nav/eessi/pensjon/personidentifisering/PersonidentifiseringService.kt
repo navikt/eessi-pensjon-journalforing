@@ -146,7 +146,7 @@ class PersonidentifiseringService(
      */
     fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
         personNavn?.let { navn ->
-            if (erSokKriererOgPdlNavnLikt(sokKriterier, navn)) {
+            if (erSokKriterieOgPdlNavnLikt(sokKriterier, navn)) {
                 secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
                         "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
                 )
@@ -155,12 +155,12 @@ class PersonidentifiseringService(
     }
 
 
-    fun erSokKriererOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
+    fun erSokKriterieOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
         val sokKriterieFornavn = sokKriterier.fornavn.contains(pdlPersonNavn.fornavn, ignoreCase = true)
         val pdlPersonFornavn = pdlPersonNavn.fornavn.contains(sokKriterier.fornavn, ignoreCase = true)
         val sokKriterieEtternavn = sokKriterier.etternavn.contains(pdlPersonNavn.etternavn, ignoreCase = true)
         val pdlPersonEtternavn = pdlPersonNavn.etternavn.contains(sokKriterier.etternavn, ignoreCase = true)
-        return sokKriterieFornavn == pdlPersonFornavn && sokKriterieEtternavn == pdlPersonEtternavn
+        return sokKriterieFornavn || pdlPersonFornavn && sokKriterieEtternavn || pdlPersonEtternavn
     }
 
 
