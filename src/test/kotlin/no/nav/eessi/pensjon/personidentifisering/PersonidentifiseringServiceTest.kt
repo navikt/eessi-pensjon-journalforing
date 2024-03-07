@@ -25,6 +25,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 
 class PersonidentifiseringServiceTest {
@@ -618,10 +620,16 @@ class PersonidentifiseringServiceTest {
             assertEquals(ident, valid)
         }
 
-        @Test
-        fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`() {
-            val sokKriterier = SokKriterier("Ola", "Testing", LocalDate.of(1960, 3, 11))
-            val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
+        @ParameterizedTest
+        @CsvSource(
+            "Ola , Testing, Ola, Testing",
+            "Ola Mariussen, Testing, Ola, Testing Mariussen",
+            "Ola, Testing, Ola, Mariussen Testing ",
+            "Ola Mariussen, Testing, Ola, Testing "
+            )
+        fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`(sokFornavn: String, sokEtternavn: String, pdlFornavn: String, pdlEtternavn: String) {
+            val sokKriterier = SokKriterier(sokFornavn, sokEtternavn, LocalDate.of(1960, 3, 11))
+            val navn = Navn(fornavn = pdlFornavn, etternavn = pdlEtternavn, metadata = metadata())
 
             assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
 
@@ -633,7 +641,7 @@ class PersonidentifiseringServiceTest {
 
         @Test
         fun `Dersom fornavn og eller etternavn fra søkkriterie ikke stemmer overens med pdlperson sitt fornavn og eller etternavn saa returneres false`() {
-            val sokKriterier = SokKriterier("Ola", "Testinga", LocalDate.of(1960, 3, 11))
+            val sokKriterier = SokKriterier("Ola", "Testifiserer", LocalDate.of(1960, 3, 11))
             val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
 
             assertFalse(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
