@@ -623,7 +623,12 @@ class PersonidentifiseringServiceTest {
             val sokKriterier = SokKriterier("Ola", "Testing", LocalDate.of(1960, 3, 11))
             val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
 
-            assertTrue(personidentifiseringService.erSokKriererOgPdlNavnLikt(sokKriterier, navn))
+            assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
+
+            val sokKriterier1 = SokKriterier("Ola Mariussen", "Testing", LocalDate.of(1960, 3, 11))
+            val navn1 = Navn(fornavn = "Ola", etternavn = "Testing Mariussen", metadata = metadata())
+
+            assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier1, navn1))
         }
 
         @Test
@@ -631,7 +636,7 @@ class PersonidentifiseringServiceTest {
             val sokKriterier = SokKriterier("Ola", "Testinga", LocalDate.of(1960, 3, 11))
             val navn = Navn(fornavn = "Ola", etternavn = "Testing", metadata = metadata())
 
-            assertFalse(personidentifiseringService.erSokKriererOgPdlNavnLikt(sokKriterier, navn))
+            assertFalse(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
         }
     }
 
