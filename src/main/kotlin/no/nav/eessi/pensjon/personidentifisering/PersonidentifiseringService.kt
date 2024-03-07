@@ -160,7 +160,7 @@ class PersonidentifiseringService(
         val pdlPersonFornavn = pdlPersonNavn.fornavn.contains(sokKriterier.fornavn, ignoreCase = true)
         val sokKriterieEtternavn = sokKriterier.etternavn.contains(pdlPersonNavn.etternavn, ignoreCase = true)
         val pdlPersonEtternavn = pdlPersonNavn.etternavn.contains(sokKriterier.etternavn, ignoreCase = true)
-        return sokKriterieFornavn || pdlPersonFornavn && sokKriterieEtternavn || pdlPersonEtternavn
+        return (sokKriterieFornavn || pdlPersonFornavn) && (sokKriterieEtternavn || pdlPersonEtternavn)
     }
 
 
