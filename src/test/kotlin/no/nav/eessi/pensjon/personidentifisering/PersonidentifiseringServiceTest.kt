@@ -624,8 +624,9 @@ class PersonidentifiseringServiceTest {
         @CsvSource(
             "Ola , Testing, Ola, Testing",
             "Ola Mariussen, Testing, Ola, Testing Mariussen",
-            "Ola, Testing, Ola, Mariussen Testing ",
-            "Ola Mariussen, Testing, Ola, Testing "
+            "Ola, Testing, Ola, Mariussen Testing",
+            "Ola Mariussen, Testing, Ola, Testing",
+            "Annette ,BRANGER, ANNETTE Mildred, BRANGER"
             )
         fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`(sokFornavn: String, sokEtternavn: String, pdlFornavn: String, pdlEtternavn: String) {
             val sokKriterier = SokKriterier(sokFornavn, sokEtternavn, LocalDate.of(1960, 3, 11))
