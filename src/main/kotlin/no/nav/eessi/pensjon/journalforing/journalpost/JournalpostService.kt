@@ -101,11 +101,26 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
+
+    /**
+     *  Ferdigstiller journalposten.
+     *
+     *  @param identifisertPerson: ID til journalposten som skal ferdigstilles.
+     *  @param hendelseType: SENDT eller MOTTATT.
+     *  @param sedHendelse: sed fra eux
+     *  @param journalPostResponse: response fra joark
+     */
     fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        if(journalPostResponse!= null && VurderAvbrutt().skalKanselleres(identifisertPerson, hendelseType)){
+        if (journalPostResponse == null || identifisertPerson?.personRelasjon?.fnr != null) {
+            logger.warn("Har ingen gyldig journalpost" + if (journalPostResponse != null) " - ${journalPostResponse.journalpostId} har fnr" else "")
+            return false
+        }
+
+        if (hendelseType == HendelseType.SENDT) {
             journalpostKlient.settStatusAvbrutt(journalPostResponse.journalpostId)
             return true
         }
+
         return false
     }
 

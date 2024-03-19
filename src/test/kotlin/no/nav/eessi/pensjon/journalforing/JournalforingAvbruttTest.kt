@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.journalforing.journalpost.VurderAvbrutt
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -35,11 +34,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { journalpostKlient.settStatusAvbrutt(any()) }
 
         journalfor(sedHendelse, sedType)
-        if (sedType in VurderAvbrutt().sedsIkkeTilAvbrutt) {
-            verify(atLeast = 0) { journalpostKlient.settStatusAvbrutt(any()) }
-        } else {
-            verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
-        }
+        verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
     }
 
     @ParameterizedTest
@@ -50,11 +45,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { journalpostKlient.settStatusAvbrutt(any()) }
 
         journalfor(sedHendelse, SedType.P8000)
-        if (buc in VurderAvbrutt().bucsIkkeTilAvbrutt) {
-            verify(atLeast = 0) { journalpostKlient.settStatusAvbrutt(any()) }
-        } else {
-            verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
-        }
+        verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
     }
 
     @Test
