@@ -119,7 +119,7 @@ class PersonidentifiseringService(
 
             val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {pdlPerson ->
                 secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $pdlPerson")
-                personRelasjon.sokKriterier
+                personRelasjon.sokKriterier?.let { sokKriteriePerson -> validerResultatPdlMotSokeKriterier(pdlPerson?.navn, sokKriteriePerson) }
             }
 
             person?.let { pdlPerson ->
@@ -144,15 +144,15 @@ class PersonidentifiseringService(
     /**
      * Validerer person fra PDL mot søkekriterer
      */
-//    fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
-//        personNavn?.let { navn ->
-//            if (erSokKriterieOgPdlNavnLikt(sokKriterier, navn)) {
-//                secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
-//                        "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
-//                )
-//            }
-//        }
-//    }
+    fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
+        personNavn?.let { navn ->
+            if (!erSokKriterieOgPdlNavnLikt(sokKriterier, navn)) {
+                secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
+                        "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
+                )
+            }
+        }
+    }
 
 
     fun erSokKriterieOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
