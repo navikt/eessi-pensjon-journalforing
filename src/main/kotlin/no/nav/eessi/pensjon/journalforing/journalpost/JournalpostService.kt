@@ -112,7 +112,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
         if (journalPostResponse == null || identifisertPerson?.personRelasjon?.fnr != null) {
-            logger.warn("Har ingen gyldig journalpost" + if (journalPostResponse != null) " - ${journalPostResponse.journalpostId} har fnr" else "")
+            logger.warn(if(journalPostResponse == null) "Har ingen gyldig journalpost" else "IdentifisertPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr")
             return false
         }
 
