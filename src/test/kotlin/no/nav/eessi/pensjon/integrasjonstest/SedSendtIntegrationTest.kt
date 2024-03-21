@@ -1,15 +1,15 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
@@ -48,7 +48,11 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun myBeforeEach() {
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+        every { gcpStorageService.hentFraJournal(any()) } returns null
+
     }
 
     @TestConfiguration
@@ -61,6 +65,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun gcpStorageService(): GcpStorageService = mockk<GcpStorageService>()
+
+        @Bean
+        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
     }
 
     @Test
@@ -77,68 +84,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    @Disabled
-    fun `Når en sedSendt hendelse blir konsumert skal det opprettes journalføringsoppgave for pensjon SEDer`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medStatusAvbrutt()
-            .medOppdaterDistribusjonsinfo()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/147666", HttpMethod.GET,
-                Buc(
-                    id = "147666",
-                    participants = emptyList<Participant>(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-NAV.json")
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",HttpMethod.GET,"/pdf/pdfResponseMedUgyldigVedlegg.json")
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
-
-        //verify route
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
-    }
-
-    @Test
-    fun `Når en SED (P2200) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medOppdaterDistribusjonsinfo()
-            .medStatusAvbrutt()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/148161",
-                HttpMethod.GET,
-                Buc(
-                    id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
-            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_03_P2200.json")
-
-        //then route to 4303
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("P2200")
-            .medtildeltEnhetsnr("4303")
-    }
-
-    @Test
     fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
         CustomMockServer()
@@ -147,7 +92,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
                 HttpMethod.GET,
                 Buc(
                     id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -169,39 +114,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medHendelsetype("SENDT")
             .medSedtype("P8000")
             .medtildeltEnhetsnr("4475")
-    }
-
-    @Disabled
-    @Test
-    fun `Når en sed (X008) hendelse blir konsumert skal det opprettes journalføringsoppgave`() {
-
-        //server setup
-        CustomMockServer()
-            .medJournalforing(false, "429434379")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .medOppdaterDistribusjonsinfo()
-            .medStatusAvbrutt()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/161558",
-                HttpMethod.GET,
-                Buc(
-                    id = "12312312312452345624355",
-                    participants = emptyList<Participant>(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile("/buc/161558/sed/44cb68f89a2f4e748934fb4722721018",HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json")
-            .mockHttpRequestWithResponseFromFile( "/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-            .mockHttpRequestWithResponseFromFile( "/buc/161558/sed/40b5723cd9284af6ac0581f3981f3044/filer",HttpMethod.GET,"/pdf/pdfResonseMedP2000MedVedlegg.json" )
-
-        meldingForSendtListener( "/eux/hendelser/P_BUC_05_X008.json")
-
-        //verify route
-        OppgaveMeldingVerification("429434379")
-            .medHendelsetype("SENDT")
-            .medSedtype("X008")
-            .medtildeltEnhetsnr("4303")
     }
 
     fun emptyResponse(): String {

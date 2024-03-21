@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.klienter.journalpost
 
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING

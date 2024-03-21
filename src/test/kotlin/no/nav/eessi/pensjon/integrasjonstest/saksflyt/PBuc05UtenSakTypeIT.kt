@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import no.nav.eessi.pensjon.models.Behandlingstema
-import no.nav.eessi.pensjon.models.Behandlingstema.*
-import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.*
+import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
+import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.logger
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle

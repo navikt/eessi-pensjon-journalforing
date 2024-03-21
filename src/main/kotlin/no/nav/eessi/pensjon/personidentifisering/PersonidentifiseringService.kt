@@ -1,22 +1,26 @@
 package no.nav.eessi.pensjon.personidentifisering
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.eessi.pensjon.eux.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelper
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.SedFnrSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Navn
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SokKriterier
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -27,43 +31,41 @@ import java.time.LocalDate
 @Component
 class PersonidentifiseringService(
     @Autowired private val personSok: PersonSok,
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val personService: PersonService,
+    private val personService: PersonService
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
     private val brukForikretPersonISed = listOf(H121, H120, H070)
 
     fun validateIdentifisertPerson(
-        identifisertPerson: IdentifisertPersonPDL,
+        identifisertPerson: IdentifisertPDLPerson,
         hendelsesType: HendelseType
-    ): IdentifisertPersonPDL? {
+    ): IdentifisertPDLPerson? {
         val personRelasjon = identifisertPerson.personRelasjon
-        val sedFnr = personRelasjon?.fdato
+        val sedFdato = personRelasjon?.fdato
         val pdlFdato = identifisertPerson.fdato
         val fnr = personRelasjon?.fnr
 
         secureLog.info("Validering av identifisert person $identifisertPerson ")
-        return if (hendelsesType == MOTTATT) {
-            val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
-                personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
-            } else {
-                pdlFdato == sedFnr
+        return when (hendelsesType) {
+            MOTTATT -> {
+                val isFnrDnrFdatoLikSedFdato = if (personRelasjon?.fnr?.erNpid != true) {
+                    personRelasjon?.isFnrDnrSinFdatoLikSedFdato()
+                } else pdlFdato == sedFdato
+
+                if (isFnrDnrFdatoLikSedFdato == true) {
+                    logger.info("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFdato, $hendelsesType")
+                    validerCounter("successful")
+                    identifisertPerson
+                } else {
+                    logger.warn("valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFdato, $hendelsesType")
+                    validerCounter("failed")
+                    null
+                }
             }
-            if (isFnrDnrFdatoLikSedFdato == true) {
-                logger.info(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.substring(0, 6)}, sed-fdato: $sedFnr, $hendelsesType"
-                )
-                validerCounter("successful")
+            SENDT -> {
                 identifisertPerson
-            } else {
-                logger.warn(
-                    "valider: $isFnrDnrFdatoLikSedFdato, fnr-dato: ${fnr?.value?.replaceRange(7, fnr.value.length, "★".repeat(fnr.value.length-7))}, sed-fdato: $sedFnr, $hendelsesType"
-                )
-                validerCounter("failed")
-                null
             }
-        } else {
-            identifisertPerson
         }
     }
 
@@ -80,9 +82,9 @@ class PersonidentifiseringService(
         sedType: SedType?,
         hendelsesType: HendelseType,
         rinaDocumentId: String,
-        identifisertePersoner: List<IdentifisertPersonPDL>,
+        identifisertePersoner: List<IdentifisertPDLPerson>,
         potensiellePersonRelasjoner: List<SEDPersonRelasjon>
-    ): IdentifisertPersonPDL? {
+    ): IdentifisertPDLPerson? {
 
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
@@ -97,16 +99,14 @@ class PersonidentifiseringService(
 
         logger.warn("Klarte ikke å finne identifisertPerson, prøver søkPerson")
         personSok.sokPersonEtterFnr(potensiellePersonRelasjoner, rinaDocumentId, bucType, sedType, hendelsesType)
-            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon, hendelsesType).also {
+            ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon).also {
                 secureLog.info("Henter person fra PDL $it")
             } }
 
         return null
     }
 
-    fun hentIdentifisertPersonFraPDL(
-        personRelasjon: SEDPersonRelasjon, hendelsesType: HendelseType
-    ): IdentifisertPersonPDL? {
+    fun hentIdentifisertPersonFraPDL( personRelasjon: SEDPersonRelasjon ): IdentifisertPDLPerson? {
 
         return try {
             logger.info("Henter person info fra pdl for relasjon: ${personRelasjon.relasjon}")
@@ -117,15 +117,22 @@ class PersonidentifiseringService(
                 return null
             }
 
-            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {
-                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $it")
+            val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {pdlPerson ->
+                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $pdlPerson")
+                personRelasjon.sokKriterier?.let { sokKriteriePerson -> validerResultatPdlMotSokeKriterier(pdlPerson?.navn, sokKriteriePerson) }
             }
 
-            person?.let {
-                populerIdentifisertPerson(
-                    person,
-                    personRelasjon,
-                    hendelsesType
+            person?.let { pdlPerson ->
+                logger.info("Populerer IdentifisertPerson for ${personRelasjon.relasjon} med data fra PDL sedType: ${personRelasjon.sedType}")
+
+                IdentifisertPDLPerson(
+                    aktoerId = pdlPerson.identer.firstOrNull { it.gruppe == AKTORID }?.ident ?: "",
+                    landkode = pdlPerson.landkode(),
+                    geografiskTilknytning = pdlPerson.geografiskTilknytning?.gtKommune ?: pdlPerson.geografiskTilknytning?.gtBydel,
+                    personRelasjon = personRelasjon.copy(fnr = Fodselsnummer.fra(pdlPerson.identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident)),
+                    personNavn = pdlPerson.navn?.run { "$fornavn $etternavn" },
+                    fdato = pdlPerson.foedsel?.foedselsdato,
+                    identer = pdlPerson.identer.map { it.ident},
                 )
             }.also { logger.info("Legger til identifisert person for aktorid: ${it?.aktoerId}") }
         } catch (ex: Exception) {
@@ -134,55 +141,39 @@ class PersonidentifiseringService(
         }
     }
 
-    fun hentIdentifisertePersoner(
-        alleSediBuc: List<Pair<String, SED>>,
-        bucType: BucType,
-        potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>,
-        hendelsesType: HendelseType,
-        rinaDocumentId: String
-    ): List<IdentifisertPersonPDL> {
-
-        val sedPersonRelasjoner = potensielleSEDPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
-        logger.info("Forsøker å identifisere personer ut fra følgende SED: ${sedPersonRelasjoner.map { "Relasjon: ${it.relasjon}, SED: ${it.sedType}" }}, BUC: $bucType")
-
-        return sedPersonRelasjoner
-            .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon, hendelsesType) }
-            .also { logger.info("liste over identifiserte personer etter filterering. Før:${potensielleSEDPersonRelasjoner.size}, etter: ${it.size}") }
+    /**
+     * Validerer person fra PDL mot søkekriterer
+     */
+    fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
+        personNavn?.let { navn ->
+            if (!erSokKriterieOgPdlNavnLikt(sokKriterier, navn)) {
+                secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
+                        "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
+                )
+            }
+        }
     }
 
-    private fun populerIdentifisertPerson(
-        person: Person,
-        sedPersonRelasjon: SEDPersonRelasjon,
-        hendelsesType: HendelseType
-    ): IdentifisertPersonPDL {
-        logger.info("Populerer IdentifisertPerson for ${sedPersonRelasjon.relasjon} med data fra PDL hendelseType: $hendelsesType")
 
-        val personNavn = person.navn?.run { "$fornavn $etternavn" }
-        val identer = person.identer
-        val aktoerId = identer.firstOrNull { it.gruppe == AKTORID }?.ident ?: ""
-        val personFnrEllerNpid = identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident
-        val geografiskTilknytning = person.geografiskTilknytning?.gtKommune ?: person.geografiskTilknytning?.gtBydel
-        val landkode = person.landkode()
-        val newPersonRelasjon = sedPersonRelasjon.copy(fnr = Fodselsnummer.fra(personFnrEllerNpid))
-
-        return IdentifisertPersonPDL(
-            aktoerId = aktoerId,
-            landkode = landkode,
-            geografiskTilknytning = geografiskTilknytning,
-            personRelasjon = newPersonRelasjon,
-            personNavn = personNavn,
-            fdato = person.foedsel?.foedselsdato
-        )
+    fun erSokKriterieOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
+        val sokKriterieFornavn = sokKriterier.fornavn.contains(pdlPersonNavn.fornavn, ignoreCase = true)
+        val pdlPersonFornavn = pdlPersonNavn.fornavn.contains(sokKriterier.fornavn, ignoreCase = true)
+        val sokKriterieEtternavn = sokKriterier.etternavn.contains(pdlPersonNavn.etternavn, ignoreCase = true)
+        val pdlPersonEtternavn = pdlPersonNavn.etternavn.contains(sokKriterier.etternavn, ignoreCase = true)
+        return (sokKriterieFornavn || pdlPersonFornavn) && (sokKriterieEtternavn || pdlPersonEtternavn)
     }
+
+
+    fun hentIdentifisertePersoner(sedPersonRelasjoner: List<SEDPersonRelasjon>): List<IdentifisertPDLPerson> =
+        sedPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
+            .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon) }
+            .also { logger.info("liste over identifiserte personer etter filterering. Før:${sedPersonRelasjoner.size}, etter: ${it.size}") }
 
     fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
-        val alleSedTyper = alleSediBuc.map { it.second.type }.toJson()
-        logger.info("Leter etter personer med adressebeskyttelse i : $alleSedTyper")
+        logger.info("Leter etter personer med adressebeskyttelse i : ${alleSediBuc.map { it.second.type }.toJson()}")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
-        val gradering =
-            listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        return personService.harAdressebeskyttelse(fnr, gradering)
+        return personService.harAdressebeskyttelse(fnr)
             .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }
 
@@ -190,11 +181,11 @@ class PersonidentifiseringService(
      * Forsøker å finne om identifisert person er en eller fler med avdød person
      */
     fun identifisertPersonUtvelger(
-        identifisertePersoner: List<IdentifisertPersonPDL>,
+        identifisertePersoner: List<IdentifisertPDLPerson>,
         bucType: BucType,
         sedType: SedType?,
         potensielleSEDPersonRelasjoner: List<SEDPersonRelasjon>
-    ): IdentifisertPersonPDL? {
+    ): IdentifisertPDLPerson? {
         logger.info("Antall identifisertePersoner : ${identifisertePersoner.size}, bucType: $bucType, sedType: $sedType")
 
         val forsikretPerson = brukForsikretPerson(sedType, identifisertePersoner)
@@ -243,9 +234,9 @@ class PersonidentifiseringService(
 
     //felles for P_BUC_05 og P_BUC_10
     private fun utvelgerPersonOgGjenlev(
-        identifisertePersoner: List<IdentifisertPersonPDL>,
+        identifisertePersoner: List<IdentifisertPDLPerson>,
         erGjenlevende: Boolean
-    ): IdentifisertPersonPDL? {
+    ): IdentifisertPDLPerson? {
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
         logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
@@ -266,8 +257,8 @@ class PersonidentifiseringService(
      */
     private fun brukForsikretPerson(
         sedType: SedType?,
-        identifisertePersoner: List<IdentifisertPersonPDL>
-    ): IdentifisertPersonPDL? {
+        identifisertePersoner: List<IdentifisertPDLPerson>
+    ): IdentifisertPDLPerson? {
         if (sedType in brukForikretPersonISed) {
             logger.info("Henter ut forsikret person fra følgende SED $sedType")
             return identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
@@ -281,14 +272,20 @@ class PersonidentifiseringService(
      * Sjekker alle SEDer, inkl kansellerte
      *
      */
-    fun hentFodselsDato(
-        identifisertPerson: IdentifisertPerson?, seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
+    fun hentFodselsDato(identifisertPerson: IdentifisertPDLPerson?, seder: List<SED>): LocalDate? {
 
         if( identifisertPerson?.personRelasjon?.fnr == null ){
-            return FodselsdatoHelper.fdatoFraSedListe(seder, kansellerteSeder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
+            return FodselsdatoHelper.fdatoFraSedListe(seder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
         }
 
-        return seder.plus(kansellerteSeder)
+        identifisertPerson.personRelasjon?.fnr?.value?.let {
+            if(identifisertPerson.identer?.contains(it) == true){
+                logger.info("Fødselsdato funnet i identifisert person sin personrelasjon")
+            }
+            else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
+        }
+
+        return seder
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }

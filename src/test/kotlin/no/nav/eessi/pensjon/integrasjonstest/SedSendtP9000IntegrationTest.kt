@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
@@ -10,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
@@ -56,7 +56,8 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun setupTest(){
-        every { gcpStorageService.eksisterer(any())} returns false
+        every { gcpStorageService.gjennyFinnes(any())} returns false
+        every { gcpStorageService.journalFinnes(any())} returns false
     }
 
     @TestConfiguration
@@ -66,11 +67,14 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
+
+        @Bean
+        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
     }
 
     @Test
     fun `Skal finne fødselsdato for 3 personer gitt en forsikret person i P9000 og to gjenlevende (P8000) `() {
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
                 FNR_VOKSEN_UNDER_62,

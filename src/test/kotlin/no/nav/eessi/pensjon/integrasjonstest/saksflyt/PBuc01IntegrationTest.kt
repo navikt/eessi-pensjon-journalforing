@@ -18,13 +18,13 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.HendelseKode
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType.BEHANDLE_SED
-import no.nav.eessi.pensjon.handler.OppgaveType.JOURNALFORING
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
+import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.BEHANDLE_SED
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
@@ -100,7 +100,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost og journalføringsoppgave`() {
+        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
             testRunnerVoksen(
@@ -117,10 +117,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
-                assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
-
+                verify { journalpostKlient.settStatusAvbrutt("429434378") }
             }
         }
 
@@ -277,7 +274,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Inngående sokPerson")
-    inner class InngaaendeSokPersonP_BUC_01 {
+    inner class InngaaendeSokPersonPBUC01 {
 
         @Test
         fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson finner person medfører maskinell journalføring`() {
@@ -402,7 +399,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
 
@@ -411,9 +408,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED))
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
-            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-            every { personService.harAdressebeskyttelse(any(), any()) } returns false
+            every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
@@ -455,7 +452,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
     @DisplayName("Utgående")
-    inner class UtgaaendeP_BUC_01 {
+    inner class UtgaaendePbuc01 {
 
         @Test
         fun `Krav om alderpensjon for utgående P2000 med NPID journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
@@ -691,12 +688,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         clearAllMocks()
     }
 
-    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
-
-    private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")
-        return mapJsonToAny(dokumentfilerJson)
-    }
+    private fun getDokumentfilerUtenGyldigVedlegg(): SedDokumentfiler =
+        mapJsonToAny(javaClass.getResource("/pdf/pdfResponseMedUgyldigVedlegg.json")!!.readText())
 
     data class TestResult(
         val opprettJournalpostRequest: OpprettJournalpostRequest,

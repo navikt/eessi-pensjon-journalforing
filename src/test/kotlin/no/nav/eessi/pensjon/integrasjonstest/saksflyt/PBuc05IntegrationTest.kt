@@ -1,39 +1,24 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.TIL_BEHANDLING
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GENRL
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.NFP_UTLAND_AALESUND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
-import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -45,7 +30,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -140,7 +124,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Utgående - Scenario 2")
     inner class Scenario2Utgaende {
-        @Disabled
         @Test
         fun `2 personer i SED, fnr og rolle mangler, men saksnummer finnes`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = SAK_ID) {
@@ -157,7 +140,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `2 personer i SED, mangler fnr og saksnummer, men rolle finnes`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = null) {
@@ -166,7 +148,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `2 personer i SED, mangler fnr, rolle, og sakId`() {
             testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = null, sakId = null) {
@@ -712,16 +693,16 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000_2 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null))
 
             val dokumenter = mapJsonToAny<List<ForenkletSED>>(javaClass.getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")!!.readText())
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
-            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000_2.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
+            every { euxKlient.hentSedJson(any(), any()) } returns sedP8000.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-            every { personService.harAdressebeskyttelse(any(), any()) } returns false
+            every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(afnr)) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR", aktorId = aktoera)
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Død", "Helt Død", "NOR", aktorId = aktoerf)
 

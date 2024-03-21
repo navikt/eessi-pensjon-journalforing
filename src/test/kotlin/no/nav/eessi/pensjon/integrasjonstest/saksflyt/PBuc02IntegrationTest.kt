@@ -11,9 +11,9 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
@@ -512,11 +512,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns bestemSak.sakInformasjonListe
         }
 
-//        every { journalpostService }
         val (journalpost, _) = initJournalPostRequestSlot()
-
         val hendelse = createHendelseJson(P2100, P_BUC_02)
-
         val meldingSlot = slot<String>()
 
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

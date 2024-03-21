@@ -3,13 +3,14 @@ package no.nav.eessi.pensjon.klienter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.eessi.pensjon.buc.EuxCacheableKlient
-import no.nav.eessi.pensjon.buc.EuxService
 import no.nav.eessi.pensjon.config.EuxCacheConfig
 import no.nav.eessi.pensjon.config.SED_CACHE
+import no.nav.eessi.pensjon.eux.EuxCacheableKlient
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
+import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -61,10 +62,23 @@ class EuxServiceCacheTest {
 
     @Test
     fun `hentSedMedGyldigStatus skal cache henting av SED og kun kalle ekstern API én gang pr sed`() {
-        val sedDataList = sedIds.map { sedId ->
-            ForenkletSED(id = sedId, status = SedStatus.SENT, type = SedType.P6000)
-        }
-        euxService.hentSedMedGyldigStatus(RINASAK_ID, sedDataList)
+        val buc = Buc(
+            id = RINASAK_ID,
+            processDefinitionName = "P_BUC_01",
+            documents = listOf(
+                DocumentsItem(
+                    id = "11111",
+                    type = SedType.P6000,
+                    status = SedStatus.SENT.name.lowercase()
+                ),
+                DocumentsItem(
+                    id = "22222",
+                    type = SedType.P6000,
+                    status = SedStatus.SENT.name.lowercase()
+                )
+            )
+        )
+        euxService.hentSedMedGyldigStatus(RINASAK_ID, buc)
         sedIds.distinct().forEach {
             verify(exactly = 1) {
                 euxRestTemplate.getForObject("/buc/${RINASAK_ID}/sed/$it", String::class.java)

@@ -4,7 +4,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_04
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -42,7 +42,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
         val sed = SED.generateSedToClass<SED>(createSed(SedType.P1000, fnr))
         initCommonMocks(sed)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(

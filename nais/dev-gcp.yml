@@ -24,6 +24,18 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
+        - host: saf-q2.dev-fss-pub.nais.io
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journal-dev
+        retentionPeriodDays: 40
+        lifecycleCondition:
+          age: 365
+          createdBefore: 2020-01-01
+          numNewerVersions: 2
+          withState: ANY
+        uniformBucketLevelAccess: true
+
   webproxy: true
   kafka:
     pool: nav-dev
@@ -32,7 +44,9 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
-    - name: GCP_BUCKET_NAME
+    - name: GCP_BUCKET_NAME_JOURNAL
+      value: eessi-pensjon-journal-dev
+    - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api-q2.dev-fss-pub.nais.io/cpi
@@ -40,6 +54,8 @@ spec:
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: JOURNALPOST_V1_URL
       value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: SAF_GRAPHQL_URL
+      value: https://saf-q2.dev-fss-pub.nais.io/graphql
     - name: EESSI_PENSJON_FAGMODUL_URL
       value: https://eessi-pensjon-fagmodul-q2.intern.dev.nav.no
     - name: NORG2_URL
@@ -74,6 +90,8 @@ spec:
       value: dev-fss.pdl.pdl-api
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
       value: dokarkiv
+    - name: AZURE_APP_SAF_CLIENT_ID
+      value: dev-fss.teamdokumenthandtering.saf
 
   image: {{ image }}
   ingresses:

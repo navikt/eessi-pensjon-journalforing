@@ -4,39 +4,39 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
-import no.nav.eessi.pensjon.buc.EuxCacheableKlient
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxCacheableKlient
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Klient
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.pdf.PDFService
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -68,9 +68,13 @@ internal class SedSendtJournalforingTest {
     private val navansattKlient = mockk<NavansattKlient>(relaxed = true)
     private val gcpStorageService = mockk<GcpStorageService>()
     private val jouralforingService =
-        JournalforingService(journalpostService, oppgaveRoutingService, mockk<PDFService>(relaxed = true).also {
-            every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
-        }, oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher)
+        JournalforingService(
+            journalpostService, oppgaveRoutingService,
+            mockk<PDFService>(relaxed = true).also {
+                every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
+            },
+            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, mockk()
+        )
 
     private val sedListener = SedSendtListener(
         jouralforingService,
@@ -103,7 +107,8 @@ internal class SedSendtJournalforingTest {
     @BeforeEach
     fun setup() {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
     }
 
     @Test
@@ -155,9 +160,10 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6,11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -219,11 +225,13 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
-        every { personidentifiseringService.hentIdentifisertePersoner(any(), any(), any(), any(), any()) } returns listOf(identifisertPerson)
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
-        every { gcpStorageService.eksisterer(rinaId) } returns false
+        every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { gcpStorageService.gjennyFinnes(rinaId) } returns false
+        every { gcpStorageService.journalFinnes(rinaId) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -232,7 +240,7 @@ internal class SedSendtJournalforingTest {
             journalpostferdigstilt = false,
         )
 
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns opprettJournalPostResponse
@@ -294,9 +302,10 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -358,9 +367,10 @@ internal class SedSendtJournalforingTest {
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any(), any()) } returns LocalDate.of(1971, 6, 11)
+        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -386,7 +396,7 @@ internal class SedSendtJournalforingTest {
         geografiskTilknytning: String? = "",
         fnr: Fodselsnummer? = null,
         personNavn: String = "Test Testesen"
-    ): IdentifisertPersonPDL =
-        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
+    ): IdentifisertPDLPerson =
+        IdentifisertPDLPerson(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
 
 }

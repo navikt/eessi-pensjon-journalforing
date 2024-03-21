@@ -57,6 +57,9 @@ class RestTemplateConfig(
     @Value("\${NAVANSATT_URL}")
     lateinit var navansattUrl: String
 
+    @Value("\${SAF_GRAPHQL_URL}")
+    lateinit var graphQlUrl: String
+
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
@@ -67,7 +70,8 @@ class RestTemplateConfig(
     fun norg2RestTemplate(): RestTemplate? = buildRestTemplate(norg2Url)
 
     @Bean
-    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoark(joarkUrl)
+    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoark(joarkUrl,
+        bearerTokenInterceptor(clientProperties("dokarkiv-credentials"), oAuth2AccessTokenService!!))
 
     @Bean
     fun fagmodulOidcRestTemplate(): RestTemplate = opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
@@ -78,11 +82,15 @@ class RestTemplateConfig(
     @Bean
     fun navansattRestTemplate(): RestTemplate? = opprettRestTemplate(navansattUrl, "navansatt-credentials")
 
+    @Bean
+    fun safGraphQlOidcRestTemplate() = opprettRestTemplateForJoark(graphQlUrl, bearerTokenInterceptor(
+        clientProperties("saf-credentials"), oAuth2AccessTokenService!!))
+
     /**
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse
      * problemer med HTTP-PATCH – som brukes mot joark.
      */
-    private fun opprettRestTemplateForJoark(url: String) : RestTemplate {
+    private fun opprettRestTemplateForJoark(url: String, bearerTokenInterceptor: ClientHttpRequestInterceptor) : RestTemplate {
         return RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
@@ -90,7 +98,7 @@ class RestTemplateConfig(
                 RequestIdHeaderInterceptor(),
                 IOExceptionRetryInterceptor(),
                 RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties("dokarkiv-credentials"), oAuth2AccessTokenService!!)
+                bearerTokenInterceptor
             )
             .build().apply {
                 requestFactory = HttpComponentsClientHttpRequestFactory()
@@ -134,7 +142,7 @@ class RestTemplateConfig(
     ): ClientHttpRequestInterceptor {
         return ClientHttpRequestInterceptor { request: HttpRequest, body: ByteArray?, execution: ClientHttpRequestExecution ->
             val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-            val tokenChunks = response?.accessToken!!.split(".")
+            val tokenChunks = response.accessToken!!.split(".")
             val tokenBody =  tokenChunks[1]
             logger.debug("subject: " + JWTClaimsSet.parse(Base64.getDecoder().decode(tokenBody).decodeToString()).subject + "/n + $response.accessToken")
 

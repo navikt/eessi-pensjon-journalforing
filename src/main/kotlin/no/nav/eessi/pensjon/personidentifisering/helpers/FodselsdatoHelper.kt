@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
-import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.eux.model.sed.P15000
@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.X005
 import no.nav.eessi.pensjon.eux.model.sed.X008
 import no.nav.eessi.pensjon.eux.model.sed.X010
-import no.nav.eessi.pensjon.models.sed.kanInneholdeIdentEllerFdato
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -28,8 +27,8 @@ class FodselsdatoHelper {
          *
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
-        fun fdatoFraSedListe(seder: List<SED>, kansellerteSeder: List<SED>): LocalDate? {
-            if (seder.isEmpty() && kansellerteSeder.isEmpty())
+        fun fdatoFraSedListe(seder: List<SED>): LocalDate? {
+            if (seder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
             val fdato = seder
@@ -41,14 +40,8 @@ class FodselsdatoHelper {
                 return fdato
             }
 
-            val kansellertfdato = kansellerteSeder
-                    .filter { it.type.kanInneholdeIdentEllerFdato() }
-                    .mapNotNull { filterFodselsdato(it) }
-                    .firstOrNull()
-
-            if (kansellertfdato != null) {
-                return kansellertfdato
-            } else if (sederUtenFdato(seder)) {
+            if (sederUtenFdato(seder)) {
+                logger.warn("Fant ingen fødselsdato i listen av SEDer (P15000 uten FNR)")
                 return null
             }
             throw RuntimeException("Fant ingen fødselsdato i listen av SEDer")

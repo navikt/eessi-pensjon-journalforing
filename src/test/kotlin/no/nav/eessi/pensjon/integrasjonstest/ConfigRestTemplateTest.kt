@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkBeans
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
@@ -14,11 +15,12 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
@@ -53,7 +55,9 @@ import org.springframework.web.client.RestTemplate
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
 )
 @MockkBeans(
+    MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
+    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
 )
 internal class ConfigRestTemplateTest {
 
@@ -75,9 +79,13 @@ internal class ConfigRestTemplateTest {
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
 
+    @MockkBean(relaxed = true)
+    private lateinit var safClient: SafClient
+
+
     @BeforeEach
     fun setup() {
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
                 JournalforingTestBase.FNR_VOKSEN_UNDER_62,
@@ -96,7 +104,8 @@ internal class ConfigRestTemplateTest {
                 )
         every { bestemSakKlient.kallBestemSak(any()) } returns mockk(relaxed = true)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { gcpStorageService.eksisterer(any())} returns false
+        every { gcpStorageService.gjennyFinnes(any())} returns false
+        every { gcpStorageService.journalFinnes(any())} returns false
     }
 
 
@@ -109,6 +118,7 @@ internal class ConfigRestTemplateTest {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),
@@ -123,9 +133,6 @@ internal class ConfigRestTemplateTest {
 
     @TestConfiguration
     class TestConfig {
-
-        @Bean
-        fun navansattRestTemplate(): RestTemplate = mockk(relaxed = true)
 
         @Bean
         @Primary

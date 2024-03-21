@@ -1,48 +1,71 @@
 package no.nav.eessi.pensjon.gcp
 
-import com.google.cloud.storage.Blob
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.cloud.storage.BlobId
+import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Component
 class GcpStorageService(
-    @param:Value("\${GCP_BUCKET_NAME}") var bucketname: String,
+    @param:Value("\${GCP_BUCKET_NAME_GJENNY}") var gjennyBucket: String,
+    @param:Value("\${GCP_BUCKET_NAME_JOURNAL}") var journalBucket: String,
     private val gcpStorage: Storage) {
     private val logger = LoggerFactory.getLogger(GcpStorageService::class.java)
 
     init {
-        ensureBucketExists()
+        ensureBucketExists(gjennyBucket)
+        ensureBucketExists(journalBucket)
     }
 
-    private fun ensureBucketExists() {
-        when (gcpStorage.get(bucketname) != null) {
-            false -> throw IllegalStateException("Fant ikke bucket med navn $bucketname. Må provisjoneres")
-            true -> logger.info("Bucket $bucketname funnet.")
+    private fun ensureBucketExists(bucketName: String) {
+        when (gcpStorage.get(bucketName) != null) {
+            false -> throw IllegalStateException("Fant ikke bucket med navn $bucketName. Må provisjoneres")
+            true -> logger.info("Bucket $bucketName funnet.")
         }
     }
 
-    fun eksisterer(storageKey: String): Boolean{
+    fun gjennyFinnes(storageKey: String) : Boolean{
+        return eksisterer(storageKey, gjennyBucket)
+    }
+    fun journalFinnes(storageKey: String) : Boolean{
+        return eksisterer(storageKey, journalBucket)
+    }
 
-        val obj = gcpStorage.get(BlobId.of(bucketname, storageKey))
+    private fun eksisterer(storageKey: String, bucketName: String): Boolean{
+
+        val obj = gcpStorage.get(BlobId.of(bucketName, storageKey))
 
         kotlin.runCatching {
-            obj.exists().also {logger.debug("sjekker om $storageKey finnes i bucket: $bucketname") }
+            obj.exists()
         }.onFailure {
         }.onSuccess {
+            logger.info("Henter melding for $storageKey fra $bucketName")
             return true
         }
+        logger.info("Melding for $storageKey finnes ikke for $bucketName")
         return false
     }
 
-    fun hent(storageKey: String): String? {
-        val jsonHendelse: Blob
+    fun hentFraGjenny(storageKey: String): String? {
+        return hent(storageKey, gjennyBucket)
+    }
+    fun hentFraJournal(storageKey: String): JournalpostDetaljer? {
+        return hent(storageKey, journalBucket)?.let { mapJsonToAny<JournalpostDetaljer>(it) }
+    }
+
+    private fun hent(storageKey: String, bucketName: String): String? {
         try {
-            jsonHendelse =  gcpStorage.get(BlobId.of(bucketname, storageKey))
+            val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
             if(jsonHendelse.exists()){
-                logger.info("Blob med key:$storageKey funnet")
+                logger.info("Henter journalpost med rinanr $storageKey")
                 return jsonHendelse.getContent().decodeToString()
             }
         } catch ( ex: Exception) {
@@ -51,7 +74,26 @@ class GcpStorageService(
         return null
     }
 
-    fun list(keyPrefix: String) : List<String> {
-        return gcpStorage.list(bucketname , Storage.BlobListOption.prefix(keyPrefix))?.values?.map { v -> v.name}  ?:  emptyList()
+    fun lagreJournalpostDetaljer(journalpostId: String?, rinaSakId: String, rinaDokumentId: String, sedType: SedType?, eksternReferanseId: String) {
+        val journalpostDetaljer = JournalpostDetaljer(journalpostId, rinaSakId, rinaDokumentId, sedType, eksternReferanseId)
+        val blob = gcpStorage.create(
+            BlobInfo.newBuilder(journalBucket, rinaSakId)
+                .setContentType("application/json")
+                .build(),
+            journalpostDetaljer.toJson().toByteArray()
+        )
+        logger.info("""Journalpostdetaljer lagret i bucket: 
+            | $journalBucket, med key: ${blob.name}
+            | innhold""".trimMargin() + journalpostDetaljer.toJson())
     }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class JournalpostDetaljer(
+    val journalpostId: String?,
+    val rinaSakId: String,
+    val rinaDokumentId: String,
+    val sedType: SedType?,
+    val eksternReferanseId: String,
+    val opprettet: LocalDateTime? = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+)

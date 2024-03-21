@@ -1,14 +1,14 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -72,28 +72,23 @@ class SedSendtListener(
                             return@measure
                         }
                         if (GyldigeHendelser.sendt(sedHendelse)) {
+                            if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
+                                logger.info("Utgående ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
+                            }
                             val bucType = sedHendelse.bucType!!
                             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
                             val navAnsattMedEnhet = navansattKlient.navAnsattMedEnhetsInfo(buc, sedHendelse)
 
-
                             logger.info("*** Starter utgående journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
-                            val alleGyldigeDokumenter = euxService.hentAlleGyldigeDokumenter(buc)
-                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
                             val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
-                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
 
                             //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
-                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(
-                                alleSedMedGyldigStatus,
-                                bucType,
-                                potensiellePersonRelasjoner,
-                                SENDT,
-                                sedHendelse.rinaSakId
-                            )
+                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
 
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
                                 bucType,
@@ -107,49 +102,38 @@ class SedSendtListener(
                             val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
                             val fdato = personidentifiseringService.hentFodselsDato(
                                 identifisertPerson,
-                                alleSedIBucList,
-                                kansellerteSeder
+                                alleSedIBucList.plus(kansellerteSeder)
                             )
                             val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
 
-                            if (identifisertPerson == null && !saksIdFraSed.isNullOrEmpty())
-                                journalforingService.journalforUkjentPersonKjentPersysSakId(
-                                    sedHendelse,
-                                    SENDT,
-                                    fdato,
-                                    null,
-                                    saksIdFraSed
-                                )
-                            else {
-                                val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-                                val gjennySak = gcpStorageService.eksisterer(sedHendelse.rinaSakId)
-                                val sakInformasjon = if (gjennySak) null else {
-                                    pensjonSakInformasjon(
-                                        identifisertPerson,
-                                        bucType,
-                                        sakTypeFraSED,
-                                        alleSedIBucList
-                                    )
-                                }
-                                val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
-                                val currentSed =
-                                    alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-
-                                journalforingService.journalfor(
-                                    sedHendelse,
-                                    SENDT,
+                            val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+                            val gjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
+                            val sakInformasjon = if (gjennySak) null else {
+                                pensjonSakInformasjon(
                                     identifisertPerson,
-                                    fdato,
-                                    saktype,
-                                    sakInformasjon,
-                                    currentSed,
-                                    harAdressebeskyttelse,
-                                    identifisertePersoner.count()
-                                        .also { logger.info("Antall identifisertePersoner: $it") },
-                                    navAnsattMedEnhet,
-                                    saksIdFraSed
+                                    bucType,
+                                    sakTypeFraSED,
+                                    alleSedIBucList
                                 )
                             }
+                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
+                            val currentSed =
+                                alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+
+                            journalforingService.journalfor(
+                                sedHendelse,
+                                SENDT,
+                                identifisertPerson,
+                                fdato,
+                                saktype,
+                                sakInformasjon,
+                                currentSed,
+                                harAdressebeskyttelse,
+                                identifisertePersoner.count()
+                                    .also { logger.info("Antall identifisertePersoner: $it") },
+                                navAnsattMedEnhet,
+                                saksIdFraSed
+                            )
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")

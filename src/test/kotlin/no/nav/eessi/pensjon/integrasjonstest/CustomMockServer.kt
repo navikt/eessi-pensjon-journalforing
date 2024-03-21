@@ -97,6 +97,15 @@ class CustomMockServer {
         )
     }
 
+    fun mockLagreJournalPostDetaljer() {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("POST")
+                .withPath("/journalpost/.*")
+        )
+
+    }
+
     /**
      * mocker journalføringresponse
      * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init

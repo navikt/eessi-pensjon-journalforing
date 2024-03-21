@@ -1,31 +1,38 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import no.nav.eessi.pensjon.automatisering.StatistikkMelding
-import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
+import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.*
+import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
+import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
-import no.nav.eessi.pensjon.oppgaverouting.*
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
-import no.nav.eessi.pensjon.pdf.PDFService
+import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.statistikk.StatistikkMelding
+import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -43,10 +50,12 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
+    private val safClient: SafClient,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
 
     private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
     private lateinit var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
@@ -76,11 +85,11 @@ class JournalforingService(
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: SakType?,
-        sakInformasjon: SakInformasjon?,
-        sed: SED?,
+        saktype: SakType? = null,
+        sakInformasjon: SakInformasjon? = null,
+        sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
-        identifisertePersoner: Int,
+            identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
         gjennySakId: String? = null
     ) {
@@ -115,7 +124,7 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
-                val journalPostResponse = journalpostService.opprettJournalpost(
+                val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
@@ -129,7 +138,13 @@ class JournalforingService(
                     tema = tema
                 )
 
-                val sattStatusAvbrutt = sattAvbrutt(
+                val journalPostResponse = journalPostResponseOgRequest.first
+
+                // ved utgående kan det være mulig å benytte info fra en tidligere journalpost
+                skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
+
+                // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
+                val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
                     identifisertPerson,
                     hendelseType,
                     sedHendelse,
@@ -205,7 +220,71 @@ class JournalforingService(
         }
     }
 
-    private fun loggDersomIkkeBehSedOppgaveOpprettes(
+    private fun skalJournalpostGjenbrukes(
+        sedHendelse: SedHendelse,
+        journalPostResponseOgRequest: Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest>
+    ) {
+        // henter lagret journalpost fra samme eux-rina-id hvis den eksisterer
+        val lagretJournalPost = hentJournalPostFraS3ogSaf(sedHendelse.rinaSakId)
+
+        val journalpostResponse = journalPostResponseOgRequest.first
+        val journalpostRequest = journalPostResponseOgRequest.second
+
+        // buc har en tidligere lagret journalpost som er ferdigstilt og skal benyttes som mal for neste
+        if (lagretJournalPost != null) {
+            val journalPostFraSaf = lagretJournalPost.first
+            val journalPostFraS3 = lagretJournalPost.second
+
+            // todo: ersattes med ny journalpost som bruker tidligere lagret data
+            if(journalPostFraSaf.journalforendeEnhet != journalpostRequest.journalfoerendeEnhet?.enhetsNr ||
+                journalPostFraSaf.tema != journalpostRequest.tema ||
+                journalPostFraSaf.behandlingstema != journalpostRequest.behandlingstema)  {
+
+                secureLog.info(
+                    """Hentet journalpost for ${sedHendelse.rinaSakId}
+                    lagret bruker saf:      ${journalPostFraSaf.bruker} : 
+                                  sed:      ${journalpostRequest.bruker}
+                    lagret JournalPostID:   ${journalPostFraSaf.journalpostId} : ${journalpostResponse?.journalpostId}
+                    lagret SED:             ${journalPostFraS3.sedType} : ${sedHendelse.sedType}
+                    lagret enhet:           ${journalPostFraSaf.journalforendeEnhet} : ${journalpostRequest.journalfoerendeEnhet?.enhetsNr} 
+                    lagret tema:            ${journalPostFraSaf.tema} : ${journalpostRequest.tema}
+                    lagret behandlingstema: ${journalPostFraSaf.behandlingstema} : ${journalpostRequest.behandlingstema}
+                    lagret opprettetDato:   ${journalPostFraS3.opprettet}
+                    retning:                ${journalpostRequest.journalpostType}""".trimIndent()
+                )
+            }
+        }
+        // buc har ingen lagret JP, men kan lagres da ferdigstilt er satt
+        else if (journalpostResponse?.journalpostferdigstilt == true  && journalpostRequest.journalpostType == JournalpostType.UTGAAENDE){
+            gcpStorageService.lagreJournalpostDetaljer(
+                journalpostResponse.journalpostId,
+                sedHendelse.rinaSakId,
+                sedHendelse.rinaDokumentId,
+                sedHendelse.sedType,
+                journalpostRequest.eksternReferanseId
+            )
+        }
+        // buc har ingen lagret JP, og heller ingen ferdgstilt
+        else {
+            logger.info("Journalpost ${journalpostResponse?.journalpostId} er ikke lagret, " +
+                    "men mangler info da ferdigstilt: ${journalpostResponse?.journalpostferdigstilt}")
+        }
+    }
+
+    fun hentJournalPostFraS3ogSaf(rinaSakId: String): Pair<JournalpostResponse, JournalpostDetaljer>? {
+        return try {
+            logger.info("Henter tilgjengelig informasjon fra GCP og SAF for buc: $rinaSakId")
+            val lagretHendelse = gcpStorageService.hentFraJournal(rinaSakId) ?: return null
+            val journalpostId = lagretHendelse.journalpostId ?: return null
+            val journalpostDetaljer = safClient.hentJournalpost(journalpostId) ?: return null
+            journalpostDetaljer to lagretHendelse
+        } catch (e: Exception) {
+            logger.error("Feiler under henting fra SAF: ${e.message}")
+            null
+        }
+    }
+
+    fun loggDersomIkkeBehSedOppgaveOpprettes(
         bucType: BucType?,
         sedHendelse: SedHendelse,
         journalpostferdigstilt: Boolean,
@@ -218,98 +297,6 @@ class JournalforingService(
         """.trimIndent()
     )
 
-    /**
-     *     Denne metoden blir kun brukt i behandlingen av utgående SEDer der person ikke er identifiserbar, men SEDen inneholder pesys sakId.
-     * 1.) Henter dokumenter og vedlegg
-     * 2.) Henter enhet
-     * 3.) Oppretter journalpost
-     * 4.) Lage journalførings-oppgave
-     * 5.) Hent oppgave-enhet
-     * 6.) Generer statisikk melding
-     */
-    fun journalforUkjentPersonKjentPersysSakId(
-        sedHendelse: SedHendelse,
-        hendelseType: HendelseType,
-        fdato: LocalDate?,
-        saktype: SakType?,
-        pesysSakId: String,
-    ) {
-        journalforOgOpprettOppgaveForSedMedUkjentPerson.measure {
-            try {
-                logger.info(
-                    """********** JOURNALFØRING FOR UKJENT PERSON MED KJENT PESYS SAKSID
-                    rinadokumentID: ${sedHendelse.rinaDokumentId} 
-                    rinasakID: ${sedHendelse.rinaSakId} 
-                    sedType: ${sedHendelse.sedType?.name} 
-                    bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, 
-                    pesysSakId: $pesysSakId, 
-                    sakType: ${saktype?.name}
-                **********""".trimIndent()
-                )
-
-                // Henter dokumenter
-                val (documents, uSupporterteVedlegg) = sedHendelse.run {
-                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
-                }
-
-                val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse.bucType!!, saktype, sedHendelse.navBruker, 0, sedHendelse.rinaSakId)
-
-                // Oppretter journalpost
-                val journalPostResponse = journalpostService.opprettJournalpost(
-                    sedHendelse = sedHendelse,
-                    fnr = null,
-                    sedHendelseType = hendelseType,
-                    journalfoerendeEnhet = ID_OG_FORDELING,
-                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, pesysSakId, null),
-                    dokumenter = documents,
-                    saktype = saktype,
-                    institusjon = institusjon,
-                    identifisertePersoner = 0,
-                    saksbehandlerInfo = null,
-                    tema = tema
-                )
-
-                oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(
-                    OppgaveMelding(
-                        sedHendelse.sedType,
-                        journalPostResponse?.journalpostId,
-                        ID_OG_FORDELING,
-                        null,
-                        sedHendelse.rinaSakId,
-                        hendelseType,
-                        null,
-                        OppgaveType.JOURNALFORING,
-                    )
-                )
-
-                if (uSupporterteVedlegg.isNotEmpty()) {
-                    opprettBehandleSedOppgave(
-                        null,
-                        ID_OG_FORDELING,
-                        null,
-                        sedHendelse,
-                        usupporterteFilnavn(uSupporterteVedlegg)
-                    )
-                }
-
-                produserStatistikkmelding(
-                    sedHendelse,
-                    oppgaveEierEnhet = ID_OG_FORDELING.name,
-                    saktype,
-                    hendelseType
-                )
-            } catch (ex: MismatchedInputException) {
-                logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
-                throw ex
-            } catch (ex: Exception) {
-                logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
-                throw ex
-            }
-        }
-    }
-
     private fun avsenderMottaker(
         hendelseType: HendelseType,
         sedHendelse: SedHendelse
@@ -321,28 +308,6 @@ class JournalforingService(
             else -> AvsenderMottaker(
                 sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand)
             )
-        }
-    }
-
-    private fun sattAvbrutt(
-        identifisertPerson: IdentifisertPerson?,
-        hendelseType: HendelseType,
-        sedHendelse: SedHendelse,
-        journalPostResponse: OpprettJournalPostResponse?
-    ): Boolean {
-        //Oppdaterer journalposten med status Avbrutt
-        val bucsIkkeTilAvbrutt = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
-        val sedsIkkeTilAvbrutt = listOf(X001, X002, X003, X004, X005, X006, X007, X008, X009, X010, X013, X050, H001, H002, H020, H021, H070, H120, H121)
-
-        val sattStatusAvbrutt =
-            if (identifisertPerson?.personRelasjon?.fnr == null && hendelseType == SENDT &&
-                sedHendelse.bucType !in bucsIkkeTilAvbrutt && sedHendelse.sedType !in sedsIkkeTilAvbrutt
-            ) {
-                journalpostService.settStatusAvbrutt(journalPostResponse!!.journalpostId)
-                true
-            } else false
-        return sattStatusAvbrutt.also {
-            logger.info("Journalpost settes til avbrutt == $it, $hendelseType, sedhendelse: ${sedHendelse.bucType}, journalpostId: ${journalPostResponse?.journalpostId}")
         }
     }
 
@@ -379,7 +344,18 @@ class JournalforingService(
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
             else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
-                .also { logEnhet(enhetFraRouting, it) }
+                .also {
+                    logEnhet(enhetFraRouting, it)
+                    metricsCounterForEnhet(it)
+                }
+        }
+    }
+
+    fun metricsCounterForEnhet(enhet: Enhet) {
+        try {
+            Metrics.counter("journalforingsEnhet_fra_tema", "type", enhet.name).increment()
+        } catch (e: Exception) {
+            logger.warn("Metrics feilet på enhet: $enhet")
         }
     }
 
@@ -419,7 +395,8 @@ class JournalforingService(
     ): Enhet {
         val tema = hentTema(sedHendelse?.bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, sedHendelse.rinaSakId)
         val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, antallIdentifisertePersoner)
-        logger.info("landkode: ${identifisertPerson.landkode} og behandlingstema: $behandlingstema")
+        logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
+
         return if (identifisertPerson.landkode == "NOR") {
             when (behandlingstema) {
                 GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND
@@ -437,7 +414,6 @@ class JournalforingService(
      * - uføre buc (P_BUC_03)
      * - saktype er UFØRETRYGD
      */
-    //TODO: Fikse sånn at denne håndterer både npid og fnr
     fun hentTema(
         bucType: BucType,
         saktype: SakType?,
@@ -445,8 +421,8 @@ class JournalforingService(
         identifisertePersoner: Int,
         euxCaseId: String
     ) : Tema {
-        return if (gcpStorageService.eksisterer(euxCaseId)) {
-            val blob = gcpStorageService.hent(euxCaseId)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
+            val blob = gcpStorageService.hentFraGjenny(euxCaseId)
             if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         } else {
             val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
@@ -463,7 +439,7 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return if (gcpStorageService.eksisterer(euxCaseId) && sakIdFraSed != null)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId,) && sakIdFraSed != null)
             Sak("FAGSAK", sakIdFraSed, "EY")
         else if (sakInformasjon?.sakId != null)
             Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")

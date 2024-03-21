@@ -1,11 +1,12 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.every
+import io.mockk.justRun
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,17 +42,19 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
 
     @BeforeEach
     fun setUp() {
-        every { gcpStorageService.eksisterer(any())} returns false
+        every { gcpStorageService.gjennyFinnes(any())} returns false
+        every { gcpStorageService.journalFinnes(any())} returns false
+        justRun{ gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any())}
     }
 
     @TestConfiguration
     class TestConfig {
         @Bean
         fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
-
         @Bean
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
-
+        @Bean
+        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
     }
 
     @Test
@@ -80,7 +83,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 HttpMethod.GET,
                 Buc(
                     id = "7477291",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
@@ -107,7 +110,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 "/buc/7477291",
                 HttpMethod.GET,Buc(
                     id = "7477291",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocuments_ugyldigFNR_ids.json")
                 ).toJson()
             )
@@ -142,7 +145,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                 "/buc/147666",
                 HttpMethod.GET,Buc(
                     id = "147666",
-                    participants = emptyList<Participant>(),
+                    participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )

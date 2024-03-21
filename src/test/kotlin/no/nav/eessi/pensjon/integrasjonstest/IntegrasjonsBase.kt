@@ -88,8 +88,6 @@ abstract class IntegrasjonsBase {
         mottattContainer.start()
         Thread.sleep(1000) // wait a bit for the container to start
 
-//        ContainerTestUtils.waitForAssignment(mottattContainer, 1)
-
         oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
         oppgaveContainer.start()
         ContainerTestUtils.waitForAssignment(oppgaveContainer, 2)
@@ -131,27 +129,22 @@ abstract class IntegrasjonsBase {
      */
     inner class OppgaveMeldingVerification(journalpostId: String) {
         val logsList: List<ILoggingEvent> = listAppender.list
-        val meldingFraLog =
-            logsList.find { message ->
-                message.message.contains("-oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") && message.message.contains(
-                    "\"journalpostId\" : \"$journalpostId\""
-                )
-            }?.message
+        val meldingFraLog = logsList.find { message ->
+            message.message.contains("-oppgave melding på kafka: eessi-pensjon-oppgave-v1  melding:") && message.message.contains(
+                "\"journalpostId\" : \"$journalpostId\""
+            )
+        }?.message ?: ""
 
         fun medtildeltEnhetsnr(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"tildeltEnhetsnr\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"tildeltEnhetsnr\" : \"$melding\""))
         }
 
         fun medSedtype(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"sedType\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"sedType\" : \"$melding\""))
         }
 
         fun medHendelsetype(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"hendelseType\" : \"$melding\""))
-        }
-
-        fun medAktorId(melding: String) = apply {
-            assertTrue(meldingFraLog!!.contains("\"aktoerId\" : \"$melding\""))
+            assertTrue(meldingFraLog.contains("\"hendelseType\" : \"$melding\""))
         }
     }
 

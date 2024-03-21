@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.*
-import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
+import io.mockk.justRun
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
@@ -9,41 +9,23 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
-import no.nav.eessi.pensjon.handler.OppgaveType
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostKlient
-import no.nav.eessi.pensjon.klienter.journalpost.JournalpostService
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.klienter.journalpost.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.pdf.PDFService
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPersonPDL
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
-import org.springframework.kafka.core.KafkaTemplate
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -51,311 +33,18 @@ import java.time.LocalDate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 
-internal class JournalforingServiceTest {
-
-    //TODO: SE OVER DENNE TESTEN OG SE OM DET ER MULIGHET FOR FORBERING
-
-    private val journalpostKlient = mockk<JournalpostKlient>()
-    private val journalpostService = JournalpostService(journalpostKlient)
-    private val pdfService = mockk<PDFService>()
-    private val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
-    private val kravHandeler = mockk<KravInitialiseringsHandler>()
-    private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
-    private val kravService = KravInitialiseringsService(kravHandeler)
-
-    private val norg2Service = mockk<Norg2Service> {
-        every { hentArbeidsfordelingEnhet(any()) } returns null
-    }
-    protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
-        every { sendDefault(any(), any()).get() } returns mockk()
-    }
-
-    private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
-    private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
-
-    private val journalforingService = JournalforingService(
-            journalpostService,
-            oppgaveRoutingService,
-            pdfService,
-            oppgaveHandler,
-            kravService,
-            gcpStorageService,
-            statistikkPublisher
-    )
+internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     private val fdato = LocalDate.now()
-    private val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
         private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
     }
 
-    @BeforeEach
-    fun setup() {
-        journalforingService.nameSpace = "test"
-
-        //MOCK RESPONSES
-        //every { journalpostService.bestemBehandlingsTema(any(), any(), any(), any()) } returns Behandlingstema.BARNEP
-        //PDF -
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2000) } returns Pair("P2000 Supported Documents", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2100) } returns Pair("P2100 Krav om etterlattepensjon", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P2200) } returns Pair("P2200 Supported Documents", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R004) } returns Pair("R004 - Melding om utbetaling", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.R005) } returns Pair("R005 - Anmodning om motregning i etterbetalinger (foreløpig eller endelig)", emptyList())
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), SedType.P15000) } returns Pair("P15000 - Overføring av pensjonssaker til EESSI (foreløpig eller endelig)", emptyList())
-
-        //every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
-        val opprettJournalPostResponse = OpprettJournalPostResponse(
-            journalpostId = "12345",
-            journalstatus = "EKSPEDERT",
-            melding = "",
-            journalpostferdigstilt = false,
-        )
-
-        every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
-
-
-        //JOURNALPOST OPPRETT JOURNALPOST
-//        every {
-//            journalpostService.opprettJournalpost(
-//                sedHendelse = any(),
-//                fnr = any(),
-//                sedHendelseType = any(),
-//                journalfoerendeEnhet = any(),
-//                arkivsaksnummer = any(),
-//                dokumenter = any(),
-//                saktype = any(),
-//                institusjon = any(),
-//                identifisertePersoner = any(),
-//                saksbehandlerInfo(),
-//                any()
-//            )
-//        } returns OpprettJournalPostResponse("123", "null", null, false)
-    }
-
-    @Test
-    fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
-            "NOR"
-        )
-
-        justRun { journalpostKlient.settStatusAvbrutt(eq("12345")) }
-
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2200),
-            identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-//        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-//        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
-
-        verify { journalpostKlient.settStatusAvbrutt(journalpostId = "12345") }
-    }
-
-    @Test
-    fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal ikke status settes til avbrutt og journalpost samt JFR oppgave opprettes`() {
-        val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
-
-        val oppgaveSlot = slot<OppgaveMelding>()
-        justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
-
-        journalforingService.journalforUkjentPersonKjentPersysSakId(
-            sedHendelse,
-            SENDT,
-            null,
-            null,
-            "123456"
-        )
-
-        verify(exactly = 0) { journalpostService.settStatusAvbrutt(any()) }
-//        verify(exactly = 1) { journalpostService.opprettJournalpost(
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any(),
-//            any()
-//        ) }
-        assertEquals(OppgaveType.JOURNALFORING, oppgaveSlot.captured.oppgaveType)
-    }
-
-    @Test
-    fun `Sendt sed P2000 med ukjent fnr SED inneholder IKKE pesys saksId saa skal ikke status settes til avbrutt og journalpost opprettes`() {
-        val sedHendelse = mockedSedHendelse(P_BUC_01, SedType.P2000)
-
-        justRun { journalpostKlient.settStatusAvbrutt(any()) }
-
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2000),
-            identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-        verify(atLeast = 1) { journalpostKlient.settStatusAvbrutt(any()) }
-        verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
-        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
-    }
-
-    @Test
-    fun `Sendt sed P2200 med ukjent fnr med saksinfo der sakid er null så skal status settes til avbrutt`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
-
-        justRun { journalpostKlient.settStatusAvbrutt(any()) }
-        val sakInformasjonMock = mockk<SakInformasjon>().apply {
-            every { sakId } returns null
-            every { sakType } returns ALDER
-        }
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            sakInformasjonMock,
-            SED(type = SedType.P2200),
-            identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-
-        verify(exactly = 1) { journalpostService.settStatusAvbrutt(any()) }
-    }
-
-    @Test
-    fun `Mottatt sed P2200 med ukjent fnr skal ikke sette status avbrutt`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
-            "NOR"
-        )
-
-        journalforingService.journalfor(
-            sedHendelse,
-            MOTTATT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2200),
-            identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-
-        verify(exactly = 0) { journalpostService.settStatusAvbrutt(journalpostId = "123") }
-
-    }
-
-    @Test
-    fun `Utgaaende sed P2200 med ukjent fnr skal sette status avbrutt og opprette behandle-sed oppgave`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            SEDPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
-            "NOR"
-        )
-        justRun { journalpostKlient.settStatusAvbrutt(eq("12345"))}
-
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2200),
-            identifisertePersoner = 0,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
-
-        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
-
-    }
-
-    @Test
-    fun `Utgaaende sed P2200 med kjent fnr skal status ikke settes til avbrutt og vi skal opprette journalfoerings oppgave`() {
-        val hendelse = """
-            {
-              "id": 1869,
-              "sedId": "P2100_b12e06dda2c7474b9998c7139c841646_2",
-              "sektorKode": "P",
-              "bucType": "P_BUC_02",
-              "rinaSakId": "147730",
-              "avsenderId": "NO:NAVT003",
-              "avsenderNavn": "NAVT003",
-              "avsenderLand": "NO",
-              "mottakerId": "NO:NAVT007",
-              "mottakerNavn": "NAV Test 07",
-              "mottakerLand": "NO",
-              "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
-              "rinaDokumentVersjon": "2",
-              "sedType": "P2100",
-              "navBruker": "22117320034"
-            }
-        """.trimIndent()
-
-        val sedHendelse = SedHendelse.fromJson(hendelse)
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            SEDPersonRelasjon(Fodselsnummer.fra("22117320034"), Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
-            "NOR"
-        )
-
-        //val journalPostResponse = OpprettJournalPostResponse("","","",false)
-
-        //every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns journalPostResponse
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LocalDate.of(1973,11,22),
-            null,
-            null,
-            SED(type = SedType.P2200),
-            identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-        assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
-
-        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
-
-    }
-
     @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = identifisertPersonPDL(
@@ -372,59 +61,13 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R004),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
-    @ParameterizedTest
-    @EnumSource(
-        BucType::class, names = [
-            "R_BUC_02"
-        ]
-    )
-    fun `Buc av denne typen skal ikke journalfores med avbrutt`(bucType: BucType) {
-        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json").readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = bucType)
-
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
-        )
-
-        every { gcpStorageService.eksisterer(any()) } returns false
-
-        val mox = journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            ALDER,
-            null,
-            SED(type = SedType.R004),
-            identifisertePersoner = 1,
-            navAnsattInfo = null,
-            gjennySakId = null
-        )
-
-        println(mox)
-
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
-              "sedType" : "R004",
-              "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "4303",
-              "aktoerId" : "12078945602",
-              "rinaSakId" : "2536475861",
-              "hendelseType" : "SENDT",
-              "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING",
-              "tema" : "PEN"
-              }""".trimIndent()
-        )
-        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
-    }
 
     @Test
     fun `Ved mottatt P2000 som kan automatisk ferdigstilles så skal det opprettes en Behandle SED oppgave`() {
@@ -448,7 +91,7 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -489,7 +132,7 @@ internal class JournalforingServiceTest {
             null,
             sed,
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -506,51 +149,6 @@ internal class JournalforingServiceTest {
               }""".trimIndent()
         )
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        SedType::class, names = [
-            "X001", "X002", "X003", "X004", "X005", "X006", "X007", "X008", "X009", "X010",
-            "X013", "X050", "H001", "H002", "H020", "H021", "H070", "H120", "H121"
-        ]
-    )
-    fun `Sed av denne typen skal ikke journalfores med avbrutt`(sedType: SedType) {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")?.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse!!).copy(sedType = sedType)
-
-        val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(null, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
-        )
-
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), sedType) } returns Pair("$sedType supported Documents", emptyList())
-
-        journalforingService.journalfor(
-            sedHendelse,
-            SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            ALDER,
-            null,
-            SED(type = sedType),
-            identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null
-        )
-        verify (exactly = 0){ journalpostService.settStatusAvbrutt(any()) }
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
-              "sedType" : "$sedType",
-              "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "4303",
-              "aktoerId" : "12078945602",
-              "rinaSakId" : "147729",
-              "hendelseType" : "SENDT",
-              "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING"}""".trimIndent()
-        )
-        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
-
     }
 
     @Test
@@ -573,7 +171,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -600,7 +198,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -635,7 +233,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.R005),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -645,7 +243,7 @@ internal class JournalforingServiceTest {
 
     @Test
     fun `Sendt gyldig Sed P2000`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json").readText()
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
@@ -655,7 +253,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -675,7 +273,7 @@ internal class JournalforingServiceTest {
         journalforingService.journalfor(
             sedHendelse, SENDT, identifisertPerson, LEALAUS_KAKE.getBirthDate(), null, null, SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -702,7 +300,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(UFORE_UTLANDSTILSNITT, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -727,7 +325,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -754,7 +352,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -780,7 +378,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -806,7 +404,7 @@ internal class JournalforingServiceTest {
             ALDER,
             null,
             SED(type = SedType.P2100), identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -832,7 +430,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -858,7 +456,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P15000),
             identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -886,7 +484,7 @@ internal class JournalforingServiceTest {
             sakInformasjon,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -937,7 +535,7 @@ internal class JournalforingServiceTest {
             saksInfo,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -966,7 +564,7 @@ internal class JournalforingServiceTest {
             sakInformasjon,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -996,7 +594,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -1024,7 +622,7 @@ internal class JournalforingServiceTest {
             null,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -1073,7 +671,7 @@ internal class JournalforingServiceTest {
             saksInfo,
             SED(type = SedType.P2100),
             identifisertePersoner = 2,
-            navAnsattInfo = navAnsattInfo(),
+            navAnsattInfo = null,
             gjennySakId = null
         )
 
@@ -1149,30 +747,5 @@ internal class JournalforingServiceTest {
         val result = journalforingService.hentTema(BucType.P_BUC_05, UFOREP, LEALAUS_KAKE,  1, RINADOK_ID)
         assertEquals(Tema.UFORETRYGD, result)
     }
-
-    private fun saksbehandlerInfo(): Pair<String, Enhet?>? = null
-
-    fun mockedSedHendelse(buc: BucType, sed: SedType) : SedHendelse{
-        return mockk<SedHendelse>(relaxed = true).apply {
-            every { bucType } returns buc
-            every { sedType } returns sed
-        }
-    }
-
-    fun identifisertPersonPDL(
-        aktoerId: String = AKTOERID,
-        personRelasjon: SEDPersonRelasjon?,
-        landkode: String? = "",
-        geografiskTilknytning: String? = "",
-        fnr: Fodselsnummer? = null,
-        personNavn: String = "Test Testesen"
-    ): IdentifisertPersonPDL =
-        IdentifisertPersonPDL(aktoerId, landkode, geografiskTilknytning, personRelasjon, fnr, personNavn = personNavn)
-
-    fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
-        SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
-
-    private fun navAnsattInfo(): Pair<String, Enhet?>? = null
-
 
 }

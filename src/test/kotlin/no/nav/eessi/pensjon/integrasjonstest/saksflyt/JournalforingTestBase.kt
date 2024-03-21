@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
-import no.nav.eessi.pensjon.automatisering.StatistikkPublisher
-import no.nav.eessi.pensjon.buc.EuxCacheableKlient
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxCacheableKlient
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
@@ -14,35 +13,40 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.handler.BehandleHendelseModel
-import no.nav.eessi.pensjon.handler.KravInitialiseringsHandler
-import no.nav.eessi.pensjon.handler.OppgaveHandler
-import no.nav.eessi.pensjon.handler.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.KravInitialiseringsService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulKlient
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.journalpost.*
-import no.nav.eessi.pensjon.klienter.navansatt.NavansattKlient
-import no.nav.eessi.pensjon.klienter.norg2.Norg2Service
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.journalforing.JournalpostType
+import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
-import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingService
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
-import no.nav.eessi.pensjon.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.AfterEach
@@ -110,8 +114,9 @@ internal open class JournalforingTestBase {
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
+        gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        gcpStorageService = gcpStorageService
+        mockk()
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -128,7 +133,8 @@ internal open class JournalforingTestBase {
         euxService = euxService,
         fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
-        profile = "test",
+        gcpStorageService = gcpStorageService,
+        profile = "test"
     )
     protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
@@ -146,7 +152,7 @@ internal open class JournalforingTestBase {
     fun setup() {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
-        every { gcpStorageService.eksisterer(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
     }
 
     @AfterEach
@@ -161,7 +167,6 @@ internal open class JournalforingTestBase {
      * @param fnrAnnenPerson: Annen person sitt fnr.
      * @param saker: En liste med saker som skal returneres på søkeren sin aktørId. (Default = emptyList())
      * @param sakId: SakID tilknyttet bestemt sak som skal uthentes. (Default = [SAK_ID])
-     * @param diskresjonkode: Diskresjonskoden knyttet til annen person. (Default = null)
      * @param land: Landet personene tilhører. Kan kun spesifisere én som brukes på alle. (Default = "NOR")
      * @param rolle: Rollen tilknyttet [fnrAnnenPerson]. Kan være "01", "02", eller "03".
      * @param assertBlock: En [Unit] for å kjøre assertions/validering på [OpprettJournalpostRequest]
@@ -181,7 +186,7 @@ internal open class JournalforingTestBase {
         val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
         initCommonMocks(sed)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns harAdressebeskyttelse
+        every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
 
 
@@ -220,12 +225,11 @@ internal open class JournalforingTestBase {
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else
+        else {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
-        // forvent tema == PEN og enhet 2103
-        val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
-        assertEquals(hendelseType, oppgaveMelding.hendelseType)
+            // forvent tema == PEN og enhet 2103
+            assertEquals(hendelseType, mapJsonToAny<OppgaveMelding>(meldingSlot.captured).hendelseType)
+        }
 
         val request = journalpost.captured
 
@@ -270,7 +274,7 @@ internal open class JournalforingTestBase {
         val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
         initCommonMocks(sed, bucType = bucType)
 
-        every { personService.harAdressebeskyttelse(any(), any()) } returns false
+        every { personService.harAdressebeskyttelse(any()) } returns false
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
@@ -379,7 +383,7 @@ internal open class JournalforingTestBase {
 
 
     fun getDokumentfilerUtenVedlegg(): SedDokumentfiler {
-        val dokumentfilerJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        val dokumentfilerJson = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json")!!.readText()
         return mapJsonToAny(dokumentfilerJson)
     }
 
@@ -398,13 +402,11 @@ internal open class JournalforingTestBase {
     }
 
     fun initCommonMocks(sed: SED, documents: List<ForenkletSED>? = null, bucType: BucType = P_BUC_01) {
-        val docs = documents ?: mapJsonToAny(getResource("/fagmodul/alldocumentsids.json"))
-        val dokumentVedleggJson = getResource("/pdf/pdfResponseUtenVedlegg.json")
+        val docs = documents ?: mapJsonToAny(javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText())
+        val dokumentVedleggJson = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json")!!.readText()
         val dokumentFiler = mapJsonToAny<SedDokumentfiler>(dokumentVedleggJson)
         initCommonMocks(sed, docs, dokumentFiler, bucType = bucType)
     }
-
-    private fun getResource(resourcePath: String): String = javaClass.getResource(resourcePath).readText()
 
     fun createBrukerWith(
         fnr: String?,
@@ -621,11 +623,5 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
-
-    fun hentEsssisaknr(bestemSak: BestemSakResponse?): String? = if (bestemSak?.sakInformasjonListe?.size == 1) {
-            bestemSak.sakInformasjonListe.first().sakId
-        } else {
-            null
-        }
 
 }

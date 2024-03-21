@@ -1,12 +1,13 @@
 package no.nav.eessi.pensjon.listeners
 
-import no.nav.eessi.pensjon.buc.EuxService
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.klienter.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.klienter.pesys.BestemSakService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
+import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -24,12 +25,13 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 
 @Service
-class SedMottattListener (
+class SedMottattListener(
     private val journalforingService: JournalforingService,
     private val personidentifiseringService: PersonidentifiseringService,
     private val euxService: EuxService,
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
+    val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) : SedListenerBase(fagmodulService, bestemSakService) {
@@ -66,8 +68,6 @@ class SedMottattListener (
 
                         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-//
-
                         if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
                             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
                             acknowledgment.acknowledge()
@@ -76,20 +76,22 @@ class SedMottattListener (
                         logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
+                            if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId,)) {
+                                logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
+                            }
                             val bucType = sedHendelse.bucType!!
                             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
                             logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
 
-                            val alleGyldigeDokumenter = euxService.hentAlleGyldigeDokumenter(buc)
-                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, alleGyldigeDokumenter)
-                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, alleGyldigeDokumenter)
+                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
+                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
 
                             val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
 
                             //identifisere Person hent Person fra PDL valider Person
                             val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
-                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(alleSedMedGyldigStatus, bucType, potensiellePersonRelasjoner, MOTTATT, sedHendelse.rinaSakId)
+                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
 
                             val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
                                 bucType,
@@ -101,7 +103,7 @@ class SedMottattListener (
                             )
 
                             val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList, kansellerteSeder)
+                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
                             val saktypeFraSed = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
                             val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)

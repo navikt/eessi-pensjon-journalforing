@@ -1,11 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
-import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
+import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.journalforing.krav.validerForKravinit
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
