@@ -73,6 +73,7 @@ class OppgaveRoutingService(private val norg2Service: Norg2Service) {
             oppgave.saktype
         )
         return norg2Service.hentArbeidsfordelingEnhet(norgKlientRequest)
+
     }
 
     private fun finnEnhetFor(oppgave: OppgaveRoutingRequest) =
