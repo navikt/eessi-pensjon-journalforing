@@ -91,7 +91,7 @@ spec:
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.dokarkiv-q1
     - name: AZURE_APP_SAF_CLIENT_ID
-      value: dev-fss.teamdokumenthandtering.saf
+      value: dev-fss.teamdokumenthandtering.saf-q1
 
   image: {{ image }}
   ingresses:
