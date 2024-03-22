@@ -47,6 +47,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         }
     }
 }
-fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null
-        && nav?.bruker?.person?.statsborgerskap != null
-        && nav?.bruker?.person?.sivilstand?.filter { it.fradato == null }.isNullOrEmpty())
+fun P2000.validerForKravinit()  = nav?.bruker?.person?.let {
+    it.statsborgerskap != null && it.sivilstand?.none { sivil -> sivil.fradato == null } == true
+} ?: false

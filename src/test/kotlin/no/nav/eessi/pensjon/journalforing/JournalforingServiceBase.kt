@@ -28,7 +28,7 @@ abstract class JournalforingServiceBase {
     val journalpostKlient = mockk<JournalpostKlient>()
     val journalpostService = JournalpostService(journalpostKlient)
     val pdfService = mockk<PDFService>()
-    val oppgaveHandler = mockk<OppgaveHandler>(relaxUnitFun = true)
+    val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     val kravHandeler = mockk<KravInitialiseringsHandler>()
     val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     val kravService = KravInitialiseringsService(kravHandeler)
