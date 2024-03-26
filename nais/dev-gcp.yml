@@ -8,8 +8,6 @@ metadata:
 spec:
   envFrom:
     - secret: journalforing-dev
-  secureLogs:
-    enabled: false
   azure:
     application:
       enabled: true
