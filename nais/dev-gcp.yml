@@ -9,7 +9,7 @@ spec:
   envFrom:
     - secret: journalforing-dev
   secureLogs:
-    enabled: false
+    enabled: true
   azure:
     application:
       enabled: true
