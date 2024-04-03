@@ -421,13 +421,14 @@ class JournalforingService(
         identifisertePersoner: Int,
         euxCaseId: String
     ) : Tema {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
+        if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val blob = gcpStorageService.hentFraGjenny(euxCaseId)
-            if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+            if (blob?.contains("BARNEP") == true) return EYBARNEP else return OMSTILLING
         } else {
-            val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
-            if (saktype == SakType.UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD
+            return if (bucType == P_BUC_03 || saktype == SakType.UFOREP) UFORETRYGD
+            else if (bucType in listOf(P_BUC_01, P_BUC_02)) PENSJON
             else {
+                val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
                 val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
                 if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
             }
