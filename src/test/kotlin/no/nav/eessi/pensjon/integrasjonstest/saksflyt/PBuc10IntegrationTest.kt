@@ -91,6 +91,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
+
+            testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
+            }
         }
 
         @Test
@@ -466,6 +471,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderspensjon`() {
 
             val allDocuemtActions = forenkletSEDs(sedStatus = SedStatus.RECEIVED)
+            val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING)
+
 
             testRunner(FNR_VOKSEN_2, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
@@ -480,6 +487,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             testRunner(FNR_OVER_62, null, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = FAMILIE_OG_PENSJONSYTELSER_OSLO) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
+            }
+
+            testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
         }
