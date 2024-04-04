@@ -102,10 +102,7 @@ class JournalforingService(
                 **********""".trimIndent()
                 )
 
-                // Henter dokumenter
-                val (documents, uSupporterteVedlegg) = sedHendelse.run {
-                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
-                }
+                val aktoerId = identifisertPerson?.aktoerId
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
@@ -117,6 +114,24 @@ class JournalforingService(
                     harAdressebeskyttelse,
                     identifisertePersoner
                 )
+
+                // Henter dokumenter
+                val (documents, _) = sedHendelse.run {
+                    sedType?.let {
+                        pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it)
+                            .also { documentsAndAttachments ->
+                                if (documentsAndAttachments.second.isNotEmpty()) {
+                                    opprettBehandleSedOppgave(
+                                        null,
+                                        tildeltJoarkEnhet,
+                                        aktoerId,
+                                        sedHendelse,
+                                        usupporterteFilnavn(documentsAndAttachments.second)
+                                    )
+                                }
+                            }
+                    } ?: throw IllegalStateException("sedType is null")
+                }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
                 val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
@@ -156,12 +171,9 @@ class JournalforingService(
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
 
-                val aktoerId = identifisertPerson?.aktoerId
-                logger.info(
-                    "********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
-                            ", sed: ${sedHendelse.sedType}" +
-                            ", enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********"
-                )
+                journalPostResponse?.journalpostferdigstilt?.let { journalPostFerdig ->
+                    logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+                }
 
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
@@ -176,16 +188,6 @@ class JournalforingService(
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-                }
-
-                if (uSupporterteVedlegg.isNotEmpty()) {
-                    opprettBehandleSedOppgave(
-                        null,
-                        tildeltJoarkEnhet,
-                        aktoerId,
-                        sedHendelse,
-                        usupporterteFilnavn(uSupporterteVedlegg)
-                    )
                 }
 
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
