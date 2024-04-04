@@ -15,7 +15,6 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -110,20 +109,30 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param sedHendelse: sed fra eux
      *  @param journalPostResponse: response fra joark
      */
-    fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        if (journalPostResponse == null || identifisertPerson?.personRelasjon?.fnr != null) {
-            logger.warn(if(journalPostResponse == null) "Har ingen gyldig journalpost" else "IdentifisertPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr")
+    fun settStatusAvbrutt(
+        fnrForRelasjon: Fodselsnummer?,
+        hendelseType: HendelseType,
+        sedHendelse: SedHendelse,
+        journalPostResponse: OpprettJournalPostResponse?
+    ): Boolean {
+        if (journalPostResponse == null) {
+            logger.warn("Ingen gyldig journalpost; setter ikke avbrutt")
             return false
         }
 
-        if (hendelseType == HendelseType.SENDT) {
-            journalpostKlient.settStatusAvbrutt(journalPostResponse.journalpostId)
-            return true
+        if (fnrForRelasjon != null) {
+            logger.warn("IdentifiedPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr; setter ikke avbrutt")
+            return false
         }
 
-        return false
-    }
+        if (hendelseType != HendelseType.SENDT) {
+            logger.warn("HendelseType er mottatt; setter ikke avbrutt")
+            return false
+        }
 
+        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
+        return true
+    }
 
     fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, identifisertePersoner: Int): Behandlingstema {
 

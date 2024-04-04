@@ -117,7 +117,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
-                verify { journalpostKlient.settStatusAvbrutt("429434378") }
+                verify { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
             }
         }
 

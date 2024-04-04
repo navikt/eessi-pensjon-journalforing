@@ -145,7 +145,7 @@ class JournalforingService(
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
-                    identifisertPerson,
+                    identifisertPerson?.personRelasjon?.fnr,
                     hendelseType,
                     sedHendelse,
                     journalPostResponse,
