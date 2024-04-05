@@ -513,7 +513,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
-                assertEquals(UFORETRYGD, journalpostRequest.tema)
+                assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)

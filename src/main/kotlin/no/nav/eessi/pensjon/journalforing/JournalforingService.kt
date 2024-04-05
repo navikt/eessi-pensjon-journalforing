@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -134,8 +135,7 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
-                fnr, identifisertePersoner, sedHendelse.rinaSakId)
+                val tema = hentTema(sedHendelse, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner)
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -395,8 +395,8 @@ class JournalforingService(
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int
     ): Enhet {
-        val tema = hentTema(sedHendelse?.bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, sedHendelse.rinaSakId)
-        val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, antallIdentifisertePersoner)
+        val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner)
+        val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse?.bucType!!, saktype, tema, antallIdentifisertePersoner)
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
 
         return if (identifisertPerson.landkode == "NOR") {
@@ -417,22 +417,27 @@ class JournalforingService(
      * - saktype er UFØRETRYGD
      */
     fun hentTema(
-        bucType: BucType,
+        sedhendelse: SedHendelse?,
         saktype: SakType?,
         fnr: Fodselsnummer?,
-        identifisertePersoner: Int,
-        euxCaseId: String
+        identifisertePersoner: Int
     ) : Tema {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
-            val blob = gcpStorageService.hentFraGjenny(euxCaseId)
+        return if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
+            val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
             if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         } else {
-            if (bucType == P_BUC_03 || saktype == SakType.UFOREP) UFORETRYGD
-            else if (bucType in listOf(P_BUC_01, P_BUC_02)) PENSJON
-            else {
-                val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
-                val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
-                if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
+            when (sedhendelse?.sedType) {
+                SedType.P2000, SedType.P2100 -> PENSJON
+                SedType.P2200 -> UFORETRYGD
+                else -> when {
+                    sedhendelse?.bucType == P_BUC_03 || saktype == SakType.UFOREP -> UFORETRYGD
+                    sedhendelse?.bucType in listOf(P_BUC_01, P_BUC_02) -> PENSJON
+                    else -> {
+                        val ufoereAlder = fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61
+                        val muligUfoereBuc = sedhendelse?.bucType in listOf(P_BUC_05, P_BUC_06)
+                        if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
+                    }
+                }
             }
         }
     }
