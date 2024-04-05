@@ -444,7 +444,7 @@ class JournalforingService(
     }
 
     private fun muligUfore(sedhendelse: SedHendelse?, fnr: Fodselsnummer?, identifisertePersoner: Int) : Boolean{
-        val ufoereAlder = fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61
+        val ufoereAlder = (fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61)
         val muligUfoereBuc = sedhendelse?.bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_10)
         return ufoereAlder && muligUfoereBuc && identifisertePersoner <= 1
     }
