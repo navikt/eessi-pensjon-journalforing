@@ -135,7 +135,9 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner)
+                val tema = hentTema(sedHendelse, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner).also {
+                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
+                }
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
@@ -433,13 +435,18 @@ class JournalforingService(
                     sedhendelse?.bucType == P_BUC_03 || saktype == SakType.UFOREP -> UFORETRYGD
                     sedhendelse?.bucType in listOf(P_BUC_01, P_BUC_02) -> PENSJON
                     else -> {
-                        val ufoereAlder = fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61
-                        val muligUfoereBuc = sedhendelse?.bucType in listOf(P_BUC_05, P_BUC_06)
-                        if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
+                        if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD
+                        else PENSJON
                     }
                 }
             }
         }
+    }
+
+    private fun muligUfore(sedhendelse: SedHendelse?, fnr: Fodselsnummer?, identifisertePersoner: Int) : Boolean{
+        val ufoereAlder = fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61
+        val muligUfoereBuc = sedhendelse?.bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_10)
+        return ufoereAlder && muligUfoereBuc && identifisertePersoner <= 1
     }
 
     fun hentSak(

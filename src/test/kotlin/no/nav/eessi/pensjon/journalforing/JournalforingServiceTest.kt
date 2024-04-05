@@ -28,6 +28,8 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -680,6 +682,22 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         verify(atLeast = 1) {
             journalpostKlient.opprettJournalpost(any(), any(), any())
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "P2000, PENSJON",
+        "P2100, PENSJON",
+        "P2200, UFORETRYGD"
+    )
+    fun `gitt at det er en sed av type P2000, P2100 eller P2200 saa skal Tema settes til UFORE ELLER PENSJON`(sedtype: String, tema: String) {
+        val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
+            every { rinaSakId } returns RINADOK_ID
+            every { bucType } returns P_BUC_01
+            every { sedType } returns SedType.valueOf(sedtype)
+        }
+        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2)
+        assertEquals(Tema.valueOf(tema), result)
     }
 
     @Test
