@@ -117,21 +117,8 @@ class JournalforingService(
                 )
 
                 // Henter dokumenter
-                val (documents, _) = sedHendelse.run {
-                    sedType?.let {
-                        pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it)
-                            .also { documentsAndAttachments ->
-                                if (documentsAndAttachments.second.isNotEmpty()) {
-                                    opprettBehandleSedOppgave(
-                                        null,
-                                        tildeltJoarkEnhet,
-                                        aktoerId,
-                                        sedHendelse,
-                                        usupporterteFilnavn(documentsAndAttachments.second)
-                                    )
-                                }
-                            }
-                    } ?: throw IllegalStateException("sedType is null")
+                val (documents, uSupporterteVedlegg) = sedHendelse.run {
+                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
@@ -188,6 +175,16 @@ class JournalforingService(
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
+                }
+
+                if (uSupporterteVedlegg.isNotEmpty()) {
+                    opprettBehandleSedOppgave(
+                        null,
+                        tildeltJoarkEnhet,
+                        aktoerId,
+                        sedHendelse,
+                        usupporterteFilnavn(uSupporterteVedlegg)
+                    )
                 }
 
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
