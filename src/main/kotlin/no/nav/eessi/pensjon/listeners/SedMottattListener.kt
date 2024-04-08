@@ -108,8 +108,7 @@ class SedMottattListener(
                             val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
                             val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
 
-                            val currentSed =
-                                alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+                            val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                             journalforingService.journalfor(
                                 sedHendelse,
                                 MOTTATT,
