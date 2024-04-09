@@ -21,7 +21,10 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
         when(sedHendelse.sedType) {
             P2000 -> {
-                if ((sed as P2000).validerForKravinit()) {
+                if(sed == null){
+                    logger.error("P2000 mangler SED informasjon, avslutter sending av krav")
+                }
+                else if ((sed as P2000).validerForKravinit()) {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelse.rinaSakId,
