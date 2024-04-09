@@ -131,7 +131,8 @@ class SedSendtListener(
                                 identifisertePersoner.count()
                                     .also { logger.info("Antall identifisertePersoner: $it") },
                                 navAnsattMedEnhet,
-                                saksIdFraSed
+                                saksIdFraSed,
+                                null
                             )
                         }
                         acknowledgment.acknowledge()

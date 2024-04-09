@@ -44,12 +44,13 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
-        tema: Tema
+        tema: Tema,
+        kravType: String?
     ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
 
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner),
+            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
@@ -134,11 +135,24 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         return true
     }
 
-    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, identifisertePersoner: Int): Behandlingstema {
+    fun bestemBehandlingsTema(
+        bucType: BucType,
+        saktype: SakType?,
+        tema: Tema,
+        identifisertePersoner: Int,
+        kravtypeFraSed: String?
+    ): Behandlingstema {
 
         if(bucType == P_BUC_01) return ALDERSPENSJON
         if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
         if(bucType == P_BUC_03) return UFOREPENSJON
+
+        // Gjelder kun P15000 der kravtypeFraSed er obligatorisk
+        when (kravtypeFraSed ) {
+          "01" -> return ALDERSPENSJON
+          "02" -> return GJENLEVENDEPENSJON
+          "03" -> return UFOREPENSJON
+        }
 
         if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
         if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON

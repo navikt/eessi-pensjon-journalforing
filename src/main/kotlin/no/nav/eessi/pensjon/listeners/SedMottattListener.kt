@@ -119,7 +119,8 @@ class SedMottattListener(
                                 currentSed,
                                 harAdressebeskyttelse,
                                 identifisertePersoner.count(),
-                                gjennySakId = null
+                                gjennySakId = null,
+                                kravTypeFraSed = currentSed?.nav?.krav?.type,
                             )
 
                         }

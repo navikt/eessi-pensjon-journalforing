@@ -90,9 +90,10 @@ class JournalforingService(
         sakInformasjon: SakInformasjon? = null,
         sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
-            identifisertePersoner: Int,
+        identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        gjennySakId: String? = null
+        gjennySakId: String? = null,
+        kravTypeFraSed: String?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -113,7 +114,8 @@ class JournalforingService(
                     hendelseType,
                     sakInformasjon,
                     harAdressebeskyttelse,
-                    identifisertePersoner
+                    identifisertePersoner,
+                    kravTypeFraSed
                 )
 
                 // Henter dokumenter
@@ -141,6 +143,8 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
+
+                val kravtype = sed?.nav?.krav?.type
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
@@ -152,7 +156,8 @@ class JournalforingService(
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
-                    tema = tema
+                    tema = tema,
+                    kravType = kravtype.toString()
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
@@ -323,7 +328,8 @@ class JournalforingService(
         hendelseType: HendelseType,
         sakInformasjon: SakInformasjon?,
         harAdressebeskyttelse: Boolean,
-        antallIdentifisertePersoner: Int
+        antallIdentifisertePersoner: Int,
+        kravTypeFraSed: String?
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon
@@ -347,7 +353,13 @@ class JournalforingService(
 
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
-            else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
+            else return enhetBasertPaaBehandlingstema(
+                sedHendelse,
+                saktype,
+                identifisertPerson,
+                antallIdentifisertePersoner,
+                kravTypeFraSed
+            )
                 .also {
                     logEnhet(enhetFraRouting, it)
                     metricsCounterForEnhet(it)
@@ -395,10 +407,18 @@ class JournalforingService(
         sedHendelse: SedHendelse?,
         saktype: SakType?,
         identifisertPerson: IdentifisertPerson,
-        antallIdentifisertePersoner: Int
+        antallIdentifisertePersoner: Int,
+        kravtypeFraSed: String?
     ): Enhet {
         val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner)
-        val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse?.bucType!!, saktype, tema, antallIdentifisertePersoner)
+        val behandlingstema = journalpostService.bestemBehandlingsTema(
+            sedHendelse?.bucType!!,
+            saktype,
+            tema,
+            antallIdentifisertePersoner,
+            kravtypeFraSed
+
+        )
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
 
         return if (identifisertPerson.landkode == "NOR") {
