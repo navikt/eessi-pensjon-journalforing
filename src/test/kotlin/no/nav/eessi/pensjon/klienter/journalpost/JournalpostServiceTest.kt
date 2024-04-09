@@ -141,7 +141,7 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null, Tema.PENSJON
+            1, null, Tema.PENSJON, null
         )
 
         // RESPONSE
@@ -167,6 +167,52 @@ internal class JournalpostServiceTest {
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
         verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true, null) }
+    }
+
+    @Test
+    fun `Gitt gyldig argumenter så sender request med riktig body og url parameter med riktig behandlingstema`() {
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
+
+        val responseBody =
+            javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
+        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
+
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
+
+        val actualResponse = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            fnr = SLAPP_SKILPADDE,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
+            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
+            dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+            saktype = null,
+            AvsenderMottaker(null, null, null, land = "NO"),
+            1, null, Tema.PENSJON, "02"
+        )
+
+        // RESPONSE
+        assertEqualResponse(expectedResponse, actualResponse.first!!)
+
+        // REQUEST
+        val actualRequest = journalpostSlot.captured
+
+        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, actualRequest.behandlingstema)
+
     }
 
     @Test
@@ -200,7 +246,8 @@ internal class JournalpostServiceTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                mockk()
+                mockk(),
+                ""
             )
         }
     }
@@ -252,7 +299,8 @@ internal class JournalpostServiceTest {
             mockk(relaxed = true),
             1,
             null,
-            Tema.PENSJON
+            Tema.PENSJON,
+            null
         )
 
         assertEqualResponse(expectedResponse, actualResponse.first!!)

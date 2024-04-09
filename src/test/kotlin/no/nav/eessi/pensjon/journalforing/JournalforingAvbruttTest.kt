@@ -99,7 +99,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             saktype = null,
             sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE),
             sed = null,
-            identifisertePersoner = 0
+            identifisertePersoner = 0,
+            kravTypeFraSed = null
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -122,7 +123,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SED(type = SedType.P2000),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            kravTypeFraSed = null
         )
         verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
         verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
@@ -149,7 +151,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            kravTypeFraSed = null
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -172,7 +175,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            kravTypeFraSed = null
         )
 
         verify(exactly = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -195,7 +199,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            kravTypeFraSed = null
         )
         Assertions.assertEquals(
             Enhet.ID_OG_FORDELING,
@@ -248,7 +253,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            gjennySakId = null
+            gjennySakId = null,
+            kravTypeFraSed = null
         )
         Assertions.assertEquals(
             Enhet.NFP_UTLAND_AALESUND,
@@ -270,7 +276,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             identifisertPerson = identer[0],
             fdato = null,
             sed = SED(type = sedType),
-            identifisertePersoner = identer.size
+            identifisertePersoner = identer.size,
+            kravTypeFraSed = null
         )
     }
 
