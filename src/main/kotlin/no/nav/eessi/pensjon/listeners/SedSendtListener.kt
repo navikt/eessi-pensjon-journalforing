@@ -1,8 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -35,7 +33,7 @@ class SedSendtListener(
     private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
-) : SedListenerBase(fagmodulService, bestemSakService) {
+) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService) {
 
     private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
@@ -104,19 +102,14 @@ class SedSendtListener(
                                 identifisertPerson,
                                 alleSedIBucList.plus(kansellerteSeder)
                             )
-                            val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
+                            val saksInfoSamlet = hentSaksInformasjonForEessi(
+                                alleSedIBucList,
+                                sedHendelse,
+                                bucType,
+                                identifisertPerson,
+                                SENDT
+                            )
 
-                            val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
-                            val gjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
-                            val sakInformasjon = if (gjennySak) null else {
-                                pensjonSakInformasjon(
-                                    identifisertPerson,
-                                    bucType,
-                                    sakTypeFraSED,
-                                    alleSedIBucList
-                                )
-                            }
-                            val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
                             val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
                             journalforingService.journalfor(
@@ -124,14 +117,12 @@ class SedSendtListener(
                                 SENDT,
                                 identifisertPerson,
                                 fdato,
-                                saktype,
-                                sakInformasjon,
+                                saksInfoSamlet = saksInfoSamlet,
                                 currentSed,
                                 harAdressebeskyttelse,
                                 identifisertePersoner.count()
                                     .also { logger.info("Antall identifisertePersoner: $it") },
                                 navAnsattMedEnhet,
-                                saksIdFraSed,
                                 null
                             )
                         }

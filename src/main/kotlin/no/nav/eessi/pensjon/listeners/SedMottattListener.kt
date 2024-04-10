@@ -1,14 +1,13 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
@@ -34,7 +33,7 @@ class SedMottattListener(
     val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
-) : SedListenerBase(fagmodulService, bestemSakService) {
+) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService) {
 
     private val logger = LoggerFactory.getLogger(SedMottattListener::class.java)
 
@@ -104,9 +103,17 @@ class SedMottattListener(
 
                             val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
                             val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
-                            val saktypeFraSed = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
-                            val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
-                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
+//                            val saktypeFraSed = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
+//                            val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
+//                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
+
+                            val saksInfoSamlet = hentSaksInformasjonForEessi(
+                                alleSedIBucList,
+                                sedHendelse,
+                                bucType,
+                                identifisertPerson,
+                                HendelseType.SENDT
+                            )
 
                             val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
                             journalforingService.journalfor(
@@ -114,12 +121,10 @@ class SedMottattListener(
                                 MOTTATT,
                                 identifisertPerson,
                                 fdato,
-                                saktype,
-                                sakInformasjon,
+                                saksInfoSamlet,
                                 currentSed,
                                 harAdressebeskyttelse,
                                 identifisertePersoner.count(),
-                                gjennySakId = null,
                                 kravTypeFraSed = currentSed?.nav?.krav?.type,
                             )
 

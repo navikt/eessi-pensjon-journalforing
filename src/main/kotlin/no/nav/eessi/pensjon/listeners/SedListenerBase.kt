@@ -1,19 +1,27 @@
 package no.nav.eessi.pensjon.listeners
+import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
 
 open class SedListenerBase(
     private val fagmodulService: FagmodulService,
-    private val bestemSakService: BestemSakService
+    private val bestemSakService: BestemSakService,
+    private val gcpStorageService: GcpStorageService,
+    private val euxService: EuxService
 ) {
 
     private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
@@ -49,5 +57,28 @@ open class SedListenerBase(
         else if (bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType ?: saktypeFraSED
         else if (saktypeFraSED != null) return saktypeFraSED
         return sakInformasjon?.sakType
+    }
+
+    fun hentSaksInformasjonForEessi(
+        alleSedIBucList: List<SED>,
+        sedHendelse: SedHendelse,
+        bucType: BucType,
+        identifisertPerson: IdentifisertPDLPerson?,
+        hendelseType: HendelseType
+    ): SaksInfoSamlet {
+        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList)
+        val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
+            .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
+
+        val sakInformasjon = if (hendelseType == HendelseType.SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
+            pensjonSakInformasjon(
+                identifisertPerson,
+                bucType,
+                sakTypeFraSED,
+                alleSedIBucList
+            )
+        }
+        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
+        return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktype)
     }
 }
