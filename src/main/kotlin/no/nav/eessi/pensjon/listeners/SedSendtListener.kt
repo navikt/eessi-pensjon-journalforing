@@ -33,7 +33,7 @@ class SedSendtListener(
     private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
-) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService) {
+) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService, profile) {
 
     private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
@@ -45,6 +45,7 @@ class SedSendtListener(
     init {
         consumeOutgoingSed = metricsHelper.init("consumeOutgoingSed")
     }
+    private val offsetsToSkip = listOf<Long>(133722, 143447, 176379, 183457, 183585, 204028)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
@@ -55,30 +56,13 @@ class SedSendtListener(
         MDC.putCloseable("x_request_id", UUID.randomUUID().toString()).use {
             consumeOutgoingSed.measure {
                 logger.info("Innkommet sedSendt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
-                val offsetToSkip = listOf<Long>(133722, 143447, 176379, 183457, 183585, 204028)
+
                 try {
-                    if (cr.offset() !in offsetToSkip) {
-                        val sedHendelse = SedHendelse.fromJson(hendelse)
-
-                        if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
-                            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
-                            acknowledgment.acknowledge()
-                            return@measure
-                        } else if (GyldigeHendelser.sendt(sedHendelse)) {
-                            behandleSedHendelse(sedHendelse)
-                        } else {
-                            logger.info("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
-                        }
-                    } else {
-                        logger.warn("Offset ligger i listen over unntak, hopper over denne: ${cr.offset()}")
+                    if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
+                        behandleHendelse(hendelse, SENDT, acknowledgment)
                     }
-
-                    acknowledgment.acknowledge()
-                    logger.info("Acket sedSendt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
-
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av sendt SED-hendelse:\\n " +
-                            "${hendelse.replaceAfter("navBruker","******")}", ex)
+                    logger.error("Feil ved behandling av SED-SENDT: ${hendelse.replaceAfter("navBruker","******")}", ex)
                     throw SedSendtRuntimeException(ex)
                 }
                 latch.countDown()
@@ -86,7 +70,7 @@ class SedSendtListener(
         }
     }
 
-    private fun behandleSedHendelse(sedHendelse: SedHendelse) {
+    override fun behandleSedHendelse(sedHendelse: SedHendelse) {
         if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
             logger.info("Utgående ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
         }
