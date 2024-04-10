@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -48,12 +49,10 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SakType.ALDER,
-            sakInformasjon = saksInformasjon,
-            SED(type = SedType.P6000),
+            SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
+            sed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null,
             kravTypeFraSed = null,
         )
         val journalpostRequest = requestSlot.captured
@@ -86,12 +85,9 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            null,
-            sakInformasjon = null,
-            SED(type = SedType.P6000),
+            sed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null,
             kravTypeFraSed = null
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
@@ -126,9 +122,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SakType.ALDER,
-            sakInformasjon = saksInformasjon,
-
+            SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
             mockk<P2000>().apply {
                 every { nav?.bruker?.person?.sivilstand } returns listOf(SivilstandItem("01-01-2023"))
                 every { nav?.krav } returns mapJsonToAny<Krav>("""{"type":"$kravtype"}""")
@@ -136,7 +130,6 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             },
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            gjennySakId = null,
             kravTypeFraSed = kravtype
         )
         capturedMelding.captured

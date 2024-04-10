@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -96,8 +97,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             hendelseType = HendelseType.SENDT,
             identifisertPerson = null,
             fdato = null,
-            saktype = null,
-            sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE),
+            SaksInfoSamlet(saktype = null,  sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)),
             sed = null,
             identifisertePersoner = 0,
             kravTypeFraSed = null
@@ -119,11 +119,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             null,
             LEALAUS_KAKE.getBirthDate(),
             null,
-            null,
             SED(type = SedType.P2000),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null,
             kravTypeFraSed = null
         )
         verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -146,12 +144,10 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.SENDT,
             null,
             LEALAUS_KAKE.getBirthDate(),
-            null,
-            sakInformasjonMock,
+            SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
             SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null,
             kravTypeFraSed = null
         )
 
@@ -170,12 +166,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2200),
+            sed = SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null,
             kravTypeFraSed = null
         )
 
@@ -194,12 +187,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            null,
-            null,
-            SED(type = SedType.P2200),
+            sed = SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            gjennySakId = null,
             kravTypeFraSed = null
         )
         Assertions.assertEquals(
@@ -248,12 +238,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.SENDT,
             identifisertPerson,
             LocalDate.of(1973,11,22),
-            null,
-            null,
-            SED(type = SedType.P2200),
+            sed = SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            gjennySakId = null,
             kravTypeFraSed = null
         )
         Assertions.assertEquals(

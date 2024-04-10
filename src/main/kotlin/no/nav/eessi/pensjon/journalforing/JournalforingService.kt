@@ -21,6 +21,7 @@ import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -86,21 +87,22 @@ class JournalforingService(
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: SakType? = null,
-        sakInformasjon: SakInformasjon? = null,
+        saksInfoSamlet: SaksInfoSamlet? = null,
         sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        gjennySakId: String? = null,
         kravTypeFraSed: String?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info(
                     """**********
-                    rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType?.name} på aktoerId: ${identifisertPerson?.aktoerId} sakType: ${saktype?.name}
+                    rinadokumentID: ${sedHendelse.rinaDokumentId},  rinasakID: ${sedHendelse.rinaSakId} 
+                    sedType: ${sedHendelse.sedType?.name}, bucType: ${sedHendelse.bucType}, hendelseType: $hendelseType, 
+                    sakId: ${saksInfoSamlet?.sakInformasjon?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjon?.sakType?.name}  
+                    sakType: ${saksInfoSamlet?.saktype?.name}, 
+                    identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
                 **********""".trimIndent()
                 )
 
@@ -109,10 +111,10 @@ class JournalforingService(
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
                     identifisertPerson,
-                    saktype,
+                    saksInfoSamlet?.saktype,
                     sedHendelse,
                     hendelseType,
-                    sakInformasjon,
+                    saksInfoSamlet?.sakInformasjon,
                     harAdressebeskyttelse,
                     identifisertePersoner,
                     kravTypeFraSed
@@ -137,7 +139,7 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse, saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner).also {
+                val tema = hentTema(sedHendelse, saksInfoSamlet?.saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner).also {
                     logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
                 }
 
@@ -150,9 +152,9 @@ class JournalforingService(
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, gjennySakId, sakInformasjon),
+                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, saksInfoSamlet?.saksIdFraSed, saksInfoSamlet?.sakInformasjon),
                     dokumenter = documents,
-                    saktype = saktype,
+                    saktype =saksInfoSamlet?.saktype,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
@@ -208,7 +210,7 @@ class JournalforingService(
                     )
                     kravInitialiseringsService.initKrav(
                         sedHendelse,
-                        sakInformasjon,
+                        saksInfoSamlet?.sakInformasjon,
                         sed
                     )
                 } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt, hendelseType)
@@ -216,7 +218,7 @@ class JournalforingService(
                 produserStatistikkmelding(
                     sedHendelse,
                     tildeltJoarkEnhet.enhetsNr,
-                    saktype,
+                    saksInfoSamlet?.saktype,
                     hendelseType
                 )
             } catch (ex: MismatchedInputException) {
@@ -474,7 +476,7 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId,) && sakIdFraSed != null)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId) && sakIdFraSed != null)
             Sak("FAGSAK", sakIdFraSed, "EY")
         else if (sakInformasjon?.sakId != null)
             Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")
