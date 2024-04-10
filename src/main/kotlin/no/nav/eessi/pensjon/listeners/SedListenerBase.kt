@@ -29,7 +29,7 @@ open class SedListenerBase(
     /**
      * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
      */
-    protected fun pensjonSakInformasjon(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
+    private fun pensjonSakInformasjon(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
@@ -52,11 +52,12 @@ open class SedListenerBase(
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
 
-    protected fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
-        if (bucType == BucType.P_BUC_02 && sakInformasjon != null && sakInformasjon.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET) return null
-        else if (bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV) return sakInformasjon?.sakType ?: saktypeFraSED
-        else if (saktypeFraSED != null) return saktypeFraSED
-        return sakInformasjon?.sakType
+    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
+        return when {
+            bucType == BucType.P_BUC_02 && sakInformasjon?.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET -> null
+            bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
+            else -> saktypeFraSED ?: sakInformasjon?.sakType
+        }
     }
 
     fun hentSaksInformasjonForEessi(
