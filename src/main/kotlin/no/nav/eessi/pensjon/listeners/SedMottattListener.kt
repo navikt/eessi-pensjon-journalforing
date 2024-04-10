@@ -7,11 +7,9 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
-import no.nav.eessi.pensjon.utils.mapAnyToJsonWithoutSensitiveData
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -33,7 +31,7 @@ class SedMottattListener(
     val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
-) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService) {
+) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService, profile) {
 
     private val logger = LoggerFactory.getLogger(SedMottattListener::class.java)
 
@@ -45,6 +43,8 @@ class SedMottattListener(
     init {
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
+
+    private val offsetsToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L, 830049L, 830051L)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
@@ -58,31 +58,12 @@ class SedMottattListener(
 
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
-                val offsetToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L, 830049L, 830051L)
                 try {
-                    val offset = cr.offset()
-                    if (offset in offsetToSkip) {
-                        logger.warn("Hopper over offset: $offset grunnet feil ved henting av vedlegg...")
-                    } else {
-
-                        val sedHendelse = SedHendelse.fromJson(hendelse)
-
-                        if (profile == "prod" && sedHendelse.avsenderId in listOf("NO:NAVAT05", "NO:NAVAT07")) {
-                            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
-                            acknowledgment.acknowledge()
-                            return@measure
-                        }
-                        logger.info("***Innkommet sed ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
-
-                        if (GyldigeHendelser.mottatt(sedHendelse)) {
-                            behandleSedHendelse(sedHendelse)
-                        }
-                        acknowledgment.acknowledge()
-                        logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
+                    if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
+                        behandleHendelse(hendelse, MOTTATT, acknowledgment)
                     }
-
                 } catch (ex: Exception) {
-                    logger.error("Noe gikk galt under behandling av mottatt SED-hendelse:\n ${hendelse.replaceAfter("navBruker", "******")}", ex)
+                    logger.error("Feil ved behandling av SED-MOTTATT: ${hendelse.replaceAfter("navBruker", "******")}", ex)
                     throw SedMottattRuntimeException(ex)
                 }
                 latch.countDown()
@@ -90,7 +71,7 @@ class SedMottattListener(
         }
     }
 
-    private fun behandleSedHendelse(sedHendelse: SedHendelse) {
+    override fun behandleSedHendelse(sedHendelse: SedHendelse) {
         if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
             logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
         }
@@ -125,7 +106,7 @@ class SedMottattListener(
             sedHendelse,
             bucType,
             identifisertPerson,
-            HendelseType.SENDT
+            MOTTATT
         )
 
         val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second

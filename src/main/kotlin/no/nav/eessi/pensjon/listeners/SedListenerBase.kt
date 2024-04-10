@@ -16,13 +16,15 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import org.slf4j.LoggerFactory
+import org.springframework.kafka.support.Acknowledgment
 
-open class SedListenerBase(
+abstract class SedListenerBase(
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     private val gcpStorageService: GcpStorageService,
-    private val euxService: EuxService
-) {
+    private val euxService: EuxService,
+    private val profile: String
+) : journalListener{
 
     private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
 
@@ -82,4 +84,33 @@ open class SedListenerBase(
         val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
         return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktype)
     }
+
+    fun skippingOffsett(offset: Long, offsetsToSkip : List<Long>): Boolean {
+        return if (offset !in offsetsToSkip) {
+            false
+        } else {
+            logger.warn("Offset ligger i listen over unntak, hopper over denne: $offset")
+            true
+        }
+    }
+
+    private val TEST_DATA_SENDERS = listOf("NO:NAVAT05", "NO:NAVAT07")
+
+    fun behandleHendelse(hendelse: String, sedRetning: HendelseType, acknowledgment: Acknowledgment) {
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
+            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+        } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
+            behandleSedHendelse(sedHendelse)
+        } else {
+            logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
+        }
+
+        acknowledgment.acknowledge()
+    }
+}
+
+interface journalListener {
+    fun behandleSedHendelse(sedHendelse: SedHendelse)
 }
