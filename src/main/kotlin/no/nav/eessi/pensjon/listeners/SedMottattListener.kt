@@ -72,62 +72,10 @@ class SedMottattListener(
                             acknowledgment.acknowledge()
                             return@measure
                         }
-                        logger.info("***Innkommet sed, uten navbruker: ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
+                        logger.info("***Innkommet sed ${mapAnyToJsonWithoutSensitiveData(sedHendelse, listOf("navBruker"))}")
 
                         if (GyldigeHendelser.mottatt(sedHendelse)) {
-                            if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId,)) {
-                                logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
-                            }
-                            val bucType = sedHendelse.bucType!!
-                            val buc = euxService.hentBuc(sedHendelse.rinaSakId)
-
-                            logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
-
-                            val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
-                            val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
-
-                            val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
-
-                            //identifisere Person hent Person fra PDL valider Person
-                            val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
-                            val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
-
-                            val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
-                                bucType,
-                                sedHendelse.sedType,
-                                MOTTATT,
-                                sedHendelse.rinaDokumentId,
-                                identifisertePersoner,
-                                potensiellePersonRelasjoner
-                            )
-
-                            val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
-                            val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
-//                            val saktypeFraSed = euxService.hentSaktypeType(sedHendelse, alleSedIBucList).takeIf {bucType == P_BUC_10 || bucType  == R_BUC_02 }
-//                            val sakInformasjon = pensjonSakInformasjon(identifisertPerson, bucType, saktypeFraSed, alleSedIBucList)
-//                            val saktype = populerSaktype(saktypeFraSed, sakInformasjon, bucType)
-
-                            val saksInfoSamlet = hentSaksInformasjonForEessi(
-                                alleSedIBucList,
-                                sedHendelse,
-                                bucType,
-                                identifisertPerson,
-                                HendelseType.SENDT
-                            )
-
-                            val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-                            journalforingService.journalfor(
-                                sedHendelse,
-                                MOTTATT,
-                                identifisertPerson,
-                                fdato,
-                                saksInfoSamlet,
-                                currentSed,
-                                harAdressebeskyttelse,
-                                identifisertePersoner.count(),
-                                kravTypeFraSed = currentSed?.nav?.krav?.type,
-                            )
-
+                            behandleSedHendelse(sedHendelse)
                         }
                         acknowledgment.acknowledge()
                         logger.info("Acket sedMottatt melding med offset: ${cr.offset()} i partisjon ${cr.partition()}")
@@ -140,6 +88,58 @@ class SedMottattListener(
                 latch.countDown()
             }
         }
+    }
+
+    private fun behandleSedHendelse(sedHendelse: SedHendelse) {
+        if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
+            logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
+        }
+        val bucType = sedHendelse.bucType!!
+        val buc = euxService.hentBuc(sedHendelse.rinaSakId)
+
+        logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+
+        val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
+        val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
+
+        val harAdressebeskyttelse =
+            personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
+
+        //identifisere Person hent Person fra PDL valider Person
+        val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
+        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersonRelasjoner)
+
+        val identifisertPerson = personidentifiseringService.hentIdentifisertPerson(
+            bucType,
+            sedHendelse.sedType,
+            MOTTATT,
+            sedHendelse.rinaDokumentId,
+            identifisertePersoner,
+            potensiellePersonRelasjoner
+        )
+
+        val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
+        val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
+        val saksInfoSamlet = hentSaksInformasjonForEessi(
+            alleSedIBucList,
+            sedHendelse,
+            bucType,
+            identifisertPerson,
+            HendelseType.SENDT
+        )
+
+        val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            fdato,
+            saksInfoSamlet,
+            currentSed,
+            harAdressebeskyttelse,
+            identifisertePersoner.count(),
+            kravTypeFraSed = currentSed?.nav?.krav?.type,
+        )
     }
 }
 
