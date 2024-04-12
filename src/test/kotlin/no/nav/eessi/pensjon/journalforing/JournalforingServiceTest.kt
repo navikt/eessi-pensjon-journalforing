@@ -176,7 +176,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             kravTypeFraSed = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -202,7 +202,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             kravTypeFraSed = null
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -332,7 +332,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -453,7 +453,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             kravTypeFraSed = null
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -667,17 +667,17 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @ParameterizedTest
     @CsvSource(
-        "P2000, PENSJON",
-        "P2100, PENSJON",
-        "P2200, UFORETRYGD"
+        "P2000, P_BUC_01, PENSJON",
+        "P2100, P_BUC_02, PENSJON",
+        "P2200, P_BUC_03, UFORETRYGD"
     )
-    fun `gitt at det er en sed av type P2000, P2100 eller P2200 saa skal Tema settes til UFORE ELLER PENSJON`(sedtype: String, tema: String) {
+    fun `gitt at det er en sed av type P2000, P2100 eller P2200 saa skal Tema settes til UFORE ELLER PENSJON`(sedtype: String, buc: String, tema: String) {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns P_BUC_01
+            every { bucType } returns BucType.valueOf(buc)
             every { sedType } returns SedType.valueOf(sedtype)
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2)
+        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2, null)
         assertEquals(Tema.valueOf(tema), result)
     }
 
@@ -688,7 +688,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2)
+        val result = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2, null)
         assertEquals(Tema.PENSJON, result)
     }
 
@@ -699,8 +699,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1)
-        assertEquals(Tema.UFORETRYGD, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
@@ -710,7 +710,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2)
+        val result = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2, null)
         assertEquals(Tema.PENSJON, result)
     }
 
@@ -721,8 +721,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2)
-        val result2 = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 1)
+        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2, null)
+        val result2 = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 1, null)
         assertEquals(Tema.PENSJON, result)
         assertEquals(Tema.PENSJON, result2)
     }
@@ -734,7 +734,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, LEALAUS_KAKE, 1)
+        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, LEALAUS_KAKE, 1, null)
         assertEquals(Tema.PENSJON, result)
     }
 
@@ -745,8 +745,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1)
-        assertEquals(Tema.UFORETRYGD, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
@@ -756,7 +756,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, LEALAUS_KAKE, 2)
+        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, LEALAUS_KAKE, 2, null)
         assertEquals(Tema.PENSJON, result)
     }
 
@@ -767,20 +767,20 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, GENRL, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatGENRL)
+        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, GENRL, LEALAUS_KAKE, 2, null)
+        assertEquals(Tema.UFORETRYGD, resultatGENRL)
 
-        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, OMSORG, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatOMSORG)
+        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, OMSORG, LEALAUS_KAKE, 2, null)
+        assertEquals(Tema.UFORETRYGD, resultatOMSORG)
 
-        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, ALDER, fnr = SLAPP_SKILPADDE, 1)
+        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, ALDER, fnr = SLAPP_SKILPADDE, 1, null)
         assertEquals(Tema.PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatGJENLEV)
+        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2, null)
+        assertEquals(Tema.UFORETRYGD, resultatGJENLEV)
 
-        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2)
-        assertEquals(Tema.PENSJON, resultatBARNEP)
+        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2, null)
+        assertEquals(Tema.UFORETRYGD, resultatBARNEP)
     }
 
     @Test
@@ -790,7 +790,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE,  1)
+        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
         assertEquals(Tema.UFORETRYGD, result)
     }
 
