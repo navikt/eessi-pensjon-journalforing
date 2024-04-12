@@ -378,7 +378,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any())}
@@ -429,7 +429,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
 
             // forvent tema == PEN og enhet Pensjon Utland
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
             assertEquals(fnr, request.bruker?.id)
 
