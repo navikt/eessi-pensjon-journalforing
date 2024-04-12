@@ -682,14 +682,14 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     }
 
     @Test
-    fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PEN`() {
+    fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama UFORETRYGD`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.PENSJON, result)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
@@ -700,22 +700,22 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
-        assertEquals(Tema.PENSJON, result)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama PEN`() {
+    fun `gitt det er en P_BUC_02 med saktype GJENLEVENDE så skal det settes teama UFORETRYGD`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.PENSJON, result)
+        assertEquals(Tema.UFORETRYGD, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama PEN`() {
+    fun `gitt det er en P_BUC_01 med saktype ALDER så skal det settes teama UFORETRYGD`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_02
@@ -723,8 +723,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         }
         val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2, null)
         val result2 = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 1, null)
-        assertEquals(Tema.PENSJON, result)
-        assertEquals(Tema.PENSJON, result2)
+        assertEquals(Tema.UFORETRYGD, result)
+        assertEquals(Tema.UFORETRYGD, result2)
     }
 
     @Test

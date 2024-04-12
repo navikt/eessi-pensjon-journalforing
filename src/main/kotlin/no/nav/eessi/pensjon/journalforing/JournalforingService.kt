@@ -465,7 +465,7 @@ class JournalforingService(
             P_BUC_03 -> if (sedhendelse.sedType == SedType.P2200) UFORETRYGD else PENSJON
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (fnr?.erUnderAlder(62) == true) UFORETRYGD else PENSJON
             P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed?.let { KravType.valueOf(it) } == KravType.UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed?.let { KravType.entries.find { it.verdi == kravtypeFraSed } } == KravType.UFOREP) UFORETRYGD else PENSJON
             else -> if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD else PENSJON
         }
     }
