@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -202,7 +203,7 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null, Tema.PENSJON, "02"
+            1, null, Tema.PENSJON, KravType.GJENLEV
         )
 
         // RESPONSE
@@ -246,8 +247,7 @@ internal class JournalpostServiceTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                mockk(),
-                ""
+                mockk()
             )
         }
     }

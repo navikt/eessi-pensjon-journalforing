@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
@@ -45,7 +46,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
-        kravType: String?
+        kravType: KravType? = null
     ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
 
         val request = OpprettJournalpostRequest(
@@ -140,7 +141,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saktype: SakType?,
         tema: Tema,
         identifisertePersoner: Int,
-        kravtypeFraSed: String?
+        kravtypeFraSed: KravType?
     ): Behandlingstema {
 
         if(bucType == P_BUC_01) return ALDERSPENSJON
@@ -148,10 +149,12 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         if(bucType == P_BUC_03) return UFOREPENSJON
 
         // Gjelder kun P15000 der kravtypeFraSed er obligatorisk
-        when (kravtypeFraSed ) {
-          "01" -> return ALDERSPENSJON
-          "02" -> return GJENLEVENDEPENSJON
-          "03" -> return UFOREPENSJON
+        if(kravtypeFraSed != null) {
+            return when (kravtypeFraSed) {
+                KravType.ALDER -> ALDERSPENSJON
+                KravType.GJENLEV -> GJENLEVENDEPENSJON
+                KravType.UFOREP -> UFOREPENSJON
+            }
         }
 
         if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
