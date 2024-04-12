@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
@@ -139,7 +140,13 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse, saksInfoSamlet?.saktype, identifisertPerson?.personRelasjon?.fnr, identifisertePersoner).also {
+                val tema = hentTema(
+                    sedHendelse,
+                    saksInfoSamlet?.saktype,
+                    identifisertPerson?.personRelasjon?.fnr,
+                    identifisertePersoner,
+                    kravTypeFraSed
+                ).also {
                     logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
                 }
 
@@ -154,7 +161,7 @@ class JournalforingService(
                     journalfoerendeEnhet = tildeltJoarkEnhet,
                     arkivsaksnummer = hentSak(sedHendelse.rinaSakId, saksInfoSamlet?.saksIdFraSed, saksInfoSamlet?.sakInformasjon),
                     dokumenter = documents,
-                    saktype =saksInfoSamlet?.saktype,
+                    saktype = saksInfoSamlet?.saktype,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
@@ -412,7 +419,7 @@ class JournalforingService(
         antallIdentifisertePersoner: Int,
         kravtypeFraSed: String?
     ): Enhet {
-        val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner)
+        val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, null)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
             saktype,
@@ -444,24 +451,22 @@ class JournalforingService(
         sedhendelse: SedHendelse?,
         saktype: SakType?,
         fnr: Fodselsnummer?,
-        identifisertePersoner: Int
-    ) : Tema {
-        return if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
+        identifisertePersoner: Int,
+        kravtypeFraSed: String?
+    ): Tema {
+        if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
             val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
-            if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
-        } else {
-            when (sedhendelse?.sedType) {
-                SedType.P2000, SedType.P2100 -> PENSJON
-                SedType.P2200 -> UFORETRYGD
-                else -> when {
-                    sedhendelse?.bucType == P_BUC_03 || saktype == SakType.UFOREP -> UFORETRYGD
-                    sedhendelse?.bucType in listOf(P_BUC_01, P_BUC_02) -> PENSJON
-                    else -> {
-                        if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD
-                        else PENSJON
-                    }
-                }
-            }
+            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+        }
+
+        //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
+        return when (sedhendelse?.bucType) {
+            P_BUC_01, P_BUC_02 -> if (sedhendelse.sedType == SedType.P2000 || sedhendelse.sedType == SedType.P2100) PENSJON else UFORETRYGD
+            P_BUC_03 -> if (sedhendelse.sedType == SedType.P2200) UFORETRYGD else PENSJON
+            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (fnr?.erUnderAlder(62) == true) UFORETRYGD else PENSJON
+            P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed?.let { KravType.valueOf(it) } == KravType.UFOREP) UFORETRYGD else PENSJON
+            else -> if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD else PENSJON
         }
     }
 
