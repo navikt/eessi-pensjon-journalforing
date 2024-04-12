@@ -93,7 +93,7 @@ class JournalforingService(
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        kravTypeFraSed: String?
+        kravTypeFraSed: KravType?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -153,7 +153,6 @@ class JournalforingService(
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
 
-                val kravtype = sed?.nav?.krav?.type
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
@@ -166,7 +165,7 @@ class JournalforingService(
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
                     tema = tema,
-                    kravType = kravtype.toString()
+                    kravType = kravTypeFraSed
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
@@ -338,7 +337,7 @@ class JournalforingService(
         sakInformasjon: SakInformasjon?,
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int,
-        kravTypeFraSed: String?
+        kravTypeFraSed: KravType?
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon
@@ -417,7 +416,7 @@ class JournalforingService(
         saktype: SakType?,
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int,
-        kravtypeFraSed: String?
+        kravtypeFraSed: KravType?
     ): Enhet {
         val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, null)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
@@ -452,7 +451,7 @@ class JournalforingService(
         saktype: SakType?,
         fnr: Fodselsnummer?,
         identifisertePersoner: Int,
-        kravtypeFraSed: String?
+        kravtypeFraSed: KravType?
     ): Tema {
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
             val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
@@ -465,7 +464,7 @@ class JournalforingService(
             P_BUC_03 -> if (sedhendelse.sedType == SedType.P2200) UFORETRYGD else PENSJON
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (fnr?.erUnderAlder(62) == true) UFORETRYGD else PENSJON
             P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed?.let { KravType.entries.find { it.verdi == kravtypeFraSed } } == KravType.UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP) UFORETRYGD else PENSJON
             else -> if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD else PENSJON
         }
     }

@@ -130,7 +130,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             },
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = kravtype
+            kravTypeFraSed = KravType.ALDER
         )
         capturedMelding.captured
         Assertions.assertEquals("""
