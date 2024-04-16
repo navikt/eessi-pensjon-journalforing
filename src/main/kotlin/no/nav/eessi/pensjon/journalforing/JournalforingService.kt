@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
@@ -460,8 +459,8 @@ class JournalforingService(
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         return when (sedhendelse?.bucType) {
-            P_BUC_01, P_BUC_02 -> if (sedhendelse.sedType == SedType.P2000 || sedhendelse.sedType == SedType.P2100) PENSJON else UFORETRYGD
-            P_BUC_03 -> if (sedhendelse.sedType == SedType.P2200) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
+            P_BUC_03 -> UFORETRYGD
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (fnr?.erUnderAlder(62) == true) UFORETRYGD else PENSJON
             P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
             P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP) UFORETRYGD else PENSJON
