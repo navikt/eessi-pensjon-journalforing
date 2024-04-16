@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -25,11 +24,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.*
@@ -111,7 +106,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -201,7 +196,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
@@ -314,7 +309,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
