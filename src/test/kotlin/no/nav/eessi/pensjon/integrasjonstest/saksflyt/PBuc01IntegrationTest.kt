@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -26,7 +25,6 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.BEHANDLE_SE
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
-import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -378,7 +376,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
-            assertEquals(UFORETRYGD, request.tema)
+            assertEquals(PENSJON, request.tema)
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { personService.sokPerson(any())}
@@ -429,7 +427,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val request = journalpost.captured
 
             // forvent tema == PEN og enhet Pensjon Utland
-            assertEquals(UFORETRYGD, request.tema)
+            assertEquals(PENSJON, request.tema)
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
             assertEquals(fnr, request.bruker?.id)
 
@@ -501,7 +499,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = UFOREP,
+                        sakType = ALDER,
                         sakStatus = LOPENDE
                     )
                 )
@@ -509,7 +507,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", P2200, SedStatus.SENT))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
+                FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
