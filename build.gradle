@@ -38,7 +38,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-actuator")
 
 	// Spring Framework BOM-fil kan overstyre så vi får siste patch-versjon av Spring Framework
-	implementation(platform("org.springframework:spring-framework-bom:6.1.5"))
+	implementation(platform("org.springframework:spring-framework-bom:6.1.6"))
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1")
 
