@@ -47,7 +47,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .map { id -> trimSakidString(id) }
             .distinct()
             .singleOrNull()
-            .also { sakId -> logger.debug("Fant sakId i SED: $sakId") }
+            .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
     }
 
     private fun filterEESSIsak(sed: SED): String? {
