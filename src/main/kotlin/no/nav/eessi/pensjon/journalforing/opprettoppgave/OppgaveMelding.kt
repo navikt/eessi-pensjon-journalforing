@@ -27,6 +27,7 @@ data class OppgaveMelding(
 }
 enum class OppgaveType{
     BEHANDLE_SED,
+    JOURNALFORING_UT,
     JOURNALFORING,
     KRAV; //støtter ikke tildeltenhet 9999
 }
