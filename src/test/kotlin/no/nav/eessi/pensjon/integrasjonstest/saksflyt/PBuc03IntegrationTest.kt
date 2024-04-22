@@ -246,7 +246,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 assertEquals(UFORE_UTLANDSTILSNITT, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(OppgaveType.JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
             }
         }
 

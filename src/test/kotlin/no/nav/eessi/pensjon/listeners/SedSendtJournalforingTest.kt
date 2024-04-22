@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING_UT
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
@@ -185,7 +186,7 @@ internal class SedSendtJournalforingTest {
 
         Assertions.assertEquals(UFORE_UTLAND, actualRequest.journalfoerendeEnhet)
         Assertions.assertEquals(UFORE_UTLAND, actualRequestOppgave.tildeltEnhetsnr)
-        Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
+        Assertions.assertEquals(JOURNALFORING_UT, actualRequestOppgave.oppgaveType)
 
     }
 
@@ -255,7 +256,7 @@ internal class SedSendtJournalforingTest {
 
         Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequest.journalfoerendeEnhet)
         Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequestOppgave.tildeltEnhetsnr)
-        Assertions.assertEquals(OppgaveType.JOURNALFORING, actualRequestOppgave.oppgaveType)
+        Assertions.assertEquals(JOURNALFORING_UT, actualRequestOppgave.oppgaveType)
 
     }
 

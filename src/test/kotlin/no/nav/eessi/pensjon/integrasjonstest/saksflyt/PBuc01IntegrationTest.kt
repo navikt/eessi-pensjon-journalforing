@@ -21,8 +21,8 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.BEHANDLE_SED
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.*
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
@@ -519,7 +519,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
             }
 
@@ -538,7 +538,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
