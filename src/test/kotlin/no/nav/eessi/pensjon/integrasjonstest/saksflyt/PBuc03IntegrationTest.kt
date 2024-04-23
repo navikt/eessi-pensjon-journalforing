@@ -23,6 +23,7 @@ import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING_UT
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
@@ -246,7 +247,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
                 assertEquals(UFORE_UTLANDSTILSNITT, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(OppgaveType.JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
             }
         }
 
