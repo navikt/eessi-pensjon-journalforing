@@ -457,11 +457,14 @@ class JournalforingService(
             return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         }
 
+        val uforAlder = fnr?.erUnderAlder(62) == true
+        val uforUnder67 = fnr?.erUnderAlder(67) == true
+
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         return when (sedhendelse?.bucType) {
             P_BUC_01, P_BUC_02 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
-            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (fnr?.erUnderAlder(62) == true) UFORETRYGD else PENSJON
+            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (uforAlder || uforUnder67 && saktype == SakType.UFOREP) UFORETRYGD else PENSJON
             P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
             P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP) UFORETRYGD else PENSJON
             else -> if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD else PENSJON
