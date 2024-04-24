@@ -465,8 +465,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             )
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
+            every { personService.hentPerson(Npid("12345678901")) } returns createBrukerWith(FNR_OVER_62, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
+
             testRunnerVoksen(
-                "01220049651",
+                FNR_OVER_62,
                 bestemsak,
                 land = "SWE",
                 krav = KravType.ALDER,
@@ -480,17 +482,16 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(2, oppgaveMeldingList.size)
 
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
                 assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
             }
-
         }
 
         @Test
