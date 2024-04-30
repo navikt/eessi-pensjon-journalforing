@@ -5,9 +5,12 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.KravType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
@@ -452,30 +455,28 @@ class JournalforingService(
         identifisertePersoner: Int,
         kravtypeFraSed: KravType?
     ): Tema {
+        if(fnr == null) {
+            // && saktype != UFOREP && sedhendelse?.bucType != P_BUC_03 && sedhendelse?.sedType != SedType.P2200 || kravtypeFraSed != KravType.UFOREP) return PENSJON
+            if(sedhendelse?.bucType == P_BUC_03 || saktype == UFOREP || kravtypeFraSed == KravType.UFOREP) return UFORETRYGD
+            return PENSJON
+        }
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
             val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
             return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         }
 
-        val uforAlder = fnr?.erUnderAlder(62) == true
-        val uforUnder67 = fnr?.erUnderAlder(67) == true
-
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         return when (sedhendelse?.bucType) {
-            P_BUC_01, P_BUC_02 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
-            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09 -> if (uforAlder || uforUnder67 && saktype == SakType.UFOREP) UFORETRYGD else PENSJON
-            P_BUC_06, P_BUC_08 -> if (saktype == SakType.UFOREP) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP) UFORETRYGD else PENSJON
-            else -> if (muligUfore(sedhendelse, fnr, identifisertePersoner)) UFORETRYGD else PENSJON
+            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
+                if (erUforAlderUnder62(fnr) || saktype == UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            else -> if (saktype == SakType.ALDER) PENSJON else UFORETRYGD
         }
     }
 
-    private fun muligUfore(sedhendelse: SedHendelse?, fnr: Fodselsnummer?, identifisertePersoner: Int) : Boolean{
-        val ufoereAlder = (fnr != null && !fnr.erNpid && Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61)
-        val muligUfoereBuc = sedhendelse?.bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_10)
-        return ufoereAlder && muligUfoereBuc && identifisertePersoner <= 1
-    }
+    fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
 
     fun hentSak(
         euxCaseId: String,
