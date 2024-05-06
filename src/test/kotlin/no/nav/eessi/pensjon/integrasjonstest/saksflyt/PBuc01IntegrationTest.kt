@@ -520,7 +520,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
             }
 
@@ -538,8 +538,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
