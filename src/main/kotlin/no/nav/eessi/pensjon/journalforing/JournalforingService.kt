@@ -201,7 +201,7 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        OppgaveType.JOURNALFORING,
+                        if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
