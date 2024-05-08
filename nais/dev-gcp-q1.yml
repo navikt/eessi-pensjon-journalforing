@@ -54,7 +54,7 @@ spec:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: JOURNALPOST_V1_URL
-      value: https://dokarkiv-q1.dev-fss-pub.nais.io/rest/journalpostapi/v1
+      value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1
     - name: SAF_GRAPHQL_URL
       value: https://saf-q1.dev-fss-pub.nais.io/graphql
     - name: EESSI_PENSJON_FAGMODUL_URL
