@@ -89,7 +89,7 @@ spec:
     - name: AZURE_APP_PDL_CLIENT_ID
       value: dev-fss.pdl.pdl-api
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
-      value: dokarkiv-q1
+      value: dev-fss.teamdokumenthandtering.dokarkiv-q1
     - name: AZURE_APP_SAF_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.saf-q1
 
