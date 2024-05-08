@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
@@ -15,7 +16,6 @@ import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -45,12 +45,13 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
-        tema: Tema
+        tema: Tema,
+        kravType: KravType? = null
     ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
 
         val request = OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner),
+            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
@@ -110,26 +111,51 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param sedHendelse: sed fra eux
      *  @param journalPostResponse: response fra joark
      */
-    fun settStatusAvbrutt(identifisertPerson: IdentifisertPerson?, hendelseType: HendelseType, sedHendelse: SedHendelse, journalPostResponse: OpprettJournalPostResponse?): Boolean {
-        if (journalPostResponse == null || identifisertPerson?.personRelasjon?.fnr != null) {
-            logger.warn(if(journalPostResponse == null) "Har ingen gyldig journalpost" else "IdentifisertPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr")
+    fun settStatusAvbrutt(
+        fnrForRelasjon: Fodselsnummer?,
+        hendelseType: HendelseType,
+        sedHendelse: SedHendelse,
+        journalPostResponse: OpprettJournalPostResponse?
+    ): Boolean {
+        if (journalPostResponse == null) {
+            logger.warn("Ingen gyldig journalpost; setter ikke avbrutt")
             return false
         }
 
-        if (hendelseType == HendelseType.SENDT) {
-            journalpostKlient.settStatusAvbrutt(journalPostResponse.journalpostId)
-            return true
+        if (fnrForRelasjon != null) {
+            logger.warn("IdentifiedPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr; setter ikke avbrutt")
+            return false
         }
 
-        return false
+        if (hendelseType != HendelseType.SENDT) {
+            logger.warn("HendelseType er mottatt; setter ikke avbrutt")
+            return false
+        }
+
+        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
+        return true
     }
 
-
-    fun bestemBehandlingsTema(bucType: BucType, saktype: SakType?, tema: Tema, identifisertePersoner: Int): Behandlingstema {
+    fun bestemBehandlingsTema(
+        bucType: BucType,
+        saktype: SakType?,
+        tema: Tema,
+        identifisertePersoner: Int,
+        kravtypeFraSed: KravType?
+    ): Behandlingstema {
 
         if(bucType == P_BUC_01) return ALDERSPENSJON
         if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
         if(bucType == P_BUC_03) return UFOREPENSJON
+
+        // Gjelder kun P15000 der kravtypeFraSed er obligatorisk
+        if(kravtypeFraSed != null) {
+            return when (kravtypeFraSed) {
+                KravType.ALDER -> ALDERSPENSJON
+                KravType.GJENLEV -> GJENLEVENDEPENSJON
+                KravType.UFOREP -> UFOREPENSJON
+            }
+        }
 
         if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
         if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON

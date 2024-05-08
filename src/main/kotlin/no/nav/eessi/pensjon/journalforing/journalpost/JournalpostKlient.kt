@@ -114,7 +114,7 @@ class JournalpostKlient(
         }
     }
 
-    fun settStatusAvbrutt(journalpostId: String) {
+    fun oppdaterJournalpostMedAvbrutt(journalpostId: String) {
         val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt"
 
         return avbruttStatusInfo.measure {

@@ -21,7 +21,10 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
 
         when(sedHendelse.sedType) {
             P2000 -> {
-                if ((sed as P2000).validerForKravinit()) {
+                if(sed == null){
+                    logger.error("P2000 med rinaSakId: ${sedHendelse.rinaSakId} mangler SED informasjon, avslutter sending av krav")
+                }
+                else if ((sed as P2000).validerForKravinit()) {
                     val hendelse = BehandleHendelseModel(
                         sakId = sakInformasjon?.sakId,
                         bucId = sedHendelse.rinaSakId,
@@ -47,6 +50,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         }
     }
 }
-fun P2000.validerForKravinit() = (nav?.bruker?.person?.sivilstand != null
-        && nav?.bruker?.person?.statsborgerskap != null
-        && nav?.bruker?.person?.sivilstand?.filter { it.fradato == null }.isNullOrEmpty())
+fun P2000.validerForKravinit()  = nav?.bruker?.person?.let {
+    it.statsborgerskap != null && it.sivilstand?.none { sivil -> sivil.fradato == null } == true
+} ?: false

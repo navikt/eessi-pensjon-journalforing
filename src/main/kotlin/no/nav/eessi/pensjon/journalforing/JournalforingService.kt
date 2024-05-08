@@ -5,8 +5,12 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
+import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.KravType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
@@ -20,6 +24,7 @@ import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -85,57 +90,84 @@ class JournalforingService(
         hendelseType: HendelseType,
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
-        saktype: SakType? = null,
-        sakInformasjon: SakInformasjon? = null,
+        saksInfoSamlet: SaksInfoSamlet? = null,
         sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
-            identifisertePersoner: Int,
+        identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        gjennySakId: String? = null
+        kravTypeFraSed: KravType?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
                 logger.info(
                     """**********
-                    rinadokumentID: ${sedHendelse.rinaDokumentId} rinasakID: ${sedHendelse.rinaSakId} sedType: ${sedHendelse.sedType?.name} bucType: ${sedHendelse.bucType}
-                    hendelseType: $hendelseType, hentSak sakId: ${sakInformasjon?.sakId} sakType: ${sakInformasjon?.sakType?.name} på aktoerId: ${identifisertPerson?.aktoerId} sakType: ${saktype?.name}
+                    rinadokumentID: ${sedHendelse.rinaDokumentId},  rinasakID: ${sedHendelse.rinaSakId} 
+                    sedType: ${sedHendelse.sedType?.name}, bucType: ${sedHendelse.bucType}, hendelseType: $hendelseType, 
+                    sakId: ${saksInfoSamlet?.sakInformasjon?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjon?.sakType?.name}  
+                    sakType: ${saksInfoSamlet?.saktype?.name}, 
+                    identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
                 **********""".trimIndent()
                 )
 
-                // Henter dokumenter
-                val (documents, uSupporterteVedlegg) = sedHendelse.run {
-                    pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, sedType!!)
-                }
+                val aktoerId = identifisertPerson?.aktoerId
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
                     identifisertPerson,
-                    saktype,
+                    saksInfoSamlet?.saktype,
                     sedHendelse,
                     hendelseType,
-                    sakInformasjon,
+                    saksInfoSamlet?.sakInformasjon,
                     harAdressebeskyttelse,
-                    identifisertePersoner
+                    identifisertePersoner,
+                    kravTypeFraSed
                 )
 
+                // Henter dokumenter
+                val (documents, _) = sedHendelse.run {
+                    sedType?.let {
+                        pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it)
+                            .also { documentsAndAttachments ->
+                                if (documentsAndAttachments.second.isNotEmpty()) {
+                                    opprettBehandleSedOppgave(
+                                        null,
+                                        tildeltJoarkEnhet,
+                                        aktoerId,
+                                        sedHendelse,
+                                        usupporterteFilnavn(documentsAndAttachments.second)
+                                    )
+                                }
+                            }
+                    } ?: throw IllegalStateException("sedType is null")
+                }
+
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(sedHendelse.bucType!!, saktype, identifisertPerson?.personRelasjon?.
-                fnr, identifisertePersoner, sedHendelse.rinaSakId)
+                val tema = hentTema(
+                    sedHendelse,
+                    saksInfoSamlet?.saktype,
+                    identifisertPerson?.personRelasjon?.fnr,
+                    identifisertePersoner,
+                    kravTypeFraSed
+                ).also {
+                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
+                }
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
+
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, gjennySakId, sakInformasjon),
+                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, saksInfoSamlet?.saksIdFraSed, saksInfoSamlet?.sakInformasjon),
                     dokumenter = documents,
-                    saktype = saktype,
+                    saktype = saksInfoSamlet?.saktype,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
-                    tema = tema
+                    tema = tema,
+                    kravType = kravTypeFraSed
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
@@ -145,7 +177,7 @@ class JournalforingService(
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
-                    identifisertPerson,
+                    identifisertPerson?.personRelasjon?.fnr,
                     hendelseType,
                     sedHendelse,
                     journalPostResponse,
@@ -156,12 +188,9 @@ class JournalforingService(
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
 
-                val aktoerId = identifisertPerson?.aktoerId
-                logger.info(
-                    "********** Maskinelt journalført:${journalPostResponse?.journalpostferdigstilt}" +
-                            ", sed: ${sedHendelse.sedType}" +
-                            ", enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********"
-                )
+                journalPostResponse?.journalpostferdigstilt?.let { journalPostFerdig ->
+                    logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+                }
 
                 if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
                     val melding = OppgaveMelding(
@@ -172,20 +201,10 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        OppgaveType.JOURNALFORING,
+                        if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-                }
-
-                if (uSupporterteVedlegg.isNotEmpty()) {
-                    opprettBehandleSedOppgave(
-                        null,
-                        tildeltJoarkEnhet,
-                        aktoerId,
-                        sedHendelse,
-                        usupporterteFilnavn(uSupporterteVedlegg)
-                    )
                 }
 
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
@@ -199,7 +218,7 @@ class JournalforingService(
                     )
                     kravInitialiseringsService.initKrav(
                         sedHendelse,
-                        sakInformasjon,
+                        saksInfoSamlet?.sakInformasjon,
                         sed
                     )
                 } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt, hendelseType)
@@ -207,7 +226,7 @@ class JournalforingService(
                 produserStatistikkmelding(
                     sedHendelse,
                     tildeltJoarkEnhet.enhetsNr,
-                    saktype,
+                    saksInfoSamlet?.saktype,
                     hendelseType
                 )
             } catch (ex: MismatchedInputException) {
@@ -319,7 +338,8 @@ class JournalforingService(
         hendelseType: HendelseType,
         sakInformasjon: SakInformasjon?,
         harAdressebeskyttelse: Boolean,
-        antallIdentifisertePersoner: Int
+        antallIdentifisertePersoner: Int,
+        kravTypeFraSed: KravType?
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon
@@ -343,7 +363,13 @@ class JournalforingService(
 
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
-            else return enhetBasertPaaBehandlingstema(sedHendelse, saktype, identifisertPerson, antallIdentifisertePersoner)
+            else return enhetBasertPaaBehandlingstema(
+                sedHendelse,
+                saktype,
+                identifisertPerson,
+                antallIdentifisertePersoner,
+                kravTypeFraSed
+            )
                 .also {
                     logEnhet(enhetFraRouting, it)
                     metricsCounterForEnhet(it)
@@ -391,10 +417,18 @@ class JournalforingService(
         sedHendelse: SedHendelse?,
         saktype: SakType?,
         identifisertPerson: IdentifisertPerson,
-        antallIdentifisertePersoner: Int
+        antallIdentifisertePersoner: Int,
+        kravtypeFraSed: KravType?
     ): Enhet {
-        val tema = hentTema(sedHendelse?.bucType!!, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, sedHendelse.rinaSakId)
-        val behandlingstema = journalpostService.bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, antallIdentifisertePersoner)
+        val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, null)
+        val behandlingstema = journalpostService.bestemBehandlingsTema(
+            sedHendelse?.bucType!!,
+            saktype,
+            tema,
+            antallIdentifisertePersoner,
+            kravtypeFraSed
+
+        )
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
 
         return if (identifisertPerson.landkode == "NOR") {
@@ -415,31 +449,41 @@ class JournalforingService(
      * - saktype er UFØRETRYGD
      */
     fun hentTema(
-        bucType: BucType,
+        sedhendelse: SedHendelse?,
         saktype: SakType?,
         fnr: Fodselsnummer?,
         identifisertePersoner: Int,
-        euxCaseId: String
-    ) : Tema {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId)) {
-            val blob = gcpStorageService.hentFraGjenny(euxCaseId)
-            if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
-        } else {
-            val ufoereAlder = if (fnr != null && !fnr.erNpid) Period.between(fnr.getBirthDate(), LocalDate.now()).years in 19..61 else false
-            if (saktype == SakType.UFOREP || bucType == P_BUC_03 && saktype == null) UFORETRYGD
-            else {
-                val muligUfoereBuc = bucType in listOf(P_BUC_05, P_BUC_06)
-                if (muligUfoereBuc && ufoereAlder && identifisertePersoner <= 1) UFORETRYGD else PENSJON
-            }
+        kravtypeFraSed: KravType?
+    ): Tema {
+        if(fnr == null) {
+            // && saktype != UFOREP && sedhendelse?.bucType != P_BUC_03 && sedhendelse?.sedType != SedType.P2200 || kravtypeFraSed != KravType.UFOREP) return PENSJON
+            if(sedhendelse?.bucType == P_BUC_03 || saktype == UFOREP || kravtypeFraSed == KravType.UFOREP) return UFORETRYGD
+            return PENSJON
+        }
+        if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
+            val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
+            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+        }
+
+        //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
+        return when (sedhendelse?.bucType) {
+            P_BUC_01, P_BUC_02 -> if (saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            P_BUC_03 -> UFORETRYGD
+            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
+                if (erUforAlderUnder62(fnr) || saktype == UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            else -> if (saktype == SakType.ALDER) PENSJON else UFORETRYGD
         }
     }
+
+    fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
 
     fun hentSak(
         euxCaseId: String,
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId,) && sakIdFraSed != null)
+        return if (gcpStorageService.gjennyFinnes(euxCaseId) && sakIdFraSed != null)
             Sak("FAGSAK", sakIdFraSed, "EY")
         else if (sakInformasjon?.sakId != null)
             Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")

@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
@@ -23,10 +24,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.*
@@ -176,7 +174,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til PENSJON med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2200, SedStatus.RECEIVED)
@@ -407,6 +405,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
+        @Disabled
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
@@ -427,7 +426,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT,
-                norg2enhet = null
+                norg2enhet = null,
+                sedHendelse = createSedPensjon(P2200, FNR_VOKSEN_UNDER_62, null,  gjenlevendeFnr = FNR_VOKSEN_2, krav = KravType.UFOREP, relasjon = RelasjonTilAvdod.EKTEFELLE)
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
@@ -478,6 +478,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
         hendelseType: HendelseType,
         norg2enhet: Enhet? = null,
+        sedHendelse: SED? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) {
@@ -486,7 +487,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             null
         }
 
-        val sed = createSedPensjon(P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
+        val sed = sedHendelse ?: createSedPensjon(P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(

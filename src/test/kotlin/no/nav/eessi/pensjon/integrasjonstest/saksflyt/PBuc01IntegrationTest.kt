@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -22,11 +21,10 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.BEHANDLE_SED
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.*
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
-import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -117,7 +115,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
-                verify { journalpostKlient.settStatusAvbrutt("429434378") }
+                verify { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
             }
         }
 
@@ -467,8 +465,10 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             )
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
+            every { personService.hentPerson(Npid("12345678901")) } returns createBrukerWith(FNR_OVER_62, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
+
             testRunnerVoksen(
-                "01220049651",
+                FNR_OVER_62,
                 bestemsak,
                 land = "SWE",
                 krav = KravType.ALDER,
@@ -482,17 +482,16 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+                assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(2, oppgaveMeldingList.size)
 
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
                 assertEquals(BEHANDLE_SED, it.oppgaveMeldingUgyldig!!.oppgaveType)
             }
-
         }
 
         @Test
@@ -501,7 +500,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 null, listOf(
                     SakInformasjon(
                         sakId = SAK_ID,
-                        sakType = UFOREP,
+                        sakType = ALDER,
                         sakStatus = LOPENDE
                     )
                 )
@@ -509,11 +508,11 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", P2200, SedStatus.SENT))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
+                FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
-                assertEquals(UFORETRYGD, journalpostRequest.tema)
+                assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
 
                 assertEquals(1, oppgaveMeldingList.size)
@@ -521,7 +520,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
             }
 
@@ -539,8 +538,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
-                assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
-                assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
+                assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
 
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)

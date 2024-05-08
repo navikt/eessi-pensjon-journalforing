@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
         return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
@@ -21,6 +22,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakId: String): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+        secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
 
         if(saklist.isEmpty()){
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ") 
@@ -47,7 +49,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .map { id -> trimSakidString(id) }
             .distinct()
             .singleOrNull()
-            .also { sakId -> logger.debug("Fant sakId i SED: $sakId") }
+            .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
     }
 
     private fun filterEESSIsak(sed: SED): String? {

@@ -65,7 +65,7 @@ class GcpStorageService(
         try {
             val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
             if(jsonHendelse.exists()){
-                logger.info("Henter journalpost med rinanr $storageKey")
+                logger.info("Henter melding med rinanr $storageKey, for bucket $bucketName")
                 return jsonHendelse.getContent().decodeToString()
             }
         } catch ( ex: Exception) {
