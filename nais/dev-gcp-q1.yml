@@ -21,6 +21,7 @@ spec:
         - host: eessi-pensjon-oppgave-q1.intern.dev.nav.no
         - host: eux-rina-api-q1.dev-fss-pub.nais.io
         - host: dokarkiv-q1.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
