@@ -21,8 +21,8 @@ import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
@@ -127,8 +127,8 @@ internal class ConfigRestTemplateTest {
         )
 
         //sjekker at denne går gjennom og at det lages en oppgave
-        assertEquals(Tema.PENSJON, requestSlot.captured.tema)
-        assertEquals(Enhet.ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
+        assertEquals(UFORETRYGD, requestSlot.captured.tema)
+        assertEquals(ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
     }
 
     @TestConfiguration

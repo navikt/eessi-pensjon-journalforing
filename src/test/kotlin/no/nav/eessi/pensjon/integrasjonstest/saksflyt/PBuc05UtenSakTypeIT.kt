@@ -26,7 +26,7 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
         testRunnerFlerePersoner(
             FNR_VOKSEN_UNDER_62,
             FNR_BARN, emptyList(), rolle = Rolle.FORSORGER) {
-            assertEquals(UFORETRYGD, it.tema)
+            assertEquals(PENSJON, it.tema)
             assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
         }
     }

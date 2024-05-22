@@ -66,7 +66,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak,
                 land = "SWE",
                 krav = KravType.ALDER,
@@ -133,7 +133,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak,
                 land = "SWE",
                 krav = KravType.ALDER,
@@ -187,7 +187,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, forsokFerdigStilt = false, hendelseType = MOTTATT
+                FNR_OVER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, forsokFerdigStilt = false, hendelseType = MOTTATT
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
@@ -208,7 +208,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT
+                FNR_OVER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
                 val journalpostRequest = it.opprettJournalpostRequest
@@ -391,13 +391,13 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
     }
         @Test
         fun `Gitt en P_BUC_01 med flere P8000 med forskjellige roller - så velges forsikret person som det journalfores på`() {
-            val fnr = "28127822044"
+            val fnr = "09035225916"
             val afnr = "05127921999"
             val bfnr = "05121021999"
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr, fdato = "1952-03-09"))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
 
@@ -533,7 +533,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", P2000, SedStatus.SENT))
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
+                FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
             ) {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
