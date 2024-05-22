@@ -467,7 +467,7 @@ class JournalforingService(
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         return when (sedhendelse?.bucType) {
-            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (saktype == UFOREP ||  identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
                 if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || identifisertePersoner == 1 && saktype == UFOREP) UFORETRYGD else PENSJON
