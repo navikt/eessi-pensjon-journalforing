@@ -19,7 +19,7 @@ jobs:
   bygg_og_publiser:
     name: 'Bygg branch og publiser image'
     permissions:
-      contents: "write"
+      contents: "read"
       id-token: "write"
     runs-on: ubuntu-latest
     steps:
