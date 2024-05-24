@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.eux
 
+import no.nav.eessi.pensjon.eux.SedTypeUtils.mapKravtypeTilSaktype
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -88,11 +88,7 @@ class EuxService(
         } else if (sedHendelse.bucType == P_BUC_10) {
             val sed = alleSedIBuc.firstOrNull { it.type == P15000 }
             if (sed != null) {
-                return when (sed.nav?.krav?.type) {
-                    "02" -> GJENLEV
-                    "03" -> UFOREP
-                    else -> ALDER
-                }
+                return mapKravtypeTilSaktype(sed.nav?.krav?.type)
             }
         }
         return null
@@ -110,10 +106,10 @@ class EuxService(
      * */
     private fun filterSaktypeR005(sed: R005): SakType {
         return when (sed.tilbakekreving?.feilutbetaling?.ytelse?.type) {
-            "alderspensjon" -> ALDER
-            "uførepensjon" -> UFOREP
-            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> GJENLEV
-            "barnepensjon" -> BARNEP
+            "alderspensjon" -> SakType.ALDER
+            "uførepensjon" -> SakType.UFOREP
+            "etterlattepensjon_enke", "etterlattepensjon_enkemann", "andre_former_for_etterlattepensjon" -> SakType.GJENLEV
+            "barnepensjon" -> SakType.BARNEP
             else -> throw RuntimeException("Klarte ikke å finne saktype for R_BUC_02")
         }
     }
