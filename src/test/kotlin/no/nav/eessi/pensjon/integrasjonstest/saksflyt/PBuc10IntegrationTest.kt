@@ -83,12 +83,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING )
 
             testRunner(FNR_VOKSEN_UNDER_62, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
             testRunner(FNR_VOKSEN_2, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
@@ -103,12 +103,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, AVSLUTTET)
 
             testRunner(FNR_VOKSEN_UNDER_62, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
             testRunner(FNR_VOKSEN_2, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }

@@ -75,7 +75,7 @@ open class RelasjonTestBase {
             nav = Nav(
                 bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle, createNameIfFnr(forsikretFnr))),
                 annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle, createNameIfFnr(annenPersonFnr, ANNEN_FNAVN))),
-                krav = navKrav?.let { Krav(type = it.verdi) }
+                krav = navKrav?.let { Krav(type = it) }
             ),
             pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )

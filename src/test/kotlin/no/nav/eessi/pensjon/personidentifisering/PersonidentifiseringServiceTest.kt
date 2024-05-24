@@ -718,7 +718,7 @@ class PersonidentifiseringServiceTest {
             nav = Nav(
                 bruker = Bruker(person = createPerson(forsikretFnr, forsikretRolle)),
                 annenperson = Bruker(person = createPerson(annenPersonFnr, annenPersonRolle)),
-                krav = navKrav?.let { Krav(type = it.verdi) }
+                krav = navKrav?.let { Krav(type = it) }
             ),
             pensjon = gjenlevFnr?.let { createPensjon(gjenlevFnr, gjenlevRelasjon, gjenlevRolle) }
         )
