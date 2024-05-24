@@ -18,13 +18,13 @@ internal class KravSerdeTest {
 
     @Test
     fun `Serde Krav object`() {
-        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER.verdi)
+        val alder = Krav(dato = "01-01-2020", type = KravType.ALDER)
         assertEquals(alder, serde(alder))
 
-        val gjenlev = Krav(dato = "01-01-2020", type = KravType.GJENLEV.verdi)
+        val gjenlev = Krav(dato = "01-01-2020", type = KravType.GJENLEV)
         assertEquals(gjenlev, serde(gjenlev))
 
-        val ufore = Krav(dato = "01-01-2020", type = KravType.UFOREP.verdi)
+        val ufore = Krav(dato = "01-01-2020", type = KravType.UFOREP)
         assertEquals(ufore, serde(ufore))
     }
 
