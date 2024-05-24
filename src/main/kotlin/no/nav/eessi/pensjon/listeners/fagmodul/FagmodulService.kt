@@ -54,6 +54,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private fun filterEESSIsak(sed: SED): String? {
         val sak = sed.nav?.eessisak ?: return null
+        logger.info("Sak fra SED: ${sak.toJson()}")
 
         return sak.filter { it.land == "NO" }
             .mapNotNull { it.saksnummer }
