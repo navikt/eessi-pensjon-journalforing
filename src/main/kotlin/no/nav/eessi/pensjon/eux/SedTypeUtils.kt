@@ -4,6 +4,8 @@ import no.nav.eessi.pensjon.eux.SedTypeUtils.typerMedIdentEllerFDato
 import no.nav.eessi.pensjon.eux.SedTypeUtils.ugyldigeTyper
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.sed.KravType
 
 object SedTypeUtils {
 
@@ -28,6 +30,14 @@ object SedTypeUtils {
         P13000, X001, X002, X003, X004, X006, X007, X009,
         X011, X012, X013, X050, X100, H001, H002, H020, H021, H120, H121, R006
     )
+
+    fun mapKravtypeTilSaktype(krav: KravType?): SakType {
+        return when (krav) {
+            KravType.GJENLEV -> SakType.GJENLEV
+            KravType.UFOREP -> SakType.UFOREP
+            else -> SakType.ALDER
+        }
+    }
 }
 
 fun SedType.kanInneholdeIdentEllerFdato(): Boolean = this in typerMedIdentEllerFDato
