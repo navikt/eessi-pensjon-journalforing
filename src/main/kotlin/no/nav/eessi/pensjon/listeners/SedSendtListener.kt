@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
@@ -103,6 +104,9 @@ class SedSendtListener(
             identifisertPerson,
             alleSedIBucList.plus(kansellerteSeder)
         )
+
+        val kravTypeISed = alleSedIBucList.firstOrNull { it.type == SedType.P15000 }?.nav?.krav?.type
+
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
             sedHendelse,
@@ -124,7 +128,7 @@ class SedSendtListener(
             identifisertePersoner.count()
                 .also { logger.info("Antall identifisertePersoner: $it") },
             navAnsattMedEnhet,
-            null
+            kravTypeISed
         )
     }
 }

@@ -2,8 +2,6 @@ package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
@@ -121,7 +119,7 @@ class SedMottattListener(
             currentSed,
             harAdressebeskyttelse,
             identifisertePersoner.count(),
-            kravTypeFraSed = KravType.fraVerdi(currentSed?.nav?.krav?.type),
+            kravTypeFraSed = currentSed?.nav?.krav?.type,
         )
     }
 }
