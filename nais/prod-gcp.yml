@@ -30,7 +30,7 @@ spec:
   gcp:
     buckets:
       - name: eessi-pensjon-journal
-        retentionPeriodDays: 40
+        retentionPeriodDays: 30
         lifecycleCondition:
           age: 365
           createdBefore: 2020-01-01
