@@ -5,12 +5,11 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.KravType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
@@ -114,10 +113,9 @@ class JournalforingService(
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
                     identifisertPerson,
-                    saksInfoSamlet?.saktype,
                     sedHendelse,
                     hendelseType,
-                    saksInfoSamlet?.sakInformasjon,
+                    saksInfoSamlet,
                     harAdressebeskyttelse,
                     identifisertePersoner,
                     kravTypeFraSed
@@ -144,10 +142,10 @@ class JournalforingService(
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
                 val tema = hentTema(
                     sedHendelse,
-                    saksInfoSamlet?.saktype,
                     identifisertPerson?.personRelasjon?.fnr,
                     identifisertePersoner,
-                    kravTypeFraSed
+                    kravTypeFraSed,
+                    saksInfoSamlet
                 ).also {
                     logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
                 }
@@ -333,10 +331,9 @@ class JournalforingService(
     private fun journalforingsEnhet(
         fdato: LocalDate?,
         identifisertPerson: IdentifisertPerson?,
-        saktype: SakType?,
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
-        sakInformasjon: SakInformasjon?,
+        sakInfo: SaksInfoSamlet?,
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int,
         kravTypeFraSed: KravType?
@@ -351,10 +348,10 @@ class JournalforingService(
                 OppgaveRoutingRequest.fra(
                     identifisertPerson,
                     fdato,
-                    saktype,
+                    sakInfo?.saktype,
                     sedHendelse,
                     hendelseType,
-                    sakInformasjon,
+                    sakInfo?.sakInformasjon,
                     harAdressebeskyttelse
                 )
             )
@@ -365,7 +362,7 @@ class JournalforingService(
 
             else return enhetBasertPaaBehandlingstema(
                 sedHendelse,
-                saktype,
+                sakInfo,
                 identifisertPerson,
                 antallIdentifisertePersoner,
                 kravTypeFraSed
@@ -415,15 +412,15 @@ class JournalforingService(
 
     private fun enhetBasertPaaBehandlingstema(
         sedHendelse: SedHendelse?,
-        saktype: SakType?,
+        sakinfo: SaksInfoSamlet?,
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int,
         kravtypeFraSed: KravType?
     ): Enhet {
-        val tema = hentTema(sedHendelse, saktype, identifisertPerson.fnr, antallIdentifisertePersoner, null)
+        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
-            saktype,
+            sakinfo?.saktype,
             tema,
             antallIdentifisertePersoner,
             kravtypeFraSed
@@ -450,14 +447,14 @@ class JournalforingService(
      */
     fun hentTema(
         sedhendelse: SedHendelse?,
-        saktype: SakType?,
         fnr: Fodselsnummer?,
         identifisertePersoner: Int,
-        kravtypeFraSed: KravType?
+        kravtypeFraSed: KravType?,
+        saksInfo: SaksInfoSamlet?
     ): Tema {
         if(fnr == null) {
             // && saktype != UFOREP && sedhendelse?.bucType != P_BUC_03 && sedhendelse?.sedType != SedType.P2200 || kravtypeFraSed != KravType.UFOREP) return PENSJON
-            if(sedhendelse?.bucType == P_BUC_03 || saktype == UFOREP || kravtypeFraSed == KravType.UFOREP) return UFORETRYGD
+            if(sedhendelse?.bucType == P_BUC_03 || saksInfo?.saktype == UFOREP || kravtypeFraSed == KravType.UFOREP) return UFORETRYGD
             return PENSJON
         }
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
@@ -467,12 +464,13 @@ class JournalforingService(
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         return when (sedhendelse?.bucType) {
-            P_BUC_01, P_BUC_02 -> if (saktype == UFOREP ||  identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+
+            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
-                if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || identifisertePersoner == 1 && saktype == UFOREP) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
-            else -> if (saktype == SakType.ALDER) PENSJON else UFORETRYGD
+                if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE|| erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
+            else -> if (saksInfo?.saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
         }
     }
 
