@@ -86,19 +86,23 @@ class GcpStorageService(
     }
 
     fun lagreJournalPostRequest(request: String?, rinaId: String?, sedId: String?) {
-        if(rinaId == null || sedId == null) {
-            logger.error("Mangler informasjon fra: $rinaId, sedId: $sedId")
-            return
+        try {
+            if(rinaId == null || sedId == null) {
+                logger.error("Mangler informasjon fra: $rinaId, sedId: $sedId")
+                return
+            }
+            val path = "${rinaId}/${sedId}"
+            logger.info("Storing sedhendelse to S3: $path")
+            val blob = gcpStorage.create(
+                BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
+                request?.toByteArray()
+            )
+            logger.debug("""Journalpostdetaljer lagret i bucket: 
+                | $journalBucket, med key: ${blob.name}
+                | innhold""".trimMargin() + request)
+        } catch (_: Exception) {
+            logger.warn("Feil under lagring av journalpost request")
         }
-        val path = "${rinaId}/${sedId}"
-        logger.info("Storing sedhendelse to S3: $path")
-        val blob = gcpStorage.create(
-            BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
-            request?.toByteArray()
-        )
-        logger.debug("""Journalpostdetaljer lagret i bucket: 
-            | $journalBucket, med key: ${blob.name}
-            | innhold""".trimMargin() + request)
     }
 
     private fun hentJournalPost(rinaId: String, sedId: String): String? {
