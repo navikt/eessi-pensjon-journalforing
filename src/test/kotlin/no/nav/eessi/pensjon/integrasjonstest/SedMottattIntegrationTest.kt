@@ -45,6 +45,8 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         every { gcpStorageService.gjennyFinnes(any())} returns false
         every { gcpStorageService.journalFinnes(any())} returns false
         justRun{ gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any())}
+        justRun { gcpStorageService.arkiverteSakerForRinaId(any()) }
+        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
     }
 
     @TestConfiguration

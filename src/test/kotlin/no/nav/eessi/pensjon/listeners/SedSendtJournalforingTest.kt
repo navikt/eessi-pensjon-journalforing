@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING_UT
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
@@ -110,6 +109,8 @@ internal class SedSendtJournalforingTest {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.journalFinnes(any()) } returns false
+        justRun { gcpStorageService.arkiverteSakerForRinaId(any()) }
+
     }
 
     @Test

@@ -77,14 +77,56 @@ class GcpStorageService(
     fun lagreJournalpostDetaljer(journalpostId: String?, rinaSakId: String, rinaDokumentId: String, sedType: SedType?, eksternReferanseId: String) {
         val journalpostDetaljer = JournalpostDetaljer(journalpostId, rinaSakId, rinaDokumentId, sedType, eksternReferanseId)
         val blob = gcpStorage.create(
-            BlobInfo.newBuilder(journalBucket, rinaSakId)
-                .setContentType("application/json")
-                .build(),
+            BlobInfo.newBuilder(journalBucket, rinaSakId).setContentType("application/json").build(),
             journalpostDetaljer.toJson().toByteArray()
         )
         logger.info("""Journalpostdetaljer lagret i bucket: 
             | $journalBucket, med key: ${blob.name}
             | innhold""".trimMargin() + journalpostDetaljer.toJson())
+    }
+
+    fun lagreJournalPostRequest(request: String?, rinaId: String?, sedId: String?) {
+        if(rinaId == null || sedId == null) {
+            logger.error("Mangler informasjon fra: $rinaId, sedId: $sedId")
+            return
+        }
+        val path = "${rinaId}/${sedId}"
+        logger.info("Storing sedhendelse to S3: $path")
+        val blob = gcpStorage.create(
+            BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
+            request?.toByteArray()
+        )
+        logger.debug("""Journalpostdetaljer lagret i bucket: 
+            | $journalBucket, med key: ${blob.name}
+            | innhold""".trimMargin() + request)
+    }
+
+    private fun hentJournalPost(rinaId: String, sedId: String): String? {
+        try {
+            val path = "${rinaId}/${sedId}"
+            val request = gcpStorage.get(BlobId.of(journalBucket, path))
+            if(request.exists()){
+                logger.info("Henter melding med rinanr $rinaId, for bucket $journalBucket")
+                return request.getContent().decodeToString()
+            }
+        } catch ( ex: Exception) {
+            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
+        }
+        return null
+    }
+
+    fun arkiverteSakerForRinaId(rinaId: String) {
+        try {
+            val blobs = gcpStorage.list(journalBucket)
+            for (blob in blobs.iterateAll()) {
+                logger.debug(blob.name)
+                if(blob.name.contains(rinaId)){
+                    logger.info("Vi har treff på en tidligere sak som mangler bruker")
+                }
+            }
+        } catch (ex: Exception) {
+            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
+        }
     }
 }
 
