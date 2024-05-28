@@ -106,6 +106,7 @@ internal class ConfigRestTemplateTest {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { gcpStorageService.gjennyFinnes(any())} returns false
         every { gcpStorageService.journalFinnes(any())} returns false
+        justRun { gcpStorageService.arkiverteSakerForRinaId(any()) }
     }
 
 

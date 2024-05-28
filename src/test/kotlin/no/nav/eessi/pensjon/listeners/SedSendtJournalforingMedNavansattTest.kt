@@ -43,6 +43,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -91,6 +92,11 @@ internal class SedSendtJournalforingMedNavansattTest {
         gcpStorageService,
         "test",
     )
+
+    @BeforeEach
+    fun setup() {
+        justRun { gcpStorageService.arkiverteSakerForRinaId(any()) }
+    }
 
     @Test
     fun `Navansatt ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
