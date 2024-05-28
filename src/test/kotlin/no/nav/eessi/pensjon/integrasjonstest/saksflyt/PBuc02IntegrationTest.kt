@@ -219,7 +219,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
