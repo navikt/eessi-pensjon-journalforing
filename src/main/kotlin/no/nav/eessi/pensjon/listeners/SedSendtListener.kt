@@ -122,7 +122,7 @@ class SedSendtListener(
             SENDT,
             identifisertPerson,
             fdato,
-            saksInfoSamlet = saksInfoSamlet,
+            saksInfoSamlet,
             currentSed,
             harAdressebeskyttelse,
             identifisertePersoner.count()

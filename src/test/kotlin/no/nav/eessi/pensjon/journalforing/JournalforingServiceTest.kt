@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.P2000
 import no.nav.eessi.pensjon.eux.model.sed.P2100
@@ -19,6 +20,8 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -81,7 +84,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            sedPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
@@ -90,7 +93,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedHendelse,
             MOTTATT,
             identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
+            SLAPP_SKILPADDE.getBirthDate(),
             SaksInfoSamlet(saktype = ALDER),
             sed,
             identifisertePersoner = 1,
@@ -155,12 +158,12 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @Test
     fun `Sendt gyldig Sed R005 på R_BUC_02`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R005.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(),
+            sedPersonRelasjon(SLAPP_SKILPADDE),
             "SE",
         )
 
@@ -168,14 +171,15 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedHendelse,
             SENDT,
             identifisertPerson,
-            fdato,
-            SaksInfoSamlet(saktype = ALDER),
+            LocalDate.of(1952, 3, 9),
+            SaksInfoSamlet(saktype = ALDER, sakInformasjon = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
             SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             kravTypeFraSed = null
         )
-        assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(PENSJON, opprettJournalpostRequestCapturingSlot.captured.tema)
+        assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
@@ -195,7 +199,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             fdato,
-            SaksInfoSamlet(saktype = ALDER),
+            SaksInfoSamlet(saktype = ALDER, sakInformasjon = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
             SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = null,
@@ -211,7 +215,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(),
+            sedPersonRelasjon(SLAPP_SKILPADDE),
             geografiskTilknytning = "3811"
         )
         val dodPerson = identifisertPersonPDL(
@@ -317,14 +321,14 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
 
         journalforingService.journalfor(
             sedHendelse,
             SENDT,
             identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
+            SLAPP_SKILPADDE.getBirthDate(),
             sed = SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
@@ -434,19 +438,20 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @Test
     fun `Mottat Sed i P_BUC_10`() {
-        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_10_P15000.json")))
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_10_P15000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon()
+            fnr = SLAPP_SKILPADDE,
+            personRelasjon = sedPersonRelasjon(fnr = SLAPP_SKILPADDE)
         )
 
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,
             identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
+            SLAPP_SKILPADDE.getBirthDate(),
             sed = SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
@@ -677,7 +682,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.valueOf(buc)
             every { sedType } returns SedType.valueOf(sedtype)
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2, null)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null)
         assertEquals(Tema.valueOf(tema), result)
     }
 
@@ -688,8 +693,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P4000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, null, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.valueOf(Tema.PENSJON.toString()), result)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null)
+        assertEquals(Tema.valueOf(PENSJON.toString()), result)
     }
 
     @Test
@@ -699,9 +704,12 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.PENSJON, result)
+
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP))
+        assertEquals(PENSJON, result)
     }
+
+    private fun saksInfoSamlet(sakType: SakType) = SaksInfoSamlet("321654", SakInformasjon("321654", sakType, LOPENDE), saktype = sakType)
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
@@ -710,8 +718,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
-        assertEquals(Tema.UFORETRYGD, result)
+        val result = journalforingService.hentTema(mockedSedhendelse,  LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        assertEquals(UFORETRYGD, result)
     }
 
     @Test
@@ -721,8 +729,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.PENSJON, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GJENLEV))
+        assertEquals(PENSJON, result)
     }
 
     @Test
@@ -732,10 +740,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, null, SLAPP_SKILPADDE, 2, null)
-        val result2 = journalforingService.hentTema(mockedSedhendelse, null, SLAPP_SKILPADDE, 1, null)
-        assertEquals(Tema.PENSJON, result)
-        assertEquals(Tema.PENSJON, result2)
+        val result = journalforingService.hentTema(mockedSedhendelse,  SLAPP_SKILPADDE, 2, null,saksInfoSamlet(ALDER))
+        val result2 = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        assertEquals(PENSJON, result)
+        assertEquals(PENSJON, result2)
     }
 
     @Test
@@ -745,8 +753,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, SLAPP_SKILPADDE, 1, null)
-        assertEquals(Tema.PENSJON, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        assertEquals(PENSJON, result)
     }
 
     @Test
@@ -756,8 +764,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
-        assertEquals(Tema.UFORETRYGD, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        assertEquals(UFORETRYGD, result)
     }
 
     @Test
@@ -767,31 +775,35 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, ALDER, SLAPP_SKILPADDE, 2, null)
-        assertEquals(Tema.PENSJON, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, null, saksInfoSamlet(ALDER))
+        assertEquals(PENSJON, result)
     }
 
     @Test
-    fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes teama PEN`() {
+    fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes tema PEN`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, GENRL, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.UFORETRYGD, resultatGENRL)
+        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL))
 
-        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, OMSORG, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.UFORETRYGD, resultatOMSORG)
+        assertEquals(Tema.PENSJON, resultatGENRL)
 
-        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, ALDER, fnr = SLAPP_SKILPADDE, 1, null)
-        assertEquals(Tema.PENSJON, resultatALDER)
+        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(OMSORG))
+        assertEquals(Tema.PENSJON, resultatOMSORG)
 
-        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, GJENLEV, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.UFORETRYGD, resultatGJENLEV)
+        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        assertEquals(PENSJON, resultatALDER)
 
-        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, BARNEP, LEALAUS_KAKE, 2, null)
-        assertEquals(Tema.UFORETRYGD, resultatBARNEP)
+        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null,saksInfoSamlet(GJENLEV))
+        assertEquals(Tema.PENSJON, resultatGJENLEV)
+
+        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP))
+        assertEquals(Tema.PENSJON, resultatBARNEP)
+
+        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        assertEquals(Tema.UFORETRYGD, resultatUFORE)
     }
 
     @Test
@@ -801,8 +813,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, UFOREP, LEALAUS_KAKE, 1, null)
-        assertEquals(Tema.UFORETRYGD, result)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        assertEquals(UFORETRYGD, result)
     }
 
 }

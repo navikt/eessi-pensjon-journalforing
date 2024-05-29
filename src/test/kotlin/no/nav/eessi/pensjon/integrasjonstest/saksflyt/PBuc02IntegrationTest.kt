@@ -43,8 +43,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
@@ -69,8 +69,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.GJENLEV,
                 land = "SWE",
@@ -130,8 +130,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.GJENLEV,
                 land = "SWE",
@@ -159,7 +159,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
-                FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.ALDER,
                 land = "NOR",
@@ -219,7 +219,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 FNR_VOKSEN_2,
                 bestemsak,
                 krav = KravType.UFOREP,
@@ -229,7 +229,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
@@ -246,8 +246,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 krav = KravType.GJENLEV,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
@@ -272,8 +272,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.GJENLEV,
                 land = "SWE",
@@ -333,8 +333,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.GJENLEV,
                 land = "SWE",
@@ -361,8 +361,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.ALDER,
                 land = "NOR",
@@ -389,8 +389,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.ALDER,
                 land = "NOR",
@@ -452,8 +452,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerVoksen(
-                FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
+                FNR_OVER_62,
                 bestemsak,
                 krav = KravType.UFOREP,
                 land = "NOR",

@@ -62,7 +62,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderspensjon`() {
              val bestemsak = bestemSakResponse(sakStatus = TIL_BEHANDLING)
 
-             testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
+             testRunner(FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                  assertEquals(PENSJON, it.tema)
                  assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
              }
@@ -93,7 +93,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             }
 
             testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
@@ -245,8 +245,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = bestemSakResponse(sakStatus = TIL_BEHANDLING)
 
             testRunnerVoksen(
-                FNR_OVER_62,
                 FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -263,8 +263,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak2 = bestemSakResponse(SakType.GJENLEV, TIL_BEHANDLING)
 
             testRunnerVoksen(
-                FNR_OVER_62,
                 FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak2,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -280,7 +280,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om gjenlevendeytelse - GP eller AP - mangler relasjon - sakid fra sed - maskinell journalføring`() {
             val bestemsak2 = bestemSakResponse(sakStatus = TIL_BEHANDLING)
 
-            testRunnerVoksen(FNR_OVER_62, FNR_VOKSEN_UNDER_62, bestemsak2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
+            testRunnerVoksen(FNR_VOKSEN_2, FNR_OVER_62, bestemsak2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -288,7 +288,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om gjenlevendeytelse - GP eller AP - mangler relasjon - mangler sakid - id og fordeling`() {
-            testRunnerVoksen(FNR_OVER_62, FNR_VOKSEN_UNDER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
+            testRunnerVoksen(FNR_VOKSEN_2, FNR_OVER_62, null, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -305,8 +305,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, TIL_BEHANDLING)
 
             testRunnerVoksen(
-                FNR_OVER_62,
                 FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -329,9 +329,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om gjenlevendeytelse - Uføretrygd manuelt - id og fordeling`() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, AVSLUTTET)
 
+            //TODO feil enhet og feil tema(person nummer 2 skal ikke trenge å være over 62 år for å få tema pensjon her)
             testRunnerVoksen(
-                FNR_OVER_62,
                 FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 bestemsak,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -342,9 +343,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            //TODO Feil tema og feil enhet
             testRunnerVoksen(
-                FNR_OVER_62,
                 FNR_VOKSEN_UNDER_62,
+                FNR_OVER_62,
                 null,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
@@ -353,7 +355,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-                assertEquals(FNR_VOKSEN_UNDER_62, it.bruker?.id!!)
+                assertEquals(FNR_OVER_62, it.bruker?.id!!)
             }
         }
     }
@@ -378,7 +380,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 }
 
-            testRunnerVoksen(FNR_OVER_62, FNR_VOKSEN_UNDER_62, bestemsak, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = SENDT) {
+            testRunnerVoksen(FNR_VOKSEN_UNDER_62,FNR_OVER_62, bestemsak, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -400,7 +402,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 }
 
-            testRunnerVoksen(FNR_OVER_62, FNR_VOKSEN_UNDER_62, bestemsak, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = SENDT) {
+            testRunnerVoksen(FNR_VOKSEN_2, FNR_OVER_62, bestemsak, krav = GJENLEV, alleDocs = allDocuemtActions, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -443,7 +445,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 }
 
-            testRunnerVoksen(FNR_VOKSEN_UNDER_62, FNR_VOKSEN_2, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
+            testRunnerVoksen(FNR_VOKSEN_UNDER_62, FNR_OVER_62, krav = GJENLEV, alleDocs = allDocuemtActions, relasjonAvod = null, hendelseType = SENDT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -474,7 +476,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING)
 
 
-            testRunner(FNR_VOKSEN_2, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
+            testRunner(FNR_OVER_62, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
@@ -489,7 +491,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
             }
 
-            testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = null) {
+            testRunner(FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = MOTTATT, norg2svar = null) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -638,7 +640,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLANDSTILSNITT, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -680,7 +682,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
             assertEquals("INNGAAENDE", request.journalpostType.name)
-            assertEquals(PENSJON, request.tema)
+            assertEquals(UFORETRYGD, request.tema)
             assertEquals(UFORE_UTLAND, request.journalfoerendeEnhet)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -808,7 +810,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2svar = null
             ) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -819,8 +821,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario4Inngaende {
         @Test
         fun `Flere sed i buc, mottatt en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-            val sed15000mottatt = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_OVER_62, gjenlevendeFnr = "", krav = GJENLEV, relasjon = RelasjonTilAvdod.EKTEFELLE))
-            val sedP5000sendt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_62, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_VOKSEN_2))
+            val sed15000mottatt = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN_2, gjenlevendeFnr = "", krav = GJENLEV, relasjon = RelasjonTilAvdod.EKTEFELLE))
+            val sedP5000sendt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_62, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_OVER_62))
 
             val saker = listOf(
                 sakInformasjon(),
@@ -835,8 +837,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP5000sendt.toJson() andThen sed15000mottatt.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-            every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns createBrukerWith(FNR_OVER_62, "Avdød", "død", "SWE")
-            every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
+            every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Avdød", "død", "SWE")
+            every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns createBrukerWith(FNR_OVER_62, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
