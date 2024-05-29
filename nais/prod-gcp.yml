@@ -29,8 +29,8 @@ spec:
   webproxy: true
   gcp:
     buckets:
-      - name: eessi-pensjon-journal
-        retentionPeriodDays: 40
+      - name: eessi-pensjon-journal-uten-bruker
+        retentionPeriodDays: 30
         lifecycleCondition:
           age: 365
           createdBefore: 2020-01-01
@@ -45,7 +45,7 @@ spec:
     - name: NAMESPACE
       value: p
     - name: GCP_BUCKET_NAME_JOURNAL
-      value: eessi-pensjon-journal
+      value: eessi-pensjon-journal-uten-bruker
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny
     - name: EUX_RINA_API_V1_URL

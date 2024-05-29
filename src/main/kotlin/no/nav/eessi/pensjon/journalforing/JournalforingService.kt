@@ -37,6 +37,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -170,8 +171,15 @@ class JournalforingService(
 
                 val journalPostResponse = journalPostResponseOgRequest.first
 
-                // ved utgående kan det være mulig å benytte info fra en tidligere journalpost
-                skalJournalpostGjenbrukes(sedHendelse, journalPostResponseOgRequest)
+                // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
+                if(journalPostResponseOgRequest.second.bruker == null){
+                    logger.info("Joournalposten mangler bruker og vil bli lagret for fremtidig vurdering")
+                    gcpStorageService.lagreJournalPostRequest(journalPostResponseOgRequest.second.toJson(), sedHendelse.rinaSakId, sedHendelse.sedId)
+                }
+                else{
+                    // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
+                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId)
+                }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
