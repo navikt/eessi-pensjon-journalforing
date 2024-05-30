@@ -129,7 +129,7 @@ class GcpStorageService(
                     firstBlobLogged = true
                 }
                 if(blob.name.contains(rinaId)){
-                    logger.info("Vi har treff på en tidligere sak som mangler bruker")
+                    logger.info("Vi har treff på en tidligere sak: $rinaId som mangler bruker")
                 }
             }
         } catch (ex: Exception) {
