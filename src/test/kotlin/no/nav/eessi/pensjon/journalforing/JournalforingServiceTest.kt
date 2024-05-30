@@ -179,7 +179,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             kravTypeFraSed = null
         )
         assertEquals(PENSJON, opprettJournalpostRequestCapturingSlot.captured.tema)
-        assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 

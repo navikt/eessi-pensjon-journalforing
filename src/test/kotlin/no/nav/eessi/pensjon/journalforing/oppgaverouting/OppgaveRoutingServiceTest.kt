@@ -296,11 +296,11 @@ internal class OppgaveRoutingServiceTest {
                 Arrays.stream(
                     arrayOf(
                         TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SedType.R004),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SedType.R005),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SedType.R006),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R006),
                         TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SedType.R004),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SedType.R005),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SedType.R006),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SedType.R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SedType.R006),
                     )
                 )
         }
