@@ -119,17 +119,12 @@ class GcpStorageService(
         return null
     }
 
-    fun arkiverteSakerForRinaId(rinaId: String) {
+    fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) {
         try {
             val blobs = gcpStorage.list(journalBucket)
-            var firstBlobLogged = false  // Flag to check if the first blob has been logged
             for (blob in blobs.iterateAll()) {
-                if (!firstBlobLogged) {
-                    logger.info("Første blob: ${blob.name}")
-                    firstBlobLogged = true
-                }
                 if(blob.name.contains(rinaId)){
-                    logger.info("Vi har treff på en tidligere sak: $rinaId som mangler bruker")
+                    logger.info("Vi har treff på en tidligere buc: $rinaId som mangler bruker, dokument: $rinaDokumentId her bruker")
                 }
             }
         } catch (ex: Exception) {
