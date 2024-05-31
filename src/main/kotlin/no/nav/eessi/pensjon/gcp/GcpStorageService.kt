@@ -124,7 +124,7 @@ class GcpStorageService(
             val blobs = gcpStorage.list(journalBucket)
             for (blob in blobs.iterateAll()) {
                 if(blob.name.contains(rinaId)){
-                    logger.info("Vi har treff på en tidligere buc: $rinaId som mangler bruker, dokument: $rinaDokumentId her bruker")
+                    logger.info("Vi har treff på en tidligere buc: $rinaId som mangler bruker, dokument: $rinaDokumentId")
                 }
             }
         } catch (ex: Exception) {
