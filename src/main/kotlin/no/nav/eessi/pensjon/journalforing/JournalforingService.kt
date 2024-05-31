@@ -174,11 +174,26 @@ class JournalforingService(
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
                 if(journalPostResponseOgRequest.second.bruker == null){
                     logger.info("Joournalposten mangler bruker og vil bli lagret for fremtidig vurdering")
-                    gcpStorageService.lagreJournalPostRequest(journalPostResponseOgRequest.second.toJson(), sedHendelse.rinaSakId, sedHendelse.sedId)
+                    gcpStorageService.lagreJournalPostRequest(
+                        journalPostResponseOgRequest.second.toJson(), "${sedHendelse.rinaSakId}/${sedHendelse.sedId}"
+                    )
                 }
                 else{
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                    try {
+                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId).forEach {
+                            val lagretJournalPost = gcpStorageService.hentOpprettJournalRequest(it)
+                            logger.info("Henter tidligere lagret journalpost: ${lagretJournalPost?.tittel}")
+                            //TODO: sende JP på nytt
+
+                            // tagger sed med complete da den er sendt
+                            gcpStorageService.lagreJournalPostRequest(lagretJournalPost?.toJson(), it+ "_COMPLETE")
+                            // sletter orginal sed
+                            gcpStorageService.slettLagretJournalPost(it)
+                        }
+                    } catch (e: Exception) {
+                        logger.error("Feil under behandling av lageret sed uten bruker")
+                    }
                 }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
