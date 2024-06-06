@@ -11,7 +11,7 @@ name: Bygg, deploy publiser for branch RINA CDM
 on:
   push:
     branches:
-      - feature/rina-cdm
+      - feature/rina-cdm-2
 
 jobs:
   bygg_deploy_dev_publiser_tag:
@@ -50,12 +50,12 @@ jobs:
       - name: 'Deploy image'
         run: echo "IMAGE=${{ steps.docker-push.outputs.image }}"
 
-      - name: 'Deploy to DEV Q1'
+      - name: 'Deploy to DEV Q2 med Q1 RINA'
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: nais/dev-gcp-q1.yml
+          RESOURCE: nais/dev-gcp.yml
           IMAGE: ${{ steps.docker-push.outputs.image }}
 
       - name: 'Opprett git tag'
