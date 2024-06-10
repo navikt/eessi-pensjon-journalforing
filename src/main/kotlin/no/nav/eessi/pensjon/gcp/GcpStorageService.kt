@@ -5,7 +5,6 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -106,12 +105,12 @@ class GcpStorageService(
         }
     }
 
-    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): OpprettJournalpostRequest ? {
+    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): String ? {
         try {
             val request = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
             if(request.exists()){
                 logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
-                return mapJsonToAny<OpprettJournalpostRequest>(request.getContent().decodeToString())
+                return request.getContent().decodeToString()
             }
         } catch ( ex: Exception) {
             logger.warn("En feil oppstod under henting av objekt: $rinaIdOgSedId i bucket")
