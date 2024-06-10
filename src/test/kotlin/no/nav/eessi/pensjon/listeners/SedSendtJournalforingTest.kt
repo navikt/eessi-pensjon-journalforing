@@ -109,8 +109,7 @@ internal class SedSendtJournalforingTest {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.journalFinnes(any()) } returns false
-        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
-
+        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
     }
 
     @Test

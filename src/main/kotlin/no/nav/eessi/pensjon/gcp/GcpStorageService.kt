@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -105,31 +106,36 @@ class GcpStorageService(
         }
     }
 
-    private fun hentJournalPost(rinaId: String, sedId: String): String? {
+    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): OpprettJournalpostRequest ? {
         try {
-            val path = "${rinaId}/${sedId}"
-            val request = gcpStorage.get(BlobId.of(journalBucket, path))
+            val request = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
             if(request.exists()){
-                logger.info("Henter melding med rinanr $rinaId, for bucket $journalBucket")
-                return request.getContent().decodeToString()
+                logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
+                return mapJsonToAny<OpprettJournalpostRequest>(request.getContent().decodeToString())
             }
         } catch ( ex: Exception) {
-            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
+            logger.warn("En feil oppstod under henting av objekt: $rinaIdOgSedId i bucket")
         }
         return null
     }
 
-    fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) {
+    fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) : List<String>? {
         try {
             val blobs = gcpStorage.list(journalBucket)
             for (blob in blobs.iterateAll()) {
-                if(blob.name.contains(rinaId)){
-                    logger.info("Vi har treff på en tidligere buc: $rinaId som mangler bruker, dokument: $rinaDokumentId")
+                return if(blob.name.contains(rinaId)){
+                    logger.info("""Vi har treff på en tidligere buc: $rinaId som mangler bruker:
+                        | dokument: $rinaDokumentId
+                        | lagret jp: ${blob.name}
+                    """.trimMargin())
+                    blobs.values.map { it.name }
                 }
+                else null
             }
         } catch (ex: Exception) {
             logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
         }
+        return null
     }
 }
 

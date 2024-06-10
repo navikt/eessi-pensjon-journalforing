@@ -22,7 +22,7 @@ import java.util.*
  *
  * Oppretter en journalpost i fagarkivet, med eller uten dokumenter
  */
-class OpprettJournalpostRequest(
+data class OpprettJournalpostRequest(
     val avsenderMottaker: AvsenderMottaker?,
     val behandlingstema: Behandlingstema? = null,
     val bruker: Bruker? = null,

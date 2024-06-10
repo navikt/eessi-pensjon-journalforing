@@ -52,7 +52,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         every { gcpStorageService.journalFinnes(any()) } returns false
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
-        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
+        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
 
     }
 

@@ -178,7 +178,13 @@ class JournalforingService(
                 }
                 else{
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
+                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
+                        gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
+                            val updatedRinaDoc = rinaDoc.copy(bruker = journalPostResponseOgRequest.second.bruker)
+                            secureLog.info("""Henter opprettjournalpostRequest:
+                                    | ${updatedRinaDoc.toJson()}""".trimMargin())
+                        }
+                    }
                 }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson

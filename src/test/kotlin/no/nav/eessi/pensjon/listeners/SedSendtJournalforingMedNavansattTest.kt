@@ -95,7 +95,7 @@ internal class SedSendtJournalforingMedNavansattTest {
 
     @BeforeEach
     fun setup() {
-        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
+        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
     }
 
     @Test
