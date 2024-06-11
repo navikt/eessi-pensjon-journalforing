@@ -179,16 +179,20 @@ class JournalforingService(
                 }
                 else{
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
-                        logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
-                        gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
-                            val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
-                            val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
-                            secureLog.info("""Henter opprettjournalpostRequest:
-                                    | ${updatedRinaDoc.toJson()}""".trimMargin())
-                            //TODO_1 send til joark
-                            //TODO_2 slett fra GCP
+                    try {
+                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
+                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
+                            gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
+                                val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
+                                val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
+                                secureLog.info("""Henter opprettjournalpostRequest:
+                                        | ${updatedRinaDoc.toJson()}""".trimMargin())
+                                //TODO_1 send til joark
+                                //TODO_2 slett fra GCP
+                            }
                         }
+                    } catch (e: Exception) {
+                        logger.error("Det har skjedd feil med henting av arkivert saker")
                     }
                 }
 
