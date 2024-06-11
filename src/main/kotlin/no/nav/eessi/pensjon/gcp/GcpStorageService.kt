@@ -127,7 +127,7 @@ class GcpStorageService(
                         | dokument: $rinaDokumentId
                         | lagret jp: ${blob.name}
                     """.trimMargin())
-                    blobs.values.map { it.name }
+                    blobs.values.map { it.name }.also { logger.info("Arkiverte saker: $it") }
                 }
                 else null
             }

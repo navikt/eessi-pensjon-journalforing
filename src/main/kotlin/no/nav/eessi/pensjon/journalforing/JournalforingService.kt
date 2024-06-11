@@ -180,6 +180,7 @@ class JournalforingService(
                 else{
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
                     gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
+                        logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
                         gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
                             val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
                             val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
