@@ -45,7 +45,7 @@ spec:
     - name: NAMESPACE
       value: q2
     - name: GCP_BUCKET_NAME_JOURNAL
-      value: eessi-pensjon-journal-uten-bruker
+      value: eessi-pensjon-journal-uten-bruker-dev
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
