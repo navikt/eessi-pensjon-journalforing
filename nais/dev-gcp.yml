@@ -27,7 +27,7 @@ spec:
         - host: saf-q2.dev-fss-pub.nais.io
   gcp:
     buckets:
-      - name: eessi-pensjon-journal-uten-bruker
+      - name: eessi-pensjon-journal-uten-bruker-dev
         retentionPeriodDays: 40
         lifecycleCondition:
           age: 365
