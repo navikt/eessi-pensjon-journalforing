@@ -105,7 +105,7 @@ class GcpStorageService(
         }
     }
 
-    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): String ? {
+    fun hentJournalpostDataModel(rinaIdOgSedId: String): String ? {
         try {
             val request = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
             if(request.exists()){
