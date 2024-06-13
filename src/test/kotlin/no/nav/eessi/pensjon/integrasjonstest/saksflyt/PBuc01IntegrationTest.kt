@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.*
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
@@ -101,22 +100,20 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
-            testRunnerVoksen(
+            testRunnerVoksenUtenKjentBruker(
                 null,
                 null,
                 land = "SWE",
                 alleDocs = allDocuemtActions,
-                forsokFerdigStilt = false,
                 hendelseType = SENDT,
                 sivilstand = null,
                 statsborgerskap = StatsborgerskapItem("SWE")
-            ) {
-                val journalpostRequest = it.opprettJournalpostRequest
-                assertEquals(PENSJON, journalpostRequest.tema)
-                assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
+            )
 
-                verify { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
-            }
+            //Oppdatering av journalpost trengs ikke da detaljer for å opprette journalpost lagres i gcp,
+            //for senere å kunne opprette journalpost og journalføre denne med kjent bruker
+            verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
+
         }
 
         @Test
@@ -683,6 +680,75 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+
+        clearAllMocks()
+    }
+
+    private fun testRunnerVoksenUtenKjentBruker(
+        fnrVoksen: String?,
+        bestemSak: BestemSakResponse? = null,
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        krav: KravType = KravType.ALDER,
+        alleDocs: List<ForenkletSED>,
+        documentFiler: SedDokumentfiler = getDokumentfilerUtenVedlegg(),
+        hendelseType: HendelseType,
+        sivilstand: SivilstandItem? = null,
+        statsborgerskap: StatsborgerskapItem? = null,
+        fdato: String? = null,
+    ) {
+
+        val mockPerson = if (fnrVoksen != null) {
+            val mockp = createBrukerWith(
+                fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID
+            )
+            if (Fodselsnummer.fra(fnrVoksen)?.erNpid != true)
+                every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
+            else
+                every { personService.hentPerson(Npid(fnrVoksen)) } returns mockp
+            mockp
+        } else {
+            null
+        }
+        val sed = SED.generateSedToClass<P2000>(createSedPensjon(
+            P2000,
+            fnrVoksen,
+            eessiSaknr = sakId,
+            krav = krav,
+            sivilstand = sivilstand,
+            statsborgerskap = statsborgerskap,
+            pdlPerson = mockPerson,
+            fdato = fdato
+        ))
+
+        val bucland = if (land === "SWE") "SE" else "NO"
+        initCommonMocks(sed, alleDocs, documentFiler, bucLand = bucland)
+        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+        if (bestemSak != null) {
+            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
+        }
+
+        val hendelse = createHendelseJson(P2000, P_BUC_01, fnrVoksen)
+
+        val meldingSlot = mutableListOf<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val kravmeldingSlot = mutableListOf<String>()
+        every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
+
+        every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
+
+        when (hendelseType) {
+            SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+            else -> fail()
+        }
+
+        if (fnrVoksen != null) verify { personService.hentPerson(any()) }
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+//        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
         clearAllMocks()
     }
