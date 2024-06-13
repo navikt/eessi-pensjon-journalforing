@@ -64,9 +64,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
 
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
-        if (request.bruker == null) {
-            return Pair(null, request)
-        }
         return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
     }
 
