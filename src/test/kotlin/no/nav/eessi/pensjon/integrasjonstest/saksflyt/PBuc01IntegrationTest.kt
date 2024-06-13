@@ -96,8 +96,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             }
         }
 
+        //TODO Har vi slettet koden for dette med at Pesys sakid er kjent men bruker er ikke det
         @Test
-        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
+        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i UTGAENDE sed så skal vi ikke opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
             testRunnerVoksenUtenKjentBruker(
@@ -111,8 +112,28 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             )
 
             //Oppdatering av journalpost trengs ikke da detaljer for å opprette journalpost lagres i gcp,
+            //for senere å kunne opprette journalpost og journalføre denne med kjent bruker.
+
+        }
+
+        @Test
+        fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i MOTTATT sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+
+            testRunnerVoksenUtenKjentBruker(
+                null,
+                null,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                hendelseType = SENDT,
+                sivilstand = null,
+                statsborgerskap = StatsborgerskapItem("SWE")
+            )
+
+            //Oppdatering av journalpost trengs ikke da detaljer for å opprette journalpost lagres i gcp,
             //for senere å kunne opprette journalpost og journalføre denne med kjent bruker
-            verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
+            //TODO: Er det greit at disse ikke lenger blir satt i status avbrutt lenger ved MOTTATTE seder?
+//            verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt("429434378") }
 
         }
 
