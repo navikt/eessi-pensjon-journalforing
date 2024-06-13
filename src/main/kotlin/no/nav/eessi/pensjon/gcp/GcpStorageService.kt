@@ -118,21 +118,26 @@ class GcpStorageService(
         return null
     }
 
-    fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) : List<String>? {
+    fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String): List<String>? {
         try {
             val blobs = gcpStorage.list(journalBucket)
-            for (blob in blobs.iterateAll()) {
-                return if(blob.name.contains(rinaId)){
-                    logger.info("""Vi har treff på en tidligere buc: $rinaId som mangler bruker:
-                        | dokument: $rinaDokumentId
-                        | lagret jp: ${blob.name}
-                    """.trimMargin())
-                    blobs.values.map { it.name }.also { logger.info("Arkiverte saker: $it") }
-                }
-                else null
+            val matchingBlobs = blobs.iterateAll().filter { it.name.contains(rinaId) }.map { it.name }
+
+            if (blobs.values.isNotEmpty()) {
+                logger.info("Første i listen: ${blobs.values.map { it.name }[0]}")
+            }
+
+            if (matchingBlobs.isNotEmpty()) {
+                logger.info(
+                    """Vi har treff på en tidligere buc: $rinaId som mangler bruker:
+                | dokument: $rinaDokumentId
+                | lagret jp: ${matchingBlobs.joinToString(", ")}
+            """.trimMargin()
+                )
+                return matchingBlobs
             }
         } catch (ex: Exception) {
-            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
+            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket", ex)
         }
         return null
     }
