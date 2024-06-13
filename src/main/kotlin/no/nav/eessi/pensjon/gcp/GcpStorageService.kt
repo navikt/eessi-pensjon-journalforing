@@ -123,7 +123,7 @@ class GcpStorageService(
             val blobs = gcpStorage.list(journalBucket)
             val matchingBlobs = blobs.iterateAll().filter { it.name.contains(rinaId) }.map { it.name }
 
-            if (blobs.values.isNotEmpty()) {
+            if (blobs.values.toList().isNotEmpty()) {
                 logger.info("Første i listen: ${blobs.values.map { it.name }[0]}")
             }
 
