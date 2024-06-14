@@ -4,7 +4,6 @@ import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforDataModel
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
@@ -13,8 +12,6 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
-import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -119,60 +116,20 @@ class SedSendtListener(
         )
 
         val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
-        if (identifisertPerson?.personRelasjon?.fnr == null) {
-            gcpStorageService.lagreJournalPostRequest(
-                JournalforDataModel(
-                sedHendelse = sedHendelse,
-                saksInfoSamlet = saksInfoSamlet,
-                sed = currentSed,
-                harAdressebeskyttelse = harAdressebeskyttelse,
-                navAnsattInfo = navAnsattMedEnhet,
-                kravTypeFraSed = kravTypeISed,
-                ).toJson(),
-            sedHendelse.rinaSakId,
-            sedHendelse.sedId
-            )
-        } else {
-            // Journalforer for sed med kjent bruker
-            journalforingService.journalfor(
-                sedHendelse,
-                SENDT,
-                identifisertPerson,
-                fdato,
-                saksInfoSamlet,
-                currentSed,
-                harAdressebeskyttelse,
-                identifisertePersoner.count()
-                    .also { logger.info("Antall identifisertePersoner: $it") },
-                navAnsattMedEnhet,
-                kravTypeISed
-            )
 
-            // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-            gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
-                logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
-                gcpStorageService.hentJournalpostDataModel(sedId)?.let { rinaDoc ->
-                    val request = mapJsonToAny<JournalforDataModel>(rinaDoc)
-                    journalforingService.journalfor(
-                        request.sedHendelse,
-                        SENDT,
-                        identifisertPerson,
-                        fdato,
-                        request.saksInfoSamlet,
-                        request.sed,
-                        request.harAdressebeskyttelse,
-                        identifisertePersoner.size,
-                        request.navAnsattInfo,
-                        request.kravTypeFraSed
-                    )
-                    secureLog.info("""Henter opprettjournalpostRequest:
-                                    | ${request.toJson()}""".trimMargin())
-                    //TODO_1 send til joark
-                    //TODO_2 slett fra GCP
-                }
-            }
-        }
-
+        journalforingService.journalfor(
+            sedHendelse,
+            SENDT,
+            identifisertPerson,
+            fdato,
+            saksInfoSamlet,
+            currentSed,
+            harAdressebeskyttelse,
+            identifisertePersoner.count()
+                .also { logger.info("Antall identifisertePersoner: $it") },
+            navAnsattMedEnhet,
+            kravTypeISed
+        )
     }
 }
 
