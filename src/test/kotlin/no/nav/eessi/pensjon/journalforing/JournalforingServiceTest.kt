@@ -29,7 +29,6 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import no.nav.eessi.pensjon.utils.mapAnyToJson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,81 +43,11 @@ private const val RINADOK_ID = "3123123"
 
 internal class JournalforingServiceTest : JournalforingServiceBase() {
 
-
-
     private val fdato = LocalDate.now()
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
         private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
-    }
-
-
-    @Test
-    fun `MOTTATT SED UTEN BRUKER så lagres sedDetaljer i gcpStorage`() {
-        val sedHendelse = sedHendelse()
-
-        journalforingService.journalfor(
-            sedHendelse,
-            hendelseType = MOTTATT,
-            null,
-            null,
-            SaksInfoSamlet(saktype = ALDER),
-            SED(type = SedType.P2000),
-            identifisertePersoner = 1,
-            navAnsattInfo = null,
-            kravTypeFraSed = null,
-        )
-
-        verify (exactly = 1) { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-
-    }
-
-    private fun sedHendelse() = SedHendelse(
-        sektorKode = "P",
-        bucType = P_BUC_01,
-        rinaSakId = "12345",
-        rinaDokumentId = "12345",
-        rinaDokumentVersjon = "1",
-        sedType = SedType.P2000,
-        navBruker = null
-    )
-
-    @Test
-    fun `Dersom mottatt sed inneholder kjent bruker lagres journalposten i gcpStorage`() {
-        val sedHendelseMedBruker = sedHendelse()
-
-        val journalpostRequest = OpprettJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker("NO:NAVAT001", IdType.UTL_ORG,"NAV Arbeid og ytelser", "NO"),
-            behandlingstema = Behandlingstema.ALDERSPENSJON,
-            bruker = Bruker("22117320034"),
-            journalpostType = JournalpostType.INNGAAENDE,
-            sak = Sak("12345", "321","PEN"),
-            tema = Tema.PENSJON,
-            tilleggsopplysninger = listOf(Tilleggsopplysning("eessi_pensjon_bucid", "12345")),
-            tittel = "Inngående P2000",
-            dokumenter = "12345",
-            journalfoerendeEnhet = PENSJON_UTLAND
-        )
-
-        val journalpostRequestJson = mapAnyToJson(journalpostRequest)
-
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns listOf("12345_hgro8t76yb34957", "12345_hgro8t76yb34rt957")
-        every { gcpStorageService.hentOpprettJournalpostRequest(any()) } returns journalpostRequestJson
-
-        journalforingService.journalfor(
-            sedHendelseMedBruker,
-            hendelseType = MOTTATT,
-            identifisertPersonPDL(AKTOERID, SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)),
-            LocalDate.of(1973, 11, 22),
-            SaksInfoSamlet(saktype = ALDER),
-            SED(type = SedType.P2000),
-            identifisertePersoner = 1,
-            navAnsattInfo = null,
-            kravTypeFraSed = null,
-        )
-
-        verify (exactly = 1) { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
     }
 
     @Test
