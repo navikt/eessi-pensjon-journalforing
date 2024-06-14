@@ -104,7 +104,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val journalpostRequestJson = mapAnyToJson(journalpostRequest)
 
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns listOf("12345_hgro8t76yb34957", "12345_hgro8t76yb34rt957")
-        every { gcpStorageService.hentJournalpostDataModel(any()) } returns journalpostRequestJson
+        every { gcpStorageService.hentOpprettJournalpostRequest(any()) } returns journalpostRequestJson
 
         journalforingService.journalfor(
             sedHendelseMedBruker,
