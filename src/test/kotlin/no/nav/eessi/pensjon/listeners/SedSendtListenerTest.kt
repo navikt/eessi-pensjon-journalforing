@@ -5,19 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforDataModel
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
-import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,9 +47,6 @@ internal class SedSendtListenerTest {
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns listOf("1234")
-        every { gcpStorageService.hentJournalpostDataModel(any()) } returns journalpostdetaljer()
-
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
@@ -66,38 +55,10 @@ internal class SedSendtListenerTest {
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        val journalpostdetaljer = journalpostdetaljer()
-
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns listOf("1234")
-        every { gcpStorageService.hentJournalpostDataModel(any()) } returns journalpostdetaljer
-
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
     }
-
-    private fun journalpostdetaljer() = JournalforDataModel(
-        sedHendelse = sedHendelse(),
-        saksInfoSamlet = SaksInfoSamlet(),
-        sed = SED(
-            type = SedType.R005,
-            nav = null,
-            pensjon = null,
-        ),
-        harAdressebeskyttelse = false,
-        navAnsattInfo = null,
-        kravTypeFraSed = KravType.ALDER
-    ).toJson()
-
-    private fun sedHendelse() = SedHendelse(
-        sektorKode = "P",
-        bucType = BucType.P_BUC_01,
-        rinaSakId = "12345",
-        rinaDokumentId = "12345",
-        rinaDokumentVersjon = "1",
-        sedType = SedType.P2000,
-        navBruker = null
-    )
 
     @Test
     fun `gitt en exception ved sedSendt så kastes RunTimeException og meldig blir IKKE ack'et`() {

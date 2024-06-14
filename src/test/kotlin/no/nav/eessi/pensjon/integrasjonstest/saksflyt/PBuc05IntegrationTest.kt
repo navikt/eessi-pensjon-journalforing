@@ -35,10 +35,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-
-const val SAK_ID = "12345"
-const val LEALAUS_KAKE = "22117320034"
-
 @DisplayName("P_BUC_05 - IntegrationTest")
 internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
@@ -110,14 +106,18 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `1 person i SED, men fnr er feil`() {
-            testRunnerUtenKjentBruker(fnr = "123456789102356878546525468432")
-
+            testRunner(fnr = "123456789102356878546525468432") {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
         }
 
         @Test
         fun `1 person i SED, men fnr mangler`() {
-            testRunnerUtenKjentBruker(fnr = null)
-
+            testRunner(fnr = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
         }
     }
 
@@ -127,9 +127,10 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario2Utgaende {
         @Test
         fun `2 personer i SED, fnr og rolle mangler, men saksnummer finnes`() {
-            //Her opprettes det heller ikke journalpost lenger, men journalpostdetaljer blir lagret i gcp
-            testRunnerFlerePersonerEnEllerFlereUkjentBruker(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = SAK_ID)
-//            verify(exactly = 1) { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
+            testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = SAK_ID) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
         }
 
         @Test
@@ -142,12 +143,18 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `2 personer i SED, mangler fnr og saksnummer, men rolle finnes`() {
-            testRunnerFlerePersonerEnEllerFlereUkjentBruker(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = null)
+            testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = Rolle.ETTERLATTE, sakId = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
         }
 
         @Test
         fun `2 personer i SED, mangler fnr, rolle, og sakId`() {
-            testRunnerFlerePersonerEnEllerFlereUkjentBruker(fnr = null, fnrAnnenPerson = null, rolle = null, sakId = null)
+            testRunnerFlerePersoner(fnr = null, fnrAnnenPerson = null, rolle = null, sakId = null) {
+                assertEquals(PENSJON, it.tema)
+                assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
+            }
         }
     }
 
@@ -664,10 +671,18 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+            val (journalpost, _) = initJournalPostRequestSlot()
+
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+            val request = journalpost.captured
+            assertEquals(PENSJON, request.tema)
+            assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+            Assertions.assertNull(request.bruker)
 
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
             clearAllMocks()
         }
@@ -769,7 +784,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        //TODO sjekke om denne nå blir riktig mtp kjent bruker eller ikke
         fun `Scenario 13 - 1 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
             val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
             val sedP5000sent = createSed(SedType.P5000, null, fdato = "1955-07-11")
@@ -786,13 +800,20 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+            val (journalpost, _) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
+            val request = journalpost.captured
+
+            assertEquals("UTGAAENDE", request.journalpostType.name)
+            assertEquals(PENSJON, request.tema)
+            assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
-//            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
             clearAllMocks()
         }
@@ -817,13 +838,20 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+            val (journalpost, _) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
+            val request = journalpost.captured
+
+            assertEquals("UTGAAENDE", request.journalpostType.name)
+            assertEquals(PENSJON, request.tema)
+            assertEquals(ID_OG_FORDELING, request.journalfoerendeEnhet)
+
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
-//            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+            verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
             clearAllMocks()
 

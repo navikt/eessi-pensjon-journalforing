@@ -253,70 +253,6 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    protected fun testRunnerFlerePersonerEnEllerFlereUkjentBruker(
-        fnr: String?,
-        fnrAnnenPerson: String?,
-        saker: List<SakInformasjon> = emptyList(),
-        sakId: String? = SAK_ID,
-        harAdressebeskyttelse: Boolean = false,
-        land: String = "NOR",
-        rolle: Rolle?,
-        hendelseType: HendelseType = SENDT,
-        fDatoFraAnnenPerson: String? = "1988-07-12",
-    ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
-        initCommonMocks(sed)
-
-        every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
-        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-
-
-        if (fnr != null) {
-            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
-                fnr,
-                "Mamma forsørger",
-                "Etternavn",
-                land,
-                aktorId = AKTOER_ID
-            )
-        }
-
-        if (fnrAnnenPerson != null) {
-            every { personService.hentPerson(NorskIdent(fnrAnnenPerson)) } returns createBrukerWith(
-                fnrAnnenPerson,
-                "Barn",
-                "Diskret",
-                land,
-                "1213",
-                aktorId = AKTOER_ID_2
-            )
-        }
-
-        if (rolle == Rolle.ETTERLATTE)
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
-        else
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
-
-        val hendelse = createHendelseJson(SedType.P8000)
-
-        val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        if (hendelseType == SENDT)
-            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else {
-            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            // forvent tema == PEN og enhet 2103
-            assertEquals(hendelseType, mapJsonToAny<OppgaveMelding>(meldingSlot.captured).hendelseType)
-        }
-
-        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
-        verify(exactly = 1) { euxKlient.hentBuc(any()) }
-        verify(exactly = 1) { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-
-        clearAllMocks()
-    }
-
     /**
      * Forenklet TestRunner for testing av Journalføring med kun én person.
      *
@@ -372,56 +308,6 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
-
-        val gyldigFnr: Boolean = fnr != null && fnr.length == 11
-        val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
-        verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
-
-        clearAllMocks()
-    }
-
-    protected fun testRunnerUtenKjentBruker(
-        fnr: String?,
-        saker: List<SakInformasjon> = emptyList(),
-        sakId: String? = SAK_ID,
-        land: String = "NOR",
-        hendelseType: HendelseType = SENDT,
-        bucType: BucType = P_BUC_01,
-    ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
-        initCommonMocks(sed, bucType = bucType)
-
-        every { personService.harAdressebeskyttelse(any()) } returns false
-
-        if (fnr != null) {
-            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
-                fnr,
-                "Fornavn",
-                "Etternavn",
-                land,
-                aktorId = AKTOER_ID
-            )
-        }
-
-        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
-        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
-
-        val hendelse = createHendelseJson(SedType.P8000)
-
-        val meldingSlot = slot<String>()
-        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
-
-        if (hendelseType == SENDT)
-            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        else
-            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-
-        verify(exactly = 1) { euxKlient.hentBuc(any()) }
-        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
-        verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
-        verify(exactly = 1) { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-//        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
         val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
