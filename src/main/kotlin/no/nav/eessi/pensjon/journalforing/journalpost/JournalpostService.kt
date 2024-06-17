@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
+import no.nav.eessi.pensjon.journalforing.Bruker
+import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
@@ -65,6 +67,17 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
         return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
+    }
+
+    fun oppdaterJournalpost(journalpostResponse: JournalpostResponse, kjentBruker: Bruker) {
+        return journalpostKlient.oppdaterJournalpost(
+            OppdaterJournalpost(
+                journalpostId = journalpostResponse.journalpostId!!,
+                dokumenter = listOf(journalpostResponse.dokumenter!!),
+                sak = journalpostResponse.sak,
+                bruker = kjentBruker
+            )
+        )
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {

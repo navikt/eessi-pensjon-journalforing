@@ -37,7 +37,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -176,22 +175,31 @@ class JournalforingService(
                 if (journalPostResponseOgRequest.second.bruker == null) {
                     logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
                     gcpStorageService.lagreJournalPostRequest(
-                        journalPostResponseOgRequest.second.toJson(),
+                        journalPostResponseOgRequest.first?.journalpostId,
                         sedHendelse.rinaSakId,
                         sedHendelse.sedId
                     )
                 } else {
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
-                        logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
-                        gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
-                            val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
-                            val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
-                            secureLog.info("""Henter opprettjournalpostRequest:
-                                    | ${updatedRinaDoc.toJson()}""".trimMargin())
-                            //TODO_1 send til joark
-                            //TODO_2 slett fra GCP
+                    try {
+                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
+                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
+                            gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
+                                val innhentetJournalpost = safClient.hentJournalpost(journalpostId)
+//                                val request = mapJsonToAny<OpprettJournalpostRequest>(journalpostId)
+//                                val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
+                                //oppdatere journpost ved kall til dokarkiv: https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
+                                val journalpostrequest = journalpostService.oppdaterJournalpost(innhentetJournalpost!!, journalPostResponseOgRequest.second.bruker!!)
+
+                                secureLog.info("""Henter opprettjournalpostRequest:
+                                        | ${journalpostrequest.toJson()}   
+                                        | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin())
+                                //TODO_1 send til joark
+                                //TODO_2 slett fra GCP
+                            }
                         }
+                    } catch (e: Exception) {
+                        logger.error("Det har skjedd feil med henting av arkivert saker")
                     }
                 }
 

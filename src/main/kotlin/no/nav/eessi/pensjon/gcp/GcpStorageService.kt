@@ -85,21 +85,21 @@ class GcpStorageService(
             | innhold""".trimMargin() + journalpostDetaljer.toJson())
     }
 
-    fun lagreJournalPostRequest(request: String?, rinaId: String?, sedId: String?) {
+    fun lagreJournalPostRequest(journalpostId: String?, rinaId: String?, dokId: String?) {
         try {
-            if(rinaId == null || sedId == null) {
-                logger.error("Mangler informasjon fra: $rinaId, sedId: $sedId")
+            if(rinaId == null || dokId == null || journalpostId == null) {
+                logger.error("Mangler informasjon fra: $rinaId, sedId: $dokId eller journalpostId: $journalpostId")
                 return
             }
-            val path = "${rinaId}/${sedId}"
+            val path = "${rinaId}/${dokId}"
             logger.info("Storing sedhendelse to S3: $path")
             val blob = gcpStorage.create(
                 BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
-                request?.toByteArray()
+                journalpostId.toByteArray()
             )
             logger.debug("""Journalpostdetaljer lagret i bucket: 
                 | $journalBucket, med key: ${blob.name}
-                | innhold""".trimMargin() + request)
+                | innhold""".trimMargin() + journalpostId)
         } catch (_: Exception) {
             logger.warn("Feil under lagring av journalpost request")
         }
@@ -107,10 +107,10 @@ class GcpStorageService(
 
     fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): String ? {
         try {
-            val request = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
-            if(request.exists()){
+            val journalpostIdFraUkjentBruker = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
+            if(journalpostIdFraUkjentBruker.exists()){
                 logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
-                return request.getContent().decodeToString()
+                return journalpostIdFraUkjentBruker.getContent().decodeToString()
             }
         } catch ( ex: Exception) {
             logger.warn("En feil oppstod under henting av objekt: $rinaIdOgSedId i bucket")

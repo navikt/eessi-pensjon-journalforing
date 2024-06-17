@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -137,5 +138,33 @@ class JournalpostKlient(
                 throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message}")
             }
         }
+    }
+
+    fun oppdaterJournalpost(oppdaterbarJournalpost: OppdaterJournalpost) {
+        val path = "/journalpost/${oppdaterbarJournalpost.journalpostId}"
+
+        try {
+            logger.info("Oppdaterer distribusjonsinfo for journalpost: ${oppdaterbarJournalpost.journalpostId}")
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+
+            journalpostOidcRestTemplate.exchange(
+                path,
+                HttpMethod.PATCH,
+                HttpEntity((oppdaterbarJournalpost).toString(), headers),
+                String::class.java).also {
+                    logger.info("JournalpostId ${oppdaterbarJournalpost.journalpostId} har blitt oppdatert med kjent bruker, $it" )
+                }
+
+            secureLog.info("Journalpostrequesten: $, /n $headers")
+
+        } catch (ex: HttpStatusCodeException) {
+            logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message} body: ${ex.responseBodyAsString}")
+        } catch (ex: Exception) {
+            logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message}")
+        }
+
     }
 }

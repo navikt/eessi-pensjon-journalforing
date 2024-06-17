@@ -20,12 +20,25 @@ data class SafRequest(
                   journalposttype
                   journalstatus
                   tema
+                  dokumenter {
+                    dokumentInfoId
+                    tittel
+                    brevkode
+                  }
                   behandlingstema
                   journalforendeEnhet
                   eksternReferanseId
                   tilleggsopplysninger {
                     nokkel
                     verdi
+                  }
+                  sak {
+                  tema
+                  fagsakId
+                  fagsaksystem
+                  arkivsaksnummer
+                  arkivsaksystem
+                  sakstype
                   }
                   datoOpprettet
                 }
