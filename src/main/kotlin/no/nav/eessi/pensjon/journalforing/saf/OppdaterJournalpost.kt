@@ -2,13 +2,18 @@ package no.nav.eessi.pensjon.journalforing.saf
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import no.nav.eessi.pensjon.journalforing.Bruker
+import no.nav.eessi.pensjon.utils.mapAnyToJson
 
 data class OppdaterJournalpost(
     val journalpostId: String,
     val dokumenter: List<SafDokument?>,
     val sak: SafSak?,
     val bruker: Bruker?,
-)
+) {
+    override fun toString(): String {
+        return mapAnyToJson(this, false)
+    }
+}
 
 data class SafDokument(
     val dokumentInfoId: String,
