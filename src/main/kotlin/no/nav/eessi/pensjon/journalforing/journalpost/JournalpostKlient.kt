@@ -153,10 +153,8 @@ class JournalpostKlient(
                 HttpMethod.PUT,
                 HttpEntity(oppdaterbarJournalpost.toString(), headers),
                 String::class.java).also {
-                    logger.info("JournalpostId ${oppdaterbarJournalpost.journalpostId} har blitt oppdatert med kjent bruker, $it" )
+                    logger.info("JournalpostId ${oppdaterbarJournalpost.journalpostId} har blitt oppdatert med kjent bruker" )
                 }
-
-            secureLog.info("Journalpostrequesten: $, /n $headers")
 
         } catch (ex: HttpStatusCodeException) {
             logger.error("En feil oppstod under oppdatering av journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
