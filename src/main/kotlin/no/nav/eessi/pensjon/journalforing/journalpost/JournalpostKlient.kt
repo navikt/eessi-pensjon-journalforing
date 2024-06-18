@@ -150,8 +150,8 @@ class JournalpostKlient(
 
             journalpostOidcRestTemplate.exchange(
                 path,
-                HttpMethod.PATCH,
-                HttpEntity((oppdaterbarJournalpost).toString(), headers),
+                HttpMethod.PUT,
+                HttpEntity(oppdaterbarJournalpost.toString(), headers),
                 String::class.java).also {
                     logger.info("JournalpostId ${oppdaterbarJournalpost.journalpostId} har blitt oppdatert med kjent bruker, $it" )
                 }
