@@ -144,7 +144,7 @@ class JournalpostKlient(
         val path = "/journalpost/${oppdaterbarJournalpost.journalpostId}"
 
         try {
-            logger.info("Oppdaterer distribusjonsinfo for journalpost: ${oppdaterbarJournalpost.journalpostId}")
+            logger.info("Oppdaterer journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId}")
             val headers = HttpHeaders()
             headers.contentType = MediaType.APPLICATION_JSON
 
