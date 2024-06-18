@@ -159,11 +159,11 @@ class JournalpostKlient(
             secureLog.info("Journalpostrequesten: $, /n $headers")
 
         } catch (ex: HttpStatusCodeException) {
-            logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
-            throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message} body: ${ex.responseBodyAsString}")
+            logger.error("En feil oppstod under oppdatering av journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            throw RuntimeException("En feil oppstod under oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message} body: ${ex.responseBodyAsString}")
         } catch (ex: Exception) {
-            logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
-            throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message}")
+            logger.error("En feil oppstod under oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            throw RuntimeException("En feil oppstod under oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ${ex.message}")
         }
 
     }
