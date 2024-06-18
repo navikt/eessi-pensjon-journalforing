@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -77,7 +78,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 sak = journalpostResponse.sak,
                 bruker = kjentBruker
             )
-        )
+        ).also { logger.debug("Nå har vi kommet hit: ${it.toJson()}") }
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {
