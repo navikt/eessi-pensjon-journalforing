@@ -103,7 +103,7 @@ data class JournalpostResponse(
     val journalpostId: String?,
     val eksternReferanseId: String?,
     val tema: Tema?,
-    val dokumenter: SafDokument?,
+    val dokumenter: List<SafDokument?>,
     val journalstatus: Journalstatus?,
     val journalpostferdigstilt: Boolean?,
     val avsenderMottaker: AvsenderMottaker?,

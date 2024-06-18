@@ -73,7 +73,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         return journalpostKlient.oppdaterJournalpost(
             OppdaterJournalpost(
                 journalpostId = journalpostResponse.journalpostId!!,
-                dokumenter = listOf(journalpostResponse.dokumenter!!),
+                dokumenter = journalpostResponse.dokumenter,
                 sak = journalpostResponse.sak,
                 bruker = kjentBruker
             )

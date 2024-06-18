@@ -5,7 +5,7 @@ import no.nav.eessi.pensjon.journalforing.Bruker
 
 data class OppdaterJournalpost(
     val journalpostId: String,
-    val dokumenter: List<SafDokument>,
+    val dokumenter: List<SafDokument?>,
     val sak: SafSak?,
     val bruker: Bruker?,
 )
