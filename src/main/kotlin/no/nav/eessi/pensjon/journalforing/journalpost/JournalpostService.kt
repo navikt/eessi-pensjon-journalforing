@@ -19,7 +19,6 @@ import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -70,15 +69,27 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
     }
 
-    fun oppdaterJournalpost(journalpostResponse: JournalpostResponse, kjentBruker: Bruker) {
+    /** Oppdatere journalpost med kall til dokarkiv:
+     *  https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
+     */
+    fun oppdaterJournalpost(
+        journalpostResponse: JournalpostResponse,
+        kjentBruker: Bruker,
+        tema: Tema,
+        enhet: Enhet,
+        behandlingsTema: Behandlingstema
+    ) {
         return journalpostKlient.oppdaterJournalpost(
             OppdaterJournalpost(
                 journalpostId = journalpostResponse.journalpostId!!,
                 dokumenter = journalpostResponse.dokumenter,
                 sak = journalpostResponse.sak,
-                bruker = kjentBruker
+                bruker = kjentBruker,
+                tema = tema,
+                enhet = enhet,
+                behandlingsTema = behandlingsTema
             )
-        ).also { logger.debug("Nå har vi kommet hit: ${it.toJson()}") }
+        ).also { logger.debug("Oppdatert journalpostId: $it") }
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {

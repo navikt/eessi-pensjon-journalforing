@@ -84,6 +84,15 @@ class GcpStorageService(
             | $journalBucket, med key: ${blob.name}
             | innhold""".trimMargin() + journalpostDetaljer.toJson())
     }
+    fun slettJournalpostDetaljer(blobId: BlobId) {
+        try {
+            logger.info("Sletter journalpostdetaljer for rinaSakId: $blobId")
+            gcpStorage.delete(blobId)
+        } catch (ex: Exception) {
+        logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
+    }
+}
+
 
     fun lagreJournalPostRequest(journalpostId: String?, rinaId: String?, dokId: String?) {
         try {
@@ -105,15 +114,19 @@ class GcpStorageService(
         }
     }
 
-    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): String ? {
+    /**
+     * Henter journalpost fra bucket med blobPath Pair<JournalPostId, BlobPath>
+     */
+    fun hentOpprettJournalpostRequest(rinaIdOgSedId: String): Pair<String, BlobId>? {
         try {
-            val journalpostIdFraUkjentBruker = gcpStorage.get(BlobId.of(journalBucket, rinaIdOgSedId))
+            val blobId = BlobId.of(journalBucket, rinaIdOgSedId)
+            val journalpostIdFraUkjentBruker = gcpStorage.get(blobId)
             if(journalpostIdFraUkjentBruker.exists()){
                 logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
-                return journalpostIdFraUkjentBruker.getContent().decodeToString()
+                return Pair(journalpostIdFraUkjentBruker.getContent().decodeToString(), blobId)
             }
         } catch ( ex: Exception) {
-            logger.warn("En feil oppstod under henting av objekt: $rinaIdOgSedId i bucket")
+            logger.warn("En feil oppstod under henting av journalpostRequest objekt ved : $rinaIdOgSedId i bucket")
         }
         return null
     }
@@ -132,7 +145,7 @@ class GcpStorageService(
                 else null
             }
         } catch (ex: Exception) {
-            logger.warn("En feil oppstod under henting av objekt: $rinaId i bucket")
+            logger.warn("En feil oppstod under henting av arkiverte rinasaker objekt: $rinaId i bucket")
         }
         return null
     }

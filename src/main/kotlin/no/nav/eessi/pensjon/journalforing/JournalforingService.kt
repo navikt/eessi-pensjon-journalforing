@@ -185,17 +185,20 @@ class JournalforingService(
                         gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
                             logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
                             gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
-                                val innhentetJournalpost = safClient.hentJournalpost(journalpostId)
-//                                val request = mapJsonToAny<OpprettJournalpostRequest>(journalpostId)
-//                                val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
-                                //oppdatere journpost ved kall til dokarkiv: https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
-                                val journalpostrequest = journalpostService.oppdaterJournalpost(innhentetJournalpost!!, journalPostResponseOgRequest.second.bruker!!)
+                                val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
+                                val journalpostrequest = journalpostService.oppdaterJournalpost(
+                                    innhentetJournalpost!!,
+                                    journalPostResponseOgRequest.second.bruker!!,
+                                    tema,
+                                    tildeltJoarkEnhet,
+                                    journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
+                                )
 
                                 secureLog.info("""Henter opprettjournalpostRequest:
                                         | ${journalpostrequest.toJson()}   
-                                        | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin())
-                                //TODO_1 send til joark
-                                //TODO_2 slett fra GCP
+                                        | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
+                                )
+                                gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
                             }
                         }
                     } catch (e: Exception) {
