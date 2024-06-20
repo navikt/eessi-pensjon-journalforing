@@ -788,19 +788,19 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         }
         val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL))
 
-        assertEquals(Tema.PENSJON, resultatGENRL)
+        assertEquals(PENSJON, resultatGENRL)
 
         val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(OMSORG))
-        assertEquals(Tema.PENSJON, resultatOMSORG)
+        assertEquals(PENSJON, resultatOMSORG)
 
         val resultatALDER = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
         assertEquals(PENSJON, resultatALDER)
 
         val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null,saksInfoSamlet(GJENLEV))
-        assertEquals(Tema.PENSJON, resultatGJENLEV)
+        assertEquals(PENSJON, resultatGJENLEV)
 
         val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP))
-        assertEquals(Tema.PENSJON, resultatBARNEP)
+        assertEquals(PENSJON, resultatBARNEP)
 
         val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
         assertEquals(Tema.UFORETRYGD, resultatUFORE)
