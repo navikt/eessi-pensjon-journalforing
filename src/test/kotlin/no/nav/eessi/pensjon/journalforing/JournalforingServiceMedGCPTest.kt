@@ -92,46 +92,23 @@ class JournalforingServiceMedGCPTest {
             emptyList(),
             Journalstatus.MOTTATT,
             false,
-            AvsenderMottaker(
-                id = "Avsender",
-                navn = "NAV",
-                land = "NO"
-            ),
+            AvsenderMottaker(id = "Avsender", navn = "NAV", land = "NO"),
             behandlingstema = ALDERSPENSJON,
             journalforendeEnhet = "PENSJON_UTLAND",
             bruker = Bruker(SLAPP_SKILPADDE, "FNR"),
-            sak = SafSak(
-                fagsakId = rinaId,
-                sakstype = "ALDER",
-                tema = "PEN",
-                fagsaksystem = "PEN",
-                arkivsaksnummer = "321654"
-            ),
+            sak = SafSak(fagsakId = rinaId, sakstype = "ALDER", tema = "PEN", fagsaksystem = "PEN", arkivsaksnummer = "321654"),
             temanavn = PENSJON.name,
             datoOpprettet = LocalDateTime.now()
         )
 
-        val opprettJournalPostResponse = OpprettJournalPostResponse(
-            journalpostId,
-            "EKSPEDERT",
-            "",
-            false
-        )
+        val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId, "EKSPEDERT", "", false)
 
         val opprettJournalpostRequest = OpprettJournalpostRequest(
-            avsenderMottaker = AvsenderMottaker(
-                id = rinaId,
-                navn = "NAV",
-                land = "NO"
-            ),
+            avsenderMottaker = AvsenderMottaker(id = rinaId, navn = "NAV", land = "NO"),
             behandlingstema = ALDERSPENSJON,
             bruker = Bruker(SLAPP_SKILPADDE, "FNR"),
             journalpostType = INNGAAENDE,
-            sak = Sak(
-                sakstype = "ALDER",
-                fagsakid = "64646",
-                fagsaksystem = "PEN",
-            ),
+            sak = Sak(sakstype = "ALDER", fagsakid = "64646", fagsaksystem = "PEN"),
             tema = PENSJON,
             tilleggsopplysninger = listOf(Tilleggsopplysning("rinaSakId", rinaId)),
             tittel = "Inngående dokument",
@@ -142,7 +119,8 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
         every { oppgaveroutingService.hentEnhet(any()) } returns PENSJON_UTLAND
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Pair(opprettJournalPostResponse, opprettJournalpostRequest)
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+                Pair(opprettJournalPostResponse, opprettJournalpostRequest)
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {
             every { exists() } returns true
             every { getContent() } returns journalpostId.toByteArray()
