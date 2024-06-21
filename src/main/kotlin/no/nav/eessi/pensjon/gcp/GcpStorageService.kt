@@ -87,7 +87,7 @@ class GcpStorageService(
     fun slettJournalpostDetaljer(blobId: BlobId) {
         try {
             logger.info("Sletter journalpostdetaljer for rinaSakId: $blobId")
-            gcpStorage.delete(blobId)
+            gcpStorage.delete(blobId).also { logger.info("Slett av journalpostdetaljer utført: $it") }
         } catch (ex: Exception) {
         logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
     }
