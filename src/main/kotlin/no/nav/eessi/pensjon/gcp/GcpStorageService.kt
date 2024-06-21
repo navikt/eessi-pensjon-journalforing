@@ -145,7 +145,7 @@ class GcpStorageService(
                 else null
             }
         } catch (ex: Exception) {
-            logger.warn("En feil oppstod under henting av arkiverte rinasaker objekt: $rinaId i bucket")
+            logger.warn("En feil oppstod under henting av arkiverte rinasaker objekt: $rinaId i bucket", ex)
         }
         return null
     }
