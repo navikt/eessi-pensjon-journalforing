@@ -32,7 +32,7 @@ internal class OppgaveMeldingSerdeTest {
 
         assertEquals(melding.sedType, deserialized.sedType)
         assertEquals(melding.journalpostId, deserialized.journalpostId)
-        assertEquals(melding.tildeltEnhetsnr, deserialized.tildeltEnhetsnr)
+        assertEquals(melding.journalførendeEnhet, deserialized.journalførendeEnhet)
         assertEquals(melding.aktoerId, deserialized.aktoerId)
         assertEquals(melding.rinaSakId, deserialized.rinaSakId)
         assertEquals(melding.hendelseType, deserialized.hendelseType)
@@ -59,7 +59,7 @@ internal class OppgaveMeldingSerdeTest {
 
         assertEquals(melding.sedType, deserialized.sedType)
         assertEquals(melding.journalpostId, deserialized.journalpostId)
-        assertEquals(melding.tildeltEnhetsnr, deserialized.tildeltEnhetsnr)
+        assertEquals(melding.journalførendeEnhet, deserialized.journalførendeEnhet)
         assertEquals(melding.aktoerId, deserialized.aktoerId)
         assertEquals(melding.rinaSakId, deserialized.rinaSakId)
         assertEquals(melding.hendelseType, deserialized.hendelseType)

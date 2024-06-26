@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.*
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
@@ -84,7 +83,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(null, it.oppgaveMelding?.filnavn)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertEquals(true, it.kravMeldingList?.isNotEmpty())
@@ -153,7 +152,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
                 assertEquals(null, it.oppgaveMelding?.filnavn)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
@@ -196,7 +195,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
@@ -217,7 +216,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
         }
@@ -238,7 +237,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(null, it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
@@ -261,7 +260,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(null, it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
 
@@ -304,7 +303,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
@@ -330,7 +329,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(ID_OG_FORDELING, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(null, it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
@@ -371,7 +370,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.journalførendeEnhet)
             assertEquals(journalpostResponse.journalpostId, oppgaveMelding.journalpostId)
             assertEquals("P5000", oppgaveMelding.sedType?.name)
 
@@ -435,7 +434,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val oppgaveMelding = oppgaveMeldingList.first()
             assertEquals("429434378", oppgaveMelding.journalpostId)
             assertEquals(null, oppgaveMelding.filnavn)
-            assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
+            assertEquals(PENSJON_UTLAND, oppgaveMelding.journalførendeEnhet)
             assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
             assertEquals(P8000, oppgaveMelding.sedType)
 
@@ -486,7 +485,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(2, oppgaveMeldingList.size)
 
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals(BEHANDLE_SED, it.oppgaveMelding?.oppgaveType)
 
                 assertNotNull(it.oppgaveMeldingUgyldig)
@@ -517,7 +516,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
                 assertEquals(1, oppgaveMeldingList.size)
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(SENDT, it.oppgaveMelding?.hendelseType)
                 assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
@@ -536,7 +535,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
             ) {
                 assertEquals("429434378", it.oppgaveMelding?.journalpostId)
-                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.tildeltEnhetsnr)
+                assertEquals(PENSJON_UTLAND, it.oppgaveMelding?.journalførendeEnhet)
                 assertEquals("0123456789000", it.oppgaveMelding?.aktoerId)
                 assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
                 assertEquals(JOURNALFORING_UT, it.oppgaveMelding?.oppgaveType)
