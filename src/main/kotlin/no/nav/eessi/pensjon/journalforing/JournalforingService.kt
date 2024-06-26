@@ -13,7 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
-import no.nav.eessi.pensjon.journalforing.Journalstatus.*
+import no.nav.eessi.pensjon.journalforing.Journalstatus.UNDER_ARBEID
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -173,7 +173,7 @@ class JournalforingService(
                 val journalPostResponse = journalPostResponseOgRequest.first
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                val journalpostUtenBruker = if(journalPostResponseOgRequest.second.bruker == null){
+                if(journalPostResponseOgRequest.second.bruker == null){
                     logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
                     gcpStorageService.lagreJournalPostRequest(
                         journalPostResponseOgRequest.first?.journalpostId,
@@ -182,7 +182,7 @@ class JournalforingService(
                     )
                 } else {
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    val oppdatertJournalpost = try {
+                    try {
                         gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
                             logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
                             gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
@@ -192,7 +192,7 @@ class JournalforingService(
                                     OppgaveMelding(
                                         sedHendelse.sedType,
                                         journalpostId.first,
-                                        journalPostResponseOgRequest.first.journalfoerendeEnhet?.enhetsNr!!,
+                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
                                         aktoerId,
                                         sedHendelse.rinaSakId,
                                         hendelseType,
@@ -200,7 +200,6 @@ class JournalforingService(
                                         if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                                         tema = tema
                                     ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }
-                                    )
                                 }
                                 val journalpostrequest = journalpostService.oppdaterJournalpost(
                                     innhentetJournalpost!!,
@@ -209,9 +208,6 @@ class JournalforingService(
                                     tildeltJoarkEnhet,
                                     journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
                                 )
-
-                                if()
-
                                 secureLog.info("""Henter opprettjournalpostRequest:
                                         | ${journalpostrequest.toJson()}   
                                         | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
