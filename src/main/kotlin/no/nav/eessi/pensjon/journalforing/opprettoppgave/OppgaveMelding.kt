@@ -28,7 +28,7 @@ data class OppgaveMelding(
 data class OppdaterOppgaveMelding(
     val id: String,
     val status: String,
-    val journalførendeEnhet: Enhet,
+    val tildeltEnhetsnr: Enhet,
     val tema: String
 
 )
