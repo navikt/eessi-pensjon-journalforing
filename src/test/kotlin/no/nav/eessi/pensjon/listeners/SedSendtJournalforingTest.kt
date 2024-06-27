@@ -185,7 +185,7 @@ internal class SedSendtJournalforingTest {
         val actualRequestOppgave = requestSlotOppgave.captured
 
         Assertions.assertEquals(UFORE_UTLAND, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(UFORE_UTLAND, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(UFORE_UTLAND, actualRequestOppgave.journalførendeEnhet)
         Assertions.assertEquals(JOURNALFORING_UT, actualRequestOppgave.oppgaveType)
 
     }
@@ -255,7 +255,7 @@ internal class SedSendtJournalforingTest {
         val actualRequestOppgave = requestSlotOppgave.captured
 
         Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequest.journalfoerendeEnhet)
-        Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequestOppgave.tildeltEnhetsnr)
+        Assertions.assertEquals(UFORE_UTLANDSTILSNITT, actualRequestOppgave.journalførendeEnhet)
         Assertions.assertEquals(JOURNALFORING_UT, actualRequestOppgave.oppgaveType)
 
     }

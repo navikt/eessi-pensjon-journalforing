@@ -135,8 +135,8 @@ abstract class IntegrasjonsBase {
             )
         }?.message ?: ""
 
-        fun medtildeltEnhetsnr(melding: String) = apply {
-            assertTrue(meldingFraLog.contains("\"tildeltEnhetsnr\" : \"$melding\""))
+        fun medjournalførendeEnhet(melding: String) = apply {
+            assertTrue(meldingFraLog.contains("\"journalførendeEnhet\" : \"$melding\""))
         }
 
         fun medSedtype(melding: String) = apply {

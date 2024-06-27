@@ -97,7 +97,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         OppgaveMeldingVerification("429434378")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
+            .medjournalførendeEnhet("4303")
     }
 
     @Test
@@ -131,7 +131,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         OppgaveMeldingVerification("429434388")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
+            .medjournalførendeEnhet("4303")
     }
 
 
@@ -159,6 +159,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         OppgaveMeldingVerification("429434378")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
+            .medjournalførendeEnhet("4303")
     }
 }

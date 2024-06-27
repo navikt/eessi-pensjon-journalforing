@@ -114,7 +114,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         OppgaveMeldingVerification("429434379")
             .medHendelsetype("SENDT")
             .medSedtype("P8000")
-            .medtildeltEnhetsnr("4475")
+            .medjournalførendeEnhet("4475")
     }
 
     fun emptyResponse(): String {

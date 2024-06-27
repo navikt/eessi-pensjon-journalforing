@@ -137,7 +137,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             {
               "sedType" : "P2000",
               "journalpostId" : "",
-              "tildeltEnhetsnr" : "0001",
+              "journalførendeEnhet" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",

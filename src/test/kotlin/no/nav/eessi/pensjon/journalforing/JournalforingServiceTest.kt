@@ -104,7 +104,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "P2000",
               "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "0001",
+              "journalførendeEnhet" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
@@ -144,7 +144,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
               "sedType" : "P2100",
               "journalpostId" : "12345",
-              "tildeltEnhetsnr" : "0001",
+              "journalførendeEnhet" : "0001",
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
