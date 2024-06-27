@@ -204,8 +204,8 @@ class JournalforingService(
                                 val journalpostrequest = journalpostService.oppdaterJournalpost(
                                     innhentetJournalpost!!,
                                     journalPostResponseOgRequest.second.bruker!!,
-                                    tema,
-                                    tildeltJoarkEnhet,
+                                    journalPostResponseOgRequest.second.tema,
+                                    journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
                                     journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
                                 )
                                 secureLog.info("""Henter opprettjournalpostRequest:
