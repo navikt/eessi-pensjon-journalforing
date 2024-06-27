@@ -3,16 +3,16 @@ buildscript {
 	ext {
 		kotlinVersion = '1.9.24'
 		springBootVersion = '3.3.0'
-		springKafkaVersion = '3.2.0'
+		springKafkaVersion = '3.2.1'
 		jacksonModuleKotlinVersion = '2.17.1'
 		tokenSupportVersion = '4.1.4'
-		imageioVersion = '3.10.1'
+		imageioVersion = '3.11.0'
 	}
 }
 
 plugins {
 	id 'org.springframework.boot' version "${springBootVersion}"
-	id "io.spring.dependency-management" version "1.1.4"
+	id "io.spring.dependency-management" version "1.1.5"
 	id "org.openrepose.gradle.plugins.jaxb" version "2.5.0"
 	id "org.jetbrains.kotlin.jvm" version "$kotlinVersion"
 	id "org.jetbrains.kotlin.plugin.spring" version "$kotlinVersion"
@@ -38,11 +38,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-actuator")
 
 	// Spring Framework BOM-fil kan overstyre så vi får siste patch-versjon av Spring Framework
-	implementation(platform("org.springframework:spring-framework-bom:6.1.8"))
+	implementation(platform("org.springframework:spring-framework-bom:6.1.9"))
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1")
 
-	implementation('org.springframework.retry:spring-retry:2.0.5')
+	implementation('org.springframework.retry:spring-retry:2.0.6')
 
 	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonModuleKotlinVersion}"
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}"
@@ -53,18 +53,18 @@ dependencies {
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
 	//GCP
-	implementation("com.google.cloud:google-cloud-storage:2.38.0")
+	implementation("com.google.cloud:google-cloud-storage:2.40.0")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:2.2.46")
-	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.64")
-	implementation("no.nav.eessi.pensjon:ep-logging:2.1.63")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.117"){
+	implementation("no.nav.eessi.pensjon:ep-eux:2.2.51")
+	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.67")
+	implementation("no.nav.eessi.pensjon:ep-logging:2.1.65")
+	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.130"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.0.113"){
+	implementation("no.nav.eessi.pensjon:ep-routing:2.0.119"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
@@ -80,7 +80,7 @@ dependencies {
 	implementation("net.logstash.logback:logstash-logback-encoder:7.4")
     testImplementation project(path: ':')
     configurations { all*.exclude group: 'commons-logging', module: 'commons-logging' }
-	implementation("org.slf4j:jcl-over-slf4j:2.0.12")
+	implementation("org.slf4j:jcl-over-slf4j:2.0.13")
 
 	//Auth
 	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
@@ -102,7 +102,7 @@ dependencies {
 	testImplementation("org.mock-server:mockserver-netty:5.15.0") {
 		exclude module: 'junit'
 	}
-	testImplementation("io.mockk:mockk:1.13.10")
+	testImplementation("io.mockk:mockk:1.13.11")
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
 
 	// Architecture tests
