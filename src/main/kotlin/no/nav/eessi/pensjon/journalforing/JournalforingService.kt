@@ -187,6 +187,8 @@ class JournalforingService(
                             logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
                             gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
                                 val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
+
+                                logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
                                 if (innhentetJournalpost?.journalstatus  == UNDER_ARBEID) {
                                     //oppdaterer oppgave med status, enhet og tema
                                     OppgaveMelding(
@@ -200,18 +202,19 @@ class JournalforingService(
                                         if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                                         tema = tema
                                     ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }
-                                }
-                                val journalpostrequest = journalpostService.oppdaterJournalpost(
-                                    innhentetJournalpost!!,
-                                    journalPostResponseOgRequest.second.bruker!!,
-                                    journalPostResponseOgRequest.second.tema,
-                                    journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                    journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
-                                )
-                                secureLog.info("""Henter opprettjournalpostRequest:
+                                    val journalpostrequest = journalpostService.oppdaterJournalpost(
+                                        innhentetJournalpost,
+                                        journalPostResponseOgRequest.second.bruker!!,
+                                        journalPostResponseOgRequest.second.tema,
+                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
+                                        journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
+                                    )
+                                    secureLog.info("""Henter opprettjournalpostRequest:
                                         | ${journalpostrequest.toJson()}   
                                         | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
-                                )
+                                    )
+                                }
+
                                 gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
                             }
                         }
