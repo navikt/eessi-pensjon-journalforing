@@ -30,4 +30,14 @@ class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, Str
             oppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }
+
+    fun oppdaterOppgaveMeldingPaaKafkaTopic(melding: OppdaterOppgaveMelding) {
+        val key = MDC.get(X_REQUEST_ID)
+        val payload = melding.toJson()
+
+        publiserOppgavemelding.measure {
+            logger.info("Oppdaterer ${melding.id}-oppgave melding på kafka: ${oppgaveKafkaTemplate.defaultTopic}  melding: $melding")
+            oppgaveKafkaTemplate.sendDefault(key, payload).get()
+        }
+    }
 }

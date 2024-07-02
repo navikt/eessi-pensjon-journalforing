@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppdaterOppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -189,19 +190,13 @@ class JournalforingService(
                                 logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
                                 if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
                                     logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
-
                                     //oppdaterer oppgave med status, enhet og tema
-                                    OppgaveMelding(
-                                        sedHendelse.sedType,
+                                    OppdaterOppgaveMelding(
                                         journalpostId.first,
+                                        journalPostResponseOgRequest.first?.journalstatus!!,
                                         journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        aktoerId,
-                                        sedHendelse.rinaSakId,
-                                        hendelseType,
-                                        null,
-                                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-                                        tema = tema
-                                    ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
+                                        journalPostResponseOgRequest.second.tema.name
+                                    ).also { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
                                     val journalpostrequest = journalpostService.oppdaterJournalpost(
                                         innhentetJournalpost,
                                         journalPostResponseOgRequest.second.bruker!!,
@@ -214,7 +209,6 @@ class JournalforingService(
                                         | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
                                     )
                                 }
-
                                 gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
                             }
                         }
