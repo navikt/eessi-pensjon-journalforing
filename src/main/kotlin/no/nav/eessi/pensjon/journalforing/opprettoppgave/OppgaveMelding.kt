@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.utils.toJson
 data class OppgaveMelding(
     val sedType: SedType?,
     val journalpostId: String? = null,
-    val journalførendeEnhet: Enhet,
+    val tildeltEnhetsnr: Enhet,
     val aktoerId: String?,
     val rinaSakId: String,
     val hendelseType: HendelseType,
@@ -28,7 +28,7 @@ data class OppgaveMelding(
 data class OppdaterOppgaveMelding(
     val id: String,
     val status: String,
-    val journalførendeEnhet: Enhet,
+    val tildeltEnhetsnr: Enhet,
     val tema: String
 
 )
