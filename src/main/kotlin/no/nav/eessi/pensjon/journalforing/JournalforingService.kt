@@ -13,7 +13,6 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
-import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -30,12 +29,15 @@ import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -172,50 +174,21 @@ class JournalforingService(
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
                 if(journalPostResponseOgRequest.second.bruker == null){
-                    logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
-                    gcpStorageService.lagreJournalPostRequest(
-                        journalPostResponseOgRequest.first?.journalpostId,
-                        sedHendelse.rinaSakId,
-                        sedHendelse.sedId
-                    )
-                } else {
+                    logger.info("Joournalposten mangler bruker og vil bli lagret for fremtidig vurdering")
+                    gcpStorageService.lagreJournalPostRequest(journalPostResponseOgRequest.second.toJson(), sedHendelse.rinaSakId, sedHendelse.sedId)
+                }
+                else{
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
                     try {
-                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
-                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
-                            gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
-                                val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
-
-                                logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
-                                if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
-                                    logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
-
-                                    //oppdaterer oppgave med status, enhet og tema
-                                    OppgaveMelding(
-                                        sedHendelse.sedType,
-                                        journalpostId.first,
-                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        aktoerId,
-                                        sedHendelse.rinaSakId,
-                                        hendelseType,
-                                        null,
-                                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-                                        tema = tema
-                                    ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
-                                    val journalpostrequest = journalpostService.oppdaterJournalpost(
-                                        innhentetJournalpost,
-                                        journalPostResponseOgRequest.second.bruker!!,
-                                        journalPostResponseOgRequest.second.tema,
-                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
-                                    ).also { logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}") }
-                                    secureLog.info("""Henter opprettjournalpostRequest:
-                                        | ${journalpostrequest.toJson()}   
-                                        | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
-                                    )
-                                }
-
-                                gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
+                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
+                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
+                            gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
+                                val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
+                                val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
+                                secureLog.info("""Henter opprettjournalpostRequest:
+                                        | ${updatedRinaDoc.toJson()}""".trimMargin())
+                                //TODO_1 send til joark
+                                //TODO_2 slett fra GCP
                             }
                         }
                     } catch (e: Exception) {
@@ -223,8 +196,7 @@ class JournalforingService(
                     }
                 }
 
-
-                // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
+                // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
                     identifisertPerson?.personRelasjon?.fnr,
                     hendelseType,
@@ -233,7 +205,7 @@ class JournalforingService(
                 )
 
                 // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
-                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == HendelseType.SENDT) {
+                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
 
@@ -250,14 +222,14 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                        if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
-                if ((hendelseType == HendelseType.MOTTATT && journalPostResponse.journalpostferdigstilt)) {
+                if ((hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
@@ -370,7 +342,7 @@ class JournalforingService(
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
         return when (hendelseType) {
-            HendelseType.SENDT -> AvsenderMottaker(
+            SENDT -> AvsenderMottaker(
                 sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand)
             )
             else -> AvsenderMottaker(
@@ -586,7 +558,7 @@ class JournalforingService(
                 oppgaveEnhet,
                 aktoerId,
                 sedHendelseModel.rinaSakId,
-                HendelseType.MOTTATT,
+                MOTTATT,
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED,
             )

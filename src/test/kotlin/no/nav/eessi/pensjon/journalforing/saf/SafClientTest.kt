@@ -54,13 +54,6 @@ class SafClientTest {
                   "tittel": "Inngående P15000 - Overføring av pensjonssaker til EESSI",
                   "journalposttype": "I",
                   "tema": "PEN",
-                  "dokumenter": [
-                    {
-                      "dokumentInfoId": "454271351",
-                      "tittel": "Inngående P15000 - Overføring av pensjonssaker til EESSI",
-                      "brevkode": "P15000"
-                    }
-                  ],
                   "behandlingstema": "ab0254",
                   "journalstatus": "JOURNALFOERT",                 
                   "behandlingstemanavn": "Alderspensjon",

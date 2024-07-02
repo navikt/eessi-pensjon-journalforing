@@ -9,8 +9,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
-import no.nav.eessi.pensjon.journalforing.Bruker
-import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
@@ -67,29 +65,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
         return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
-    }
-
-    /** Oppdatere journalpost med kall til dokarkiv:
-     *  https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
-     */
-    fun oppdaterJournalpost(
-        journalpostResponse: JournalpostResponse,
-        kjentBruker: Bruker,
-        tema: Tema,
-        enhet: Enhet,
-        behandlingsTema: Behandlingstema
-    ) {
-        return journalpostKlient.oppdaterJournalpost(
-            OppdaterJournalpost(
-                journalpostId = journalpostResponse.journalpostId!!,
-                dokumenter = journalpostResponse.dokumenter,
-                sak = journalpostResponse.sak,
-                bruker = kjentBruker,
-                tema = tema,
-                enhet = enhet,
-                behandlingsTema = behandlingsTema
-            )
-        ).also { logger.debug("Oppdatert journalpostId: $it") }
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {

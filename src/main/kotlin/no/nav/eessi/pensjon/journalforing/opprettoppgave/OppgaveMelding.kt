@@ -19,19 +19,12 @@ data class OppgaveMelding(
     val oppgaveType: OppgaveType,
     val tema: Tema? = Tema.PENSJON
 )  {
+
     override fun toString(): String {
         return toJson()
     }
 
 }
-
-data class OppdaterOppgaveMelding(
-    val id: String,
-    val status: String,
-    val tildeltEnhetsnr: Enhet,
-    val tema: String
-
-)
 enum class OppgaveType{
     BEHANDLE_SED,
     JOURNALFORING_UT,

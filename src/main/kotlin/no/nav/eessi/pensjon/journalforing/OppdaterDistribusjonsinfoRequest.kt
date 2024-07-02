@@ -17,4 +17,3 @@ class OppdaterDistribusjonsinfoRequest {
         return mapAnyToJson(this,true)
     }
 }
-
