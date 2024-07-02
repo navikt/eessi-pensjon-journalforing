@@ -201,14 +201,14 @@ class JournalforingService(
                                         null,
                                         if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                                         tema = tema
-                                    ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }
+                                    ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
                                     val journalpostrequest = journalpostService.oppdaterJournalpost(
                                         innhentetJournalpost,
                                         journalPostResponseOgRequest.second.bruker!!,
                                         journalPostResponseOgRequest.second.tema,
                                         journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
                                         journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
-                                    )
+                                    ).also { logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}") }
                                     secureLog.info("""Henter opprettjournalpostRequest:
                                         | ${journalpostrequest.toJson()}   
                                         | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
