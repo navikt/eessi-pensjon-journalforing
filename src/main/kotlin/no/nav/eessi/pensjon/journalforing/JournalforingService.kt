@@ -13,7 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
-import no.nav.eessi.pensjon.journalforing.Journalstatus.UNDER_ARBEID
+import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -30,8 +30,6 @@ import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
@@ -189,7 +187,9 @@ class JournalforingService(
                                 val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
 
                                 logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
-                                if (innhentetJournalpost?.journalstatus  == UNDER_ARBEID) {
+                                if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT)) {
+                                    logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
+
                                     //oppdaterer oppgave med status, enhet og tema
                                     OppgaveMelding(
                                         sedHendelse.sedType,
@@ -199,7 +199,7 @@ class JournalforingService(
                                         sedHendelse.rinaSakId,
                                         hendelseType,
                                         null,
-                                        if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                                         tema = tema
                                     ).also { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
                                     val journalpostrequest = journalpostService.oppdaterJournalpost(
@@ -233,7 +233,7 @@ class JournalforingService(
                 )
 
                 // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
-                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == SENDT) {
+                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == HendelseType.SENDT) {
                     journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                 }
 
@@ -250,14 +250,14 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         hendelseType,
                         null,
-                        if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                         tema = tema
                     )
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                 }
 
                 //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
-                if ((hendelseType == MOTTATT && journalPostResponse.journalpostferdigstilt)) {
+                if ((hendelseType == HendelseType.MOTTATT && journalPostResponse.journalpostferdigstilt)) {
                     logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
                     opprettBehandleSedOppgave(
                         journalPostResponse.journalpostId,
@@ -370,7 +370,7 @@ class JournalforingService(
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
         return when (hendelseType) {
-            SENDT -> AvsenderMottaker(
+            HendelseType.SENDT -> AvsenderMottaker(
                 sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand)
             )
             else -> AvsenderMottaker(
@@ -586,7 +586,7 @@ class JournalforingService(
                 oppgaveEnhet,
                 aktoerId,
                 sedHendelseModel.rinaSakId,
-                MOTTATT,
+                HendelseType.MOTTATT,
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED,
             )
