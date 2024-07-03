@@ -4,6 +4,7 @@ SPRING_PROFILES_ACTIVE: test
 KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
 KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
+KAFKA_OPPDATER_OPPGAVE_TOPIC: 'eessi-pensjon-opprett-oppgave-v1'
 KAFKA_KRAVINIT_TOPIC: 'eessi-pensjon-krav-q'
 KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
@@ -25,6 +26,9 @@ kafka:
     groupid: eessi-pensjon-group
   oppgave:
     topic: ${KAFKA_OPPGAVE_TOPIC}
+    groupid: eessi-pensjon-group
+  oppdater-oppgave:
+    topic: ${KAFKA_OPPDATER-OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group
   krav:
     topic: ${KAFKA_KRAVINIT_TOPIC}

@@ -24,6 +24,7 @@ class IntegrasjonsTestConfig {
     @Value("\${" + EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS + "}")
     private lateinit var brokerAddresses: String
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private lateinit var oppgaveTopic: String
+    @Value("\${KAFKA_OPPDATER_OPPGAVE_TOPIC}") private lateinit var oppdaterOppgaveTopic: String
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private lateinit var automatiseringTopic: String
 
     @MockkBean
@@ -49,6 +50,13 @@ class IntegrasjonsTestConfig {
     fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
             defaultTopic = oppgaveTopic
+        }
+    }
+
+    @Bean
+    fun oppdaterOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
+        return KafkaTemplate(producerFactory()).apply {
+            defaultTopic = oppdaterOppgaveTopic
         }
     }
 

@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
+    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC, OPPDATER_OPPGAVE_TOPIC])
 internal class SedMottattIntegrationTest : IntegrasjonsBase(){
 
     init {
