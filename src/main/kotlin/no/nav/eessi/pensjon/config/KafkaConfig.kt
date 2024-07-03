@@ -33,7 +33,8 @@ class KafkaConfig(
     @param:Value("\${kafka.security.protocol}") private val securityProtocol: String,
     @Autowired private val kafkaErrorHandler: KafkaStoppingErrorHandler?,
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String,
-    @Value("\${KAFKA_OPPGAVE_TOPIC}") private val oppgaveTopic: String
+    @Value("\${KAFKA_OPPGAVE_TOPIC}") private val oppgaveTopic: String,
+    @Value("\${KAFKA_OPPDATER_OPPGAVE_TOPIC}") private val oppdaterOppgaveTopic: String
 ) {
 
     @Bean
@@ -69,11 +70,17 @@ class KafkaConfig(
 
     @Bean
     fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
-        val template = KafkaTemplate(producerFactory())
-        template.defaultTopic = oppgaveTopic
-        return template
+        return KafkaTemplate(producerFactory()).apply {
+            defaultTopic = oppgaveTopic
+        }
     }
 
+    @Bean
+    fun oppdaterOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
+        return KafkaTemplate(producerFactory()).apply {
+            defaultTopic = oppdaterOppgaveTopic
+        }
+    }
 
     fun kafkaConsumerFactory(): ConsumerFactory<String, String> {
         val configMap: MutableMap<String, Any> = HashMap()
