@@ -137,14 +137,14 @@ class GcpStorageService(
             val blobs = gcpStorage.list(journalBucket).also { logger.info("""GCP innhold: ${it.values}""") }
 
             for (blob in blobs.iterateAll()) {
-                return if(blob.name.contains(rinaId)){
+                logger.debug("Undersøker blob_name: ${blob.name} mot $rinaId")
+                if(blob.name.contains(rinaId)){
                     logger.info("""Vi har treff på en tidligere buc: $rinaId som mangler bruker:
                         | dokument: $rinaDokumentId
                         | lagret jp: ${blob.name}
                     """.trimMargin())
-                    blobs.values.filter { it.name.contains(rinaId) }.map { it.name }.also { logger.info("Arkiverte saker: $it") }
+                    return blobs.values.filter { it.name.contains(rinaId) }.map { it.name }.also { logger.info("Arkiverte saker: $it") }
                 }
-                else null
             }
         } catch (ex: Exception) {
             logger.warn("En feil oppstod under henting av arkiverte rinasaker objekt: $rinaId i bucket", ex)
