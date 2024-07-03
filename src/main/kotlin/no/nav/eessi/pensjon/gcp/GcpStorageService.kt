@@ -134,7 +134,8 @@ class GcpStorageService(
     fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) : List<String>? {
         try {
             logger.info("Henter arkiverte saker for RinaId: $rinaId, dokumentid: $rinaDokumentId")
-            val blobs = gcpStorage.list(journalBucket)
+            val blobs = gcpStorage.list(journalBucket).also { logger.info("""GCP innhold: ${it.values}""") }
+
             for (blob in blobs.iterateAll()) {
                 return if(blob.name.contains(rinaId)){
                     logger.info("""Vi har treff på en tidligere buc: $rinaId som mangler bruker:
