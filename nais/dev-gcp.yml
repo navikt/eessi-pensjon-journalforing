@@ -28,11 +28,6 @@ spec:
   gcp:
     buckets:
       - name: eessi-pensjon-journal-uten-bruker-dev
-        lifecycleCondition:
-          age: 365
-          createdBefore: 2020-01-01
-          numNewerVersions: 2
-          withState: ANY
         uniformBucketLevelAccess: true
 
   webproxy: true
