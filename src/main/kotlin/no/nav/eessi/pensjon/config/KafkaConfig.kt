@@ -34,7 +34,7 @@ class KafkaConfig(
     @Autowired private val kafkaErrorHandler: KafkaStoppingErrorHandler?,
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private val automatiseringTopic: String,
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private val oppgaveTopic: String,
-    @Value("\${KAFKA_OPPDATER_OPPGAVE_TOPIC}") private val oppdaterOppgaveTopic: String
+    @Value("\${KAFKA_OPPDATEROPPGAVE_TOPIC}") private val oppdaterOppgaveTopic: String
 ) {
 
     @Bean

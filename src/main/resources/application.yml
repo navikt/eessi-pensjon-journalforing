@@ -9,7 +9,7 @@ kafka:
   oppgave:
     topic: ${KAFKA_OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group
-  oppdater-oppgave:
+  oppdaterOppgave:
     topic: ${KAFKA_OPPDATER_OPPGAVE_TOPIC}
     groupid: eessi-pensjon-group
   krav:
