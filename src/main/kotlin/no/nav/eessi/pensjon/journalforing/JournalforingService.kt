@@ -185,6 +185,7 @@ class JournalforingService(
                         gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
                             logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
                             gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
+                                logger.info("Henter informasjon fra SAF for: ${journalpostId.first}, rinaid: $rinaId")
                                 val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
 
                                 logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")

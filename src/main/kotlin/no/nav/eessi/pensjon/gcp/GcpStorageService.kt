@@ -123,7 +123,10 @@ class GcpStorageService(
             val journalpostIdFraUkjentBruker = gcpStorage.get(blobId)
             if(journalpostIdFraUkjentBruker.exists()){
                 logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
-                return Pair(journalpostIdFraUkjentBruker.getContent().decodeToString(), blobId)
+                return Pair(journalpostIdFraUkjentBruker.getContent().decodeToString(), blobId).also { logger.debug("""Journalpost fra ukjent bruker:
+                    | blobid: $blobId
+                    | rinaIdOgSedId: $rinaIdOgSedId
+                    | $it""".trimMargin()) }
             }
         } catch ( ex: Exception) {
             logger.warn("En feil oppstod under henting av journalpostRequest objekt ved : $rinaIdOgSedId i bucket")
