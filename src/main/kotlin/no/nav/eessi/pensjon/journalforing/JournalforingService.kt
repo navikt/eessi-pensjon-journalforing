@@ -209,7 +209,8 @@ class JournalforingService(
                                         | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
                                     )
                                 }
-                                gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
+                                // Tar denne bort så lenge vi driver med testing
+                                //gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
                             }
                         }
                     } catch (e: Exception) {

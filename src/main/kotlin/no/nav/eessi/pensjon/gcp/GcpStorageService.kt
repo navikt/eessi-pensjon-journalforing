@@ -134,7 +134,7 @@ class GcpStorageService(
     fun arkiverteSakerForRinaId(rinaId: String, rinaDokumentId: String) : List<String>? {
         try {
             logger.info("Henter arkiverte saker for RinaId: $rinaId, dokumentid: $rinaDokumentId")
-            val blobs = gcpStorage.list(journalBucket).also { logger.info("""GCP innhold: ${it.values}""") }
+            val blobs = gcpStorage.list(journalBucket)
 
             for (blob in blobs.iterateAll()) {
                 logger.debug("Undersøker blob_name: ${blob.name} mot $rinaId")
