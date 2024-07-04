@@ -24,7 +24,7 @@ class IntegrasjonsTestConfig {
     @Value("\${" + EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS + "}")
     private lateinit var brokerAddresses: String
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private lateinit var oppgaveTopic: String
-    @Value("\${KAFKA_OPPDATER_OPPGAVE_TOPIC}") private lateinit var oppdaterOppgaveTopic: String
+    @Value("\${KAFKA_OPPDATEROPPGAVE_TOPIC}") private lateinit var oppdaterOppgaveTopic: String
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private lateinit var automatiseringTopic: String
 
     @MockkBean
