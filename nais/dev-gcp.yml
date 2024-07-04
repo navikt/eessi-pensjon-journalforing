@@ -64,8 +64,8 @@ spec:
       value: eessibasis.sedsendt-v1-q2
     - name: KAFKA_SEDMOTTATT_TOPIC
       value: eessibasis.sedmottatt-v1-q2
-    - name: KAFKA_OPPRETT_OPPGAVE_TOPIC
-      value: eessipensjon.privat-opprett-oppgave-q2
+    - name: KAFKA_OPPDATEROPPGAVE_TOPIC
+      value: eessipensjon.privat-oppdater-oppgave-q2
     - name: KAFKA_OPPGAVE_TOPIC
       value: eessipensjon.privat-oppgave-q2
     - name: KAFKA_KRAV_TOPIC
