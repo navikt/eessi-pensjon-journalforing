@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
 const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
-const val OPPDATER_OPPGAVE_TOPIC = "eessi-pensjon-oppdater-oppgave-v1"
+const val OPPDATER_OPPGAVE_TOPIC = "eessi-pensjonoppdater-oppgave-v1"
 
 abstract class IntegrasjonsBase {
 
