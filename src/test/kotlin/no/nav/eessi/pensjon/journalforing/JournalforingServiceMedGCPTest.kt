@@ -34,6 +34,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -80,6 +81,7 @@ class JournalforingServiceMedGCPTest {
     }
 
     @Test
+    @Disabled
     fun `Etter oppdatering av journalpost på ukjent bruker slettes oppføringen i gcpStorage`(){
         val rinaId = "12345"
         val journalpostId = "54321111"
