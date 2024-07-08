@@ -31,10 +31,19 @@ data class OppdaterOppgaveMelding(
     val status: String,
     val tildeltEnhetsnr: Enhet,
     val tema: String,
-    val bruker: Bruker,
+    val bruker: OppgaveBruker,
     val aktoerId: String?
-
 )
+
+data class OppgaveBruker(
+    val ident: String,
+    val type: OppgaveBrukerType
+)
+
+enum class OppgaveBrukerType {
+    PERSON, ARBEIDSGIVER, SAMHANDLER
+}
+
 enum class OppgaveType{
     BEHANDLE_SED,
     JOURNALFORING_UT,
