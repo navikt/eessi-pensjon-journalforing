@@ -31,7 +31,6 @@ data class OppdaterOppgaveMelding(
     val status: String,
     val tildeltEnhetsnr: Enhet,
     val tema: String,
-    val bruker: OppgaveBruker,
     val aktoerId: String?
 )
 
