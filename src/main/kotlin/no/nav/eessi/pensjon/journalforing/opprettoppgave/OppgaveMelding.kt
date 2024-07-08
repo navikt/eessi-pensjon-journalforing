@@ -31,8 +31,9 @@ data class OppdaterOppgaveMelding(
     val status: String,
     val tildeltEnhetsnr: Enhet,
     val tema: String,
-    val aktoerId: String?
-)
+    val aktoerId: String?,
+    val rinaSakId: String
+    )
 
 data class OppgaveBruker(
     val ident: String,
