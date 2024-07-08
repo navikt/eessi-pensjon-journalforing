@@ -194,7 +194,7 @@ class JournalforingService(
                                     //oppdaterer oppgave med status, enhet og tema
                                     OppdaterOppgaveMelding(
                                         journalpostId.first,
-                                        journalPostResponseOgRequest.first?.journalstatus!!,
+                                        innhentetJournalpost.journalstatus!!.name,
                                         journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
                                         journalPostResponseOgRequest.second.tema.name
                                     ).also { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
