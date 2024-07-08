@@ -196,7 +196,9 @@ class JournalforingService(
                                         journalpostId.first,
                                         innhentetJournalpost.journalstatus!!.name,
                                         journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        journalPostResponseOgRequest.second.tema.name
+                                        journalPostResponseOgRequest.second.tema.name,
+                                        journalPostResponseOgRequest.second.bruker!!,
+                                        identifisertPerson?.aktoerId
                                     ).also { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
                                     val journalpostrequest = journalpostService.oppdaterJournalpost(
                                         innhentetJournalpost,

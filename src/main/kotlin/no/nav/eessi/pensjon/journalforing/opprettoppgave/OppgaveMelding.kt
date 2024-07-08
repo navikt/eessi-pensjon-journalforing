@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing.opprettoppgave
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.journalforing.Bruker
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -29,7 +30,9 @@ data class OppdaterOppgaveMelding(
     val id: String,
     val status: String,
     val tildeltEnhetsnr: Enhet,
-    val tema: String
+    val tema: String,
+    val bruker: Bruker,
+    val aktoerId: String?
 
 )
 enum class OppgaveType{
