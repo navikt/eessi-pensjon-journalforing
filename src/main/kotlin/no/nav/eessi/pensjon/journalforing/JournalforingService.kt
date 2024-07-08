@@ -192,25 +192,30 @@ class JournalforingService(
                                 if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
                                     logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
                                     //oppdaterer oppgave med status, enhet og tema
-                                    OppdaterOppgaveMelding(
-                                        journalpostId.first,
-                                        innhentetJournalpost.journalstatus!!.name,
-                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        journalPostResponseOgRequest.second.tema.name,
-                                        identifisertPerson?.aktoerId,
-                                        sedHendelse.rinaSakId
-                                    ).also { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(it) }.also { secureLog.info("Oppdatert oppgave ${it}") }
-                                    val journalpostrequest = journalpostService.oppdaterJournalpost(
-                                        innhentetJournalpost,
-                                        journalPostResponseOgRequest.second.bruker!!,
-                                        journalPostResponseOgRequest.second.tema,
-                                        journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
-                                    ).also { logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}") }
-                                    secureLog.info("""Henter opprettjournalpostRequest:
-                                        | ${journalpostrequest.toJson()}   
-                                        | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin()
-                                    )
+
+                                    oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(
+                                        OppdaterOppgaveMelding(
+                                            id = journalpostId.first,
+                                            status = innhentetJournalpost.journalstatus!!.name,
+                                            tildeltEnhetsnr = journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
+                                            tema = journalPostResponseOgRequest.second.tema.name,
+                                            aktoerId = identifisertPerson?.aktoerId,
+                                            rinaSakId = sedHendelse.rinaSakId
+                                        ).also { secureLog.info("Oppdatert oppgave ${it}") })
+
+                                    journalpostService.oppdaterJournalpost(
+                                        journalpostResponse = innhentetJournalpost,
+                                        kjentBruker = journalPostResponseOgRequest.second.bruker!!,
+                                        tema = journalPostResponseOgRequest.second.tema,
+                                        enhet = journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
+                                        behandlingsTema = journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
+                                    ).also {
+                                        logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}")
+                                        secureLog.info(
+                                            """Henter opprettjournalpostRequest:
+                                                | ${it.toJson()}   
+                                                | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin())
+                                    }
                                 }
                                 // Tar denne bort så lenge vi driver med testing
                                 //gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
