@@ -179,6 +179,7 @@ class JournalforingService(
                         sedHendelse.rinaSakId,
                         sedHendelse.sedId
                     )
+                    countForOppdatering("Lagerer journalpostid for journalpost uten bruker")
                 } else {
                     // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
                     try {
@@ -191,8 +192,8 @@ class JournalforingService(
                                 logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
                                 if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
                                     logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
-                                    //oppdaterer oppgave med status, enhet og tema
 
+                                    //oppdaterer oppgave med bruker, status, enhet og tema
                                     oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(
                                         OppdaterOppgaveMelding(
                                             id = journalpostId.first,
@@ -201,8 +202,13 @@ class JournalforingService(
                                             tema = journalpostRequest.tema.name,
                                             aktoerId = identifisertPerson?.aktoerId,
                                             rinaSakId = sedHendelse.rinaSakId
-                                        ).also { secureLog.info("Oppdatert oppgave ${it}") })
+                                        ).also {
+                                            secureLog.info("Oppdatert oppgave ${it}")
+                                            countForOppdatering("Oppdaterer oppgave med bruker fra ny sed med bruker ")
+                                        }
+                                    )
 
+                                    //oppdaterer journalpost med status, enhet og tema
                                     journalpostService.oppdaterJournalpost(
                                         journalpostResponse = innhentetJournalpost,
                                         kjentBruker = journalpostRequest.bruker,
@@ -215,10 +221,13 @@ class JournalforingService(
                                             """Henter opprettjournalpostRequest:
                                                 | ${it.toJson()}   
                                                 | ${journalpostRequest.bruker.toJson()}""".trimMargin())
+                                        countForOppdatering("Oppdaterer journalpost med bruker fra ny sed med bruker ")
                                     }
                                 }
                                 // Tar denne bort så lenge vi driver med testing
-                                //gcpStorageService.slettJournalpostDetaljer(journalpostId.second)
+                                gcpStorageService.slettJournalpostDetaljer(journalpostId.second).also {
+                                    countForOppdatering("Sletter fra journalpostid etter oppgatering av oppgave og journalpost")
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -288,6 +297,14 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
+        }
+    }
+
+    private fun countForOppdatering(melding: String) {
+        try {
+            Metrics.counter("eessi_pensjon_journalføring_oppgave_oppdatering", "melding", melding).increment()
+        } catch (e: Exception) {
+            logger.warn("Metrics feilet med melding: $melding", e)
         }
     }
 
