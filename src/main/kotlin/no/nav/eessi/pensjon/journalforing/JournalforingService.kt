@@ -170,9 +170,10 @@ class JournalforingService(
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
+                val journalpostRequest = journalPostResponseOgRequest.second
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                if(journalPostResponseOgRequest.second.bruker == null){
+                if(journalpostRequest.bruker == null){
                     logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
                     gcpStorageService.lagreJournalPostRequest(
                         journalPostResponseOgRequest.first?.journalpostId,
@@ -197,24 +198,24 @@ class JournalforingService(
                                         OppdaterOppgaveMelding(
                                             id = journalpostId.first,
                                             status = innhentetJournalpost.journalstatus!!.name,
-                                            tildeltEnhetsnr = journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                            tema = journalPostResponseOgRequest.second.tema.name,
+                                            tildeltEnhetsnr = journalpostRequest.journalfoerendeEnhet!!,
+                                            tema = journalpostRequest.tema.name,
                                             aktoerId = identifisertPerson?.aktoerId,
                                             rinaSakId = sedHendelse.rinaSakId
                                         ).also { secureLog.info("Oppdatert oppgave ${it}") })
 
                                     journalpostService.oppdaterJournalpost(
                                         journalpostResponse = innhentetJournalpost,
-                                        kjentBruker = journalPostResponseOgRequest.second.bruker!!,
-                                        tema = journalPostResponseOgRequest.second.tema,
-                                        enhet = journalPostResponseOgRequest.second.journalfoerendeEnhet!!,
-                                        behandlingsTema = journalPostResponseOgRequest.second.behandlingstema ?: innhentetJournalpost.behandlingstema!!
+                                        kjentBruker = journalpostRequest.bruker!!,
+                                        tema = journalpostRequest.tema,
+                                        enhet = journalpostRequest.journalfoerendeEnhet!!,
+                                        behandlingsTema = journalpostRequest.behandlingstema ?: innhentetJournalpost.behandlingstema!!
                                     ).also {
                                         logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}")
                                         secureLog.info(
                                             """Henter opprettjournalpostRequest:
                                                 | ${it.toJson()}   
-                                                | ${journalPostResponseOgRequest.second.bruker!!.toJson()}""".trimMargin())
+                                                | ${journalpostRequest.bruker!!.toJson()}""".trimMargin())
                                     }
                                 }
                                 // Tar denne bort så lenge vi driver med testing
