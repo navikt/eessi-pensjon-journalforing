@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.gcp.JournalpostDetaljer
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -504,11 +505,17 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return if (gcpStorageService.gjennyFinnes(euxCaseId) && sakIdFraSed != null)
-            Sak("FAGSAK", sakIdFraSed, "EY")
-        else if (sakInformasjon?.sakId != null)
-            Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")
-        else null
+        return when {
+            gcpStorageService.gjennyFinnes(euxCaseId) -> {
+                val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
+                   SakIDHelper.gjennySak(gjennySak)
+                    ?: SakIDHelper.sakIdFraSed(sakIdFraSed)
+                    ?: SakIDHelper.sakInformasjon(sakInformasjon)
+            }
+
+            sakInformasjon?.sakId != null -> Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")
+            else -> null
+        }
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
