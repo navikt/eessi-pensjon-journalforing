@@ -12,16 +12,13 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppdaterOppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
@@ -36,7 +33,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -54,7 +50,7 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
-    private val safClient: SafClient,
+    private val journalforingUtenBruker: JournalforingUtenBruker,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -172,69 +168,11 @@ class JournalforingService(
                 val journalpostRequest = journalPostResponseOgRequest.second
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                if(journalpostRequest.bruker == null){
-                    logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
-                    gcpStorageService.lagreJournalPostRequest(
-                        journalPostResponseOgRequest.first?.journalpostId,
-                        sedHendelse.rinaSakId,
-                        sedHendelse.sedId
-                    )
-                    countForOppdatering("Lagerer journalpostid for journalpost uten bruker")
-                } else {
-                    // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    try {
-                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { rinaId ->
-                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
-                            gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { journalpostId ->
-                                logger.info("Henter informasjon fra SAF for: ${journalpostId.first}, rinaid: $rinaId")
-                                val innhentetJournalpost = safClient.hentJournalpost(journalpostId.first)
-
-                                logger.info("Hentet journalpost: ${innhentetJournalpost?.journalpostId} med status: ${innhentetJournalpost?.journalstatus}")
-                                if (innhentetJournalpost != null && innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
-                                    logger.info("Lager oppgavemelding og oppdaterer rinasak: $rinaId med status:  ${innhentetJournalpost.journalstatus}")
-
-                                    //oppdaterer oppgave med bruker, status, enhet og tema
-                                    oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic(
-                                        OppdaterOppgaveMelding(
-                                            id = journalpostId.first,
-                                            status = innhentetJournalpost.journalstatus!!.name,
-                                            tildeltEnhetsnr = journalpostRequest.journalfoerendeEnhet!!,
-                                            tema = journalpostRequest.tema.name,
-                                            aktoerId = identifisertPerson?.aktoerId,
-                                            rinaSakId = sedHendelse.rinaSakId
-                                        ).also {
-                                            secureLog.info("Oppdatert oppgave ${it}")
-                                            countForOppdatering("Oppdaterer oppgave med bruker fra ny sed med bruker ")
-                                        }
-                                    )
-
-                                    //oppdaterer journalpost med status, enhet og tema
-                                    journalpostService.oppdaterJournalpost(
-                                        journalpostResponse = innhentetJournalpost,
-                                        kjentBruker = journalpostRequest.bruker,
-                                        tema = journalpostRequest.tema,
-                                        enhet = journalpostRequest.journalfoerendeEnhet,
-                                        behandlingsTema = journalpostRequest.behandlingstema ?: innhentetJournalpost.behandlingstema!!
-                                    ).also {
-                                        logger.info("Oppdatert journalpost med JPID: ${journalpostId.first}")
-                                        secureLog.info(
-                                            """Henter opprettjournalpostRequest:
-                                                | ${it.toJson()}   
-                                                | ${journalpostRequest.bruker.toJson()}""".trimMargin())
-                                        countForOppdatering("Oppdaterer journalpost med bruker fra ny sed med bruker ")
-                                    }
-                                }
-                                // Tar denne bort så lenge vi driver med testing
-                                gcpStorageService.slettJournalpostDetaljer(journalpostId.second).also {
-                                    countForOppdatering("Sletter fra journalpostid etter oppgatering av oppgave og journalpost")
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Det har skjedd feil med henting av arkivert saker")
-                    }
-                }
-
+                journalforingUtenBruker.harJournalpostBruker(
+                    journalPostResponse,
+                    journalpostRequest,
+                    sedHendelse,
+                    identifisertPerson)
 
                 // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
@@ -297,14 +235,6 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
-        }
-    }
-
-    private fun countForOppdatering(melding: String) {
-        try {
-            Metrics.counter("eessi_pensjon_journalføring_oppgave_oppdatering", "melding", melding).increment()
-        } catch (e: Exception) {
-            logger.warn("Metrics feilet med melding: $melding", e)
         }
     }
 
