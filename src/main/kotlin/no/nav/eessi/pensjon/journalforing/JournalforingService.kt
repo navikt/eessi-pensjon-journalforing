@@ -505,17 +505,23 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        return when {
-            gcpStorageService.gjennyFinnes(euxCaseId) -> {
-                val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
-                   SakIDHelper.gjennySak(gjennySak)
-                    ?: SakIDHelper.sakIdFraSed(sakIdFraSed)
-                    ?: SakIDHelper.sakInformasjon(sakInformasjon)
-            }
+        val sakType = "FAGSAK"
+        val sakInstitusjon = "EY"
 
-            sakInformasjon?.sakId != null -> Sak("FAGSAK", sakInformasjon.sakId!!, "PP01")
-            else -> null
+        if (gcpStorageService.gjennyFinnes(euxCaseId)) {
+            val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
+            return gjennySak?.sakId?.let { Sak(sakType, it, sakInstitusjon) }
         }
+
+        sakIdFraSed?.takeIf { it.isNotBlank() }?.let {
+            return Sak(sakType, it, sakInstitusjon)
+        }
+
+        sakInformasjon?.sakId?.takeIf { it.isNotBlank() }?.let {
+            return Sak(sakType, it, sakInstitusjon)
+        }
+
+        return null
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
