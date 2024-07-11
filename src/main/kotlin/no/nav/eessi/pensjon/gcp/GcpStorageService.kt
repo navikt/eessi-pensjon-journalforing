@@ -128,6 +128,9 @@ class GcpStorageService(
                     | rinaIdOgSedId: $rinaIdOgSedId
                     | $it""".trimMargin()) }
             }
+            else {
+                logger.error("Finner ikke lagret journalpostId for $rinaIdOgSedId, for bucket $journalBucket")
+            }
         } catch ( ex: Exception) {
             logger.warn("En feil oppstod under henting av journalpostRequest objekt ved : $rinaIdOgSedId i bucket")
         }
