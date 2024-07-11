@@ -507,6 +507,11 @@ class JournalforingService(
     ): Sak? {
         val sakType = "FAGSAK"
 
+        if(euxCaseId == sakIdFraSed || euxCaseId == sakInformasjon?.sakId){
+            logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
+            return null
+        }
+
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
             return gjennySak?.sakId?.let { Sak(sakType, it, "EY") }
