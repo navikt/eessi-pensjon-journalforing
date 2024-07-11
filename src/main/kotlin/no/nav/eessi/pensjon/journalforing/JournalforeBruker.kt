@@ -79,6 +79,7 @@ class JournalforeBruker (
                     if (innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
                         oppdaterOppgave(rinaId, innhentetJournalpost, journalpostRequest, sedHendelse, identifisertPerson)
                         oppdaterJournalpost(innhentetJournalpost, journalpostRequest, bruker)
+                        journalpostService.ferdigstilljournalpost(innhentetJournalpost.journalpostId!!, innhentetJournalpost.journalforendeEnhet!!)
                     }
 
                     deleteJournalpostDetails(journalpostInfo.second)

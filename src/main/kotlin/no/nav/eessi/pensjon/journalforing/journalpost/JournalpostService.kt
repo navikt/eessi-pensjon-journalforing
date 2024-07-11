@@ -129,6 +129,13 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
 
     /**
+     *  Førsøker å ferdigstille journalposten.
+     *
+     *  @param journalpostId: ID til journalposten som skal ferdigstilles.
+     */
+    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+
+    /**
      *  Ferdigstiller journalposten.
      *
      *  @param identifisertPerson: ID til journalposten som skal ferdigstilles.
