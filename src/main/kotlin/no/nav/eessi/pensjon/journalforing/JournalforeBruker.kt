@@ -56,7 +56,7 @@ class JournalforeBruker (
     /***
      *  se om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
      */
-    private fun journalpostMedBruker(
+    fun journalpostMedBruker(
         journalpostRequest: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,
@@ -91,7 +91,7 @@ class JournalforeBruker (
         }
     }
 
-    private fun oppdaterOppgave(
+    fun oppdaterOppgave(
         rinaId: String,
         innhentetJournalpost: JournalpostResponse,
         journalpostRequest: OpprettJournalpostRequest,
@@ -115,7 +115,7 @@ class JournalforeBruker (
         }
     }
 
-    private fun oppdaterJournalpost(
+    fun oppdaterJournalpost(
         innhentetJournalpost: JournalpostResponse,
         journalpostRequest: OpprettJournalpostRequest,
         bruker: Bruker
