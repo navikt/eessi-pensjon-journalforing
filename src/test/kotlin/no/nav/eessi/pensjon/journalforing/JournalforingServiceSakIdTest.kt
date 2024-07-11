@@ -38,7 +38,7 @@ class JournalforingServiceSakIdTest : JournalforingServiceBase() {
 
         val result = journalforingService.hentSak(euxCaseId, sakIdFraSed)
 
-        assertEquals(Sak("FAGSAK", sakIdFraSed, "EY"), result)
+        assertEquals(Sak("FAGSAK", sakIdFraSed, "PP01"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
     }
 
@@ -51,7 +51,7 @@ class JournalforingServiceSakIdTest : JournalforingServiceBase() {
 
         val result = journalforingService.hentSak(euxCaseId, sakInformasjon = sakInformasjon)
 
-        assertEquals(Sak("FAGSAK", sakInformasjon.sakId!!, "EY"), result)
+        assertEquals(Sak("FAGSAK", sakInformasjon.sakId!!, "PP01"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
     }
 
