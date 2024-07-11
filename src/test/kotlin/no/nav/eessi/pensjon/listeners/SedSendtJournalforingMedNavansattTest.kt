@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.journalforing.JournalforeBruker
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
@@ -73,13 +74,16 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
+    private val journalforingutenbruker = mockk<JournalforeBruker>()
+
     private val journalforingService =
         JournalforingService(
             journalpostService, oppgaveRoutingService,
             mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher, mockk()
+            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
+            journalforingutenbruker
         )
 
     private val sedListener = SedSendtListener(
@@ -96,6 +100,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
+        justRun { journalforingutenbruker.harJournalpostBruker(any(), any(), any(), any()) }
     }
 
     @Test

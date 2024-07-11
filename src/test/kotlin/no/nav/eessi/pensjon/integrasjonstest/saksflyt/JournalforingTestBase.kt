@@ -13,11 +13,9 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.JournalpostType
-import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -73,6 +71,9 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID_2 = "0009876543210"
     }
 
+    protected val journalforeBruker: JournalforeBruker = mockk(relaxed = true){
+        justRun { harJournalpostBruker(any(), any(), any(), any()) }
+    }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
@@ -119,7 +120,7 @@ internal open class JournalforingTestBase {
         kravInitialiseringsService = kravService,
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        mockk()
+        journalforeBruker = journalforeBruker
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

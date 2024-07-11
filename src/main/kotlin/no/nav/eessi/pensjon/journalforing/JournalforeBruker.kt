@@ -15,14 +15,14 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
-class JournalforingUtenBruker (
+class JournalforeBruker (
     private val safClient: SafClient,
     private val gcpStorageService: GcpStorageService,
     private val journalpostService: JournalpostService,
     private val oppgaveHandler: OppgaveHandler,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()){
 
-    private val logger = LoggerFactory.getLogger(JournalforingUtenBruker::class.java)
+    private val logger = LoggerFactory.getLogger(JournalforeBruker::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun harJournalpostBruker(
