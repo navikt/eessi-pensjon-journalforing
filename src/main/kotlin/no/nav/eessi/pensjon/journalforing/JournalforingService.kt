@@ -506,19 +506,18 @@ class JournalforingService(
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
         val sakType = "FAGSAK"
-        val sakInstitusjon = "EY"
 
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
-            return gjennySak?.sakId?.let { Sak(sakType, it, sakInstitusjon) }
+            return gjennySak?.sakId?.let { Sak(sakType, it, "EY") }
         }
 
         sakIdFraSed?.takeIf { it.isNotBlank() }?.let {
-            return Sak(sakType, it, sakInstitusjon)
+            return Sak(sakType, it, "PP01")
         }
 
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() }?.let {
-            return Sak(sakType, it, sakInstitusjon)
+            return Sak(sakType, it, "PP01")
         }
 
         return null
