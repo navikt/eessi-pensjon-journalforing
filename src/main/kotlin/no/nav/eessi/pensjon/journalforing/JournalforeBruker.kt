@@ -14,7 +14,9 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
+@Service
 class JournalforeBruker (
     private val safClient: SafClient,
     private val gcpStorageService: GcpStorageService,
