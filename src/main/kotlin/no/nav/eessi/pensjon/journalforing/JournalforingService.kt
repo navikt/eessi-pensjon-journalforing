@@ -517,15 +517,25 @@ class JournalforingService(
             return gjennySak?.sakId?.let { Sak(sakType, it, "EY") }
         }
 
-        sakIdFraSed?.takeIf { it.isNotBlank() }?.let {
+        sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
             return Sak(sakType, it, "PP01")
         }
 
-        sakInformasjon?.sakId?.takeIf { it.isNotBlank() }?.let {
+        sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
             return Sak(sakType, it, "PP01")
         }
 
+        logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} mangler verdi")
         return null
+    }
+
+    /**
+     * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2)
+     */
+    private fun String.erGyldigPesysNummer(): Boolean {
+        val firstDigitChar = this.first()
+        val firstDigit = firstDigitChar.toString().toInt()
+        return firstDigit == 1 || firstDigit == 2
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =

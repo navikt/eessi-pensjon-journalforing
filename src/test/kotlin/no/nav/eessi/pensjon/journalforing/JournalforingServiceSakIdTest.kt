@@ -32,7 +32,7 @@ class JournalforingServiceSakIdTest : JournalforingServiceBase() {
     @Test
     fun `hentSak skal gi Sak fra sakIdFraSed naar gjennySak mangler`() {
         val euxCaseId = "123"
-        val sakIdFraSed = "sakIdSed"
+        val sakIdFraSed = "12131"
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
@@ -45,7 +45,7 @@ class JournalforingServiceSakIdTest : JournalforingServiceBase() {
     @Test
     fun `hentSak skal gi Sak fra sakInformasjon naar gjennySak og sakIdFraSed mangler`() {
         val euxCaseId = "123"
-        val sakInformasjon = SakInformasjon("32131", SakType.GJENLEV, LOPENDE)
+        val sakInformasjon = SakInformasjon("12131", SakType.GJENLEV, LOPENDE)
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
@@ -65,5 +65,29 @@ class JournalforingServiceSakIdTest : JournalforingServiceBase() {
 
         assertNull(result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
+    }
+
+    @Test
+    fun `hentSak skal gi null naar id fra sakInformasjon er 000000000000 `() {
+        val euxCaseId = "123"
+        val sakInformasjon = SakInformasjon("00000000000", SakType.GJENLEV, LOPENDE)
+
+        every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
+
+        val result = journalforingService.hentSak(euxCaseId, sakInformasjon = sakInformasjon)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `hentSak skal gi null naar sakIdFraSed er 000000000000 `() {
+        val euxCaseId = "123"
+        val sakIdFraSed = "000000000000"
+
+        every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
+
+        val result = journalforingService.hentSak(euxCaseId, sakIdFraSed)
+
+        assertNull(result)
     }
 }
