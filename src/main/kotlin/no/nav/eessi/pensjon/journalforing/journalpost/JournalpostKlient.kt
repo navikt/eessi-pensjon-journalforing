@@ -65,7 +65,7 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                secureLog.info("Journalpostrequesten: $request, /n $headers")
+                secureLog.info("Journalpostrequesten: ${request.maskerteVerdier()}, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
@@ -81,6 +81,9 @@ class JournalpostKlient(
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
         }
+    }
+    private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
+        return this.copy(dokumenter = "***************** maskerte verdier **************")
     }
 
     /**
