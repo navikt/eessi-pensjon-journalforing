@@ -525,7 +525,7 @@ class JournalforingService(
             return Sak(sakType, it, "PP01")
         }
 
-        logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} mangler verdi")
+        logger.warn("RinaID: $euxCaseId, sakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} mangler verdi")
         return null
     }
 
