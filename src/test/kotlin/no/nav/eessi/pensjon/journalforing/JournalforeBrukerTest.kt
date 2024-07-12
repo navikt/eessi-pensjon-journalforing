@@ -37,7 +37,7 @@ class JournalforeBrukerTest {
     }
 
     @Test
-    fun `journalpostId skal hentes fra lagring og benyttes til ved opprettelse av journalpost og ferdigstiller `() {
+    fun `journalpostId skal hentes fra lagring deretter lage journalpost og ferdigstille `() {
         val journalpostRequest: OpprettJournalpostRequest = mockk()
 
         val rinaId = "111111"
