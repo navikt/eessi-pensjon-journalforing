@@ -525,7 +525,9 @@ class JournalforingService(
             return Sak(sakType, it, "PP01")
         }
 
-        logger.warn("RinaID: $euxCaseId, sakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} mangler verdi")
+        logger.warn("""RinaID: $euxCaseId
+            | sakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId}
+            | mangler verdi eller er ikke gyldig pesys nummer""".trimMargin())
         return null
     }
 
