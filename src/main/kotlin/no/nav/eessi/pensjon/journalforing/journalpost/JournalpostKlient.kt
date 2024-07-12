@@ -64,8 +64,8 @@ class JournalpostKlient(
                 if(!saksbehandlerIdent.isNullOrBlank()) {
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
-
-                secureLog.info("Journalpostrequesten: ${request.maskerteVerdier()}, /n $headers")
+                val logg = request.maskerteVerdier()
+                secureLog.info("Journalpostrequesten: $logg, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
@@ -83,7 +83,10 @@ class JournalpostKlient(
         }
     }
     private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
-        return this.copy(dokumenter = "***************** maskerte verdier **************")
+        if(dokumenter.isNotEmpty()) {
+            return this.copy(dokumenter = "*****************")
+        }
+        return this
     }
 
     /**
