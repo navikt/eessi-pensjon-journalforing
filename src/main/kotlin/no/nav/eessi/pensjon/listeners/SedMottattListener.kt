@@ -44,7 +44,7 @@ class SedMottattListener(
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
 
-    private val offsetsToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L, 830049L, 830051L, 1266524L, 1280337L, 1280599L, 1280619L,1280891L)
+    private val offsetsToSkip = listOf(524914L, 530474L, 549326L, 549343L, 564697L, 573162L, 580192L, 592980L, 748455L, 748872L, 794071L, 814894L, 814914L, 830049L, 830051L, 1266524L, 1280337L, 1280599L, 1280619L, 1280891L, 1280893L)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
