@@ -505,24 +505,26 @@ class JournalforingService(
         sakIdFraSed: String? = null,
         sakInformasjon: SakInformasjon? = null
     ): Sak? {
-        val sakType = "FAGSAK"
 
         if(euxCaseId == sakIdFraSed || euxCaseId == sakInformasjon?.sakId){
             logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
             return null
         }
 
+        // 1. Er dette en Gjenny sak
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
-            return gjennySak?.sakId?.let { Sak(sakType, it, "EY") }
+            return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
         }
 
-        sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak(sakType, it, "PP01")
-        }
-
+        // 2. Pesys nr fra pesys
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
-            return Sak(sakType, it, "PP01")
+            return Sak("FAGSAK", it, "PP01")
+        }
+
+        // 3. Pesys nr fra SED
+        sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
+            return Sak("FAGSAK", it, "PP01")
         }
 
         logger.warn("""RinaID: $euxCaseId
@@ -535,9 +537,7 @@ class JournalforingService(
      * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2)
      */
     private fun String.erGyldigPesysNummer(): Boolean {
-        val firstDigitChar = this.first()
-        val firstDigit = firstDigitChar.toString().toInt()
-        return firstDigit == 1 || firstDigit == 2
+        return this.first() == '1' || this.first() == '2'
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-class JournalforingServiceSakIdTest : JournalforingServiceBase() {
+class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
     @Test
     fun `hentSak skal gi sak ved treff mot tidligere gjennySak`() {
