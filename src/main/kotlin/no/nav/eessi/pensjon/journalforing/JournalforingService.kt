@@ -39,7 +39,6 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -155,13 +154,17 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
-
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = hentSak(sedHendelse.rinaSakId, saksInfoSamlet?.saksIdFraSed, saksInfoSamlet?.sakInformasjon),
+                    arkivsaksnummer = hentSak(
+                        sedHendelse.rinaSakId,
+                        saksInfoSamlet?.saksIdFraSed,
+                        saksInfoSamlet?.sakInformasjon,
+                        identifisertPerson?.personRelasjon?.fnr
+                    ),
                     dokumenter = documents,
                     saktype = saksInfoSamlet?.saktype,
                     institusjon = institusjon,
@@ -172,30 +175,6 @@ class JournalforingService(
                 )
 
                 val journalPostResponse = journalPostResponseOgRequest.first
-
-                // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                if(journalPostResponseOgRequest.second.bruker == null){
-                    logger.info("Joournalposten mangler bruker og vil bli lagret for fremtidig vurdering")
-                    gcpStorageService.lagreJournalPostRequest(journalPostResponseOgRequest.second.toJson(), sedHendelse.rinaSakId, sedHendelse.sedId)
-                }
-                else{
-                    // ser om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
-                    try {
-                        gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)?.forEach { sedId ->
-                            logger.info("Henter tidligere journalføring for å sette bruker for sed: $sedId")
-                            gcpStorageService.hentOpprettJournalpostRequest(sedId)?.let { rinaDoc ->
-                                val request = mapJsonToAny<OpprettJournalpostRequest>(rinaDoc)
-                                val updatedRinaDoc = request.copy(bruker = journalPostResponseOgRequest.second.bruker)
-                                secureLog.info("""Henter opprettjournalpostRequest:
-                                        | ${updatedRinaDoc.toJson()}""".trimMargin())
-                                //TODO_1 send til joark
-                                //TODO_2 slett fra GCP
-                            }
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Det har skjedd feil med henting av arkivert saker")
-                    }
-                }
 
                 // journalposten skal settes til avbrutt ved manglende bruker/identifisertperson
                 val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
@@ -500,10 +479,24 @@ class JournalforingService(
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
 
+
+    /**
+     * Henter en sak basert på sakid og/eller gjenny informasjon
+     *
+     * @param euxCaseId SaksID fra EUX.
+     * @param sakIdFraSed SaksID fra SED (valgfri).
+     * @param sakInformasjon Tilleggsinfo om saken (valgfri).
+     * @param identifisertPersonFnr Fødselsnummer (valgfri).
+     * @return Et `Sak`-objekt hvis:
+     * 1. saken finnes i Gjenny.
+     * 2. identifisert person fnr  eksisterer.
+     * 3. det finnes gyldig Pesys-nummer i `sakInformasjon` eller `sakIdFraSed`.
+     */
     fun hentSak(
         euxCaseId: String,
         sakIdFraSed: String? = null,
-        sakInformasjon: SakInformasjon? = null
+        sakInformasjon: SakInformasjon? = null,
+        identifisertPersonFnr: Fodselsnummer? = null
     ): Sak? {
 
         if(euxCaseId == sakIdFraSed || euxCaseId == sakInformasjon?.sakId){
@@ -517,12 +510,18 @@ class JournalforingService(
             return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
         }
 
-        // 2. Pesys nr fra pesys
+        // 2. Joark oppretter ikke JP der det finnes sak, men mangler bruker
+        if(identifisertPersonFnr == null){
+            logger.warn("Fnr mangler for rinaSakId: $euxCaseId, henter derfor ikke sak")
+            return null
+        }
+
+        // 3. Pesys nr fra pesys
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
             return Sak("FAGSAK", it, "PP01")
         }
 
-        // 3. Pesys nr fra SED
+        // 4. Pesys nr fra SED
         sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
             return Sak("FAGSAK", it, "PP01")
         }
