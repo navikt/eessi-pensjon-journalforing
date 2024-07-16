@@ -8,8 +8,12 @@ import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppdaterOppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -79,16 +83,57 @@ class JournalforeBruker (
                     logger.info("Hentet journalpost: ${innhentetJournalpost.journalpostId} med status: ${innhentetJournalpost.journalstatus}")
 
                     if (innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
-                        oppdaterOppgave(rinaId, innhentetJournalpost, journalpostRequest, sedHendelse, identifisertPerson)
                         oppdaterJournalpost(innhentetJournalpost, journalpostRequest, bruker)
-                        journalpostService.ferdigstilljournalpost(innhentetJournalpost.journalpostId!!, innhentetJournalpost.journalforendeEnhet!!)
+                        ferdigstillJournalpost(innhentetJournalpost, sedHendelse, identifisertPerson, journalpostRequest)
+                        deleteJournalpostDetails(journalpostInfo.second)
                     }
-
-                    deleteJournalpostDetails(journalpostInfo.second)
                 }
         } catch (e: Exception) {
             logger.error("Det har skjedd feil med henting av arkivert saker")
         }
+    }
+
+    private fun ferdigstillJournalpost(
+        innhentetJournalpost: JournalpostResponse,
+        sedHendelse: SedHendelse,
+        identifisertPerson: IdentifisertPerson?,
+        journalpostRequest: OpprettJournalpostRequest
+    ) {
+        val result = journalpostService.ferdigstilljournalpost(
+            innhentetJournalpost.journalpostId!!,
+            innhentetJournalpost.journalforendeEnhet!!
+        )
+
+        when (result) {
+            is JournalpostModel.Ferdigstilt -> {
+                logger.info(result.description)
+            }
+
+            is JournalpostModel.IngenFerdigstilling -> {
+                logger.warn(result.description)
+                opprettOppgave(sedHendelse, innhentetJournalpost, identifisertPerson, journalpostRequest)
+            }
+        }
+    }
+
+    fun opprettOppgave(
+        sedHendelse: SedHendelse,
+        innhentetJournalpost: JournalpostResponse,
+        identifisertPerson: IdentifisertPerson?,
+        journalpostRequest: OpprettJournalpostRequest
+    ) {
+        val melding = OppgaveMelding(
+            sedHendelse.sedType,
+            innhentetJournalpost.journalpostId,
+            Enhet.getEnhet(innhentetJournalpost.journalforendeEnhet!!)!!,
+            identifisertPerson?.aktoerId,
+            sedHendelse.rinaSakId,
+            if (journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) HendelseType.MOTTATT else HendelseType.SENDT,
+            null,
+            if (journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+            tema = innhentetJournalpost.tema
+        )
+        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
     }
 
     fun oppdaterOppgave(

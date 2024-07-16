@@ -25,6 +25,19 @@ class JournalforeBrukerTest {
     private lateinit var metricsHelper: MetricsHelper
     private lateinit var journalforeBruker: JournalforeBruker
 
+    private val journalpostRequest: OpprettJournalpostRequest = mockk()
+    private val rinaId = "111111"
+    private val dokumentId = "222222"
+    private val sedHendelse: SedHendelse = mockk {
+        every { rinaSakId } returns rinaId
+        every { rinaDokumentId } returns dokumentId
+    }
+    private val identifisertPerson: IdentifisertPerson = mockk()
+    private val bruker: Bruker = mockk()
+
+    private val journalpostId = "journalpostId"
+    private val journalforendeEnhet = "journalforendeEnhet"
+
     @BeforeEach
     fun setUp() {
         safClient = mockk()
@@ -34,39 +47,45 @@ class JournalforeBrukerTest {
         metricsHelper = MetricsHelper.ForTest()
 
         journalforeBruker = spyk(JournalforeBruker(safClient, gcpStorageService, journalpostService, oppgaveHandler, metricsHelper))
-    }
-
-    @Test
-    fun `journalpostId skal hentes fra lagring deretter lage journalpost og ferdigstille `() {
-        val journalpostRequest: OpprettJournalpostRequest = mockk()
-
-        val rinaId = "111111"
-        val dokumentId = "222222"
-        val sedHendelse: SedHendelse = mockk {
-            every { rinaSakId } returns rinaId
-            every { rinaDokumentId } returns dokumentId
-        }
-        val identifisertPerson: IdentifisertPerson = mockk()
-        val bruker: Bruker = mockk()
-
-        val journalpostId = "journalpostId"
-        val journalforendeEnhet = "journalforendeEnhet"
 
         every { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) } returns listOf(rinaId)
         every { gcpStorageService.hentOpprettJournalpostRequest(rinaId) } returns Pair(journalpostId, mockk())
         every { safClient.hentJournalpost(journalpostId) } returns createTestJournalpostResponse(journalpostId = journalpostId, journalforendeEnhet = journalforendeEnhet)
 
-        every { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) } just Runs
+//        every { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) } just Runs
         every { journalforeBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) } just Runs
-        every { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) } just Runs
         every { gcpStorageService.slettJournalpostDetaljer(any()) } just Runs
+    }
+
+    @Test
+    fun `journalpostId skal hentes fra GCP deretter lage journalpost og ferdigstille uten aa lage oppgave`() {
+
+        every { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) } returns JournalpostModel.Ferdigstilt("Ferdigstilt, ingen oppgave")
+        journalforeBruker.journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, bruker)
+
+        verify(exactly = 1) { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) }
+        verify(exactly = 1) { gcpStorageService.hentOpprettJournalpostRequest(rinaId) }
+        verify(exactly = 1) { safClient.hentJournalpost(journalpostId) }
+        //verify(exactly = 1) { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) }
+//        verify(exactly = 1) { journalforeBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) }
+        verify(exactly = 1) { journalforeBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) }
+        verify(exactly = 1) { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) }
+        verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(any()) }
+    }
+
+    @Test
+    fun `journalpostId skal hentes fra GCP deretter lage journalpost og lage oppgave`() {
+
+        every { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) } returns JournalpostModel.IngenFerdigstilling("Ingen ferdigstilling, lager oppgave")
+        every { journalforeBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) } just Runs
 
         journalforeBruker.journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, bruker)
 
         verify(exactly = 1) { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) }
         verify(exactly = 1) { gcpStorageService.hentOpprettJournalpostRequest(rinaId) }
         verify(exactly = 1) { safClient.hentJournalpost(journalpostId) }
-        verify(exactly = 1) { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) }
+        //verify(exactly = 1) { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) }
+        verify(exactly = 1) { journalforeBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) }
         verify(exactly = 1) { journalforeBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) }
         verify(exactly = 1) { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) }
         verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(any()) }

@@ -133,7 +133,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
-    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) : JournalpostModel.FerdigJournalpost = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
 
     /**
      *  Ferdigstiller journalposten.
