@@ -153,18 +153,22 @@ class JournalforingService(
                 }
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
+
+                val arkivsaksnummer = hentSak(
+                    sedHendelse.rinaSakId,
+                    saksInfoSamlet?.saksIdFraSed,
+                    saksInfoSamlet?.sakInformasjon,
+                    identifisertPerson?.personRelasjon?.fnr
+                ).also { logger.info("""SakId for rinaSak: ${sedHendelse.rinaSakId}: 
+                    | $it""".trimMargin()) }
+
                 // Oppretter journalpost
                 val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
                     journalfoerendeEnhet = tildeltJoarkEnhet,
-                    arkivsaksnummer = hentSak(
-                        sedHendelse.rinaSakId,
-                        saksInfoSamlet?.saksIdFraSed,
-                        saksInfoSamlet?.sakInformasjon,
-                        identifisertPerson?.personRelasjon?.fnr
-                    ),
+                    arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
                     saktype = saksInfoSamlet?.saktype,
                     institusjon = institusjon,
