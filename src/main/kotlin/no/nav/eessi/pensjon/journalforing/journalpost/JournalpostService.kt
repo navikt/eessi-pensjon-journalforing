@@ -89,7 +89,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                 enhet = enhet,
                 behandlingsTema = behandlingsTema
             )
-        ).also { logger.debug("Oppdatert journalpostId: $it") }
+        ).also { logger.debug("Oppdatert journalpostId: ${journalpostResponse.journalpostId}") }
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {
