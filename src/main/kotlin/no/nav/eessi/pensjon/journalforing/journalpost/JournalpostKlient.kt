@@ -109,7 +109,7 @@ class JournalpostKlient(
                         String::class.java)
 
             } catch (ex: Exception) {
-                handleException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
+                handleException("oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
             }
         }
     }
@@ -140,7 +140,7 @@ class JournalpostKlient(
                     )
                 }
             } catch (ex: Exception) {
-                val errorMessage = "En feil oppstod under ferdigstilling av journalpost: $journalpostId"
+                val errorMessage = "ferdigstilling av journalpost: $journalpostId"
                 handleException(errorMessage, ex)
                 return@measure JournalpostModel.IngenFerdigstilling("$errorMessage: ${ex.message}")
             }
@@ -164,7 +164,7 @@ class JournalpostKlient(
                     String::class.java)
 
             } catch (ex: Exception) {
-                handleException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
             }
         }
     }
@@ -186,7 +186,7 @@ class JournalpostKlient(
                 }
 
         } catch (ex: Exception) {
-            handleException("En feil oppstod under oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            handleException("oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
         }
     }
     private fun handleException(context: String, ex: Exception) {
