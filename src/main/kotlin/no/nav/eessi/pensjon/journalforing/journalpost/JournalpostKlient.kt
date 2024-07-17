@@ -141,8 +141,9 @@ class JournalpostKlient(
                 }
             } catch (ex: Exception) {
                 val errorMessage = "ferdigstilling av journalpost: $journalpostId"
-                handleException(errorMessage, ex)
-                return@measure JournalpostModel.IngenFerdigstilling("$errorMessage: ${ex.message}")
+                handleException(errorMessage, ex).also {
+                    return@measure JournalpostModel.IngenFerdigstilling(it)
+                }
             }
         }
         return JournalpostModel.IngenFerdigstilling("Ingen gyldig verdi")
@@ -164,7 +165,9 @@ class JournalpostKlient(
                     String::class.java)
 
             } catch (ex: Exception) {
-                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
+                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
+                    throw RuntimeException(it)
+                }
             }
         }
     }
@@ -186,16 +189,18 @@ class JournalpostKlient(
                 }
 
         } catch (ex: Exception) {
-            handleException("oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex)
+            handleException("oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex).also {
+                throw RuntimeException(it)
+            }
         }
     }
-    private fun handleException(context: String, ex: Exception) {
-        val errorMsg = if (ex is HttpStatusCodeException) {
+    private fun handleException(context: String, ex: Exception) : String {
+        return if (ex is HttpStatusCodeException) {
             "Feil under $context: ${ex.message}, body: ${ex.responseBodyAsString}"
         } else {
             "Feil under $context: ${ex.message}"
+        }.also {
+            logger.error(it, ex)
         }
-        logger.error(errorMsg, ex)
-        throw RuntimeException(errorMsg)
     }
 }
