@@ -35,8 +35,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
-    @Autowired
-    private lateinit var journalforingMedBruker: JournalforingMedBruker
 
     init {
         if (System.getProperty("mockServerport") == null) {
@@ -78,7 +76,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `Når en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
+    fun `Gitt en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
 
         //setup server
         CustomMockServer()
