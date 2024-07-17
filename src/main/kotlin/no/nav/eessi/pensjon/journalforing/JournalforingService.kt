@@ -50,7 +50,7 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
-    private val journalforeBruker: JournalforeBruker,
+    private val journalforingMedBruker: JournalforingMedBruker,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -168,7 +168,7 @@ class JournalforingService(
                 val journalpostRequest = journalPostResponseOgRequest.second
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                journalforeBruker.harJournalpostBruker(
+                journalforingMedBruker.harJournalpostBruker(
                     journalPostResponse,
                     journalpostRequest,
                     sedHendelse,

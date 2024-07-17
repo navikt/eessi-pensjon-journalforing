@@ -16,7 +16,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.JournalforeBruker
+import no.nav.eessi.pensjon.journalforing.JournalforingMedBruker
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
@@ -74,7 +74,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
-    private val journalforingutenbruker = mockk<JournalforeBruker>()
+    private val journalforingutenbruker = mockk<JournalforingMedBruker>()
 
     private val journalforingService =
         JournalforingService(

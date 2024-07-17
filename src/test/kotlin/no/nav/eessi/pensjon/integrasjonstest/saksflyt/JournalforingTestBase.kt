@@ -71,7 +71,7 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID_2 = "0009876543210"
     }
 
-    protected val journalforeBruker: JournalforeBruker = mockk(relaxed = true){
+    protected val journalforingMedBruker: JournalforingMedBruker = mockk(relaxed = true){
         justRun { harJournalpostBruker(any(), any(), any(), any()) }
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
@@ -120,7 +120,7 @@ internal open class JournalforingTestBase {
         kravInitialiseringsService = kravService,
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        journalforeBruker = journalforeBruker
+        journalforingMedBruker = journalforingMedBruker
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

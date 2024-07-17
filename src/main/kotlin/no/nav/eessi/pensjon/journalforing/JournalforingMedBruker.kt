@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class JournalforeBruker (
+class JournalforingMedBruker (
     private val safClient: SafClient,
     private val gcpStorageService: GcpStorageService,
     private val journalpostService: JournalpostService,
     private val oppgaveHandler: OppgaveHandler,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()){
 
-    private val logger = LoggerFactory.getLogger(JournalforeBruker::class.java)
+    private val logger = LoggerFactory.getLogger(JournalforingMedBruker::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun harJournalpostBruker(
@@ -83,9 +83,9 @@ class JournalforeBruker (
                     logger.info("Hentet journalpost: ${innhentetJournalpost.journalpostId} med status: ${innhentetJournalpost.journalstatus}")
 
                     if (innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
-                        oppdaterJournalpost(innhentetJournalpost, journalpostRequest, bruker)
-                        ferdigstillJournalpost(innhentetJournalpost, sedHendelse, identifisertPerson, journalpostRequest)
-                        deleteJournalpostDetails(journalpostInfo.second)
+                        oppdaterJournalpost(innhentetJournalpost, journalpostRequest, bruker).also { logger.info("Ferdig med oppdatering av journalpost" )}
+                        ferdigstillJournalpost(innhentetJournalpost, sedHendelse, identifisertPerson, journalpostRequest).also { logger.info("Ferdig forsøke ferdigstilling av journalpost" )}
+                        deleteJournalpostDetails(journalpostInfo.second).also { logger.info("Ferdig sletting av lagret journalpost: ${innhentetJournalpost.journalpostId}" )}
                     }
                 }
         } catch (e: Exception) {

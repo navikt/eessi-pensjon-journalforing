@@ -11,7 +11,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
-import no.nav.eessi.pensjon.journalforing.JournalforeBruker
+import no.nav.eessi.pensjon.journalforing.JournalforingMedBruker
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -58,7 +58,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     private lateinit var gcpStorageService: GcpStorageService
 
     @Autowired
-    private lateinit var journalforebruker: JournalforeBruker
+    private lateinit var journalforebruker: JournalforingMedBruker
 
     @BeforeEach
     fun setupTest(){
@@ -79,7 +79,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
 
         @Bean
-        fun journalforebruker(): JournalforeBruker = mockk(relaxed = true)
+        fun journalforebruker(): JournalforingMedBruker = mockk(relaxed = true)
     }
 
     @Test

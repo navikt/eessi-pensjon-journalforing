@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforeBruker
+import no.nav.eessi.pensjon.journalforing.JournalforingMedBruker
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +36,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
     @Autowired
-    private lateinit var journalforeBruker: JournalforeBruker
+    private lateinit var journalforingMedBruker: JournalforingMedBruker
 
     init {
         if (System.getProperty("mockServerport") == null) {
@@ -73,7 +73,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
 
         @Bean
-        fun journalforingUtenBruker(): JournalforeBruker = JournalforeBruker(safClient(), gcpStorageService(), mockk(), mockk())
+        fun journalforingUtenBruker(): JournalforingMedBruker = JournalforingMedBruker(safClient(), gcpStorageService(), mockk(), mockk())
         //TODO: Ingen kobling mellomg journalføringservice og denne.. gå gjennom de andre mock -beans også
     }
 
