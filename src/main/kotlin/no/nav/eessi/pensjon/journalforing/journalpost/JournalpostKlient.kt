@@ -169,7 +169,7 @@ class JournalpostKlient(
         }
     }
 
-    fun oppdaterJournalpost(oppdaterbarJournalpost: OppdaterJournalpost) {
+    fun oppdaterJournalpostMedBruker(oppdaterbarJournalpost: OppdaterJournalpost) {
         val path = "/journalpost/${oppdaterbarJournalpost.journalpostId}"
 
         try {

@@ -70,7 +70,7 @@ internal class JournalpostKlientTest {
             )
         } returns ResponseEntity(HttpStatus.OK)
 
-        journalpostKlient.oppdaterJournalpost(journalpostSomSkalOppdateres)
+        journalpostKlient.oppdaterJournalpostMedBruker(journalpostSomSkalOppdateres)
 
         mapJsonToAny<OppdaterJournalpost>(bodySlot.captured.body!!)
 

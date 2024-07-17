@@ -79,7 +79,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         enhet: Enhet,
         behandlingsTema: Behandlingstema
     ) {
-        return journalpostKlient.oppdaterJournalpost(
+        journalpostKlient.oppdaterJournalpostMedBruker(
             OppdaterJournalpost(
                 journalpostId = journalpostResponse.journalpostId!!,
                 dokumenter = journalpostResponse.dokumenter,
