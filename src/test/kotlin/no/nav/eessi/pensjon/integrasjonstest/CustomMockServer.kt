@@ -131,6 +131,31 @@ class CustomMockServer {
         )
     }
 
+    /**
+     * mocker journalføringresponse
+     * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init
+     * @param {String} journalpostId, erstatter default id
+     * */
+    fun medJournalforingMedUkjentBruker(forsoekFerdigstill: Boolean = false, journalpostId: String = "429434378") = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("PATCH")
+                .withPath("/journalpost/$journalpostId/feilregistrer/settUkjentBruker")
+        )
+            .respond(
+                when (forsoekFerdigstill) {
+                    true -> {
+                        val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseTrue.json")
+                        reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
+                    }
+                    false -> {
+                        val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseFalse.json")
+                        reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
+                    }
+                }
+            )
+    }
+
     fun medNorg2Tjeneste() = apply {
         mockServer.`when`(
             HttpRequest.request()

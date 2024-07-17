@@ -128,7 +128,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         )
 
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
-        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq("12345")) }
+        justRun { journalpostKlient.oppdaterJournalpostMedUkjentBruker(eq("12345")) }
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,

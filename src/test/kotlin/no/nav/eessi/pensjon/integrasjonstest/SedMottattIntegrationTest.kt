@@ -42,9 +42,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
     @Autowired
     lateinit var gcpStorageService: GcpStorageService
 
-    @Autowired
-    lateinit var journalforingMedBruker: JournalforingMedBruker
-
     @BeforeEach
     fun setUp() {
         every { gcpStorageService.gjennyFinnes(any())} returns false
@@ -52,7 +49,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         justRun{ gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any())}
         justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
         justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-//        justRun { journalforeBruker.harJournalpostBruker(any(), any(), any(), any()) }
     }
 
     @TestConfiguration

@@ -172,6 +172,29 @@ class JournalpostKlient(
         }
     }
 
+    fun oppdaterJournalpostMedUkjentBruker(journalpostId: String) {
+        val path = "/journalpost/$journalpostId/feilregistrer/settUkjentBruker"
+
+        return avbruttStatusInfo.measure {
+            try {
+                logger.info("Setter status avbryt for journalpost: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    path,
+                    HttpMethod.PATCH,
+                    HttpEntity("",headers),
+                    String::class.java)
+
+            } catch (ex: Exception) {
+                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
+                    throw RuntimeException(it)
+                }
+            }
+        }
+    }
+
     fun oppdaterJournalpostMedBruker(oppdaterbarJournalpost: OppdaterJournalpost) {
         val path = "/journalpost/${oppdaterbarJournalpost.journalpostId}"
 

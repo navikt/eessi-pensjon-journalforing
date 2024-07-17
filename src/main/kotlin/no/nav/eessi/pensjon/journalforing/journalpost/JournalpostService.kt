@@ -164,7 +164,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
+        journalpostKlient.oppdaterJournalpostMedUkjentBruker(journalPostResponse.journalpostId)
         return true
     }
 
