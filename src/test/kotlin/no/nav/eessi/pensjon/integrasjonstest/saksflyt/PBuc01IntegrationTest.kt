@@ -114,7 +114,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
 
-                verify { journalpostKlient.oppdaterJournalpostMedUkjentBruker("429434378") }
+                verify { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning("429434378") }
             }
         }
 

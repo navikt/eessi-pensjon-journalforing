@@ -150,7 +150,6 @@ class JournalpostKlient(
     }
 
     fun oppdaterJournalpostMedAvbrutt(journalpostId: String) {
-        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt"
 
         return avbruttStatusInfo.measure {
             try {
@@ -159,10 +158,11 @@ class JournalpostKlient(
                 headers.contentType = MediaType.APPLICATION_JSON
 
                 journalpostOidcRestTemplate.exchange(
-                    path,
+                    "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt",
                     HttpMethod.PATCH,
-                    HttpEntity("",headers),
-                    String::class.java)
+                    HttpEntity("", headers),
+                    String::class.java
+                )
 
             } catch (ex: Exception) {
                 handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
@@ -172,8 +172,7 @@ class JournalpostKlient(
         }
     }
 
-    fun oppdaterJournalpostMedUkjentBruker(journalpostId: String) {
-        val path = "/journalpost/$journalpostId/feilregistrer/settUkjentBruker"
+    fun oppdaterJournalpostfeilregistrerSakstilknytning(journalpostId: String) {
 
         return avbruttStatusInfo.measure {
             try {
@@ -182,10 +181,11 @@ class JournalpostKlient(
                 headers.contentType = MediaType.APPLICATION_JSON
 
                 journalpostOidcRestTemplate.exchange(
-                    path,
+                    "/journalpost/$journalpostId/feilregistrer/feilregistrerSakstilknytning",
                     HttpMethod.PATCH,
-                    HttpEntity("",headers),
-                    String::class.java)
+                    HttpEntity("", headers),
+                    String::class.java
+                )
 
             } catch (ex: Exception) {
                 handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {

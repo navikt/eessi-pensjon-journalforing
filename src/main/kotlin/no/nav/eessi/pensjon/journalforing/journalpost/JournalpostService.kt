@@ -164,7 +164,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        journalpostKlient.oppdaterJournalpostMedUkjentBruker(journalPostResponse.journalpostId)
+        journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(journalPostResponse.journalpostId)
         return true
     }
 
