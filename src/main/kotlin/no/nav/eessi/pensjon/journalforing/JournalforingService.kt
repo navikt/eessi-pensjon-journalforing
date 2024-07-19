@@ -50,7 +50,7 @@ class JournalforingService(
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
-    private val journalforingMedBruker: JournalforingMedBruker,
+    private val vurderBrukerInfo: VurderBrukerInfo,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
 ) {
 
@@ -175,7 +175,7 @@ class JournalforingService(
 //                    identifisertPerson)
 
                 if(journalpostRequest.bruker == null){
-                    journalforingMedBruker.journalPostUtenBruker(
+                    vurderBrukerInfo.journalPostUtenBruker(
                         journalpostRequest,
                         sedHendelse,
                         hendelseType)
@@ -190,7 +190,7 @@ class JournalforingService(
                             navAnsattInfo?.first
                     )
 
-                    journalforingMedBruker.journalpostMedBruker(
+                    vurderBrukerInfo.journalpostMedBruker(
                         journalpostRequest,
                         sedHendelse,
                         identifisertPerson,

@@ -12,15 +12,11 @@ import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.journalforing.saf.SafDokument
-import no.nav.eessi.pensjon.journalforing.saf.SafSak
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -29,18 +25,17 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
-import java.time.LocalDateTime
 
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 private const val AKTOERID = "12078945602"
 
-class JournalforingMedBrukerTest {
+class VurderBrukerInfoTest {
 
     private lateinit var safClient: SafClient
     private lateinit var gcpStorageService: GcpStorageService
     private lateinit var journalpostService: JournalpostService
     private lateinit var oppgaveHandler: OppgaveHandler
-    private lateinit var journalforingMedBruker: JournalforingMedBruker
+    private lateinit var vurderBrukerInfo: VurderBrukerInfo
 
     private var journalpostKlient: JournalpostKlient = mockk()
     private val lagretJournalpostRquest = opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
@@ -73,8 +68,8 @@ class JournalforingMedBrukerTest {
             rinaSakId = sedMedBruker.rinaSakId
         )
 
-        journalforingMedBruker = spyk(
-            JournalforingMedBruker(
+        vurderBrukerInfo = spyk(
+            VurderBrukerInfo(
                 safClient,
                 gcpStorageService,
                 journalpostService,
@@ -119,7 +114,7 @@ class JournalforingMedBrukerTest {
         }
         val bruker = createTestBruker("121280334444")
         val journalPostMedBruker = opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
-        journalforingMedBruker.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
+        vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
             {

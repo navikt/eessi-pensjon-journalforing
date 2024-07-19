@@ -7,7 +7,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforingMedBruker
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +62,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
         @Bean
-        fun journalforebruker(): JournalforingMedBruker = mockk(relaxed = true)
+        fun vurderBrukerInfo(): VurderBrukerInfo = mockk(relaxed = true)
     }
 
     @Test

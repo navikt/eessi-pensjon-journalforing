@@ -54,7 +54,7 @@ class JournalforingServiceMedGCPTest {
     lateinit var journalpostService: JournalpostService
     lateinit var oppgaveHandler: OppgaveHandler
     lateinit var statistikkPublisher: StatistikkPublisher
-    lateinit var journalforingMedBruker: JournalforingMedBruker
+    lateinit var vurderBrukerInfo: VurderBrukerInfo
 
     @BeforeEach
     fun setup() {
@@ -68,7 +68,7 @@ class JournalforingServiceMedGCPTest {
         journalpostService = mockk()
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
-        journalforingMedBruker = JournalforingMedBruker(safClient, gcpStorageService, journalpostService, oppgaveHandler)
+        vurderBrukerInfo = VurderBrukerInfo(safClient, gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
             oppgaveroutingService,
@@ -77,7 +77,7 @@ class JournalforingServiceMedGCPTest {
             mockk(),
             gcpStorageService,
             statistikkPublisher,
-            journalforingMedBruker
+            vurderBrukerInfo
         )
     }
 
