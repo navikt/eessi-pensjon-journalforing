@@ -4,7 +4,6 @@ import com.google.cloud.storage.BlobId
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.Journalstatus.*
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppdaterOppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -12,9 +11,9 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,26 +30,29 @@ class JournalforingMedBruker (
     private val logger = LoggerFactory.getLogger(JournalforingMedBruker::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun harJournalpostBruker(
-        journalpostResponse: OpprettJournalPostResponse?,
-        journalpostRequest: OpprettJournalpostRequest,
-        sedHendelse: SedHendelse,
-        identifisertPerson: IdentifisertPerson?
-    ) {
-        journalpostRequest.bruker?.let {
-            journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, it)
-        } ?: run {
-            journalPostUtenBruker(journalpostResponse, sedHendelse)
-        }
-    }
+//    fun harJournalpostBruker(
+//        journalpostResponse: OpprettJournalPostResponse?,
+//        journalpostRequest: OpprettJournalpostRequest,
+//        sedHendelse: SedHendelse,
+//        identifisertPerson: IdentifisertPerson?
+//    ) {
+//        journalpostRequest.bruker?.let {
+//            journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, it)
+//        } ?: run {
+//            journalPostUtenBruker(journalpostResponse, sedHendelse)
+//        }
+//    }
 
-    private fun journalPostUtenBruker(
-        journalpostResponse: OpprettJournalPostResponse?,
-        sedHendelse: SedHendelse
+    fun journalPostUtenBruker(
+        journalpostRequest: OpprettJournalpostRequest?,
+        sedHendelse: SedHendelse,
+        sedHendelseType: HendelseType
     ) {
         logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
+        val lagretJournalpost = LagretJournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
+
         gcpStorageService.lagreJournalPostRequest(
-            journalpostResponse?.journalpostId,
+            lagretJournalpost.toJson(),
             sedHendelse.rinaSakId,
             sedHendelse.sedId
         )
@@ -61,77 +63,91 @@ class JournalforingMedBruker (
      *  se om vi har lagret sed fra samme buc. Hvis ja; se om vi har bruker vi kan benytte i lagret sedhendelse
      */
     fun journalpostMedBruker(
-        journalpostRequest: OpprettJournalpostRequest,
+        jprMedBruker: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,
-        bruker: Bruker
+        bruker: Bruker,
+        saksbehandlerIdent: String?
     ) {
         try {
             gcpStorageService.arkiverteSakerForRinaId(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId)
                 ?.forEach { rinaId ->
                     logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
+                    val lagretRequest = gcpStorageService.hentOpprettJournalpostRequest(rinaId)
+                    if (lagretRequest != null) {
+                        val (journalpost, blob) = lagretRequest
+                        val lagretJournalPost = mapJsonToAny<LagretJournalpostMedSedInfo>(journalpost)
 
-                    val journalpostInfo = gcpStorageService.hentOpprettJournalpostRequest(rinaId) ?: return
-                    logger.info("Henter informasjon fra SAF for: ${journalpostInfo.first}, rinaid: $rinaId")
+                        val jprUtenBrukerOppdatert = lagretJournalPost.copy(
+                            journalpostRequest = lagretJournalPost.journalpostRequest.copy(
+                                tema = jprMedBruker.tema,
+                                bruker = jprMedBruker.bruker,
+                                journalfoerendeEnhet = jprMedBruker.journalfoerendeEnhet
+                            )
+                        )
+                        logger.info("Henter lagret sed: ${jprUtenBrukerOppdatert.journalpostRequest.tittel} fra gcp, rinaid: $rinaId")
 
-                    val innhentetJournalpost = safClient.hentJournalpost(journalpostInfo.first)
-                    if (innhentetJournalpost == null) {
-                        logger.warn("Journalpost not found for ID: ${journalpostInfo.first}")
-                        return
-                    }
+                        val opprettetJournalpost = journalpostService.sendJournalPost(
+                            jprUtenBrukerOppdatert.journalpostRequest,
+                            jprUtenBrukerOppdatert.sedHendelse,
+                            jprUtenBrukerOppdatert.sedHendelseType,
+                            saksbehandlerIdent
+                        )
 
-                    logger.info("Hentet journalpost: ${innhentetJournalpost.journalpostId} med status: ${innhentetJournalpost.journalstatus}")
+                        opprettOppgave(jprUtenBrukerOppdatert, opprettetJournalpost, identifisertPerson)
 
-                    if (innhentetJournalpost.journalstatus in listOf(UNDER_ARBEID, MOTTATT, AVBRUTT, UKJENT_BRUKER, UKJENT, OPPLASTING_DOKUMENT)) {
-                        oppdaterJournalpost(innhentetJournalpost, journalpostRequest, bruker).also { logger.info("Ferdig med oppdatering av journalpost" )}
-                        ferdigstillJournalpost(innhentetJournalpost, sedHendelse, identifisertPerson, journalpostRequest).also { logger.info("Ferdig forsøke ferdigstilling av journalpost" )}
-                        deleteJournalpostDetails(journalpostInfo.second).also { logger.info("Ferdig sletting av lagret journalpost: ${innhentetJournalpost.journalpostId}" )}
+                        logger.info("Opprettet journalpost: ${opprettetJournalpost?.journalpostId} med status: ${opprettetJournalpost?.journalstatus}")
+
+                        deleteJournalpostDetails(blob).also {
+                            logger.info("Ferdig sletting av lagret journalpost: ${opprettetJournalpost?.journalpostId}")
+                        }
                     }
                 }
         } catch (e: Exception) {
-            logger.error("Det har skjedd feil med henting av arkivert saker")
+            logger.error("Det har skjedd feil med oppdatering av lagret journalpost uten bruker", e)
         }
     }
 
-    private fun ferdigstillJournalpost(
-        innhentetJournalpost: JournalpostResponse,
-        sedHendelse: SedHendelse,
-        identifisertPerson: IdentifisertPerson?,
-        journalpostRequest: OpprettJournalpostRequest
-    ) {
-        val result = journalpostService.ferdigstilljournalpost(
-            innhentetJournalpost.journalpostId!!,
-            innhentetJournalpost.journalforendeEnhet!!
-        )
-
-        when (result) {
-            is JournalpostModel.Ferdigstilt -> {
-                logger.info(result.description)
-            }
-
-            is JournalpostModel.IngenFerdigstilling -> {
-                logger.warn(result.description)
-                opprettOppgave(sedHendelse, innhentetJournalpost, identifisertPerson, journalpostRequest)
-            }
-        }
-    }
+    //    private fun opprettOppgave(
+//        innhentetJournalpost: LagretJournalpostMedSedInfo,
+//        opprettetJournalpost: OpprettJournalPostResponse?,
+//        identifisertPerson: IdentifisertPerson?,
+//        journalpostRequest: OpprettJournalpostRequest
+//    ) {
+//
+//
+////        val result = journalpostService.ferdigstilljournalpost(
+////            innhentetJournalpost.journalpostId!!,
+////            innhentetJournalpost.journalforendeEnhet!!
+////        )
+//
+////        when (result) {
+////            is JournalpostModel.Ferdigstilt -> {
+////                logger.info(result.description)
+////            }
+////
+////            is JournalpostModel.IngenFerdigstilling -> {
+////                logger.warn(result.description)
+//                opprettOppgave(innhentetJournalpost.sedHendelse, opprettetJournalpost?.journalpostId, identifisertPerson, journalpostRequest)
+////            }
+////        }
+//    }
 
     fun opprettOppgave(
-        sedHendelse: SedHendelse,
-        innhentetJournalpost: JournalpostResponse,
-        identifisertPerson: IdentifisertPerson?,
-        journalpostRequest: OpprettJournalpostRequest
+        jprUtenBrukerOppdatert: LagretJournalpostMedSedInfo,
+        opprettetJournalpost: OpprettJournalPostResponse?,
+        identifisertPerson: IdentifisertPerson?
     ) {
         val melding = OppgaveMelding(
-            sedHendelse.sedType,
-            innhentetJournalpost.journalpostId,
-            Enhet.getEnhet(innhentetJournalpost.journalforendeEnhet!!)!!,
+            jprUtenBrukerOppdatert.sedHendelse.sedType,
+            opprettetJournalpost?.journalpostId,
+            jprUtenBrukerOppdatert.journalpostRequest.journalfoerendeEnhet!!,
             identifisertPerson?.aktoerId,
-            sedHendelse.rinaSakId,
-            if (journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) HendelseType.MOTTATT else HendelseType.SENDT,
+            jprUtenBrukerOppdatert.sedHendelse.rinaSakId,
+            if (jprUtenBrukerOppdatert.journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) HendelseType.MOTTATT else HendelseType.SENDT,
             null,
-            if (journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-            tema = innhentetJournalpost.tema
+            if (jprUtenBrukerOppdatert.journalpostRequest.journalpostType == JournalpostType.INNGAAENDE) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+            tema = jprUtenBrukerOppdatert.journalpostRequest.tema
         )
         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
     }

@@ -104,7 +104,7 @@ class JournalforingServiceMedGCPTest {
             datoOpprettet = LocalDateTime.now()
         )
 
-        val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId, "EKSPEDERT", "", false)
+        //val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId, "EKSPEDERT", "", false)
 
         val opprettJournalpostRequest = OpprettJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(id = rinaId, navn = "NAV", land = "NO"),
@@ -125,7 +125,7 @@ class JournalforingServiceMedGCPTest {
         justRun { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic((any())) }
 
         every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
-                Pair(opprettJournalPostResponse, opprettJournalpostRequest)
+                opprettJournalpostRequest
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {
             every { exists() } returns true
             every { getContent() } returns journalpostId.toByteArray()

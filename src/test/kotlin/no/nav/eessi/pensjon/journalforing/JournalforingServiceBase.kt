@@ -72,23 +72,27 @@ abstract class JournalforingServiceBase {
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
     }
 
-    fun identifisertPersonPDL(
-        aktoerId: String = AKTOERID,
-        personRelasjon: SEDPersonRelasjon?,
-        landkode: String? = "",
-        geografiskTilknytning: String? = "",
-        fnr: Fodselsnummer? = null,
-        personNavn: String = "Test Testesen"
-    ): IdentifisertPDLPerson =
-        IdentifisertPDLPerson(
-            aktoerId,
-            landkode,
-            geografiskTilknytning,
-            personRelasjon,
-            fnr,
-            personNavn = personNavn,
-            identer = null
-        )
+    companion object{
+        fun identifisertPersonPDL(
+            aktoerId: String = AKTOERID,
+            personRelasjon: SEDPersonRelasjon?,
+            landkode: String? = "",
+            geografiskTilknytning: String? = "",
+            fnr: Fodselsnummer? = null,
+            personNavn: String = "Test Testesen"
+        ): IdentifisertPDLPerson =
+            IdentifisertPDLPerson(
+                aktoerId,
+                landkode,
+                geografiskTilknytning,
+                personRelasjon,
+                fnr,
+                personNavn = personNavn,
+                identer = null
+            )
+    }
+
+
 
     fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
         SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)

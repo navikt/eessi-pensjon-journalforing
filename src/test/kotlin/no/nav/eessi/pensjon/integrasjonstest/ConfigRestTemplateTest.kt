@@ -89,7 +89,7 @@ internal class ConfigRestTemplateTest {
 
     @BeforeEach
     fun setup() {
-        justRun { journalforingutenbruker.harJournalpostBruker(any(), any(), any(), any()) }
+        justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(

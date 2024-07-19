@@ -72,7 +72,9 @@ internal open class JournalforingTestBase {
     }
 
     protected val journalforingMedBruker: JournalforingMedBruker = mockk(relaxed = true){
-        justRun { harJournalpostBruker(any(), any(), any(), any()) }
+        justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
+        justRun { journalPostUtenBruker(any(), any(), any()) }
+
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())

@@ -49,9 +49,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
         kravType: KravType? = null
-    ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
+    ): OpprettJournalpostRequest {
 
-        val request = OpprettJournalpostRequest(
+        return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),
             bruker = fnr?.let { Bruker(id = it.value) },
@@ -64,9 +64,17 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
         )
 
-        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
+        //val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
 
-        return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
+        //return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
+    }
+
+    fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
+                        sedHendelse: SedHendelse,
+                        hendelseType: HendelseType,
+                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+        val forsokFerdigstill: Boolean = kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+        return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
     }
 
     /** Oppdatere journalpost med kall til dokarkiv:
@@ -133,7 +141,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
-    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) : JournalpostModel.FerdigJournalpost = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+//    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) : JournalpostModel.FerdigJournalpost = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
 
     /**
      *  Ferdigstiller journalposten.
@@ -164,7 +172,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(journalPostResponse.journalpostId)
+//        journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(journalPostResponse.journalpostId)
         return true
     }
 

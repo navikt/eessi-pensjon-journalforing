@@ -149,7 +149,7 @@ class JournalforingService(
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
                 // Oppretter journalpost
 
-                val journalPostResponseOgRequest = journalpostService.opprettJournalpost(
+                val journalpostRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     fnr = identifisertPerson?.personRelasjon?.fnr,
                     sedHendelseType = hendelseType,
@@ -164,70 +164,99 @@ class JournalforingService(
                     kravType = kravTypeFraSed
                 )
 
-                val journalPostResponse = journalPostResponseOgRequest.first
-                val journalpostRequest = journalPostResponseOgRequest.second
+//                val journalPostResponse = journalPostResponseOgRequest.first
+//                val journalpostRequest = journalPostResponseOgRequest.second
 
                 // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-                journalforingMedBruker.harJournalpostBruker(
-                    journalPostResponse,
-                    journalpostRequest,
-                    sedHendelse,
-                    identifisertPerson)
+//                journalforingMedBruker.harJournalpostBruker(
+//                    journalPostResponse,
+//                    journalpostRequest,
+//                    sedHendelse,
+//                    identifisertPerson)
 
-                // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
-                val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
-                    identifisertPerson?.personRelasjon?.fnr,
-                    hendelseType,
-                    sedHendelse,
-                    journalPostResponse,
-                )
-
-                // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
-                if (journalPostResponse != null && journalPostResponse.journalpostferdigstilt && hendelseType == HendelseType.SENDT) {
-                    journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
-                }
-
-                journalPostResponse?.journalpostferdigstilt?.let { journalPostFerdig ->
-                    logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
-                }
-
-                if (!journalPostResponse!!.journalpostferdigstilt && !sattStatusAvbrutt) {
-                    val melding = OppgaveMelding(
-                        sedHendelse.sedType,
-                        journalPostResponse.journalpostId,
-                        tildeltJoarkEnhet,
-                        aktoerId,
-                        sedHendelse.rinaSakId,
-                        hendelseType,
-                        null,
-                        if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-                        tema = tema
-                    )
-                    oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-                }
-
-                //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
-                if ((hendelseType == HendelseType.MOTTATT && journalPostResponse.journalpostferdigstilt)) {
-                    logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
-                    opprettBehandleSedOppgave(
-                        journalPostResponse.journalpostId,
-                        tildeltJoarkEnhet,
-                        aktoerId,
-                        sedHendelse
-                    )
-                    kravInitialiseringsService.initKrav(
+                if(journalpostRequest.bruker == null){
+                    journalforingMedBruker.journalPostUtenBruker(
+                        journalpostRequest,
                         sedHendelse,
-                        saksInfoSamlet?.sakInformasjon,
-                        sed
+                        hendelseType)
+                    logger.warn("Journalpost er satt på vent grunnet manglende bruker")
+                    return@measure
+                }
+                else {
+                    val journalPostResponse = journalpostService.sendJournalPost(
+                            journalpostRequest,
+                            sedHendelse,
+                            hendelseType,
+                            navAnsattInfo?.first
                     )
-                } else loggDersomIkkeBehSedOppgaveOpprettes(sedHendelse.bucType, sedHendelse, journalPostResponse.journalpostferdigstilt, hendelseType)
 
-                produserStatistikkmelding(
-                    sedHendelse,
-                    tildeltJoarkEnhet.enhetsNr,
-                    saksInfoSamlet?.saktype,
-                    hendelseType
-                )
+                    journalforingMedBruker.journalpostMedBruker(
+                        journalpostRequest,
+                        sedHendelse,
+                        identifisertPerson,
+                        journalpostRequest.bruker,
+                        navAnsattInfo?.first)
+
+                    // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
+                    val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
+                        identifisertPerson?.personRelasjon?.fnr,
+                        hendelseType,
+                        sedHendelse,
+                        journalPostResponse,
+                    )
+
+                    // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
+                    if (journalPostResponse?.journalpostferdigstilt == true && hendelseType == HendelseType.SENDT) {
+                        journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
+                    }
+
+                    journalPostResponse?.journalpostferdigstilt.let { journalPostFerdig ->
+                        logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+                    }
+
+                    if (journalPostResponse?.journalpostferdigstilt == false && !sattStatusAvbrutt) {
+                        val melding = OppgaveMelding(
+                            sedHendelse.sedType,
+                            journalPostResponse.journalpostId,
+                            tildeltJoarkEnhet,
+                            aktoerId,
+                            sedHendelse.rinaSakId,
+                            hendelseType,
+                            null,
+                            if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                            tema = tema
+                        )
+                        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
+                    }
+
+                    //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
+                    if ((hendelseType == HendelseType.MOTTATT && journalPostResponse?.journalpostferdigstilt!!)) {
+                        logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
+                        opprettBehandleSedOppgave(
+                            journalPostResponse.journalpostId,
+                            tildeltJoarkEnhet,
+                            aktoerId,
+                            sedHendelse
+                        )
+                        kravInitialiseringsService.initKrav(
+                            sedHendelse,
+                            saksInfoSamlet?.sakInformasjon,
+                            sed
+                        )
+                    } else loggDersomIkkeBehSedOppgaveOpprettes(
+                        sedHendelse.bucType,
+                        sedHendelse,
+                        journalPostResponse?.journalpostferdigstilt,
+                        hendelseType
+                    )
+
+                    produserStatistikkmelding(
+                        sedHendelse,
+                        tildeltJoarkEnhet.enhetsNr,
+                        saksInfoSamlet?.saktype,
+                        hendelseType
+                    )
+                }
             } catch (ex: MismatchedInputException) {
                 logger.error("Det oppstod en feil ved deserialisering av hendelse", ex)
                 throw ex
@@ -241,7 +270,7 @@ class JournalforingService(
     fun loggDersomIkkeBehSedOppgaveOpprettes(
         bucType: BucType?,
         sedHendelse: SedHendelse,
-        journalpostferdigstilt: Boolean,
+        journalpostferdigstilt: Boolean?,
         hendelseType: HendelseType
     ) = logger.info("""
             Oppretter ikke behandleSedOppgave for $hendelseType hendelse og ferdigstilt er: $journalpostferdigstilt

@@ -1,8 +1,14 @@
 package no.nav.eessi.pensjon.journalforing
 
+import com.google.api.gax.paging.Page
+import com.google.cloud.storage.Blob
+import com.google.cloud.storage.BlobId
+import com.google.cloud.storage.Storage
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.identifisertPersonPDL
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
@@ -11,10 +17,22 @@ import no.nav.eessi.pensjon.journalforing.saf.SafSak
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDateTime
+
+private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
+private const val AKTOERID = "12078945602"
 
 class JournalforingMedBrukerTest {
 
@@ -22,145 +40,127 @@ class JournalforingMedBrukerTest {
     private lateinit var gcpStorageService: GcpStorageService
     private lateinit var journalpostService: JournalpostService
     private lateinit var oppgaveHandler: OppgaveHandler
-    private lateinit var metricsHelper: MetricsHelper
     private lateinit var journalforingMedBruker: JournalforingMedBruker
 
-    private val journalpostRequest: OpprettJournalpostRequest = mockk()
-    private val rinaId = "111111"
+    private var journalpostKlient: JournalpostKlient = mockk()
+    private val lagretJournalpostRquest = opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
     private val dokumentId = "222222"
-    private val sedHendelse: SedHendelse = mockk {
-        every { rinaSakId } returns rinaId
-        every { rinaDokumentId } returns dokumentId
-    }
-    private val identifisertPerson: IdentifisertPerson = mockk()
-    private val bruker: Bruker = mockk()
+    lateinit var sedUtenBruker: SedHendelse
+    lateinit var sedMedBruker: SedHendelse
 
-    private val journalpostId = "journalpostId"
-    private val journalforendeEnhet = "journalforendeEnhet"
+    val identifisertPerson = identifisertPersonPDL(
+        AKTOERID,
+        SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = dokumentId),
+        "NOR"
+    )
+    private val storage: Storage = mockk(relaxed = true)
+    lateinit var lagretJournalPost: LagretJournalpostMedSedInfo
 
     @BeforeEach
     fun setUp() {
         safClient = mockk()
-        gcpStorageService = mockk()
-        journalpostService = mockk()
-        oppgaveHandler = mockk()
-        metricsHelper = MetricsHelper.ForTest()
+        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
+        journalpostService = spyk(JournalpostService(journalpostKlient))
+        oppgaveHandler = spyk(
+            OppgaveHandler(
+                mockk<KafkaTemplate<String, String>>(relaxed = true).apply {
+                    every { sendDefault(any(), any()).get() } returns mockk(relaxed = true) },
+                mockk(relaxed = true))
+        )
 
-        journalforingMedBruker = spyk(JournalforingMedBruker(safClient, gcpStorageService, journalpostService, oppgaveHandler, metricsHelper))
+        sedMedBruker = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText())
+        sedUtenBruker = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")!!.readText()).copy (
+            rinaSakId = sedMedBruker.rinaSakId
+        )
 
-        every { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) } returns listOf(rinaId)
-        every { gcpStorageService.hentOpprettJournalpostRequest(rinaId) } returns Pair(journalpostId, mockk())
-        every { safClient.hentJournalpost(journalpostId) } returns createTestJournalpostResponse(journalpostId = journalpostId, journalforendeEnhet = journalforendeEnhet)
+        journalforingMedBruker = spyk(
+            JournalforingMedBruker(
+                safClient,
+                gcpStorageService,
+                journalpostService,
+                oppgaveHandler,
+                MetricsHelper.ForTest()
+            ))
 
-//        every { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) } just Runs
-        every { journalforingMedBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) } just Runs
-        every { gcpStorageService.slettJournalpostDetaljer(any()) } just Runs
+        lagretJournalPost = LagretJournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
+
+        every { storage.list("journalB") } returns mockk<Page<Blob>>().apply {
+            every { iterateAll() } returns mockk<MutableIterable<Blob>>().apply {
+                every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
+                    every { hasNext() } returns true andThen false
+                    every { next() } returns mockk<Blob>().apply {
+                        every { getName() } returns sedUtenBruker.rinaSakId
+                        every { getContent() } returns lagretJournalPost.toJson().toByteArray()
+                        every { getValues() } returns mockk<MutableIterable<Blob>>().apply {
+                            every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
+                                every { hasNext() } returns true andThen false
+                                every { next() } returns mockk<Blob>().apply {
+                                    every { getName() } returns sedUtenBruker.rinaSakId
+                                    every { getContent() } returns lagretJournalPost.toJson().toByteArray()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns  mockk {
+            every { exists() } returns true
+            every { getContent() } returns lagretJournalPost.toJson().toByteArray()
+        }
     }
 
     @Test
-    fun `journalpostId skal hentes fra GCP deretter lage journalpost og ferdigstille uten aa lage oppgave`() {
+    fun `journalpost med bruker skal hente lageret jp uten bruker og opprette jp samt oppgave`() {
+        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
+            every { journalpostId } returns "1111"
+            every { journalstatus } returns "UNDER_ARBEID"
+        }
+        val bruker = createTestBruker("121280334444")
+        val journalPostMedBruker = opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
+        journalforingMedBruker.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
-        every { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) } returns JournalpostModel.Ferdigstilt("Ferdigstilt, ingen oppgave")
-        journalforingMedBruker.journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, bruker)
-
-        verify(exactly = 1) { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) }
-        verify(exactly = 1) { gcpStorageService.hentOpprettJournalpostRequest(rinaId) }
-        verify(exactly = 1) { safClient.hentJournalpost(journalpostId) }
-        //verify(exactly = 1) { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) }
-//        verify(exactly = 1) { journalforeBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) }
-        verify(exactly = 1) { journalforingMedBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) }
-        verify(exactly = 1) { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) }
-        verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(any()) }
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
+            {
+              "sedType" : "P2000",
+              "journalpostId" : "1111",
+              "tildeltEnhetsnr" : "${journalPostMedBruker.journalfoerendeEnhet?.enhetsNr}",
+              "aktoerId" : "${identifisertPerson.aktoerId}",
+              "rinaSakId" : "147729",
+              "hendelseType" : "MOTTATT",
+              "filnavn" : null,
+              "oppgaveType" : "JOURNALFORING",
+              "tema" : "${journalPostMedBruker.tema.kode}"
+            }
+        """.trimIndent())) }
+        verify { journalpostService.sendJournalPost(eq(lagretJournalpostRquest.copy(
+            tema = journalPostMedBruker.tema,
+            journalfoerendeEnhet = journalPostMedBruker.journalfoerendeEnhet,
+            bruker = journalPostMedBruker.bruker
+        )), lagretJournalPost.sedHendelse, any(), any()) }
+        verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(BlobId.of("journalB", sedUtenBruker.rinaSakId)) }
     }
 
-    @Test
-    fun `journalpostId skal hentes fra GCP deretter lage journalpost og lage oppgave`() {
-
-        every { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) } returns JournalpostModel.IngenFerdigstilling("Ingen ferdigstilling, lager oppgave")
-        every { journalforingMedBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) } just Runs
-
-        journalforingMedBruker.journalpostMedBruker(journalpostRequest, sedHendelse, identifisertPerson, bruker)
-
-        verify(exactly = 1) { gcpStorageService.arkiverteSakerForRinaId(rinaId, dokumentId) }
-        verify(exactly = 1) { gcpStorageService.hentOpprettJournalpostRequest(rinaId) }
-        verify(exactly = 1) { safClient.hentJournalpost(journalpostId) }
-        //verify(exactly = 1) { journalforeBruker.oppdaterOppgave(rinaId, any(), journalpostRequest, sedHendelse, identifisertPerson) }
-        verify(exactly = 1) { journalforingMedBruker.opprettOppgave(sedHendelse, any(), identifisertPerson, journalpostRequest) }
-        verify(exactly = 1) { journalforingMedBruker.oppdaterJournalpost(any(), journalpostRequest, bruker) }
-        verify(exactly = 1) { journalpostService.ferdigstilljournalpost(journalpostId, journalforendeEnhet) }
-        verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(any()) }
-    }
-
-    fun createTestJournalpostResponse(
-        journalpostId: String? = "defaultJournalpostId",
-        eksternReferanseId: String? = "defaultEksternReferanseId",
-        tema: Tema? = Tema.UFORETRYGD,
-        dokumenter: List<SafDokument?> = listOf(createTestSafDokument()),
-        journalstatus: Journalstatus? = Journalstatus.UNDER_ARBEID,
-        journalpostferdigstilt: Boolean? = false,
-        avsenderMottaker: AvsenderMottaker? = createTestAvsenderMottaker(),
-        behandlingstema: Behandlingstema? = Behandlingstema.UFOREPENSJON,
-        journalforendeEnhet: String? = "defaultEnhet",
-        temanavn: String? = "defaultTemanavn",
-        bruker: Bruker? = createTestBruker(),
-        sak: SafSak? = createTestSafSak(),
-        datoOpprettet: LocalDateTime? = LocalDateTime.now()
-    ): JournalpostResponse {
-        return JournalpostResponse(
-            journalpostId = journalpostId,
-            eksternReferanseId = eksternReferanseId,
-            tema = tema,
-            dokumenter = dokumenter,
-            journalstatus = journalstatus,
-            journalpostferdigstilt = journalpostferdigstilt,
-            avsenderMottaker = avsenderMottaker,
-            behandlingstema = behandlingstema,
-            journalforendeEnhet = journalforendeEnhet,
-            temanavn = temanavn,
-            bruker = bruker,
-            sak = sak,
-            datoOpprettet = datoOpprettet
-        )
-    }
-
-    fun createTestSafDokument(
-        dokumentInfoId: String? = "defaultDokumentInfoId",
-        tittel: String? = "defaultTittel",
-        brevkode: String? = "defaultBrevkode"
-    ): SafDokument {
-        return SafDokument(
-            dokumentInfoId = dokumentInfoId!!,
-            tittel = tittel!!,
-            brevkode = brevkode
-        )
-    }
-
-    fun createTestAvsenderMottaker(
-        id: String? = "defaultId",
-        navn: String? = "defaultNavn",
-    ): AvsenderMottaker {
-        return AvsenderMottaker(
-            id = id,
-            navn = navn
-        )
-    }
 
     fun createTestBruker(
         id: String? = "defaultId"
     ): Bruker {
         return Bruker(
-            id = id!!,
-           "type"
+            id = id!!
         )
     }
 
-    fun createTestSafSak(
-        fagsakId: String? = "defaultFagsakId",
-        fagsaksystem: String? = "defaultFagsaksystem"
-    ): SafSak {
-        return SafSak(
-            fagsakId = fagsakId,
-            fagsaksystem = fagsaksystem
-        )
-    }
+    private fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?) = OpprettJournalpostRequest(
+        AvsenderMottaker(land = "GB"),
+        Behandlingstema.ALDERSPENSJON,
+        bruker = bruker,
+        "[]",
+        enhet,
+        JournalpostType.INNGAAENDE,
+        Sak("FAGSAK", "11111", "PEN"),
+        tema = tema ?: Tema.OMSTILLING,
+        emptyList(),
+        "tittel på sak"
+    )
 }

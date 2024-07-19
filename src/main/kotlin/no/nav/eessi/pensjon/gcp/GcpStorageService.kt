@@ -84,31 +84,32 @@ class GcpStorageService(
             | $journalBucket, med key: ${blob.name}
             | innhold""".trimMargin() + journalpostDetaljer.toJson())
     }
+
     fun slettJournalpostDetaljer(blobId: BlobId) {
         try {
             logger.info("Sletter journalpostdetaljer for rinaSakId: $blobId")
             gcpStorage.delete(blobId).also { logger.info("Slett av journalpostdetaljer utført: $it") }
         } catch (ex: Exception) {
-        logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
+            logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
+        }
     }
-}
 
 
-    fun lagreJournalPostRequest(journalpostId: String?, rinaId: String?, dokId: String?) {
+    fun lagreJournalPostRequest(lagretJournalPost: String, rinaId: String?, dokId: String?) {
         try {
-            if(rinaId == null || dokId == null || journalpostId == null) {
-                logger.error("Mangler informasjon fra: $rinaId, sedId: $dokId eller journalpostId: $journalpostId")
+            if(rinaId == null || dokId == null) {
+                logger.error("Mangler informasjon fra: $rinaId, sedId: $dokId eller journalpost")
                 return
             }
             val path = "${rinaId}/${dokId}"
             logger.info("Storing sedhendelse to S3: $path")
             val blob = gcpStorage.create(
                 BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
-                journalpostId.toByteArray()
+                lagretJournalPost.toByteArray()
             )
             logger.debug("""Journalpostdetaljer lagret i bucket: 
                 | $journalBucket, med key: ${blob.name}
-                | innhold""".trimMargin() + journalpostId)
+                | innhold: ${lagretJournalPost}""".trimMargin() )
         } catch (_: Exception) {
             logger.warn("Feil under lagring av journalpost request")
         }
@@ -123,10 +124,13 @@ class GcpStorageService(
             val journalpostIdFraUkjentBruker = gcpStorage.get(blobId)
             if(journalpostIdFraUkjentBruker.exists()){
                 logger.info("Henter melding med rinanr $rinaIdOgSedId, for bucket $journalBucket")
-                return Pair(journalpostIdFraUkjentBruker.getContent().decodeToString(), blobId).also { logger.debug("""Journalpost fra ukjent bruker:
-                    | blobid: $blobId
-                    | rinaIdOgSedId: $rinaIdOgSedId
-                    | $it""".trimMargin()) }
+                val request = journalpostIdFraUkjentBruker.getContent().decodeToString()
+                return Pair(request, blobId)
+                    .also { logger.debug("""Journalpost fra ukjent bruker:
+                        | blobid: $blobId
+                        | rinaIdOgSedId: $rinaIdOgSedId
+                        | $it""".trimMargin())
+                    }
             }
             else {
                 logger.error("Finner ikke lagret journalpostId for $rinaIdOgSedId, for bucket $journalBucket")
@@ -149,7 +153,10 @@ class GcpStorageService(
                         | dokument: $rinaDokumentId
                         | lagret jp: ${blob.name}
                     """.trimMargin())
-                    return blobs.values.filter { it.name.contains(rinaId) }.map { it.name }.also { logger.info("Arkiverte saker: $it") }
+                    return blobs.values.filter {
+                        logger.info(it.name)
+                        it.name.contains(rinaId)
+                    }.map { it.name }.also { logger.info("Arkiverte saker: $it") }
                 }
             }
         } catch (ex: Exception) {

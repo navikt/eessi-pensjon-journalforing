@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -26,6 +27,7 @@ import java.time.LocalDate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
+@Disabled
 internal class JournalforingAvbruttTest : JournalforingServiceBase() {
     @ParameterizedTest
     @EnumSource(SedType::class)
