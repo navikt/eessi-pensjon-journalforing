@@ -63,10 +63,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             dokumenter = dokumenter,
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
         )
-
-        //val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
-
-        //return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
     }
 
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
@@ -75,6 +71,11 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
+    }
+
+    fun sendJournalPost(journalpostRequest: LagretJournalpostMedSedInfo,
+                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+        return sendJournalPost(journalpostRequest.journalpostRequest, journalpostRequest.sedHendelse, journalpostRequest.sedHendelseType, saksbehandlerIdent)
     }
 
     /** Oppdatere journalpost med kall til dokarkiv:
@@ -135,13 +136,6 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param journalpostId: ID til journalposten som skal ferdigstilles.
      */
     fun oppdaterDistribusjonsinfo(journalpostId: String) = journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
-
-    /**
-     *  Førsøker å ferdigstille journalposten.
-     *
-     *  @param journalpostId: ID til journalposten som skal ferdigstilles.
-     */
-//    fun ferdigstilljournalpost(journalpostId: String, journalfoerendeEnhet: String) : JournalpostModel.FerdigJournalpost = journalpostKlient.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
 
     /**
      *  Ferdigstiller journalposten.

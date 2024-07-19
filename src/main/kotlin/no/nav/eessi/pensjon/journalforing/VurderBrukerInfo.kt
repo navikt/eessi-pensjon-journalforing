@@ -5,11 +5,9 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppdaterOppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
-import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class VurderBrukerInfo (
-    private val safClient: SafClient,
     private val gcpStorageService: GcpStorageService,
     private val journalpostService: JournalpostService,
     private val oppgaveHandler: OppgaveHandler,
@@ -59,20 +56,15 @@ class VurderBrukerInfo (
 
                 gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { (journalpost, blob) ->
                     val lagretJournalPost = mapJsonToAny<LagretJournalpostMedSedInfo>(journalpost)
+
                     val jprUtenBrukerOppdatert = lagretJournalPost.copy(
-                        journalpostRequest = lagretJournalPost.journalpostRequest.copy(
-                            tema = jprMedBruker.tema,
-                            bruker = jprMedBruker.bruker,
-                            journalfoerendeEnhet = jprMedBruker.journalfoerendeEnhet
-                        )
+                        journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker)
                     )
 
                     logger.info("Henter lagret sed: ${jprUtenBrukerOppdatert.journalpostRequest.tittel} fra gcp, rinaid: $rinaId")
 
                     val opprettetJournalpost = journalpostService.sendJournalPost(
-                        jprUtenBrukerOppdatert.journalpostRequest,
-                        jprUtenBrukerOppdatert.sedHendelse,
-                        jprUtenBrukerOppdatert.sedHendelseType,
+                        jprUtenBrukerOppdatert,
                         saksbehandlerIdent
                     )
 
@@ -90,6 +82,14 @@ class VurderBrukerInfo (
         } catch (e: Exception) {
             logger.error("Det har skjedd feil med oppdatering av lagret journalpost uten bruker", e)
         }
+    }
+
+    private fun updateRequest(originalRequest: OpprettJournalpostRequest, jprMedBruker: OpprettJournalpostRequest): OpprettJournalpostRequest {
+        return originalRequest.copy(
+            tema = jprMedBruker.tema,
+            bruker = jprMedBruker.bruker,
+            journalfoerendeEnhet = jprMedBruker.journalfoerendeEnhet
+        )
     }
 
     fun opprettOppgave(

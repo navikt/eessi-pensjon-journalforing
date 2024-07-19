@@ -198,7 +198,7 @@ class JournalforingService(
                         navAnsattInfo?.first)
 
                     // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
-                    val sattStatusAvbrutt = journalpostService.settStatusAvbrutt(
+                    val kanLageOppgave = journalpostService.settStatusAvbrutt(
                         identifisertPerson?.personRelasjon?.fnr,
                         hendelseType,
                         sedHendelse,
@@ -211,10 +211,10 @@ class JournalforingService(
                     }
 
                     journalPostResponse?.journalpostferdigstilt.let { journalPostFerdig ->
-                        logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $sattStatusAvbrutt **********")
+                        logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $kanLageOppgave **********")
                     }
 
-                    if (journalPostResponse?.journalpostferdigstilt == false && !sattStatusAvbrutt) {
+                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave) {
                         val melding = OppgaveMelding(
                             sedHendelse.sedType,
                             journalPostResponse.journalpostId,
