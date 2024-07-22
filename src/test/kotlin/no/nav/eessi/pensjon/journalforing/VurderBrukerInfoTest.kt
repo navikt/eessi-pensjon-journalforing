@@ -4,7 +4,10 @@ import com.google.api.gax.paging.Page
 import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.Storage
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.identifisertPersonPDL
@@ -70,7 +73,6 @@ class VurderBrukerInfoTest {
 
         vurderBrukerInfo = spyk(
             VurderBrukerInfo(
-                safClient,
                 gcpStorageService,
                 journalpostService,
                 oppgaveHandler,

@@ -68,7 +68,7 @@ class JournalforingServiceMedGCPTest {
         journalpostService = mockk()
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
-        vurderBrukerInfo = VurderBrukerInfo(safClient, gcpStorageService, journalpostService, oppgaveHandler)
+        vurderBrukerInfo = VurderBrukerInfo(gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
             oppgaveroutingService,

@@ -71,7 +71,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
 
         @Bean
-        fun journalforingUtenBruker(): VurderBrukerInfo = VurderBrukerInfo(safClient(), gcpStorageService(), mockk(), mockk())
+        fun journalforingUtenBruker(): VurderBrukerInfo = VurderBrukerInfo(gcpStorageService(), mockk(), mockk())
         //TODO: Ingen kobling mellomg journalføringservice og denne.. gå gjennom de andre mock -beans også
     }
 
