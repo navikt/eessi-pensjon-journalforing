@@ -119,7 +119,7 @@ class VurderBrukerInfo (
 
     private fun countForOppdatering(melding: String) {
         try {
-            Metrics.counter("eessi_pensjon_journalføring_oppgave_oppdatering", "melding", melding).increment()
+            Metrics.counter("eessi_pensjon_journalforing_vurder_bruker", "melding", melding).increment()
         } catch (e: Exception) {
             logger.warn("Metrics feilet med melding: $melding", e)
         }
