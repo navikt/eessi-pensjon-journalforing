@@ -104,8 +104,6 @@ class JournalforingServiceMedGCPTest {
             datoOpprettet = LocalDateTime.now()
         )
 
-        //val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId, "EKSPEDERT", "", false)
-
         val opprettJournalpostRequest = OpprettJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(id = rinaId, navn = "NAV", land = "NO"),
             behandlingstema = ALDERSPENSJON,
