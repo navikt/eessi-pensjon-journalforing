@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.journalforing.skedulering
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -19,7 +20,10 @@ class OpprettJournalpostUkjentBruker(
     @Scheduled(cron = EVERY_TWO_MIN)
     operator fun invoke() {
         val jp = gcpStorageService.hentGamleRinaSakerMedJPDetlajer(2)
-        jp?.forEach { mapJsonToAny<LagretJournalpostMedSedInfo>(it) }
-            .also { logger.info("Executing cron...sakerfunnet: $jp") }
+        logger.info("Executing cron...sakerfunnet: $jp")
+
+        jp?.forEach { mapJsonToAny<LagretJournalpostMedSedInfo>(it).also {
+            logger.info("LagretJournalpostMedSedInfo: ${it.toJson()}")
+        } }
     }
 }
