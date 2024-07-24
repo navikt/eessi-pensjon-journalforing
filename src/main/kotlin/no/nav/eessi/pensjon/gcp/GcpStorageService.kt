@@ -197,8 +197,7 @@ class GcpStorageService(
                         | Eldre saker: ${blob.name}
                     """.trimMargin()
                     )
-                    val jpId = gcpStorage.get(blob.blobId)
-                    jpListe.add(jpId.getContent().decodeToString())
+                    jpListe.add(blob.getContent().decodeToString())
                 }
             }
             return jpListe

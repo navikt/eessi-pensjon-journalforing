@@ -1,7 +1,5 @@
 package no.nav.eessi.pensjon.journalforing
 
-import com.google.api.gax.paging.Page
-import com.google.cloud.storage.Blob
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.Storage
 import io.mockk.every
@@ -10,14 +8,13 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.gcp.GcpStorageServiceTest.Companion.lageGcpStorageMedLagretJP
+import no.nav.eessi.pensjon.gcp.GcpStorageServiceTest
 import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.identifisertPersonPDL
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -42,7 +39,7 @@ class VurderBrukerInfoTest {
     private lateinit var vurderBrukerInfo: VurderBrukerInfo
 
     private var journalpostKlient: JournalpostKlient = mockk()
-    private val lagretJournalpostRquest = opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
+    private val lagretJournalpostRquest = GcpStorageServiceTest.opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
     private val dokumentId = "222222"
     lateinit var sedUtenBruker: SedHendelse
     lateinit var sedMedBruker: SedHendelse
@@ -97,9 +94,9 @@ class VurderBrukerInfoTest {
             every { journalstatus } returns "UNDER_ARBEID"
         }
         val bruker = createTestBruker("121280334444")
-        val journalPostMedBruker = opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
+        val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
 
-        lageGcpStorageMedLagretJP(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
+        GcpStorageServiceTest.simulerGcpStorage(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
 
         vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
@@ -135,16 +132,5 @@ class VurderBrukerInfoTest {
     }
 
 
-    private fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?) = OpprettJournalpostRequest(
-        AvsenderMottaker(land = "GB"),
-        Behandlingstema.ALDERSPENSJON,
-        bruker = bruker,
-        "[]",
-        enhet,
-        JournalpostType.INNGAAENDE,
-        Sak("FAGSAK", "11111", "PEN"),
-        tema = tema ?: Tema.OMSTILLING,
-        emptyList(),
-        "tittel på sak"
-    )
+
 }
