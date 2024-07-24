@@ -194,7 +194,7 @@ class GcpStorageService(
                 if (blob.createTimeOffsetDateTime.isBefore(OffsetDateTime.now().minusMinutes(min))) {
                     logger.info(
                         """fant følgende SED med rinaIder som er eldre enn $min dager:
-                        | Eldre saker: 
+                        | Eldre saker: ${blob.name}
                     """.trimMargin()
                     )
                     val jpId = gcpStorage.get(blob.blobId)
