@@ -10,6 +10,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GcpStorageServiceTest.Companion.lageGcpStorageMedLagretJP
 import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.identifisertPersonPDL
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -81,33 +82,6 @@ class VurderBrukerInfoTest {
 
         lagretJournalPost = LagretJournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
-        every { storage.list("journalB") } returns mockk<Page<Blob>>().apply {
-            //list start
-            every { iterateAll() } returns mockk<MutableIterable<Blob>>().apply {
-                every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
-                    every { hasNext() } returns true andThen false
-                    every { next() } returns mockk<Blob>().apply {
-                    // liste stop
-
-                        //blob nivå
-                        every { getName() } returns sedUtenBruker.rinaSakId
-                        every { getContent() } returns lagretJournalPost.toJson().toByteArray()
-                        every { getValues() } returns mockk<MutableIterable<Blob>>().apply {
-                            //liste funksjonalitet for values innenfor en blob
-                            every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
-                                every { hasNext() } returns true andThen false
-                                every { next() } returns mockk<Blob>().apply {
-                                    // metainfo for enkelt objekt på values
-                                    every { getName() } returns sedUtenBruker.rinaSakId
-                                    every { getContent() } returns lagretJournalPost.toJson().toByteArray()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns  mockk {
             every { exists() } returns true
             every { getContent() } returns lagretJournalPost.toJson().toByteArray()
@@ -116,21 +90,27 @@ class VurderBrukerInfoTest {
 
     @Test
     fun `journalpost med bruker skal hente lageret jp uten bruker og opprette jp samt oppgave`() {
+        val rinaID = "147729"
+
         every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
             every { journalpostId } returns "1111"
             every { journalstatus } returns "UNDER_ARBEID"
         }
         val bruker = createTestBruker("121280334444")
         val journalPostMedBruker = opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
+
+        lageGcpStorageMedLagretJP(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
+
         vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
-        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
+        verify {
+            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
             {
               "sedType" : "P2000",
               "journalpostId" : "1111",
               "tildeltEnhetsnr" : "${journalPostMedBruker.journalfoerendeEnhet?.enhetsNr}",
               "aktoerId" : "${identifisertPerson.aktoerId}",
-              "rinaSakId" : "147729",
+              "rinaSakId" : $rinaID,
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING",
@@ -153,6 +133,7 @@ class VurderBrukerInfoTest {
             id = id!!
         )
     }
+
 
     private fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?) = OpprettJournalpostRequest(
         AvsenderMottaker(land = "GB"),
