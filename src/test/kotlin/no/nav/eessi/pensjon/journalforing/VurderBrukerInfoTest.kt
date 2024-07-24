@@ -82,16 +82,22 @@ class VurderBrukerInfoTest {
         lagretJournalPost = LagretJournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
         every { storage.list("journalB") } returns mockk<Page<Blob>>().apply {
+            //list start
             every { iterateAll() } returns mockk<MutableIterable<Blob>>().apply {
                 every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
                     every { hasNext() } returns true andThen false
                     every { next() } returns mockk<Blob>().apply {
+                    // liste stop
+
+                        //blob nivå
                         every { getName() } returns sedUtenBruker.rinaSakId
                         every { getContent() } returns lagretJournalPost.toJson().toByteArray()
                         every { getValues() } returns mockk<MutableIterable<Blob>>().apply {
+                            //liste funksjonalitet for values innenfor en blob
                             every { iterator() } returns mockk<MutableIterator<Blob>>().apply {
                                 every { hasNext() } returns true andThen false
                                 every { next() } returns mockk<Blob>().apply {
+                                    // metainfo for enkelt objekt på values
                                     every { getName() } returns sedUtenBruker.rinaSakId
                                     every { getContent() } returns lagretJournalPost.toJson().toByteArray()
                                 }
