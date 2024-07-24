@@ -32,8 +32,10 @@ class VurderBrukerInfo (
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
-        logger.info("Journalposten mangler bruker og vil bli lagret for fremtidig vurdering")
         val lagretJournalpost = LagretJournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
+        logger.debug("""Journalposten mangler bruker og vil bli lagret for fremtidig vurdering
+            | ${lagretJournalpost.toJson()}
+        """.trimMargin())
 
         gcpStorageService.lagreJournalPostRequest(
             lagretJournalpost.toJson(),
