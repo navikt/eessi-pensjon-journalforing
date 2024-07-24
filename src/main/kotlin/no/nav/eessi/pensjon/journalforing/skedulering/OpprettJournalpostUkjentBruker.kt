@@ -20,6 +20,6 @@ class OpprettJournalpostUkjentBruker(
     operator fun invoke() {
         val jp = gcpStorageService.hentGamleRinaSakerMedJPDetlajer(2)
         jp?.forEach { mapJsonToAny<LagretJournalpostMedSedInfo>(it) }
-            .also { logger.info("Executing cron...sakerfunnet: $it") }
+            .also { logger.info("Executing cron...sakerfunnet: $jp") }
     }
 }
