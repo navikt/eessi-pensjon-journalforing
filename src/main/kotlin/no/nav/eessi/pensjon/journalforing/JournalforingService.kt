@@ -458,7 +458,7 @@ class JournalforingService(
 
         // 3. Pesys nr fra pesys
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01").also { logger.info("Har funnet saksinformasjon fra pesys: $it") }
+            return Sak("FAGSAK", it, "PP01").also { logger.info("Har funnet saksinformasjon fra pesys: $it, saksType:${sakInformasjon.sakType}, sakStatus:${sakInformasjon.sakStatus}") }
         }
 
         // 4. Pesys nr fra SED
@@ -473,10 +473,10 @@ class JournalforingService(
     }
 
     /**
-     * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2)
+     * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2) og at lengden er 8 siffer
      */
     private fun String.erGyldigPesysNummer(): Boolean {
-        return this.first() == '1' || this.first() == '2'
+        return (this.first() == '1' || this.first() == '2') && this.length == 8
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
