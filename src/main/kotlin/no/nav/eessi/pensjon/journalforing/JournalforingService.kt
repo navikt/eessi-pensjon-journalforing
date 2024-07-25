@@ -458,12 +458,12 @@ class JournalforingService(
 
         // 3. Pesys nr fra pesys
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01")
+            return Sak("FAGSAK", it, "PP01").also { logger.info("Har funnet saksinformasjon fra pesys: $it") }
         }
 
         // 4. Pesys nr fra SED
         sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01")
+            return Sak("FAGSAK", it, "PP01").also { logger.info("har funnet saksinformasjon fra SED: $it") }
         }
 
         logger.warn("""RinaID: $euxCaseId
