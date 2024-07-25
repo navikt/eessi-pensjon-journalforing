@@ -34,7 +34,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     @Test
     fun `hentSak skal gi Sak fra sakIdFraSed naar gjennySak mangler`() {
         val euxCaseId = "123"
-        val sakIdFraSed = "12131"
+        val sakIdFraSed = "12131132"
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
@@ -48,7 +48,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     @Test
     fun `hentSak skal gi Sak fra sakInformasjon naar gjennySak og sakIdFraSed mangler`() {
         val euxCaseId = "123"
-        val sakInformasjon = SakInformasjon("12131", SakType.GJENLEV, LOPENDE)
+        val sakInformasjon = SakInformasjon("12131223", SakType.GJENLEV, LOPENDE)
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
@@ -92,7 +92,6 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
-
         val result = journalforingService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 
         assertNull(result)
