@@ -16,6 +16,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 val logger: Logger = LoggerFactory.getLogger(Relasjon::class.java)
+val secureLog = LoggerFactory.getLogger(Relasjon::class.java)
 
 abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
 
@@ -60,7 +61,7 @@ abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucTy
             etternavn,
             fodseldato
         )
-        logger.debug("Oppretter sokKriterier: ${sokKriterier.fornavn}, ${sokKriterier.etternavn}, ${sokKriterier.foedselsdato}")
+        secureLog.info("Oppretter sokKriterier: ${sokKriterier.fornavn}, ${sokKriterier.etternavn}, ${sokKriterier.foedselsdato}")
         return sokKriterier
     }
 

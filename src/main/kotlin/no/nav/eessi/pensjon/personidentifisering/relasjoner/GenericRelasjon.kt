@@ -20,7 +20,7 @@ class GenericRelasjon(private val sed: SED, private val bucType: BucType, privat
         if(bucType == P_BUC_02) {
             fnrListe.addAll(hentRelasjonGjenlevendeFnrHvisFinnes())
         } else {
-            fnrListe.addAll(hentForsikretPerson(bestemSaktype(bucType))).also { logger.debug("hentrelasjoner som legges til: $it") }
+            fnrListe.addAll(hentForsikretPerson(bestemSaktype(bucType))).also { secureLog.info("hentrelasjoner som legges til: $it") }
         }
         return fnrListe
     }

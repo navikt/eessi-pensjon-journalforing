@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.toJson
 
 abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
@@ -19,7 +20,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         val sedType = sed.type
         //gjenlevendePerson (søker)
         val gjenlevendePerson = gjenlevendeBruker?.person
-        logger.debug("Hva er gjenlevendePerson pin?: ${gjenlevendePerson?.pin}")
+        secureLog.info("Hva er gjenlevendePerson pin?: ${gjenlevendePerson?.pin}")
 
         if (gjenlevendePerson == null) {
             return emptyList()
@@ -34,7 +35,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         logger.info("Innhenting av relasjon: ${gjenlevendeRelasjon?.let { RelasjonTilAvdod.values().firstOrNull{it.kode == gjenlevendeRelasjon}}}")
 
         if (gjenlevendeRelasjon == null) {
-            logger.debug("Legger til person $GJENLEVENDE med ukjente relasjoner")
+            secureLog.info("Legger til person $GJENLEVENDE med ukjente relasjoner")
             return listOf(SEDPersonRelasjon(gjenlevendePin, GJENLEVENDE, sedType = sedType, sokKriterier = sokPersonKriterie, fdato = gjenlevendeFdato, rinaDocumentId = rinaDocumentId))
         }
 
@@ -43,7 +44,7 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
         } else {
             GJENLEV
         }
-        logger.debug("Legger til person $GJENLEVENDE med sakType: $sakType")
+        secureLog.info("Legger til person $GJENLEVENDE med sakType: $sakType")
         return listOf(SEDPersonRelasjon(gjenlevendePin, GJENLEVENDE, sakType, sedType = sedType, sokKriterier = sokPersonKriterie, gjenlevendeFdato, rinaDocumentId= rinaDocumentId))
     }
 
@@ -60,12 +61,21 @@ abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: 
      */
     fun leggTilAnnenGjenlevendeFnrHvisFinnes(): SEDPersonRelasjon? {
         val gjenlevendePerson = sed.nav?.annenperson?.takeIf { it.person?.rolle == Rolle.ETTERLATTE.name }?.person
+        secureLog.info("""leggTilAnnenGjenlevendeFnrHvisFinnes: $gjenlevendePerson
+            | rolle: ${sed.nav?.annenperson?.person?.rolle}""".trimMargin())
 
         gjenlevendePerson?.let { person ->
             val sokPersonKriterie = opprettSokKriterie(person)
             val fodselnummer = Fodselsnummer.fra(person.pin?.firstOrNull { it.land == "NO" }?.identifikator)
             val fdato =  mapFdatoTilLocalDate(person.foedselsdato)
-            return SEDPersonRelasjon(fodselnummer, GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie, fdato = fdato, rinaDocumentId=rinaDocumentId)
+            return SEDPersonRelasjon(
+                fodselnummer, GJENLEVENDE, sedType = sed.type, sokKriterier = sokPersonKriterie,
+                fdato = fdato, rinaDocumentId = rinaDocumentId
+            ).also {
+                secureLog.info("""leggTilAnnenGjenlevendeFnrHvisFinnes: 
+                    | SEDPersonRelasjon: ${it.toJson()}""".trimMargin()
+                )
+            }
         }
         return null
     }
