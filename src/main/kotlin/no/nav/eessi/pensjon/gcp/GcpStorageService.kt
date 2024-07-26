@@ -184,7 +184,7 @@ class GcpStorageService(
         return null
     }
 
-    fun hentGamleRinaSakerMedJPDetlajer(dager: Long): List<String>? {
+    fun hentGamleRinaSakerMedJPDetaljer(dager: Long): List<String>? {
         try {
             logger.info("Henter rinasaker som er eldre enn $dager dager gamle")
             val blobs = gcpStorage.list(journalBucket)
