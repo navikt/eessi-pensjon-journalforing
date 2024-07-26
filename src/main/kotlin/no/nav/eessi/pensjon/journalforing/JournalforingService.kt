@@ -198,7 +198,7 @@ class JournalforingService(
                         navAnsattInfo?.first)
 
                     // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
-                    val kanLageOppgave = journalpostService.settStatusAvbrutt(
+                    val kanLageOppgave = journalpostService.skalStatusSettesTilAvbrutt(
                         identifisertPerson?.personRelasjon?.fnr,
                         hendelseType,
                         sedHendelse,
