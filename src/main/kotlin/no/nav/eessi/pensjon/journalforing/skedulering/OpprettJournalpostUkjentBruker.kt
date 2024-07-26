@@ -24,10 +24,10 @@ class OpprettJournalpostUkjentBruker(
 
     @Scheduled(cron = EVERY_DAY)
     operator fun invoke() {
-        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(1)
+        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(10)
 
         jp?.forEach { journalpostDetaljer ->
-            mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer)
+            mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
                 val response = journalpostService.sendJournalPost(it, "eessipensjon")
 
@@ -49,6 +49,7 @@ class OpprettJournalpostUkjentBruker(
                         oppgaveType = OppgaveType.JOURNALFORING,
                     ).also { oppgaveMelding ->  logger.info("Opprettet journalforingsoppgave for sak med rinaId: ${oppgaveMelding.rinaSakId}") }
                     oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
+                    jp.firstOrNull()?.second?.let { blobId -> gcpStorageService.slettJournalpostDetaljer(blobId) }
                 } else {
                     logger.error("Journalpost ikke opprettet")
                 }

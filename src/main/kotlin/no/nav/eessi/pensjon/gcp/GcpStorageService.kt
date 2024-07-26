@@ -184,20 +184,21 @@ class GcpStorageService(
         return null
     }
 
-    fun hentGamleRinaSakerMedJPDetaljer(dager: Long): List<String>? {
+    fun hentGamleRinaSakerMedJPDetaljer(dager: Long): List<Pair<String, BlobId>>? {
         try {
             logger.info("Henter rinasaker som er eldre enn $dager dager gamle")
             val blobs = gcpStorage.list(journalBucket)
 
-            val jpListe = mutableListOf<String>()
+            val jpListe = mutableListOf<Pair<String, BlobId>>()
             for (blob in blobs.iterateAll()) {
+            val blobben = BlobId.of(journalBucket, blob.name)
                 if (blob.createTimeOffsetDateTime.isBefore(OffsetDateTime.now().minusDays(dager))) {
                     logger.info(
                         """fant følgende SED med rinaIder som er eldre enn $dager dager:
                         | Eldre saker: ${blob.name}
                     """.trimMargin()
                     )
-                    jpListe.add(blob.getContent().decodeToString())
+                    jpListe.add(Pair(blob.getContent().decodeToString(), blobben))
                 }
             }
             return jpListe
