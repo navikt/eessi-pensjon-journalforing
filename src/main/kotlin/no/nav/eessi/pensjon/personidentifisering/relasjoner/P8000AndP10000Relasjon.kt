@@ -25,8 +25,8 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
             }
         }
 
-        logger.debug("forsikret $forsikret")
-        logger.debug("gjenlevlist: $fnrListe")
+        secureLog.info("forsikret $forsikret")
+        secureLog.info("gjenlevlist: $fnrListe")
 
         if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER || it.relasjon == Relasjon.GJENLEVENDE } != null ) {
             return fnrListe + forsikret
@@ -38,7 +38,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
     fun hentAnnenpersonRelasjon(): SEDPersonRelasjon? {
         val annenPerson = sed.nav?.annenperson?.person
 
-        logger.debug("annenPerson: $annenPerson")
+        secureLog.info("annenPerson: $annenPerson")
         annenPerson?.let { person ->
             val sokAnnenPersonKriterie =  opprettSokKriterie(person)
             //TODO: håndtere npid
@@ -53,7 +53,7 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
                 ETTERLATTE.kode -> SEDPersonRelasjon(annenPersonPin, Relasjon.GJENLEVENDE, sedType = sed.type, sokKriterier = sokAnnenPersonKriterie , fdato = annenPersonFdato, rinaDocumentId = rinaDocumentId)
                 else -> null
             }
-            return annenPersonRelasjon
+            return annenPersonRelasjon.also { secureLog.info("annenPersonRelasjon: $it") }
         }
         return null
     }
