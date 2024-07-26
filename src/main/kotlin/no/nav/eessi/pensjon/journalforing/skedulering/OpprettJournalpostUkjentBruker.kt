@@ -18,11 +18,11 @@ class OpprettJournalpostUkjentBruker(
     private val oppgaveHandler: OppgaveHandler,
 ) {
     companion object {
-        const val EVERY_TWO_MIN = "0 0/2 * * * ?"
+        const val EVERY_DAY = "0 45 10 * * ?"
     }
     private val logger = LoggerFactory.getLogger(OpprettJournalpostUkjentBruker::class.java)
 
-    @Scheduled(cron = EVERY_TWO_MIN)
+    @Scheduled(cron = EVERY_DAY)
     operator fun invoke() {
         val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(1)
 
