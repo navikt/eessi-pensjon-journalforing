@@ -143,7 +143,7 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
 
         justRun { journalpostService.oppdaterJournalpost(any(), any(), any(), any(), any()) }
-        every { journalpostService.settStatusAvbrutt(any(), any(), any(), any()) } returns false
+        every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
 

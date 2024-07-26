@@ -60,7 +60,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
         justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
 
-        journalpostService.settStatusAvbrutt(identifisertPerson.personRelasjon?.fnr, HendelseType.SENDT, sedHendelse, mockk<OpprettJournalPostResponse>().apply {
+        journalpostService.skalStatusSettesTilAvbrutt(identifisertPerson.personRelasjon?.fnr, HendelseType.SENDT, sedHendelse, mockk<OpprettJournalPostResponse>().apply {
             every { journalpostId } returns jpId
         })
 
