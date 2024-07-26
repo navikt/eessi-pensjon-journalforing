@@ -82,13 +82,13 @@ class OpprettJournalpostUkjentBrukerTest {
             journalpostferdigstilt = false
         )
 
-        every { gcpStorageService.hentGamleRinaSakerMedJPDetlajer(any()) } returns listeOverJpDetaljer
+        every { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) } returns listeOverJpDetaljer
         every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns opprettJPResponse
 
         opprettJournalpostUkjentBruker.invoke()
 
         verify (exactly = 1) { opprettJournalpostUkjentBruker.invoke() }
-        verify (exactly = 1) { gcpStorageService.hentGamleRinaSakerMedJPDetlajer(any()) }
+        verify (exactly = 1) { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) }
         verify (exactly = 1) { journalpostService.sendJournalPost(any(), any()) }
         verify (exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
 

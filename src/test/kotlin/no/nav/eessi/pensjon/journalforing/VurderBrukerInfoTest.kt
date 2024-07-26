@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GcpStorageServiceTest
+import no.nav.eessi.pensjon.gcp.GcpStorageTestHelper
 import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.identifisertPersonPDL
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -96,7 +97,7 @@ class VurderBrukerInfoTest {
         val bruker = createTestBruker("121280334444")
         val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
 
-        GcpStorageServiceTest.simulerGcpStorage(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
+        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
 
         vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
@@ -130,7 +131,4 @@ class VurderBrukerInfoTest {
             id = id!!
         )
     }
-
-
-
 }

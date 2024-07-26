@@ -24,7 +24,7 @@ class OpprettJournalpostUkjentBruker(
 
     @Scheduled(cron = EVERY_TWO_MIN)
     operator fun invoke() {
-        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetlajer(1)
+        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(1)
 
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer)
