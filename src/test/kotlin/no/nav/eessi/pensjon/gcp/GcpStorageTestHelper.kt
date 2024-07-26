@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.gcp
 
 import com.google.api.gax.paging.Page
 import com.google.cloud.storage.Blob
+import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.Storage
 import io.mockk.every
 import io.mockk.mockk
@@ -15,18 +16,18 @@ class GcpStorageTestHelper {
         companion object {
             fun simulerGcpStorage(
                 sedHendelse: SedHendelse,
-                lagretJournalPost: LagretJournalpostMedSedInfo,
+                lagretJournalPost: List<Pair<LagretJournalpostMedSedInfo, BlobId>>,
                 gcpStorage: Storage
             ) {
                 val blob = createMockBlob(sedHendelse, lagretJournalPost)
-                val page = createMockPage(blob, sedHendelse, lagretJournalPost)
+                val page = createMockPage(blob, sedHendelse, lagretJournalPost.first().first)
 
                 every { gcpStorage.list("journalB") } returns page
             }
 
             private fun createMockBlob(
                 sedHendelse: SedHendelse,
-                lagretJournalPost: LagretJournalpostMedSedInfo
+                lagretJournalPost: List<Pair<LagretJournalpostMedSedInfo, BlobId>>
             ): Blob {
                 return mockk<Blob>().apply {
                     every { name } returns sedHendelse.rinaSakId

@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.skedulering
 
+import com.google.cloud.storage.BlobId
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -30,7 +31,9 @@ class OpprettJournalpostUkjentBrukerTest {
 
     @Test
     fun `Hvis journalpostdetaljer ligger i bucket over 3 aar så skal journalpost opprettes og og jfr oppgave opprettes`() {
-    val listeOverJpDetaljer = listOf("""
+        val listeOverJpDetaljer = listOf(
+            Pair(
+                """
         {
           "journalpostRequest" : {
             "avsenderMottaker" : {
@@ -73,8 +76,10 @@ class OpprettJournalpostUkjentBrukerTest {
           },
           "sedHendelseType" : "MOTTATT"
         }
-    """.trimIndent()
-    )
+    """.trimIndent(), mockk<BlobId>("blob")
+            )
+        )
+
         val opprettJPResponse = OpprettJournalPostResponse(
             journalpostId = "1111",
             journalstatus = "UNDER_ARBEID",
@@ -91,6 +96,7 @@ class OpprettJournalpostUkjentBrukerTest {
         verify (exactly = 1) { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) }
         verify (exactly = 1) { journalpostService.sendJournalPost(any(), any()) }
         verify (exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
+        verify (exactly = 1) { gcpStorageService.slettJournalpostDetaljer(any()) }
 
     }
 

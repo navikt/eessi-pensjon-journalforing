@@ -89,6 +89,7 @@ class VurderBrukerInfoTest {
     @Test
     fun `journalpost med bruker skal hente lageret jp uten bruker og opprette jp samt oppgave`() {
         val rinaID = "147729"
+        val blobId = mockk<BlobId>(relaxed = true)
 
         every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
             every { journalpostId } returns "1111"
@@ -97,7 +98,7 @@ class VurderBrukerInfoTest {
         val bruker = createTestBruker("121280334444")
         val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
 
-        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, lagretJournalPost, gcpStorage = storage)
+        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, listOf(Pair(lagretJournalPost, blobId)), gcpStorage = storage)
 
         vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
