@@ -38,19 +38,19 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun opprettJournalpost(
         sedHendelse: SedHendelse,
-        fnr: Fodselsnummer?,
+        fnr: Fodselsnummer? = null,
         sedHendelseType: HendelseType,
         journalfoerendeEnhet: Enhet,
-        arkivsaksnummer: Sak?,
+        arkivsaksnummer: Sak? = null,
         dokumenter: String,
-        saktype: SakType?,
+        saktype: SakType? = null,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
         kravType: KravType? = null
     ): OpprettJournalpostRequest {
-
+        logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),

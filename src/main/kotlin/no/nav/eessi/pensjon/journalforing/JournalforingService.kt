@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.google.cloud.storage.BlobId
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -236,14 +237,14 @@ class JournalforingService(
                             sedHendelse.rinaSakId,
                             hendelseType,
                             null,
-                            if (hendelseType == HendelseType.MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                            if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                             tema = tema
                         )
                         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                     }
 
                     //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
-                    if ((hendelseType == HendelseType.MOTTATT && journalPostResponse?.journalpostferdigstilt!!)) {
+                    if ((hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt!!)) {
                         logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
                         opprettBehandleSedOppgave(
                             journalPostResponse.journalpostId,
@@ -277,6 +278,33 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
+        }
+    }
+
+    fun lagJournalpostOgOppgave(journalpostRequest: LagretJournalpostMedSedInfo, saksbehandlerIdent: String?, blobId: BlobId){
+        val response = journalpostService.sendJournalPost(journalpostRequest, "eessipensjon")
+
+        logger.info("""Lagret JP hentet fra GCP: 
+                | sedHendelse: ${journalpostRequest.sedHendelse}
+                | enhet: ${journalpostRequest.journalpostRequest.journalfoerendeEnhet}
+                | tema: ${journalpostRequest.journalpostRequest.tema}""".trimMargin()
+        )
+
+        if(response?.journalpostId != null) {
+            val melding = OppgaveMelding(
+                sedType = journalpostRequest.sedHendelse.sedType,
+                journalpostId = response.journalpostId,
+                tildeltEnhetsnr = journalpostRequest.journalpostRequest.journalfoerendeEnhet!!,
+                aktoerId = null,
+                rinaSakId = journalpostRequest.sedHendelse.rinaSakId,
+                hendelseType = journalpostRequest.sedHendelseType,
+                filnavn = null,
+                oppgaveType = OppgaveType.JOURNALFORING,
+            ).also { oppgaveMelding ->  logger.info("Opprettet journalforingsoppgave for sak med rinaId: ${oppgaveMelding.rinaSakId}") }
+            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
+            gcpStorageService.slettJournalpostDetaljer(blobId)
+        } else {
+            logger.error("Journalpost ikke opprettet")
         }
     }
 

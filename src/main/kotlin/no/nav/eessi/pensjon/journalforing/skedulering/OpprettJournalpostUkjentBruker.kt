@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.skedulering
 
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class OpprettJournalpostUkjentBruker(
     private val gcpStorageService: GcpStorageService,
-    private val journalpostService: JournalpostService,
-    private val oppgaveHandler: OppgaveHandler,
+    private val journalforingService: JournalforingService
 ) {
     companion object {
         const val EVERY_DAY = "0 0 18 * * ?"
@@ -29,30 +29,7 @@ class OpprettJournalpostUkjentBruker(
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
-                val response = journalpostService.sendJournalPost(it, "eessipensjon")
-
-                logger.info("""Lagret JP hentet fra GCP: 
-                | sedHendelse: ${it.sedHendelse}
-                | enhet: ${it.journalpostRequest.journalfoerendeEnhet}
-                | tema: ${it.journalpostRequest.tema}""".trimMargin()
-                )
-
-                if(response?.journalpostId != null) {
-                    val melding = OppgaveMelding(
-                        sedType = it.sedHendelse.sedType,
-                        journalpostId = response.journalpostId,
-                        tildeltEnhetsnr = it.journalpostRequest.journalfoerendeEnhet!!,
-                        aktoerId = null,
-                        rinaSakId = it.sedHendelse.rinaSakId,
-                        hendelseType = it.sedHendelseType,
-                        filnavn = null,
-                        oppgaveType = OppgaveType.JOURNALFORING,
-                    ).also { oppgaveMelding ->  logger.info("Opprettet journalforingsoppgave for sak med rinaId: ${oppgaveMelding.rinaSakId}") }
-                    oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-                    jp.firstOrNull()?.second?.let { blobId -> gcpStorageService.slettJournalpostDetaljer(blobId) }
-                } else {
-                    logger.error("Journalpost ikke opprettet")
-                }
+                journalforingService.lagJournalpostOgOppgave(it, "eessipensjon", journalpostDetaljer.second)
         } }
     }
 }
