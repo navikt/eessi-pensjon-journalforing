@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
@@ -17,11 +19,11 @@ import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
 import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
+import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
-import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.*
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
 import no.nav.eessi.pensjon.models.Tema.PENSJON
@@ -40,14 +42,12 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 @DisplayName("P_BUC_01 – IntegrationTest")
-@Disabled("Rettes etter journalføring er verifisert uten jp ved manglende bruker")
 internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
     @Nested
@@ -116,8 +116,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 val journalpostRequest = it.opprettJournalpostRequest
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(ID_OG_FORDELING, journalpostRequest.journalfoerendeEnhet)
-
-                verify { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning("429434378") }
             }
         }
 
@@ -547,9 +545,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(PENSJON, journalpostRequest.tema)
                 assertEquals(PENSJON_UTLAND, journalpostRequest.journalfoerendeEnhet)
             }
-
         }
-
     }
 
     private fun testRunnerVoksenSokPerson(
@@ -567,8 +563,17 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
     ) {
 
         val fnrSokVoken = null
-        val mockPerson = createBrukerWith(fnrVoksen,  "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-        val sed = SED.generateSedToClass<P2000>(createSedPensjon(P2000, fnrSokVoken, eessiSaknr = sakId, krav = krav, pdlPerson = mockPerson, fdato = mockPerson.foedsel?.foedselsdato.toString()))
+        val mockPerson = createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
+        val sed = SED.generateSedToClass<P2000>(
+            createSedPensjon(
+                P2000,
+                fnrSokVoken,
+                eessiSaknr = sakId,
+                krav = krav,
+                pdlPerson = mockPerson,
+                fdato = mockPerson.foedsel?.foedselsdato.toString()
+            )
+        )
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
@@ -586,16 +591,34 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
+        var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it)
+        }
 
+        if (oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
+            println("""Opprettet manual journalføring: | ${journalpostRequest.captured.toJson()}""".trimMargin())
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                "",
+                BlobId.of("", "")
+            )
+        }
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)
         }
-        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+        oppgaveMeldingList = meldingSlot.map {
             mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
@@ -603,7 +626,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         verify(exactly = 1) { euxKlient.hentBuc(any()) }
         verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
-
+       // }
 
         clearAllMocks()
     }
@@ -666,16 +689,36 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
 
+        var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it)
+        }
+
+        if (oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                "",
+                BlobId.of("", "")
+            )
+        }
+
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)
         }
-        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+
+        oppgaveMeldingList = meldingSlot.map {
             mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))

@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
+import io.mockk.impl.annotations.SpyK
 import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
@@ -70,11 +71,9 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID = "0123456789000"
         const val AKTOER_ID_2 = "0009876543210"
     }
-
     protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
         justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
         justRun { journalPostUtenBruker(any(), any(), any()) }
-
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
@@ -88,7 +87,7 @@ internal open class JournalforingTestBase {
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
-    private val journalpostService = JournalpostService(journalpostKlient)
+    val journalpostService = spyk(JournalpostService(journalpostKlient))
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val pdfService: PDFService = PDFService(euxService)
@@ -114,7 +113,7 @@ internal open class JournalforingTestBase {
 
     protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
 
-    private val journalforingService: JournalforingService = JournalforingService(
+    val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,

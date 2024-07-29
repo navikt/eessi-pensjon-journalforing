@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test
 class OpprettJournalpostUkjentBrukerTest {
     private lateinit var gcpStorageService: GcpStorageService
     private lateinit var journalpostService: JournalpostService
+    private lateinit var journalforingService: JournalforingService
     private lateinit var oppgaveHandler: OppgaveHandler
     private lateinit var opprettJournalpostUkjentBruker: OpprettJournalpostUkjentBruker
 
@@ -23,9 +25,19 @@ class OpprettJournalpostUkjentBrukerTest {
         gcpStorageService = mockk(relaxed = true)
         journalpostService = mockk(relaxed = true)
         oppgaveHandler = mockk(relaxed = true)
+        journalforingService = JournalforingService(
+            journalpostService = journalpostService,
+            oppgaveHandler = oppgaveHandler,
+            gcpStorageService = gcpStorageService,
+            oppgaveRoutingService = mockk(),
+            pdfService = mockk(),
+            kravInitialiseringsService = mockk(),
+            statistikkPublisher = mockk(),
+            vurderBrukerInfo = mockk()
+        )
 
         opprettJournalpostUkjentBruker = spyk(
-            OpprettJournalpostUkjentBruker(gcpStorageService, journalpostService, oppgaveHandler)
+            OpprettJournalpostUkjentBruker(gcpStorageService, journalforingService)
         )
     }
 
