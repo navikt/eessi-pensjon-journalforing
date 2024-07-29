@@ -18,13 +18,13 @@ class OpprettJournalpostUkjentBruker(
     private val oppgaveHandler: OppgaveHandler,
 ) {
     companion object {
-        const val EVERY_DAY = "0 45 10 * * ?"
+        const val EVERY_DAY = "0 0 18 * * ?"
     }
     private val logger = LoggerFactory.getLogger(OpprettJournalpostUkjentBruker::class.java)
 
     @Scheduled(cron = EVERY_DAY)
     operator fun invoke() {
-        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(10)
+        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(14)
 
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
