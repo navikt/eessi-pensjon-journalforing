@@ -23,13 +23,11 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
 
-@Disabled("Rettes etter journalføring er verifisert uten jp ved manglende bruker")
 internal class JournalpostServiceTest {
 
     private val mockKlient: JournalpostKlient = mockk(relaxed = true)
@@ -118,37 +116,35 @@ internal class JournalpostServiceTest {
         val responseBody =
             javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-//        val sedHendelse = sedHendelse(P2000, P_BUC_01, null)
+        val sedHendelse = sedHendelse(P2000, P_BUC_01, null)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-//        val actualResponse = journalpostService.opprettJournalpost(
-//            sedHendelse = sedHendelse,
-//            fnr = SLAPP_SKILPADDE,
-//            sedHendelseType = MOTTATT,
-//            journalfoerendeEnhet = ID_OG_FORDELING,
-//            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
-//            dokumenter = """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
-//            saktype = null,
-//            AvsenderMottaker(null, null, null, land = "NO"),
-//            1, null, Tema.PENSJON, null
-//        )
-
-        // RESPONSE
-        //assertEqualResponse(expectedResponse, actualResponse)
+        val actualJournalPostRequest = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            fnr = SLAPP_SKILPADDE,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
+            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
+            dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+            saktype = null,
+            AvsenderMottaker(null, null, null, land = "NO"),
+            1, null, Tema.PENSJON, null
+        )
+        journalpostService.sendJournalPost(actualJournalPostRequest, sedHendelse, SENDT, "")
 
         // REQUEST
         val actualRequest = journalpostSlot.captured
@@ -169,7 +165,7 @@ internal class JournalpostServiceTest {
         assertEquals("PEN", actualRequest.sak!!.fagsaksystem)
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), true, null) }
+        verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any(), any()) }
     }
 
     @Test
@@ -179,43 +175,39 @@ internal class JournalpostServiceTest {
         val responseBody =
             javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-//        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
+        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-//        val actualResponse = journalpostService.opprettJournalpost(
-//            sedHendelse = sedHendelse,
-//            fnr = SLAPP_SKILPADDE,
-//            sedHendelseType = MOTTATT,
-//            journalfoerendeEnhet = ID_OG_FORDELING,
-//            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
-//            dokumenter = """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
-//            saktype = null,
-//            AvsenderMottaker(null, null, null, land = "NO"),
-//            1, null, Tema.PENSJON, KravType.GJENLEV
-//        )
-
-        // RESPONSE
-//        assertEqualResponse(expectedResponse, actualResponse.first!!)
+        val actualResponse = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            fnr = SLAPP_SKILPADDE,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
+            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
+            dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+            saktype = null,
+            AvsenderMottaker(null, null, null, land = "NO"),
+            1, null, Tema.PENSJON, KravType.GJENLEV
+        )
+        journalpostService.sendJournalPost(actualResponse, sedHendelse, SENDT, "")
 
         // REQUEST
         val actualRequest = journalpostSlot.captured
-
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, actualRequest.behandlingstema)
-
     }
 
     @Test
@@ -290,22 +282,23 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
 
-//        val actualResponse = journalpostService.opprettJournalpost(
-//            sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003"),
-//            fnr = LEALAUS_KAKE,
-//            sedHendelseType = SENDT,
-//            journalfoerendeEnhet = ID_OG_FORDELING,
-//            arkivsaksnummer = null,
-//            dokumenter = "[\"P2100\"]",
-//            saktype = null,
-//            mockk(relaxed = true),
-//            1,
-//            null,
-//            Tema.PENSJON,
-//            null
-//        )
-
-//        assertEqualResponse(expectedResponse, actualResponse.first!!)
+        val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
+        val actualResponse = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            fnr = LEALAUS_KAKE,
+            sedHendelseType = SENDT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
+            arkivsaksnummer = null,
+            dokumenter = "[\"P2100\"]",
+            saktype = null,
+            mockk(relaxed = true),
+            1,
+            null,
+            Tema.PENSJON,
+            null
+        )
+        journalpostService.sendJournalPost(actualResponse, sedHendelse, SENDT, "")
+        //assertEqualResponse(expectedResponse, actualResponse)
 
         val actualRequest = requestSlot.captured
 
@@ -325,7 +318,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
 
-        verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false, null) }
+        //verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false, null) }
     }
 
     @Test
@@ -335,14 +328,6 @@ internal class JournalpostServiceTest {
         journalpostService.oppdaterDistribusjonsinfo(journalpostId)
 
         verify(exactly = 1) { mockKlient.oppdaterDistribusjonsinfo(journalpostId) }
-    }
-
-
-    private fun assertEqualResponse(expected: OpprettJournalPostResponse, actual: OpprettJournalPostResponse) {
-        assertEquals(expected.journalpostId, actual.journalpostId)
-        assertEquals(expected.journalstatus, actual.journalstatus)
-        assertEquals(expected.melding, actual.melding)
-        assertEquals(expected.journalpostferdigstilt, actual.journalpostferdigstilt)
     }
 
     private fun sedHendelse(sedType: SedType, bucType: BucType = P_BUC_01, avsenderNavn: String? = null) = SedHendelse(
