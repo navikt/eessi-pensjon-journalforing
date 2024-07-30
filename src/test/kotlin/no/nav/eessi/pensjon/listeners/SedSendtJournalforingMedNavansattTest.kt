@@ -45,7 +45,6 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -53,7 +52,6 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 
-@Disabled("Rettes etter journalføring er verifisert uten jp ved manglende bruker")
 internal class SedSendtJournalforingMedNavansattTest {
 
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
@@ -76,7 +74,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
-    private val journalforingutenbruker = mockk<VurderBrukerInfo>()
+    private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
     private val journalforingService =
         JournalforingService(
@@ -85,7 +83,7 @@ internal class SedSendtJournalforingMedNavansattTest {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
             oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
-            journalforingutenbruker
+            vurderBrukerInfo
         )
 
     private val sedListener = SedSendtListener(
@@ -102,6 +100,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
+        justRun { vurderBrukerInfo.journalpostMedBruker(any(), any(), any(), any(), any()) }
         //justRun { journalforingutenbruker.harJournalpostBruker(any(), any(), any(), any()) }
     }
 
