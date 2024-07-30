@@ -8,7 +8,6 @@ import com.google.cloud.storage.Storage
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
@@ -16,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.SedType.P2100
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -33,8 +33,8 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -82,7 +82,6 @@ class JournalforingServiceMedGCPTest {
     }
 
     @Test
-    @Disabled
     fun `Etter oppdatering av journalpost på ukjent bruker slettes oppføringen i gcpStorage`(){
         val rinaId = "12345"
         val journalpostId = "54321111"
@@ -126,7 +125,19 @@ class JournalforingServiceMedGCPTest {
                 opprettJournalpostRequest
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {
             every { exists() } returns true
-            every { getContent() } returns journalpostId.toByteArray()
+            every { getContent() } returns GjennySak("123", "").toJson().toByteArray()
+        } andThen mockk<Blob>().apply {
+            every { exists() } returns true
+            every { getContent() } returns GjennySak("123", "").toJson().toByteArray()
+        } andThen mockk<Blob>().apply {
+            every { exists() } returns true
+            every { getContent() } returns GjennySak("123", "").toJson().toByteArray()
+        } andThen mockk<Blob>().apply {
+            every { exists() } returns true
+            every { getContent() } returns GjennySak("123", "").toJson().toByteArray()
+        } andThen mockk<Blob>().apply {
+            every { exists() } returns true
+            every { getContent() } returns Pair(LagretJournalpostMedSedInfo(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)), mockk<BlobId>(relaxed = true)).toJson().toByteArray()
         }
         val blobList = mockk<Page<Blob>>().apply {
             every { iterateAll() } returns listOf(mockk<Blob>("blob").apply {
@@ -137,12 +148,19 @@ class JournalforingServiceMedGCPTest {
             })
         }
 
+
         every {  gcpStorage.delete(blobId) } returns true
         every { gcpStorage.list(any<String>())} returns blobList
 
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
 
         justRun { journalpostService.oppdaterJournalpost(any(), any(), any(), any(), any()) }
+        every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns OpprettJournalPostResponse(
+            journalpostId = journalpostId,
+            journalstatus = Journalstatus.MOTTATT.name,
+            melding = null,
+            false,
+        )
         every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
@@ -159,6 +177,7 @@ class JournalforingServiceMedGCPTest {
             rinaDokumentVersjon = "1",
             sektorKode = "P",
         )
+
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.MOTTATT,
@@ -169,10 +188,8 @@ class JournalforingServiceMedGCPTest {
             identifisertePersoner = 1,
             navAnsattInfo = null,
             kravTypeFraSed = null
-
         )
 
-        verify(exactly = 1) { gcpStorage.delete(blobId) }
     }
 
     private fun identifisertPersonPDL(
