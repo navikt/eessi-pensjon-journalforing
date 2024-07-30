@@ -281,7 +281,7 @@ class JournalforingService(
         }
     }
 
-    fun lagJournalpostOgOppgave(journalpostRequest: LagretJournalpostMedSedInfo, saksbehandlerIdent: String?, blobId: BlobId){
+    fun lagJournalpostOgOppgave(journalpostRequest: LagretJournalpostMedSedInfo, saksbehandlerIdent: String? = null, blobId: BlobId){
         val response = journalpostService.sendJournalPost(journalpostRequest, "eessipensjon")
 
         logger.info("""Lagret JP hentet fra GCP: 
