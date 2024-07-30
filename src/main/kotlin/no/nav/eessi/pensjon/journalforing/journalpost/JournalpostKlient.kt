@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing.journalpost
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.eessi.pensjon.journalforing.JournalpostModel
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
@@ -11,7 +10,10 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
@@ -118,41 +120,6 @@ class JournalpostKlient(
             }
         }
     }
-
-//    fun ferdigstillJournalpost(journalpostId: String, journalfoerendeEnhet: String): JournalpostModel.FerdigJournalpost {
-//        val path = "/journalpost/$journalpostId/ferdigstill"
-//        ferdigstillJournal.measure {
-//            try {
-//                logger.info("Forsøker å ferdigstille journalpost: $journalpostId")
-//                val headers = HttpHeaders().apply {
-//                    contentType = MediaType.APPLICATION_JSON
-//                }
-//
-//                val requestBody = """{ "journalfoerendeEnhet": "$journalfoerendeEnhet" } """.trimIndent()
-//
-//                val response = journalpostOidcRestTemplate.exchange(
-//                    path,
-//                    HttpMethod.PATCH,
-//                    HttpEntity(requestBody, headers),
-//                    String::class.java
-//                )
-//                if (response.statusCode == HttpStatus.OK) {
-//                    return@measure JournalpostModel.Ferdigstilt("Journalpost: $journalpostId er ferdigstilt")
-//                } else {
-//                    return@measure JournalpostModel.IngenFerdigstilling("""
-//                        Journalpost: $journalpostId er ikke ferdigstilt
-//                        Feilmelding: ${response.body}""".trimIndent()
-//                    )
-//                }
-//            } catch (ex: Exception) {
-//                val errorMessage = "ferdigstilling av journalpost: $journalpostId"
-//                handleException(errorMessage, ex).also {
-//                    return@measure JournalpostModel.IngenFerdigstilling(it)
-//                }
-//            }
-//        }
-//        return JournalpostModel.IngenFerdigstilling("Ingen gyldig verdi")
-//    }
 
     fun oppdaterJournalpostMedAvbrutt(journalpostId: String) {
 
