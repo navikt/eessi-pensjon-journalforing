@@ -30,12 +30,6 @@ spec:
   gcp:
     buckets:
       - name: eessi-pensjon-journal-uten-bruker
-        retentionPeriodDays: 30
-        lifecycleCondition:
-          age: 365
-          createdBefore: 2020-01-01
-          numNewerVersions: 2
-          withState: ANY
         uniformBucketLevelAccess: true
   kafka:
     pool: nav-prod
