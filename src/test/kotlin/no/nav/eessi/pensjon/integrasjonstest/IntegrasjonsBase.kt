@@ -3,9 +3,18 @@ package no.nav.eessi.pensjon.integrasjonstest
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
+import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -39,12 +48,14 @@ abstract class IntegrasjonsBase {
 
     @Autowired
     lateinit var mottattListener: SedMottattListener
-
     @Autowired
     lateinit var sendtListener: SedSendtListener
-
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
+    @Autowired
+    lateinit var vurderBrukerInfo: VurderBrukerInfo
+    @Autowired
+    lateinit var journalforingService: JournalforingService
 
     lateinit var mottattContainer: KafkaMessageListenerContainer<String, String>
     lateinit var oppgaveContainer: KafkaMessageListenerContainer<String, String>
@@ -163,9 +174,27 @@ abstract class IntegrasjonsBase {
 
 
     fun meldingForMottattListener(messagePath: String) {
-        sedMottattTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
+        // del 1: opprettelse av journalpost og oppgave: lagre jp-request før vurdering
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
+        val hendelse = javaClass.getResource(messagePath)!!.readText()
+
+        sedMottattTemplate.sendDefault(hendelse).get(20L, TimeUnit.SECONDS)
         mottattListener.getLatch().await(50, TimeUnit.SECONDS)
         Thread.sleep(5000)
+
+        // del 2: sender manuel generering av JP og oppgave som batch / gcp storage ville gjort
+        if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    HendelseType.MOTTATT
+                ),
+                blobId = mockk()
+            )
+        }
     }
     fun meldingForSendtListener(messagePath: String) {
         sedSendttTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
