@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import com.google.cloud.storage.BlobId
 import io.mockk.*
-import io.mockk.impl.annotations.SpyK
 import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
@@ -241,17 +240,7 @@ internal open class JournalforingTestBase {
             assertEquals(hendelseType, mapJsonToAny<OppgaveMelding>(meldingSlot.captured).hendelseType)
         }
 
-        if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                "",
-                BlobId.of("", "")
-            )
-        }
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
 
         val request = journalpost.captured
 
@@ -273,6 +262,23 @@ internal open class JournalforingTestBase {
         }
 
         clearAllMocks()
+    }
+
+    protected fun createMockedJournalPostWithOppgave(
+        journalpostRequest: CapturingSlot<OpprettJournalpostRequest>,
+        hendelse: String,
+        hendelseType: HendelseType
+    ) {
+        if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                blobId = mockk()
+            )
+        }
     }
 
     /**
@@ -327,17 +333,7 @@ internal open class JournalforingTestBase {
         else
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-        if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                "",
-                BlobId.of("", "")
-            )
-        }
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
 
         assertBlock(journalpost.captured)
 

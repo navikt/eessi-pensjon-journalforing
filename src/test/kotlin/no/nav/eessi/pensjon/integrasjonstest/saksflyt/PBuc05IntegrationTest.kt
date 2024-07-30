@@ -679,15 +679,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    SENDT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, SENDT)
 
             val request = journalpost.captured
             assertEquals(PENSJON, request.tema)
@@ -819,15 +811,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    SENDT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, SENDT)
+
             val request = journalpost.captured
 
             assertEquals("UTGAAENDE", request.journalpostType.name)
@@ -868,15 +853,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    SENDT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, SENDT)
 
             val request = journalpost.captured
 
@@ -1144,17 +1121,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-        if(!journalpost.isCaptured) {
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    SENDT
-                ),
-                "",
-                BlobId.of("", "")
-            )
-        }
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, SENDT)
+
         val request = journalpost.captured
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
         return Pair(request, oppgaveMelding)
@@ -1208,15 +1176,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    MOTTATT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, MOTTATT)
 
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
@@ -1253,15 +1213,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    MOTTATT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, MOTTATT)
 
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
@@ -1375,15 +1327,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    MOTTATT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, MOTTATT)
 
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
@@ -1681,15 +1625,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    MOTTATT
-                ),
-                "",
-                BlobId.of("", "")
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, MOTTATT)
 
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 

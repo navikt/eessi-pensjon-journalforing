@@ -599,26 +599,14 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
-        var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it)
-        }
 
-        if (oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
-            println("""Opprettet manual journalføring: | ${journalpostRequest.captured.toJson()}""".trimMargin())
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                "",
-                BlobId.of("", "")
-            )
-        }
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
+
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)
         }
-        oppgaveMeldingList = meldingSlot.map {
+
+        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
             mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
@@ -698,27 +686,13 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             else -> fail()
         }
 
-        var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
-            mapJsonToAny(it)
-        }
-
-        if (oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                "",
-                BlobId.of("", "")
-            )
-        }
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)
         }
 
-        oppgaveMeldingList = meldingSlot.map {
+        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
             mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))
