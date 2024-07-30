@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
@@ -508,6 +507,7 @@ internal open class JournalforingTestBase {
 
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(request), any(), any()) }
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any(), any()) } returns journalpostResponse
