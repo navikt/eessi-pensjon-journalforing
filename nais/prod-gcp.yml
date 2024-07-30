@@ -37,8 +37,6 @@ spec:
           numNewerVersions: 2
           withState: ANY
         uniformBucketLevelAccess: true
-      - name: eessi-pensjon-journal-uten-bruker
-        uniformBucketLevelAccess: true
   kafka:
     pool: nav-prod
   env:
