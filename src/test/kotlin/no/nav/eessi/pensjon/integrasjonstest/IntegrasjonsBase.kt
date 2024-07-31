@@ -58,7 +58,6 @@ abstract class IntegrasjonsBase {
 
     lateinit var mottattContainer: KafkaMessageListenerContainer<String, String>
     lateinit var oppgaveContainer: KafkaMessageListenerContainer<String, String>
-    lateinit var oppdaterOppgaveContainer: KafkaMessageListenerContainer<String, String>
 
     private val deugLogger: Logger = LoggerFactory.getLogger("no.nav.eessi.pensjon") as Logger
     private val listAppender = ListAppender<ILoggingEvent>()
@@ -118,7 +117,6 @@ abstract class IntegrasjonsBase {
         listAppender.stop()
         mottattContainer.stop()
         oppgaveContainer.stop()
-        oppdaterOppgaveContainer.stop()
         MockServerClient("localhost", System.getProperty("mockServerport").toInt()).reset()
     }
 
