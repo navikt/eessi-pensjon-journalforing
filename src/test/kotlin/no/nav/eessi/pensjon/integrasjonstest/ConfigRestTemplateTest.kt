@@ -53,7 +53,7 @@ import org.springframework.web.client.RestTemplate
 @ActiveProfiles("test")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC, OPPDATER_OPPGAVE_TOPIC]
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
 )
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),

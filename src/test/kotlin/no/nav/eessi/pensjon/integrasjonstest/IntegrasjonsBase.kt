@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit
 const val SED_MOTTATT_TOPIC = "eessi-basis-sedMottatt-v1"
 const val SED_SENDT_TOPIC = "eessi-basis-sedSendt-v1"
 const val OPPGAVE_TOPIC = "eessi-pensjon-oppgave-v1"
-const val OPPDATER_OPPGAVE_TOPIC = "eessi-pensjonoppdater-oppgave-v1"
 
 abstract class IntegrasjonsBase {
 
@@ -67,7 +66,6 @@ abstract class IntegrasjonsBase {
     lateinit var mockServer: ClientAndServer
 
     lateinit var oppgaveTemplate: KafkaTemplate<String, String>
-    lateinit var oppdaterOppgaveTemplate: KafkaTemplate<String, String>
     lateinit var sedMottattTemplate: KafkaTemplate<String, String>
     lateinit var sedSendttTemplate: KafkaTemplate<String, String>
 
@@ -106,15 +104,11 @@ abstract class IntegrasjonsBase {
         oppgaveContainer.start()
         ContainerTestUtils.waitForAssignment(oppgaveContainer, 2)
 
-        oppdaterOppgaveContainer = settOppUtitlityConsumer(OPPDATER_OPPGAVE_TOPIC)
-        oppdaterOppgaveContainer.start()
-
         println("*************************  BeforeEach DONE *****************************")
 
         sedMottattTemplate = settOppProducerTemplate(SED_MOTTATT_TOPIC)
         sedSendttTemplate = settOppProducerTemplate(SED_SENDT_TOPIC)
         oppgaveTemplate = settOppProducerTemplate(OPPGAVE_TOPIC)
-        oppdaterOppgaveTemplate = settOppProducerTemplate(OPPDATER_OPPGAVE_TOPIC)
     }
 
     @AfterEach
