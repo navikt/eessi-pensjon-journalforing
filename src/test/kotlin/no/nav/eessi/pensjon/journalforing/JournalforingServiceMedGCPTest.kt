@@ -119,8 +119,6 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
         every { oppgaveroutingService.hentEnhet(any()) } returns PENSJON_UTLAND
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-        justRun { oppgaveHandler.oppdaterOppgaveMeldingPaaKafkaTopic((any())) }
-
         every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
                 opprettJournalpostRequest
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {

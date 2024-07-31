@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, String>,
-                     private val oppdaterOppgaveKafkaTemplate: KafkaTemplate<String, String>,
                      @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest() ) {
 
     private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
@@ -29,16 +28,6 @@ class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, Str
         publiserOppgavemelding.measure {
             logger.info("Opprette ${melding.oppgaveType}-oppgave melding på kafka: ${oppgaveKafkaTemplate.defaultTopic}  melding: $melding")
             oppgaveKafkaTemplate.sendDefault(key, payload).get()
-        }
-    }
-
-    fun oppdaterOppgaveMeldingPaaKafkaTopic(melding: OppdaterOppgaveMelding) {
-        val key = MDC.get(X_REQUEST_ID)
-        val payload = melding.toJson()
-
-        publiserOppgavemelding.measure {
-            logger.info("Oppdaterer ${melding.id}-oppgave melding på kafka: ${oppdaterOppgaveKafkaTemplate.defaultTopic}  melding: $melding")
-            oppdaterOppgaveKafkaTemplate.sendDefault(key, payload).get()
         }
     }
 }

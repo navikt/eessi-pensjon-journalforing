@@ -95,15 +95,12 @@ internal open class JournalforingTestBase {
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
-    protected val opprettOppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
-        every { sendDefault(any(), any()).get() } returns mockk()
-    }
 
     protected val kravInitHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveHandlerKafka, opprettOppgaveHandlerKafka)
+    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
