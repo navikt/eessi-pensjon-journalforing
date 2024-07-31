@@ -61,8 +61,7 @@ class VurderBrukerInfoTest {
         oppgaveHandler = spyk(
             OppgaveHandler(
                 mockk<KafkaTemplate<String, String>>(relaxed = true).apply {
-                    every { sendDefault(any(), any()).get() } returns mockk(relaxed = true) },
-                mockk(relaxed = true))
+                    every { sendDefault(any(), any()).get() } returns mockk(relaxed = true) })
         )
 
         sedMedBruker = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText())
