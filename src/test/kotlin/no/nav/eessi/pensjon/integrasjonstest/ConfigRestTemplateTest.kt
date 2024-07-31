@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
@@ -52,7 +53,7 @@ import org.springframework.web.client.RestTemplate
 @ActiveProfiles("test")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC, OPPDATER_OPPGAVE_TOPIC]
 )
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
@@ -63,6 +64,9 @@ internal class ConfigRestTemplateTest {
 
     @Autowired
     private lateinit var sedSendtListener: SedSendtListener
+
+    @MockkBean
+    private lateinit var journalforingutenbruker: VurderBrukerInfo
 
     @MockkBean
     private lateinit var personService: PersonService
@@ -85,6 +89,7 @@ internal class ConfigRestTemplateTest {
 
     @BeforeEach
     fun setup() {
+        justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(

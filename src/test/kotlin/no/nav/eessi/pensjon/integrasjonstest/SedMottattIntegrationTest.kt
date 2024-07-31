@@ -2,13 +2,22 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import io.mockk.every
 import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
@@ -25,7 +34,7 @@ import org.springframework.web.client.RestTemplate
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
+    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC, OPPDATER_OPPGAVE_TOPIC])
 internal class SedMottattIntegrationTest : IntegrasjonsBase(){
 
     init {
@@ -47,6 +56,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         justRun{ gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any())}
         justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
         justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
+        justRun { gcpStorageService.slettJournalpostDetaljer(any()) }
     }
 
     @TestConfiguration
@@ -57,6 +67,8 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
+        @Bean
+        fun vurderBrukerInfo(): VurderBrukerInfo = mockk(relaxed = true)
     }
 
     @Test

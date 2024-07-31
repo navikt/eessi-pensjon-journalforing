@@ -1,7 +1,9 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
@@ -11,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.KravType.*
+import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -38,6 +41,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_10 – IntegrationTest")
+//@Disabled("Rettes etter journalføring er verifisert uten jp ved manglende bruker")
 internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     /**
@@ -711,6 +715,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
             val request = journalpost.captured
+
+            createMockedJournalPostWithOppgave(journalpost, hendelse, MOTTATT)
+
             val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
 
             assertEquals(OppgaveType.JOURNALFORING, oppgaveMelding.oppgaveType)
@@ -919,10 +926,26 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
+        }
+
+        if (!meldingSlot.isCaptured && journalpostRequest.captured.bruker == null) {
+            println("""Opprettet manuell journalføring: | ${journalpostRequest.captured.toJson()}""".trimMargin())
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                "",
+                BlobId.of("", "")
+            )
         }
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)

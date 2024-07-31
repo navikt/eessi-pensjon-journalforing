@@ -9,9 +9,14 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.journalforing.saf.SafDokument
+import no.nav.eessi.pensjon.journalforing.saf.SafSak
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
 import java.time.LocalDateTime
@@ -43,6 +48,12 @@ data class OpprettJournalpostRequest(
         return mapAnyToJson(this)
     }
 }
+
+data class LagretJournalpostMedSedInfo(
+    val journalpostRequest: OpprettJournalpostRequest,
+    val sedHendelse: SedHendelse,
+    val sedHendelseType: HendelseType
+)
 
 enum class JournalpostType: Code {
     UTGAAENDE {
@@ -99,7 +110,9 @@ private class JsonAsStringDeserializer : JsonDeserializer<String>() {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class JournalpostResponse(
     val journalpostId: String?,
+    val eksternReferanseId: String?,
     val tema: Tema?,
+    val dokumenter: List<SafDokument?>,
     val journalstatus: Journalstatus?,
     val journalpostferdigstilt: Boolean?,
     val avsenderMottaker: AvsenderMottaker?,
@@ -107,6 +120,7 @@ data class JournalpostResponse(
     val journalforendeEnhet: String?,
     val temanavn: String?,
     val bruker: Bruker?,
+    val sak: SafSak?,
     val datoOpprettet: LocalDateTime? = null
 )
 

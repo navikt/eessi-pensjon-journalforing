@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +29,7 @@ import org.springframework.web.client.RestTemplate
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC, OPPDATER_OPPGAVE_TOPIC]
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
@@ -53,7 +54,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-
     }
 
     @TestConfiguration
@@ -69,10 +69,14 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
+
+        @Bean
+        fun journalforingUtenBruker(): VurderBrukerInfo = VurderBrukerInfo(gcpStorageService(), mockk(), mockk())
+        //TODO: Ingen kobling mellomg journalføringservice og denne.. gå gjennom de andre mock -beans også
     }
 
     @Test
-    fun `Når en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
+    fun `Gitt en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
 
         //setup server
         CustomMockServer()

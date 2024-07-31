@@ -1,10 +1,9 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import com.google.cloud.storage.BlobId
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
@@ -18,14 +17,17 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus.SENT
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING_UT
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
@@ -318,7 +320,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
         }
 
-        val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
+        val (journalpost, journalpostResponse) = initJournalPostRequestSlot(forsokFerdigStilt)
 
         val hendelse = createHendelseJson(P2200, P_BUC_03)
 
@@ -328,17 +330,33 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         val kravmeldingSlot = mutableListOf<String>()
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             else -> fail()
         }
+        var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+            mapJsonToAny(it)
+        }
 
+        if (!journalpostResponse.journalpostferdigstilt && oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                "",
+                BlobId.of("", "")
+            )
+        }
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)
         }
-        val oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
+        oppgaveMeldingList = meldingSlot.map {
             mapJsonToAny(it)
         }
         block(TestResult(journalpost.captured, oppgaveMeldingList, kravMeldingList))

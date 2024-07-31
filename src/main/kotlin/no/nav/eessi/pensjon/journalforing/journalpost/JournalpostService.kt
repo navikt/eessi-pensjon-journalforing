@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.journalforing.*
+import no.nav.eessi.pensjon.journalforing.Bruker
+import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
@@ -36,20 +38,20 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun opprettJournalpost(
         sedHendelse: SedHendelse,
-        fnr: Fodselsnummer?,
+        fnr: Fodselsnummer? = null,
         sedHendelseType: HendelseType,
         journalfoerendeEnhet: Enhet,
-        arkivsaksnummer: Sak?,
+        arkivsaksnummer: Sak? = null,
         dokumenter: String,
-        saktype: SakType?,
+        saktype: SakType? = null,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
         kravType: KravType? = null
-    ): Pair<OpprettJournalPostResponse?, OpprettJournalpostRequest> {
-
-        val request = OpprettJournalpostRequest(
+    ): OpprettJournalpostRequest {
+        logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
+        return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),
             bruker = fnr?.let { Bruker(id = it.value) },
@@ -61,10 +63,42 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             dokumenter = dokumenter,
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
         )
+    }
 
-        val forsokFerdigstill: Boolean = kanSakFerdigstilles(request, sedHendelse.bucType!!, sedHendelseType)
+    fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
+                        sedHendelse: SedHendelse,
+                        hendelseType: HendelseType,
+                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+        val forsokFerdigstill: Boolean = kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+        return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
+    }
 
-        return Pair(journalpostKlient.opprettJournalpost(request, forsokFerdigstill, saksbehandlerInfo?.first), request)
+    fun sendJournalPost(journalpostRequest: LagretJournalpostMedSedInfo,
+                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+        return sendJournalPost(journalpostRequest.journalpostRequest, journalpostRequest.sedHendelse, journalpostRequest.sedHendelseType, saksbehandlerIdent)
+    }
+
+    /** Oppdatere journalpost med kall til dokarkiv:
+     *  https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
+     */
+    fun oppdaterJournalpost(
+        journalpostResponse: JournalpostResponse,
+        kjentBruker: Bruker,
+        tema: Tema,
+        enhet: Enhet,
+        behandlingsTema: Behandlingstema
+    ) {
+        journalpostKlient.oppdaterJournalpostMedBruker(
+            OppdaterJournalpost(
+                journalpostId = journalpostResponse.journalpostId!!,
+                dokumenter = journalpostResponse.dokumenter,
+                sak = journalpostResponse.sak,
+                bruker = kjentBruker,
+                tema = tema,
+                enhet = enhet,
+                behandlingsTema = behandlingsTema
+            )
+        ).also { logger.debug("Oppdatert journalpostId: ${journalpostResponse.journalpostId}") }
     }
 
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {
@@ -111,7 +145,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param sedHendelse: sed fra eux
      *  @param journalPostResponse: response fra joark
      */
-    fun settStatusAvbrutt(
+    fun skalStatusSettesTilAvbrutt(
         fnrForRelasjon: Fodselsnummer?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
@@ -131,10 +165,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
-
-        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
         return true
     }
+
+    fun settJournalpostTilAvbrutt(journalpostId: String) = journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId)
 
     fun bestemBehandlingsTema(
         bucType: BucType,

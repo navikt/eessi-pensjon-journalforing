@@ -4,7 +4,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,11 +34,15 @@ class JournalpostKlient(
     private lateinit var opprettjournalpost: MetricsHelper.Metric
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
     private lateinit var avbruttStatusInfo: MetricsHelper.Metric
+    private lateinit var ferdigstillJournal: MetricsHelper.Metric
+
 
     init {
         avbruttStatusInfo = metricsHelper.init("avbruttStatusInfo")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
+        ferdigstillJournal = metricsHelper.init("ferdigstillJournal")
+
     }
 
     /**
@@ -51,9 +57,8 @@ class JournalpostKlient(
      */
     fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
-        if (forsokFerdigstill == true) {
-            logger.info("Forsøker å ferdigstille journalpost")
-        }
+
+        logger.info("Forsøker å ferdigstille journalpost: $forsokFerdigstill")
 
         return opprettjournalpost.measure {
             return@measure try {
@@ -110,18 +115,13 @@ class JournalpostKlient(
                         HttpEntity(OppdaterDistribusjonsinfoRequest().toString(), headers),
                         String::class.java)
 
-            } catch (ex: HttpStatusCodeException) {
-                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
-                throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
-                throw RuntimeException("En feil oppstod under oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ${ex.message}")
+                handleException("oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
             }
         }
     }
 
     fun oppdaterJournalpostMedAvbrutt(journalpostId: String) {
-        val path = "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt"
 
         return avbruttStatusInfo.measure {
             try {
@@ -130,18 +130,72 @@ class JournalpostKlient(
                 headers.contentType = MediaType.APPLICATION_JSON
 
                 journalpostOidcRestTemplate.exchange(
-                    path,
+                    "/journalpost/$journalpostId/feilregistrer/settStatusAvbryt",
                     HttpMethod.PATCH,
-                    HttpEntity("",headers),
-                    String::class.java)
+                    HttpEntity("", headers),
+                    String::class.java
+                )
 
-            } catch (ex: HttpStatusCodeException) {
-                logger.error("En HttpStatusCodeException oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
-                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message} body: ${ex.responseBodyAsString}")
             } catch (ex: Exception) {
-                logger.error("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex)
-                throw RuntimeException("En feil oppstod ved forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ${ex.message}")
+                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
+                    throw RuntimeException(it)
+                }
             }
+        }
+    }
+
+    fun oppdaterJournalpostfeilregistrerSakstilknytning(journalpostId: String) {
+
+        return avbruttStatusInfo.measure {
+            try {
+                logger.info("Setter status avbryt for journalpost: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    "/journalpost/$journalpostId/feilregistrer/feilregistrerSakstilknytning",
+                    HttpMethod.PATCH,
+                    HttpEntity("", headers),
+                    String::class.java
+                )
+
+            } catch (ex: Exception) {
+                handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
+                    throw RuntimeException(it)
+                }
+            }
+        }
+    }
+
+    fun oppdaterJournalpostMedBruker(oppdaterbarJournalpost: OppdaterJournalpost) {
+        val path = "/journalpost/${oppdaterbarJournalpost.journalpostId}"
+
+        try {
+            logger.info("Oppdaterer journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId}")
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+
+            journalpostOidcRestTemplate.exchange(
+                path,
+                HttpMethod.PUT,
+                HttpEntity(oppdaterbarJournalpost.toJson(), headers),
+                String::class.java).also {
+                    logger.info("JournalpostId ${oppdaterbarJournalpost.journalpostId} har blitt oppdatert med kjent bruker" )
+                }
+
+        } catch (ex: Exception) {
+            handleException("oppdatering journalpost med journalpostId: ${oppdaterbarJournalpost.journalpostId} ex: ", ex).also {
+                throw RuntimeException(it)
+            }
+        }
+    }
+    private fun handleException(context: String, ex: Exception) : String {
+        return if (ex is HttpStatusCodeException) {
+            "Feil under $context: ${ex.message}, body: ${ex.responseBodyAsString}"
+        } else {
+            "Feil under $context: ${ex.message}"
+        }.also {
+            logger.error(it, ex)
         }
     }
 }

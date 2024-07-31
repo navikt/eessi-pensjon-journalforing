@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
@@ -13,11 +14,9 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.JournalpostType
-import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -72,7 +71,10 @@ internal open class JournalforingTestBase {
         const val AKTOER_ID = "0123456789000"
         const val AKTOER_ID_2 = "0009876543210"
     }
-
+    protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
+        justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
+        justRun { journalPostUtenBruker(any(), any(), any()) }
+    }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
@@ -85,7 +87,7 @@ internal open class JournalforingTestBase {
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
-    private val journalpostService = JournalpostService(journalpostKlient)
+    val journalpostService = spyk(JournalpostService(journalpostKlient))
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     private val pdfService: PDFService = PDFService(euxService)
@@ -93,12 +95,15 @@ internal open class JournalforingTestBase {
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
+    protected val opprettOppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
+        every { sendDefault(any(), any()).get() } returns mockk()
+    }
 
     protected val kravInitHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
     }
 
-    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveKafkaTemplate = oppgaveHandlerKafka)
+    private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveHandlerKafka, opprettOppgaveHandlerKafka)
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
@@ -108,7 +113,7 @@ internal open class JournalforingTestBase {
 
     protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
 
-    private val journalforingService: JournalforingService = JournalforingService(
+    val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
         pdfService = pdfService,
@@ -116,7 +121,7 @@ internal open class JournalforingTestBase {
         kravInitialiseringsService = kravService,
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        mockk()
+        vurderBrukerInfo = vurderBrukerInfo
     )
 
     protected val personService: PersonService = mockk(relaxed = true)
@@ -223,6 +228,9 @@ internal open class JournalforingTestBase {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else {
@@ -230,6 +238,8 @@ internal open class JournalforingTestBase {
             // forvent tema == PEN og enhet 2103
             assertEquals(hendelseType, mapJsonToAny<OppgaveMelding>(meldingSlot.captured).hendelseType)
         }
+
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
 
         val request = journalpost.captured
 
@@ -251,6 +261,23 @@ internal open class JournalforingTestBase {
         }
 
         clearAllMocks()
+    }
+
+    protected fun createMockedJournalPostWithOppgave(
+        journalpostRequest: CapturingSlot<OpprettJournalpostRequest>,
+        hendelse: String,
+        hendelseType: HendelseType
+    ) {
+        if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
+            journalforingService.lagJournalpostOgOppgave(
+                LagretJournalpostMedSedInfo(
+                    journalpostRequest = journalpostRequest.captured,
+                    mapJsonToAny<SedHendelse>(hendelse),
+                    hendelseType
+                ),
+                blobId = mockk()
+            )
+        }
     }
 
     /**
@@ -297,10 +324,15 @@ internal open class JournalforingTestBase {
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         else
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
 
         assertBlock(journalpost.captured)
 
@@ -475,6 +507,7 @@ internal open class JournalforingTestBase {
 
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
+        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(request), any(), any()) }
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any(), any()) } returns journalpostResponse
