@@ -178,16 +178,6 @@ class JournalforingService(
                     kravType = kravTypeFraSed
                 )
 
-//                val journalPostResponse = journalPostResponseOgRequest.first
-//                val journalpostRequest = journalPostResponseOgRequest.second
-
-                // Dette er en ny feature som ser om vi mangler bruker, eller om det er tidligere sed/journalposter på samme buc som har manglet
-//                journalforingMedBruker.harJournalpostBruker(
-//                    journalPostResponse,
-//                    journalpostRequest,
-//                    sedHendelse,
-//                    identifisertPerson)
-
                 if(journalpostRequest.bruker == null){
                     vurderBrukerInfo.journalPostUtenBruker(
                         journalpostRequest,
