@@ -143,7 +143,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED",
-              "tema" : "PEN"
+              "tema" : "UFO"
             }
         """.trimIndent(), capturedMelding.captured.toJson())
     }
