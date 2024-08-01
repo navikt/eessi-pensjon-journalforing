@@ -122,6 +122,16 @@ class JournalforingService(
                     kravTypeFraSed
                 )
 
+                val tema = hentTema(
+                    sedHendelse,
+                    identifisertPerson?.personRelasjon?.fnr,
+                    identifisertePersoner,
+                    kravTypeFraSed,
+                    saksInfoSamlet
+                ).also {
+                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
+                }
+
                 // Henter dokumenter
                 val (documents, _) = sedHendelse.run {
                     sedType?.let {
@@ -133,7 +143,8 @@ class JournalforingService(
                                         tildeltJoarkEnhet,
                                         aktoerId,
                                         sedHendelse,
-                                        usupporterteFilnavn(documentsAndAttachments.second)
+                                        usupporterteFilnavn(documentsAndAttachments.second),
+                                        tema
                                     )
                                 }
                             }
@@ -141,15 +152,6 @@ class JournalforingService(
                 }
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
-                val tema = hentTema(
-                    sedHendelse,
-                    identifisertPerson?.personRelasjon?.fnr,
-                    identifisertePersoner,
-                    kravTypeFraSed,
-                    saksInfoSamlet
-                ).also {
-                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
-                }
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
 
@@ -240,7 +242,8 @@ class JournalforingService(
                             journalPostResponse.journalpostId,
                             tildeltJoarkEnhet,
                             aktoerId,
-                            sedHendelse
+                            sedHendelse,
+                            tema = tema
                         )
                         kravInitialiseringsService.initKrav(
                             sedHendelse,
@@ -571,7 +574,8 @@ class JournalforingService(
         oppgaveEnhet: Enhet,
         aktoerId: String? = null,
         sedHendelseModel: SedHendelse,
-        uSupporterteVedlegg: String? = null
+        uSupporterteVedlegg: String? = null,
+        tema: Tema
     ) {
         if (sedHendelseModel.avsenderLand != "NO") {
             val oppgave = OppgaveMelding(
@@ -583,6 +587,7 @@ class JournalforingService(
                 MOTTATT,
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED,
+                tema
             )
             oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")
