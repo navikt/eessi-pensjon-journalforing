@@ -114,9 +114,8 @@ class VurderBrukerInfo (
     }
 
     private fun deleteJournalpostDetails(blobId: BlobId) {
-        gcpStorageService.slettJournalpostDetaljer(blobId).also {
-            countForOppdatering("Sletter fra journalpostid etter oppdatering av oppgave og journalpost")
-        }
+        gcpStorageService.slettJournalpostDetaljer(blobId)
+        countForOppdatering("Sletter fra journalpostid etter oppdatering av oppgave og journalpost")
     }
 
     private fun countForOppdatering(melding: String) {
