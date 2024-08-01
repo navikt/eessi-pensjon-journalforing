@@ -5,6 +5,7 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -123,7 +124,7 @@ class GcpStorageService(
                 BlobInfo.newBuilder(journalBucket, path).setContentType("application/json").build(),
                 lagretJournalPost.toByteArray()
             )
-            logger.debug(
+            secureLog.info(
                 """Journalpostdetaljer lagret i bucket: 
                 | $journalBucket, med key: ${blob.name}
                 | innhold: ${lagretJournalPost}""".trimMargin()
