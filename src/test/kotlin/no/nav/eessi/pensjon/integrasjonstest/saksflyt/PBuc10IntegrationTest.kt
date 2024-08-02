@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_10 – IntegrationTest")
-//@Disabled("Rettes etter journalføring er verifisert uten jp ved manglende bruker")
 internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
     /**
