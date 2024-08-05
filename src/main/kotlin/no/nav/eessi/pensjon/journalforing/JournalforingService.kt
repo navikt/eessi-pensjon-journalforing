@@ -185,7 +185,7 @@ class JournalforingService(
                         journalpostRequest,
                         sedHendelse,
                         hendelseType)
-                    logger.warn("Journalpost er satt på vent grunnet manglende bruker, ringnr: ${sedHendelse.rinaSakId}")
+                    logger.warn("Journalpost er satt på vent grunnet manglende bruker, rinanr: ${sedHendelse.rinaSakId}")
                     return@measure
                 }
                 else {
