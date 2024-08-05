@@ -118,7 +118,7 @@ class PersonidentifiseringService(
             }
 
             val person = personService.hentPerson(Ident.bestemIdent(valgtFnr)).also {pdlPerson ->
-                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: $pdlPerson")
+                secureLog.info("Hent fra PDL person med fnr $valgtFnr gir resultatet: ${pdlPerson?.toJson()}")
                 personRelasjon.sokKriterier?.let { sokKriteriePerson -> validerResultatPdlMotSokeKriterier(pdlPerson?.navn, sokKriteriePerson) }
             }
 
@@ -192,8 +192,8 @@ class PersonidentifiseringService(
         if (forsikretPerson != null)
             return forsikretPerson
 
-        secureLog.info("Identifiserte personer: $identifisertePersoner")
-        secureLog.info("Potensielle relasjoner: $potensielleSEDPersonRelasjoner")
+        secureLog.info("Identifiserte personer: ${identifisertePersoner.toJson()}")
+        secureLog.info("Potensielle relasjoner: ${potensielleSEDPersonRelasjoner.toJson()}")
 
         return when {
             identifisertePersoner.isEmpty() -> null
