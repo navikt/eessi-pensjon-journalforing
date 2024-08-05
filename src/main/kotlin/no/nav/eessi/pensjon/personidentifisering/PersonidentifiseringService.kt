@@ -167,6 +167,7 @@ class PersonidentifiseringService(
     fun hentIdentifisertePersoner(sedPersonRelasjoner: List<SEDPersonRelasjon>): List<IdentifisertPDLPerson> =
         sedPersonRelasjoner.distinctBy { relasjon -> relasjon.fnr }
             .mapNotNull { relasjon -> hentIdentifisertPersonFraPDL(relasjon) }
+            .distinctBy { it.aktoerId }
             .also { logger.info("liste over identifiserte personer etter filterering. Før:${sedPersonRelasjoner.size}, etter: ${it.size}") }
 
     fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
