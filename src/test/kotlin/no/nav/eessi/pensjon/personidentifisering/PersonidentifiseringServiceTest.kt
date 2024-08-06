@@ -42,6 +42,14 @@ class PersonidentifiseringServiceTest {
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
     @Test
+    fun `Dersom fornavn og  søkkriterie ikke stemmer overens med pdlperson sitt fornavn og eller etternavn saa returneres false`() {
+        val sokKriterier = SokKriterier("Johanna M", "Scherer", LocalDate.of(1960, 3, 11))
+        val navn = Navn(fornavn = "Johanna Maria", etternavn = "Scherer", metadata = metadata())
+
+        assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
+    }
+
+    @Test
     fun `Gitt en P_BUC_02 med gjenlevende og en P8000 med forsikret så skal gjenlevende i P2100 returneres`() {
         val rinaDocumentIdP8000 = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
         val fdatoGjenlev = LocalDate.of(2015, 1, 12)

@@ -41,8 +41,11 @@ class PersonSok(
     fun sokPersonEtterFnr(personRelasjoner: List<SEDPersonRelasjon>, rinaDocumentId: String, bucType: BucType, sedType: SedType?, hendelsesType: HendelseType): SEDPersonRelasjon? {
         logger.info("PersonUtvelger *** SøkPerson *** rinadokumentId: $rinaDocumentId sedType: $sedType bucType: $bucType personrelasjoner: ${personRelasjoner.map { it.relasjon }} hendelsesType")
 
-        val potensiellePersonRelasjoner = if (bucType == BucType.P_BUC_02 || sedType in listOf(H070, H120, H121)) personRelasjoner
-        else personRelasjoner.filter { relasjon -> relasjon.rinaDocumentId == rinaDocumentId }
+        /** Har prioritet på fnr i journalførende sed, men åpner også opp for å bruke fnr fra andre sed i buc */
+        val potensiellePersonRelasjoner = when {
+            bucType == BucType.P_BUC_02 || sedType in listOf(H070, H120, H121) -> personRelasjoner
+            else -> personRelasjoner.filter { it.rinaDocumentId == rinaDocumentId }.ifEmpty { personRelasjoner }
+        }
 
         if (potensiellePersonRelasjoner.isEmpty()) {
             logger.info("Ingen personrelasjoner funnet i sed (personSøk).")
