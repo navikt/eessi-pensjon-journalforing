@@ -127,7 +127,8 @@ class JournalforingService(
                     identifisertPerson?.personRelasjon?.fnr,
                     identifisertePersoner,
                     kravTypeFraSed,
-                    saksInfoSamlet
+                    saksInfoSamlet,
+                    sed
                 ).also {
                     logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
                 }
@@ -417,7 +418,7 @@ class JournalforingService(
         antallIdentifisertePersoner: Int,
         kravtypeFraSed: KravType?
     ): Enhet {
-        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo)
+        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo,)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
             sakinfo?.saktype,
@@ -450,7 +451,8 @@ class JournalforingService(
         fnr: Fodselsnummer?,
         identifisertePersoner: Int,
         kravtypeFraSed: KravType?,
-        saksInfo: SaksInfoSamlet?
+        saksInfo: SaksInfoSamlet?,
+        currentSed: SED?
     ): Tema {
         if(fnr == null) {
             // && saktype != UFOREP && sedhendelse?.bucType != P_BUC_03 && sedhendelse?.sedType != SedType.P2200 || kravtypeFraSed != KravType.UFOREP) return PENSJON
@@ -467,6 +469,7 @@ class JournalforingService(
 
             P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
+            P_BUC_08 -> if(currentSed.pensjon?.)
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
                 if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
             P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE|| erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
