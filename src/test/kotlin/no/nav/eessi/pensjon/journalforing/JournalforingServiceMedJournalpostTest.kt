@@ -50,7 +50,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
-            sed = SED(type = SedType.P6000),
+            currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             kravTypeFraSed = null,
@@ -85,10 +85,10 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            sed = SED(type = SedType.P6000),
+            currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -123,14 +123,14 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
-            mockk<P2000>().apply {
+            currentSed = mockk<P2000>().apply {
                 every { nav?.bruker?.person?.sivilstand } returns listOf(SivilstandItem("01-01-2023"))
                 every { nav?.krav } returns mapJsonToAny<Krav>("""{"type":"$kravtype"}""")
                 every { nav?.bruker?.person?.statsborgerskap } returns listOf(StatsborgerskapItem("NO"))
             },
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = KravType.ALDER
+            kravTypeFraSed = KravType.ALDER,
         )
         capturedMelding.captured
         Assertions.assertEquals("""

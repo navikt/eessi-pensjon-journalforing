@@ -182,10 +182,10 @@ class JournalforingServiceMedGCPTest {
             identifisertPersonPDL(AKTOERID, sedPersonRelasjon(Fodselsnummer.fra(SLAPP_SKILPADDE))),
             LocalDate.of(1952,3,9),
             SaksInfoSamlet(saktype = ALDER),
-            SED(type = P2000),
+            currentSed = SED(type = P2000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
 
     }

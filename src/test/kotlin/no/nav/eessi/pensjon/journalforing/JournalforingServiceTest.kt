@@ -66,10 +66,13 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = ALDER),
-            SED(type = SedType.R004),
+            false,
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(
+                type = SedType.R004,
+            )
         )
         assertEquals(OKONOMI_PENSJON, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -95,10 +98,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
             SaksInfoSamlet(saktype = ALDER),
-            sed,
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = sed
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -135,10 +138,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = GJENLEV),
-            sed = sed,
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = sed
         )
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
@@ -173,10 +176,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             LocalDate.of(1952, 3, 9),
             SaksInfoSamlet(saktype = ALDER, sakInformasjon = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
-            SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.R005)
         )
         assertEquals(PENSJON, opprettJournalpostRequestCapturingSlot.captured.tema)
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -200,10 +203,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             fdato,
             SaksInfoSamlet(saktype = ALDER, sakInformasjon = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
-            SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.R005)
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -234,10 +237,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             fdato,
             SaksInfoSamlet(saktype = ALDER),
-            SED(type = SedType.R005),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.R005)
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -258,10 +261,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            sed = SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2000)
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -281,10 +284,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedHendelse, SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            sed = SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2000)
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -306,10 +309,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            sed = SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200)
         )
         assertEquals(UFORE_UTLANDSTILSNITT, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -329,10 +332,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            sed = SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P15000)
         )
 
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -354,10 +357,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            sed = SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2000)
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -378,10 +381,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            sed = SED(type = SedType.P2000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2000)
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -404,9 +407,11 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = ALDER),
-            SED(type = SedType.P2100), identifisertePersoner = 1,
+            false,
+            identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            SED(type = SedType.P2100)
         )
         assertEquals(NFP_UTLAND_AALESUND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -427,10 +432,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            sed = SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200)
         )
         assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -452,10 +457,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            sed = SED(type = SedType.P15000),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P15000)
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.ALDERSPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -479,10 +484,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet( saktype = GJENLEV, sakInformasjon = sakInformasjon),
-            SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2100)
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -529,10 +534,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertGjenlevendePerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = GJENLEV, sakInformasjon = saksInfo),
-            SED(type = SedType.P2100),
+            currentSed = SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
         assertEquals(PENSJON_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -557,10 +562,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertPerson,
             fdato,
             SaksInfoSamlet(sakInformasjon = sakInformasjon),
-            SED(type = SedType.P2100),
+            currentSed = SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -585,10 +590,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             fdato,
-            sed = SED(type = SedType.P2100),
+            currentSed = SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
@@ -611,10 +616,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             fdato,
-            sed = SED(type = SedType.P2100),
+            currentSed = SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
 
         assertEquals(ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
@@ -659,10 +664,10 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             identifisertGjenlevendePerson,
             STERK_BUSK.getBirthDate(),
             SaksInfoSamlet(saktype = BARNEP, sakInformasjon = saksInfo),
-            SED(type = SedType.P2100),
+            currentSed = SED(type = SedType.P2100),
             identifisertePersoner = 2,
             navAnsattInfo = null,
-            kravTypeFraSed = null
+            kravTypeFraSed = null,
         )
 
         verify(atLeast = 1) {
@@ -677,12 +682,13 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         "P2200, P_BUC_03, UFORETRYGD"
     )
     fun `gitt at det er en sed av type P2000, P2100 eller P2200 saa skal Tema settes til UFORE ELLER PENSJON`(sedtype: String, buc: String, tema: String) {
+        val currentSed = SED(type = SedType.valueOf(sedtype))
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns BucType.valueOf(buc)
             every { sedType } returns SedType.valueOf(sedtype)
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null, currentSed)
         assertEquals(Tema.valueOf(tema), result)
     }
 
@@ -693,7 +699,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P4000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null)
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null, SED(type = SedType.P4000))
+
         assertEquals(Tema.valueOf(PENSJON.toString()), result)
     }
 
@@ -705,7 +712,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P8000
         }
 
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP))
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP), SED(type = SedType.P8000)
+        )
         assertEquals(PENSJON, result)
     }
 
@@ -718,7 +726,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse,  LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        val result = journalforingService.hentTema(mockedSedhendelse,  LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, result)
     }
 
@@ -729,7 +737,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GJENLEV))
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -740,8 +748,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse,  SLAPP_SKILPADDE, 2, null,saksInfoSamlet(ALDER))
-        val result2 = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        val result = journalforingService.hentTema(mockedSedhendelse,  SLAPP_SKILPADDE, 2, null,saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val result2 = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
         assertEquals(PENSJON, result2)
     }
@@ -753,7 +761,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -764,7 +772,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, result)
     }
 
@@ -775,7 +783,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, null, saksInfoSamlet(ALDER))
+        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -786,23 +794,23 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL))
+        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL), SED(type = SedType.P8000))
 
-        assertEquals(Tema.PENSJON, resultatGENRL)
+        assertEquals(PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(OMSORG))
-        assertEquals(Tema.PENSJON, resultatOMSORG)
+        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(OMSORG), SED(type = SedType.P8000))
+        assertEquals(PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER))
+        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null,saksInfoSamlet(GJENLEV))
-        assertEquals(Tema.PENSJON, resultatGJENLEV)
+        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null,saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
+        assertEquals(PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP))
-        assertEquals(Tema.PENSJON, resultatBARNEP)
+        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
+        assertEquals(PENSJON, resultatBARNEP)
 
-        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(Tema.UFORETRYGD, resultatUFORE)
     }
 
@@ -813,7 +821,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP))
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, result)
     }
 
