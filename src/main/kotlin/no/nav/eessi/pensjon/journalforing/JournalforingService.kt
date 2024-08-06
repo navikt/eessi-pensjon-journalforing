@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.P12000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
@@ -38,6 +39,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -91,11 +93,11 @@ class JournalforingService(
         identifisertPerson: IdentifisertPerson?,
         fdato: LocalDate?,
         saksInfoSamlet: SaksInfoSamlet? = null,
-        sed: SED? = null,
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        kravTypeFraSed: KravType?
+        kravTypeFraSed: KravType?,
+        currentSed: SED?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
@@ -119,7 +121,8 @@ class JournalforingService(
                     saksInfoSamlet,
                     harAdressebeskyttelse,
                     identifisertePersoner,
-                    kravTypeFraSed
+                    kravTypeFraSed,
+                    currentSed
                 )
 
                 val tema = hentTema(
@@ -128,7 +131,7 @@ class JournalforingService(
                     identifisertePersoner,
                     kravTypeFraSed,
                     saksInfoSamlet,
-                    sed
+                    currentSed
                 ).also {
                     logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
                 }
@@ -249,7 +252,7 @@ class JournalforingService(
                         kravInitialiseringsService.initKrav(
                             sedHendelse,
                             saksInfoSamlet?.sakInformasjon,
-                            sed
+                            currentSed
                         )
                     } else loggDersomIkkeBehSedOppgaveOpprettes(
                         sedHendelse.bucType,
@@ -337,7 +340,8 @@ class JournalforingService(
         sakInfo: SaksInfoSamlet?,
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int,
-        kravTypeFraSed: KravType?
+        kravTypeFraSed: KravType?,
+        currentSed: SED?
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon
@@ -366,7 +370,9 @@ class JournalforingService(
                 sakInfo,
                 identifisertPerson,
                 antallIdentifisertePersoner,
-                kravTypeFraSed
+                kravTypeFraSed,
+                currentSed
+
             )
                 .also {
                     logEnhet(enhetFraRouting, it)
@@ -416,9 +422,10 @@ class JournalforingService(
         sakinfo: SaksInfoSamlet?,
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int,
-        kravtypeFraSed: KravType?
+        kravtypeFraSed: KravType?,
+        currentSed: SED?
     ): Enhet {
-        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo,)
+        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo, currentSed)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
             sakinfo?.saktype,
@@ -469,8 +476,11 @@ class JournalforingService(
 
             P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
-            P_BUC_08 -> if(currentSed.pensjon?.)
-            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06, P_BUC_08 ->
+            P_BUC_08 -> {
+                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).p12000Pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }
+                if (currentSed is P12000 && pensjonsType == "02") UFORETRYGD else PENSJON
+            }
+            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06 ->
                 if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
             P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE|| erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
             else -> if (saksInfo?.saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON

@@ -117,10 +117,10 @@ class SedMottattListener(
             identifisertPerson,
             fdato,
             saksInfoSamlet,
-            currentSed,
             harAdressebeskyttelse,
             identifisertePersoner.count(),
             kravTypeFraSed = currentSed?.nav?.krav?.type,
+            currentSed = currentSed,
         )
     }
 }

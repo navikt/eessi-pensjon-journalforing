@@ -123,12 +123,12 @@ class SedSendtListener(
             identifisertPerson,
             fdato,
             saksInfoSamlet,
-            currentSed,
             harAdressebeskyttelse,
             identifisertePersoner.count()
                 .also { logger.info("Antall identifisertePersoner: $it") },
             navAnsattMedEnhet,
-            kravTypeISed
+            kravTypeISed,
+            currentSed
         )
     }
 }
