@@ -111,6 +111,8 @@ class JournalforingService(
                 **********""".trimIndent()
                 )
 
+                secureLog.info("""Sed som skal journalføres: \n${currentSed?.toJson()}""")
+
                 val aktoerId = identifisertPerson?.aktoerId
 
                 val tildeltJoarkEnhet = journalforingsEnhet(
