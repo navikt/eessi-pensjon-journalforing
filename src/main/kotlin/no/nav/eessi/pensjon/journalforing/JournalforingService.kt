@@ -477,7 +477,7 @@ class JournalforingService(
             P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
             P_BUC_08 -> {
-                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).p12000Pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }
+                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).p12000Pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }.also { logger.info("Pensjonstype: $it") }
                 if (currentSed is P12000 && pensjonsType == "02") UFORETRYGD else PENSJON
             }
             P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06 ->
