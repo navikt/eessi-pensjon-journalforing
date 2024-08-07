@@ -5,17 +5,14 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.P2100
-import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
@@ -705,6 +702,34 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `Gitt en P12000 i P_BUC_08 med tema ufoere så skal tema bli uforep`() {
+        val p12000 = P12000(type = SedType.P12000, p12000Pensjon = P12000Pensjon(pensjoninfo = listOf(Pensjoninfo(betalingsdetaljer = Betalingsdetaljer(pensjonstype = "02")))))
+        val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
+            every { rinaSakId } returns RINADOK_ID
+            every { bucType } returns P_BUC_08
+            every { sedType } returns SedType.P12000
+        }
+
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null, p12000)
+
+        assertEquals(Tema.valueOf(UFORETRYGD.toString()), result)
+    }
+
+    @Test
+    fun `Gitt en P12000 i P_BUC_08 med tema gjenlevende så skal tema bli PEN`() {
+        val p12000 = P12000(type = SedType.P12000, p12000Pensjon = P12000Pensjon(pensjoninfo = listOf(Pensjoninfo(betalingsdetaljer = Betalingsdetaljer(pensjonstype = "03")))))
+        val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
+            every { rinaSakId } returns RINADOK_ID
+            every { bucType } returns P_BUC_08
+            every { sedType } returns SedType.P12000
+        }
+
+        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, null, p12000)
+
+        assertEquals(Tema.valueOf(PENSJON.toString()), result)
+    }
+
+    @Test
     fun `gitt det er en P_BUC_02 med saktype BARNEP så skal det settes teama PENSJON`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
@@ -758,7 +783,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     fun `gitt det er en R_BUC_02 og sed er R004 og enhet er 4819 så skal det settes teama PEN`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns BucType.R_BUC_02
+            every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
@@ -769,7 +794,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     fun `gitt det er en R_BUC_02 ytelseype er UFOREP så skal det settes teama UFO`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns BucType.R_BUC_02
+            every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
@@ -780,7 +805,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     fun `gitt det er en R_BUC_02 ytelseype er ALDER så skal det settes teama PEN`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns BucType.R_BUC_02
+            every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, null, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
@@ -791,7 +816,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     fun `gitt det er en P_BUC_05 ytelseype IKKE er UFOREP så skal det settes tema PEN`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
             every { sedType } returns SedType.P8000
         }
         val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL), SED(type = SedType.P8000))
@@ -818,7 +843,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
-            every { bucType } returns BucType.P_BUC_05
+            every { bucType } returns P_BUC_05
             every { sedType } returns SedType.P8000
         }
         val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
