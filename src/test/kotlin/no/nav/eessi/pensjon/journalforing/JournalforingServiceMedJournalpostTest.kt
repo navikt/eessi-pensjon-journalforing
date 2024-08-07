@@ -123,7 +123,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
-            currentSed = mockk<P2000>().apply {
+            currentSed = mockk<P2000>(relaxed = true).apply {
                 every { nav?.bruker?.person?.sivilstand } returns listOf(SivilstandItem("01-01-2023"))
                 every { nav?.krav } returns mapJsonToAny<Krav>("""{"type":"$kravtype"}""")
                 every { nav?.bruker?.person?.statsborgerskap } returns listOf(StatsborgerskapItem("NO"))
