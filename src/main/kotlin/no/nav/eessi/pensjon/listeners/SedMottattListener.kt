@@ -110,7 +110,7 @@ class SedMottattListener(
             MOTTATT
         )
 
-        val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+        val currentSed = alleSedIBucList.firstOrNull()
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,
