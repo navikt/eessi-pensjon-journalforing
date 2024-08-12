@@ -102,9 +102,9 @@ class OpprettJournalpostUkjentBrukerTest {
         every { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) } returns listeOverJpDetaljer
         every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns opprettJPResponse
 
-        opprettJournalpostUkjentBruker.invoke()
+        opprettJournalpostUkjentBruker.dagligSjekkForLagredeJournalposter()
 
-        verify (exactly = 1) { opprettJournalpostUkjentBruker.invoke() }
+        verify (exactly = 1) { opprettJournalpostUkjentBruker.dagligSjekkForLagredeJournalposter() }
         verify (exactly = 1) { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) }
         verify (exactly = 1) { journalpostService.sendJournalPost(any(), any()) }
         verify (exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
