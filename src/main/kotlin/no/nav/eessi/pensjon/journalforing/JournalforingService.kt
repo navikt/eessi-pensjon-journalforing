@@ -6,6 +6,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
@@ -478,11 +479,13 @@ class JournalforingService(
 
             P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
-            P_BUC_08 -> {
-                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }.also { logger.info("Pensjonstype: $it") }
-                if (currentSed is P12000 && pensjonsType == "02") UFORETRYGD else PENSJON
-            }
-            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06 ->
+            P_BUC_07, P_BUC_08->
+                if (currentSed?.type == SedType.P12000 && (mapJsonToAny<P12000>(currentSed.toJson()).pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype == "02")) UFORETRYGD else PENSJON
+//            P_BUC_08 -> {
+//                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }.also { logger.info("Pensjonstype: $it") }
+//                if (currentSed is P12000 && pensjonsType == "02") UFORETRYGD else PENSJON
+//            }
+            P_BUC_04, P_BUC_05, P_BUC_09, P_BUC_06 ->
                 if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
             P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE|| erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
             else -> if (saksInfo?.saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
