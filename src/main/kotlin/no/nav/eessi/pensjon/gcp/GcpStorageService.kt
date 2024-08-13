@@ -197,15 +197,10 @@ class GcpStorageService(
             for (blob in blobs.iterateAll()) {
             val blobben = BlobId.of(journalBucket, blob.name)
                 if (blob.createTimeOffsetDateTime.isBefore(OffsetDateTime.now().minusDays(dager))) {
-                    logger.info(
-                        """fant følgende SED med rinaIder som er eldre enn $dager dager:
-                        | Eldre saker: ${blob.name}
-                    """.trimMargin()
-                    )
                     jpListe.add(Pair(blob.getContent().decodeToString(), blobben))
                 }
             }
-            return jpListe
+            return jpListe.also { logger.info("Det er ${jpListe.size} SED med rinaID eldre enn $dager dager") }
         } catch (ex: Exception) {
             logger.warn("En feil oppstod under henting av gamle rinasaker fra bucket", ex)
         }
