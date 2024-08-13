@@ -50,10 +50,18 @@ class OpprettJournalpostUkjentBruker(
                 bucTypeCounts[it] = bucTypeCounts[it]!! + 1
             }
         }
+
+        val filteredSedTypeCounts = sedTypeCounts.filter { it.value > 1 }
+        val filteredBucTypeCounts = bucTypeCounts.filter { it.value > 1 }
+
         val bucOgSedGCP = mapOf(
-            "sedTypeCounts" to sedTypeCounts,
-            "bucTypeCounts" to bucTypeCounts)
-        logger.info("""*************** LAGRET SED OG BUC PÅ GCP *****************
+            "sedTypeCounts" to filteredSedTypeCounts,
+            "bucTypeCounts" to filteredBucTypeCounts
+        )
+
+        if (bucOgSedGCP["sedTypeCounts"]!!.isNotEmpty() || bucOgSedGCP["bucTypeCounts"]!!.isNotEmpty()) {
+            logger.info("""*************** LAGRET SED OG BUC PÅ GCP *****************
             | ${bucOgSedGCP.toJson()} """)
+        }
     }
 }
