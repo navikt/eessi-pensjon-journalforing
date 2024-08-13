@@ -609,8 +609,11 @@ internal open class JournalforingTestBase {
         val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen, fdato = fdatoAnnenPerson))
 
         val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
+            if (sedType == SedType.P12000) {
+                P12000Pensjon(listOf(Pensjoninfo(Betalingsdetaljer(pensjonstype = "02"))), gjenlevende = annenPerson)
+            }
             Pensjon(gjenlevende = annenPerson)
-        }  else {
+        } else {
             null
         }
 
