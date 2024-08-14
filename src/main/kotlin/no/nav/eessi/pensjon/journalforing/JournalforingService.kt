@@ -6,6 +6,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
@@ -474,19 +475,21 @@ class JournalforingService(
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
+        val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(fnr)
         return when (sedhendelse?.bucType) {
 
-            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && saksInfo?.saktype == UFOREP || identifisertePersoner == 1 && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
-            P_BUC_08 -> {
-                val pensjonsType = currentSed?.let { mapJsonToAny<P12000>(it.toJson()).pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype }.also { logger.info("Pensjonstype: $it") }
-                if (currentSed is P12000 && pensjonsType == "02") UFORETRYGD else PENSJON
+            P_BUC_07, P_BUC_08 -> {
+                val p12000Ufore = currentSed?.type == SedType.P12000 && mapJsonToAny<P12000>(currentSed.toJson())
+                    .pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype == "02"
+                if (p12000Ufore || enPersonOgUforeAlderUnder62 || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
             }
-            P_BUC_04, P_BUC_05, P_BUC_07, P_BUC_09, P_BUC_06 ->
-                if (identifisertePersoner == 1 && erUforAlderUnder62(fnr) || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE|| erUforAlderUnder62(fnr) && identifisertePersoner == 1) UFORETRYGD else PENSJON
+            P_BUC_04, P_BUC_05, P_BUC_09, P_BUC_06 -> if (enPersonOgUforeAlderUnder62 || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
+            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE || enPersonOgUforeAlderUnder62) UFORETRYGD else PENSJON
             else -> if (saksInfo?.saktype == UFOREP && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
-        }
+
+        }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
     }
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
