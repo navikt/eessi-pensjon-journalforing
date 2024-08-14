@@ -22,6 +22,7 @@ class OpprettJournalpostUkjentBruker(
     fun dagligSjekkForLagredeJournalposter() {
         val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(14)
 
+        logger.info("Daglig sjekk viser ${jp?.size} saker fra GCP som mangler bruker og som nå journalføres")
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
