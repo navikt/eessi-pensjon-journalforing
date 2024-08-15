@@ -492,10 +492,19 @@ class JournalforingService(
         enPersonOgUforeAlderUnder62: Boolean,
         saksInfo: SaksInfoSamlet?
     ): Tema {
-        val p12000Ufore = currentSed?.type == SedType.P12000 && mapJsonToAny<P12000>(currentSed.toJson())
-            .pensjon?.pensjoninfo?.firstOrNull()?.betalingsdetaljer?.pensjonstype == "02"
-        return if (p12000Ufore || enPersonOgUforeAlderUnder62 || saksInfo?.saktype == UFOREP) UFORETRYGD else PENSJON
+        val isUforeP12000 = currentSed?.let { sed ->
+            sed.type == SedType.P12000 && (sed as P12000).harUforePensjonType()
+        } ?: false
+
+        val isUforeSakType = saksInfo?.saktype == UFOREP
+
+        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) {
+            UFORETRYGD
+        } else {
+            PENSJON
+        }
     }
+
 
     private fun temaPbuc06(
         currentSed: SED?,
