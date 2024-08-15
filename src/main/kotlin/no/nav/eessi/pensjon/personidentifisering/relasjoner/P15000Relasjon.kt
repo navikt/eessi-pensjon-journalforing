@@ -18,7 +18,7 @@ class P15000Relasjon(private val sed: SED, bucType: BucType, rinaDocumentId: Str
 
         return if (saksType == GJENLEV) {
             logger.debug("legger til gjenlevende: ($saksType)")
-            hentRelasjonGjenlevendeFnrHvisFinnes((sed as P15000).p15000Pensjon?.gjenlevende)
+            hentRelasjonGjenlevendeFnrHvisFinnes((sed as P15000).pensjon?.gjenlevende)
         } else {
             logger.debug("legger til forsikret: ($saksType)")
             hentForsikretPerson(saksType)
