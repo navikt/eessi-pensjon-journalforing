@@ -91,14 +91,14 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: P15000): String? {
-            return if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.p15000Pensjon?.gjenlevende)
+            return if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
             else filterPersonFodselsdato(sed.nav?.bruker?.person)
         }
 
 
         /**
          * R005 har mulighet for flere personer.
-         * har sed kun en person retureres dette fdato
+         * har sed kun en person returneres dette fdato
          * har sed flere personer leter vi etter status 07/avdød_mottaker_av_ytelser og returnerer dette fdato
          *
          * * hvis ingen intreffer returnerer vi null
