@@ -492,10 +492,7 @@ class JournalforingService(
         enPersonOgUforeAlderUnder62: Boolean,
         saksInfo: SaksInfoSamlet?
     ): Tema {
-        val isUforeP12000 = currentSed?.let { sed ->
-            sed.type == SedType.P12000 && (sed as P12000).harUforePensjonType()
-        } ?: false
-
+        val isUforeP12000 = (currentSed as? P12000)?.hasUforePensjonType() ?: false
         val isUforeSakType = saksInfo?.saktype == UFOREP
 
         return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) {
