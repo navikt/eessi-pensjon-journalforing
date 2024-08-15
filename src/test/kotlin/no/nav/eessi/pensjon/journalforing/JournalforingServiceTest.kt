@@ -840,6 +840,43 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `gitt det er en P_BUC_06 kravtypen er UFOREP så skal det settes tema UFO`() {
+        val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
+            every { rinaSakId } returns RINADOK_ID
+            every { bucType } returns P_BUC_06
+            every { sedType } returns SedType.P6000
+        }
+        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(GENRL), SED(type = SedType.P6000))
+
+        assertEquals(PENSJON, resultatGENRL)
+
+        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(OMSORG), SED(type = SedType.P6000))
+        assertEquals(PENSJON, resultatOMSORG)
+
+        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, null, saksInfoSamlet(ALDER), SED(type = SedType.P6000))
+        assertEquals(PENSJON, resultatALDER)
+
+        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null,saksInfoSamlet(GJENLEV), SED(type = SedType.P6000))
+        assertEquals(PENSJON, resultatGJENLEV)
+
+        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, saksInfoSamlet(BARNEP), SED(type = SedType.P6000))
+        assertEquals(PENSJON, resultatBARNEP)
+
+        val resultatUFOREMedSakType = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(type = SedType.P6000))
+        assertEquals(UFORETRYGD, resultatUFOREMedSakType)
+
+        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, null, saksInfoSamlet(UFOREP), SED(
+            type = SedType.P6000,
+            pensjon = P6000Pensjon(
+                vedtak = listOf(VedtakItem(
+                    type = "30"
+                )
+        ))))
+
+        assertEquals(UFORETRYGD, resultatUFORE)
+    }
+
+    @Test
     fun `gitt det er en P_BUC_05 ytelseype er UFOREP så skal det settes teama UFO`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
