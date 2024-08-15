@@ -1,7 +1,7 @@
 buildscript {
 
 	ext {
-		kotlinVersion = '1.9.24'
+		kotlinVersion = '2.0.10'
 		springBootVersion = '3.3.2'
 		springKafkaVersion = '3.2.2'
 		jacksonModuleKotlinVersion = '2.17.2'
@@ -38,11 +38,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-actuator")
 
 	// Spring Framework BOM-fil kan overstyre så vi får siste patch-versjon av Spring Framework
-	implementation(platform("org.springframework:spring-framework-bom:6.1.11"))
+	implementation(platform("org.springframework:spring-framework-bom:6.1.12"))
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1")
 
-	implementation('org.springframework.retry:spring-retry:2.0.6')
+	implementation('org.springframework.retry:spring-retry:2.0.7')
 
 	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonModuleKotlinVersion}"
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}"
@@ -57,14 +57,15 @@ dependencies {
 
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-eux:2.2.76")
-	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.73")
-	implementation("no.nav.eessi.pensjon:ep-logging:2.1.70")
-	implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.144"){
+	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.75")
+	implementation("no.nav.eessi.pensjon:ep-logging:2.1.72")
+
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.147"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.0.125"){
+	implementation("no.nav.eessi.pensjon:ep-routing:2.0.138"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'

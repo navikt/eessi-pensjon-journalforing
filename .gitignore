@@ -4,6 +4,7 @@ out/
 codemr/
 !gradle/wrapper/gradle-wrapper.jar
 
+.kotlin
 .idea
 *.iws
 *.iml
