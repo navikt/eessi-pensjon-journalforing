@@ -507,12 +507,21 @@ class JournalforingService(
         currentSed: SED?,
         enPersonOgUforeAlderUnder62: Boolean,
         saksInfo: SaksInfoSamlet?): Tema {
+
         val sedType = currentSed?.type
-        return if (sedType == SedType.P5000 && mapJsonToAny<P5000>(currentSed.toJson()).pensjon?.medlemskapboarbeid?.enkeltkrav?.krav == "30" ||(enPersonOgUforeAlderUnder62 || saksInfo?.saktype == UFOREP)) UFORETRYGD
-        else if (sedType == SedType.P6000 && mapJsonToAny<P6000>(currentSed.toJson()).pensjon?.vedtak?.firstOrNull()?.type == "30") UFORETRYGD
-        else if ( sedType == SedType.P7000 && mapJsonToAny<P7000>(currentSed.toJson()).pensjon?.samletVedtak?.tildeltepensjoner?.firstOrNull()?.pensjonType == "02") UFORETRYGD
-        else if ( sedType == SedType.P10000 && mapJsonToAny<P10000>(currentSed.toJson()).pensjon?.merinformasjon?.ytelser?.firstOrNull()?.ytelsestype == "08") UFORETRYGD
-        else PENSJON
+        val isUforeP5000 = (currentSed as? P5000)?.hasUforePensjonType() ?: false
+        val isUforeP6000 = (currentSed as? P6000)?.hasUforePensjonType() ?: false
+        val isUforeP7000 = (currentSed as? P7000)?.hasUforePensjonType() ?: false
+        val isUforeP10000 = (currentSed as? P10000)?.hasUforePensjonType() ?: false
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
+
+        return when {
+            sedType == SedType.P5000 && (isUforeP5000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
+            sedType == SedType.P6000 && (isUforeP6000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
+            sedType == SedType.P7000 && (isUforeP7000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
+            sedType == SedType.P10000 && (isUforeP10000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
+            else -> PENSJON
+        }
     }
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
