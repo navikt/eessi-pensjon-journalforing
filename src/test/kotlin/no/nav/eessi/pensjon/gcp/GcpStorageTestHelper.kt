@@ -7,7 +7,7 @@ import com.google.cloud.storage.Storage
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.utils.toJson
 import java.time.OffsetDateTime
 
@@ -16,7 +16,7 @@ class GcpStorageTestHelper {
         companion object {
             fun simulerGcpStorage(
                 sedHendelse: SedHendelse,
-                lagretJournalPost: List<Pair<LagretJournalpostMedSedInfo, BlobId>>,
+                lagretJournalPost: List<Pair<JournalpostMedSedInfo, BlobId>>,
                 gcpStorage: Storage
             ) {
                 val blob = createMockBlob(sedHendelse, lagretJournalPost)
@@ -27,7 +27,7 @@ class GcpStorageTestHelper {
 
             private fun createMockBlob(
                 sedHendelse: SedHendelse,
-                lagretJournalPost: List<Pair<LagretJournalpostMedSedInfo, BlobId>>
+                lagretJournalPost: List<Pair<JournalpostMedSedInfo, BlobId>>
             ): Blob {
                 return mockk<Blob>().apply {
                     every { name } returns sedHendelse.rinaSakId
@@ -37,7 +37,7 @@ class GcpStorageTestHelper {
                 }
             }
 
-            private fun createMockPage(blob: Blob, sedHendelse: SedHendelse, lagretJournalPost: LagretJournalpostMedSedInfo): Page<Blob> {
+            private fun createMockPage(blob: Blob, sedHendelse: SedHendelse, lagretJournalPost: JournalpostMedSedInfo): Page<Blob> {
                 return mockk<Page<Blob>>().apply {
                     every { iterateAll() } returns mutableListOf(blob)
                     every { values } returns mockk<MutableIterable<Blob>>().apply {

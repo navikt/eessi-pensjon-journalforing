@@ -1,9 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
-import io.mockk.every
-import io.mockk.justRun
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
@@ -58,8 +55,6 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
 
-        println(journalpostRequest)
-
         Assertions.assertEquals("22874955", journalpostRequest.sak?.fagsakid)
         Assertions.assertEquals(true, erMuligAaFerdigstille)
 
@@ -84,6 +79,29 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             sedHendelse,
             HendelseType.SENDT,
             identifisertPerson,
+            LEALAUS_KAKE.getBirthDate(),
+            currentSed = SED(type = SedType.P6000),
+            identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo(),
+            kravTypeFraSed = null,
+        )
+        val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
+
+        Assertions.assertEquals(false, erMuligAaFerdigstille)
+    }
+
+    @Test
+    fun `Sendt P_BUC_06 med manglende bruker skal lage journalpost`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val forsoekFerdigstillSlot = slot<Boolean>()
+        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            null,
             LEALAUS_KAKE.getBirthDate(),
             currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,

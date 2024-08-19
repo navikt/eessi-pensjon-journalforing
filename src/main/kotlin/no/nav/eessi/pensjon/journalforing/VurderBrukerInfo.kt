@@ -32,7 +32,7 @@ class VurderBrukerInfo (
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
-        val lagretJournalpost = LagretJournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
+        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
         logger.debug("""Journalposten mangler bruker og vil bli lagret for fremtidig vurdering
             | ${lagretJournalpost.toJson()}
         """.trimMargin())
@@ -57,7 +57,7 @@ class VurderBrukerInfo (
                 logger.info("Henter tidligere journalføring for å sette bruker for sed: $rinaId")
 
                 gcpStorageService.hentOpprettJournalpostRequest(rinaId)?.let { (journalpost, blob) ->
-                    val lagretJournalPost = mapJsonToAny<LagretJournalpostMedSedInfo>(journalpost)
+                    val lagretJournalPost = mapJsonToAny<JournalpostMedSedInfo>(journalpost)
 
                     val jprUtenBrukerOppdatert = lagretJournalPost.copy(
                         journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker)
@@ -95,7 +95,7 @@ class VurderBrukerInfo (
     }
 
     fun opprettOppgave(
-        jprUtenBrukerOppdatert: LagretJournalpostMedSedInfo,
+        jprUtenBrukerOppdatert: JournalpostMedSedInfo,
         opprettetJournalpost: OpprettJournalPostResponse?,
         identifisertPerson: IdentifisertPerson?
     ) {

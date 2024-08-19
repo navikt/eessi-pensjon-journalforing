@@ -51,7 +51,7 @@ class VurderBrukerInfoTest {
         "NOR"
     )
     private val storage: Storage = mockk(relaxed = true)
-    lateinit var lagretJournalPost: LagretJournalpostMedSedInfo
+    lateinit var lagretJournalPost: JournalpostMedSedInfo
 
     @BeforeEach
     fun setUp() {
@@ -77,7 +77,7 @@ class VurderBrukerInfoTest {
                 MetricsHelper.ForTest()
             ))
 
-        lagretJournalPost = LagretJournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
+        lagretJournalPost = JournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
         every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns  mockk {
             every { exists() } returns true

@@ -135,7 +135,7 @@ class JournalforingServiceMedGCPTest {
             every { getContent() } returns GjennySak("123", "").toJson().toByteArray()
         } andThen mockk<Blob>().apply {
             every { exists() } returns true
-            every { getContent() } returns Pair(LagretJournalpostMedSedInfo(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)), mockk<BlobId>(relaxed = true)).toJson().toByteArray()
+            every { getContent() } returns Pair(JournalpostMedSedInfo(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)), mockk<BlobId>(relaxed = true)).toJson().toByteArray()
         }
         val blobList = mockk<Page<Blob>>().apply {
             every { iterateAll() } returns listOf(mockk<Blob>("blob").apply {

@@ -267,12 +267,11 @@ internal open class JournalforingTestBase {
     ) {
         if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
             journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
+                JournalpostMedSedInfo(
                     journalpostRequest = journalpostRequest.captured,
                     mapJsonToAny<SedHendelse>(hendelse),
                     hendelseType
-                ),
-                blobId = mockk()
+                )
             )
         }
     }
@@ -293,9 +292,10 @@ internal open class JournalforingTestBase {
         land: String = "NOR",
         hendelseType: HendelseType = SENDT,
         bucType: BucType = P_BUC_01,
+        sedType: SedType = SedType.P8000,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(sedType = SedType.P8000, fnr = fnr, eessiSaknr = sakId))
+        val sed = SED.generateSedToClass<P8000>(createSed(sedType = sedType, fnr = fnr, eessiSaknr = sakId))
         initCommonMocks(sed, bucType = bucType)
 
         every { personService.harAdressebeskyttelse(any()) } returns false
