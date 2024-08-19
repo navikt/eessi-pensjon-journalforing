@@ -186,19 +186,15 @@ class JournalforingService(
                     kravType = kravTypeFraSed
                 )
 
-                if(journalpostRequest.bruker == null){
-                    if(sedHendelse.bucType in listOf(P_BUC_06)) {
+                if (journalpostRequest.bruker == null) {
+                    val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09)) {
                         journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
-                        logger.warn("Journalpost for ${sedHendelse.sedType}, for buc: ${sedHendelse.bucType} sendes direkte for rinaid: ${sedHendelse.rinaSakId}")
+                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
+                    } else {
+                        vurderBrukerInfo.journalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
+                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
                     }
-                    else {
-                        vurderBrukerInfo.journalPostUtenBruker(
-                            journalpostRequest,
-                            sedHendelse,
-                            hendelseType
-                        )
-                        logger.warn("Journalpost er satt på vent grunnet manglende bruker, rinanr: ${sedHendelse.rinaSakId}")
-                    }
+                    logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")
                     return@measure
                 }
                 else {

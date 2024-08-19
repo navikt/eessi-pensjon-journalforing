@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.*
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
@@ -17,12 +18,14 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 
-internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBase(){
+internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase() {
 
     @Test
     fun `Sendt P6000 med all infor for forsoekFerdigstill true skal populere Journalpostresponsen med pesys sakid`() {
@@ -38,7 +41,13 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         val forsoekFedrigstillSlot = slot<Boolean>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), capture(forsoekFedrigstillSlot), any()) } returns mockk(relaxed = true)
+        every {
+            journalpostKlient.opprettJournalpost(
+                capture(requestSlot),
+                capture(forsoekFedrigstillSlot),
+                any()
+            )
+        } returns mockk(relaxed = true)
 
 
         journalforingService.journalfor(
@@ -60,7 +69,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
 
     }
 
-    private fun navAnsattInfo(): Pair<String, Enhet?> = Pair("Z990965",Enhet.NFP_UTLAND_AALESUND)
+    private fun navAnsattInfo(): Pair<String, Enhet?> = Pair("Z990965", Enhet.NFP_UTLAND_AALESUND)
 
     @Test
     fun `Sendt P6000 med manglende saksinfo skal returnere false på forsoekFerdigstill`() {
@@ -90,27 +99,27 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
         Assertions.assertEquals(false, erMuligAaFerdigstille)
     }
 
-    @Test
-    fun `Sendt P_BUC_06 med manglende bruker skal lage journalpost`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
-        val sedHendelse = SedHendelse.fromJson(hendelse)
+    @ParameterizedTest
+    @EnumSource(BucType::class, names = ["R_BUC_02", "P_BUC_06", "P_BUC_09"])
+    fun `Sendt SED med manglende bruker skal lage journalpost`(bucType: BucType) {
+        val generiskSED = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText())
+            .copy(bucType = bucType, navBruker = null)
 
         val forsoekFerdigstillSlot = slot<Boolean>()
         every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
 
         journalforingService.journalfor(
-            sedHendelse,
-            HendelseType.SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
-            currentSed = SED(type = SedType.P6000),
-            identifisertePersoner = 1,
+            sedHendelse = generiskSED,
+            hendelseType = HendelseType.SENDT,
+            currentSed = SED(type = generiskSED.sedType!!),
+            identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
             kravTypeFraSed = null,
+            identifisertPerson = null,
+            fdato = null
         )
-        val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
-
-        Assertions.assertEquals(false, erMuligAaFerdigstille)
+        verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        Assertions.assertEquals(false, forsoekFerdigstillSlot.captured)
     }
 
     @Test
@@ -119,21 +128,29 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val kravtype = "01"
-        val identifisertPerson = identifisertPersonPDL(AKTOERID,
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
             sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
         val saksInformasjon = SakInformasjon(sakId = "22874955", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)
 
         val requestSlot = slot<OpprettJournalpostRequest>()
-        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns mockk<OpprettJournalPostResponse>(relaxed = true).apply {
-            val opprettJournalPostResponse: OpprettJournalPostResponse = mockk<OpprettJournalPostResponse>(relaxed = true).apply {
-                every { journalpostferdigstilt } returns true
-            }
+        every {
+            journalpostKlient.opprettJournalpost(
+                capture(requestSlot),
+                any(),
+                any()
+            )
+        } returns mockk<OpprettJournalPostResponse>(relaxed = true).apply {
+            val opprettJournalPostResponse: OpprettJournalPostResponse =
+                mockk<OpprettJournalPostResponse>(relaxed = true).apply {
+                    every { journalpostferdigstilt } returns true
+                }
             every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns opprettJournalPostResponse
         }
 
         val capturedMelding = slot<OppgaveMelding>()
-        justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic( capture(capturedMelding) ) }
+        justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(capturedMelding)) }
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
         journalforingService.journalfor(
             sedHendelse,
@@ -151,7 +168,8 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
             kravTypeFraSed = KravType.ALDER,
         )
         capturedMelding.captured
-        Assertions.assertEquals("""
+        Assertions.assertEquals(
+            """
             {
               "sedType" : "P2000",
               "journalpostId" : "",
@@ -163,6 +181,7 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
               "oppgaveType" : "BEHANDLE_SED",
               "tema" : "UFO"
             }
-        """.trimIndent(), capturedMelding.captured.toJson())
+        """.trimIndent(), capturedMelding.captured.toJson()
+        )
     }
 }
