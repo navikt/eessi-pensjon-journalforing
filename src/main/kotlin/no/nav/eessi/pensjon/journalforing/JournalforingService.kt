@@ -187,7 +187,7 @@ class JournalforingService(
                 )
 
                 if(journalpostRequest.bruker == null){
-                    if(sedHendelse.bucType in listOf(R_BUC_02 , P_BUC_06 ,P_BUC_09)) {
+                    if(sedHendelse.bucType in listOf(P_BUC_06)) {
                         journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
                         logger.warn("Journalpost for ${sedHendelse.sedType}, for buc: ${sedHendelse.bucType} sendes direkte for rinaid: ${sedHendelse.rinaSakId}")
                     }
