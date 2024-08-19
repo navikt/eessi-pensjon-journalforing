@@ -123,6 +123,29 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
+    fun `Sendt P_BUC_06 med manglende bruker skal lage journalpost`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val forsoekFerdigstillSlot = slot<Boolean>()
+        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            null,
+            LEALAUS_KAKE.getBirthDate(),
+            currentSed = SED(type = SedType.P6000),
+            identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo(),
+            kravTypeFraSed = null,
+        )
+        val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
+
+        Assertions.assertEquals(false, erMuligAaFerdigstille)
+    }
+
+    @Test
     fun `Innkommende P2000 fra utlanded som oppfyller alle krav til maskinell journalføring skal opprette behandle SED oppgave`() {
 
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
