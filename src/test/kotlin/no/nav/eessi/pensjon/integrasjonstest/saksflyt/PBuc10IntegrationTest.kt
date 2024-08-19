@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -13,7 +12,7 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.KravType.*
-import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -937,13 +936,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         if (!meldingSlot.isCaptured && journalpostRequest.captured.bruker == null) {
             println("""Opprettet manuell journalføring: | ${journalpostRequest.captured.toJson()}""".trimMargin())
             journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
+                JournalpostMedSedInfo(
                     journalpostRequest = journalpostRequest.captured,
                     mapJsonToAny<SedHendelse>(hendelse),
                     hendelseType
                 ),
-                "",
-                BlobId.of("", "")
+                "eessi-pensjon"
             )
         }
 

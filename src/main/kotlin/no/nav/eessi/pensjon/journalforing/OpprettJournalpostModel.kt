@@ -16,7 +16,6 @@ import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
 import java.time.LocalDateTime
@@ -49,7 +48,7 @@ data class OpprettJournalpostRequest(
     }
 }
 
-data class LagretJournalpostMedSedInfo(
+data class JournalpostMedSedInfo(
     val journalpostRequest: OpprettJournalpostRequest,
     val sedHendelse: SedHendelse,
     val sedHendelseType: HendelseType

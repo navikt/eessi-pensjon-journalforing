@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.google.cloud.storage.BlobId
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -188,11 +187,18 @@ class JournalforingService(
                 )
 
                 if(journalpostRequest.bruker == null){
-                    vurderBrukerInfo.journalPostUtenBruker(
-                        journalpostRequest,
-                        sedHendelse,
-                        hendelseType)
-                    logger.warn("Journalpost er satt på vent grunnet manglende bruker, rinanr: ${sedHendelse.rinaSakId}")
+                    if(sedHendelse.bucType in listOf(R_BUC_02 , P_BUC_06 ,P_BUC_09)) {
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        logger.warn("Journalpost for ${sedHendelse.sedType}, for buc: ${sedHendelse.bucType} sendes direkte for rinaid: ${sedHendelse.rinaSakId}")
+                    }
+                    else {
+                        vurderBrukerInfo.journalPostUtenBruker(
+                            journalpostRequest,
+                            sedHendelse,
+                            hendelseType
+                        )
+                        logger.warn("Journalpost er satt på vent grunnet manglende bruker, rinanr: ${sedHendelse.rinaSakId}")
+                    }
                     return@measure
                 }
                 else {
@@ -281,7 +287,7 @@ class JournalforingService(
         }
     }
 
-    fun lagJournalpostOgOppgave(journalpostRequest: LagretJournalpostMedSedInfo, saksbehandlerIdent: String? = null, blobId: BlobId){
+    fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){
         val response = journalpostService.sendJournalPost(journalpostRequest, "eessipensjon")
 
         logger.info("""Lagret JP hentet fra GCP: 
@@ -302,7 +308,7 @@ class JournalforingService(
                 oppgaveType = OppgaveType.JOURNALFORING,
             ).also { oppgaveMelding ->  logger.info("Opprettet journalforingsoppgave for sak med rinaId: ${oppgaveMelding.rinaSakId}") }
             oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-            gcpStorageService.slettJournalpostDetaljer(blobId)
+
         } else {
             logger.error("Journalpost ikke opprettet")
         }

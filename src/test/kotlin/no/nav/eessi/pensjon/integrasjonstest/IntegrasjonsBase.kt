@@ -9,7 +9,7 @@ import io.mockk.slot
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.listeners.SedMottattListener
@@ -179,12 +179,11 @@ abstract class IntegrasjonsBase {
         // del 2: sender manuel generering av JP og oppgave som batch / gcp storage ville gjort
         if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
             journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
+                JournalpostMedSedInfo(
                     journalpostRequest = journalpostRequest.captured,
                     mapJsonToAny<SedHendelse>(hendelse),
                     HendelseType.MOTTATT
-                ),
-                blobId = mockk()
+                )
             )
         }
     }
