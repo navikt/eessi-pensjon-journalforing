@@ -95,11 +95,6 @@ internal class JournalforingServiceMedJournalpostTest :  JournalforingServiceBas
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-//        val identifisertPerson = identifisertPersonPDL(
-//            AKTOERID,
-//            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
-//        )
-
         val forsoekFerdigstillSlot = slot<Boolean>()
         every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
 
