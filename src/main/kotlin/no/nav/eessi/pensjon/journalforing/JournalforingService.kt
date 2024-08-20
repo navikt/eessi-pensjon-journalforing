@@ -322,12 +322,8 @@ class JournalforingService(
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
         return when (hendelseType) {
-            SENDT -> AvsenderMottaker(
-                sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand)
-            )
-            else -> AvsenderMottaker(
-                sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand)
-            )
+            SENDT -> AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand))
+            else -> AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand))
         }
     }
 
@@ -395,21 +391,12 @@ class JournalforingService(
         val barn = Period.between(fdato, LocalDate.now()).years < 18
         val ufoereAlder = Period.between(fdato, LocalDate.now()).years in 19..61
 
-        if (pensjonist || barn) {
-            return if (bosattNorge) {
-                NFP_UTLAND_AALESUND
-            } else PENSJON_UTLAND
-        }
+        if (pensjonist || barn) return if (bosattNorge) NFP_UTLAND_AALESUND else PENSJON_UTLAND
         if (ufoereAlder) {
-            if (bosattNorge) {
-                return if (antallIdentifisertePersoner <= 1) {
-                    UFORE_UTLANDSTILSNITT
-                } else ID_OG_FORDELING
-            }
-            if (antallIdentifisertePersoner <= 1) {
-                return UFORE_UTLAND
-            }
+            if (bosattNorge) return if (antallIdentifisertePersoner <= 1) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
+            if (antallIdentifisertePersoner <= 1) return UFORE_UTLAND
         }
+
         return ID_OG_FORDELING
     }
 
