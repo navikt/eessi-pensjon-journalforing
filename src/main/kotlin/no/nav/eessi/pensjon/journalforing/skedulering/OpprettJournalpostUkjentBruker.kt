@@ -4,7 +4,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -24,9 +24,10 @@ class OpprettJournalpostUkjentBruker(
 
         logger.info("Daglig sjekk viser ${jp?.size} saker fra GCP som mangler bruker og som nå journalføres")
         jp?.forEach { journalpostDetaljer ->
-            mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
+            mapJsonToAny<JournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
-                journalforingService.lagJournalpostOgOppgave(it, "eessipensjon", journalpostDetaljer.second)
+                journalforingService.lagJournalpostOgOppgave(it, "eessipensjon")
+                gcpStorageService.slettJournalpostDetaljer(journalpostDetaljer.second).also { logger.info("") }
         } }
     }
 
@@ -42,7 +43,7 @@ class OpprettJournalpostUkjentBruker(
         }
 
         jp?.forEach { journalpostDetaljer ->
-            val lagretJournalpostMedSedInfo = mapJsonToAny<LagretJournalpostMedSedInfo>(journalpostDetaljer.first)
+            val lagretJournalpostMedSedInfo = mapJsonToAny<JournalpostMedSedInfo>(journalpostDetaljer.first)
 
             lagretJournalpostMedSedInfo.sedHendelse.sedType?.let {
                 sedTypeCounts[it] = sedTypeCounts[it]!! + 1

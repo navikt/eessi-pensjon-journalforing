@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
-import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
-import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
@@ -14,7 +12,6 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.journalforing.LagretJournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -34,8 +31,11 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 @DisplayName("P_BUC_05 - IntegrationTest")
 internal class PBuc05IntegrationTest : JournalforingTestBase() {

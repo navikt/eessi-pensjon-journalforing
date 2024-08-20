@@ -21,7 +21,7 @@ open class GcpStorageServiceTest {
     private lateinit var gcpStorageService: GcpStorageService
 
     private val storage: Storage = mockk(relaxed = true)
-    lateinit var lagretJournalPost: LagretJournalpostMedSedInfo
+    lateinit var lagretJournalPost: JournalpostMedSedInfo
     lateinit var sedMedBruker: SedHendelse
     lateinit var sedUtenBruker: SedHendelse
 
@@ -34,7 +34,7 @@ open class GcpStorageServiceTest {
                     rinaSakId = sedMedBruker.rinaSakId
                 )
         val lagretJournalpostRquest = opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
-        lagretJournalPost = LagretJournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
+        lagretJournalPost = JournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
         gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
         every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns mockk {

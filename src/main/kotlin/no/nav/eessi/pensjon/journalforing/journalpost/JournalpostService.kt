@@ -73,7 +73,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
     }
 
-    fun sendJournalPost(journalpostRequest: LagretJournalpostMedSedInfo,
+    fun sendJournalPost(journalpostRequest: JournalpostMedSedInfo,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         return sendJournalPost(journalpostRequest.journalpostRequest, journalpostRequest.sedHendelse, journalpostRequest.sedHendelseType, saksbehandlerIdent)
     }

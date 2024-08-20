@@ -344,13 +344,12 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         if (!journalpostResponse.journalpostferdigstilt && oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
             journalforingService.lagJournalpostOgOppgave(
-                LagretJournalpostMedSedInfo(
+                JournalpostMedSedInfo(
                     journalpostRequest = journalpostRequest.captured,
                     mapJsonToAny<SedHendelse>(hendelse),
                     hendelseType
                 ),
-                "",
-                BlobId.of("", "")
+                ""
             )
         }
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
