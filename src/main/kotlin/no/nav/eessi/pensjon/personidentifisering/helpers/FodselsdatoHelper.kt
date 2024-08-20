@@ -64,8 +64,8 @@ class FodselsdatoHelper {
                     SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
                     P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).p5000Pensjon?.gjenlevende)
-                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).p6000Pensjon?.gjenlevende)
+                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
+                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
                     P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
                     P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
@@ -91,14 +91,14 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: P15000): String? {
-            return if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.p15000Pensjon?.gjenlevende)
+            return if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
             else filterPersonFodselsdato(sed.nav?.bruker?.person)
         }
 
 
         /**
          * R005 har mulighet for flere personer.
-         * har sed kun en person retureres dette fdato
+         * har sed kun en person returneres dette fdato
          * har sed flere personer leter vi etter status 07/avdød_mottaker_av_ytelser og returnerer dette fdato
          *
          * * hvis ingen intreffer returnerer vi null

@@ -17,6 +17,7 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
+import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -310,12 +311,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 FNR_VOKSEN_UNDER_62,
                 FNR_OVER_62,
                 bestemsak,
-                krav = GJENLEV,
+                krav = UFOREP,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT
             ) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(Behandlingstema.UFOREPENSJON, it.behandlingstema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
@@ -336,12 +338,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 FNR_VOKSEN_UNDER_62,
                 FNR_OVER_62,
                 bestemsak,
-                krav = GJENLEV,
+                krav = UFOREP,
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT
             ) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(Behandlingstema.UFOREPENSJON, it.behandlingstema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 

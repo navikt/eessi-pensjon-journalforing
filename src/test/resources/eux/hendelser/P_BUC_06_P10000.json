@@ -1,0 +1,17 @@
+{
+  "id": 1869,
+  "sedId": "P10000_b12e06dda2c7474b9998c7139c77777_2",
+  "sektorKode": "P",
+  "bucType": "P_BUC_06",
+  "rinaSakId": "2536475861",
+  "avsenderId": "NO:NAVT003",
+  "avsenderNavn": "NAVT003",
+  "avsenderLand": "NO",
+  "mottakerId": "NO:NAVT007",
+  "mottakerNavn": "NAV Test 07",
+  "mottakerLand": "NO",
+  "rinaDokumentId": "b12e06dda2c7474b9998c7139c77777",
+  "rinaDokumentVersjon": "2",
+  "sedType": "P10000",
+  "navBruker": "22117320034"
+}
