@@ -101,7 +101,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             fdato = null,
             SaksInfoSamlet(saktype = null,  sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)),
             identifisertePersoner = 0,
-            kravTypeFraSed = null,
             currentSed = null,
         )
 
@@ -121,10 +120,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             null,
             LEALAUS_KAKE.getBirthDate(),
             null,
-            currentSed = SED(type = SedType.P2000),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2000),
         )
         verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
         verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
@@ -147,10 +145,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             null,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
-            currentSed = SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200),
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
@@ -168,10 +165,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            currentSed = SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200),
         )
 
         verify(exactly = 0) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
@@ -189,10 +185,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            currentSed = SED(type = SedType.P2200),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200),
         )
         Assertions.assertEquals(
             Enhet.ID_OG_FORDELING,
@@ -240,10 +235,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             HendelseType.SENDT,
             identifisertPerson,
             LocalDate.of(1973,11,22),
-            currentSed = SED(type = SedType.P2200),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P2200),
         )
         Assertions.assertEquals(
             Enhet.NFP_UTLAND_AALESUND,
@@ -264,9 +258,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             hendelseType = HendelseType.SENDT,
             identifisertPerson = identer[0],
             fdato = null,
-            currentSed = SED(type = sedType),
             identifisertePersoner = identer.size,
-            kravTypeFraSed = null,
+            currentSed = SED(type = sedType),
         )
     }
 
