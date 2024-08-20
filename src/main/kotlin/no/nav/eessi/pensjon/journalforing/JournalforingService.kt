@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
@@ -495,33 +494,23 @@ class JournalforingService(
         val isUforeP12000 = (currentSed as? P12000)?.hasUforePensjonType() ?: false
         val isUforeSakType = saksInfo?.saktype == UFOREP
 
-        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) {
-            UFORETRYGD
-        } else {
-            PENSJON
-        }
+        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) UFORETRYGD else PENSJON
     }
-
 
     private fun temaPbuc06(
         currentSed: SED?,
         enPersonOgUforeAlderUnder62: Boolean,
-        saksInfo: SaksInfoSamlet?): Tema {
-
-        val sedType = currentSed?.type
-        val isUforeP5000 = (currentSed as? P5000)?.hasUforePensjonType() ?: false
-        val isUforeP6000 = (currentSed as? P6000)?.hasUforePensjonType() ?: false
-        val isUforeP7000 = (currentSed as? P7000)?.hasUforePensjonType() ?: false
-        val isUforeP10000 = (currentSed as? P10000)?.hasUforePensjonType() ?: false
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
-
-        return when {
-            sedType == SedType.P5000 && (isUforeP5000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
-            sedType == SedType.P6000 && (isUforeP6000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
-            sedType == SedType.P7000 && (isUforeP7000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
-            sedType == SedType.P10000 && (isUforeP10000 || uforeSakTypeEllerUforPerson) -> UFORETRYGD
-            else -> PENSJON
+        saksInfo: SaksInfoSamlet?
+    ): Tema {
+        val isUforePensjon = when (currentSed) {
+            is P5000 -> currentSed.hasUforePensjonType()
+            is P6000 -> currentSed.hasUforePensjonType()
+            is P7000 -> currentSed.hasUforePensjonType()
+            is P10000 -> currentSed.hasUforePensjonType()
+            else -> false
         }
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
+        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
