@@ -463,9 +463,9 @@ class JournalforingService(
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
-        val UfoereSak = saksInfo?.saktype == UFOREP
+        val ufoereSak = saksInfo?.saktype == UFOREP
         if(fnr == null) {
-            if(sedhendelse?.bucType == P_BUC_03 || UfoereSak || kravtypeFraSed == KravType.UFOREP) return UFORETRYGD
+            if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
             return PENSJON
         }
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
@@ -477,15 +477,25 @@ class JournalforingService(
         val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(fnr)
         return when (sedhendelse?.bucType) {
 
-            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (UfoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
             P_BUC_03 -> UFORETRYGD
             P_BUC_06 -> temaPbuc06(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || UfoereSak) UFORETRYGD else PENSJON
-            P_BUC_10 -> if (kravtypeFraSed == KravType.UFOREP && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE || enPersonOgUforeAlderUnder62) UFORETRYGD else PENSJON
-            else -> if (UfoereSak && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
+            P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
+            else -> if (ufoereSak && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
 
         }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
+    }
+
+    private fun temaPbuc10(
+        currentSed: SED?,
+        enPersonOgUforeAlderUnder62: Boolean,
+        saksInfo: SaksInfoSamlet?
+    ): Tema {
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
+        val isUforePensjon = if (currentSed is P15000 && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE) currentSed.hasUforePensjonType() else false
+        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
     private fun temaPbuc07Og08(
