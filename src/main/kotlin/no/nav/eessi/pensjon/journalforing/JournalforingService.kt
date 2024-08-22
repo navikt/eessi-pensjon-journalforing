@@ -550,7 +550,8 @@ class JournalforingService(
 
         // 4. Pesys nr fra SED
         sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01").also { logger.info("har funnet saksinformasjon fra SED: $it") }
+            logger.error("Nå har vi ikke funnet noen saker i pesys på bruker med aktoerId, her er det noe muffins :P:P Noen har lagt inn feil pesyssaknr i seden: $it")
+            return null
         }
 
         logger.warn("""RinaID: $euxCaseId
