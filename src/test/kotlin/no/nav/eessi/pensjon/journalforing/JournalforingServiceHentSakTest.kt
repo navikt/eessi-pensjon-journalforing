@@ -32,7 +32,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     }
 
     @Test
-    fun `hentSak returnerer null dersom sakIdFraSed og gjennySak mangler`() {
+    fun `hentSak skal gi Sak fra sakIdFraSed naar gjennySak mangler`() {
         val euxCaseId = "123"
         val sakIdFraSed = "12131132"
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
@@ -41,7 +41,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         val result = journalforingService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 
-        assertNull(result)
+        assertEquals(Sak("FAGSAK", sakIdFraSed, "PP01"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
     }
 
