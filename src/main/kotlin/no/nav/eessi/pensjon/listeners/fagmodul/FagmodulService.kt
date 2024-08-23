@@ -19,21 +19,21 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
     }
 
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakIdFraAlleSeder: String): SakInformasjon? {
+    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakId: String): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
         secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
 
         if(saklist.isEmpty()){
-            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraAlleSeder ")
+            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ") 
         }
         else{
-            logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraAlleSeder Pensjoninformasjon: ${saklist.toJson()}")
+            logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
         }
 
-        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakIdFraAlleSeder }
+        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }
         if (gyldigSak?.sakType !in eessipenSakTyper ||gyldigSak == null) {
-            logger.info("Finner ingen sakId i saksliste for aktoer for sedSakId: $pesysSakIdFraAlleSeder")
+            logger.info("Finner ingen sakId i saksliste for aktoer for sedSakId: $pesysSakId")
             return null
         }
         //noe skjer når det er generell saker
