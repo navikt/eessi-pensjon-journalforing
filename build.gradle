@@ -3,7 +3,7 @@ buildscript {
 	ext {
 		kotlinVersion = '2.0.10'
 		springBootVersion = '3.3.2'
-		springKafkaVersion = '3.2.2'
+		springKafkaVersion = '3.2.3'
 		jacksonModuleKotlinVersion = '2.17.2'
 		tokenSupportVersion = '4.1.4'
 		imageioVersion = '3.11.0'
@@ -56,16 +56,16 @@ dependencies {
 	implementation("com.google.cloud:google-cloud-storage:2.40.1")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:2.3.3")
-	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.75")
-	implementation("no.nav.eessi.pensjon:ep-logging:2.1.72")
+	implementation("no.nav.eessi.pensjon:ep-eux:2.3.4")
+	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.76")
+	implementation("no.nav.eessi.pensjon:ep-logging:2.1.73")
 
-    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.147"){
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.1.153"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.0.138"){
+	implementation("no.nav.eessi.pensjon:ep-routing:2.0.142"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'

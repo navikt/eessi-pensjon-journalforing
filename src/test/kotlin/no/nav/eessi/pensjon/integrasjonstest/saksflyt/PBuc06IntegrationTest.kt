@@ -1,19 +1,19 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.sed.*
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_06
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 internal class PBuc06IntegrationTest : JournalforingTestBase() {
 
@@ -35,7 +35,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(sedSendtJson)
 
-        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, null, sed)
+        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, sed)
         assertEquals(tema, actual.toString())
     }
 
@@ -59,7 +59,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_06_P5000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(sedSendtJson)
 
-        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, null, sed)
+        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, sed)
         assertEquals(tema, actual.toString())
     }
 
@@ -70,7 +70,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         "09035225916, 03, PENSJON",
         "11067122781, 02, UFORETRYGD"
     )
-    fun `Gitt en P7000 med enkeltkrav krav med type ufore eller pensjon så skal tema bli deretter`(fnr: String, penType: String, tema: String) {
+    fun `Gitt en P7000 med enkeltkrav krav med type ufore eller pensjon s å skal tema bli deretter`(fnr: String, penType: String, tema: String) {
 
         val sed = SED(
             type = SedType.P7000,
@@ -83,7 +83,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_06_P7000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(sedSendtJson)
 
-        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, null, sed)
+        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, sed)
         assertEquals(tema, actual.toString())
     }
 
@@ -107,7 +107,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_06_P10000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(sedSendtJson)
 
-        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, null, sed)
+        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, sed)
         assertEquals(tema, actual.toString())
     }
 

@@ -56,10 +56,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
-            currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P6000),
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -89,10 +88,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P6000),
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -111,12 +109,11 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         journalforingService.journalfor(
             sedHendelse = generiskSED,
             hendelseType = HendelseType.SENDT,
-            currentSed = SED(type = generiskSED.sedType!!),
+            identifisertPerson = null,
+            fdato = null,
             identifisertePersoner = 0,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = null,
-            identifisertPerson = null,
-            fdato = null
+            currentSed = SED(type = generiskSED.sedType!!)
         )
         verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
         Assertions.assertEquals(false, forsoekFerdigstillSlot.captured)
@@ -135,10 +132,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.SENDT,
             null,
             LEALAUS_KAKE.getBirthDate(),
-            currentSed = SED(type = SedType.P6000),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = null,
+            currentSed = SED(type = SedType.P6000),
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -181,14 +177,13 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
+            identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo(),
             currentSed = mockk<P2000>(relaxed = true).apply {
                 every { nav?.bruker?.person?.sivilstand } returns listOf(SivilstandItem("01-01-2023"))
                 every { nav?.krav } returns mapJsonToAny<Krav>("""{"type":"$kravtype"}""")
                 every { nav?.bruker?.person?.statsborgerskap } returns listOf(StatsborgerskapItem("NO"))
             },
-            identifisertePersoner = 1,
-            navAnsattInfo = navAnsattInfo(),
-            kravTypeFraSed = KravType.ALDER,
         )
         capturedMelding.captured
         Assertions.assertEquals(

@@ -93,7 +93,6 @@ class JournalforingService(
         harAdressebeskyttelse: Boolean = false,
         identifisertePersoner: Int,
         navAnsattInfo: Pair<String, Enhet?>? = null,
-        kravTypeFraSed: KravType?,
         currentSed: SED?
     ) {
         journalforOgOpprettOppgaveForSed.measure {
@@ -120,7 +119,6 @@ class JournalforingService(
                     saksInfoSamlet,
                     harAdressebeskyttelse,
                     identifisertePersoner,
-                    kravTypeFraSed,
                     currentSed
                 )
 
@@ -128,7 +126,6 @@ class JournalforingService(
                     sedHendelse,
                     identifisertPerson?.personRelasjon?.fnr,
                     identifisertePersoner,
-                    kravTypeFraSed,
                     saksInfoSamlet,
                     currentSed
                 ).also {
@@ -180,7 +177,7 @@ class JournalforingService(
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
                     tema = tema,
-                    kravType = kravTypeFraSed
+                    kravType = currentSed?.nav?.krav?.type
                 )
 
                 if (journalpostRequest.bruker == null) {
@@ -325,12 +322,8 @@ class JournalforingService(
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
         return when (hendelseType) {
-            SENDT -> AvsenderMottaker(
-                sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand)
-            )
-            else -> AvsenderMottaker(
-                sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand)
-            )
+            SENDT -> AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand))
+            else -> AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand))
         }
     }
 
@@ -342,7 +335,6 @@ class JournalforingService(
         sakInfo: SaksInfoSamlet?,
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int,
-        kravTypeFraSed: KravType?,
         currentSed: SED?
     ): Enhet {
         val bucType = sedHendelse.bucType
@@ -372,9 +364,7 @@ class JournalforingService(
                 sakInfo,
                 identifisertPerson,
                 antallIdentifisertePersoner,
-                kravTypeFraSed,
                 currentSed
-
             )
                 .also {
                     logEnhet(enhetFraRouting, it)
@@ -401,21 +391,12 @@ class JournalforingService(
         val barn = Period.between(fdato, LocalDate.now()).years < 18
         val ufoereAlder = Period.between(fdato, LocalDate.now()).years in 19..61
 
-        if (pensjonist || barn) {
-            return if (bosattNorge) {
-                NFP_UTLAND_AALESUND
-            } else PENSJON_UTLAND
-        }
+        if (pensjonist || barn) return if (bosattNorge) NFP_UTLAND_AALESUND else PENSJON_UTLAND
         if (ufoereAlder) {
-            if (bosattNorge) {
-                return if (antallIdentifisertePersoner <= 1) {
-                    UFORE_UTLANDSTILSNITT
-                } else ID_OG_FORDELING
-            }
-            if (antallIdentifisertePersoner <= 1) {
-                return UFORE_UTLAND
-            }
+            if (bosattNorge) return if (antallIdentifisertePersoner <= 1) UFORE_UTLANDSTILSNITT else ID_OG_FORDELING
+            if (antallIdentifisertePersoner <= 1) return UFORE_UTLAND
         }
+
         return ID_OG_FORDELING
     }
 
@@ -424,18 +405,17 @@ class JournalforingService(
         sakinfo: SaksInfoSamlet?,
         identifisertPerson: IdentifisertPerson,
         antallIdentifisertePersoner: Int,
-        kravtypeFraSed: KravType?,
         currentSed: SED?
     ): Enhet {
-        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, null, sakinfo, currentSed)
+        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, sakinfo, currentSed)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
             sakinfo?.saktype,
             tema,
             antallIdentifisertePersoner,
-            kravtypeFraSed
-
+            currentSed?.nav?.krav?.type
         )
+
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
 
         return if (identifisertPerson.landkode == "NOR") {
@@ -459,7 +439,6 @@ class JournalforingService(
         sedhendelse: SedHendelse?,
         fnr: Fodselsnummer?,
         identifisertePersoner: Int,
-        kravtypeFraSed: KravType?,
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
