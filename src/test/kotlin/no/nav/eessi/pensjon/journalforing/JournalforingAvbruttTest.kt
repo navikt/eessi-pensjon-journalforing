@@ -101,7 +101,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             fdato = null,
             SaksInfoSamlet(saktype = null,  sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)),
             identifisertePersoner = 0,
-            currentSed = null,
+            currentSed = null
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
@@ -147,7 +147,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200),
+            currentSed = SED(type = SedType.P2200)
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
@@ -167,7 +167,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             LEALAUS_KAKE.getBirthDate(),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200),
+            currentSed = SED(type = SedType.P2200)
         )
 
         verify(exactly = 0) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
@@ -187,7 +187,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             LEALAUS_KAKE.getBirthDate(),
             identifisertePersoner = 0,
             navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200),
+            currentSed = SED(type = SedType.P2200)
         )
         Assertions.assertEquals(
             Enhet.ID_OG_FORDELING,
@@ -237,7 +237,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             LocalDate.of(1973,11,22),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200),
+            currentSed = SED(type = SedType.P2200)
         )
         Assertions.assertEquals(
             Enhet.NFP_UTLAND_AALESUND,
@@ -259,7 +259,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             identifisertPerson = identer[0],
             fdato = null,
             identifisertePersoner = identer.size,
-            currentSed = SED(type = sedType),
+            currentSed = SED(type = sedType)
         )
     }
 
