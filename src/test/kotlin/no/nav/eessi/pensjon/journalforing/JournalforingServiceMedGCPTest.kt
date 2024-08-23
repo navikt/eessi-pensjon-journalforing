@@ -119,7 +119,7 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
         every { oppgaveroutingService.hentEnhet(any()) } returns PENSJON_UTLAND
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
                 opprettJournalpostRequest
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {
             every { exists() } returns true
@@ -146,8 +146,7 @@ class JournalforingServiceMedGCPTest {
             })
         }
 
-
-        every {  gcpStorage.delete(blobId) } returns true
+        every { gcpStorage.delete(blobId) } returns true
         every { gcpStorage.list(any<String>())} returns blobList
 
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
@@ -184,9 +183,8 @@ class JournalforingServiceMedGCPTest {
             SaksInfoSamlet(saktype = ALDER),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            currentSed = SED(type = P2000),
+            currentSed = SED(type = P2000)
         )
-
     }
 
     private fun identifisertPersonPDL(
@@ -209,6 +207,5 @@ class JournalforingServiceMedGCPTest {
 
     private fun sedPersonRelasjon(fnr: Fodselsnummer? = LEALAUS_KAKE, relasjon: Relasjon = Relasjon.FORSIKRET, rinaDocumentId: String = RINADOK_ID) =
         SEDPersonRelasjon(fnr = fnr, relasjon = relasjon, rinaDocumentId = rinaDocumentId)
-
 
 }

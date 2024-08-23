@@ -83,7 +83,8 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
         val sedSendtJson = javaClass.getResource("/eux/hendelser/P_BUC_06_P7000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(sedSendtJson)
 
-        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1, null, sed)
+        val actual = journalforingService.hentTema(sedHendelse, Fodselsnummer.fra(fnr), 1,null, sed)
+
         assertEquals(tema, actual.toString())
     }
 
