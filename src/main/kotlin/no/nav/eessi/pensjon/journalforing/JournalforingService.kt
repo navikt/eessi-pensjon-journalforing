@@ -160,8 +160,7 @@ class JournalforingService(
                     saksInfoSamlet?.saksIdFraSed,
                     saksInfoSamlet?.sakInformasjon,
                     identifisertPerson?.personRelasjon?.fnr
-                ).also { logger.info("""SakId for rinaSak: ${sedHendelse.rinaSakId}: 
-                    | $it""".trimMargin()) }
+                ).also { logger.info("""SakId for rinaSak: ${sedHendelse.rinaSakId} pesysSakId: $it""".trimMargin()) }
 
                 // Oppretter journalpost
 
@@ -177,7 +176,7 @@ class JournalforingService(
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
                     tema = tema,
-                    kravType = currentSed?.nav?.krav?.type
+                    currentSed
                 )
 
                 if (journalpostRequest.bruker == null) {
@@ -413,7 +412,7 @@ class JournalforingService(
             sakinfo?.saktype,
             tema,
             antallIdentifisertePersoner,
-            currentSed?.nav?.krav?.type
+            currentSed
         )
 
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")

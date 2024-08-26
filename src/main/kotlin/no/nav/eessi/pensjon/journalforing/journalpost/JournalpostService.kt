@@ -7,9 +7,10 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.Bruker
+import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
@@ -48,12 +49,12 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
-        kravType: KravType? = null
+        currentSed: SED? = null
     ): OpprettJournalpostRequest {
         logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
-            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, kravType),
+            behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, currentSed),
             bruker = fnr?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
@@ -175,21 +176,16 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saktype: SakType?,
         tema: Tema,
         identifisertePersoner: Int,
-        kravtypeFraSed: KravType?
+        currentSed: SED?
     ): Behandlingstema {
+        val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
 
         if(bucType == P_BUC_01) return ALDERSPENSJON
         if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
         if(bucType == P_BUC_03) return UFOREPENSJON
 
-        // Gjelder kun P15000 der kravtypeFraSed er obligatorisk
-        if(kravtypeFraSed != null) {
-            return when (kravtypeFraSed) {
-                KravType.ALDER -> ALDERSPENSJON
-                KravType.GJENLEV -> GJENLEVENDEPENSJON
-                KravType.UFOREP -> UFOREPENSJON
-            }
-        }
+        if (bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list) return BehandlingstemaPbuc06(currentSed)
+        if (bucType == P_BUC_10 && currentSed?.type == SedType.P15000) return behandlingstemaPbuc10(currentSed)
 
         if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
         if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON
@@ -203,8 +199,33 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                     ALDERSPENSJON
                 }
             }
-
         } else ALDERSPENSJON
+    }
+
+    private fun BehandlingstemaPbuc06(currentSed: SED?) : Behandlingstema {
+        return when {
+            currentSed is P5000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is P5000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+
+            currentSed is P6000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is P6000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+
+            currentSed is P7000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is P7000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+
+            currentSed is P10000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is P10000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+
+        else -> ALDERSPENSJON
+        }
+    }
+
+    private fun behandlingstemaPbuc10(currentSed: SED?) : Behandlingstema {
+        return when {
+            currentSed is P15000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is P15000 && currentSed.hasGjenlevendePensjonType() -> GJENLEVENDEPENSJON
+            else -> ALDERSPENSJON
+        }
     }
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =

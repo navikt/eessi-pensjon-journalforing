@@ -9,9 +9,11 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.P2000
-import no.nav.eessi.pensjon.eux.model.SedType.P2100
+import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
+import no.nav.eessi.pensjon.eux.model.sed.Nav
+import no.nav.eessi.pensjon.eux.model.sed.P15000Pensjon
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -22,6 +24,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -175,11 +178,13 @@ internal class JournalpostServiceTest {
         val responseBody =
             javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
+        val sedHendelse = sedHendelse(P15000, BucType.P_BUC_10, null)
+
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-        val actualResponse = journalpostService.opprettJournalpost(
+        val opprettJournalpost = journalpostService.opprettJournalpost(
             sedHendelse = sedHendelse,
             fnr = SLAPP_SKILPADDE,
             sedHendelseType = MOTTATT,
@@ -201,12 +206,14 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null, Tema.PENSJON, KravType.GJENLEV
+            1, null, Tema.PENSJON, currentSed = currentSed
         )
-        journalpostService.sendJournalPost(actualResponse, sedHendelse, SENDT, "")
+        journalpostService.sendJournalPost(opprettJournalpost, sedHendelse, SENDT, "")
 
         // REQUEST
         val actualRequest = journalpostSlot.captured
+        println("actualResponse ${opprettJournalpost.toJson()}")
+        println("actualreq ${actualRequest.toJson()}")
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, actualRequest.behandlingstema)
     }
 

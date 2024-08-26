@@ -58,7 +58,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            currentSed = SED(type = SedType.P6000),
+            currentSed = SED(type = SedType.P6000)
         )
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
@@ -90,7 +90,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             LEALAUS_KAKE.getBirthDate(),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            currentSed = SED(type = SedType.P6000),
+            currentSed = SED(type = SedType.P6000)
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
@@ -115,6 +115,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             navAnsattInfo = navAnsattInfo(),
             currentSed = SED(type = generiskSED.sedType!!)
         )
+
         verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
         Assertions.assertEquals(false, forsoekFerdigstillSlot.captured)
     }
@@ -134,7 +135,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             LEALAUS_KAKE.getBirthDate(),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            currentSed = SED(type = SedType.P6000),
+            currentSed = SED(type = SedType.P6000)
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
