@@ -214,7 +214,7 @@ class JournalforingService(
                     )
 
                     // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
-                    if (journalPostResponse?.journalpostferdigstilt == true && hendelseType == HendelseType.SENDT) {
+                    if (journalPostResponse?.journalpostferdigstilt == true && hendelseType == SENDT) {
                         journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
                     }
 
@@ -561,8 +561,9 @@ class JournalforingService(
     /**
      * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2) og at lengden er 8 siffer
      */
-    private fun String.erGyldigPesysNummer(): Boolean {
-        return (this.first() == '1' || this.first() == '2') && this.length == 8
+    fun String?.erGyldigPesysNummer(): Boolean {
+        if(this.isNullOrEmpty()) return false
+        return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =

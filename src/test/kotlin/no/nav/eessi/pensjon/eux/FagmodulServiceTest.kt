@@ -75,7 +75,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("123123", mockAlleSedIBuc)
         assertNull(result)
 
-        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
 
     @Test
