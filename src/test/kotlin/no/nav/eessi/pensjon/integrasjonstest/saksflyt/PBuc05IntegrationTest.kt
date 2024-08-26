@@ -699,7 +699,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val afnr = "05127921999"
             val aktoera = "${fnr}1111"
             val aktoerf = "${fnr}0000"
-            val saknr = "1223123123"
+            val saknr = "13345678"
 
             val sedP8000 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
@@ -975,7 +975,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Scenario 13 - 3 Sed sendes som svar med fnr og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave til UFORE_UTLANDSTILSNITT`() {
             //En identifisert person, bruker er er over 62 år og bosatt Norge
             val fnr = FNR_OVER_62
-            val sakid = "1231232323"
+            val sakid = "13345678"
             val aktoer = "${fnr}111"
             val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = "1952-03-09").toJson())
             val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
@@ -1022,7 +1022,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Scenario 13 - 4 Sed sendes som svar med fnr utland og sak finnes og er GENRL pa tidligere mottatt P8000, opprettes en journalføringsoppgave som rutes til PENSJON UTLAND`() {
             val fnr = FNR_OVER_62
-            val sakid = "1231232323"
+            val sakid = "12345678"
             val aktoer = "${fnr}111"
             val sedP8000recevied = mapJsonToAny<P8000>((createSed(SedType.P8000, null, fdato = "1955-07-11").toJson()))
             val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
@@ -1038,9 +1038,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "SWE", aktorId = aktoer)
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = UFOREP, sakStatus = AVSLUTTET),
-                SakInformasjon(sakId = "123123123123123123", sakType = GENRL, sakStatus = LOPENDE)
+                SakInformasjon(sakId = "13345678", sakType = ALDER, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "14345678", sakType = UFOREP, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = "15345678", sakType = GENRL, sakStatus = LOPENDE)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
 
@@ -1070,7 +1070,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Scenario 13 - 5 Sed sendes som svar med fnr og sak finnes og er UFOREP pa tidligere mottatt P8000, journalføres automatisk`() {
             val fnr = FNR_VOKSEN_UNDER_62
-            val sakid = "1231232323"
+            val sakid = "13345678"
             val aktoer = "${fnr}111"
             val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
             val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
@@ -1086,8 +1086,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
 
             val saker = listOf(
-                SakInformasjon(sakId = "34234234", sakType = OMSORG, sakStatus = LOPENDE),
-                SakInformasjon(sakId = "23232312", sakType = GENRL, sakStatus = AVSLUTTET),
+                SakInformasjon(sakId = "12345678", sakType = OMSORG, sakStatus = LOPENDE),
+                SakInformasjon(sakId = "24232312", sakType = GENRL, sakStatus = AVSLUTTET),
                 SakInformasjon(sakId = sakid, sakType = UFOREP, sakStatus = LOPENDE)
             )
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker

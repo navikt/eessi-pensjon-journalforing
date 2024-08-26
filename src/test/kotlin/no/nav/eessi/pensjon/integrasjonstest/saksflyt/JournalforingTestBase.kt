@@ -61,7 +61,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Person as PdlPerson
 internal open class JournalforingTestBase {
 
     companion object {
-        const val SAK_ID = "12345"
+        const val SAK_ID = "12345678"
 
         const val FNR_OVER_62 = "09035225916"   // SLAPP SKILPADDE
         const val FNR_VOKSEN_UNDER_62 = "11067122781"    // KRAFTIG VEGGPRYD
