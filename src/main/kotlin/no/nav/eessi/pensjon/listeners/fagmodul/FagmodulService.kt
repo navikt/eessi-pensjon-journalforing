@@ -21,7 +21,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
         if (pesysSakId.erGyldigPesysNummer().not()) {
-            logger.warn("Pesys sakID: ${pesysSakId ?: "null"} for aktoerid: $aktoerId")
+            logger.warn("Det er registert feil eller ugyldig pesys sakID: ${pesysSakId} for aktoerid: $aktoerId")
             return null
         }
 
