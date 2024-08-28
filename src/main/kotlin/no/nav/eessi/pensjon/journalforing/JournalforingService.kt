@@ -372,6 +372,10 @@ class JournalforingService(
         }
     }
 
+    fun metricsOppdatering(slettetMelding: String) {
+        vurderBrukerInfo.countForOppdatering(slettetMelding)
+    }
+
     fun metricsCounterForEnhet(enhet: Enhet) {
         try {
             Metrics.counter("journalforingsEnhet_fra_tema", "type", enhet.name).increment()

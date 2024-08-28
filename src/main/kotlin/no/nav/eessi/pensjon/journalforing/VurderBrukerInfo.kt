@@ -118,7 +118,7 @@ class VurderBrukerInfo (
         countForOppdatering("Sletter fra journalpostid etter oppdatering av oppgave og journalpost")
     }
 
-    private fun countForOppdatering(melding: String) {
+    fun countForOppdatering(melding: String) {
         try {
             Metrics.counter("eessi_pensjon_journalforing_vurder_bruker", "melding", melding).increment()
         } catch (e: Exception) {

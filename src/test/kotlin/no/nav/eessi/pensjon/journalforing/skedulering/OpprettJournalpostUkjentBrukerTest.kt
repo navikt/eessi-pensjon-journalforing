@@ -1,10 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.skedulering
 
 import com.google.cloud.storage.BlobId
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
@@ -101,6 +98,7 @@ class OpprettJournalpostUkjentBrukerTest {
 
         every { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) } returns listeOverJpDetaljer
         every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns opprettJPResponse
+        justRun { journalforingService.metricsOppdatering(any()) }
 
         opprettJournalpostUkjentBruker.dagligSjekkForLagredeJournalposter()
 

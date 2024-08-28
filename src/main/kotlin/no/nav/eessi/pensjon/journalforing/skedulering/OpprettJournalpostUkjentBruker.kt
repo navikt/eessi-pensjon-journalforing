@@ -28,6 +28,7 @@ class OpprettJournalpostUkjentBruker(
             .also {
                 journalforingService.lagJournalpostOgOppgave(it, "eessipensjon")
                 gcpStorageService.slettJournalpostDetaljer(journalpostDetaljer.second).also { logger.info("") }
+                journalforingService.metricsOppdatering("Sletter automatisk lagret journalpost som har gått over 14 dager")
         } }
     }
 
