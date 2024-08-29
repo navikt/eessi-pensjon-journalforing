@@ -28,9 +28,7 @@ abstract class SedListenerBase(
 
     private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
 
-    /**
-     * Velger saktype fra enten bestemSak eller pensjonsinformasjon der det foreligger.
-     */
+    /** Velger saktype fra enten bestemSak eller pensjonsinformasjon der det finnes */
     private fun pensjonSakInformasjon(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null

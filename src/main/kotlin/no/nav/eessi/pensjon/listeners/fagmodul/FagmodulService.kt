@@ -15,16 +15,20 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
         return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
-            validerSakIdFraSEDogReturnerPensjonSak(aktoerId, sakId)
+            if (sakId.erGyldigPesysNummer().not()) {
+                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId} for aktoerid: $aktoerId")
+                return null
+            }
+            hentSakInformasjonFraPensjonSak(aktoerId, sakId)
         }
     }
 
-    private fun validerSakIdFraSEDogReturnerPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
-        if (pesysSakId.erGyldigPesysNummer().not()) {
-            logger.warn("Det er registert feil eller ugyldig pesys sakID: ${pesysSakId} for aktoerid: $aktoerId")
-            return null
-        }
+    fun String?.erGyldigPesysNummer(): Boolean {
+        if(this.isNullOrEmpty()) return false
+        return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
+    }
 
+    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
         secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
@@ -45,11 +49,6 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return gyldigSak.takeIf { saklist.size <= 1 }
             ?: gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
 
-    }
-
-    fun String?.erGyldigPesysNummer(): Boolean {
-        if(this.isNullOrEmpty()) return false
-        return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
     fun hentSakIdFraSED(sedListe: List<SED>): String? {
