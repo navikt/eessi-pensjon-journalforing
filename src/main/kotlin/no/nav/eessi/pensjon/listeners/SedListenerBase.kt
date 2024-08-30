@@ -57,7 +57,9 @@ abstract class SedListenerBase(
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
         return when {
             bucType == BucType.P_BUC_02 && sakInformasjon?.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET -> null
-            bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
+            bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType.also { logger.info("sakinformasjon.saktype: $it") } ?: saktypeFraSED
+            bucType == BucType.P_BUC_06 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
+            bucType == BucType.P_BUC_05 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
             else -> saktypeFraSED ?: sakInformasjon?.sakType
         }
     }
