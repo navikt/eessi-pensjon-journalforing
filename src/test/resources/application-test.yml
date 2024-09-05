@@ -1,6 +1,5 @@
 
 SPRING_PROFILES_ACTIVE: test
-ENV: test
 KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
 KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
