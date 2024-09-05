@@ -77,7 +77,8 @@ class JournalforingServiceMedGCPTest {
             mockk(),
             gcpStorageService,
             statistikkPublisher,
-            vurderBrukerInfo
+            vurderBrukerInfo,
+            env = null
         )
     }
 

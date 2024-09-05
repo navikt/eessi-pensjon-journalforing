@@ -56,6 +56,7 @@ class JournalforingService(
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
+    @Value("\${NAMESPACE}") private val env : String?
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -180,10 +181,14 @@ class JournalforingService(
                 )
 
                 if (journalpostRequest.bruker == null) {
-                    val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09)) {
+                    val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
                         journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
-                    } else {
+                    } else if(env != null && env in listOf("q2", "q1")){
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er ${env} og sendes direkte"
+                    }
+                    else {
                         vurderBrukerInfo.journalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
                     }

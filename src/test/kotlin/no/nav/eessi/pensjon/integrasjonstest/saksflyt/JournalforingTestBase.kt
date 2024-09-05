@@ -118,7 +118,8 @@ internal open class JournalforingTestBase {
         kravInitialiseringsService = kravService,
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
-        vurderBrukerInfo = vurderBrukerInfo
+        vurderBrukerInfo = vurderBrukerInfo,
+        env = null
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

@@ -7,7 +7,8 @@ KAFKA_KRAVINIT_TOPIC: 'eessi-pensjon-krav-q'
 KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
 AZURE_APP_JWK: "dummy"
-
+ENV: q2
+NAMESPACE: test
 kafka:
   sedSendt:
     topic: ${KAFKA_SEDSENDT_TOPIC}
@@ -30,7 +31,6 @@ kafka:
 
   security.protocol: SSL
 
-namespace: 'test'
 
 GCP_STORAGE_API_URL: "http://some.strange.place"
 GCP_BUCKET_NAME: 'dummyBucket'

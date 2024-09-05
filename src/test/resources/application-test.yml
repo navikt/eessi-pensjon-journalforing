@@ -1,6 +1,7 @@
 
 SPRING_PROFILES_ACTIVE: test
-
+ENV: test
+NAMESPACE: test
 KAFKA_SEDSENDT_TOPIC: 'eessi-basis-sedSendt-v1'
 KAFKA_SEDMOTTATT_TOPIC: 'eessi-basis-sedMottatt-v1'
 KAFKA_OPPGAVE_TOPIC: 'eessi-pensjon-oppgave-v1'
@@ -39,7 +40,6 @@ kafka:
 
   security.protocol: SSL
 
-namespace: 'test'
 METRICS_REQUESTFILTER_ENABLE: false
 NAIS_APP_NAME: eessi-pensjon-journalforing
 SAF_GRAPHQL_URL: http://localhost

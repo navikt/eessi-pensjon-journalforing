@@ -30,7 +30,8 @@ class OpprettJournalpostUkjentBrukerTest {
             pdfService = mockk(),
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk(),
-            vurderBrukerInfo = mockk()
+            vurderBrukerInfo = mockk(),
+            env = null
         )
 
         opprettJournalpostUkjentBruker = spyk(
