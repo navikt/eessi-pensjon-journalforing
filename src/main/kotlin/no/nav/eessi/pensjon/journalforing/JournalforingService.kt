@@ -56,7 +56,7 @@ class JournalforingService(
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
-    @Value("\${NAMESPACE}") private val env : String?,
+    @Value("\${NAMESPACE}") private val env : String?
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
