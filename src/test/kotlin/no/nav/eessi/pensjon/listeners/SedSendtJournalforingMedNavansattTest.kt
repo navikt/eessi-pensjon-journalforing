@@ -83,7 +83,8 @@ internal class SedSendtJournalforingMedNavansattTest {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
             oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
-            vurderBrukerInfo
+            vurderBrukerInfo,
+            env = null
         )
 
     private val sedListener = SedSendtListener(

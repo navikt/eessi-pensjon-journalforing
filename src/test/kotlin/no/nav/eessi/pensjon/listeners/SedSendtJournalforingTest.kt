@@ -80,7 +80,8 @@ internal class SedSendtJournalforingTest {
         mockk(),
         gcpStorageService,
         statistikkPublisher,
-        journalforingutenbruker
+        journalforingutenbruker,
+        env = null
     )
 
     private val sedListener = SedSendtListener(

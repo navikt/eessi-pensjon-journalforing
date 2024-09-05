@@ -51,7 +51,8 @@ abstract class JournalforingServiceBase {
         kravService,
         gcpStorageService,
         statistikkPublisher,
-        mockk(relaxed = true)
+        mockk(relaxed = true),
+        env = null
     )
 
     protected val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()
