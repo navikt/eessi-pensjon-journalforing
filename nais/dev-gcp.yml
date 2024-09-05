@@ -40,7 +40,7 @@ spec:
     pool: nav-dev
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: q2
+      value: test
     - name: NAMESPACE
       value: q2
     - name: GCP_BUCKET_NAME_JOURNAL

@@ -50,7 +50,7 @@
         </root>
     </springProfile>
 
-    <springProfile name="q2">
+    <springProfile name="test">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%level %logger %msg %n</pattern>
