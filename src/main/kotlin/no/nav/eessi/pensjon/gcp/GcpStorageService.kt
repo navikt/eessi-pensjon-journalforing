@@ -84,8 +84,8 @@ class GcpStorageService(
     }
 
     fun lagre(euxCaseId: String, gjennysak: GjennySak? = null) {
-        if (eksisterer(euxCaseId, "eessi-pensjon-gjenny")) return
-        val blobInfo =  BlobInfo.newBuilder(BlobId.of("eessi-pensjon-gjenny", euxCaseId)).setContentType("application/json").build()
+        if (eksisterer(euxCaseId, gjennyBucket)) return
+        val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, euxCaseId)).setContentType("application/json").build()
         kotlin.runCatching {
             gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
         }.onFailure { e ->
