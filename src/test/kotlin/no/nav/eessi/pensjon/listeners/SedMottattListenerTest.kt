@@ -1,9 +1,8 @@
 package no.nav.eessi.pensjon.listeners
 
-import io.mockk.Called
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
@@ -22,6 +21,10 @@ internal class SedMottattListenerTest {
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
+    private val gcpStorageService = mockk<GcpStorageService>().apply {
+        every { journalFinnes(any()) } returns false
+        justRun { lagre(any(), any()) }
+    }
 
     private val sedListener = SedMottattListener(
         jouralforingService,
@@ -29,13 +32,21 @@ internal class SedMottattListenerTest {
         euxService,
         fagmodulService = mockk(relaxed = true),
         bestemSakService,
-        gcpStorageService = mockk(relaxed = true),
+        gcpStorageService,
         "test"
     )
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
 
+        verify(exactly = 1) { acknowledgment.acknowledge() }
+    }
+
+    @Test
+    fun `Gitt en P_BUC_02 som er en gjenny buc saa skal den lagres i gjenny bucketen`() {
+        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json"))), cr, acknowledgment)
+
+        verify(exactly = 1) { gcpStorageService.lagre(any(), any()) }
         verify(exactly = 1) { acknowledgment.acknowledge() }
     }
 
