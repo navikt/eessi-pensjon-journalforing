@@ -45,11 +45,10 @@ METRICS_REQUESTFILTER_ENABLE: false
 #REST TEMPLATE URLS
 PDL_URL: http://localhost
 NAVANSATT_URL: http://localhost
+ETTERLATTE_URL: http://localhost
 SAF_GRAPHQL_URL: http://localhost
 EUX_RINA_API_V1_URL: http://localhost
 NAIS_APP_NAME: eessi-pensjon-journalforing
-ETTERLATTE_URL: http://localhost:${mockServerport}
-
 securitytokenservice.url: http://someurl
 srvusername: someuser
 srvpassword: somepass

@@ -58,9 +58,9 @@ import org.springframework.web.client.RestTemplate
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "etterlatteRestTemplate", classes = [RestTemplate::class]),
+    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
+
 internal class ConfigRestTemplateTest {
 
     @Autowired
