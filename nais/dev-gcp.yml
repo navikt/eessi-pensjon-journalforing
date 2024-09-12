@@ -15,6 +15,10 @@ spec:
       enabled: true
   accessPolicy:
     outbound:
+      rules:
+        - application: etterlatte-api
+          namespace: etterlatte
+          cluster: dev-gcp
       external:
         - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
         - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
@@ -91,6 +95,10 @@ spec:
       value: dokarkiv
     - name: AZURE_APP_SAF_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.saf
+    - name: AZURE_APP_ETTERLATTE_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-api
+    - name: ETTERLATTE_URL
+      value: https://etterlatte-api.intern.dev.nav.no
 
   image: {{ image }}
   ingresses:
