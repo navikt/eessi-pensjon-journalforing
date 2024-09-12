@@ -94,6 +94,9 @@ class IntegrasjonsTestConfig {
     fun navansattRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
+    fun etterlatteRestTemplate(): RestTemplate = mockedRestTemplate()
+
+    @Bean
     fun gcpStorageService(): GcpStorageService = mockk()
 
     fun mockedRestTemplate(): RestTemplate {
