@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test
 open class GcpStorageServiceTest {
 
     private lateinit var gcpStorageService: GcpStorageService
+    private val storage: Storage = mockk()
 
-    private val storage: Storage = mockk(relaxed = true)
     lateinit var lagretJournalPost: JournalpostMedSedInfo
     lateinit var sedMedBruker: SedHendelse
     lateinit var sedUtenBruker: SedHendelse
@@ -36,11 +36,13 @@ open class GcpStorageServiceTest {
         val lagretJournalpostRquest = opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
         lagretJournalPost = JournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
-        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
         every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns mockk {
             every { exists() } returns true
             every { getContent() } returns lagretJournalPost.toJson().toByteArray()
         }
+        listOf("gjennyB", "journalB").forEach { every { storage.get(it, *emptyArray<Storage.BucketGetOption>()) } returns mockk(relaxed = true)}
+        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
+
     }
 
     @Test
