@@ -34,6 +34,14 @@ spec:
           numNewerVersions: 2
           withState: ANY
         uniformBucketLevelAccess: true
+      - name: eessi-pensjon-gjenny-dev
+        retentionPeriodDays: 40
+        lifecycleCondition:
+          age: 365
+          createdBefore: 2020-01-01
+          numNewerVersions: 2
+          withState: ANY
+        uniformBucketLevelAccess: true
 
   webproxy: true
   kafka:
