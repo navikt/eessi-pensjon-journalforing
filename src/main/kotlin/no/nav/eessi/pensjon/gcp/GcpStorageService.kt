@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
@@ -19,7 +20,7 @@ import java.time.temporal.ChronoUnit
 class GcpStorageService(
     @param:Value("\${GCP_BUCKET_NAME_GJENNY}") var gjennyBucket: String,
     @param:Value("\${GCP_BUCKET_NAME_JOURNAL}") var journalBucket: String,
-    private val gcpStorage: Storage
+    var gcpStorage: Storage
 ) {
     private val logger = LoggerFactory.getLogger(GcpStorageService::class.java)
 
@@ -80,6 +81,18 @@ class GcpStorageService(
             logger.warn("En feil oppstod under henting av objekt: $storageKey i bucket")
         }
         return null
+    }
+
+    fun lagre(euxCaseId: String, gjennysak: GjennySak? = null) {
+        if (eksisterer(euxCaseId, "eessi-pensjon-gjenny")) return
+        val blobInfo =  BlobInfo.newBuilder(BlobId.of("eessi-pensjon-gjenny", euxCaseId)).setContentType("application/json").build()
+        kotlin.runCatching {
+            gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
+        }.onFailure { e ->
+            logger.error("Feilet med å lagre dokument med id: ${blobInfo.blobId.name}", e)
+        }.onSuccess {
+            if (gjennysak != null) logger.info("Lagret info på S3 med rinaID: $euxCaseId for gjenny: ${gjennysak.toJson()}")
+        }
     }
 
     fun lagreJournalpostDetaljer(
