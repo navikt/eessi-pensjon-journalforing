@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
@@ -56,6 +57,8 @@ class JournalforingServiceMedGCPTest {
     lateinit var statistikkPublisher: StatistikkPublisher
     lateinit var vurderBrukerInfo: VurderBrukerInfo
 
+    val etterlatteService = mockk<EtterlatteService>()
+
     @BeforeEach
     fun setup() {
         gcpStorage = mockk<Storage>()
@@ -78,6 +81,7 @@ class JournalforingServiceMedGCPTest {
             gcpStorageService,
             statistikkPublisher,
             vurderBrukerInfo,
+            etterlatteService,
             env = null
         )
     }

@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -70,6 +71,8 @@ internal class SedSendtJournalforingTest {
     private val gcpStorageService = mockk<GcpStorageService>()
     private val journalforingutenbruker = mockk<VurderBrukerInfo>()
 
+    val etterlatteService = mockk<EtterlatteService>()
+
     private val jouralforingService = JournalforingService(
         journalpostService,
         oppgaveRoutingService,
@@ -81,6 +84,7 @@ internal class SedSendtJournalforingTest {
         gcpStorageService,
         statistikkPublisher,
         journalforingutenbruker,
+        etterlatteService,
         env = null
     )
 
@@ -119,8 +123,7 @@ internal class SedSendtJournalforingTest {
         every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
-
-        //justRun { journalforingutenbruker.harJournalpostBruker(any(), any(), any(), any()) }
+        every { etterlatteService.hentGjennySak(any()) } returns "123456789"
     }
 
     @Test

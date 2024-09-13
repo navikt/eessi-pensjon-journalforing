@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
@@ -89,6 +90,9 @@ internal open class JournalforingTestBase {
 
     val journalpostService = spyk(JournalpostService(journalpostKlient))
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    val etterlatteService = mockk<EtterlatteService>(relaxed = true).apply {
+        every { hentGjennySak(eq("12345678")) }  returns "12345678"
+    }
 
     private val pdfService: PDFService = PDFService(euxService)
 
@@ -119,6 +123,7 @@ internal open class JournalforingTestBase {
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
         vurderBrukerInfo = vurderBrukerInfo,
+        etterlatteService = etterlatteService,
         env = null
     )
 
@@ -156,6 +161,7 @@ internal open class JournalforingTestBase {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
         every { gcpStorageService.gjennyFinnes(any()) } returns false
+//        every { etterlatteService.hentGjennySak(any()) } returns "123456789"
     }
 
     @AfterEach

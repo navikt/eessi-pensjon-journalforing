@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -33,6 +34,9 @@ import org.springframework.web.client.RestTemplate
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
+//    @Autowired
+//    private lateinit var etterlatteService: EtterlatteService
+
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
 
@@ -54,6 +58,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
+//        every { etterlatteService.hentGjennySak(any()) }  returns "1234"
     }
 
     @TestConfiguration
@@ -110,6 +115,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medJournalforing(false, "429434379")
             .medNorg2Tjeneste()
             .mockBestemSak()
+            .medGjennyResponse()
             .mockPensjonsinformasjon()
             .medOppdaterDistribusjonsinfo()
 

@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
@@ -32,6 +33,7 @@ abstract class JournalforingServiceBase {
     val kravHandeler = mockk<KravInitialiseringsHandler>()
     val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     val kravService = KravInitialiseringsService(kravHandeler)
+    val etterlatteService = mockk<EtterlatteService>()
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -52,6 +54,7 @@ abstract class JournalforingServiceBase {
         gcpStorageService,
         statistikkPublisher,
         mockk(relaxed = true),
+        etterlatteService,
         env = null
     )
 
@@ -69,6 +72,7 @@ abstract class JournalforingServiceBase {
             melding = "",
             journalpostferdigstilt = false,
         )
+        every { etterlatteService.hentGjennySak(any()) } returns "123456789"
 
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
     }

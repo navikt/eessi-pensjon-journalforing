@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -55,6 +56,7 @@ class JournalforingService(
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
+    private val etterlatteService: EtterlatteService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
     @Value("\${NAMESPACE}") private val env : String?
 ) {
@@ -538,6 +540,8 @@ class JournalforingService(
             logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
             return null
         }
+
+        sakIdFraSed?.let { sakId -> logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak(sakId)) }
 
         // 1. Er dette en Gjenny sak
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {

@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -76,14 +77,18 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val gcpStorageService = mockk<GcpStorageService>()
     private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
+    val etterlatteService = mockk<EtterlatteService>()
+
     private val journalforingService =
         JournalforingService(
-            journalpostService, oppgaveRoutingService,
-            mockk<PDFService>(relaxed = true).also {
+            journalpostService = journalpostService,
+            oppgaveRoutingService = oppgaveRoutingService,
+            pdfService = mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
-            vurderBrukerInfo,
+            oppgaveHandler = oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
+            vurderBrukerInfo = vurderBrukerInfo,
+            etterlatteService = etterlatteService,
             env = null
         )
 
