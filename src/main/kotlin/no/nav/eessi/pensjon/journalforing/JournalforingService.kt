@@ -541,7 +541,9 @@ class JournalforingService(
             return null
         }
 
-        sakIdFraSed?.let { sakId -> logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak(sakId)) }
+        //sakIdFraSed?.let { sakId -> logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak(sakId)) }
+        logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak("1234"))
+
 
         // 1. Er dette en Gjenny sak
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
