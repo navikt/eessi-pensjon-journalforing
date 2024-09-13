@@ -98,7 +98,7 @@ spec:
     - name: AZURE_APP_ETTERLATTE_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-api
     - name: ETTERLATTE_URL
-      value: https://etterlatte-api.intern.dev.nav.no
+      value: http://etterlatte-api.etterlatte
 
   image: {{ image }}
   ingresses:
