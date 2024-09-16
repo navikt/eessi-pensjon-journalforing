@@ -97,6 +97,8 @@ spec:
       value: dev-fss.teamdokumenthandtering.saf
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
+    - name: AZURE_APP_ETTERLATTE_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-api
 
   image: {{ image }}
   ingresses:
