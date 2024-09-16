@@ -5,6 +5,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import org.junit.jupiter.api.BeforeEach
@@ -98,7 +99,7 @@ class OpprettJournalpostUkjentBrukerTest {
         )
 
         every { gcpStorageService.hentGamleRinaSakerMedJPDetaljer(any()) } returns listeOverJpDetaljer
-        every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns opprettJPResponse
+        every { journalpostService.sendJournalPost(any<OpprettJournalpostRequest>(), any(), any(), any()) } returns opprettJPResponse
         justRun { journalforingService.metricsOppdatering(any()) }
 
         opprettJournalpostUkjentBruker.dagligSjekkForLagredeJournalposter()

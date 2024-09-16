@@ -5,16 +5,14 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.web.client.RestTemplate
 
 internal class JournalpostKlientTest {
@@ -30,15 +28,20 @@ internal class JournalpostKlientTest {
     @Test
     fun `Sjekker opprettelse av journalpost`(){
         val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val opprettJournalpostRequestJson = javaClass.getResource("/journalpost/opprettJournalpostRequest.json")!!.readText()
+        val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequest>((opprettJournalpostRequestJson))
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
 
         every { mockrestTemplate.exchange(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
-                any(),
+                HttpEntity(opprettJournalpostRequest.toString(), headers),
                 String::class.java)
         } returns ResponseEntity.ok(dummyResponse)
 
-        journalpostKlient.opprettJournalpost(mockk(relaxed = true), false, null)
+        journalpostKlient.opprettJournalpost(opprettJournalpostRequest, false, null)
 
         verify(exactly = 1) {
             mockrestTemplate.exchange("/journalpost?forsoekFerdigstill=false", HttpMethod.POST, any(), String::class.java)
