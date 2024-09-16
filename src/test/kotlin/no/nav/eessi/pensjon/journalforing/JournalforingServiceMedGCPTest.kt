@@ -166,6 +166,7 @@ class JournalforingServiceMedGCPTest {
         every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
+        every { etterlatteService.hentGjennySak(eq("1234")) } returns "123"
 
         val sedHendelse = SedHendelse(
             sedType = P2100,
