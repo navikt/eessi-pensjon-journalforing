@@ -180,7 +180,7 @@ class JournalforingService(
                     currentSed
                 )
 
-                if (journalpostRequest.bruker == null) {
+                if (journalpostRequest.bruker == null && journalpostRequest is OpprettJournalpostRequest) {
                     val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
                         journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
@@ -197,7 +197,7 @@ class JournalforingService(
                 }
                 else {
                     val journalPostResponse = journalpostService.sendJournalPost(
-                            journalpostRequest,
+                            journalpostRequest as OpprettJournalpostRequest,
                             sedHendelse,
                             hendelseType,
                             navAnsattInfo?.first
@@ -207,7 +207,7 @@ class JournalforingService(
                         journalpostRequest,
                         sedHendelse,
                         identifisertPerson,
-                        journalpostRequest.bruker,
+                        journalpostRequest.bruker!!,
                         navAnsattInfo?.first)
 
                     // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson

@@ -15,8 +15,7 @@ import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.PENSJON
-import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -50,8 +49,17 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
         currentSed: SED? = null
-    ): OpprettJournalpostRequest {
+    ): OpprettJournalpostRequestBase {
         logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
+
+        if(tema == EYBARNEP || tema == OMSTILLING) {
+            logger.info("Tema er $tema oppretter journalpost som kan overtas av gjenny")
+            return OpprettJournalpostRequestGjenny(
+                bruker = fnr?.let { Bruker(id = it.value) },
+                tema = tema
+            )
+        }
+
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, currentSed),
@@ -72,6 +80,13 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         val forsokFerdigstill: Boolean = kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
+    }
+
+    fun sendJournalPost(journalpostRequest: OpprettJournalpostRequestGjenny,
+                        sedHendelse: SedHendelse,
+                        hendelseType: HendelseType,
+                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+        return journalpostKlient.opprettJournalpost(journalpostRequest as OpprettJournalpostRequestGjenny, false, saksbehandlerIdent)
     }
 
     fun sendJournalPost(journalpostRequest: JournalpostMedSedInfo,

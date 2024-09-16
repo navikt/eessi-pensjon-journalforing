@@ -10,16 +10,15 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.journalforing.journalpost.OpprettJournalpostRequestBase
 import no.nav.eessi.pensjon.journalforing.saf.SafDokument
 import no.nav.eessi.pensjon.journalforing.saf.SafSak
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.utils.mapAnyToJson
 import java.io.IOException
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * /rest/journalpostapi/v1/journalpost
@@ -29,24 +28,22 @@ import java.util.*
 data class OpprettJournalpostRequest(
     val avsenderMottaker: AvsenderMottaker?,
     val behandlingstema: Behandlingstema? = null,
-    val bruker: Bruker? = null,
+    override val bruker: Bruker? = null,
     @JsonDeserialize(using = JsonAsStringDeserializer::class)
     @JsonRawValue
     val dokumenter: String,
     val journalfoerendeEnhet: Enhet? = null,
     val journalpostType: JournalpostType,
     val sak: Sak? = null,
-    val tema: Tema = Tema.PENSJON,
+    override val tema: Tema = Tema.PENSJON,
     val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
     val tittel: String
-){
-    val kanal: String = "EESSI"
-    val eksternReferanseId: String = UUID.randomUUID().toString()
+): OpprettJournalpostRequestBase()
 
-    override fun toString(): String {
-        return mapAnyToJson(this)
-    }
-}
+data class OpprettJournalpostRequestGjenny(
+    override val bruker: Bruker? = null,
+    override val tema: Tema,
+) : OpprettJournalpostRequestBase()
 
 data class JournalpostMedSedInfo(
     val journalpostRequest: OpprettJournalpostRequest,

@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.journalpost.OpprettJournalpostRequestBase
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -28,11 +29,11 @@ class VurderBrukerInfo (
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun journalPostUtenBruker(
-        journalpostRequest: OpprettJournalpostRequest?,
+        journalpostRequest: OpprettJournalpostRequestBase,
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
-        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
+        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest as OpprettJournalpostRequest, sedHendelse, sedHendelseType)
         logger.debug("""Journalposten mangler bruker og vil bli lagret for fremtidig vurdering
             | ${lagretJournalpost.toJson()}
         """.trimMargin())
@@ -46,7 +47,7 @@ class VurderBrukerInfo (
     }
 
     fun journalpostMedBruker(
-        jprMedBruker: OpprettJournalpostRequest,
+        jprMedBruker: OpprettJournalpostRequestBase,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,
         bruker: Bruker,
@@ -60,7 +61,7 @@ class VurderBrukerInfo (
                     val lagretJournalPost = mapJsonToAny<JournalpostMedSedInfo>(journalpost)
 
                     val jprUtenBrukerOppdatert = lagretJournalPost.copy(
-                        journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker)
+                        journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker as OpprettJournalpostRequest)
                     )
 
                     logger.info("Henter lagret sed: ${jprUtenBrukerOppdatert.journalpostRequest.tittel} fra gcp, rinaid: $rinaId")

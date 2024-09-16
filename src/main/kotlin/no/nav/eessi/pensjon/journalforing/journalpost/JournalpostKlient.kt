@@ -55,7 +55,7 @@ class JournalpostKlient(
      *         Respons fra Joark. Inneholder journalposten sin ID, status, melding, og en boolean-verdi
      *         som indikerer om posten ble ferdigstilt.
      */
-    fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+    fun opprettJournalpost(request: OpprettJournalpostRequestBase, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
 
         logger.info("Forsøker å ferdigstille journalpost: $forsokFerdigstill")
@@ -66,11 +66,17 @@ class JournalpostKlient(
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
+
                 if(!saksbehandlerIdent.isNullOrBlank()) {
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
-                val logg = request.maskerteVerdier()
-                secureLog.info("Journalpostrequesten: $logg, /n $headers")
+
+                if (request is OpprettJournalpostRequest) {
+                    val logg = request.maskerteVerdier()
+                    secureLog.info("Journalpostrequesten: $logg, /n $headers")
+                }
+
+                logger.info("Journalpostrequesten ljrehtugwlidfgu: $request, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
