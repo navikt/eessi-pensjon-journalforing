@@ -5,6 +5,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
@@ -38,6 +39,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
+        every { etterlatteService.hentGjennySak(eq("123456789")) } returns JournalforingTestBase.mockHentGjennySakMedError()
 
         val result = journalforingService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 

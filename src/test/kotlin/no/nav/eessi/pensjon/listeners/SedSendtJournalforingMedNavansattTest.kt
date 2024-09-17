@@ -22,6 +22,8 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -76,14 +78,18 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val gcpStorageService = mockk<GcpStorageService>()
     private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
+    val etterlatteService = mockk<EtterlatteService>()
+
     private val journalforingService =
         JournalforingService(
-            journalpostService, oppgaveRoutingService,
-            mockk<PDFService>(relaxed = true).also {
+            journalpostService = journalpostService,
+            oppgaveRoutingService = oppgaveRoutingService,
+            pdfService = mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
-            vurderBrukerInfo,
+            oppgaveHandler = oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
+            vurderBrukerInfo = vurderBrukerInfo,
+            etterlatteService = etterlatteService,
             env = null
         )
 
@@ -161,6 +167,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         every { gcpStorageService.journalFinnes(any())} returns false
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+        every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",

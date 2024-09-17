@@ -17,6 +17,8 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
@@ -58,8 +60,9 @@ import org.springframework.web.client.RestTemplate
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
+    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
+
 internal class ConfigRestTemplateTest {
 
     @Autowired
@@ -82,6 +85,9 @@ internal class ConfigRestTemplateTest {
 
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient
+
+    @MockkBean(relaxed = true)
+    private lateinit var etterlatteService: EtterlatteService
 
     @MockkBean(relaxed = true)
     private lateinit var safClient: SafClient
@@ -125,6 +131,7 @@ internal class ConfigRestTemplateTest {
 
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+        every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),

@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.P5000
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType.JOURNALFORING_UT
@@ -218,6 +219,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes, SakType er GENRL, bosatt utland`() {
             val saker = listOf(sakInformasjon(GENRL))
 
+            every { etterlatteService.hentGjennySak("12345678") }  returns mockHentGjennySak("12345678")
 
             testRunner(FNR_OVER_62, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
@@ -667,7 +669,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val voksen = createBrukerWith(FNR_OVER_62, "Voksen", "Vanlig", "NOR", "1213", aktorId = AKTOER_ID)
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
-
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
             val hendelse = createHendelseJson(SedType.P8000)
 
             val meldingSlot = slot<String>()
@@ -713,6 +715,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(afnr)) } returns createBrukerWith(afnr, "Lever", "Helt i live", "NOR", aktorId = aktoera)
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Død", "Helt Død", "NOR", aktorId = aktoerf)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
 
             val saker = listOf(
@@ -762,6 +765,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP5000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -799,7 +803,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP5000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -841,8 +845,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP5000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -892,8 +896,8 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP9000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
-
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -942,9 +946,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP9000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
-
             every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "KRAFTIG ", "VEGGPRYD", "NOR", aktorId = aktoer)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -989,6 +993,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP5000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = LOPENDE),
@@ -1042,7 +1047,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
                 SakInformasjon(sakId = "14345678", sakType = UFOREP, sakStatus = AVSLUTTET),
                 SakInformasjon(sakId = "15345678", sakType = GENRL, sakStatus = LOPENDE)
             )
-            every { fagmodulKlient.hentPensjonSaklist(aktoer) } returns saker
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1084,6 +1089,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000recevied.toJson() andThen sedP5000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Lever", "Helt i live", "NOR", aktorId = aktoer)
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val saker = listOf(
                 SakInformasjon(sakId = "12345678", sakType = OMSORG, sakStatus = LOPENDE),
@@ -1163,6 +1169,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val barn = createBrukerWith(FNR_BARN, "Barn", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns barn
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val hendelse = createHendelseJson(SedType.P8000)
 
@@ -1200,6 +1207,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val voksen = createBrukerWith(FNR_VOKSEN_UNDER_62, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns voksen
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val hendelse = createHendelseJson(SedType.P8000)
 
@@ -1249,6 +1257,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN_UNDER_62, IdentGruppe.FOLKEREGISTERIDENT))
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Voksen", "Avdod", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns mockEttrelatte
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1320,6 +1329,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val hendelse = createHendelseJson(SedType.P8000)
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val (journalpost, _) = initJournalPostRequestSlot()
             val journalpostRequest = slot<OpprettJournalpostRequest>()

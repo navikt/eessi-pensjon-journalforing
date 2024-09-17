@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -55,6 +56,7 @@ class JournalforingService(
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
+    private val etterlatteService: EtterlatteService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
     @Value("\${NAMESPACE}") private val env : String?
 ) {
@@ -539,7 +541,15 @@ class JournalforingService(
             return null
         }
 
-        // 1. Er dette en Gjenny sak
+        // 0. Sjekk for gjenny: fra etterlatte-api
+        sakIdFraSed?.let { sakId ->
+            etterlatteService.hentGjennySak(sakId).fold(
+                onSuccess = { gjennySak ->  return Sak("FAGSAK", gjennySak?.id.toString(), "EY")},
+                onFailure = { error -> logger.warn("Finner ingen gjennySak for rinasakId: $euxCaseId, og sakID: $sakId") }
+            )
+        }
+
+        // 1. Sjekk for gjenny: gcp
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
             return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }

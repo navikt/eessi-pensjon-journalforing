@@ -5,6 +5,7 @@ import io.mockk.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import org.junit.jupiter.api.BeforeEach
@@ -16,6 +17,8 @@ class OpprettJournalpostUkjentBrukerTest {
     private lateinit var journalforingService: JournalforingService
     private lateinit var oppgaveHandler: OppgaveHandler
     private lateinit var opprettJournalpostUkjentBruker: OpprettJournalpostUkjentBruker
+
+    val etterlatteService = mockk<EtterlatteService>()
 
     @BeforeEach
     fun setUp() {
@@ -31,7 +34,8 @@ class OpprettJournalpostUkjentBrukerTest {
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk(),
             vurderBrukerInfo = mockk(),
-            env = null
+            etterlatteService = etterlatteService,
+            env = null,
         )
 
         opprettJournalpostUkjentBruker = spyk(
