@@ -193,7 +193,6 @@ internal open class JournalforingTestBase {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-//        every { etterlatteService.hentGjennySak(any()) } returns "123456789"
     }
 
     @AfterEach

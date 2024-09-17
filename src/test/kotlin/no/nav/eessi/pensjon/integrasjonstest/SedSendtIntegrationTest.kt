@@ -34,9 +34,6 @@ import org.springframework.web.client.RestTemplate
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
-//    @Autowired
-//    private lateinit var etterlatteService: EtterlatteService
-
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
 
@@ -58,7 +55,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-//        every { etterlatteService.hentGjennySak(any()) }  returns "1234"
     }
 
     @TestConfiguration

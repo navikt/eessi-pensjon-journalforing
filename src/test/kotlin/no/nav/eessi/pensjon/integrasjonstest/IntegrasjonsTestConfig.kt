@@ -98,9 +98,7 @@ class IntegrasjonsTestConfig {
 
     @Bean
     fun etterlatteRestTemplate(): RestTemplate {
-        return mockedRestTemplate().apply {
-            //every { getForEntity("/api/sak/", String::class.java) } returns ResponseEntity("Mocked Response", HttpStatus.OK)
-        }
+        return mockedRestTemplate()
     }
 
     @Bean
