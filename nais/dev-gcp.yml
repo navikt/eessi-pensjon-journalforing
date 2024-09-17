@@ -95,10 +95,10 @@ spec:
       value: dokarkiv
     - name: AZURE_APP_SAF_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.saf
-    - name: AZURE_APP_ETTERLATTE_CLIENT_ID
-      value: dev-gcp.etterlatte.etterlatte-api
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
+    - name: AZURE_APP_ETTERLATTE_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-api
 
   image: {{ image }}
   ingresses:

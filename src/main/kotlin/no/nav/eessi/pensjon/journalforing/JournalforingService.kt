@@ -184,10 +184,10 @@ class JournalforingService(
 
                 if (journalpostRequest.bruker == null) {
                     val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
                     } else if(env != null && env in listOf("q2", "q1")){
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er ${env} og sendes direkte"
                     }
                     else {
@@ -284,7 +284,7 @@ class JournalforingService(
     }
 
     fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){
-        val response = journalpostService.sendJournalPost(journalpostRequest, "eessipensjon")
+        val response = journalpostService.sendJournalPost(journalpostRequest, saksbehandlerIdent)
 
         logger.info("""Lagret JP hentet fra GCP: 
                 | sedHendelse: ${journalpostRequest.sedHendelse}

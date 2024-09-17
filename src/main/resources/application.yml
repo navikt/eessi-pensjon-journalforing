@@ -83,7 +83,6 @@ no.nav.security.jwt:
           client-jwk: ${AZURE_APP_JWK}
           client-auth-method: private_key_jwt
 
-
 management:
   endpoints:
     metrics.enabled: true
