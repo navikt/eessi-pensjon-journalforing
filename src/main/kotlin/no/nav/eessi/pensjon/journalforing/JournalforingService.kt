@@ -541,11 +541,15 @@ class JournalforingService(
             return null
         }
 
-        //sakIdFraSed?.let { sakId -> logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak(sakId)) }
-        logger.info("Resulat fra gjenny for sakIdFraSed: " + etterlatteService.hentGjennySak("1234"))
+        // 0. Sjekk for gjenny: fra etterlatte-api
+        sakIdFraSed?.let { sakId ->
+            etterlatteService.hentGjennySak(sakId).fold(
+                onSuccess = { gjennySak ->  return Sak("FAGSAK", gjennySak?.id.toString(), "EY")},
+                onFailure = { error -> logger.warn("Finner ingen gjennySak for rinasakId: $euxCaseId, og sakID: $sakId") }
+            )
+        }
 
-
-        // 1. Er dette en Gjenny sak
+        // 1. Sjekk for gjenny: gcp
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
             return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
