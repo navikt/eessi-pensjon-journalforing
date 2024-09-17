@@ -490,6 +490,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         val sed = sedHendelse ?: createSedPensjon(P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
+        every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
             fnrVoksen,
             "Voksen ",

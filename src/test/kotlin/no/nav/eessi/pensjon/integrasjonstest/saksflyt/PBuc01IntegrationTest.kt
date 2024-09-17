@@ -100,6 +100,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
 
+//            every { etterlatteService.hentGjennySak(any()) }  returns mockHentGjennySak("12345678")
+
             testRunnerVoksen(
                 null,
                 null,
@@ -398,9 +400,11 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
             val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
 
-            val dokumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P8000, SedStatus.RECEIVED),
+            val dokumenter = listOf(
+                ForenkletSED("b12e06dda2c7474b9998c7139c841646", P8000, SedStatus.RECEIVED),
                 ForenkletSED("b12e06dda2c7474b9998c7139c841647", P8000, SedStatus.SENT),
-                ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED))
+                ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED)
+            )
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
             every { euxKlient.hentSedJson(any(), any()) } returns sedP8000.toJson() andThen sedP8000sendt.toJson() andThen sedP8000recevied.toJson()
@@ -408,6 +412,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val (journalpost, _) = initJournalPostRequestSlot(false)
             val hendelse = createHendelseJson(P8000, P_BUC_01)
@@ -590,7 +595,11 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
         justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
-
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -673,6 +682,12 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { kravInitHandlerKafka.sendDefault(any(), capture(kravmeldingSlot)).get() } returns mockk()
 
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
+
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
         justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }

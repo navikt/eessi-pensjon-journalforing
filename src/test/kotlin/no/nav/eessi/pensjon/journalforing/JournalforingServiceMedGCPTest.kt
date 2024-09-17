@@ -16,8 +16,10 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -166,7 +168,7 @@ class JournalforingServiceMedGCPTest {
         every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
-        every { etterlatteService.hentGjennySak(eq("1234")) } returns "123"
+        every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         val sedHendelse = SedHendelse(
             sedType = P2100,
