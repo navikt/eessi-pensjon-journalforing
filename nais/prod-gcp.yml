@@ -91,7 +91,7 @@ spec:
     - name: AZURE_APP_ETTERLATTE_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-api
 
-image: {{ image }}
+  image: {{ image }}
   ingresses:
     - https://eessi-pensjon-journaforing.intern.nav.no
   liveness:
