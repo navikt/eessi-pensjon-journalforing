@@ -1,4 +1,4 @@
-package no.nav.eessi.pensjon.journalforing.etterlatte
+    package no.nav.eessi.pensjon.journalforing.etterlatte
 
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.Etterlatte
@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 
@@ -39,23 +40,12 @@ class EtterlatteService(
 
             logger.debug("Hent sak fra gjenny: response: ${response.body}".trimMargin())
 
-            when (response.statusCode) {
-                HttpStatus.OK -> {
-                    response.body?.let {
-                        Result.success(mapJsonToAny<EtterlatteResponseData>(it))
-                    } ?: Result.success(null) // Handle null body
-                }
-                HttpStatus.NOT_FOUND -> {
-                    logger.warn("Ugyldig request; gjenny sak for ID: $sakId")
-                    Result.failure(IllegalArgumentException("Sak ikke funnet(404) for sakId: $sakId"))
-                }
-                else -> {
-                    logger.error("En generell feil  ${response.statusCode} under henting av gjenny sak for ID: $sakId")
-                    Result.failure(IllegalStateException("Feil under henting av gjenny: ${response.statusCode}"))
-                }
-            }
+            response.body?.let {
+                Result.success(mapJsonToAny<EtterlatteResponseData>(it))
+            } ?: Result.failure(IllegalArgumentException("Mangler melding fra gjenny")) // Handle null body
+        } catch (e: HttpClientErrorException.NotFound) {
+            Result.failure(IllegalArgumentException("Sak: $sakId ikke funnet (404)"))
         } catch (e: Exception) {
-            logger.error("En generell feil oppstod under henting av gjenny sak: ${e.message}")
             Result.failure(e)
         }
     }
