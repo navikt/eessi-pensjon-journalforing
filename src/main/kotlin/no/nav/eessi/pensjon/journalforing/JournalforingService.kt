@@ -196,12 +196,21 @@ class JournalforingService(
                     return@measure
                 }
                 else {
-                    val journalPostResponse = journalpostService.sendJournalPost(
-                            journalpostRequest as OpprettJournalpostRequest,
+                    val journalPostResponse = if(journalpostRequest is OpprettJournalpostRequest) {
+                         journalpostService.sendJournalPost(
+                                journalpostRequest,
+                                sedHendelse,
+                                hendelseType,
+                                navAnsattInfo?.first
+                        )
+                    } else {
+                        journalpostService.sendJournalPost(
+                            journalpostRequest as OpprettJournalpostRequestGjenny,
                             sedHendelse,
                             hendelseType,
                             navAnsattInfo?.first
-                    )
+                        )
+                    }
 
                     vurderBrukerInfo.journalpostMedBruker(
                         journalpostRequest,
