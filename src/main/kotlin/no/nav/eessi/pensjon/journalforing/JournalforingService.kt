@@ -541,7 +541,13 @@ class JournalforingService(
             return null
         }
 
-        // 0. Sjekk for gjenny: fra etterlatte-api
+        // 1. Joark oppretter ikke JP der det finnes sak, men mangler bruker
+        if(identifisertPersonFnr == null){
+            logger.warn("Fnr mangler for rinaSakId: $euxCaseId, henter derfor ikke sak")
+            return null
+        }
+
+        // 2. Sjekk for gjenny: fra etterlatte-api
         sakIdFraSed?.let { sakId ->
             etterlatteService.hentGjennySak(sakId).fold(
                 onSuccess = { gjennySak ->  return Sak("FAGSAK", gjennySak?.id.toString(), "EY")},
@@ -549,19 +555,13 @@ class JournalforingService(
             )
         }
 
-        // 1. Sjekk for gjenny: gcp
+        // 3. Sjekk for gjenny: gcp
         if (gcpStorageService.gjennyFinnes(euxCaseId)) {
             val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
             return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
         }
 
-        // 2. Joark oppretter ikke JP der det finnes sak, men mangler bruker
-        if(identifisertPersonFnr == null){
-            logger.warn("Fnr mangler for rinaSakId: $euxCaseId, henter derfor ikke sak")
-            return null
-        }
-
-        // 3. Pesys nr fra pesys
+        // 4. Pesys nr fra pesys
         sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
             return Sak("FAGSAK", it, "PP01").also { logger.info("Har funnet saksinformasjon fra pesys: $it, saksType:${sakInformasjon.sakType}, sakStatus:${sakInformasjon.sakStatus}") }
         }
