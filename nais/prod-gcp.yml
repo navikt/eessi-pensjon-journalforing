@@ -15,6 +15,10 @@ spec:
       enabled: true
   accessPolicy:
     outbound:
+      rules:
+        - application: etterlatte-api
+          namespace: etterlatte
+          cluster: prod-gcp
       external:
         - host: prod-fss.eessipensjon.eessi-pensjon-onprem-proxy
         - host: eessi-pensjon-fagmodul.intern.nav.no
