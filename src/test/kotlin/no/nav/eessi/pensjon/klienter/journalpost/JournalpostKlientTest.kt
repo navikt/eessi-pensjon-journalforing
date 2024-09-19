@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequestGjenny
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,6 +24,34 @@ internal class JournalpostKlientTest {
     @BeforeEach
     fun setup() {
         journalpostKlient = JournalpostKlient(mockrestTemplate)
+    }
+
+    @Test
+    fun `Sjekker oppretteldflighwøidufghse av journalpost`(){
+        val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val opprettJournalpostRequestJson = javaClass.getResource("/journalpost/opprettJournalpostRequest.json")!!.readText()
+        val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequestGjenny>((opprettJournalpostRequestJson))
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        every { mockrestTemplate.exchange(
+            "/journalpost?forsoekFerdigstill=false",
+            HttpMethod.POST,
+            HttpEntity(opprettJournalpostRequest.toString(), headers),
+            String::class.java)
+        } returns ResponseEntity.ok(dummyResponse)
+
+        journalpostKlient.opprettJournalpost(opprettJournalpostRequest, false, null)
+
+        verify(exactly = 1) {
+            mockrestTemplate.exchange(
+                "/journalpost?forsoekFerdigstill=false",
+                HttpMethod.POST,
+                HttpEntity("OpprettJournalpostRequest(bruker=Bruker(id=12345678912, idType=FNR), tema=PENSJON)", headers),
+                String::class.java
+            )
+        }
     }
 
     @Test

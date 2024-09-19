@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.journalforing
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonRawValue
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.TreeNode
@@ -40,6 +41,7 @@ data class OpprettJournalpostRequest(
     val tittel: String
 ): OpprettJournalpostRequestBase()
 
+@JsonTypeName("OpprettJournalpostRequest")
 data class OpprettJournalpostRequestGjenny(
     override val bruker: Bruker? = null,
     override val tema: Tema,
