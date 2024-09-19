@@ -38,7 +38,7 @@ internal class JournalpostKlientTest {
         every { mockrestTemplate.exchange(
             "/journalpost?forsoekFerdigstill=false",
             HttpMethod.POST,
-            HttpEntity(opprettJournalpostRequest.toString(), headers),
+            any(),
             String::class.java)
         } returns ResponseEntity.ok(dummyResponse)
 
@@ -66,7 +66,7 @@ internal class JournalpostKlientTest {
         every { mockrestTemplate.exchange(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
-                HttpEntity(opprettJournalpostRequest.toString(), headers),
+                any(),
                 String::class.java)
         } returns ResponseEntity.ok(dummyResponse)
 

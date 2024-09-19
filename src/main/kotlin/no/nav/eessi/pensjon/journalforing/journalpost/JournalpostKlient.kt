@@ -76,12 +76,12 @@ class JournalpostKlient(
                     secureLog.info("Journalpostrequesten: $logg., /n $headers")
                 }
 
-                logger.info("Journalpostrequesten ljrehtugwlidfgu: ${request}, /n $headers")
+                logger.info("Journalpostrequesten ljrehtugwlidfgu: ${request.toStringForJournalpost()}, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
                         HttpMethod.POST,
-                        HttpEntity(request.toJson(), headers),
+                        HttpEntity(request.toStringForJournalpost(), headers),
                         String::class.java)
                 mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
