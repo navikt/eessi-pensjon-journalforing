@@ -9,8 +9,6 @@ abstract class OpprettJournalpostRequestBase(
     open val bruker: Bruker? = null,
 
     ) {
-    abstract fun toStringForJournalpost() : String
-
     val kanal: String = "EESSI"
     val eksternReferanseId: String = UUID.randomUUID().toString()
 

@@ -73,13 +73,13 @@ class JournalpostKlient(
 
                 if (request is OpprettJournalpostRequest) {
                     val logg = request.maskerteVerdier()
-                    secureLog.info("Journalpostrequesten: $logg, /n $headers")
-                } else secureLog.info("Journalpostrequesten: ${request.toStringForJournalpost()}, /n $headers")
+                    secureLog.info("Journalpostrequesten: ${logg.toJson()} /n $headers")
+                } else secureLog.info("Journalpostrequesten: ${request.toJson()}, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
                         HttpMethod.POST,
-                        HttpEntity(request.toStringForJournalpost(), headers),
+                        HttpEntity(request.toJson(), headers),
                         String::class.java)
                 mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
             } catch (ex: HttpStatusCodeException) {

@@ -38,19 +38,12 @@ data class OpprettJournalpostRequest(
     override val tema: Tema = Tema.PENSJON,
     val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
     val tittel: String
-): OpprettJournalpostRequestBase() {
-    override fun toStringForJournalpost(): String =
-        "OpprettJournalpostRequest(avsenderMottaker=$avsenderMottaker, behandlingstema=$behandlingstema, bruker=$bruker, dokumenter='$dokumenter', journalfoerendeEnhet=$journalfoerendeEnhet, journalpostType=$journalpostType, sak=$sak, tema=$tema, tilleggsopplysninger=$tilleggsopplysninger, tittel='$tittel')"
-}
+): OpprettJournalpostRequestBase()
 
 data class OpprettJournalpostRequestGjenny(
     override val bruker: Bruker? = null,
     override val tema: Tema,
-) : OpprettJournalpostRequestBase() {
-    override fun toStringForJournalpost(): String {
-        return "OpprettJournalpostRequest(bruker=$bruker, tema=$tema)"
-    }
-}
+) : OpprettJournalpostRequestBase()
 
 data class JournalpostMedSedInfo(
     val journalpostRequest: OpprettJournalpostRequest,

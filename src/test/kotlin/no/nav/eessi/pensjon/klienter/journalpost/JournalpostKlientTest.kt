@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequestGjenny
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -48,7 +49,7 @@ internal class JournalpostKlientTest {
             mockrestTemplate.exchange(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
-                HttpEntity("OpprettJournalpostRequest(bruker=Bruker(id=12345678912, idType=FNR), tema=PENSJON)", headers),
+                HttpEntity(opprettJournalpostRequest.toJson(), headers),
                 String::class.java
             )
         }
@@ -76,7 +77,7 @@ internal class JournalpostKlientTest {
             mockrestTemplate.exchange(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
-                HttpEntity("OpprettJournalpostRequest(avsenderMottaker=AvsenderMottaker(id=null, idType=UTL_ORG, navn=null, land=NO), behandlingstema=ALDERSPENSJON, bruker=Bruker(id=12345678912, idType=FNR), dokumenter='[{\"brevkode\":\"NAV 14-05.09\",\"dokumentKategori\":\"SOK\",\"dokumentvarianter\":[{\"filtype\":\"PDF/A\",\"fysiskDokument\":\"string\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"Søknad om foreldrepenger ved fødsel\"}]', journalfoerendeEnhet=UFORE_UTLAND, journalpostType=INNGAAENDE, sak=Sak(sakstype=FAGSAK, fagsakid=11111, fagsaksystem=PEN), tema=PENSJON, tilleggsopplysninger=[Tilleggsopplysning(nokkel=eessi_pensjon_bucid, verdi=1111)], tittel='Inngående P2000 - Krav om alderspensjon')", headers),
+                HttpEntity(opprettJournalpostRequest.toJson(), headers),
                 String::class.java
             )
         }
