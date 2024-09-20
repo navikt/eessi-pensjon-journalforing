@@ -73,7 +73,12 @@ internal class JournalpostKlientTest {
         journalpostKlient.opprettJournalpost(opprettJournalpostRequest, false, null)
 
         verify(exactly = 1) {
-            mockrestTemplate.exchange("/journalpost?forsoekFerdigstill=false", HttpMethod.POST, any(), String::class.java)
+            mockrestTemplate.exchange(
+                "/journalpost?forsoekFerdigstill=false",
+                HttpMethod.POST,
+                HttpEntity("OpprettJournalpostRequest(avsenderMottaker=AvsenderMottaker(id=null, idType=UTL_ORG, navn=null, land=NO), behandlingstema=ALDERSPENSJON, bruker=Bruker(id=12345678912, idType=FNR), dokumenter='[{\"brevkode\":\"NAV 14-05.09\",\"dokumentKategori\":\"SOK\",\"dokumentvarianter\":[{\"filtype\":\"PDF/A\",\"fysiskDokument\":\"string\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"Søknad om foreldrepenger ved fødsel\"}]', journalfoerendeEnhet=UFORE_UTLAND, journalpostType=INNGAAENDE, sak=Sak(sakstype=FAGSAK, fagsakid=11111, fagsaksystem=PEN), tema=PENSJON, tilleggsopplysninger=[Tilleggsopplysning(nokkel=eessi_pensjon_bucid, verdi=1111)], tittel='Inngående P2000 - Krav om alderspensjon')", headers),
+                String::class.java
+            )
         }
     }
 
