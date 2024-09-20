@@ -73,10 +73,8 @@ class JournalpostKlient(
 
                 if (request is OpprettJournalpostRequest) {
                     val logg = request.maskerteVerdier()
-                    secureLog.info("Journalpostrequesten: $logg., /n $headers")
-                }
-
-                logger.info("Journalpostrequesten ljrehtugwlidfgu: ${request.toStringForJournalpost()}, /n $headers")
+                    secureLog.info("Journalpostrequesten: $logg, /n $headers")
+                } else secureLog.info("Journalpostrequesten: ${request.toStringForJournalpost()}, /n $headers")
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,

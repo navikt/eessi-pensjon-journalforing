@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
-import com.fasterxml.jackson.annotation.*
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonRawValue
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.TreeNode
@@ -38,9 +39,8 @@ data class OpprettJournalpostRequest(
     val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
     val tittel: String
 ): OpprettJournalpostRequestBase() {
-    override fun toStringForJournalpost(): String {
-        return "OpprettJournalpostRequest(avsenderMottaker=$avsenderMottaker, behandlingstema=$behandlingstema, bruker=$bruker, dokumenter='$dokumenter', journalfoerendeEnhet=$journalfoerendeEnhet, journalpostType=$journalpostType, sak=$sak, tema=$tema, tilleggsopplysninger=$tilleggsopplysninger, tittel='$tittel')"
-    }
+    override fun toStringForJournalpost(): String =
+        "OpprettJournalpostRequest(avsenderMottaker=$avsenderMottaker, behandlingstema=$behandlingstema, bruker=$bruker, dokumenter='$dokumenter', journalfoerendeEnhet=$journalfoerendeEnhet, journalpostType=$journalpostType, sak=$sak, tema=$tema, tilleggsopplysninger=$tilleggsopplysninger, tittel='$tittel')"
 }
 
 data class OpprettJournalpostRequestGjenny(
