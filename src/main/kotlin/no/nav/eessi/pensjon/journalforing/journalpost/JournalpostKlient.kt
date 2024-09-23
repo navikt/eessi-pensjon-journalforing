@@ -81,6 +81,9 @@ class JournalpostKlient(
                         HttpMethod.POST,
                         HttpEntity(request.toJson(), headers),
                         String::class.java)
+                logger.info("""Journalpost er opprettet med status: ${response.statusCode}
+                    | ${response.body}
+                """.trimMargin())
                 mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
