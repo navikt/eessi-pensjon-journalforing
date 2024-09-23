@@ -56,7 +56,8 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             logger.info("Tema er $tema oppretter journalpost som kan overtas av gjenny")
             return OpprettJournalpostRequestGjenny(
                 bruker = fnr?.let { Bruker(id = it.value) },
-                tema = tema
+                tema = tema,
+                dokumenter = dokumenter
             )
         }
 
@@ -86,7 +87,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         sedHendelse: SedHendelse,
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
-        return journalpostKlient.opprettJournalpost(journalpostRequest as OpprettJournalpostRequestGjenny, false, saksbehandlerIdent)
+        return journalpostKlient.opprettJournalpost(journalpostRequest, false, saksbehandlerIdent)
     }
 
     fun sendJournalPost(journalpostRequest: JournalpostMedSedInfo,

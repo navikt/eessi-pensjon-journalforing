@@ -31,7 +31,7 @@ data class OpprettJournalpostRequest(
     override val bruker: Bruker? = null,
     @JsonDeserialize(using = JsonAsStringDeserializer::class)
     @JsonRawValue
-    val dokumenter: String,
+    override val dokumenter: String,
     val journalfoerendeEnhet: Enhet? = null,
     val journalpostType: JournalpostType,
     val sak: Sak? = null,
@@ -43,6 +43,9 @@ data class OpprettJournalpostRequest(
 data class OpprettJournalpostRequestGjenny(
     override val bruker: Bruker? = null,
     override val tema: Tema,
+    @JsonDeserialize(using = JsonAsStringDeserializer::class)
+    @JsonRawValue
+    override val dokumenter: String,
 ) : OpprettJournalpostRequestBase()
 
 data class JournalpostMedSedInfo(
