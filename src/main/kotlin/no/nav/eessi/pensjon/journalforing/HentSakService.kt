@@ -7,7 +7,9 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 
+@Service
 class HentSakService(private val etterlatteService: EtterlatteService, private val gcpStorageService: GcpStorageService) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
