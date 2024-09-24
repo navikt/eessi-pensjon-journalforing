@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.listeners
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalforingService
@@ -111,8 +113,8 @@ class SedMottattListener(
         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
 
         if (bucType == P_BUC_02 ) {
-            val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSTILLING else EYBARNEP
-            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(sedHendelse.rinaSakId, gjennyTema.kode))
+            val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
+            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(sedHendelse.rinaSakId, gjennyTema.name))
         }
 
         val saksInfoSamlet = hentSaksInformasjonForEessi(

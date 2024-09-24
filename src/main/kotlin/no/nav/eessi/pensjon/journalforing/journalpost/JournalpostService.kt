@@ -52,11 +52,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     ): OpprettJournalpostRequestBase {
         logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
 
-        if(tema == EYBARNEP || tema == OMSTILLING) {
+        if (tema == EYBARNEP || tema == OMSTILLING) {
             logger.info("Tema er $tema oppretter journalpost som kan overtas av gjenny")
+            val gjennyTema = if (fnr?.erUnderAlder(20) == true)
+                EYBARNEP else OMSTILLING
+
             return OpprettJournalpostRequestGjenny(
-                bruker = fnr?.let { Bruker(id = it.value) },
-                tema = tema,
+                bruker = fnr.let { it?.let { it1 -> Bruker(id = it1.value) } },
+                tema = gjennyTema,
                 dokumenter = dokumenter
             )
         }
