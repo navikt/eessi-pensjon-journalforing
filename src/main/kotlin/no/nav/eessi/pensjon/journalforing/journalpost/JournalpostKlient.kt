@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequestGjenny
 import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
@@ -71,10 +72,7 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                if (request is OpprettJournalpostRequest) {
-                    val logg = request.maskerteVerdier()
-                    secureLog.info("Journalpostrequesten: ${logg.toJson()} /n $headers")
-                } else secureLog.info("Journalpostrequesten: ${request.toJson()}, /n $headers")
+                request.loggOpprettJournapostRequestUtenDok(headers.toString())
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
@@ -94,12 +92,16 @@ class JournalpostKlient(
             }
         }
     }
-    private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
-        if(dokumenter.isNotEmpty()) {
-            return this.copy(dokumenter = "*****************")
+
+    private fun <T : OpprettJournalpostRequestBase>T.loggOpprettJournapostRequestUtenDok(header : String) {
+        when (this) {
+            is OpprettJournalpostRequest ->
+                secureLog.info("Journalpostrequesten: ${this.copy(dokumenter = "***").toJson()}, header: $header")
+
+            is OpprettJournalpostRequestGjenny ->
+                secureLog.info("Journalpostrequesten: ${this.copy(dokumenter = "***").toJson()}, header: $header")
+            }
         }
-        return this
-    }
 
     /**
      *  Oppdaterer journaposten. Kanal og ekspedertstatus settes med {@code OppdaterDistribusjonsinfoRequest}.
