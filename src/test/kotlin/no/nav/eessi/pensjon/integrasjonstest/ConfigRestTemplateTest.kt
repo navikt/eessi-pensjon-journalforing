@@ -16,9 +16,8 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
+import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient

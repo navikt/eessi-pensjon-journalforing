@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
@@ -14,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties

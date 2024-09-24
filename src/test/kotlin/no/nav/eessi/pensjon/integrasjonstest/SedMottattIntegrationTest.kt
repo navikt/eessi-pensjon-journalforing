@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson

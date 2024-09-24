@@ -19,7 +19,6 @@ import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
-import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler

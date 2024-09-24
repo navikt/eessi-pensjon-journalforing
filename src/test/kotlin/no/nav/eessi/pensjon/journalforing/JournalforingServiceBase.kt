@@ -7,9 +7,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
-import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
-import no.nav.eessi.pensjon.journalforing.etterlatte.GjennySakType
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler

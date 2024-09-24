@@ -19,7 +19,6 @@ import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
-import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
