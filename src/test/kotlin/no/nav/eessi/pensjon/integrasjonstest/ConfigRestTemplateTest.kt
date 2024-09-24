@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
@@ -90,6 +91,9 @@ internal class ConfigRestTemplateTest {
     private lateinit var etterlatteService: EtterlatteService
 
     @MockkBean(relaxed = true)
+    private lateinit var hentSakService: HentSakService
+
+    @MockkBean(relaxed = true)
     private lateinit var safClient: SafClient
 
 
@@ -118,6 +122,7 @@ internal class ConfigRestTemplateTest {
         every { gcpStorageService.gjennyFinnes(any())} returns false
         every { gcpStorageService.journalFinnes(any())} returns false
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
+        every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
     }
 
 
@@ -131,7 +136,6 @@ internal class ConfigRestTemplateTest {
 
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),

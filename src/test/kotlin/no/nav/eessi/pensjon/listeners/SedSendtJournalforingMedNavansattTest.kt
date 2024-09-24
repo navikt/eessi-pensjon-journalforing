@@ -15,10 +15,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
-import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
@@ -77,8 +74,8 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
     private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
-
-    val etterlatteService = mockk<EtterlatteService>()
+    private val etterlatteService = mockk<EtterlatteService>()
+    private val hentSakService = HentSakService(etterlatteService, gcpStorageService)
 
     private val journalforingService =
         JournalforingService(
@@ -89,7 +86,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             },
             oppgaveHandler = oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
             vurderBrukerInfo = vurderBrukerInfo,
-            etterlatteService = etterlatteService,
+            hentSakService = hentSakService,
             env = null
         )
 

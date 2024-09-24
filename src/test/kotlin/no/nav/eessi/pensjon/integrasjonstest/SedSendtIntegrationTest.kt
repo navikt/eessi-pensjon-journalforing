@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
@@ -37,6 +38,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
 
+    @Autowired
+    private lateinit var hentSakService: HentSakService
+
     init {
         if (System.getProperty("mockServerport") == null) {
             mockServer = ClientAndServer(Configuration().apply {
@@ -55,6 +59,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
+        every { hentSakService.hentSak(any(), any(), any(), any()) } returns mockk(relaxed = true)
     }
 
     @TestConfiguration

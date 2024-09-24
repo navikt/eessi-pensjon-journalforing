@@ -12,10 +12,7 @@ import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
-import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
@@ -73,7 +70,8 @@ internal class SedSendtJournalforingTest {
     private val gcpStorageService = mockk<GcpStorageService>()
     private val journalforingutenbruker = mockk<VurderBrukerInfo>()
 
-    val etterlatteService = mockk<EtterlatteService>()
+    private val etterlatteService = mockk<EtterlatteService>()
+    private val hentSakService = HentSakService(etterlatteService, gcpStorageService)
 
     private val jouralforingService = JournalforingService(
         journalpostService,
@@ -86,7 +84,7 @@ internal class SedSendtJournalforingTest {
         gcpStorageService,
         statistikkPublisher,
         journalforingutenbruker,
-        etterlatteService,
+        hentSakService,
         env = null
     )
 

@@ -146,6 +146,7 @@ internal open class JournalforingTestBase {
 
     protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
 
+    val hentSakService = HentSakService(etterlatteService, gcpStorageService)
     val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
@@ -155,7 +156,7 @@ internal open class JournalforingTestBase {
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
         vurderBrukerInfo = vurderBrukerInfo,
-        etterlatteService = etterlatteService,
+        hentSakService = hentSakService,
         env = null
     )
 
@@ -228,6 +229,7 @@ internal open class JournalforingTestBase {
 
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
         } ?: run {

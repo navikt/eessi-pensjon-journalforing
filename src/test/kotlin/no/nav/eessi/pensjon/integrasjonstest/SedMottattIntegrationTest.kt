@@ -7,6 +7,8 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
@@ -42,14 +44,21 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
     @Autowired
     lateinit var gcpStorageService: GcpStorageService
 
+    @Autowired
+    lateinit var hentSakService: HentSakService
+
     @BeforeEach
     fun setUp() {
-        every { gcpStorageService.gjennyFinnes(any())} returns false
-        every { gcpStorageService.journalFinnes(any())} returns false
-        justRun{ gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any())}
-        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
+        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
         justRun { gcpStorageService.slettJournalpostDetaljer(any()) }
+
+        listOf("147729", "147666", "7477291").forEach {
+            every { hentSakService.hentSak(it) } returns mockk(relaxed = true)
+        }
     }
 
     @TestConfiguration

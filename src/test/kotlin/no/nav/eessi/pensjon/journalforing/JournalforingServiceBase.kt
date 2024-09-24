@@ -37,6 +37,7 @@ abstract class JournalforingServiceBase {
     val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     val kravService = KravInitialiseringsService(kravHandeler)
     val etterlatteService = mockk<EtterlatteService>()
+    val hentSakService = HentSakService(etterlatteService, gcpStorageService)
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -57,7 +58,7 @@ abstract class JournalforingServiceBase {
         gcpStorageService,
         statistikkPublisher,
         mockk(relaxed = true),
-        etterlatteService,
+        hentSakService,
         env = null
     )
 
