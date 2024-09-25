@@ -58,7 +58,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-        every { hentSakService.hentSak(any(), any(), any(), any()) } returns mockk(relaxed = true)
+//        every { hentSakService.hentSak(any(), any(), any(), any()) } returns mockk(relaxed = true)
     }
 
     @TestConfiguration

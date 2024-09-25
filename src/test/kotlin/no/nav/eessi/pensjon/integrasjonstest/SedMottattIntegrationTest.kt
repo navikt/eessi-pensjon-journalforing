@@ -43,8 +43,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
     @Autowired
     lateinit var gcpStorageService: GcpStorageService
 
-    @Autowired
-    lateinit var hentSakService: HentSakService
+        var hentSakService: HentSakService = mockk()
 
     @BeforeEach
     fun setUp() {
