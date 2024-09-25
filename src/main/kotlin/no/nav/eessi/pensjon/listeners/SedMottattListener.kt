@@ -114,7 +114,7 @@ class SedMottattListener(
 
         if (bucType == P_BUC_02 ) {
             val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
-            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(sedHendelse.rinaSakId, gjennyTema.name))
+            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
         }
 
         val saksInfoSamlet = hentSaksInformasjonForEessi(
