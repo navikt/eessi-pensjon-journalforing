@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
-import no.nav.eessi.pensjon.journalforing.journalpost.OpprettJournalpostRequestBase
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -29,7 +28,7 @@ class VurderBrukerInfo (
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun journalPostUtenBruker(
-        journalpostRequest: OpprettJournalpostRequestBase,
+        journalpostRequest: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
@@ -47,7 +46,7 @@ class VurderBrukerInfo (
     }
 
     fun journalpostMedBruker(
-        jprMedBruker: OpprettJournalpostRequestBase,
+        jprMedBruker: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,
         bruker: Bruker,

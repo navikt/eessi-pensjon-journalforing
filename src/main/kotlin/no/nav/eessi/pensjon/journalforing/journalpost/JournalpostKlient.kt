@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequestGjenny
 import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
@@ -56,7 +55,7 @@ class JournalpostKlient(
      *         Respons fra Joark. Inneholder journalposten sin ID, status, melding, og en boolean-verdi
      *         som indikerer om posten ble ferdigstilt.
      */
-    fun opprettJournalpost(request: OpprettJournalpostRequestBase, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+    fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
 
         logger.info("Forsøker å ferdigstille journalpost: $forsokFerdigstill")
@@ -72,7 +71,8 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                request.loggOpprettJournapostRequestUtenDok(headers.toString())
+                secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
+
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
@@ -92,16 +92,6 @@ class JournalpostKlient(
             }
         }
     }
-
-    private fun <T : OpprettJournalpostRequestBase>T.loggOpprettJournapostRequestUtenDok(header : String) {
-        when (this) {
-            is OpprettJournalpostRequest ->
-                secureLog.info("Journalpostrequesten: ${this.copy(dokumenter = "***").toJson()}, header: $header")
-
-            is OpprettJournalpostRequestGjenny ->
-                secureLog.info("Journalpostrequesten: ${this.copy(dokumenter = "***").toJson()}, header: $header")
-            }
-        }
 
     /**
      *  Oppdaterer journaposten. Kanal og ekspedertstatus settes med {@code OppdaterDistribusjonsinfoRequest}.

@@ -180,7 +180,7 @@ class JournalforingService(
                     currentSed
                 )
 
-                if (journalpostRequest.bruker == null && journalpostRequest is OpprettJournalpostRequest) {
+                if (journalpostRequest.bruker == null) {
                     val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
                         journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
@@ -196,28 +196,20 @@ class JournalforingService(
                     return@measure
                 }
                 else {
-                    val journalPostResponse = if(journalpostRequest is OpprettJournalpostRequest) {
-                         journalpostService.sendJournalPost(
-                                journalpostRequest,
-                                sedHendelse,
-                                hendelseType,
-                                navAnsattInfo?.first
-                        )
-                    } else {
-                        journalpostService.sendJournalPost(
-                            journalpostRequest as OpprettJournalpostRequestGjenny,
-                            sedHendelse,
-                            hendelseType,
-                            navAnsattInfo?.first
-                        )
-                    }
+                    val journalPostResponse = journalpostService.sendJournalPost(
+                        journalpostRequest,
+                        sedHendelse,
+                        hendelseType,
+                        navAnsattInfo?.first
+                    )
 
                     vurderBrukerInfo.journalpostMedBruker(
                         journalpostRequest,
                         sedHendelse,
                         identifisertPerson,
-                        journalpostRequest.bruker!!,
-                        navAnsattInfo?.first)
+                        journalpostRequest.bruker,
+                        navAnsattInfo?.first
+                    )
 
                     // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
                     val kanLageOppgave = journalpostService.skalStatusSettesTilAvbrutt(
