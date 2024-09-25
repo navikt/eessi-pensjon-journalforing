@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
@@ -36,9 +35,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @Autowired
     private lateinit var gcpStorageService: GcpStorageService
-
-    @Autowired
-    private lateinit var hentSakService: HentSakService
 
     init {
         if (System.getProperty("mockServerport") == null) {
