@@ -28,7 +28,7 @@ private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase() {
 
     @Test
-    fun `Sendt P6000 med all infor for forsoekFerdigstill true skal populere Journalpostresponsen med pesys sakid`() {
+    fun `Sendt P6000 med all info for at forsoekFerdigstill returnerer true saa skal det populere Journalpostresponsen med pesys sakid`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 

@@ -6,7 +6,6 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequestGjenny
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -31,7 +30,7 @@ internal class JournalpostKlientTest {
     fun `Sjekker oppretteldflighwøidufghse av journalpost`(){
         val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val opprettJournalpostRequestJson = javaClass.getResource("/journalpost/opprettJournalpostRequest.json")!!.readText()
-        val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequestGjenny>((opprettJournalpostRequestJson))
+        val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequest>((opprettJournalpostRequestJson))
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
