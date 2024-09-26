@@ -226,7 +226,7 @@ class JournalforingService(
                         logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $kanLageOppgave **********")
                     }
 
-                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave && tema !in listOf(BARNEP, OMSTILLING)) {
+                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave && tema !in listOf(EYBARNEP, OMSTILLING)) {
                         val melding = OppgaveMelding(
                             sedHendelse.sedType,
                             journalPostResponse.journalpostId,
