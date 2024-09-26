@@ -48,6 +48,42 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `Gitt at saksbehandler har opprettet en P2100 og sakType er OMSORG saa skal det ikke opprettes en journalforingsoppgave`() {
+
+        val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json")))
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val identifisertPerson = identifisertPersonPDL(
+            fnr = Fodselsnummer.fra("22117320034"),
+            aktoerId = AKTOERID,
+            personRelasjon = sedPersonRelasjon(fnr = Fodselsnummer.fra("22117320034")),
+            landkode = "NO"
+        )
+
+        val gjennysakGcp = """
+            {
+              "sakId" : "147730",
+              "sakType" : "EYO"
+            }
+        """.trimIndent()
+
+        every { gcpStorageService.gjennyFinnes(any()) } returns true
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennysakGcp
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            LocalDate.of(1973, 11,22),
+            identifisertePersoner = 2,
+            navAnsattInfo = null,
+            currentSed = SED(type = SedType.P2100)
+        )
+
+        assertEquals(Tema.OMSTILLING, opprettJournalpostRequestCapturingSlot.captured.tema)
+    }
+
+    @Test
     fun `Sendt gyldig Sed R004 på R_BUC_02`() {
         val hendelse = javaClass.getResource("/eux/hendelser/R_BUC_02_R004.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
