@@ -228,7 +228,7 @@ class JournalforingService(
                         logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $kanLageOppgave **********")
                     }
 
-                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave) {
+                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave && tema !in listOf(BARNEP, OMSTILLING)) {
                         val melding = OppgaveMelding(
                             sedHendelse.sedType,
                             journalPostResponse.journalpostId,
@@ -239,7 +239,7 @@ class JournalforingService(
                             null,
                             if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                             tema = tema
-                        )
+                        ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
                         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                     }
 
