@@ -32,7 +32,7 @@ class VurderBrukerInfo (
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
-        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest as OpprettJournalpostRequest, sedHendelse, sedHendelseType)
+        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest, sedHendelse, sedHendelseType)
         logger.debug("""Journalposten mangler bruker og vil bli lagret for fremtidig vurdering
             | ${lagretJournalpost.toJson()}
         """.trimMargin())
@@ -60,7 +60,7 @@ class VurderBrukerInfo (
                     val lagretJournalPost = mapJsonToAny<JournalpostMedSedInfo>(journalpost)
 
                     val jprUtenBrukerOppdatert = lagretJournalPost.copy(
-                        journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker as OpprettJournalpostRequest)
+                        journalpostRequest = updateRequest(lagretJournalPost.journalpostRequest, jprMedBruker)
                     )
 
                     logger.info("Henter lagret sed: ${jprUtenBrukerOppdatert.journalpostRequest.tittel} fra gcp, rinaid: $rinaId")
