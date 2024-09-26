@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -94,7 +95,15 @@ class IntegrasjonsTestConfig {
     fun navansattRestTemplate(): RestTemplate = mockedRestTemplate()
 
     @Bean
+    fun etterlatteRestTemplate(): RestTemplate {
+        return mockedRestTemplate()
+    }
+
+    @Bean
     fun gcpStorageService(): GcpStorageService = mockk()
+
+    @Bean
+    fun HentSakService(): HentSakService = mockk()
 
     fun mockedRestTemplate(): RestTemplate {
         val port = System.getProperty("mockServerport")

@@ -167,6 +167,20 @@ class CustomMockServer {
         )
     }
 
+    fun medGjennyResponse() = apply {
+        mockServer.`when`(
+            HttpRequest.request()
+                .withMethod("GET")
+                .withPath("/api/sak/123123124341345134513513451345134513513451345")
+        )
+            .respond(
+                HttpResponse.response()
+                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
+                    .withStatusCode(HttpStatusCode.OK_200.code())
+                    .withDelay(TimeUnit.SECONDS, 1)
+            )
+    }
+
     fun mockHttpRequestWithResponseFromFile(path: String, httpMethod: HttpMethod, response: String) = apply {
         mockServer.`when`(
             HttpRequest.request()

@@ -16,8 +16,10 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
@@ -55,6 +57,9 @@ class JournalforingServiceMedGCPTest {
     lateinit var oppgaveHandler: OppgaveHandler
     lateinit var statistikkPublisher: StatistikkPublisher
     lateinit var vurderBrukerInfo: VurderBrukerInfo
+    lateinit var hentSakService: HentSakService
+
+    var etterlatteService = mockk<EtterlatteService>()
 
     @BeforeEach
     fun setup() {
@@ -68,6 +73,7 @@ class JournalforingServiceMedGCPTest {
         journalpostService = mockk()
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
+        hentSakService = HentSakService(etterlatteService, gcpStorageService)
         vurderBrukerInfo = VurderBrukerInfo(gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
@@ -78,6 +84,7 @@ class JournalforingServiceMedGCPTest {
             gcpStorageService,
             statistikkPublisher,
             vurderBrukerInfo,
+            hentSakService,
             env = null
         )
     }
@@ -162,6 +169,7 @@ class JournalforingServiceMedGCPTest {
         every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
+        every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         val sedHendelse = SedHendelse(
             sedType = P2100,

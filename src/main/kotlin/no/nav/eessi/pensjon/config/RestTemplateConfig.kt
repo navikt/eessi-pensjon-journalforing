@@ -60,6 +60,10 @@ class RestTemplateConfig(
     @Value("\${SAF_GRAPHQL_URL}")
     lateinit var graphQlUrl: String
 
+    @Value("\${ETTERLATTE_URL}")
+    lateinit var etterlatteUrl: String
+
+
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
@@ -85,6 +89,9 @@ class RestTemplateConfig(
     @Bean
     fun safGraphQlOidcRestTemplate() = opprettRestTemplateForJoark(graphQlUrl, bearerTokenInterceptor(
         clientProperties("saf-credentials"), oAuth2AccessTokenService!!))
+
+    @Bean
+    fun etterlatteRestTemplate() = opprettRestTemplate(etterlatteUrl, "etterlatte-credentials")
 
     /**
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse

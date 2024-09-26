@@ -3,9 +3,11 @@ package no.nav.eessi.pensjon.journalforing.skedulering
 import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import org.junit.jupiter.api.BeforeEach
@@ -18,9 +20,13 @@ class OpprettJournalpostUkjentBrukerTest {
     private lateinit var oppgaveHandler: OppgaveHandler
     private lateinit var opprettJournalpostUkjentBruker: OpprettJournalpostUkjentBruker
 
+    private val etterlatteService = mockk<EtterlatteService>()
+    private lateinit var hentSakService : HentSakService
+
     @BeforeEach
     fun setUp() {
         gcpStorageService = mockk(relaxed = true)
+        hentSakService = HentSakService(etterlatteService, gcpStorageService)
         journalpostService = mockk(relaxed = true)
         oppgaveHandler = mockk(relaxed = true)
         journalforingService = JournalforingService(
@@ -32,7 +38,8 @@ class OpprettJournalpostUkjentBrukerTest {
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk(),
             vurderBrukerInfo = mockk(),
-            env = null
+            hentSakService = hentSakService,
+            env = null,
         )
 
         opprettJournalpostUkjentBruker = spyk(

@@ -11,7 +11,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -30,12 +29,10 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
-import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
-import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -55,6 +52,7 @@ class JournalforingService(
     private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
+    private val hentSakService: HentSakService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
     @Value("\${NAMESPACE}") private val env : String?
 ) {
@@ -156,7 +154,7 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
 
-                val arkivsaksnummer = hentSak(
+                val arkivsaksnummer = hentSakService.hentSak(
                     sedHendelse.rinaSakId,
                     saksInfoSamlet?.saksIdFraSed,
                     saksInfoSamlet?.sakInformasjon,
@@ -182,10 +180,10 @@ class JournalforingService(
 
                 if (journalpostRequest.bruker == null) {
                     val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
                     } else if(env != null && env in listOf("q2", "q1")){
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), "eessipensjon")
+                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er ${env} og sendes direkte"
                     }
                     else {
@@ -283,7 +281,7 @@ class JournalforingService(
     }
 
     fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){
-        val response = journalpostService.sendJournalPost(journalpostRequest, "eessipensjon")
+        val response = journalpostService.sendJournalPost(journalpostRequest, saksbehandlerIdent)
 
         logger.info("""Lagret JP hentet fra GCP: 
                 | sedHendelse: ${journalpostRequest.sedHendelse}
@@ -515,66 +513,6 @@ class JournalforingService(
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
 
-
-    /**
-     * Henter en sak basert på sakid og/eller gjenny informasjon
-     *
-     * @param euxCaseId SaksID fra EUX.
-     * @param sakIdFraSed SaksID fra SED (valgfri).
-     * @param sakInformasjon Tilleggsinfo om saken (valgfri).
-     * @param identifisertPersonFnr Fødselsnummer (valgfri).
-     * @return Et `Sak`-objekt hvis:
-     * 1. saken finnes i Gjenny.
-     * 2. identifisert person fnr  eksisterer.
-     * 3. det finnes gyldig Pesys-nummer i `sakInformasjon` eller `sakIdFraSed`.
-     */
-    fun hentSak(
-        euxCaseId: String,
-        sakIdFraSed: String? = null,
-        sakInformasjon: SakInformasjon? = null,
-        identifisertPersonFnr: Fodselsnummer? = null
-    ): Sak? {
-
-        if(euxCaseId == sakIdFraSed || euxCaseId == sakInformasjon?.sakId){
-            logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
-            return null
-        }
-
-        // 1. Er dette en Gjenny sak
-        if (gcpStorageService.gjennyFinnes(euxCaseId)) {
-            val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
-            return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
-        }
-
-        // 2. Joark oppretter ikke JP der det finnes sak, men mangler bruker
-        if(identifisertPersonFnr == null){
-            logger.warn("Fnr mangler for rinaSakId: $euxCaseId, henter derfor ikke sak")
-            return null
-        }
-
-        // 3. Pesys nr fra pesys
-        sakInformasjon?.sakId?.takeIf { it.isNotBlank() &&  it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01").also { logger.info("Har funnet saksinformasjon fra pesys: $it, saksType:${sakInformasjon.sakType}, sakStatus:${sakInformasjon.sakStatus}") }
-        }
-
-        // 4. Pesys nr fra SED
-        sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01").also { logger.info("har funnet saksinformasjon fra SED: $it") }
-        }
-
-        logger.warn("""RinaID: $euxCaseId
-            | sakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId}
-            | mangler verdi eller er ikke gyldig pesys nummer""".trimMargin())
-        return null
-    }
-
-    /**
-     * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2) og at lengden er 8 siffer
-     */
-    fun String?.erGyldigPesysNummer(): Boolean {
-        if(this.isNullOrEmpty()) return false
-        return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
-    }
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
         logger.info("Journalpost enhet: $enhetFraRouting rutes til -> Saksbehandlende enhet: $it")

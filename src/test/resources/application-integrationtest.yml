@@ -40,20 +40,22 @@ securityTokenService:
 
 NAIS_APP_NAME: eessi-pensjon-journalforing
 
-EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
-NAVANSATT_URL: http://localhost:${mockServerport}
 PDL_URL: http://localhost:${mockServerport}
+NORG2_URL: http://localhost:${mockServerport}
+BestemSak_URL: http://localhost:${mockServerport}
+NAVANSATT_URL: http://localhost:${mockServerport}
+ETTERLATTE_URL: http://localhost:${mockServerport}
+JOURNALPOST_V1_URL: http://localhost:${mockServerport}
+EUX_RINA_API_V1_URL: http://localhost:${mockServerport}
+oppgave.oppgaver.url: http://localhost:${mockServerport}
+aktoerregister.api.v1.url: http://localhost:${mockServerport}
+EESSI_PENSJON_FAGMODUL_URL: http://localhost:${mockServerport}
+
 securitytokenservice.url: http://someurl
 srvusername: someuser
 srvpassword: somepass
-oppgave.oppgaver.url: http://localhost:${mockServerport}
-JOURNALPOST_V1_URL: http://localhost:${mockServerport}
-aktoerregister.api.v1.url: http://localhost:${mockServerport}
 virksomhet.person.v3:
   endpointurl: http://localhost:${mockServerport}
-EESSI_PENSJON_FAGMODUL_URL: http://localhost:${mockServerport}
-NORG2_URL: http://localhost:${mockServerport}
-BestemSak_URL: http://localhost:${mockServerport}
 
 spring:
   kafka:

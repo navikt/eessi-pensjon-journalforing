@@ -5,6 +5,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
@@ -20,17 +21,32 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     fun `hentSak skal gi sak ved treff mot tidligere gjennySak`() {
         val euxCaseId = "123"
         val gjennySakJson = """{ "sakId": "sakId123", "sakType": "EY"}""".trimIndent()
+        val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
+
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns true
         every { gcpStorageService.hentFraGjenny(euxCaseId) } returns gjennySakJson
 
-        val result = journalforingService.hentSak(euxCaseId)
+        val result = hentSakService.hentSak(euxCaseId, identifisertPersonFnr = fnr)
 
         assertEquals(Sak("FAGSAK", "sakId123", "EY"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
         verify { gcpStorageService.hentFraGjenny(euxCaseId) }
     }
 
+    @Test
+    fun `hentSak skal returnere null det finnes gjennysak men bruker er null`() {
+        val euxCaseId = "123"
+        val gjennySakJson = """{ "sakId": "sakId123", "sakType": "EY"}""".trimIndent()
+
+        every { gcpStorageService.gjennyFinnes(euxCaseId) } returns true
+        every { gcpStorageService.hentFraGjenny(euxCaseId) } returns gjennySakJson
+
+        assertNull(hentSakService.hentSak(euxCaseId))
+
+        verify (exactly = 0) { gcpStorageService.gjennyFinnes(euxCaseId) }
+        verify (exactly = 0) { gcpStorageService.hentFraGjenny(euxCaseId) }
+    }
     @Test
     fun `hentSak skal gi Sak fra sakIdFraSed naar gjennySak mangler`() {
         val euxCaseId = "123"
@@ -39,7 +55,8 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
-        val result = journalforingService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
+        every { etterlatteService.hentGjennySak(eq("123456789")) } returns JournalforingTestBase.mockHentGjennySakMedError()
+        val result = hentSakService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 
         assertEquals(Sak("FAGSAK", sakIdFraSed, "PP01"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
@@ -53,7 +70,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
-        val result = journalforingService.hentSak(euxCaseId, sakInformasjon = sakInformasjon, identifisertPersonFnr = fnr)
+        val result = hentSakService.hentSak(euxCaseId, sakInformasjon = sakInformasjon, identifisertPersonFnr = fnr)
 
         assertEquals(Sak("FAGSAK", sakInformasjon.sakId!!, "PP01"), result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
@@ -66,7 +83,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
-        val result = journalforingService.hentSak(euxCaseId, identifisertPersonFnr = fnr)
+        val result = hentSakService.hentSak(euxCaseId, identifisertPersonFnr = fnr)
 
         assertNull(result)
         verify { gcpStorageService.gjennyFinnes(euxCaseId) }
@@ -80,7 +97,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
 
-        val result = journalforingService.hentSak(euxCaseId, sakInformasjon = sakInformasjon, identifisertPersonFnr = fnr)
+        val result = hentSakService.hentSak(euxCaseId, sakInformasjon = sakInformasjon, identifisertPersonFnr = fnr)
 
         assertNull(result)
     }
@@ -92,7 +109,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
 
         every { gcpStorageService.gjennyFinnes(euxCaseId) } returns false
-        val result = journalforingService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
+        val result = hentSakService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 
         assertNull(result)
     }

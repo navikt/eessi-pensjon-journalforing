@@ -480,7 +480,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = forenkletSEDs(sedStatus = SedStatus.RECEIVED)
             val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING)
 
-
             testRunner(FNR_OVER_62, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
@@ -849,6 +848,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns createBrukerWith(FNR_OVER_62, "Gjenlevende", "Lever", "SWE", aktorId = AKTOER_ID_2)
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -897,7 +897,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-
+        sakId?.let {   // Check if sakId is not null
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         if (fnrBarn != null) {
             every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
         }
@@ -981,7 +985,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-
+        sakId?.let {   // Check if sakId is not null
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         if (fnrBarn != null) {
             every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
         }
@@ -1060,7 +1068,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Mamma forsørger", "Etternavn", land, aktorId = AKTOER_ID)
         every { personService.hentPerson(NorskIdent(fnrBarn)) } returns mockBarn
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         val (journalpost, _) = initJournalPostRequestSlot()
 
         val forsikretfnr = if (krav == GJENLEV) fnrVoksen else null
@@ -1107,7 +1119,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         initCommonMocks(sed, alleDocs)
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         if (fnrVoksenSoker != null) {
             every { personService.hentPerson(NorskIdent(fnrVoksenSoker)) } returns createBrukerWith(fnrVoksenSoker, "Voksen", "Gjenlevende", land, aktorId = AKTOER_ID_2)
         }
@@ -1173,6 +1189,11 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
         val hendelse = createHendelseJson(SedType.P15000, P_BUC_10)

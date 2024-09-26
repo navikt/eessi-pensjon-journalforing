@@ -19,6 +19,9 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
+import no.nav.eessi.pensjon.journalforing.etterlatte.GjennySakType
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
@@ -70,6 +73,38 @@ internal open class JournalforingTestBase {
 
         const val AKTOER_ID = "0123456789000"
         const val AKTOER_ID_2 = "0009876543210"
+
+        fun mockHentGjennySakMedError(): Result<EtterlatteResponseData?> {
+            return mockHentGjennySak(null)
+        }
+        fun mockHentGjennySak(
+            sakId: String?,
+            id: Int = 1,
+            ident: String? = null,
+            enhet: String? = null,
+            sakType: GjennySakType? = null
+        ): Result<EtterlatteResponseData?> {
+            return when (sakId) {
+                "validId" -> {
+                    val mockData = EtterlatteResponseData(
+                        id = id,
+                        ident = ident,
+                        enhet = enhet,
+                        sakType = sakType
+                    )
+                    Result.success(mockData)
+                }
+                "notFoundId" -> {
+                    Result.failure(NoSuchElementException("Sak ikke funnet (404) for sakId: $sakId"))
+                }
+                "errorId" -> {
+                    Result.failure(IllegalStateException("Uventet statuskode: 500 for sakId: $sakId"))
+                }
+                else -> {
+                    Result.failure(Exception("En ukjent feil oppstod for sakId: $sakId"))
+                }
+            }
+        }
     }
     protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
         justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
@@ -89,6 +124,7 @@ internal open class JournalforingTestBase {
 
     val journalpostService = spyk(JournalpostService(journalpostKlient))
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
+    val etterlatteService = mockk<EtterlatteService>(relaxed = true)
 
     private val pdfService: PDFService = PDFService(euxService)
 
@@ -110,6 +146,7 @@ internal open class JournalforingTestBase {
 
     protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
 
+    val hentSakService = HentSakService(etterlatteService, gcpStorageService)
     val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
@@ -119,6 +156,7 @@ internal open class JournalforingTestBase {
         gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
         vurderBrukerInfo = vurderBrukerInfo,
+        hentSakService = hentSakService,
         env = null
     )
 
@@ -192,6 +230,11 @@ internal open class JournalforingTestBase {
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
 
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
 
         if (fnr != null) {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
@@ -314,6 +357,7 @@ internal open class JournalforingTestBase {
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+        every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(sakId)
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
@@ -378,7 +422,11 @@ internal open class JournalforingTestBase {
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockBruker
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-
+        sakId?.let {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
+        } ?: run {
+            every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
+        }
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
         val hendelse = createHendelseJson(SedType.P2200, P_BUC_03)
@@ -657,5 +705,4 @@ internal open class JournalforingTestBase {
             }
         """.trimIndent()
     }
-
 }
