@@ -1,5 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
@@ -9,22 +11,17 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
+private const val FAGSAK = "FAGSAK"
+private const val PP01 = "PP01"
+private const val EY = "EY"
+
 @Service
 class HentSakService(private val etterlatteService: EtterlatteService, private val gcpStorageService: GcpStorageService) {
 
-    private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
+    private val logger = LoggerFactory.getLogger(HentSakService::class.java)
 
     /**
      * Henter en sak basert på sakid og/eller gjenny informasjon
-     *
-     * @param euxCaseId SaksID fra EUX.
-     * @param sakIdFraSed SaksID fra SED (valgfri).
-     * @param sakInformasjon Tilleggsinfo om saken (valgfri).
-     * @param identifisertPersonFnr Fødselsnummer (valgfri).
-     * @return Et `Sak`-objekt hvis:
-     * 1. saken finnes i Gjenny.
-     * 2. identifisert person fnr  eksisterer.
-     * 3. det finnes gyldig Pesys-nummer i `sakInformasjon` eller `sakIdFraSed`.
      */
     fun hentSak(
         euxCaseId: String,
@@ -32,60 +29,65 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
         sakInformasjon: SakInformasjon? = null,
         identifisertPersonFnr: Fodselsnummer? = null
     ): Sak? {
-
         if (euxCaseId == sakIdFraSed || euxCaseId == sakInformasjon?.sakId) {
-            logger.error("SakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
+            logger.error("SakIdFromSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId} er lik rinaSakId: $euxCaseId")
             return null
         }
 
-        // 1. Joark oppretter ikke JP der det finnes sak, men mangler bruker
         if (identifisertPersonFnr == null) {
             logger.warn("Fnr mangler for rinaSakId: $euxCaseId, henter derfor ikke sak")
             return null
         }
 
-        // 2. Sjekk for gjenny: fra etterlatte-api
-        sakIdFraSed?.let { sakId ->
+        return hentGjennySak(sakIdFraSed, euxCaseId)
+            ?: hentGjennyFraGCP(euxCaseId)
+            ?: validerPesysSak(sakInformasjon, sakIdFraSed)
+            ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
+    }
+
+    private fun hentGjennySak(sakIdFromSed: String?, euxCaseId: String): Sak? {
+        sakIdFromSed?.let { sakId ->
             etterlatteService.hentGjennySak(sakId).fold(
-                onSuccess = { gjennySak -> return Sak("FAGSAK", gjennySak?.id.toString(), "EY") },
-                onFailure = { error -> logger.warn("Finner ingen gjennySak for rinasakId: $euxCaseId, og sakID: $sakId") }
+                onSuccess = { gjennySak -> return Sak(FAGSAK, gjennySak?.id.toString(), EY) },
+                onFailure = { logger.warn("Finner ingen gjennySak for rinasakId: $euxCaseId, og sakID: $sakId") }
             )
         }
+        return null
+    }
 
-        // 3. Sjekk for gjenny: gcp
-        if (gcpStorageService.gjennyFinnes(euxCaseId)) {
-            val gjennySak = gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }
-            return gjennySak?.sakId?.let { Sak("FAGSAK", it, "EY") }
+    private fun hentGjennyFraGCP(euxCaseId: String): Sak? {
+        return gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }?.sakId
+            ?.let { Sak(FAGSAK, it, EY) }
+    }
+
+    private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?): Sak? {
+        sakInfo?.sakId?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let { sakId ->
+            return lagSak(sakId, sakInfo.sakType, sakInfo.sakStatus)
         }
 
-        // 4. Pesys nr fra pesys
-        sakInformasjon?.sakId?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak(
-                "FAGSAK",
-                it,
-                "PP01"
-            ).also { logger.info("Har funnet saksinformasjon fra pesys: $it, saksType:${sakInformasjon.sakType}, sakStatus:${sakInformasjon.sakStatus}") }
+        sakIdFromSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
+            logger.info("Har funnet saksinformasjon fra SED: $it")
+            return Sak(FAGSAK, it, PP01)
         }
 
-        // 5. Pesys nr fra SED
-        sakIdFraSed?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let {
-            return Sak("FAGSAK", it, "PP01").also { logger.info("har funnet saksinformasjon fra SED: $it") }
-        }
+        return null
+    }
 
+    private fun lagSak(sakId: String, sakType: SakType?, sakStatus: SakStatus?): Sak {
+        logger.info("Har funnet saksinformasjon fra pesys: $sakId, saksType:$sakType, sakStatus:$sakStatus")
+        return Sak(FAGSAK, sakId, PP01)
+    }
+
+    private fun logOgReturnerNull(euxCaseId: String, sakIdFromSed: String?, sakInfo: SakInformasjon?): Sak? {
         logger.warn(
             """RinaID: $euxCaseId
-            | sakIdFraSed: $sakIdFraSed eller sakId fra saksInformasjon: ${sakInformasjon?.sakId}
+            | sakIdFromSed: $sakIdFromSed eller sakId fra saksInformasjon: ${sakInfo?.sakId}
             | mangler verdi eller er ikke gyldig pesys nummer""".trimMargin()
         )
         return null
     }
 
-    /**
-     * @return true om første tall er 1 eller 2 (pesys saksid begynner på 1 eller 2) og at lengden er 8 siffer
-     */
     fun String?.erGyldigPesysNummer(): Boolean {
-        if(this.isNullOrEmpty()) return false
-        return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
+        return this?.let { it.length == 8 && it.first() in listOf('1', '2') && it.all { char -> char.isDigit() } } ?: false
     }
-
 }
