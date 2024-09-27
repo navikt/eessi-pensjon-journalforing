@@ -33,6 +33,13 @@ import java.util.*
 @DisplayName("P_BUC_02 – IntegrationTest")
 internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
+
+    @BeforeEach
+    fun setupClass() {
+        justRun { gcpStorageService.lagre(any(), any())}
+    }
+
+
     @Nested
     @DisplayName("Inngående")
     inner class Scenario1Inngaende {
@@ -87,6 +94,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
+
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
             )
