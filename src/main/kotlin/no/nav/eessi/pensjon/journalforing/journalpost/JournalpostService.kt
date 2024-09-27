@@ -15,8 +15,7 @@ import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.PENSJON
-import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -52,6 +51,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         currentSed: SED? = null
     ): OpprettJournalpostRequest {
         logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
+
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, currentSed),
@@ -70,7 +70,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         sedHendelse: SedHendelse,
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
-        val forsokFerdigstill: Boolean = kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+
+        val gjenny = journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)
+        val forsokFerdigstill: Boolean = if(gjenny) false else kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
     }
 

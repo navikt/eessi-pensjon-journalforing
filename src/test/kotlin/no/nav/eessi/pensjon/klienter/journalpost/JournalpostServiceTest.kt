@@ -9,7 +9,8 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.SedType.P2000
+import no.nav.eessi.pensjon.eux.model.SedType.P2100
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
@@ -178,9 +179,9 @@ internal class JournalpostServiceTest {
         val responseBody =
             javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(P15000, BucType.P_BUC_10, null)
+        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
 
-        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = SedType.P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
@@ -215,6 +216,51 @@ internal class JournalpostServiceTest {
         println("actualResponse ${opprettJournalpost.toJson()}")
         println("actualreq ${actualRequest.toJson()}")
         assertEquals(Behandlingstema.GJENLEVENDEPENSJON, actualRequest.behandlingstema)
+    }
+
+    @Test
+    fun `Gitt gyldig argumenter for gjennysak så oppretter vi journalpost med bruker og tema`() {
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
+
+        val responseBody = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
+        val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
+
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
+
+        val opprettJournalpost = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            fnr = SLAPP_SKILPADDE,
+            sedHendelseType = MOTTATT,
+            journalfoerendeEnhet = ID_OG_FORDELING,
+            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
+            dokumenter = """
+                [{
+                    "brevkode": "NAV 14-05.09",
+                    "dokumentKategori": "SOK",
+                    "dokumentvarianter": [
+                            {
+                                "filtype": "PDF/A",
+                                "fysiskDokument": "string",
+                                "variantformat": "ARKIV"
+                            }
+                        ],
+                        "tittel": "Søknad om foreldrepenger ved fødsel"
+                }]
+            """.trimIndent(),
+            saktype = null,
+            AvsenderMottaker(null, null, null, land = "NO"),
+            1, null,
+            Tema.EYBARNEP, currentSed = currentSed
+        )
+        journalpostService.sendJournalPost(opprettJournalpost, sedHendelse, SENDT, "")
+
+        // REQUEST
+        val actualRequest = journalpostSlot.captured
+        println("actualResponse ${opprettJournalpost.toJson()}")
+        println("actualreq ${actualRequest.toJson()}")
     }
 
     @Test

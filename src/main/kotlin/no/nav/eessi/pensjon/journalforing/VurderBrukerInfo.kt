@@ -28,11 +28,11 @@ class VurderBrukerInfo (
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun journalPostUtenBruker(
-        journalpostRequest: OpprettJournalpostRequest?,
+        journalpostRequest: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
     ) {
-        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest!!, sedHendelse, sedHendelseType)
+        val lagretJournalpost = JournalpostMedSedInfo(journalpostRequest, sedHendelse, sedHendelseType)
         logger.debug("""Journalposten mangler bruker og vil bli lagret for fremtidig vurdering
             | ${lagretJournalpost.toJson()}
         """.trimMargin())

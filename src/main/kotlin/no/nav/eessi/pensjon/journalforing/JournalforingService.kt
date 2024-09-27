@@ -195,10 +195,10 @@ class JournalforingService(
                 }
                 else {
                     val journalPostResponse = journalpostService.sendJournalPost(
-                            journalpostRequest,
-                            sedHendelse,
-                            hendelseType,
-                            navAnsattInfo?.first
+                        journalpostRequest,
+                        sedHendelse,
+                        hendelseType,
+                        navAnsattInfo?.first
                     )
 
                     vurderBrukerInfo.journalpostMedBruker(
@@ -206,7 +206,8 @@ class JournalforingService(
                         sedHendelse,
                         identifisertPerson,
                         journalpostRequest.bruker,
-                        navAnsattInfo?.first)
+                        navAnsattInfo?.first
+                    )
 
                     // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
                     val kanLageOppgave = journalpostService.skalStatusSettesTilAvbrutt(
@@ -225,7 +226,7 @@ class JournalforingService(
                         logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $kanLageOppgave **********")
                     }
 
-                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave) {
+                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave && tema !in listOf(EYBARNEP, OMSTILLING)) {
                         val melding = OppgaveMelding(
                             sedHendelse.sedType,
                             journalPostResponse.journalpostId,
@@ -236,7 +237,7 @@ class JournalforingService(
                             null,
                             if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                             tema = tema
-                        )
+                        ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
                         oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
                     }
 

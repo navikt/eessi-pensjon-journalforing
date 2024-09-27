@@ -66,17 +66,22 @@ class JournalpostKlient(
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
+
                 if(!saksbehandlerIdent.isNullOrBlank()) {
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
-                val logg = request.maskerteVerdier()
-                secureLog.info("Journalpostrequesten: $logg, /n $headers")
+
+                secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
+
 
                 val response = journalpostOidcRestTemplate.exchange(
                         path,
                         HttpMethod.POST,
-                        HttpEntity(request.toString(), headers),
+                        HttpEntity(request.toJson(), headers),
                         String::class.java)
+                logger.info("""Journalpost er opprettet med status: ${response.statusCode}
+                    | ${response.body}
+                """.trimMargin())
                 mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
             } catch (ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
@@ -87,6 +92,7 @@ class JournalpostKlient(
             }
         }
     }
+
     private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
         if (dokumenter.isNotEmpty()) {
             return this.copy(dokumenter = dokumenter.take(20) + "**********")

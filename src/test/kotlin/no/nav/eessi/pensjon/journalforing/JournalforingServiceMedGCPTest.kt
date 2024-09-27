@@ -160,7 +160,7 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
 
         justRun { journalpostService.oppdaterJournalpost(any(), any(), any(), any(), any()) }
-        every { journalpostService.sendJournalPost(any(), any(), any(), any()) } returns OpprettJournalPostResponse(
+        every { journalpostService.sendJournalPost(any<OpprettJournalpostRequest>(), any(), any(), any()) } returns OpprettJournalPostResponse(
             journalpostId = journalpostId,
             journalstatus = Journalstatus.MOTTATT.name,
             melding = null,

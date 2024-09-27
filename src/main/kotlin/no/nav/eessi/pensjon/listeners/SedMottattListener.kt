@@ -1,12 +1,18 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
+import no.nav.eessi.pensjon.models.Tema.EYBARNEP
+import no.nav.eessi.pensjon.models.Tema.OMSTILLING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
@@ -18,6 +24,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.Period
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -76,6 +84,7 @@ class SedMottattListener(
         if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
             logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
         }
+
         val bucType = sedHendelse.bucType!!
         val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
@@ -102,6 +111,12 @@ class SedMottattListener(
 
         val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
+
+        if (bucType == P_BUC_02 ) {
+            val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
+            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
+        }
+
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
             sedHendelse,

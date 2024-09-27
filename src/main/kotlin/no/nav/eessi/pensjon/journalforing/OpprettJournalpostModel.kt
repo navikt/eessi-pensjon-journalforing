@@ -35,16 +35,16 @@ data class OpprettJournalpostRequest(
     val dokumenter: String,
     val journalfoerendeEnhet: Enhet? = null,
     val journalpostType: JournalpostType,
-    val sak: Sak? = null,
+    val sak: Sak? = null,           //Tom for Gjennyrequest
     val tema: Tema = Tema.PENSJON,
     val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
-    val tittel: String
+    val tittel: String,
 ){
     val kanal: String = "EESSI"
     val eksternReferanseId: String = UUID.randomUUID().toString()
 
     override fun toString(): String {
-        return mapAnyToJson(this)
+        return mapAnyToJson(this,true)
     }
 }
 
