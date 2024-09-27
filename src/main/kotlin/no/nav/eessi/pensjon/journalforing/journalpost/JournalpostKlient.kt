@@ -93,6 +93,13 @@ class JournalpostKlient(
         }
     }
 
+    private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
+        if (dokumenter.isNotEmpty()) {
+            return this.copy(dokumenter = dokumenter.take(20) + "**********")
+        }
+        return this
+    }
+
     /**
      *  Oppdaterer journaposten. Kanal og ekspedertstatus settes med {@code OppdaterDistribusjonsinfoRequest}.
      *  Dette låser og ferdigstiller journalposten!
