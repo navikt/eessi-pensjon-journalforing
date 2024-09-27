@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
@@ -88,8 +89,8 @@ internal class ConfigRestTemplateTest {
     @MockkBean(relaxed = true)
     private lateinit var etterlatteService: EtterlatteService
 
-//    @MockkBean(relaxed = true)
-//    private lateinit var hentSakService: HentSakService
+    @MockkBean(relaxed = true)
+    private lateinit var hentSakService: HentSakService
 
     @MockkBean(relaxed = true)
     private lateinit var safClient: SafClient
@@ -120,7 +121,7 @@ internal class ConfigRestTemplateTest {
         every { gcpStorageService.gjennyFinnes(any())} returns false
         every { gcpStorageService.journalFinnes(any())} returns false
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-//        every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
+        every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
     }
 
 
@@ -152,6 +153,10 @@ internal class ConfigRestTemplateTest {
         @Bean
         @Primary
         fun euxKlientLab(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+
+        @Bean
+        @Primary
+        fun hentSakService(): HentSakService = mockk(relaxed = true)
 
         @Bean
         @Primary

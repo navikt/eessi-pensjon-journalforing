@@ -32,11 +32,10 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import org.springframework.test.context.event.annotation.BeforeTestClass
+import org.springframework.test.util.ReflectionTestUtils
 
 @DisplayName("P_BUC_05 - IntegrationTest")
 internal class PBuc05IntegrationTest : JournalforingTestBase() {
@@ -1242,6 +1241,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     @Nested
     @DisplayName("Inngående - Scenario 3")
     inner class Scenario3Inngaende {
+
         @Test
         fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte mangler fnr medfører bruk av sokPerson`() {
 

@@ -144,7 +144,16 @@ internal open class JournalforingTestBase {
     }
     private val statistikkPublisher = StatistikkPublisher(automatiseringHandlerKafka)
 
-    protected val gcpStorageService : GcpStorageService = mockk(relaxed = true)
+    protected val gcpStorageService : GcpStorageService = mockk<GcpStorageService>()
+
+    @BeforeEach
+    fun setup() {
+        ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
+        journalforingService.nameSpace = "test"
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+    }
 
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
     val journalforingService: JournalforingService = JournalforingService(
@@ -188,14 +197,6 @@ internal open class JournalforingTestBase {
         navansattKlient = navansattKlient
     )
 
-
-    @BeforeEach
-    fun setup() {
-        ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
-        journalforingService.nameSpace = "test"
-        every { gcpStorageService.gjennyFinnes(any()) } returns false
-    }
-
     @AfterEach
     fun after() {
         clearAllMocks()
@@ -229,6 +230,9 @@ internal open class JournalforingTestBase {
 
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
@@ -358,6 +362,10 @@ internal open class JournalforingTestBase {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
         every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(sakId)
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 

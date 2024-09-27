@@ -179,6 +179,7 @@ internal class SedSendtJournalforingTest {
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -255,7 +256,7 @@ internal class SedSendtJournalforingTest {
             journalpostferdigstilt = false,
         )
 
-        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val requestSlot = slot<OpprettJournalpostRequest>()
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns opprettJournalPostResponse
@@ -322,6 +323,7 @@ internal class SedSendtJournalforingTest {
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -388,7 +390,7 @@ internal class SedSendtJournalforingTest {
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
-
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "EKSPEDERT",

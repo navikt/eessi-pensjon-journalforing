@@ -27,6 +27,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.springframework.test.util.ReflectionTestUtils
 import java.util.*
 
 @DisplayName("P_BUC_02 – IntegrationTest")
