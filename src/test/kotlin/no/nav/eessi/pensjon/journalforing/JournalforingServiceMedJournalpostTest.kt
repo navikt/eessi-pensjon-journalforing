@@ -48,6 +48,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
                 any()
             )
         } returns mockk(relaxed = true)
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
 
         journalforingService.journalfor(
@@ -82,7 +83,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
 
         val forsoekFerdigstillSlot = slot<Boolean>()
         every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
-
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
@@ -172,6 +173,8 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         val capturedMelding = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(capturedMelding)) }
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.MOTTATT,

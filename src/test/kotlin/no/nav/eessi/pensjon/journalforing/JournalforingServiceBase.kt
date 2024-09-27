@@ -32,7 +32,7 @@ abstract class JournalforingServiceBase {
     val pdfService = mockk<PDFService>()
     val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     val kravHandeler = mockk<KravInitialiseringsHandler>()
-    val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
+    val gcpStorageService = mockk<GcpStorageService>()
     val kravService = KravInitialiseringsService(kravHandeler)
     val etterlatteService = mockk<EtterlatteService>()
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
@@ -67,14 +67,16 @@ abstract class JournalforingServiceBase {
 
         //MOCK RESPONSES
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-        every { gcpStorageService.journalFinnes(any()) } returns false
+//        every { gcpStorageService.journalFinnes(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "EKSPEDERT",
             melding = "",
             journalpostferdigstilt = false,
         )
-        every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
+//        every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
+//        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
     }

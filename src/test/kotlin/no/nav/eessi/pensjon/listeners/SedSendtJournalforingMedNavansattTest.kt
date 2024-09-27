@@ -164,6 +164,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",

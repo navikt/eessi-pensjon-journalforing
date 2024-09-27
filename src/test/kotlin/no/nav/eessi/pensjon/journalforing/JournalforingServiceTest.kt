@@ -28,6 +28,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -45,6 +46,11 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
         private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
+    }
+
+    @BeforeEach
+    fun setupClass() {
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
 
     @Test
