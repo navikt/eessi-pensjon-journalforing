@@ -88,8 +88,8 @@ class JournalpostKlient(
         }
     }
     private fun OpprettJournalpostRequest.maskerteVerdier(): OpprettJournalpostRequest {
-        if(dokumenter.isNotEmpty()) {
-            return this.copy(dokumenter = "*****************")
+        if (dokumenter.isNotEmpty()) {
+            return this.copy(dokumenter = dokumenter.take(20) + "**********")
         }
         return this
     }
