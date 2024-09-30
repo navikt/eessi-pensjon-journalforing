@@ -187,7 +187,7 @@ class JournalforingService(
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er ${env} og sendes direkte"
                     }
                     else {
-                        vurderBrukerInfo.journalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
+                        vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
                         "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
                     }
                     logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")

@@ -167,7 +167,7 @@ abstract class IntegrasjonsBase {
     fun meldingForMottattListener(messagePath: String) {
         // del 1: opprettelse av journalpost og oppgave: lagre jp-request før vurdering
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         val hendelse = javaClass.getResource(messagePath)!!.readText()
 

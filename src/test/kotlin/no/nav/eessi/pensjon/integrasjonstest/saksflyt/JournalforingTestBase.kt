@@ -108,7 +108,7 @@ internal open class JournalforingTestBase {
     }
     protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
         justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
-        justRun { journalPostUtenBruker(any(), any(), any()) }
+        justRun { lagreJournalPostUtenBruker(any(), any(), any()) }
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
@@ -274,7 +274,7 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -375,7 +375,7 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(journalpostRequest), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -561,7 +561,7 @@ internal open class JournalforingTestBase {
 
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.journalPostUtenBruker(capture(request), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(request), any(), any()) }
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any(), any()) } returns journalpostResponse

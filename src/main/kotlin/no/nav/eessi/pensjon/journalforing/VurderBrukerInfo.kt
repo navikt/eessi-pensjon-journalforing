@@ -27,7 +27,7 @@ class VurderBrukerInfo (
     private val logger = LoggerFactory.getLogger(VurderBrukerInfo::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun journalPostUtenBruker(
+    fun lagreJournalPostUtenBruker(
         journalpostRequest: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         sedHendelseType: HendelseType
