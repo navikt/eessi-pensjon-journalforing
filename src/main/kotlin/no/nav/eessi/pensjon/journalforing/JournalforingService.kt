@@ -179,19 +179,7 @@ class JournalforingService(
                 )
 
                 if (journalpostRequest.bruker == null) {
-                    val logMelding = if (sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) )  {
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
-                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men sendes direkte"
-                    } else if(env != null && env in listOf("q2", "q1")){
-                        journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
-                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er ${env} og sendes direkte"
-                    }
-                    else {
-                        vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
-                        "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
-                    }
-                    logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")
-                    return@measure
+                    if (behandleJournalpostUtenBruker(sedHendelse, journalpostRequest, env, hendelseType, navAnsattInfo)) return@measure
                 }
                 else {
                     val journalPostResponse = journalpostService.sendJournalPost(
@@ -278,6 +266,32 @@ class JournalforingService(
                 throw ex
             }
         }
+    }
+
+    private fun behandleJournalpostUtenBruker(
+        sedHendelse: SedHendelse,
+        journalpostRequest: OpprettJournalpostRequest,
+        env: String?,
+        hendelseType: HendelseType,
+        navAnsattInfo: Pair<String, Enhet?>?
+    ): Boolean {
+        val skalSendesDirekte = sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
+        val testMiljo = env != null && env in listOf("q2", "q1")
+
+        val logMelding = when {
+            skalSendesDirekte || testMiljo -> {
+                journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
+                "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte"
+            }
+
+            else -> {
+                vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
+                "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
+            }
+        }
+
+        logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")
+        return true
     }
 
     fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){

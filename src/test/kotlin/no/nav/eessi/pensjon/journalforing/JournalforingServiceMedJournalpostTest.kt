@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -17,9 +18,11 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
@@ -122,25 +125,36 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
-    fun `Sendt P_BUC_06 med manglende bruker skal lage journalpost`() {
-        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_06_P6000.json")!!.readText()
+    fun `Sendt P_BUC_2 2100 med omstilling skal lage journalpost`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
         val forsoekFerdigstillSlot = slot<Boolean>()
-        every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
 
+        every { journalpostKlient.opprettJournalpost(capture(journalpostSlot), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+        every { gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId) } returns true
+        every { gcpStorageService.hentFraGjenny(any()) } returns """{ "sakId" : "147730","sakType" : "EYO"}""".trimIndent()
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
+            identifisertPerson,
+            LocalDate.now(),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
-            currentSed = SED(type = SedType.P6000)
+            currentSed = SED(type = SedType.P2100)
         )
-        val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
-        Assertions.assertEquals(false, erMuligAaFerdigstille)
+        // journalposten opprettes
+        verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        // journalposten har tema omstilling
+        assertEquals(journalpostSlot.captured.tema, Tema.OMSTILLING)
+        assertEquals(false, forsoekFerdigstillSlot.captured)
     }
 
     @Test
