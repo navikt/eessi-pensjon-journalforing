@@ -51,6 +51,14 @@ internal class SedMottattListenerTest {
     }
 
     @Test
+    fun `Gitt en P_BUC_02 som ikke er P2100 saa skal den ikke lagres i gjenny bucketen`() {
+        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P10000.json"))), cr, acknowledgment)
+
+        verify(exactly = 0) { gcpStorageService.lagre(any(), any()) }
+        verify(exactly = 1) { acknowledgment.acknowledge() }
+    }
+
+    @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
