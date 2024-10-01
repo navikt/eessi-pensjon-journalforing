@@ -3,16 +3,15 @@ package no.nav.eessi.pensjon.listeners
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Tema.EYBARNEP
-import no.nav.eessi.pensjon.models.Tema.OMSTILLING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
@@ -112,7 +111,8 @@ class SedMottattListener(
         val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
 
-        if (bucType == P_BUC_02 ) {
+        if (bucType == P_BUC_02 && sedHendelse.sedType == SedType.P2100) {
+            logger.info("Innkommende P_BUC_02 med sedType ${sedHendelse.sedType} blir behandlet som GjennySak")
             val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
             gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
         }
