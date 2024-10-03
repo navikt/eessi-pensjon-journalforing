@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 val logger: Logger = LoggerFactory.getLogger(Relasjon::class.java)
-val secureLog = LoggerFactory.getLogger(Relasjon::class.java)
+val secureLog = LoggerFactory.getLogger("secureLog")
 
 abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
 
