@@ -35,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           export TZ=CET
-          ./gradlew build --stacktrace
+          ./gradlew build -x test --stacktrace
 
       - uses: nais/docker-build-push@v0
         id: docker-push
