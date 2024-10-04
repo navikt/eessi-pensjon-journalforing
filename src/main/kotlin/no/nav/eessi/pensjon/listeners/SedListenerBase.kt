@@ -96,7 +96,7 @@ abstract class SedListenerBase(
 
     fun behandleHendelse(hendelse: String, sedRetning: HendelseType, acknowledgment: Acknowledgment) {
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        logger.info("buc: ${sedHendelse.rinaSakId}, sed: ${sedHendelse.sedId}, sed: ${sedHendelse.rinaDokumentId}")
+        logger.info("buc_export ${sedHendelse.sedId}")
 
         if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
@@ -106,7 +106,7 @@ abstract class SedListenerBase(
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
         }
 
-        //acknowledgment.acknowledge()
+        acknowledgment.acknowledge()
     }
 }
 
