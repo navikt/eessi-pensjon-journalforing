@@ -101,7 +101,7 @@ abstract class SedListenerBase(
         if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
         } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
-            //behandleSedHendelse(sedHendelse)
+            behandleSedHendelse(sedHendelse)
         } else {
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
         }
