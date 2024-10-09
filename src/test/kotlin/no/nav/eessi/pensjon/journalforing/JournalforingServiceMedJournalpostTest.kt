@@ -153,6 +153,39 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
         // journalposten har tema omstilling
         assertEquals(journalpostSlot.captured.tema, Tema.OMSTILLING)
+        assertEquals(true, forsoekFerdigstillSlot.captured)
+    }
+
+    @Test
+    fun `Mottatt P_BUC_2 2100 med omstilling skal lage journalpost uten ferdigstilling`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+
+        val forsoekFerdigstillSlot = slot<Boolean>()
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
+
+        every { journalpostKlient.opprettJournalpost(capture(journalpostSlot), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+        every { gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId) } returns true
+        every { gcpStorageService.hentFraGjenny(any()) } returns """{ "sakId" : "147730","sakType" : "EYO"}""".trimIndent()
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+        journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.MOTTATT,
+            identifisertPerson,
+            LocalDate.now(),
+            identifisertePersoner = 1,
+            navAnsattInfo = navAnsattInfo(),
+            currentSed = SED(type = SedType.P2100)
+        )
+
+        // journalposten opprettes
+        verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        // journalposten har tema omstilling
+        assertEquals(journalpostSlot.captured.tema, Tema.OMSTILLING)
         assertEquals(false, forsoekFerdigstillSlot.captured)
     }
 

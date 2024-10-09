@@ -75,10 +75,11 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             if (hendelseType == HendelseType.MOTTATT && sedHendelse.sedType == SedType.P2100 && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) false
             else if (journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) true else false
 
-        val forsokFerdigstill: Boolean = if(gjenny) false else kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+        val forsokFerdigstill: Boolean = gjenny || kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
 
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
     }
+
 
     fun sendJournalPost(journalpostRequest: JournalpostMedSedInfo,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
