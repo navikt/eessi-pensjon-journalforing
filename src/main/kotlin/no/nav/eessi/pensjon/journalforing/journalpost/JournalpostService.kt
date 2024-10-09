@@ -71,7 +71,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
 
-        val gjenny = journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)
+        val gjenny =
+            if (hendelseType == HendelseType.MOTTATT && sedHendelse.sedType == SedType.P2100 && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) false
+            else if (journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) true else false
+
         val forsokFerdigstill: Boolean = if(gjenny) false else kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
 
         return journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)

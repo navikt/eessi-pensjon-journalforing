@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -67,8 +66,8 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         val journalpostRequest = requestSlot.captured
         val erMuligAaFerdigstille = forsoekFedrigstillSlot.captured
 
-        Assertions.assertEquals("22874955", journalpostRequest.sak?.fagsakid)
-        Assertions.assertEquals(true, erMuligAaFerdigstille)
+        assertEquals("22874955", journalpostRequest.sak?.fagsakid)
+        assertEquals(true, erMuligAaFerdigstille)
 
     }
 
@@ -98,7 +97,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         )
         val erMuligAaFerdigstille = forsoekFerdigstillSlot.captured
 
-        Assertions.assertEquals(false, erMuligAaFerdigstille)
+        assertEquals(false, erMuligAaFerdigstille)
     }
 
     @ParameterizedTest
@@ -121,7 +120,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         )
 
         verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
-        Assertions.assertEquals(false, forsoekFerdigstillSlot.captured)
+        assertEquals(false, forsoekFerdigstillSlot.captured)
     }
 
     @Test
@@ -204,7 +203,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             },
         )
         capturedMelding.captured
-        Assertions.assertEquals(
+        assertEquals(
             """
             {
               "sedType" : "P2000",
