@@ -123,7 +123,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }
-        if (bucType == P_BUC_02 && sedHendelseType == MOTTATT) return false
+        if (bucType == P_BUC_02 && sedHendelseType == MOTTATT || sedHendelseType == MOTTATT && request.tema in listOf(EYBARNEP, OMSTILLING)) return false
         if(detFinnesNull)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
