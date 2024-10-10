@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -71,9 +72,11 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
 
-        val gjenny =
-            if (hendelseType == HendelseType.MOTTATT && sedHendelse.sedType == SedType.P2100 && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) false
-            else if (journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING)) true else false
+        val gjenny = when {
+            hendelseType == MOTTATT && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> false
+            hendelseType == SENDT && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> true
+            else -> false
+        }
 
         val forsokFerdigstill: Boolean = gjenny || kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
 
@@ -120,7 +123,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             request.tittel,
             request.dokumenter
         ).any { it == null }
-        if (bucType == P_BUC_02 && sedHendelseType == HendelseType.MOTTATT) return false
+        if (bucType == P_BUC_02 && sedHendelseType == MOTTATT) return false
         if(detFinnesNull)
         {
             val vasketFnr = request.bruker?.id?.isNotEmpty()
@@ -169,7 +172,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        if (hendelseType != HendelseType.SENDT) {
+        if (hendelseType != SENDT) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
@@ -236,7 +239,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     }
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
-            if (sedHendelseType == HendelseType.SENDT) JournalpostType.UTGAAENDE
+            if (sedHendelseType == SENDT) JournalpostType.UTGAAENDE
             else JournalpostType.INNGAAENDE
 
     private fun lagTittel(journalpostType: JournalpostType,
