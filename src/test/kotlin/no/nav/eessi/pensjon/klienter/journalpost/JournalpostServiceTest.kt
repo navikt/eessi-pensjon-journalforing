@@ -5,21 +5,25 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.P2000
-import no.nav.eessi.pensjon.eux.model.SedType.P2100
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P15000Pensjon
 import no.nav.eessi.pensjon.journalforing.*
+import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
+import no.nav.eessi.pensjon.journalforing.JournalpostType.UTGAAENDE
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
+import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.EYBARNEP
+import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -44,70 +48,49 @@ internal class JournalpostServiceTest {
 
     @Test
     fun kanSakFerdigstillesTest() {
-        assertFalse(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-            null,
-            Behandlingstema.ALDERSPENSJON,
-            Bruker("brukerId"),
-            "[]",
-            ID_OG_FORDELING,
-            JournalpostType.INNGAAENDE,
-            Sak("FAGSAK", "11111", "PEN"),
-            Tema.PENSJON,
-            emptyList(),
-            "tittel på sak"),
+        assertFalse(journalpostService.kanSakFerdigstilles(opprettJournalpostRequest(null),
             P_BUC_01,
-            SENDT)
-        )
+            SENDT
+        ))
 
-        assertTrue(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-            AvsenderMottaker(land = "GB"),
-            Behandlingstema.ALDERSPENSJON,
-            Bruker("brukerId"),
-            "[]",
-            ID_OG_FORDELING,
-            JournalpostType.INNGAAENDE,
-            Sak("FAGSAK", "11111", "PEN"),
-            Tema.PENSJON,
-            emptyList(),
-            "tittel på sak"),
+        assertTrue(journalpostService.kanSakFerdigstilles(opprettJournalpostRequest(AvsenderMottaker(land = "GB")),
             P_BUC_01,
             SENDT
         ))
     }
 
     @Test
+    fun `Innkommende P_BUC_02 seder som ikke er p2100 skal kunne ferdigstilles dersom all info for det er tilgjengelig`() {
+        val journalpostSlot = slot<OpprettJournalpostRequest>()
+
+        val request = opprettJournalpostRequest(null, INNGAAENDE, "EY", EYBARNEP, GJENLEVENDEPENSJON)
+        val sedHendelse = sedHendelse(sedType = P2100, P_BUC_02)
+
+        val responseBody = responsebody(true)
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
+
+        journalpostService.sendJournalPost(request, sedHendelse, MOTTATT, "Line")
+
+        val actualRequest = journalpostSlot.captured
+        assertEquals(EYBARNEP, actualRequest.tema)
+        assertEquals("EESSI", actualRequest.kanal)
+        assertEquals("EY", actualRequest.sak?.fagsaksystem)
+        assertEquals( INNGAAENDE, actualRequest.journalpostType)
+
+    }
+
+    @Test
     fun `kanSakFerdigstillesTest skal returnere false dersom det er innkommende P_BUC_02`() {
         assertFalse(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-                null,
-                Behandlingstema.GJENLEVENDEPENSJON,
-                Bruker("brukerId"),
-                "[]",
-                ID_OG_FORDELING,
-                JournalpostType.INNGAAENDE,
-                Sak("FAGSAK", "11111", "PEN"),
-                Tema.PENSJON,
-                emptyList(),
-                "tittel på sak"),
+            opprettJournalpostRequest(null),
                 P_BUC_02,
                 MOTTATT
             )
         )
 
         assertFalse(journalpostService.kanSakFerdigstilles(
-            OpprettJournalpostRequest(
-                null,
-                Behandlingstema.GJENLEVENDEPENSJON,
-                Bruker("brukerId"),
-                "[]",
-                ID_OG_FORDELING,
-                JournalpostType.UTGAAENDE,
-                Sak("FAGSAK", "11111", "PEN"),
-                Tema.PENSJON,
-                emptyList(),
-                "tittel på sak"),
+            opprettJournalpostRequest(null, UTGAAENDE),
                 P_BUC_02,
                 MOTTATT
             ))
@@ -117,20 +100,19 @@ internal class JournalpostServiceTest {
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter`() {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
-        val responseBody =
-            javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val responseBody = responsebody(false)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
         val sedHendelse = sedHendelse(P2000, P_BUC_01, null)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
         val actualJournalPostRequest = journalpostService.opprettJournalpost(
-            sedHendelse = sedHendelse,
-            fnr = SLAPP_SKILPADDE,
-            sedHendelseType = MOTTATT,
-            journalfoerendeEnhet = ID_OG_FORDELING,
-            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
-            dokumenter = """
+            sedHendelse,
+            SLAPP_SKILPADDE,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+            """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -146,7 +128,7 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null, Tema.PENSJON, null
+            1, null, PENSJON, null
         )
         journalpostService.sendJournalPost(actualJournalPostRequest, sedHendelse, SENDT, "")
 
@@ -158,12 +140,12 @@ internal class JournalpostServiceTest {
         assertNull(actualRequest.avsenderMottaker?.idType)
         assertNull(actualRequest.avsenderMottaker?.navn)
 
-        assertEquals(Behandlingstema.ALDERSPENSJON, actualRequest.behandlingstema)
+        assertEquals(ALDERSPENSJON, actualRequest.behandlingstema)
         assertEquals(SLAPP_SKILPADDE.toString(), actualRequest.bruker!!.id)
         assertNotNull(actualRequest.dokumenter)
         assertNotNull(actualRequest.eksternReferanseId)
         assertEquals(ID_OG_FORDELING, actualRequest.journalfoerendeEnhet)
-        assertEquals(JournalpostType.INNGAAENDE, actualRequest.journalpostType)
+        assertEquals(INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
         assertEquals("11111", actualRequest.sak!!.fagsakid)
         assertEquals("PEN", actualRequest.sak!!.fagsaksystem)
@@ -176,22 +158,21 @@ internal class JournalpostServiceTest {
     fun `Gitt gyldig argumenter så sender request med riktig body og url parameter med riktig behandlingstema`() {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
-        val responseBody =
-            javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val responseBody = responsebody(true)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(SedType.P15000, BucType.P_BUC_10, null)
+        val sedHendelse = sedHendelse(P15000, P_BUC_10, null)
 
-        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = SedType.P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
         val opprettJournalpost = journalpostService.opprettJournalpost(
-            sedHendelse = sedHendelse,
-            fnr = SLAPP_SKILPADDE,
-            sedHendelseType = MOTTATT,
-            journalfoerendeEnhet = ID_OG_FORDELING,
-            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
-            dokumenter = """
+            sedHendelse,
+            SLAPP_SKILPADDE,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+            """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -207,22 +188,23 @@ internal class JournalpostServiceTest {
             """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
-            1, null, Tema.PENSJON, currentSed = currentSed
+            1, null, PENSJON, currentSed = currentSed
         )
+
         journalpostService.sendJournalPost(opprettJournalpost, sedHendelse, SENDT, "")
 
         // REQUEST
         val actualRequest = journalpostSlot.captured
         println("actualResponse ${opprettJournalpost.toJson()}")
         println("actualreq ${actualRequest.toJson()}")
-        assertEquals(Behandlingstema.GJENLEVENDEPENSJON, actualRequest.behandlingstema)
+        assertEquals(GJENLEVENDEPENSJON, actualRequest.behandlingstema)
     }
 
     @Test
     fun `Gitt gyldig argumenter for gjennysak så oppretter vi journalpost med bruker og tema`() {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
-        val responseBody = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
+        val responseBody = responsebody(true)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
         val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
 
@@ -231,12 +213,12 @@ internal class JournalpostServiceTest {
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
         val opprettJournalpost = journalpostService.opprettJournalpost(
-            sedHendelse = sedHendelse,
-            fnr = SLAPP_SKILPADDE,
-            sedHendelseType = MOTTATT,
-            journalfoerendeEnhet = ID_OG_FORDELING,
-            arkivsaksnummer = Sak("FAGSAK", "11111", "PEN"),
-            dokumenter = """
+            sedHendelse,
+            SLAPP_SKILPADDE,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+            """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -253,7 +235,7 @@ internal class JournalpostServiceTest {
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null,
-            Tema.EYBARNEP, currentSed = currentSed
+            EYBARNEP, currentSed = currentSed
         )
         journalpostService.sendJournalPost(opprettJournalpost, sedHendelse, SENDT, "")
 
@@ -271,12 +253,12 @@ internal class JournalpostServiceTest {
 
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
-                sedHendelse = sedHendelse(P2000, P_BUC_01, null),
-                fnr = SLAPP_SKILPADDE,
-                sedHendelseType = MOTTATT,
-                journalfoerendeEnhet = ID_OG_FORDELING,
-                arkivsaksnummer = Sak("FAGSAK", "11111", "PEN" ),
-                dokumenter = """
+                sedHendelse(P2000, P_BUC_01, null),
+                SLAPP_SKILPADDE,
+                MOTTATT,
+                ID_OG_FORDELING,
+                Sak("FAGSAK", "11111", "PEN" ),
+                """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -337,21 +319,20 @@ internal class JournalpostServiceTest {
 
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
         val actualResponse = journalpostService.opprettJournalpost(
-            sedHendelse = sedHendelse,
-            fnr = LEALAUS_KAKE,
-            sedHendelseType = SENDT,
-            journalfoerendeEnhet = ID_OG_FORDELING,
-            arkivsaksnummer = null,
-            dokumenter = "[\"P2100\"]",
-            saktype = null,
+            sedHendelse,
+            LEALAUS_KAKE,
+            SENDT,
+            ID_OG_FORDELING,
+            null,
+            "[\"P2100\"]",
+            null,
             mockk(relaxed = true),
             1,
             null,
-            Tema.PENSJON,
+            PENSJON,
             null
         )
         journalpostService.sendJournalPost(actualResponse, sedHendelse, SENDT, "")
-        //assertEqualResponse(expectedResponse, actualResponse)
 
         val actualRequest = requestSlot.captured
 
@@ -377,11 +358,46 @@ internal class JournalpostServiceTest {
     @Test
     fun `Gitt JournalpostId Når Oppdater Distribusjonsinfo Så OppdaterJournalpost Med EESSI`() {
         val journalpostId = "12345"
-
         journalpostService.oppdaterDistribusjonsinfo(journalpostId)
 
         verify(exactly = 1) { mockKlient.oppdaterDistribusjonsinfo(journalpostId) }
     }
+
+    private fun responsebody(ferdigstilt: Boolean): String {
+        val responseBody = """
+                {
+                  "journalpostId": "429434378",
+                  "journalstatus": "M",
+                  "melding": "null",
+                  "journalpostferdigstilt": $ferdigstilt,
+                  "dokumenter": [
+                    {
+                      "dokumentInfoId": "453867272"
+                    }
+                  ]
+                }
+            """.trimIndent()
+        return responseBody
+    }
+
+    private fun opprettJournalpostRequest(
+        avsenderMottaker: AvsenderMottaker? = AvsenderMottaker(land = "GB"),
+        journalpostType: JournalpostType? = INNGAAENDE,
+        fagsystem: String ?= "PEN",
+        tema: Tema? = PENSJON,
+        behandlingstema: Behandlingstema? = ALDERSPENSJON
+    ) = OpprettJournalpostRequest(
+        avsenderMottaker,
+        behandlingstema,
+        Bruker("brukerId"),
+        "[]",
+        ID_OG_FORDELING,
+        journalpostType!!,
+        Sak("FAGSAK", "11111", fagsystem!!),
+        tema!!,
+        emptyList(),
+        "tittel på sak"
+    )
 
     private fun sedHendelse(sedType: SedType, bucType: BucType = P_BUC_01, avsenderNavn: String? = null) = SedHendelse(
         id = 1111,
