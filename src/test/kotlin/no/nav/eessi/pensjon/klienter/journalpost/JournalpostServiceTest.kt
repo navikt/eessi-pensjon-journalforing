@@ -15,15 +15,13 @@ import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P15000Pensjon
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
-import no.nav.eessi.pensjon.journalforing.JournalpostType.UTGAAENDE
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.EYBARNEP
-import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
@@ -66,7 +64,7 @@ internal class JournalpostServiceTest {
         val request = opprettJournalpostRequest(null, INNGAAENDE, "EY", EYBARNEP, GJENLEVENDEPENSJON)
         val sedHendelse = sedHendelse(sedType = P2100, P_BUC_02)
 
-        val responseBody = responsebody(true)
+        val responseBody = responsebody(false)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
@@ -89,10 +87,17 @@ internal class JournalpostServiceTest {
             )
         )
 
+        //Skal ikke ferdigstille innkommende seder som har gjennytema
         assertFalse(journalpostService.kanSakFerdigstilles(
-            opprettJournalpostRequest(null, UTGAAENDE),
+            opprettJournalpostRequest(tema = OMSTILLING),
+            P_BUC_01,
+            MOTTATT
+        ))
+
+        assertTrue(journalpostService.kanSakFerdigstilles(
+            opprettJournalpostRequest(AvsenderMottaker("GB"), tema = OMSTILLING),
                 P_BUC_02,
-                MOTTATT
+                SENDT
             ))
     }
 
