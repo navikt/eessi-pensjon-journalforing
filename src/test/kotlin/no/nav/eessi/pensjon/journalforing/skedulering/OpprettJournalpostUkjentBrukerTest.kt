@@ -3,10 +3,7 @@ package no.nav.eessi.pensjon.journalforing.skedulering
 import com.google.cloud.storage.BlobId
 import io.mockk.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.JournalforingService
-import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
-import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
@@ -22,11 +19,13 @@ class OpprettJournalpostUkjentBrukerTest {
 
     private val etterlatteService = mockk<EtterlatteService>()
     private lateinit var hentSakService : HentSakService
+    private lateinit var hentTemaService: HentTemaService
 
     @BeforeEach
     fun setUp() {
         gcpStorageService = mockk(relaxed = true)
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
+        hentTemaService = HentTemaService(mockk(), gcpStorageService)
         journalpostService = mockk(relaxed = true)
         oppgaveHandler = mockk(relaxed = true)
         journalforingService = JournalforingService(
@@ -39,6 +38,7 @@ class OpprettJournalpostUkjentBrukerTest {
             statistikkPublisher = mockk(),
             vurderBrukerInfo = mockk(),
             hentSakService = hentSakService,
+            hentTemaService = hentTemaService,
             env = null,
         )
 

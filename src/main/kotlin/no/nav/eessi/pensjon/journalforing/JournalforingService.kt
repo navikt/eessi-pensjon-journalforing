@@ -5,12 +5,11 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.journalforing.IdType.UTL_ORG
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
@@ -19,10 +18,10 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.*
+import no.nav.eessi.pensjon.models.Tema.EYBARNEP
+import no.nav.eessi.pensjon.models.Tema.OMSTILLING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -30,7 +29,6 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.toJson
@@ -53,8 +51,9 @@ class JournalforingService(
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
     private val hentSakService: HentSakService,
+    private val hentTemaService: HentTemaService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
-    @Value("\${NAMESPACE}") private val env : String?
+    @Value("\${NAMESPACE}") private val env: String?
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
@@ -96,16 +95,7 @@ class JournalforingService(
     ) {
         journalforOgOpprettOppgaveForSed.measure {
             try {
-                logger.info(
-                    """**********
-                    rinadokumentID: ${sedHendelse.rinaDokumentId},  rinasakID: ${sedHendelse.rinaSakId} 
-                    sedType: ${sedHendelse.sedType?.name}, bucType: ${sedHendelse.bucType}, hendelseType: $hendelseType, 
-                    sakId: ${saksInfoSamlet?.sakInformasjon?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjon?.sakType?.name}  
-                    sakType: ${saksInfoSamlet?.saktype?.name}, 
-                    identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
-                **********""".trimIndent()
-                )
-
+                infologging(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
                 secureLog.info("""Sed som skal journalføres: ${currentSed?.toJson()}""")
 
                 val aktoerId = identifisertPerson?.aktoerId
@@ -121,7 +111,7 @@ class JournalforingService(
                     currentSed
                 )
 
-                val tema = hentTema(
+                val tema = hentTemaService.hentTema(
                     sedHendelse,
                     identifisertPerson?.personRelasjon?.fnr,
                     identifisertePersoner,
@@ -268,6 +258,23 @@ class JournalforingService(
         }
     }
 
+    private fun infologging(
+        sedHendelse: SedHendelse,
+        hendelseType: HendelseType,
+        saksInfoSamlet: SaksInfoSamlet?,
+        identifisertPerson: IdentifisertPerson?
+    ) {
+        logger.info(
+            """**********
+                        rinadokumentID: ${sedHendelse.rinaDokumentId},  rinasakID: ${sedHendelse.rinaSakId} 
+                        sedType: ${sedHendelse.sedType?.name}, bucType: ${sedHendelse.bucType}, hendelseType: $hendelseType, 
+                        sakId: ${saksInfoSamlet?.sakInformasjon?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjon?.sakType?.name}  
+                        sakType: ${saksInfoSamlet?.saktype?.name}, 
+                        identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
+                    **********""".trimIndent()
+        )
+    }
+
     private fun behandleJournalpostUtenBruker(
         sedHendelse: SedHendelse,
         journalpostRequest: OpprettJournalpostRequest,
@@ -339,8 +346,8 @@ class JournalforingService(
         sedHendelse: SedHendelse
     ): AvsenderMottaker {
         return when (hendelseType) {
-            SENDT -> AvsenderMottaker(sedHendelse.mottakerId, IdType.UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand))
-            else -> AvsenderMottaker(sedHendelse.avsenderId, IdType.UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand))
+            SENDT -> AvsenderMottaker(sedHendelse.mottakerId, UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand))
+            else -> AvsenderMottaker(sedHendelse.avsenderId, UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand))
         }
     }
 
@@ -376,7 +383,7 @@ class JournalforingService(
 
             else if(bucType in listOf(P_BUC_05, P_BUC_06)) return enhetDersomIdOgFordeling(identifisertPerson, fdato, antallIdentifisertePersoner).also { logEnhet(enhetFraRouting, it) }
 
-            else return enhetBasertPaaBehandlingstema(
+            else return hentTemaService.enhetBasertPaaBehandlingstema(
                 sedHendelse,
                 sakInfo,
                 identifisertPerson,
@@ -420,113 +427,6 @@ class JournalforingService(
 
         return ID_OG_FORDELING
     }
-
-    private fun enhetBasertPaaBehandlingstema(
-        sedHendelse: SedHendelse?,
-        sakinfo: SaksInfoSamlet?,
-        identifisertPerson: IdentifisertPerson,
-        antallIdentifisertePersoner: Int,
-        currentSed: SED?
-    ): Enhet {
-        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, sakinfo, currentSed)
-        val behandlingstema = journalpostService.bestemBehandlingsTema(
-            sedHendelse?.bucType!!,
-            sakinfo?.saktype,
-            tema,
-            antallIdentifisertePersoner,
-            currentSed
-        )
-
-        logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
-
-        return if (identifisertPerson.landkode == "NOR") {
-            when (behandlingstema) {
-                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> NFP_UTLAND_AALESUND
-                UFOREPENSJON -> UFORE_UTLANDSTILSNITT
-            }
-        } else when (behandlingstema) {
-            GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> PENSJON_UTLAND
-            UFOREPENSJON -> UFORE_UTLANDSTILSNITT
-        }
-    }
-
-
-    /**
-     * Tema er PENSJON såfremt det ikke er en
-     * - uføre buc (P_BUC_03)
-     * - saktype er UFØRETRYGD
-     */
-    fun hentTema(
-        sedhendelse: SedHendelse?,
-        fnr: Fodselsnummer?,
-        identifisertePersoner: Int,
-        saksInfo: SaksInfoSamlet?,
-        currentSed: SED?
-    ): Tema {
-        val ufoereSak = saksInfo?.saktype == UFOREP
-        if(fnr == null) {
-            if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
-            return PENSJON
-        }
-        if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
-            val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
-            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
-        }
-
-        //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
-        val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(fnr)
-        return when (sedhendelse?.bucType) {
-
-            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
-            P_BUC_03 -> UFORETRYGD
-            P_BUC_06 -> temaPbuc06(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
-            P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            else -> if (ufoereSak && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
-
-        }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
-    }
-
-    private fun temaPbuc10(
-        currentSed: SED?,
-        enPersonOgUforeAlderUnder62: Boolean,
-        saksInfo: SaksInfoSamlet?
-    ): Tema {
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
-        val isUforePensjon = if (currentSed is P15000 && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE) currentSed.hasUforePensjonType() else false
-        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
-    }
-
-    private fun temaPbuc07Og08(
-        currentSed: SED?,
-        enPersonOgUforeAlderUnder62: Boolean,
-        saksInfo: SaksInfoSamlet?
-    ): Tema {
-        val isUforeP12000 = (currentSed as? P12000)?.hasUforePensjonType() ?: false
-        val isUforeSakType = saksInfo?.saktype == UFOREP
-
-        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) UFORETRYGD else PENSJON
-    }
-
-    private fun temaPbuc06(
-        currentSed: SED?,
-        enPersonOgUforeAlderUnder62: Boolean,
-        saksInfo: SaksInfoSamlet?
-    ): Tema {
-        val isUforePensjon = when (currentSed) {
-            is P5000 -> currentSed.hasUforePensjonType()
-            is P6000 -> currentSed.hasUforePensjonType()
-            is P7000 -> currentSed.hasUforePensjonType()
-            is P10000 -> currentSed.hasUforePensjonType()
-            else -> false
-        }
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
-        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
-    }
-
-    fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
-
 
     private fun logEnhet(enhetFraRouting: Enhet, it: Enhet) =
         logger.info("Journalpost enhet: $enhetFraRouting rutes til -> Saksbehandlende enhet: $it")

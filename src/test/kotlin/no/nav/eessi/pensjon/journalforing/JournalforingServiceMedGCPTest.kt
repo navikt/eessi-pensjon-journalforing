@@ -58,6 +58,7 @@ class JournalforingServiceMedGCPTest {
     lateinit var statistikkPublisher: StatistikkPublisher
     lateinit var vurderBrukerInfo: VurderBrukerInfo
     lateinit var hentSakService: HentSakService
+    lateinit var hentTemaService: HentTemaService
 
     var etterlatteService = mockk<EtterlatteService>()
 
@@ -74,6 +75,7 @@ class JournalforingServiceMedGCPTest {
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
+        hentTemaService = HentTemaService(journalpostService, gcpStorageService)
         vurderBrukerInfo = VurderBrukerInfo(gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
@@ -85,6 +87,7 @@ class JournalforingServiceMedGCPTest {
             statistikkPublisher,
             vurderBrukerInfo,
             hentSakService,
+            hentTemaService,
             env = null
         )
     }
