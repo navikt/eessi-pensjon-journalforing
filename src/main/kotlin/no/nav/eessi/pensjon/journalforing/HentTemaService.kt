@@ -1,15 +1,16 @@
 package no.nav.eessi.pensjon.journalforing
 
-import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
-import no.nav.eessi.pensjon.models.Behandlingstema
+import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -23,14 +24,15 @@ class HentTemaService(
     private val journalpostService: JournalpostService,
     private val gcpStorageService: GcpStorageService
 ) {
-
     private val logger = LoggerFactory.getLogger(HentTemaService::class.java)
 
     /**
      * Tema er PENSJON såfremt det ikke er en
      * - uføre buc (P_BUC_03)
      * - saktype er UFØRETRYGD
+     * - gjenny tema; EYBARNEP eller EYOMSTILLING
      */
+
     fun hentTema(
         sedhendelse: SedHendelse?,
         fnr: Fodselsnummer?,
@@ -38,28 +40,27 @@ class HentTemaService(
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
-        val ufoereSak = saksInfo?.saktype == SakType.UFOREP
+        val ufoereSak = saksInfo?.saktype == UFOREP
         if(fnr == null) {
-            if(sedhendelse?.bucType == BucType.P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return Tema.UFORETRYGD
-            return Tema.PENSJON
+            if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
+            return PENSJON
         }
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
             val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
-            return if (blob?.contains("BARNEP") == true) Tema.EYBARNEP else Tema.OMSTILLING
+            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
         val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(fnr)
         return when (sedhendelse?.bucType) {
 
-            BucType.P_BUC_01, BucType.P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) Tema.UFORETRYGD else Tema.PENSJON
-            BucType.P_BUC_03 -> Tema.UFORETRYGD
-            BucType.P_BUC_06 -> temaPbuc06(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            BucType.P_BUC_07, BucType.P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            BucType.P_BUC_04, BucType.P_BUC_05, BucType.P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) Tema.UFORETRYGD else Tema.PENSJON
-            BucType.P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
-            else -> if (ufoereSak && erUforAlderUnder62(fnr)) Tema.UFORETRYGD else Tema.PENSJON
-
+            P_BUC_03 -> UFORETRYGD
+            P_BUC_06 -> temaPbuc06(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
+            P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
+            P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
+            P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
+            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
+            else -> if (ufoereSak && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
         }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
     }
 
@@ -68,9 +69,9 @@ class HentTemaService(
         enPersonOgUforeAlderUnder62: Boolean,
         saksInfo: SaksInfoSamlet?
     ): Tema {
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == SakType.UFOREP || enPersonOgUforeAlderUnder62
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
         val isUforePensjon = if (currentSed is P15000 && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE) currentSed.hasUforePensjonType() else false
-        return if (isUforePensjon || uforeSakTypeEllerUforPerson) Tema.UFORETRYGD else Tema.PENSJON
+        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
     private fun temaPbuc07Og08(
@@ -79,9 +80,9 @@ class HentTemaService(
         saksInfo: SaksInfoSamlet?
     ): Tema {
         val isUforeP12000 = (currentSed as? P12000)?.hasUforePensjonType() ?: false
-        val isUforeSakType = saksInfo?.saktype == SakType.UFOREP
+        val isUforeSakType = saksInfo?.saktype == UFOREP
 
-        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) Tema.UFORETRYGD else Tema.PENSJON
+        return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) UFORETRYGD else PENSJON
     }
 
     private fun temaPbuc06(
@@ -96,8 +97,8 @@ class HentTemaService(
             is P10000 -> currentSed.hasUforePensjonType()
             else -> false
         }
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == SakType.UFOREP || enPersonOgUforeAlderUnder62
-        return if (isUforePensjon || uforeSakTypeEllerUforPerson) Tema.UFORETRYGD else Tema.PENSJON
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
+        return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
     fun enhetBasertPaaBehandlingstema(
@@ -118,15 +119,14 @@ class HentTemaService(
 
         logger.info("${sedHendelse.sedType} gir landkode: ${identifisertPerson.landkode}, behandlingstema: $behandlingstema, tema: $tema")
 
-        return if (identifisertPerson.landkode == "NOR") {
+        return if (identifisertPerson.landkode == "NOR")
             when (behandlingstema) {
-                Behandlingstema.GJENLEVENDEPENSJON, Behandlingstema.BARNEP, Behandlingstema.ALDERSPENSJON, Behandlingstema.TILBAKEBETALING -> Enhet.NFP_UTLAND_AALESUND
-                Behandlingstema.UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
+                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.NFP_UTLAND_AALESUND
+                UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
+            } else when (behandlingstema) {
+                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.PENSJON_UTLAND
+                UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
             }
-        } else when (behandlingstema) {
-            Behandlingstema.GJENLEVENDEPENSJON, Behandlingstema.BARNEP, Behandlingstema.ALDERSPENSJON, Behandlingstema.TILBAKEBETALING -> Enhet.PENSJON_UTLAND
-            Behandlingstema.UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
-        }
     }
 
     fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
