@@ -35,7 +35,7 @@ abstract class JournalforingServiceBase {
     val kravService = KravInitialiseringsService(kravHandeler)
     val etterlatteService = mockk<EtterlatteService>()
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
-    val hentTemaService = HentTemaService(etterlatteService, journalpostService, gcpStorageService)
+    val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null

@@ -25,7 +25,7 @@ class OpprettJournalpostUkjentBrukerTest {
     fun setUp() {
         gcpStorageService = mockk(relaxed = true)
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
-        hentTemaService = HentTemaService(etterlatteService, mockk(), gcpStorageService)
+        hentTemaService = HentTemaService(mockk(), gcpStorageService)
         journalpostService = mockk(relaxed = true)
         oppgaveHandler = mockk(relaxed = true)
         journalforingService = JournalforingService(

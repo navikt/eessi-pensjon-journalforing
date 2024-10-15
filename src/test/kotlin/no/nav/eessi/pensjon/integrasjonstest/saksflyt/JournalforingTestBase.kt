@@ -156,7 +156,7 @@ internal open class JournalforingTestBase {
     }
 
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
-    val hentTemaService = HentTemaService(etterlatteService, journalpostService, gcpStorageService)
+    val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
     val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
