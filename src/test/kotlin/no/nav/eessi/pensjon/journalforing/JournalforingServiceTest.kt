@@ -706,7 +706,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns BucType.valueOf(buc)
             every { sedType } returns SedType.valueOf(sedtype)
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2,null, currentSed)
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2,null, currentSed)
         assertEquals(Tema.valueOf(tema), result)
     }
 
@@ -717,7 +717,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_01
             every { sedType } returns SedType.P4000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, SED(type = SedType.P4000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, SED(type = SedType.P4000))
 
         assertEquals(Tema.valueOf(PENSJON.toString()), result)
     }
@@ -731,7 +731,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P12000
         }
 
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, p12000)
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, p12000)
 
         assertEquals(Tema.valueOf(UFORETRYGD.toString()), result)
     }
@@ -745,7 +745,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P12000
         }
 
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, p12000)
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, null, p12000)
 
         assertEquals(Tema.valueOf(PENSJON.toString()), result)
     }
@@ -758,7 +758,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P8000
         }
 
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -771,7 +771,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, result)
     }
 
@@ -782,7 +782,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -793,8 +793,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse,  SLAPP_SKILPADDE, 2, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
-        val result2 = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse,  SLAPP_SKILPADDE, 2, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val result2 = hentTemaService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
         assertEquals(PENSJON, result2)
     }
@@ -806,7 +806,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -817,7 +817,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(
+        val result = hentTemaService.hentTema(
             mockedSedhendelse,
             LEALAUS_KAKE,
             1,
@@ -835,7 +835,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns R_BUC_02
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val result = hentTemaService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 2, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, result)
     }
 
@@ -846,22 +846,22 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GENRL), SED(type = SedType.P8000))
+        val resultatGENRL = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GENRL), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P8000))
+        val resultatOMSORG = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val resultatALDER = hentTemaService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
+        val resultatGJENLEV = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
+        val resultatBARNEP = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatBARNEP)
 
-        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
+        val resultatUFORE = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, resultatUFORE)
     }
 
@@ -873,44 +873,44 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { sedType } returns SedType.P6000
         }
 
-        val resultatGENRL = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GENRL), SED(type = SedType.P6000))
+        val resultatGENRL = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GENRL), SED(type = SedType.P6000))
         assertEquals(PENSJON, resultatGENRL)
 
-        val resultatOMSORG = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P6000))
+        val resultatOMSORG = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P6000))
         assertEquals(PENSJON, resultatOMSORG)
 
-        val resultatALDER = journalforingService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P6000))
+        val resultatALDER = hentTemaService.hentTema(mockedSedhendelse, SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P6000))
         assertEquals(PENSJON, resultatALDER)
 
-        val resultatGJENLEV = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P6000))
+        val resultatGJENLEV = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P6000))
         assertEquals(PENSJON, resultatGJENLEV)
 
-        val resultatBARNEP = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P6000))
+        val resultatBARNEP = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P6000))
         assertEquals(PENSJON, resultatBARNEP)
 
-        val resultatUFOREMedSakType = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P6000))
+        val resultatUFOREMedSakType = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P6000))
         assertEquals(UFORETRYGD, resultatUFOREMedSakType)
 
-        val resultatUFORE = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP),
+        val resultatUFORE = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP),
             SED(type = SedType.P6000, pensjon = P6000Pensjon(vedtak = listOf(VedtakItem(type = "30")))
             )
         )
         assertEquals(UFORETRYGD, resultatUFORE)
         assertEquals(PENSJON, resultatGENRL)
 
-        val resultatOMSORGP8000 = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P8000))
+        val resultatOMSORGP8000 = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(OMSORG), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatOMSORGP8000)
 
-        val resultatALDERP8000 = journalforingService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
+        val resultatALDERP8000 = hentTemaService.hentTema(mockedSedhendelse, fnr = SLAPP_SKILPADDE, 1, saksInfoSamlet(ALDER), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatALDERP8000)
 
-        val resultatGJENLEVP8000 = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
+        val resultatGJENLEVP8000 = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(GJENLEV), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatGJENLEVP8000)
 
-        val resultatBARNEPP8000 = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
+        val resultatBARNEPP8000 = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 2, saksInfoSamlet(BARNEP), SED(type = SedType.P8000))
         assertEquals(PENSJON, resultatBARNEPP8000)
 
-        val resultatUFOREP8000 = journalforingService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
+        val resultatUFOREP8000 = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE, 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
         assertEquals(UFORETRYGD, resultatUFOREP8000)
     }
 
@@ -921,7 +921,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             every { bucType } returns P_BUC_05
             every { sedType } returns SedType.P8000
         }
-        val result = journalforingService.hentTema(
+        val result = hentTemaService.hentTema(
             mockedSedhendelse,
             LEALAUS_KAKE,
             1,

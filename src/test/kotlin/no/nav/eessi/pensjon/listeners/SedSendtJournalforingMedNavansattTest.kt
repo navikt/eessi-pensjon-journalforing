@@ -75,6 +75,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
     private val etterlatteService = mockk<EtterlatteService>()
     private val hentSakService = HentSakService(etterlatteService, gcpStorageService)
+    private val hentTemaService = HentTemaService(etterlatteService, journalpostService, gcpStorageService)
 
     private val journalforingService =
         JournalforingService(
@@ -86,6 +87,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             oppgaveHandler = oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
             vurderBrukerInfo = vurderBrukerInfo,
             hentSakService = hentSakService,
+            hentTemaService = hentTemaService,
             env = null
         )
 

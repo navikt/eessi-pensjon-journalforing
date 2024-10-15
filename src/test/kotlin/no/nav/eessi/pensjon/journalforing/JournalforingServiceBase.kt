@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
@@ -36,6 +35,7 @@ abstract class JournalforingServiceBase {
     val kravService = KravInitialiseringsService(kravHandeler)
     val etterlatteService = mockk<EtterlatteService>()
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
+    val hentTemaService = HentTemaService(etterlatteService, journalpostService, gcpStorageService)
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -57,6 +57,7 @@ abstract class JournalforingServiceBase {
         statistikkPublisher,
         mockk(relaxed = true),
         hentSakService,
+        hentTemaService,
         env = null
     )
 
