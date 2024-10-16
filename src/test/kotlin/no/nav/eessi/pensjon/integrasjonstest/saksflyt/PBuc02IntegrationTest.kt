@@ -27,7 +27,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.springframework.test.util.ReflectionTestUtils
 import java.util.*
 
 @DisplayName("P_BUC_02 – IntegrationTest")
@@ -117,6 +116,34 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLANDSTILSNITT`() {
+
+            val allDocuemtActions = listOf(
+                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+            )
+            val bestemsak = BestemSakResponse(
+                null, listOf(
+                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
+                )
+            )
+
+            testRunnerVoksen(
+                FNR_VOKSEN_UNDER_62,
+                FNR_VOKSEN_2,
+                bestemsak,
+                krav = KravType.GJENLEV,
+                land = "NOR",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = MOTTATT,
+                norg2enhet = null
+            ) {
+                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
 
