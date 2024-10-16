@@ -125,7 +125,7 @@ class HentTemaService(
                 UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
             } else when (behandlingstema) {
                 GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.PENSJON_UTLAND
-                UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
+                UFOREPENSJON -> Enhet.UFORE_UTLAND
             }
     }
 
