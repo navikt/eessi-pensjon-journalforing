@@ -7,9 +7,6 @@ buildscript {
 		jacksonModuleKotlinVersion = '2.17.2'
 		tokenSupportVersion = '4.1.4'
 		imageioVersion = '3.12.0'
-
-		//test
-		jupiterVersion = '5.11.2'
 	}
 }
 
@@ -99,8 +96,8 @@ dependencies {
 	}
 	testImplementation "org.springframework.kafka:spring-kafka-test:$springKafkaVersion"
 
-	testImplementation(platform("org.junit:junit-bom:$jupiterVersion"))
-	testImplementation("org.junit.jupiter:junit-jupiter:$jupiterVersion")
+	
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.2")
 
 	//mock - test
 	testImplementation("org.mock-server:mockserver-netty:5.15.0") {
