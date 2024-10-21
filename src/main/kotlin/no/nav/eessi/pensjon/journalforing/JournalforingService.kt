@@ -139,6 +139,7 @@ class JournalforingService(
                             }
                     } ?: throw IllegalStateException("sedType is null")
                 }
+                logger.info("Dokument hentet, størrelse: ${dokumentStorrelse(documents)}")
 
                 val institusjon = avsenderMottaker(hendelseType, sedHendelse)
 
@@ -256,6 +257,11 @@ class JournalforingService(
                 throw ex
             }
         }
+    }
+
+    fun dokumentStorrelse(input: String): Double {
+        val byteSize = input.length * 2
+        return byteSize / (1024.0 * 1024.0)
     }
 
     private fun infologging(
