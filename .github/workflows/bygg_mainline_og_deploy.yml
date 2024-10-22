@@ -50,13 +50,13 @@ jobs:
       - name: 'Deploy image'
         run: echo "IMAGE=${{ steps.docker-push.outputs.image }}"
 
-#      - name: 'Deploy to DEV'
-#        uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: dev-gcp
-#          RESOURCE: nais/dev-gcp.yml
-#          IMAGE: ${{ steps.docker-push.outputs.image }}
+      - name: 'Deploy to DEV'
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/dev-gcp.yml
+          IMAGE: ${{ steps.docker-push.outputs.image }}
 
       - name: 'Opprett git tag'
         run: |
