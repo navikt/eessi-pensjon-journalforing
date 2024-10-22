@@ -97,22 +97,17 @@ abstract class SedListenerBase(
     fun behandleHendelse(hendelse: String, sedRetning: HendelseType, acknowledgment: Acknowledgment) {
         val sedHendelse = SedHendelse.fromJson(hendelse)
 
-        if (sedHendelse.sedType.toString().contains("P3000")) {
-            logger.warn("${sedHendelse.sedType} med rinanummer: ${sedHendelse.rinaSakId} og dokumentType: ${sedHendelse.rinaDokumentId} hoppes over for nå")
-            return
+        if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
+            logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
+        } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
+            logger.info("Godkjent sed: ${sedHendelse.sedId}, klar for behandling")
+            behandleSedHendelse(sedHendelse)
         } else {
-            if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
-                logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
-            } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
-                logger.info("Godkjent sed: ${sedHendelse.sedId}, klar for behandling")
-                behandleSedHendelse(sedHendelse)
-            } else {
-                logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
-            }
-            acknowledgment.acknowledge()
+            logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
         }
-    }
 
+        acknowledgment.acknowledge()
+    }
 }
 
 interface journalListener {
