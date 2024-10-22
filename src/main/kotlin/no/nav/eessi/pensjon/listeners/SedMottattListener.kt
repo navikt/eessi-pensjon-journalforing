@@ -90,7 +90,7 @@ class SedMottattListener(
         val bucType = sedHendelse.bucType!!
         val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
-        logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId} ***")
+        logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId}, SedID: ${sedHendelse.sedId} ***")
 
         val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
         val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
