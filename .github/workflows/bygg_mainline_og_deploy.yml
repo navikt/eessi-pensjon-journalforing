@@ -30,12 +30,12 @@ jobs:
           java-version: 21
           distribution: temurin
 
-#      - name: 'Sjekker at bygget kjører'
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          export TZ=CET
-#          ./gradlew build --stacktrace
+      - name: 'Sjekker at bygget kjører'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export TZ=CET
+          ./gradlew build --stacktrace
 
       - uses: nais/docker-build-push@v0
         id: docker-push
