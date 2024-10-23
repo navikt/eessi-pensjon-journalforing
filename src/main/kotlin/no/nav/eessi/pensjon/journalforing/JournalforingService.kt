@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -145,7 +146,7 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
 
-                val arkivsaksnummer = hentSakService.hentSak(
+                val arkivsaksnummer = if (sedHendelse.sedType == SedType.P2100 && hendelseType == MOTTATT) null else hentSakService.hentSak(
                     sedHendelse.rinaSakId,
                     saksInfoSamlet?.saksIdFraSed,
                     saksInfoSamlet?.sakInformasjon,

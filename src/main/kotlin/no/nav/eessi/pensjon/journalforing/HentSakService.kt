@@ -41,7 +41,7 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
 
         return hentGjennySak(sakIdFraSed, euxCaseId)
             ?: hentGjennyFraGCP(euxCaseId)
-            ?: validerPesysSak(sakInformasjon, sakIdFraSed)
+            ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId)
             ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
@@ -60,7 +60,9 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             ?.let { Sak(FAGSAK, it, EY) }
     }
 
-    private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?): Sak? {
+    private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?, euxCaseId: String): Sak? {
+        // Hvis det finnes en gjenny sak, returner null
+        if(gcpStorageService.hentFraGjenny(euxCaseId) != null) return null
         sakInfo?.sakId?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let { sakId ->
             return lagSak(sakId, sakInfo.sakType, sakInfo.sakStatus)
         }
