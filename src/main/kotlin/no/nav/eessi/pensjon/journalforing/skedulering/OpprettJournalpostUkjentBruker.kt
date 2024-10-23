@@ -26,7 +26,9 @@ class OpprettJournalpostUkjentBruker(
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<JournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
-                journalforingService.lagJournalpostOgOppgave(it, "eessipensjon")
+                val jpUtenSak = it.copy(journalpostRequest = it.journalpostRequest.copy(sak = null))
+                    .also { logger.info("Tar ikke med sak: ${it.journalpostRequest.sak} hvor det mangler bruker" ) }
+                journalforingService.lagJournalpostOgOppgave(jpUtenSak, "eessipensjon")
                 gcpStorageService.slettJournalpostDetaljer(journalpostDetaljer.second).also { logger.info("") }
                 journalforingService.metricsOppdatering("Sletter automatisk lagret journalpost som har gått over 14 dager")
         } }
