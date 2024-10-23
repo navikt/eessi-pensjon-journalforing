@@ -58,6 +58,27 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `hentSak skal returnere null dersom buc finnes i gcpstorage`() {
+        val euxCaseId = "123"
+        val sakIdFraSed = "12131132"
+        val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
+        val gjennygcpsvar ="""
+            {
+              "sakId" : null,
+              "sakType" : "OMSORG"
+            }
+        """.trimIndent()
+
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennygcpsvar
+        every { etterlatteService.hentGjennySak(eq(sakIdFraSed)) } returns JournalforingTestBase.mockHentGjennySakMedError()
+
+        val result = hentSakService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
+
+        assertNull(result)
+        verify { gcpStorageService.hentFraGjenny(euxCaseId) }
+    }
+
+    @Test
     fun `hentSak skal gi Sak fra sakInformasjon naar gjennySak og sakIdFraSed mangler`() {
         val euxCaseId = "123"
         val sakInformasjon = SakInformasjon("12131223", SakType.GJENLEV, LOPENDE)
