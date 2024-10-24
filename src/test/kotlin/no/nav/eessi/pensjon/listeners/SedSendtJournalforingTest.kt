@@ -7,7 +7,7 @@ import io.mockk.slot
 import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
-import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.P8000
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
@@ -33,7 +33,7 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
@@ -46,6 +46,8 @@ import java.time.LocalDate
 
 private const val PESYS_SAKID = "25595454"
 private const val RINA_ID = "148161"
+private const val AKTOER_ID = "3216549873212"
+
 internal class SedSendtJournalforingTest {
 
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
@@ -100,21 +102,15 @@ internal class SedSendtJournalforingTest {
         "test"
     )
 
-    private val buc = Buc(
-        id = PESYS_SAKID,
-        documents = listOf(
-            DocumentsItem(
-                type = SedType.P8000,
+    private val buc = Buc(id = PESYS_SAKID, documents = listOf(DocumentsItem(
+                type = P8000,
                 id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1",
                 status = "sent",
                 direction = "OUT"
-            )
-        ), participants = listOf(
-            Participant(
+            )), participants = listOf(Participant(
                 role = "CaseOwner",
                 organisation = Organisation(countryCode = "NO")
-            )
-        )
+            ))
     )
 
     @BeforeEach
@@ -129,28 +125,14 @@ internal class SedSendtJournalforingTest {
 
     @Test
     fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med maskinell journalforing`() {
-        val rinaId = RINA_ID
-        val buc = Buc(
-            id = rinaId,
-            documents = listOf(
-                DocumentsItem(
-                    type = SedType.P8000,
-                    id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1",
-                    status = "sent",
-                    direction = "OUT"
-                )
-            ),
-            participants = listOf(
-                Participant(role = "CaseOwner", organisation = Organisation(countryCode = "NO"))
-            )
+        val buc = Buc(id = RINA_ID, documents = listOf(DocumentsItem(type = P8000, id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1", status = "sent", direction = "OUT")),
+            participants = listOf(Participant(role = "CaseOwner", organisation = Organisation(countryCode = "NO")))
         )
-        val aktoerId = "3216549873212"
-        val pesysSakId = PESYS_SAKID
         val sedHendelse = javaClass.getResource("/eux/hendelser/P_BUC_05_P8000_02.json")!!.readText()
         val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
 
         val sakInformasjon = SakInformasjon(
-            sakId = pesysSakId,
+            sakId = PESYS_SAKID,
             sakType = SakType.GJENLEV,
             sakStatus = SakStatus.LOPENDE,
             saksbehandlendeEnhetId = "",
@@ -158,26 +140,25 @@ internal class SedSendtJournalforingTest {
         )
 
         val identifisertPerson = identifisertPersonPDL(
-            aktoerId = aktoerId,
             landkode = "NO",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = Relasjon.GJENLEVENDE,
+                relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = SedType.P8000,
+                sedType = P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxService.hentBuc(eq(rinaId)) } returns buc
-        every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
+        every { euxService.hentBuc(eq(RINA_ID)) } returns buc
+        every { euxKlientLib.hentSedJson(eq(RINA_ID), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
-        every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
+        every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
@@ -210,14 +191,11 @@ internal class SedSendtJournalforingTest {
     @Test
     fun `Ved kall til pensjonSakInformasjonSendt ved en saktype vi ikke behandler rutes oppgave i hht til regler i journalforingsEnhet`() {
         // Denne oppgaven blir rutet til UFORE_UTLANDSTILSNITT siden det er en identifisert person under 62 årr (over 18) som er bosatt Norge
-        val rinaId = RINA_ID
-        val aktoerId = "3216549873212"
-        val pesysSakId = PESYS_SAKID
         val sedHendelse = javaClass.getResource("/eux/hendelser/P_BUC_05_P8000_02.json")!!.readText()
         val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
 
         val sakInformasjon = SakInformasjon(
-            sakId = pesysSakId,
+            sakId = PESYS_SAKID,
             sakType = SakType.AFP_PRIVAT,
             sakStatus = SakStatus.LOPENDE,
             saksbehandlendeEnhetId = "",
@@ -225,29 +203,28 @@ internal class SedSendtJournalforingTest {
         )
 
         val identifisertPerson = identifisertPersonPDL(
-            aktoerId = aktoerId,
             landkode = "NOR",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = Relasjon.GJENLEVENDE,
+                relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = SedType.P8000,
+                sedType = P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
 
-        every { euxService.hentBuc(eq(rinaId)) } returns buc
-        every { euxKlientLib.hentSedJson(eq(rinaId), any()) } returns sedJson
+        every { euxService.hentBuc(eq(RINA_ID)) } returns buc
+        every { euxKlientLib.hentSedJson(eq(RINA_ID), any()) } returns sedJson
         every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
         every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any()) } returns identifisertPerson
         every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
-        every { gcpStorageService.gjennyFinnes(rinaId) } returns false
-        every { gcpStorageService.journalFinnes(rinaId) } returns false
-        every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
+        every { gcpStorageService.gjennyFinnes(RINA_ID) } returns false
+        every { gcpStorageService.journalFinnes(RINA_ID) } returns false
+        every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         justRun { journalforingutenbruker.journalpostMedBruker(any(), any(), any(), any(), any()) }
@@ -279,8 +256,6 @@ internal class SedSendtJournalforingTest {
 
     @Test
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid M051`() {
-        val aktoerId = "3216549873212"
-        val pesysSakId = PESYS_SAKID
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
         val sedHendelse = javaClass.getResource("/eux/hendelser/M_BUC_03a_M051.json")!!.readText()
 
@@ -292,7 +267,7 @@ internal class SedSendtJournalforingTest {
                 saksbehandlendeEnhetId = "",
                 nyopprettet = false
             ), SakInformasjon(
-                sakId = pesysSakId,
+                sakId = PESYS_SAKID,
                 sakType = SakType.GJENLEV,
                 sakStatus = SakStatus.OPPHOR,
                 saksbehandlendeEnhetId = "",
@@ -301,14 +276,13 @@ internal class SedSendtJournalforingTest {
         )
 
         val identifisertPerson = identifisertPersonPDL(
-            aktoerId = aktoerId,
             landkode = "NO",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = Relasjon.GJENLEVENDE,
+                relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = SedType.P8000,
+                sedType = P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "165sdugh587dfkgjhbkj"
             ),
@@ -346,8 +320,6 @@ internal class SedSendtJournalforingTest {
 
     @Test
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid`() {
-        val aktoerId = "3216549873212"
-        val pesysSakId = PESYS_SAKID
         val sedJson = javaClass.getResource("/sed/P_BUC_05-P8000.json")!!.readText()
         val sedHendelse = javaClass.getResource("/eux/hendelser/P_BUC_05_P8000_02.json")!!.readText()
 
@@ -359,7 +331,7 @@ internal class SedSendtJournalforingTest {
                 saksbehandlendeEnhetId = "",
                 nyopprettet = false
             ), SakInformasjon(
-                sakId = pesysSakId,
+                sakId = PESYS_SAKID,
                 sakType = SakType.GJENLEV,
                 sakStatus = SakStatus.OPPHOR,
                 saksbehandlendeEnhetId = "",
@@ -368,14 +340,13 @@ internal class SedSendtJournalforingTest {
         )
 
         val identifisertPerson = identifisertPersonPDL(
-            aktoerId = aktoerId,
             landkode = "NO",
             geografiskTilknytning = null,
             personRelasjon = SEDPersonRelasjon(
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = Relasjon.GJENLEVENDE,
+                relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = SedType.P8000,
+                sedType = P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "165sdugh587dfkgjhbkj"
             ),
@@ -411,7 +382,7 @@ internal class SedSendtJournalforingTest {
     }
 
     fun identifisertPersonPDL(
-        aktoerId: String = "3216549873215",
+        aktoerId: String = AKTOER_ID,
         personRelasjon: SEDPersonRelasjon?,
         landkode: String? = "",
         geografiskTilknytning: String? = "",
