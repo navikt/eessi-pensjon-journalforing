@@ -51,7 +51,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         tema: Tema,
         currentSed: SED? = null
     ): OpprettJournalpostRequest {
-        logger.info("Oppretter OpprettJournalpostRequest for ${sedHendelse.rinaSakId}")
+        logger.info("Oppretter OpprettJournalpostRequest for sed: ${sedHendelse.sedType} med rinasSakId: ${sedHendelse.rinaSakId}")
 
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
