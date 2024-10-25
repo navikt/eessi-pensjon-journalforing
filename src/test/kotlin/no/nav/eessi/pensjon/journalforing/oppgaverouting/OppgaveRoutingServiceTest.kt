@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
@@ -19,9 +20,12 @@ import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -38,6 +42,8 @@ import java.util.stream.Stream
 val norg2Klient = mockk<Norg2Klient>()
 val norg2Service = Norg2Service(norg2Klient)
 val routingService = OppgaveRoutingService(norg2Service)
+
+private const val AKTOER_ID = "01010101010"
 
 fun irrelevantDato(): LocalDate = LocalDate.MIN
 
@@ -63,92 +69,81 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt manglende fnr naar oppgave routes saa send oppgave til ID_OG_FORDELING`() {
-        val enhet = routingService.hentEnhet(
-            OppgaveRoutingRequest(
-                fdato = irrelevantDato(),
-                landkode = MANGLER_LAND,
-                geografiskTilknytning = DUMMY_TILKNYTNING,
-                bucType = P_BUC_01,
-                hendelseType = HendelseType.SENDT
-            )
-        )
+        val enhet = routingService.hentEnhet(oppgaveRoutingRequest(irrelevantDato(), P_BUC_01, MANGLER_LAND, hendelseType = SENDT, aktoerId = null))
         assertEquals(enhet, ID_OG_FORDELING)
     }
 
     @Test
     fun `Gitt manglende ytelsestype for P_BUC_10 saa send oppgave til PENSJON_UTLAND`() {
-        val enhet = routingService.hentEnhet(
-            OppgaveRoutingRequest(
-                aktorId = "010101010101",
-                fdato = irrelevantDato(),
-                landkode = MANGLER_LAND,
-                bucType = P_BUC_10,
-                hendelseType = HendelseType.SENDT
-            )
-        )
+        val enhet = routingService.hentEnhet( oppgaveRoutingRequest(irrelevantDato(), P_BUC_10, MANGLER_LAND, hendelseType = SENDT))
         assertEquals(enhet, PENSJON_UTLAND)
     }
 
+    // Routing: https://confluence.adeo.no/pages/viewpage.action?pageId=579152774
     @Test
     fun `Routing for mottatt H_BUC_07`() {
+        //Ukjent bruker
         assertEquals(
-            UFORE_UTLAND,
-            routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    bucType = H_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            PENSJON_UTLAND,
-            routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    bucType = H_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
+            ID_OG_FORDELING,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder60aar, H_BUC_07, NORGE, null))
         )
 
         assertEquals(
             UFORE_UTLANDSTILSNITT,
-            routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder18aar,
-                    landkode = NORGE,
-                    bucType = H_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
-        )
-        assertEquals(
-            FAMILIE_OG_PENSJONSYTELSER_OSLO,
-            routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = alder60aar,
-                    landkode = NORGE,
-                    bucType = H_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
+            routingService.hentEnhet(oppgaveRoutingRequest(alder18aar, H_BUC_07, NORGE))
         )
 
         assertEquals(
-            ID_OG_FORDELING,
-            routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    fdato = alder60aar,
-                    landkode = NORGE,
-                    bucType = H_BUC_07,
-                    hendelseType = HendelseType.SENDT
-                )
-            )
+            FAMILIE_OG_PENSJONSYTELSER_OSLO,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder60aar, H_BUC_07, NORGE))
+        )
+
+        assertEquals(
+            UFORE_UTLANDSTILSNITT,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder18aar, H_BUC_07, NORGE))
+        )
+
+        assertEquals(
+            FAMILIE_OG_PENSJONSYTELSER_OSLO,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder60aar, H_BUC_07, NORGE))
+        )
+
+        //UTLAND
+        assertEquals(
+            PENSJON_UTLAND,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder60aar, H_BUC_07, UTLAND))
+        )
+
+        assertEquals(
+            UFORE_UTLAND,
+            routingService.hentEnhet(oppgaveRoutingRequest(alder18aar, H_BUC_07, UTLAND))
+        )
+
+    }
+
+    private fun oppgaveRoutingRequest(
+        fdato: LocalDate? = alder18aar,
+        bucType: BucType? = P_BUC_02,
+        landkode: String? = NORGE,
+        aktoerId: String? = AKTOER_ID,
+        hendelseType: HendelseType? = SENDT,
+        geoTilknytning: String? = DUMMY_TILKNYTNING,
+        sakInformasjon: SakInformasjon ?= null,
+        identifisertPerson: IdentifisertPDLPerson?= mockerEnPerson("NO", DUMMY_TILKNYTNING, FORSIKRET, "Testern"),
+        sakType: SakType? = ALDER,
+        sedType: SedType? = R004
+    ): OppgaveRoutingRequest {
+        return OppgaveRoutingRequest(
+            aktorId = aktoerId,
+            fdato = fdato!!,
+            bucType = bucType!!,
+            landkode = landkode,
+            hendelseType = hendelseType!!,
+            geografiskTilknytning = geoTilknytning,
+            sakInformasjon = sakInformasjon,
+            identifisertPerson = identifisertPerson,
+            saktype = sakType,
+            sedType = sedType
         )
     }
 
@@ -157,16 +152,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 ingen ytelse`() {
         assertEquals(
             ID_OG_FORDELING, routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = NORGE,
-                    geografiskTilknytning = DUMMY_TILKNYTNING,
-                    bucType = R_BUC_02,
-                    hendelseType = HendelseType.MOTTATT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
-                )
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, NORGE, aktoerId = null)
             )
         )
     }
@@ -175,17 +161,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 alderpensjon ytelse`() {
         assertEquals(
             PENSJON_UTLAND, routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = DUMMY_TILKNYTNING,
-                    bucType = R_BUC_02,
-                    saktype = ALDER,
-                    hendelseType = HendelseType.MOTTATT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
-                )
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sedType = R005)
             )
         )
     }
@@ -194,16 +170,13 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 uforepensjon ytelse`() {
         assertEquals(
             UFORE_UTLAND, routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = DUMMY_TILKNYTNING,
-                    bucType = R_BUC_02,
-                    saktype = UFOREP,
-                    hendelseType = HendelseType.MOTTATT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
+                oppgaveRoutingRequest(
+                    irrelevantDato(),
+                    R_BUC_02,
+                    UTLAND,
+                    hendelseType = MOTTATT,
+                    sakType = UFOREP,
+                    sedType = R005
                 )
             )
         )
@@ -213,18 +186,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R004 på R_BUC_02 skal gi en routing til UFORE_UTLAND`() {
         assertEquals(
             OKONOMI_PENSJON, routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = "01010101010",
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = DUMMY_TILKNYTNING,
-                    bucType = R_BUC_02,
-                    saktype = UFOREP,
-                    sedType = SedType.R004,
-                    hendelseType = HendelseType.MOTTATT,
-                    sakInformasjon = null,
-                    identifisertPerson = mockerEnPerson()
-                )
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, sakType = UFOREP, hendelseType = MOTTATT, sedType = R004)
             )
         )
     }
@@ -233,55 +195,19 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R004 på R_BUC_02 ukjent ident`() {
         assertEquals(
             ID_OG_FORDELING, routingService.hentEnhet(
-                OppgaveRoutingRequest(
-                    aktorId = null,
-                    fdato = irrelevantDato(),
-                    landkode = UTLAND,
-                    geografiskTilknytning = DUMMY_TILKNYTNING,
-                    bucType = R_BUC_02,
-                    saktype = UFOREP,
-                    sedType = SedType.R004,
-                    hendelseType = HendelseType.MOTTATT,
-                    sakInformasjon = null
-                )
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, null, sakType = UFOREP, hendelseType = MOTTATT)
             )
         )
     }
 
     @Test
     fun `Routing av mottatte sed R_BUC_02 med mer enn én person routes til ID_OG_FORDELING`() {
-        val forsikret = IdentifisertPDLPerson(
-            "123",
-            null,
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, rinaDocumentId =  "3123123"),
-            personNavn = "Testern",
-            identer = null
-        )
-        val avod = IdentifisertPDLPerson(
-            "234",
-            null,
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), AVDOD, rinaDocumentId =  "3123123"),
-            personNavn = "Avdod",
-            identer = null
-
-        )
+        val forsikret = mockerEnPerson("NO", DUMMY_TILKNYTNING, FORSIKRET, "Testern")
+        val avod = mockerEnPerson(landkode = null, relasjon = AVDOD, navn = "AVDOD")
         forsikret.personListe = listOf(forsikret, avod)
 
         val enhetresult = routingService.hentEnhet(
-            OppgaveRoutingRequest(
-                aktorId = "123123123",
-                fdato = irrelevantDato(),
-                landkode = null,
-                geografiskTilknytning = DUMMY_TILKNYTNING,
-                bucType = R_BUC_02,
-                saktype = ALDER,
-                sedType = SedType.R005,
-                hendelseType = HendelseType.MOTTATT,
-                sakInformasjon = null,
-                identifisertPerson = forsikret
-            )
+            oppgaveRoutingRequest(irrelevantDato(), R_BUC_02,null, sedType = R005, hendelseType = MOTTATT, identifisertPerson= forsikret)
         )
 
         assertEquals(ID_OG_FORDELING, enhetresult)
@@ -295,12 +221,12 @@ internal class OppgaveRoutingServiceTest {
             fun arguments(): Stream<TestArgumentsPBuc02> =
                 Arrays.stream(
                     arrayOf(
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SedType.R004),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R005),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SedType.R006),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SedType.R004),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SedType.R005),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SedType.R006),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, R004),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, R006),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, R004),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, R006),
                     )
                 )
         }
@@ -325,13 +251,13 @@ internal class OppgaveRoutingServiceTest {
             assertEquals(
                 arguments.expectedResult, routingService.hentEnhet(
                     OppgaveRoutingRequest(
-                        aktorId = "01010101010",
+                        aktorId = AKTOER_ID,
                         fdato = irrelevantDato(),
                         landkode = arguments.landkode,
                         geografiskTilknytning = DUMMY_TILKNYTNING,
                         bucType = R_BUC_02,
                         sedType = arguments.sedType,
-                        hendelseType = HendelseType.SENDT,
+                        hendelseType = SENDT,
                         sakInformasjon = null,
                         identifisertPerson = mockerEnPerson()
                     )
@@ -386,13 +312,13 @@ internal class OppgaveRoutingServiceTest {
                 arguments.expectedResult,
                 routingService.hentEnhet(
                     OppgaveRoutingRequest(
-                        aktorId = "01010101010",
+                        aktorId = AKTOER_ID,
                         fdato = irrelevantDato(),
                         landkode = arguments.landkode,
                         bucType = P_BUC_02,
                         saktype = arguments.saktype,
                         sakInformasjon = arguments.sakStatus?.let { opprettSakInfo(it) },
-                        hendelseType = HendelseType.SENDT
+                        hendelseType = SENDT
                     )
                 )
             )
@@ -450,12 +376,12 @@ internal class OppgaveRoutingServiceTest {
                 arguments.expectedResult,
                 routingService.hentEnhet(
                     OppgaveRoutingRequest(
-                        aktorId = "01010101010",
+                        aktorId = AKTOER_ID,
                         fdato = arguments.alder,
                         bucType = P_BUC_10,
                         landkode = arguments.landkode,
                         saktype = arguments.saktype,
-                        hendelseType = HendelseType.SENDT
+                        hendelseType = SENDT
                     )
                 )
             )
@@ -465,35 +391,17 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Routing for P_BUC_10 mottatt med bruk av Norg2 tjeneste`() {
         val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+        val identifisertPerson = mockerEnPerson(landkode = "NOR", geoTilknytning = "3005", navn = "Ole Olsen")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
-
-        val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, ALDER, SedType.P15000, rinaDocumentId =  "3123123")
-        val identifisertPerson =
-            IdentifisertPDLPerson(
-                "01010101010",
-                "NOR",
-                "3005",
-                personRelasjon,
-                personListe = emptyList(),
-                personNavn = "Ole Olsen",
-                identer = null
-            )
-
-        val sedHendelseModel = SedHendelse(
-            1232312L, "2321313", "P", P_BUC_10, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
-            SedType.P15000, null
-        )
 
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
             ALDER,
-            sedHendelseModel,
-            HendelseType.MOTTATT,
-            null,
+            sedHendelse(P_BUC_10, P15000),
+            MOTTATT,
+            null
         )
 
         val result = routingService.hentEnhet(oppgaveroutingrequest)
@@ -502,6 +410,8 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt gjenlevendesak for P_BUC_02 mottatt når bruk av Norg2 tjeneste benyttes så routes det til PensjonUtland`() {
+        val identifisertPerson = mockerEnPerson(landkode = "NOR", geoTilknytning = "3005", relasjon = GJENLEVENDE, navn = "Ole Olsen")
+
         val json = """
             {
             "id": 100026861,
@@ -521,34 +431,14 @@ internal class OppgaveRoutingServiceTest {
         """.trimIndent()
         val mappedResponse = mapJsonToAny<Norg2ArbeidsfordelingItem>(json)
 
-
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
-
-        val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), GJENLEVENDE, GJENLEV, SedType.P2100, rinaDocumentId =  "3123123")
-        val identifisertPerson =
-            IdentifisertPDLPerson(
-                "01010101010",
-                "NOR",
-                "3005",
-                personRelasjon,
-                personListe = emptyList(),
-                personNavn = "Ole Olsen",
-                identer = null
-            )
-
-        val sedHendelseModel = SedHendelse(
-            1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
-            SedType.P2100, null
-        )
 
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
             GJENLEV,
-            sedHendelseModel,
-            HendelseType.MOTTATT,
+            sedHendelse(sedType = P2100, land = "NO"),
+            MOTTATT,
             null,
         )
 
@@ -559,6 +449,8 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt barnePensjon for P_BUC_02 mottatt når bruk av Norg2 tjeneste benyttes så routes det til PensjonUtland`() {
+        val identifisertPerson = mockerEnPerson(landkode = "SWE", geoTilknytning = "3005", relasjon = GJENLEVENDE, navn = "Ole Olsen")
+
         val json = """
             {
             "id": 100026861,
@@ -578,33 +470,14 @@ internal class OppgaveRoutingServiceTest {
         """.trimIndent()
         val mappedResponse = mapJsonToAny<Norg2ArbeidsfordelingItem>(json)
 
-
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
-
-        val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), GJENLEVENDE, BARNEP, SedType.P2100, rinaDocumentId =  "3123123")
-        val identifisertPerson = IdentifisertPDLPerson(
-            "01010101010",
-            "SWE",
-            "3005",
-            personRelasjon,
-            personListe = emptyList(),
-            personNavn = "Ole Olsen",
-            identer = null,
-        )
-
-        val sedHendelseModel = SedHendelse(
-            1232312L, "2321313", "P", P_BUC_02, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
-            SedType.P2100, null
-        )
 
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
             BARNEP,
-            sedHendelseModel,
-            HendelseType.MOTTATT,
+            sedHendelse(sedType = P2100, land = "NO"),
+            hendelseType = MOTTATT,
             null,
         )
 
@@ -616,34 +489,16 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun `Gitt aldersak for P_BUC_01 mottatt når bruk av Norg2 tjeneste benyttes så routes det til FAMILIE_OG_PENSJONSYTELSER_OSLO`() {
         val enhetlist = norg2ArbeidsfordelingItemListe("/norg2/norg2arbeidsfordelig4862med-viken-result.json")
+        val identifisertPerson = mockerEnPerson(landkode = "NOR", geoTilknytning = "3005", navn = "Ole Olsen")
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns enhetlist
-
-        val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, ALDER, SedType.P2000, rinaDocumentId =  "3123123")
-        val identifisertPerson =
-            IdentifisertPDLPerson(
-                "01010101010",
-                "NOR",
-                "3005",
-                personRelasjon,
-                personListe = emptyList(),
-                personNavn = "Ole Olsen",
-                identer = null
-            )
-
-        val sedHendelseModel = SedHendelse(
-            1232312L, "2321313", "P", P_BUC_01, "32131", avsenderId = "12313123",
-            "SE", "SE", "2312312", "NO", "NO", "23123123", "1",
-            SedType.P2000, null
-        )
 
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
             ALDER,
-            sedHendelseModel,
-            HendelseType.MOTTATT,
+            sedHendelse(P_BUC_01, P2100),
+            MOTTATT,
             null,
         )
 
@@ -654,6 +509,8 @@ internal class OppgaveRoutingServiceTest {
 
     @Test
     fun `Gitt uføresak for P_BUC_02 mottatt når bruk av Norg2 tjeneste benyttes så routes det til UFORE_UTLAND`() {
+        val identifisertPerson = mockerEnPerson(landkode = "SWE", geoTilknytning = null, navn = "Ole Olsen")
+
         val json = """
             {
             "id": 100026861,
@@ -675,31 +532,12 @@ internal class OppgaveRoutingServiceTest {
 
         every { norg2Klient.hentArbeidsfordelingEnheter(any()) } returns listOf(mappedResponse)
 
-        val personRelasjon =
-            SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, UFOREP, SedType.P2200, rinaDocumentId =  "3123123")
-        val identifisertPerson =
-            IdentifisertPDLPerson(
-                "01010101010",
-                "SWE",
-                null,
-                personRelasjon,
-                personListe = emptyList(),
-                personNavn = "Ole Olsen",
-                identer = null
-            )
-
-        val sedHendelseModel = SedHendelse(
-            1232312L, "2321313", "P", P_BUC_03, "32131", avsenderId = "12313123",
-            "NO", "NO", "2312312", "SE", "SE", "23123123", "1",
-            SedType.P2200, null
-        )
-
         val oppgaveroutingrequest = OppgaveRoutingRequest.fra(
             identifisertPerson,
             alder60aar,
             UFOREP,
-            sedHendelseModel,
-            HendelseType.SENDT,
+            sedHendelse(P_BUC_03, P2200, "SE"),
+            SENDT,
             null,
         )
 
@@ -809,12 +647,12 @@ internal class OppgaveRoutingServiceTest {
                 arguments.expectedResult,
                 routingService.hentEnhet(
                     OppgaveRoutingRequest(
-                        aktorId = "01010101010",
+                        aktorId = AKTOER_ID,
                         fdato = arguments.fdato ?: irrelevantDato(),
                         geografiskTilknytning = arguments.geografiskTilknytning,
                         bucType = arguments.bucType,
                         landkode = arguments.landkode,
-                        hendelseType = HendelseType.SENDT,
+                        hendelseType = SENDT,
                         harAdressebeskyttelse = arguments.adressebeskyttet ?: false,
                         saktype = arguments.saksType
                     )
@@ -914,9 +752,7 @@ internal class OppgaveRoutingServiceTest {
     @Test
     fun testEnumEnhets() {
         assertEquals(PENSJON_UTLAND, Enhet.getEnhet("0001"))
-
         assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, Enhet.getEnhet("4803"))
-
         assertEquals(DISKRESJONSKODE, Enhet.getEnhet("2103"))
     }
 
@@ -925,13 +761,24 @@ internal class OppgaveRoutingServiceTest {
         return mapJsonToAny(json)
     }
 
-    fun mockerEnPerson() = IdentifisertPDLPerson(
-        "123",
-        "NO",
-        "010",
-        SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), FORSIKRET, rinaDocumentId =  "3123123"),
-        personNavn = "Testern",
+    fun mockerEnPerson(
+        landkode: String? = "NO",
+        geoTilknytning: String? = DUMMY_TILKNYTNING,
+        relasjon: Relasjon? = FORSIKRET,
+        navn: String? = "Testeren"
+    ) = IdentifisertPDLPerson(
+        aktoerId = AKTOER_ID,
+        landkode,
+        geografiskTilknytning = geoTilknytning,
+        personRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(DUMMY_FNR), relasjon!!, rinaDocumentId =  "3123123"),
+        personNavn = navn,
         identer = null
+    )
+
+    private fun sedHendelse(bucType: BucType? = P_BUC_02, sedType: SedType? = P2100, land: String ?= "NO") = SedHendelse(
+        1232312L, "2321313", "P", bucType, "32131", avsenderId = "12313123",
+        "SE", "SE", "2312312", land, land, "23123123", "1",
+        sedType, null
     )
 
 }
