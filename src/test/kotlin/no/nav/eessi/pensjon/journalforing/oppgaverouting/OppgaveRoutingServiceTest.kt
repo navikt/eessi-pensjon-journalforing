@@ -170,14 +170,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 uforepensjon ytelse`() {
         assertEquals(
             UFORE_UTLAND, routingService.hentEnhet(
-                oppgaveRoutingRequest(
-                    irrelevantDato(),
-                    R_BUC_02,
-                    UTLAND,
-                    hendelseType = MOTTATT,
-                    sakType = UFOREP,
-                    sedType = R005
-                )
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sakType = UFOREP, sedType = R005)
             )
         )
     }
@@ -195,7 +188,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R004 på R_BUC_02 ukjent ident`() {
         assertEquals(
             ID_OG_FORDELING, routingService.hentEnhet(
-                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, null, sakType = UFOREP, hendelseType = MOTTATT)
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, null, sakType = UFOREP, hendelseType = MOTTATT, sedType = R004)
             )
         )
     }
