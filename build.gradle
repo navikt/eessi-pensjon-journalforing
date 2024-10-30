@@ -42,7 +42,7 @@ dependencies {
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.3.1")
 
-	implementation("org.springframework.retry:spring-retry:2.0.9")
+	implementation("org.springframework.retry:spring-retry:2.0.10")
 
 	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonModuleKotlinVersion}"
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}"
