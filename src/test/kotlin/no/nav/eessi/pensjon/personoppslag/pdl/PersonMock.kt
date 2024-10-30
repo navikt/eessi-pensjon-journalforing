@@ -13,7 +13,7 @@ object PersonMock {
         etternavn: String = "Testesen",
         aktoerId: AktoerId? = null,
         geo: String? = "0301"
-    ): Person {
+    ): PdlPerson {
 
         val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
             LocalDate.now().minusYears(66)
@@ -45,7 +45,7 @@ object PersonMock {
             "1234"
         )
 
-        return Person(
+        return PdlPerson(
             identer = identer,
             navn = Navn(fornavn, null, etternavn, metadata = metadata),
             adressebeskyttelse = listOf(AdressebeskyttelseGradering.UGRADERT),

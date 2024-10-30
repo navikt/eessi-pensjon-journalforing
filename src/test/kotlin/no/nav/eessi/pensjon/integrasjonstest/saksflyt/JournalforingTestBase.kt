@@ -59,7 +59,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Person as PdlPerson
+import no.nav.eessi.pensjon.personoppslag.pdl.model.PdlPerson
 
 internal open class JournalforingTestBase {
 
@@ -635,7 +635,7 @@ internal open class JournalforingTestBase {
         gjenlevendeFnr: String? = null,
         krav: KravType? = null,
         relasjon: RelasjonTilAvdod? = null,
-        pdlPerson: no.nav.eessi.pensjon.personoppslag.pdl.model.Person? = null,
+        pdlPerson: PdlPerson? = null,
         sivilstand: SivilstandItem? = null,
         statsborgerskap: StatsborgerskapItem? = null,
         fdato: String? = null,

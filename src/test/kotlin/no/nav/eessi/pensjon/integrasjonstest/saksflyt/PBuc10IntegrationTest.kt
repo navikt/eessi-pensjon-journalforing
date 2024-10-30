@@ -30,7 +30,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
-import no.nav.eessi.pensjon.personoppslag.pdl.model.Person
+import no.nav.eessi.pensjon.personoppslag.pdl.model.PdlPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -890,7 +890,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
         sedJson: String? = null,
         hendelseType: HendelseType,
-        sokPerson: Person? = null,
+        sokPerson: PdlPerson? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
@@ -981,7 +981,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         relasjonAvod: RelasjonTilAvdod? = RelasjonTilAvdod.EGET_BARN,
         sedJson: String? = null,
         hendelseType: HendelseType,
-        sokPerson: Person? = null,
+        sokPerson: PdlPerson? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
