@@ -112,10 +112,13 @@ class SedMottattListener(
         val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }
         val fdato = personidentifiseringService.hentFodselsDato(identifisertPerson, alleSedIBucList.plus(kansellerteSeder))
 
-        if (bucType == P_BUC_02 && sedHendelse.sedType == SedType.P2100) {
-            logger.info("Innkommende P_BUC_02 med sedType ${sedHendelse.sedType} blir behandlet som GjennySak")
-            val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
-            gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
+        val identifisertPersonBirthDate = identifisertPerson?.fnr?.getAge()
+        if ((identifisertPersonBirthDate != null && identifisertPersonBirthDate < 67)) {
+            if (bucType == P_BUC_02 && sedHendelse.sedType == SedType.P2100) {
+                logger.info("Innkommende P_BUC_02 med sedType ${sedHendelse.sedType} blir behandlet som GjennySak")
+                val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
+                gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
+            }
         }
 
         val saksInfoSamlet = hentSaksInformasjonForEessi(
