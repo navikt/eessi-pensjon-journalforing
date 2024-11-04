@@ -92,6 +92,70 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
+        fun `Sjekker om identifisert person er over 67 aar dersom han er det skal vi ikke håndtere det som en gjennysak og tema pensjon returneres`() {
+            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            every { gcpStorageService.gjennyFinnes(any()) } returns false
+
+            testRunnerVoksen(
+                FNR_VOKSEN_2,
+                FNR_OVER_62,
+                null,
+                krav = KravType.GJENLEV,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = MOTTATT,
+                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+            ) {
+                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Sjekker om identifisert person er under 67 aar dersom han er det skal vi sette det til gjennysak og tema omstilling returneres i dette tilfellet`() {
+            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            every { gcpStorageService.gjennyFinnes(any()) } returns true
+
+            testRunnerVoksen(
+                FNR_VOKSEN_2,
+                FNR_VOKSEN_2,
+                null,
+                krav = KravType.GJENLEV,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = MOTTATT,
+                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+            ) {
+                Assertions.assertEquals(Tema.OMSTILLING, it.tema)
+                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
+        fun `Sjekker om identifisert person er barn i en mottatt P2100 og setter den til gjennysak med tema eybarnep`() {
+            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            every { gcpStorageService.gjennyFinnes(any()) } returns true
+            every { gcpStorageService.hentFraGjenny(any()) } returns "BARNEP"
+
+            testRunnerVoksen(
+                FNR_VOKSEN_2,
+                FNR_BARN,
+                null,
+                krav = KravType.GJENLEV,
+                land = "SWE",
+                alleDocs = allDocuemtActions,
+                relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
+                hendelseType = MOTTATT,
+                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
+            ) {
+                Assertions.assertEquals(Tema.EYBARNEP, it.tema)
+                Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+            }
+        }
+
+        @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
 
             val allDocuemtActions = listOf(
