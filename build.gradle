@@ -4,7 +4,7 @@ buildscript {
 		kotlinVersion = '2.0.21'
 		springBootVersion = '3.3.5'
 		springKafkaVersion = '3.2.4'
-		jacksonModuleKotlinVersion = '2.17.2'
+		jacksonModuleKotlinVersion = '2.18.1'
 		tokenSupportVersion = '4.1.4'
 		imageioVersion = '3.12.0'
 	}
@@ -45,8 +45,6 @@ dependencies {
 	implementation("org.springframework.retry:spring-retry:2.0.10")
 
 	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonModuleKotlinVersion}"
-	implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}"
-	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonModuleKotlinVersion}"
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
@@ -56,16 +54,16 @@ dependencies {
 	implementation("com.google.cloud:google-cloud-storage:2.44.1")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:2.3.35")
+	implementation("no.nav.eessi.pensjon:ep-eux:2.3.37")
 	implementation("no.nav.eessi.pensjon:ep-metrics:2.0.89")
 	implementation("no.nav.eessi.pensjon:ep-logging:2.1.87")
 
-    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.2.5"){
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.2.8"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.0.167"){
+	implementation("no.nav.eessi.pensjon:ep-routing:2.0.171"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
