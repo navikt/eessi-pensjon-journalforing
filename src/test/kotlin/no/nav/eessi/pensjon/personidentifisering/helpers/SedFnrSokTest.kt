@@ -1,17 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.eux.model.sed.Kontekst
-import no.nav.eessi.pensjon.eux.model.sed.Nav
-import no.nav.eessi.pensjon.eux.model.sed.Navsak
-import no.nav.eessi.pensjon.eux.model.sed.Person
-import no.nav.eessi.pensjon.eux.model.sed.PinItem
-import no.nav.eessi.pensjon.eux.model.sed.PinLandItem
-import no.nav.eessi.pensjon.eux.model.sed.SED
-
-import no.nav.eessi.pensjon.eux.model.sed.X005
-import no.nav.eessi.pensjon.eux.model.sed.XNav
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -38,7 +28,8 @@ internal class SedFnrSokTest {
         val sed = SED(
                 type = SedType.H020,
                 nav = Nav(
-                        bruker = Bruker(person = Person(pinland = PinLandItem(
+                        bruker = Bruker(person = Person(
+                            pinland = PinLandItem(
                                 oppholdsland = "22117320034",
                                 kompetenteuland = "09035225916"
                         )
