@@ -49,7 +49,7 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
         sakIdFromSed?.let { sakId ->
             etterlatteService.hentGjennySak(sakId).fold(
                 onSuccess = { gjennySak -> return Sak(FAGSAK, gjennySak?.id.toString(), EY) },
-                onFailure = { logger.warn("Finner ingen gjennySak for rinasakId: $euxCaseId, og sakID: $sakId") }
+                onFailure = { logger.warn("Finner ingen gjennySak hos etterlatte for rinasakId: $euxCaseId, og sakID: $sakId") }
             )
         }
         return null
