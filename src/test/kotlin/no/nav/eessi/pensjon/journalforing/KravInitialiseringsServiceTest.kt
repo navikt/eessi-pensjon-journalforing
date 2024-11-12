@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.sed.Bruker
 import no.nav.eessi.pensjon.journalforing.krav.validerForKravinit
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ internal class KravInitialiseringsServiceTest {
                 sivilstand = listOf(
                     SivilstandItem(
                         dato.toString(),
-                        "gift"
+                        SivilstandRina.GIFT
                     )
                 ),
                 statsborgerskap = listOf(
