@@ -755,7 +755,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                     gjenlevendeFnr = fnrSokVoken,
                     sivilstand = SivilstandItem(
                         fradato = "01-30-1980",
-                        status = "01"
+                        status = SivilstandRina.enslig
                     ),
                     krav = GJENLEV,
                     relasjon = RelasjonTilAvdod.EKTEFELLE,
