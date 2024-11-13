@@ -30,6 +30,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.OppgaveRoutingRequest
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkMelding
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.toJson
@@ -189,37 +190,15 @@ class JournalforingService(
                         navAnsattInfo?.first
                     )
 
-                    // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
-                    val kanLageOppgave = journalpostService.skalStatusSettesTilAvbrutt(
+                    settAvbruttOglagOppgave(
                         identifisertPerson?.personRelasjon?.fnr,
                         hendelseType,
                         sedHendelse,
                         journalPostResponse,
+                        tildeltJoarkEnhet,
+                        aktoerId,
+                        tema
                     )
-
-                    // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
-                    if (journalPostResponse?.journalpostferdigstilt == true && hendelseType == SENDT) {
-                        journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
-                    }
-
-                    journalPostResponse?.journalpostferdigstilt.let { journalPostFerdig ->
-                        logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $kanLageOppgave **********")
-                    }
-
-                    if (journalPostResponse?.journalpostferdigstilt == false && !kanLageOppgave) {
-                        val melding = OppgaveMelding(
-                            sedHendelse.sedType,
-                            journalPostResponse.journalpostId,
-                            tildeltJoarkEnhet,
-                            aktoerId,
-                            sedHendelse.rinaSakId,
-                            hendelseType,
-                            null,
-                            if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-                            tema = tema
-                        ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
-                        oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-                    }
 
                     //Fag har bestemt at alle mottatte seder som ferdigstilles maskinelt skal det opprettes BEHANDLE_SED oppgave for
                     if ((hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt!!)) {
@@ -257,6 +236,48 @@ class JournalforingService(
                 logger.error("Det oppstod en uventet feil ved journalforing av hendelse", ex)
                 throw ex
             }
+        }
+    }
+
+    private fun settAvbruttOglagOppgave(
+        fnr: Fodselsnummer?,
+        hendelseType: HendelseType,
+        sedHendelse: SedHendelse,
+        journalPostResponse: OpprettJournalPostResponse?,
+        tildeltJoarkEnhet: Enhet,
+        aktoerId: String?,
+        tema: Tema
+    ) {
+        // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
+        val journalpostErAvbrutt = journalpostService.journalpostSattTilAvbrutt(
+            fnr,
+            hendelseType,
+            sedHendelse,
+            journalPostResponse,
+        )
+
+        // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
+        if (journalPostResponse?.journalpostferdigstilt == true && hendelseType == SENDT) {
+            journalpostService.oppdaterDistribusjonsinfo(journalPostResponse.journalpostId)
+        }
+
+        journalPostResponse?.journalpostferdigstilt.let { journalPostFerdig ->
+            logger.info("Maskinelt journalført: $journalPostFerdig, sed: ${sedHendelse.sedType}, enhet: $tildeltJoarkEnhet, sattavbrutt: $journalpostErAvbrutt **********")
+        }
+
+        if (journalPostResponse?.journalpostferdigstilt == false && !journalpostErAvbrutt) {
+            val melding = OppgaveMelding(
+                sedHendelse.sedType,
+                journalPostResponse.journalpostId,
+                tildeltJoarkEnhet,
+                aktoerId,
+                sedHendelse.rinaSakId,
+                hendelseType,
+                null,
+                if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
+                tema = tema
+            ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
+            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
         }
     }
 
@@ -316,23 +337,15 @@ class JournalforingService(
                 | enhet: ${journalpostRequest.journalpostRequest.journalfoerendeEnhet}
                 | tema: ${journalpostRequest.journalpostRequest.tema}""".trimMargin()
         )
-
-        if(response?.journalpostId != null) {
-            val melding = OppgaveMelding(
-                sedType = journalpostRequest.sedHendelse.sedType,
-                journalpostId = response.journalpostId,
-                tildeltEnhetsnr = journalpostRequest.journalpostRequest.journalfoerendeEnhet!!,
-                aktoerId = null,
-                rinaSakId = journalpostRequest.sedHendelse.rinaSakId,
-                hendelseType = journalpostRequest.sedHendelseType,
-                filnavn = null,
-                oppgaveType = OppgaveType.JOURNALFORING,
-            ).also { oppgaveMelding ->  logger.info("Opprettet journalforingsoppgave for sak med rinaId: ${oppgaveMelding.rinaSakId}") }
-            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(melding)
-
-        } else {
-            logger.error("Journalpost ikke opprettet")
-        }
+        settAvbruttOglagOppgave(
+            Fodselsnummer.fra(journalpostRequest.journalpostRequest.bruker?.id),
+            journalpostRequest.sedHendelseType,
+            journalpostRequest.sedHendelse,
+            response,
+            journalpostRequest.journalpostRequest.journalfoerendeEnhet!!,
+            journalpostRequest.journalpostRequest.bruker?.id,
+            journalpostRequest.journalpostRequest.tema
+        )
     }
 
     fun loggDersomIkkeBehSedOppgaveOpprettes(

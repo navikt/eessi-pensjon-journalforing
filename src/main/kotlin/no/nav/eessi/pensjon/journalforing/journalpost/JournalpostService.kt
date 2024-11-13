@@ -156,7 +156,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param sedHendelse: sed fra eux
      *  @param journalPostResponse: response fra joark
      */
-    fun skalStatusSettesTilAvbrutt(
+    fun journalpostSattTilAvbrutt(
         fnrForRelasjon: Fodselsnummer?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
@@ -176,10 +176,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
+        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
         return true
     }
-
-    fun settJournalpostTilAvbrutt(journalpostId: String) = journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId)
 
     fun bestemBehandlingsTema(
         bucType: BucType,
