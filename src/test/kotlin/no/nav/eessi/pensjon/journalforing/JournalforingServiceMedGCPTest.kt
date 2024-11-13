@@ -169,7 +169,7 @@ class JournalforingServiceMedGCPTest {
             melding = null,
             false,
         )
-        every { journalpostService.skalStatusSettesTilAvbrutt(any(), any(), any(), any()) } returns false
+        every { journalpostService.journalpostSattTilAvbrutt(any(), any(), any(), any()) } returns false
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
         justRun { statistikkPublisher.publiserStatistikkMelding(any()) }
         every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
