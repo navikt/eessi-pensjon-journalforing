@@ -2,7 +2,8 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.P2200
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
@@ -10,13 +11,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
-import no.nav.eessi.pensjon.eux.model.sed.KravType
-import no.nav.eessi.pensjon.eux.model.sed.P2000
-import no.nav.eessi.pensjon.eux.model.sed.P5000
-import no.nav.eessi.pensjon.eux.model.sed.P8000
-import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.eux.model.sed.SivilstandItem
-import no.nav.eessi.pensjon.eux.model.sed.StatsborgerskapItem
+import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
@@ -70,7 +65,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_OVER_62,
@@ -80,7 +75,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 forsokFerdigStilt = true,
                 hendelseType = MOTTATT,
-                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), "ugift"),
+                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), SivilstandRina.enslig),
                 statsborgerskap = StatsborgerskapItem("SWE")
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
@@ -106,7 +101,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.SENT))
 
 //            every { etterlatteService.hentGjennySak(any()) }  returns mockHentGjennySak("12345678")
 
@@ -137,7 +132,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_OVER_62,
@@ -148,7 +143,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 forsokFerdigStilt = true,
                 documentFiler = getDokumentfilerUtenGyldigVedlegg(),
                 hendelseType = MOTTATT,
-                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), "ugift"),
+                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), SivilstandRina.enslig),
                 statsborgerskap = StatsborgerskapItem("SWE")
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
@@ -191,7 +186,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_OVER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, forsokFerdigStilt = false, hendelseType = MOTTATT
@@ -212,7 +207,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om Alder P2000 feiler med bestemSak`() {
             val bestemsak = BestemSakResponse(null, emptyList())
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 FNR_OVER_62, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT
@@ -232,7 +227,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om Alder P2000 uten gyldig validering fnr-fato og sed-fdato går til ID og Fordeling`() {
             val bestemsak = BestemSakResponse(null, emptyList())
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
             val fdato = "1970-06-20"
 
             testRunnerVoksen(
@@ -256,7 +251,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om Alder P2000 uten gyldig fnr sendes til ID og Fordeling`() {
             val bestemsak = BestemSakResponse(null, emptyList())
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksen(
                 null, bestemsak, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT
@@ -293,7 +288,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 )
             )
 
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
 
             testRunnerVoksenSokPerson(
@@ -320,7 +315,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om Alder P2000 ingen fnr funnet benytter sokPerson som heller ikke finner person Oppgave routes til ID Og Fordeling`() {
 
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.RECEIVED))
 
             testRunnerVoksenSokPerson(
                 FNR_VOKSEN_UNDER_62,
@@ -346,13 +341,13 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P2000, krav ALDER skal routes til PENSJON_UTLAND 001`() {
             val pdlPerson = createBrukerWith(FNR_OVER_62, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
-            val sed20000mottatt = SED.generateSedToClass<P2000>( createSedPensjon(P2000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(P5000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
+            val sed20000mottatt = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P2000>( createSedPensjon(SedType.P2000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
+            val sedP5000mottatt = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P5000>( createSedPensjon(SedType.P5000, null, krav = KravType.ALDER, pdlPerson = pdlPerson, fdato = pdlPerson.foedsel?.foedselsdato.toString()))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", P2000, SedStatus.RECEIVED),
-                ForenkletSED("b12e06dda2c7474b9998c7139c841646", P5000, SedStatus.RECEIVED),
-                ForenkletSED("654654", P8000, SedStatus.EMPTY)
+                ForenkletSED("10001", SedType.P2000, SedStatus.RECEIVED),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P5000, SedStatus.RECEIVED),
+                ForenkletSED("654654", SedType.P8000, SedStatus.EMPTY)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_01, alleDocumenter)
@@ -370,7 +365,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(P5000, P_BUC_01)
+            val hendelse = createHendelseJson(SedType.P5000, P_BUC_01)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -404,14 +399,14 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "1223123123"
 
-            val sedP8000 = SED.generateSedToClass<P8000>(createSed(P8000, fnr, null, saknr, fdato = "1952-03-09"))
-            val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
-            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
+            val sedP8000 = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P8000>(createSed(SedType.P8000, fnr, null, saknr, fdato = "1952-03-09"))
+            val sedP8000sendt = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.FORSORGER), saknr))
+            val sedP8000recevied = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = bfnr, rolle = Rolle.BARN), null))
 
             val dokumenter = listOf(
-                ForenkletSED("b12e06dda2c7474b9998c7139c841646", P8000, SedStatus.RECEIVED),
-                ForenkletSED("b12e06dda2c7474b9998c7139c841647", P8000, SedStatus.SENT),
-                ForenkletSED("b12e06dda2c7474b9998c7139c841648", P8000, SedStatus.RECEIVED)
+                ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841647", SedType.P8000, SedStatus.SENT),
+                ForenkletSED("b12e06dda2c7474b9998c7139c841648", SedType.P8000, SedStatus.RECEIVED)
             )
 
             every { euxKlient.hentBuc(any()) } returns Buc(id = "2", processDefinitionName = "P_BUC_01", documents = bucDocumentsFrom(dokumenter))
@@ -423,7 +418,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
             val (journalpost, _) = initJournalPostRequestSlot(false)
-            val hendelse = createHendelseJson(P8000, P_BUC_01)
+            val hendelse = createHendelseJson(SedType.P8000, P_BUC_01)
 
             val meldingSlot = mutableListOf<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -447,7 +442,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             assertEquals(null, oppgaveMelding.filnavn)
             assertEquals(PENSJON_UTLAND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(JOURNALFORING, oppgaveMelding.oppgaveType)
-            assertEquals(P8000, oppgaveMelding.sedType)
+            assertEquals(SedType.P8000, oppgaveMelding.sedType)
 
             verify(exactly = 1) { personService.hentPerson(any<NorskIdent>()) }
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
@@ -473,7 +468,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     )
                 )
             )
-            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", P2000, SedStatus.SENT))
+            val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.SENT))
 
             every { personService.hentPerson(Npid("12345678901")) } returns createBrukerWith(FNR_OVER_62, "Voksen ", "Forsikret", "SWE", aktorId = AKTOER_ID)
 
@@ -486,7 +481,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 forsokFerdigStilt = true,
                 documentFiler = getDokumentfilerUtenGyldigVedlegg(),
                 hendelseType = MOTTATT,
-                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), "ugift"),
+                sivilstand = SivilstandItem(LocalDate.of(2020, 10, 11).toString(), SivilstandRina.enslig),
                 statsborgerskap = StatsborgerskapItem("SWE")
             ) {
                 val oppgaveMeldingList = it.oppgaveMeldingList
@@ -540,7 +535,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val bestemsak = BestemSakResponse(
                 null, emptyList()
             )
-            val allDocuemtActions = listOf(ForenkletSED("10001212", P2000, SedStatus.SENT))
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SedType.P2000, SedStatus.SENT))
 
             testRunnerVoksen(
                 FNR_OVER_62, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT
@@ -574,9 +569,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         val fnrSokVoken = null
         val mockPerson = createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
-        val sed = SED.generateSedToClass<P2000>(
+        val sed = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P2000>(
             createSedPensjon(
-                P2000,
+                SedType.P2000,
                 fnrSokVoken,
                 eessiSaknr = sakId,
                 krav = krav,
@@ -593,7 +588,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(P2000, P_BUC_01)
+        val hendelse = createHendelseJson(SedType.P2000, P_BUC_01)
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
@@ -661,8 +656,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         } else {
             null
         }
-        val sed = SED.generateSedToClass<P2000>(createSedPensjon(
-            P2000,
+        val sed = SED.generateSedToClass<no.nav.eessi.pensjon.eux.model.sed.P2000>(createSedPensjon(
+            SedType.P2000,
             fnrVoksen,
             eessiSaknr = sakId,
             krav = krav,
@@ -681,7 +676,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(P2000, P_BUC_01, fnrVoksen)
+        val hendelse = createHendelseJson(SedType.P2000, P_BUC_01, fnrVoksen)
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

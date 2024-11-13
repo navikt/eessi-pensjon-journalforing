@@ -18,7 +18,7 @@ internal class KravInitialiseringsServiceTest {
                 sivilstand = listOf(
                     SivilstandItem(
                         dato.toString(),
-                        SivilstandRina.GIFT
+                        SivilstandRina.gift
                     )
                 ),
                 statsborgerskap = listOf(
@@ -49,7 +49,7 @@ internal class KravInitialiseringsServiceTest {
             person = Person(
                 sivilstand = listOf(
                     SivilstandItem(null,
-                        "enslig"
+                        SivilstandRina.enslig
                     )
                 ),
                 statsborgerskap = listOf(
