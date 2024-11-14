@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
@@ -16,7 +15,6 @@ import no.nav.eessi.pensjon.eux.model.document.SedStatus.SENT
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.krav.BehandleHendelseModel
 import no.nav.eessi.pensjon.journalforing.krav.HendelseKode
@@ -343,14 +341,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
 
         if (!journalpostResponse.journalpostferdigstilt && oppgaveMeldingList.isEmpty() && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                JournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                ""
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
         }
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {
             mapJsonToAny(it)

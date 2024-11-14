@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import io.mockk.CapturingSlot
 import io.mockk.justRun
 import io.mockk.slot
 import no.nav.eessi.pensjon.eux.model.SedHendelse
@@ -11,9 +12,11 @@ import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -52,6 +55,8 @@ abstract class IntegrasjonsBase {
     lateinit var embeddedKafka: EmbeddedKafkaBroker
     @Autowired
     lateinit var vurderBrukerInfo: VurderBrukerInfo
+    @Autowired
+    lateinit var journalpostService: JournalpostService
     @Autowired
     lateinit var journalforingService: JournalforingService
 
@@ -176,13 +181,29 @@ abstract class IntegrasjonsBase {
         Thread.sleep(5000)
 
         // del 2: sender manuel generering av JP og oppgave som batch / gcp storage ville gjort
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, HendelseType.MOTTATT)
+    }
+    fun createMockedJournalPostWithOppgave(
+        journalpostRequest: CapturingSlot<OpprettJournalpostRequest>,
+        hendelse: String,
+        hendelseType: HendelseType
+    ) {
         if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                JournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    HendelseType.MOTTATT
-                )
+            val lagretJournalpost = JournalpostMedSedInfo(
+                journalpostRequest.captured,
+                mapJsonToAny<SedHendelse>(hendelse),
+                hendelseType
+            )
+            val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
+
+            journalforingService.settAvbruttOglagOppgave(
+                Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),
+                lagretJournalpost.sedHendelseType,
+                lagretJournalpost.sedHendelse,
+                response,
+                lagretJournalpost.journalpostRequest.journalfoerendeEnhet!!,
+                lagretJournalpost.journalpostRequest.bruker?.id,
+                lagretJournalpost.journalpostRequest.tema
             )
         }
     }

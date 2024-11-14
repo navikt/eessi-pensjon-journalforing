@@ -5,6 +5,8 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
+import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
@@ -21,7 +23,8 @@ import org.springframework.stereotype.Component
 @Component
 class OpprettJournalpostUkjentBruker(
     private val gcpStorageService: GcpStorageService,
-    private val journalforingService: JournalforingService
+    private val journalforingService: JournalforingService,
+    private val journalpostService: JournalpostService
 ) {
     private val logger = LoggerFactory.getLogger(OpprettJournalpostUkjentBruker::class.java)
 
@@ -37,14 +40,27 @@ class OpprettJournalpostUkjentBruker(
         jp?.forEach { journalpostDetaljer ->
             mapJsonToAny<JournalpostMedSedInfo>(journalpostDetaljer.first)
             .also {
-                val jpUtenSak = it.copy(journalpostRequest = it.journalpostRequest.copy(sak = null))
+                val journalPostUtenBruker = it.copy(journalpostRequest = it.journalpostRequest.copy(sak = null))
                     .also { logger.info("Tar ikke med sak: ${it.journalpostRequest.sak} hvor det mangler bruker" ) }
-                journalforingService.lagJournalpostOgOppgave(jpUtenSak, "eessipensjon").also {
+
+                val journalpostRequest = journalPostUtenBruker.journalpostRequest
+
+                val journalpostResponse = journalpostService.sendJournalPost(journalPostUtenBruker, "eessipensjon").also {
                     logger.info("""Lagret JP hentet fra GCP: 
-                    | sedHendelse: ${jpUtenSak.sedHendelse}
-                    | enhet: ${jpUtenSak.journalpostRequest.journalfoerendeEnhet}
-                    | tema: ${jpUtenSak.journalpostRequest.tema}""".trimMargin())
+                    | sedHendelse: ${journalPostUtenBruker.sedHendelse}
+                    | enhet: ${journalpostRequest.journalfoerendeEnhet}
+                    | tema: ${journalpostRequest.tema}""".trimMargin())
                 }
+                journalforingService.settAvbruttOglagOppgave(
+                    fnr = Fodselsnummer.fra(journalpostRequest.bruker?.id),
+                    hendelseType = journalPostUtenBruker.sedHendelseType,
+                    sedHendelse = journalPostUtenBruker.sedHendelse,
+                    journalPostResponse = journalpostResponse,
+                    tildeltJoarkEnhet = journalpostRequest.journalfoerendeEnhet!!,
+                    aktoerId = journalpostRequest.bruker?.id,
+                    tema = journalpostRequest.tema
+                )
+
                 gcpStorageService.slettJournalpostDetaljer(journalpostDetaljer.second).also { logger.info("") }
                 journalforingService.metricsOppdatering("Sletter automatisk lagret journalpost som har gått over 14 dager")
         } }

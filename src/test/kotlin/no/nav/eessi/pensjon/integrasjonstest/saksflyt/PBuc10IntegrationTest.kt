@@ -948,14 +948,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         if (!meldingSlot.isCaptured && journalpostRequest.captured.bruker == null) {
             println("""Opprettet manuell journalføring: | ${journalpostRequest.captured.toJson()}""".trimMargin())
-            journalforingService.lagJournalpostOgOppgave(
-                JournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                ),
-                "eessi-pensjon"
-            )
+            createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
         }
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)

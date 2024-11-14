@@ -310,18 +310,27 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
-    protected fun createMockedJournalPostWithOppgave(
+    fun createMockedJournalPostWithOppgave(
         journalpostRequest: CapturingSlot<OpprettJournalpostRequest>,
         hendelse: String,
         hendelseType: HendelseType
     ) {
         if (journalpostRequest.isCaptured && journalpostRequest.captured.bruker == null) {
-            journalforingService.lagJournalpostOgOppgave(
-                JournalpostMedSedInfo(
-                    journalpostRequest = journalpostRequest.captured,
-                    mapJsonToAny<SedHendelse>(hendelse),
-                    hendelseType
-                )
+            val lagretJournalpost = JournalpostMedSedInfo(
+                journalpostRequest.captured,
+                mapJsonToAny<SedHendelse>(hendelse),
+                hendelseType
+            )
+            val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
+
+            journalforingService.settAvbruttOglagOppgave(
+                Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),
+                lagretJournalpost.sedHendelseType,
+                lagretJournalpost.sedHendelse,
+                response,
+                lagretJournalpost.journalpostRequest.journalfoerendeEnhet!!,
+                lagretJournalpost.journalpostRequest.bruker?.id,
+                lagretJournalpost.journalpostRequest.tema
             )
         }
     }
