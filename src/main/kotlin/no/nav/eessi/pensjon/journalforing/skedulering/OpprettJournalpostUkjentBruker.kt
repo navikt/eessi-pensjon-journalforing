@@ -39,7 +39,12 @@ class OpprettJournalpostUkjentBruker(
             .also {
                 val jpUtenSak = it.copy(journalpostRequest = it.journalpostRequest.copy(sak = null))
                     .also { logger.info("Tar ikke med sak: ${it.journalpostRequest.sak} hvor det mangler bruker" ) }
-                journalforingService.lagJournalpostOgOppgave(jpUtenSak, "eessipensjon")
+                journalforingService.lagJournalpostOgOppgave(jpUtenSak, "eessipensjon").also {
+                    logger.info("""Lagret JP hentet fra GCP: 
+                    | sedHendelse: ${jpUtenSak.sedHendelse}
+                    | enhet: ${jpUtenSak.journalpostRequest.journalfoerendeEnhet}
+                    | tema: ${jpUtenSak.journalpostRequest.tema}""".trimMargin())
+                }
                 gcpStorageService.slettJournalpostDetaljer(journalpostDetaljer.second).also { logger.info("") }
                 journalforingService.metricsOppdatering("Sletter automatisk lagret journalpost som har gått over 14 dager")
         } }
