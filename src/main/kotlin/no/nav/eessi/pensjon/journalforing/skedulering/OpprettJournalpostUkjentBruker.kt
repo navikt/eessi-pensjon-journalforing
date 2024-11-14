@@ -11,6 +11,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+/**
+ * Sjekker hver dag om det er journalposter som har ventet mer enn 14 dager
+ * Sender disse til sending:
+ *  1. Sett avbrutt
+ *  2a. Lager oppgave om det innkommet sed
+ *  3b. Lager ikke oppgave om det er utgående sed *
+ */
 @Component
 class OpprettJournalpostUkjentBruker(
     private val gcpStorageService: GcpStorageService,
