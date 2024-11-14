@@ -330,18 +330,13 @@ class JournalforingService(
     }
 
     fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){
-        val response = journalpostService.sendJournalPost(journalpostRequest, saksbehandlerIdent)
+        val journalpostResponse = journalpostService.sendJournalPost(journalpostRequest, saksbehandlerIdent)
 
-        logger.info("""Lagret JP hentet fra GCP: 
-                | sedHendelse: ${journalpostRequest.sedHendelse}
-                | enhet: ${journalpostRequest.journalpostRequest.journalfoerendeEnhet}
-                | tema: ${journalpostRequest.journalpostRequest.tema}""".trimMargin()
-        )
         settAvbruttOglagOppgave(
             Fodselsnummer.fra(journalpostRequest.journalpostRequest.bruker?.id),
             journalpostRequest.sedHendelseType,
             journalpostRequest.sedHendelse,
-            response,
+            journalpostResponse,
             journalpostRequest.journalpostRequest.journalfoerendeEnhet!!,
             journalpostRequest.journalpostRequest.bruker?.id,
             journalpostRequest.journalpostRequest.tema
