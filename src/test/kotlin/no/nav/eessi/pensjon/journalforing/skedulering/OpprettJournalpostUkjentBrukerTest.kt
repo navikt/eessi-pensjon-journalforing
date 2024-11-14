@@ -47,7 +47,7 @@ class OpprettJournalpostUkjentBrukerTest {
         )
 
         opprettJournalpostUkjentBruker = spyk(
-            OpprettJournalpostUkjentBruker(gcpStorageService, journalforingService)
+            OpprettJournalpostUkjentBruker(gcpStorageService, journalforingService, journalpostService)
         )
     }
 

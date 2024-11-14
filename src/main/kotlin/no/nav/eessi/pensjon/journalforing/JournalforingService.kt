@@ -239,7 +239,7 @@ class JournalforingService(
         }
     }
 
-    private fun settAvbruttOglagOppgave(
+    fun settAvbruttOglagOppgave(
         fnr: Fodselsnummer?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
@@ -327,20 +327,6 @@ class JournalforingService(
 
         logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")
         return true
-    }
-
-    fun lagJournalpostOgOppgave(journalpostRequest: JournalpostMedSedInfo, saksbehandlerIdent: String? = null){
-        val journalpostResponse = journalpostService.sendJournalPost(journalpostRequest, saksbehandlerIdent)
-
-        settAvbruttOglagOppgave(
-            Fodselsnummer.fra(journalpostRequest.journalpostRequest.bruker?.id),
-            journalpostRequest.sedHendelseType,
-            journalpostRequest.sedHendelse,
-            journalpostResponse,
-            journalpostRequest.journalpostRequest.journalfoerendeEnhet!!,
-            journalpostRequest.journalpostRequest.bruker?.id,
-            journalpostRequest.journalpostRequest.tema
-        )
     }
 
     fun loggDersomIkkeBehSedOppgaveOpprettes(
