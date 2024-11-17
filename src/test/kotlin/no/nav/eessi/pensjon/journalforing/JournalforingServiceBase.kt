@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -36,6 +37,7 @@ abstract class JournalforingServiceBase {
     val etterlatteService = mockk<EtterlatteService>()
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
     val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
+    val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -55,20 +57,21 @@ abstract class JournalforingServiceBase {
         kravService,
         gcpStorageService,
         statistikkPublisher,
-        mockk(relaxed = true),
+        vurderBrukerInfo,
         hentSakService,
         hentTemaService,
         env = null
     )
 
     protected val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()
+    protected val opprettJPVurdering = slot<OpprettJournalpostRequest>()
+
     @BeforeEach
     fun setup() {
         journalforingService.nameSpace = "test"
 
         //MOCK RESPONSES
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-//        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
@@ -76,9 +79,9 @@ abstract class JournalforingServiceBase {
             melding = "",
             journalpostferdigstilt = false,
         )
-//        every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
-//        every { gcpStorageService.hentFraGjenny(any()) } returns null
 
+        justRun { vurderBrukerInfo.journalpostMedBruker(capture(opprettJPVurdering), any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(opprettJournalpostRequestCapturingSlot), any(), any()) }
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
     }
 
