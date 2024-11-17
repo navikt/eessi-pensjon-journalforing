@@ -253,7 +253,7 @@ class JournalforingService(
             fnr,
             hendelseType,
             sedHendelse,
-            journalPostResponse,
+            journalPostResponse?.journalpostId,
         )
 
         // Oppdaterer distribusjonsinfo for utgående og maskinell journalføring (Ferdigstiller journalposten)
