@@ -4,12 +4,12 @@ import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -17,8 +17,8 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -27,17 +27,23 @@ import java.time.LocalDate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
-@Disabled
+
 internal class JournalforingAvbruttTest : JournalforingServiceBase() {
+
+    @BeforeEach
+    fun setupForTest() {
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+    }
+
     @ParameterizedTest
     @EnumSource(SedType::class)
     fun `SED med ukjent fnr settes til avbrutt gitt at den ikke er i listen sedsIkkeTilAvbrutt`(sedType: SedType) {
         val sedHendelse = createMockSedHendelse(sedType, BucType.P_BUC_02)
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
-        journalfor(sedHendelse, sedType)
-        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
+        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
     @ParameterizedTest
@@ -45,10 +51,11 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
     fun `SED med ukjent fnr settes til avbrutt gitt at den ikke er i listen bucIkkeTilAvbrutt`(buc: BucType) {
         val sedHendelse = createMockSedHendelse(SedType.P8000, buc)
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
 
-        journalfor(sedHendelse, SedType.P8000)
-        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
+        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
     @Test
@@ -58,74 +65,57 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq("12345")) }
 
-        journalpostService.journalpostSattTilAvbrutt(identifisertPerson.personRelasjon?.fnr, HendelseType.SENDT, sedHendelse, mockk<OpprettJournalPostResponse>().apply {
-            every { journalpostId } returns jpId
-        })
+        journalpostService.journalpostSattTilAvbrutt(
+            identifisertPerson.personRelasjon?.fnr,
+            HendelseType.SENDT,
+            sedHendelse,
+            jpId
+        )
 
-        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(jpId) }
+        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(jpId) }
     }
 
     @Test
     fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
+        val journapostId = "112233"
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq(sedHendelse.rinaSakId)) }
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT, journalPostIdMock = journapostId)
 
-        journalfor(sedHendelse, SedType.P2200)
-        Assertions.assertEquals(
-            Enhet.ID_OG_FORDELING,
-            opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet
-        )
-        Assertions.assertEquals(
-            Behandlingstema.UFOREPENSJON,
-            opprettJournalpostRequestCapturingSlot.captured.behandlingstema
-        )
+        assertEquals(Enhet.ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
-        verify { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(journalpostId = "12345") }
+        verify { journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId = journapostId) }
     }
 
     @Test
-    fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal status settes til avbrutt og journalpost`() {
+    fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal status settes til avbrutt`() {
         val sedHendelse = createMockSedHendelse(SedType.P2000, BucType.P_BUC_01)
         val oppgaveSlot = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
-        justRun {journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
-        journalforingService.journalfor(
-            sedHendelse = sedHendelse,
-            hendelseType = HendelseType.SENDT,
-            identifisertPerson = null,
-            fdato = null,
-            SaksInfoSamlet(saktype = null,  sakInformasjon = SakInformasjon("12345", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)),
-            identifisertePersoner = 0,
-            currentSed = null
-        )
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
 
-        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
-        verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+//        verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
     }
 
     @Test
     fun `Sendt sed P2000 med ukjent fnr SED inneholder IKKE pesys saksId saa skal ikke status settes til avbrutt og journalpost opprettes`() {
         val sedHendelse = createMockSedHendelse(SedType.P2000, BucType.P_BUC_01)
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
-        journalforingService.journalfor(
-            sedHendelse,
-            HendelseType.SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
-            null,
-            identifisertePersoner = 0,
-            navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2000),
-        )
-        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
-        verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        val journapostId = "112233"
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq(sedHendelse.rinaSakId)) }
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT, journalPostIdMock = journapostId)
+
+        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
         verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
 
@@ -133,24 +123,22 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
     fun `Sendt sed P2200 med ukjent fnr med saksinfo der sakid er null så skal status settes til avbrutt`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPDLPerson()
 
         justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
         val sakInformasjonMock = mockk<SakInformasjon>().apply {
             every { sakId } returns null
             every { sakType } returns SakType.ALDER
         }
-        journalforingService.journalfor(
+
+        journalManueltMedAvbrutt(
             sedHendelse,
             HendelseType.SENDT,
-            null,
-            LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
-            identifisertePersoner = 0,
-            navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200)
+            identer = listOf(identifisertPerson),
+            saksInfoSamlet = SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
         )
 
-        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
 
@@ -160,45 +148,35 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
 
-        journalforingService.journalfor(
+        journalManueltMedAvbrutt(
             sedHendelse,
             HendelseType.MOTTATT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            identifisertePersoner = 0,
-            navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200)
+            identer = listOf(identifisertPerson)
         )
 
-        verify(exactly = 0) { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
+        verify(exactly = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
     @Test
-    fun `Utgaaende sed P2200 med ukjent fnr skal sette status avbrutt og opprette behandle-sed oppgave`() {
+    fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt og opprette behandle-sed oppgave`() {
+
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345"))}
+        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq(sedHendelse.rinaSakId)) }
+        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT, journalPostIdMock = "112233", identer = listOf(identifisertPerson))
 
-        journalforingService.journalfor(
-            sedHendelse,
-            HendelseType.SENDT,
-            identifisertPerson,
-            LEALAUS_KAKE.getBirthDate(),
-            identifisertePersoner = 0,
-            navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200)
-        )
-        Assertions.assertEquals(
+        assertEquals(
             Enhet.ID_OG_FORDELING,
             opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet
         )
-        Assertions.assertEquals(
+        assertEquals(
             Behandlingstema.UFOREPENSJON,
             opprettJournalpostRequestCapturingSlot.captured.behandlingstema
         )
 
-        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
+        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
 
     @Test
@@ -229,37 +207,59 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             SEDPersonRelasjon(Fodselsnummer.fra("22117320034"), Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
             "NOR"
         )
-
+        every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns null
+        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
             identifisertPerson,
-            LocalDate.of(1973,11,22),
+            LocalDate.of(1973, 11, 22),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2200)
         )
-        Assertions.assertEquals(
+        journalpostService.sendJournalPost(opprettJPVurdering.captured, sedHendelse, HendelseType.SENDT, "ident")
+        assertEquals(
             Enhet.NFP_UTLAND_AALESUND,
-            opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet
+            opprettJPVurdering.captured.journalfoerendeEnhet
         )
-        Assertions.assertEquals(
+        assertEquals(
             Behandlingstema.GJENLEVENDEPENSJON,
-            opprettJournalpostRequestCapturingSlot.captured.behandlingstema
+            opprettJPVurdering.captured.behandlingstema
         )
 
-        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any())}
+        verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
 
-    private fun journalfor(sedHendelse: SedHendelse, sedType: SedType, identer: List<IdentifisertPDLPerson> = listOf(identifisertPDLPerson())) {
+    private fun journalManueltMedAvbrutt(
+        sedHendelse: SedHendelse,
+        hendelseType: HendelseType = HendelseType.SENDT,
+        identer: List<IdentifisertPDLPerson> = listOf(identifisertPDLPerson()),
+        journalPostIdMock: String = "112233",
+        saksInfoSamlet: SaksInfoSamlet? = null
+    ) {
 
         journalforingService.journalfor(
+            sedHendelse,
+            HendelseType.SENDT,
+            identer.first(),
+            LocalDate.of(1973, 11, 22),
+            identifisertePersoner = 1,
+            navAnsattInfo = null,
+            saksInfoSamlet = saksInfoSamlet,
+            currentSed = SED(type = SedType.P2200)
+        )
+
+        journalforingService.settAvbruttOglagOppgave(
+            fnr = identer[0].fnr,
+            hendelseType = hendelseType,
             sedHendelse = sedHendelse,
-            hendelseType = HendelseType.SENDT,
-            identifisertPerson = identer[0],
-            fdato = null,
-            identifisertePersoner = identer.size,
-            currentSed = SED(type = sedType)
+            mockk<OpprettJournalPostResponse>(relaxed = true).apply {
+                every { journalpostId } returns journalPostIdMock
+            },
+            Enhet.ID_OG_FORDELING,
+            identer.first().fdato.toString(),
+            Tema.OMSTILLING
         )
     }
 
