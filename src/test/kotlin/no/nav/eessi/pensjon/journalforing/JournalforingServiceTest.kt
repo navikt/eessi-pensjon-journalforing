@@ -168,7 +168,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         )
 
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq("12345")) }
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,
@@ -462,8 +462,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2200)
         )
-        assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
+        assertEquals(UFORE_UTLAND, opprettJPVurdering.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJPVurdering.captured.behandlingstema)
     }
 
     @Test
