@@ -154,21 +154,21 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      *  @param identifisertPerson: ID til journalposten som skal ferdigstilles.
      *  @param hendelseType: SENDT eller MOTTATT.
      *  @param sedHendelse: sed fra eux
-     *  @param journalPostResponse: response fra joark
+     *  @param journalpostId: response fra joark
      */
     fun journalpostSattTilAvbrutt(
         fnrForRelasjon: Fodselsnummer?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
-        journalPostResponse: OpprettJournalPostResponse?
+        journalpostId: String?
     ): Boolean {
-        if (journalPostResponse == null) {
+        if (journalpostId == null) {
             logger.warn("Ingen gyldig journalpost; setter ikke avbrutt")
             return false
         }
 
         if (fnrForRelasjon != null) {
-            logger.warn("IdentifiedPerson med journalpostID: ${journalPostResponse.journalpostId} har fnr; setter ikke avbrutt")
+            logger.warn("IdentifiedPerson med journalpostID: $journalpostId har fnr; setter ikke avbrutt")
             return false
         }
 
@@ -176,7 +176,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
-        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalPostResponse.journalpostId)
+        journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId)
         return true
     }
 
