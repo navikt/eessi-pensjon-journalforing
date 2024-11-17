@@ -59,9 +59,9 @@ open class GcpStorageServiceTest {
     }
 
     companion object{
-        fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?) = OpprettJournalpostRequest(
+        fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?, behandlingstema: Behandlingstema? = Behandlingstema.ALDERSPENSJON) = OpprettJournalpostRequest(
             AvsenderMottaker(land = "GB"),
-            Behandlingstema.ALDERSPENSJON,
+            behandlingstema,
             bruker = bruker,
             "[]",
             enhet,
