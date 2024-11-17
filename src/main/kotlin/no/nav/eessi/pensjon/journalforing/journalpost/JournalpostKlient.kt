@@ -150,6 +150,11 @@ class JournalpostKlient(
         }
     }
 
+    /**
+     * Oppdaterer en journalpost ved å feilregistrere sakstilknytningen.
+     * NB: Feilregisterering av bruker krever sakstilknytning. Og vi oppretter ikke sak uten bruker.
+     * @param journalpostId ID-en til journalposten som skal oppdateres.
+     */
     fun oppdaterJournalpostfeilregistrerSakstilknytning(journalpostId: String) {
 
         return avbruttStatusInfo.measure {
