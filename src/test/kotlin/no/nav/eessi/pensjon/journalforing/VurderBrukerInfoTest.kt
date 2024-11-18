@@ -99,7 +99,7 @@ class VurderBrukerInfoTest {
 
         GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, listOf(Pair(lagretJournalPost, blobId)), gcpStorage = storage)
 
-        vurderBrukerInfo.journalpostMedBruker(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
+        vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(journalPostMedBruker, sedMedBruker, identifisertPerson, bruker, "5555")
 
         verify {
             oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""

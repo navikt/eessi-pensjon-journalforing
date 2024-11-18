@@ -51,7 +51,7 @@ class OpprettJournalpostUkjentBruker(
                     | enhet: ${journalpostRequest.journalfoerendeEnhet}
                     | tema: ${journalpostRequest.tema}""".trimMargin())
                 }
-                journalforingService.settAvbruttOglagOppgave(
+                journalforingService.vurderSettAvbruttOgLagOppgave(
                     fnr = Fodselsnummer.fra(journalpostRequest.bruker?.id),
                     hendelseType = journalPostUtenBruker.sedHendelseType,
                     sedHendelse = journalPostUtenBruker.sedHendelse,

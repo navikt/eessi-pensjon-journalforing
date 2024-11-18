@@ -45,7 +45,7 @@ class VurderBrukerInfo (
         countForOppdatering("Lagerer journalpostid for journalpost uten bruker")
     }
 
-    fun journalpostMedBruker(
+    fun finnLagretSedUtenBrukerForRinaNr(
         jprMedBruker: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,

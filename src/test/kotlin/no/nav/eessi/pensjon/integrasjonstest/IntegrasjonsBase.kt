@@ -196,7 +196,7 @@ abstract class IntegrasjonsBase {
             )
             val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
 
-            journalforingService.settAvbruttOglagOppgave(
+            journalforingService.vurderSettAvbruttOgLagOppgave(
                 Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),
                 lagretJournalpost.sedHendelseType,
                 lagretJournalpost.sedHendelse,
