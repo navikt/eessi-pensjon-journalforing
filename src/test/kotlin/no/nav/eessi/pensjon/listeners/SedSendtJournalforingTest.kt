@@ -83,7 +83,6 @@ internal class SedSendtJournalforingTest {
         },
         oppgaveHandler,
         mockk(),
-        gcpStorageService,
         statistikkPublisher,
         journalforingutenbruker,
         hentSakService,

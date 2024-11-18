@@ -55,7 +55,6 @@ abstract class JournalforingServiceBase {
         pdfService,
         oppgaveHandler,
         kravService,
-        gcpStorageService,
         statistikkPublisher,
         vurderBrukerInfo,
         hentSakService,

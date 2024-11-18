@@ -84,8 +84,7 @@ internal class SedSendtJournalforingMedNavansattTest {
             pdfService = mockk<PDFService>(relaxed = true).also {
                 every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
             },
-            oppgaveHandler = oppgaveHandler, mockk(), gcpStorageService, statistikkPublisher,
-            vurderBrukerInfo = vurderBrukerInfo,
+            oppgaveHandler = oppgaveHandler, mockk(), statistikkPublisher, vurderBrukerInfo = vurderBrukerInfo,
             hentSakService = hentSakService,
             hentTemaService = hentTemaService,
             env = null

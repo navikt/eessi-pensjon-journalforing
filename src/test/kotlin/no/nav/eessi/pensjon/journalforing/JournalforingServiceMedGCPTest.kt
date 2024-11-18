@@ -83,7 +83,6 @@ class JournalforingServiceMedGCPTest {
             pdfService,
             oppgaveHandler,
             mockk(),
-            gcpStorageService,
             statistikkPublisher,
             vurderBrukerInfo,
             hentSakService,
