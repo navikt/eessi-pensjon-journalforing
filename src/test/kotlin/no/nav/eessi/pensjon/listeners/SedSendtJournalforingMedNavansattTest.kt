@@ -104,7 +104,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-        justRun { vurderBrukerInfo.journalpostMedBruker(any(), any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any(), any()) }
         //justRun { journalforingutenbruker.harJournalpostBruker(any(), any(), any(), any()) }
     }
 

@@ -79,7 +79,7 @@ abstract class JournalforingServiceBase {
             journalpostferdigstilt = false,
         )
 
-        justRun { vurderBrukerInfo.journalpostMedBruker(capture(opprettJPVurdering), any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(capture(opprettJPVurdering), any(), any(), any(), any()) }
         justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(opprettJournalpostRequestCapturingSlot), any(), any()) }
         every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
     }

@@ -107,7 +107,7 @@ internal open class JournalforingTestBase {
         }
     }
     protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
-        justRun { journalpostMedBruker(any(), any(), any(), any(), any()) }
+        justRun { finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any(), any()) }
         justRun { lagreJournalPostUtenBruker(any(), any(), any()) }
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
@@ -322,7 +322,7 @@ internal open class JournalforingTestBase {
             )
             val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
 
-            journalforingService.settAvbruttOglagOppgave(
+            journalforingService.vurderSettAvbruttOgLagOppgave(
                 Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),
                 lagretJournalpost.sedHendelseType,
                 lagretJournalpost.sedHendelse,
