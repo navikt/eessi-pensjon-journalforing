@@ -108,6 +108,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
 
         val forsoekFerdigstillSlot = slot<Boolean>()
         every { journalpostKlient.opprettJournalpost(any(), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
+        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
         journalforingService.journalfor(
             sedHendelse = generiskSED,
@@ -120,6 +121,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         )
 
         verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any())}
         assertEquals(false, forsoekFerdigstillSlot.captured)
     }
 
