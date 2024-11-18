@@ -9,12 +9,9 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import no.nav.eessi.pensjon.EessiPensjonJournalforingApplication
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
-
-@Disabled
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ArchitectureTest {
@@ -48,7 +45,6 @@ internal class ArchitectureTest {
         // Root packages
         val eux = "eux"
         val config = "config"
-        val health = "health"
         val listeners = "listeners"
         val oppgaveRouting = "journalforing bestemenhet"
 
@@ -67,7 +63,6 @@ internal class ArchitectureTest {
                 .layer(root).definedBy(this.root)
                 .layer(eux).definedBy("${this.root}.eux")
                 .layer(config).definedBy("${this.root}.config")
-                .layer(health).definedBy("${this.root}.health")
                 .layer(journalforing).definedBy("${this.root}.journalforing")
                 .layer(listeners).definedBy("${this.root}.listeners")
                 .layer(oppgaveRouting).definedBy("${this.root}.journalforing.bestemenhet")
@@ -81,7 +76,6 @@ internal class ArchitectureTest {
                 .whereLayer(root).mayNotBeAccessedByAnyLayer()
                 .whereLayer(eux).mayOnlyBeAccessedByLayers(listeners, journalforing, pdf) // Sed
                 .whereLayer(config).mayNotBeAccessedByAnyLayer()
-                .whereLayer(health).mayNotBeAccessedByAnyLayer()
                 .whereLayer(journalforing).mayOnlyBeAccessedByLayers(listeners)
                 .whereLayer(listeners).mayOnlyBeAccessedByLayers(root)
                 .whereLayer(oppgaveRouting).mayOnlyBeAccessedByLayers(journalforing)
