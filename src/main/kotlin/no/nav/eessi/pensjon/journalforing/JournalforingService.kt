@@ -65,6 +65,10 @@ class JournalforingService(
     @Value("\${namespace}")
     lateinit var nameSpace: String
 
+    companion object {
+        val BUC_SOM_SENDES_DIREKTE = listOf(R_BUC_02, P_BUC_06, P_BUC_09)
+    }
+
     init {
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
         journalforOgOpprettOppgaveForSedMedUkjentPerson = metricsHelper.init("journalforOgOpprettOppgaveForSed")
@@ -169,10 +173,19 @@ class JournalforingService(
                     currentSed
                 )
 
-                if (journalpostRequest.bruker == null) {
-                    if (behandleJournalpostUtenBruker(sedHendelse, journalpostRequest, env, hendelseType, navAnsattInfo)) return@measure
+                val skalSendesDirekte = sedHendelse.bucType in  BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
+                val testMiljo = env != null && env in listOf("q2", "q1")
+
+                if (journalpostRequest.bruker == null && !skalSendesDirekte && !testMiljo) {
+                    logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent")
+                    vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
+                    return@measure
                 }
                 else {
+                    if(journalpostRequest.bruker == null) {
+                        logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
+                    }
+
                     val journalPostResponse = journalpostService.sendJournalPost(
                         journalpostRequest,
                         sedHendelse,
@@ -180,15 +193,17 @@ class JournalforingService(
                         navAnsattInfo?.first
                     )
 
-                    vurderBrukerInfo.journalpostMedBruker(
-                        journalpostRequest,
-                        sedHendelse,
-                        identifisertPerson,
-                        journalpostRequest.bruker,
-                        navAnsattInfo?.first
-                    )
+                    if(journalpostRequest.bruker != null) {
+                        vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(
+                            journalpostRequest,
+                            sedHendelse,
+                            identifisertPerson,
+                            journalpostRequest.bruker,
+                            navAnsattInfo?.first
+                        )
+                    }
 
-                    settAvbruttOglagOppgave(
+                    vurderSettAvbruttOgLagOppgave(
                         identifisertPerson?.personRelasjon?.fnr,
                         hendelseType,
                         sedHendelse,
@@ -237,7 +252,7 @@ class JournalforingService(
         }
     }
 
-    fun settAvbruttOglagOppgave(
+    fun vurderSettAvbruttOgLagOppgave(
         fnr: Fodselsnummer?,
         hendelseType: HendelseType,
         sedHendelse: SedHendelse,
@@ -299,32 +314,6 @@ class JournalforingService(
                         identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
                     **********""".trimIndent()
         )
-    }
-
-    private fun behandleJournalpostUtenBruker(
-        sedHendelse: SedHendelse,
-        journalpostRequest: OpprettJournalpostRequest,
-        env: String?,
-        hendelseType: HendelseType,
-        navAnsattInfo: Pair<String, Enhet?>?
-    ): Boolean {
-        val skalSendesDirekte = sedHendelse.bucType in listOf(R_BUC_02, P_BUC_06, P_BUC_09) || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
-        val testMiljo = env != null && env in listOf("q2", "q1")
-
-        val logMelding = when {
-            skalSendesDirekte || testMiljo -> {
-                journalpostService.sendJournalPost(JournalpostMedSedInfo(journalpostRequest, sedHendelse, hendelseType), navAnsattInfo?.first)
-                "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte"
-            }
-
-            else -> {
-                vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
-                "Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent"
-            }
-        }
-
-        logger.warn("$logMelding, buc: ${sedHendelse.bucType}, sed: ${sedHendelse.sedType}")
-        return true
     }
 
     fun loggDersomIkkeBehSedOppgaveOpprettes(

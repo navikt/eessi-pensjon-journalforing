@@ -162,6 +162,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         sedHendelse: SedHendelse,
         journalpostId: String?
     ): Boolean {
+        logger.info("Vurderer avbrutt for journalpostId: $journalpostId, rinaNr: ${sedHendelse.rinaSakId}, buc: ${sedHendelse.bucType}")
         if (journalpostId == null) {
             logger.warn("Ingen gyldig journalpost; setter ikke avbrutt")
             return false
