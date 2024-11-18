@@ -34,10 +34,9 @@ class OpprettJournalpostUkjentBrukerTest {
         oppgaveHandler = mockk(relaxed = true)
         journalforingService = JournalforingService(
             journalpostService = journalpostService,
-            oppgaveHandler = oppgaveHandler,
-            gcpStorageService = gcpStorageService,
             oppgaveRoutingService = mockk(),
             pdfService = mockk(),
+            oppgaveHandler = oppgaveHandler,
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk(),
             vurderBrukerInfo = mockk(),

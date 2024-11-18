@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.SED
-import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.IdType.UTL_ORG
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -49,7 +48,6 @@ class JournalforingService(
     private val pdfService: PDFService,
     private val oppgaveHandler: OppgaveHandler,
     private val kravInitialiseringsService: KravInitialiseringsService,
-    private val gcpStorageService: GcpStorageService,
     private val statistikkPublisher: StatistikkPublisher,
     private val vurderBrukerInfo: VurderBrukerInfo,
     private val hentSakService: HentSakService,

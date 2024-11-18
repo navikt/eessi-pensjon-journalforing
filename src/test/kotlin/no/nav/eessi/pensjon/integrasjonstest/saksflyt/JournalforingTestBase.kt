@@ -163,7 +163,6 @@ internal open class JournalforingTestBase {
         pdfService = pdfService,
         oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
-        gcpStorageService = gcpStorageService,
         statistikkPublisher = statistikkPublisher,
         vurderBrukerInfo = vurderBrukerInfo,
         hentSakService = hentSakService,
