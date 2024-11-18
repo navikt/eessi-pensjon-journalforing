@@ -22,7 +22,7 @@ class PDLConfiguration(
     override fun callBack(): PdlToken {
         val clientProperties =  Optional.ofNullable(clientConfigurationProperties.registration["pdl-credentials"]).orElseThrow { RuntimeException("could not find oauth2 client config for pdl-credentials") }
         val response = oAuth2AccessTokenService.getAccessToken(clientProperties)
-        val token = response.accessToken!!
+        val token = response.access_token!!
         return PdlTokenImp(token)
     }
 
