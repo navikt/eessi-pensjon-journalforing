@@ -28,7 +28,7 @@ class OpprettJournalpostUkjentBruker(
 ) {
     private val logger = LoggerFactory.getLogger(OpprettJournalpostUkjentBruker::class.java)
 
-    //@Scheduled(cron = "0 0 18 * * ?")
+    @Scheduled(cron = "0 0 21 * * ?")
     fun dagligSjekkForLagredeJournalposter() {
         val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(14)
 
