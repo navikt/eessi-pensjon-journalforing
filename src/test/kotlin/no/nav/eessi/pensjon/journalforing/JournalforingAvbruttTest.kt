@@ -81,7 +81,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         assertEquals(Enhet.ID_OG_FORDELING, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
         assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
 
-        verify { journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId = journapostId) }
+        verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId = journapostId) }
     }
 
     @Test
