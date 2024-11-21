@@ -61,22 +61,28 @@ class FodselsdatoHelper {
             return seder.any { it.type == SedTypeP15000 && it.nav?.krav?.type == GJENLEV }
         }
 
+        /**
+         * Finner fdato fra de forskjellige sed / sedtypene
+         * NB: det må brukes sedtype for vurdering da flere sed ikke er direkte implementert (P11000 mm),
+         *     men benytter baseklassen SED og sedType for vurdering
+         *
+         * @param sed, spesfikke sed som skal vurderes
+         * @return Fødselsdato som [LocalDate]
+         */
         fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
                 val fdato = when (sed.type) {
                     SedTypeR005 -> filterPersonR005Fodselsdato(sed as R005)
-                    SedTypeP2000, SedTypeP2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedTypeP2000, SedTypeP2200, SedTypeH120, SedTypeH121, SedTypeH070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     SedTypeP2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    SedTypeP5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
-                    SedTypeP6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
-                    SedTypeP8000, SedTypeP10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedTypeP9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
-                    SedTypeP11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    SedTypeP12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    SedTypeP5000, SedTypeP6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    SedTypeP8000, SedTypeP10000 -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedTypeP9000 -> filterPersonFodselsdato(sed.nav?.bruker?.person) ?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
+                    SedTypeP11000, SedTypeP12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
                     SedTypeP15000 -> filterP15000(sed as P15000)
-                    SedTypeH120, SedTypeH121, SedTypeH070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     SedTypeX005, SedTypeX008, SedTypeX010 -> filterPersonFodselsdatoX00Sed(sed)
-                    else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    else ->
+                        leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
                 fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }.also {
@@ -87,7 +93,6 @@ class FodselsdatoHelper {
                 null
             }
         }
-
         private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Bruker?): String? {
             return if (gjenlevende != null) filterGjenlevendeFodselsdato(gjenlevende)
             else filterPersonFodselsdato(person)
