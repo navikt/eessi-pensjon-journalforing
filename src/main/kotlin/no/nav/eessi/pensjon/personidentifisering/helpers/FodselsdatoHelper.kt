@@ -1,23 +1,26 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import no.nav.eessi.pensjon.eux.kanInneholdeIdentEllerFdato
-import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.eux.model.SedType.*
-import no.nav.eessi.pensjon.eux.model.SedType.P10000
-import no.nav.eessi.pensjon.eux.model.SedType.P2000
-import no.nav.eessi.pensjon.eux.model.SedType.P2100
-import no.nav.eessi.pensjon.eux.model.SedType.P2200
-import no.nav.eessi.pensjon.eux.model.SedType.P8000
-import no.nav.eessi.pensjon.eux.model.SedType.P9000
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.SedType.P10000 as SedTypeP10000
+import no.nav.eessi.pensjon.eux.model.SedType.P2000 as SedTypeP2000
+import no.nav.eessi.pensjon.eux.model.SedType.P5000 as SedTypeP5000
+import no.nav.eessi.pensjon.eux.model.SedType.P6000 as SedTypeP6000
+import no.nav.eessi.pensjon.eux.model.SedType.H120 as SedTypeH120
+import no.nav.eessi.pensjon.eux.model.SedType.H121 as SedTypeH121
+import no.nav.eessi.pensjon.eux.model.SedType.H070 as SedTypeH070
+import no.nav.eessi.pensjon.eux.model.SedType.R005 as SedTypeR005
+import no.nav.eessi.pensjon.eux.model.SedType.P2100 as SedTypeP2100
+import no.nav.eessi.pensjon.eux.model.SedType.P2200 as SedTypeP2200
+import no.nav.eessi.pensjon.eux.model.SedType.P8000 as SedTypeP8000
+import no.nav.eessi.pensjon.eux.model.SedType.P9000 as SedTypeP9000
+import no.nav.eessi.pensjon.eux.model.SedType.P11000 as SedTypeP11000
+import no.nav.eessi.pensjon.eux.model.SedType.P12000 as SedTypeP12000
+import no.nav.eessi.pensjon.eux.model.SedType.P15000 as SedTypeP15000
+import no.nav.eessi.pensjon.eux.model.SedType.X005 as SedTypeX005
+import no.nav.eessi.pensjon.eux.model.SedType.X008 as SedTypeX008
+import no.nav.eessi.pensjon.eux.model.SedType.X010 as SedTypeX010
 import no.nav.eessi.pensjon.eux.model.sed.KravType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.sed.P15000
-import no.nav.eessi.pensjon.eux.model.sed.P5000
-import no.nav.eessi.pensjon.eux.model.sed.P6000
-import no.nav.eessi.pensjon.eux.model.sed.R005
-import no.nav.eessi.pensjon.eux.model.sed.X005
-import no.nav.eessi.pensjon.eux.model.sed.X008
-import no.nav.eessi.pensjon.eux.model.sed.X010
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -55,24 +58,24 @@ class FodselsdatoHelper {
 
         //Det er noen XSed som mangler FNR
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == GJENLEV }
+            return seder.any { it.type == SedTypeP15000 && it.nav?.krav?.type == GJENLEV }
         }
 
         fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
                 val fdato = when (sed.type) {
-                    SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
-                    P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
-                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
-                    P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
-                    P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    SedType.P12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    SedType.P15000 -> filterP15000(sed as P15000)
-                    H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedType.X005, SedType.X008, SedType.X010 -> filterPersonFodselsdatoX00Sed(sed)
+                    SedTypeR005 -> filterPersonR005Fodselsdato(sed as R005)
+                    SedTypeP2000, SedTypeP2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedTypeP2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
+                    SedTypeP5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
+                    SedTypeP6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
+                    SedTypeP8000, SedTypeP10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedTypeP9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
+                    SedTypeP11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    SedTypeP12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    SedTypeP15000 -> filterP15000(sed as P15000)
+                    SedTypeH120, SedTypeH121, SedTypeH070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    SedTypeX005, SedTypeX008, SedTypeX010 -> filterPersonFodselsdatoX00Sed(sed)
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
