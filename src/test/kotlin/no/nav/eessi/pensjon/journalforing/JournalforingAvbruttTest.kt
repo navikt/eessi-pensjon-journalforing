@@ -43,7 +43,10 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
         journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
-        verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+        if(sedType == SedType.R006){
+            verify(atLeast = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+        }
+        else verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
     @ParameterizedTest

@@ -172,10 +172,17 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
+        if(sedHendelse.sedType == SedType.R006 && hendelseType == SENDT){
+            logger.warn("HendelseType er utgående og SED er R006; setter ikke avbrutt")
+            return false
+
+        }
+
         if (hendelseType != SENDT) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
+
         logger.info("Journalpost:$journalpostId settes til avbrutt for rinaNr: ${sedHendelse.rinaSakId}, buc: ${sedHendelse.bucType}, sed:${sedHendelse.rinaDokumentId}")
         journalpostKlient.oppdaterJournalpostMedAvbrutt(journalpostId)
         return true
