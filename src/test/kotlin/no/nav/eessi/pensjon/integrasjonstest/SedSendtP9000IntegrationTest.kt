@@ -94,6 +94,8 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns JournalforingTestBase()
             .createBrukerWith(FNR_VOKSEN_UNDER_62,aktorId = JournalforingTestBase.AKTOER_ID)
 
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+
         //server setup
         CustomMockServer()
             .medJournalforing(false, "429434379")

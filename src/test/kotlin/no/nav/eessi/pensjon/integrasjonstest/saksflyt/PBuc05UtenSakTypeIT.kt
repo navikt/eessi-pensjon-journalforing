@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
+import io.mockk.every
 import no.nav.eessi.pensjon.models.Behandlingstema.UFOREPENSJON
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD

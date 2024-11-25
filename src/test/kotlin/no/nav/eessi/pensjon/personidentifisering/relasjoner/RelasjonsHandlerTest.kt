@@ -104,7 +104,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             ), P_BUC_02
         )
 
-        val sok = createSokKritere(fornavn = GJENLEV_FNAVN)
+        val sok = createSokKritere(fornavn = GJENLEV_FNAVN,)
         val expected = setOf(
             SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
@@ -186,7 +186,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), R_BUC_02
             )
 
-            val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11))
+            val sok = createSokKritere(fdato = LocalDate.of(1971, 6, 11),)
             val forste = SEDPersonRelasjon(Fodselsnummer.fra(KRAFTIG_VEGGPRYD),
                 Relasjon.FORSIKRET,
                 sedType = SedType.H070,
@@ -314,7 +314,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_02
             )
 
-            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9),)
             val expectedPersonRelasjon = SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
                 Relasjon.GJENLEVENDE,
@@ -363,7 +363,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             println("*** $actual ***")
-            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22))
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973, 11, 22),)
             val expectedPersonRelasjon = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, SedType.P5000, sokKriterier = sok, fdato = sok.foedselsdato , rinaDocumentId = "23123123")
 
             assertEquals(2, actual.size)
@@ -384,7 +384,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_02
             )
 
-            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9),)
             val expectedPersonRelasjon = SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
                 Relasjon.GJENLEVENDE,
@@ -406,7 +406,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             ), P_BUC_02
         )
 
-        val sok = createSokKritere(FORSIKRET_FNAVN, fdato = LocalDate.of(1971, 6, 11))
+        val sok = createSokKritere(FORSIKRET_FNAVN, fdato = LocalDate.of(1971, 6, 11),)
         val expectedPersonRelasjon = SEDPersonRelasjon(
             Fodselsnummer.fra(KRAFTIG_VEGGPRYD),
             Relasjon.FORSIKRET,
@@ -433,7 +433,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_07
             )
 
-            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9))
+            val sok = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1952, 3, 9),)
             val expectedPersonRelasjon = SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
                 Relasjon.GJENLEVENDE,
@@ -456,7 +456,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_07
             )
 
-            val sok = createSokKritere(FORSIKRET_FNAVN, fdato = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)!!.getBirthDate()!!)
+            val sok = createSokKritere(FORSIKRET_FNAVN, fdato = Fodselsnummer.fra(KRAFTIG_VEGGPRYD)!!.getBirthDate()!!,)
             val expectedPersonRelasjon = SEDPersonRelasjon(
                 Fodselsnummer.fra(forventetFnr),
                 Relasjon.FORSIKRET,
@@ -488,7 +488,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
                 ), P_BUC_10
             )
 
-            val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22))
+            val sokgjen = createSokKritere(GJENLEV_FNAVN, fdato = LocalDate.of(1973,11,22),)
             val expectedGjenlevP15000 = SEDPersonRelasjon(Fodselsnummer.fra(gjenlevFnr), Relasjon.GJENLEVENDE, GJENLEV, sedType = SedType.P15000, sokKriterier = sokgjen, fdato = LocalDate.of(1973,11,22), rinaDocumentId = "31231231")
             assertEquals(1, actual.size)
             assertEquals(expectedGjenlevP15000, actual[0])
@@ -504,7 +504,7 @@ internal class RelasjonsHandlerTest : RelasjonTestBase() {
             )
 
             val actual = RelasjonsHandler.hentRelasjoner(sedList, P_BUC_01)
-            val sok = createSokKritere(fdato = LocalDate.of(1971,6,11))
+            val sok = createSokKritere(fdato = LocalDate.of(1971,6,11),)
             val expectedPerson = SEDPersonRelasjon(Fodselsnummer.fra(forsikretFnr), Relasjon.FORSIKRET, ALDER, sedType = SedType.P15000, sokKriterier = sok, fdato = LocalDate.of(1971, 6,11), rinaDocumentId = "3123123")
 
             assertEquals(1, actual.size)

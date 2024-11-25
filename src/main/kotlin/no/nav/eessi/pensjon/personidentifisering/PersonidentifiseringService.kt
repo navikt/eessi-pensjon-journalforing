@@ -201,8 +201,8 @@ class PersonidentifiseringService(
             bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner.filterIndexed{ index, _ -> index != 0 } }
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
-                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
-                utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
+                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon in listOf(GJENLEVENDE, BARN, FORSORGER) }
+                utvelgerPersonOgGjenlevPBuc05(identifisertePersoner, erGjenlevendeRelasjon)
             }
 
             bucType == P_BUC_06 -> {
@@ -240,6 +240,26 @@ class PersonidentifiseringService(
     ): IdentifisertPDLPerson? {
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
+        logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
+
+        return when {
+            gjenlevendePerson != null -> gjenlevendePerson
+            erGjenlevende -> null
+            else -> {
+                forsikretPerson?.apply {
+                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == FORSIKRET }
+                }
+            }
+        }
+    }
+
+    //Gjelder kun for P_BUC_05
+    private fun utvelgerPersonOgGjenlevPBuc05(
+        identifisertePersoner: List<IdentifisertPDLPerson>,
+        erGjenlevende: Boolean
+    ): IdentifisertPDLPerson? {
+        val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
+        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon in listOf(GJENLEVENDE, BARN, FORSORGER) }
         logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
 
         return when {

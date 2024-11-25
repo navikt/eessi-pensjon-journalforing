@@ -18,6 +18,9 @@ import no.nav.eessi.pensjon.eux.model.sed.R005
 import no.nav.eessi.pensjon.eux.model.sed.X005
 import no.nav.eessi.pensjon.eux.model.sed.X008
 import no.nav.eessi.pensjon.eux.model.sed.X010
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -33,14 +36,16 @@ class FodselsdatoHelper {
          *
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
-        fun fdatoFraSedListe(seder: List<SED>): LocalDate? {
+        fun fdatoFraSedListe(seder: List<SED>, relasjon: SEDPersonRelasjon? = null): LocalDate? {
             if (seder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
+            val gjenlevende = if(relasjon?.relasjon in listOf(FORSIKRET, GJENLEVENDE, AVDOD, ANNET, BARN, FORSORGER)) relasjon else null
             val fdato = seder
                     .filter { it.type.kanInneholdeIdentEllerFdato() }
                     .mapNotNull { filterFodselsdato(it) }
-                    .firstOrNull()
+                    //.takeIf {  relasjon?.fdato == it.firstOrNull()
+                        .firstOrNull()
 
             if (fdato != null) {
                 return fdato
@@ -66,7 +71,8 @@ class FodselsdatoHelper {
                     P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
                     SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
                     SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
-                    P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P8000 ->  leggTilAnnenPersonFdatoHvisFinnesP8000(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
                     P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
                     SedType.P12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
@@ -115,6 +121,12 @@ class FodselsdatoHelper {
             logger.info("Annen persons rolle er: ${annenPerson?.rolle}")
             if (annenPerson?.rolle != Rolle.ETTERLATTE.kode) return null
             return annenPerson.foedselsdato
+        }
+
+        private fun leggTilAnnenPersonFdatoHvisFinnesP8000(annenPerson: Person?): String? {
+            logger.info("Annen persons rolle er: ${annenPerson?.rolle}")
+            if (annenPerson?.rolle !in listOf(Rolle.ETTERLATTE.kode, Rolle.FORSORGER.kode, Rolle.BARN.kode)) return null
+            return annenPerson?.foedselsdato
         }
 
         private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? = gjenlevende?.person?.foedselsdato

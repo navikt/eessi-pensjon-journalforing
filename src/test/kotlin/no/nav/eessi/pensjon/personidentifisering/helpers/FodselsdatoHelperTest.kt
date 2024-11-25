@@ -12,7 +12,7 @@ internal class FodselsdatoHelperTest {
     @Test
     fun `Calling getFDatoFromSed returns exception when foedselsdato is not found`() {
         assertThrows<RuntimeException> {
-            FodselsdatoHelper.fdatoFraSedListe(listOf(getSedFile("/buc/EmptySED.json")))
+            FodselsdatoHelper.fdatoFraSedListe(listOf(getSedFile("/buc/EmptySED.json")), null)
         }
     }
 
@@ -22,7 +22,8 @@ internal class FodselsdatoHelperTest {
             listOf(
                     getSedFile("/buc/P2100-PinDK-NAV.json"),
                     getSedFile("/buc/P2000-NAV.json"),
-                    getSedFile("/buc/P15000-NAV.json"))
+                    getSedFile("/buc/P15000-NAV.json")),
+            null
         )
         val expected = LocalDate.of(1969, 9, 11)
         assertEquals(expected, actual)
@@ -31,7 +32,7 @@ internal class FodselsdatoHelperTest {
     @Test
     fun `getFDatoFromSed return RunTimeError when all list is empty`() {
         assertThrows<RuntimeException> {
-            FodselsdatoHelper.fdatoFraSedListe(emptyList())
+            FodselsdatoHelper.fdatoFraSedListe(emptyList(), null)
         }
     }
 
@@ -41,7 +42,8 @@ internal class FodselsdatoHelperTest {
             listOf(
                 getSedFile("/buc/P2100-PinDK-NAV.json"),
                 getSedFile("/buc/P2000-NAV.json"),
-                getSedFile("/buc/P15000-NAV.json"))
+                getSedFile("/buc/P15000-NAV.json")),
+            null
         )
         val expected = LocalDate.of(1969, 9, 11)
         assertEquals(expected, actual)
@@ -52,26 +54,26 @@ internal class FodselsdatoHelperTest {
     @Test
     fun `Calling getFDatoFromSed   returns valid resultset on BUC_01` () {
         val sedListe = listOf(getSedFile("/buc/P2000-NAV.json"))
-        assertEquals(LocalDate.of(1980, 1, 1), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1980, 1, 1), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
 
     @Test
     fun `Calling getFDatoFromSed   returns valid resultset on P10000 P_BUC_06` () {
         val sedListe = listOf(getSedFile("/buc/P10000-enkel.json"))
-        assertEquals(LocalDate.of(1948, 6, 28), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1948, 6, 28), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
     fun `Calling getFDatoFromSed   returns valid resultset on P10000 superenkel P_BUC_06` () {
         val sedListe = listOf(getSedFile("/buc/P10000-superenkel.json"))
-        assertEquals(LocalDate.of(1958, 7, 11), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1958, 7, 11), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
     fun `Calling getFDatoFromSed   returns valid resultset on P10000 person og annenperson P_BUC_06` () {
         val sedListe = listOf(getSedFile("/buc/P10000-person-annenperson.json"))
-        assertEquals(LocalDate.of(1986, 1, 29), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1986, 1, 29), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
@@ -81,20 +83,20 @@ internal class FodselsdatoHelperTest {
                 getSedFile("/buc/EmptySED.json"),
                 getSedFile("/buc/P10000-superenkel.json"))
 
-        assertEquals(LocalDate.of(1958, 7, 11), FodselsdatoHelper.fdatoFraSedListe(seds))
+        assertEquals(LocalDate.of(1958, 7, 11), FodselsdatoHelper.fdatoFraSedListe(seds, null))
     }
 
     @Test
     fun `ved henting ved fdato på R005 når kun en person hentes personen` () {
         val sedListe = listOf(getSedFile("/sed/R_BUC_02-R005-IkkePin.json"))
-        assertEquals(LocalDate.of(1980, 10, 22), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1980, 10, 22), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
     fun `ved henting ved fdato på R005 når kun en person hentes personen test2` () {
         val x008 = X008(xnav=XNav(Navsak()))
         val sedListe = listOf(x008, getSedFile("/sed/R_BUC_02_R005_SE.json"))
-        assertEquals(LocalDate.of(1959, 4, 27), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(1959, 4, 27), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
@@ -102,13 +104,13 @@ internal class FodselsdatoHelperTest {
         val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-avdod-enke-NAV.json").readText())
 
         val sedListe = listOf(sed)
-        assertEquals(LocalDate.of(2000, 8, 26), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+        assertEquals(LocalDate.of(2000, 8, 26), FodselsdatoHelper.fdatoFraSedListe(sedListe, null))
     }
 
     @Test
     fun `ved henting ved fdato på R005 ved den person som debitor og sak er alderpensjon`() {
         val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText())
-        assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fdatoFraSedListe(listOf(sed)))
+        assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fdatoFraSedListe(listOf(sed), null))
     }
 
     private fun getSedFile(file: String): SED =  SED.fromJsonToConcrete(javaClass.getResource(file).readText())
