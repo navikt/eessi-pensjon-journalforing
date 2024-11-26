@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle.FORSORGER
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.utils.toJson
 
 class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String): AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
@@ -25,9 +26,10 @@ class P8000AndP10000Relasjon(private val sed: SED, private val bucType: BucType,
             }
         }
 
-        secureLog.info("forsikret $forsikret")
-        secureLog.info("gjenlevlist: $fnrListe")
+        secureLog.info("forsikret ${forsikret.toJson()}")
+        secureLog.info("gjenlevlist: ${fnrListe.toJson()}")
 
+        //TODO: Litt usikker på firstOrNull
         if (fnrListe.firstOrNull { it.relasjon == Relasjon.BARN || it.relasjon == Relasjon.FORSORGER || it.relasjon == Relasjon.GJENLEVENDE } != null ) {
             return fnrListe + forsikret
         }

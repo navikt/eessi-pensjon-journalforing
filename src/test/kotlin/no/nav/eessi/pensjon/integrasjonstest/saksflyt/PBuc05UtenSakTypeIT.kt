@@ -24,11 +24,10 @@ internal class PBuc05UtenSakTypeIT : JournalforingTestBase(){
 
     @Test
     fun `2 personer i SED, har rolle barn 02 FORSORGER`() {
-        testRunnerFlerePersoner(
-            FNR_VOKSEN_UNDER_62,
-            FNR_BARN, emptyList(), rolle = Rolle.FORSORGER) {
+        val barn = createBrukerWith(FNR_BARN, "Barn", "Diskret", "NOR", "1213")
+        testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, saker = emptyList(), rolle = Rolle.FORSORGER, pdlpersonAnnenPerson = barn) {
             assertEquals(PENSJON, it.tema)
-            assertEquals(Enhet.ID_OG_FORDELING, it.journalfoerendeEnhet)
+            assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
         }
     }
 

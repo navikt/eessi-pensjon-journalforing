@@ -124,7 +124,7 @@ class FodselsdatoHelper {
         }
 
         private fun leggTilAnnenPersonFdatoHvisFinnesP8000(annenPerson: Person?): String? {
-            logger.info("Annen persons rolle er: ${annenPerson?.rolle}")
+            logger.info("Annen persons rolle er: ${annenPerson?.rolle}, ${Rolle.fromValue(annenPerson?.rolle)}")
             if (annenPerson?.rolle !in listOf(Rolle.ETTERLATTE.kode, Rolle.FORSORGER.kode, Rolle.BARN.kode)) return null
             return annenPerson?.foedselsdato
         }

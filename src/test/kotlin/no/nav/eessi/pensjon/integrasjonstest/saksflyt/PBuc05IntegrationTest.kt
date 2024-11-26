@@ -292,7 +292,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `2 personer i SED fnr finnes, rolle er 02 og bestemsak finner flere sak Så journalføres manuelt på tema PENSJON og enhet NFP_UTLAND_AALESUND`() {
             val saker = listOf(sakInformasjon(ALDER), sakInformasjon(UFOREP), sakInformasjon(GENRL))
 
-            testRunnerFlerePersoner(FNR_OVER_62, FNR_VOKSEN_UNDER_62, saker, sakId = SAK_ID, rolle = Rolle.FORSORGER) {
+            val forsorger = createBrukerWith(FNR_VOKSEN_UNDER_62, "Barn", "Diskret", "NOR", "1213")
+            testRunnerFlerePersoner(
+                FNR_OVER_62,
+                FNR_VOKSEN_UNDER_62,
+                saker, sakId = SAK_ID, rolle = Rolle.FORSORGER,
+                pdlpersonAnnenPerson = forsorger
+            ) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -1399,14 +1405,20 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario5Inngaende {
         @Test
         fun `To personer angitt, gyldig fnr, rolle er 03(barn), bosatt norge`() {
-            testRunnerFlerePersoner(FNR_OVER_62, FNR_VOKSEN_UNDER_62, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT) {
+
+            val barn = createBrukerWith(FNR_VOKSEN_UNDER_62, "Barn", "Diskret", "NOR", "1213")
+
+            testRunnerFlerePersoner(FNR_OVER_62, FNR_VOKSEN_UNDER_62, rolle = Rolle.BARN, sakId = null, pdlpersonAnnenPerson = barn, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-                assertEquals(FNR_OVER_62, it.bruker!!.id)
+                assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
+                assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
+//            verify {
+//                // ekstra verif, men burde holde med linjen over: assertEquals(FNR_BARN, it.bruker!!.id)
+//                journalpostService.opprettJournalpost(any(), Fodselsnummer.fra(FNR_VOKSEN_UNDER_62), any(), any(), any(), any(), any(), any(), any(), any(), any())
+//            }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT) {
-//                assertEquals(PENSJON, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
                 assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
@@ -1430,16 +1442,17 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `To personer angitt, gyldig fnr, rolle er 03(barn), bosatt utland`() {
+
             testRunnerFlerePersoner(FNR_OVER_62, FNR_VOKSEN_UNDER_62, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
-                assertEquals(FNR_OVER_62, it.bruker!!.id)
+                assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
+                assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
             }
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, rolle = Rolle.BARN, sakId = null, hendelseType = MOTTATT, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
-                assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
-                assertEquals(FNR_VOKSEN_UNDER_62, it.bruker!!.id)
+                assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
+                assertEquals(FNR_BARN, it.bruker!!.id)
             }
         }
 

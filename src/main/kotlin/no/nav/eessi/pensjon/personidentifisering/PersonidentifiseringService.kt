@@ -295,22 +295,24 @@ class PersonidentifiseringService(
      */
     fun hentFodselsDato(identifisertPerson: IdentifisertPDLPerson?, seder: List<SED>): LocalDate? {
 
+        val relasjon = identifisertPerson?.personRelasjon?.relasjon
+
         if( identifisertPerson?.personRelasjon?.fnr == null ){
-            return FodselsdatoHelper.fdatoFraSedListe(seder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
+            return FodselsdatoHelper.fdatoFraSedListe(seder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon: $relasjon") }
         }
 
         identifisertPerson.personRelasjon?.fnr?.value?.let {
             if(identifisertPerson.identer?.contains(it) == true){
-                logger.info("Fødselsdato funnet i identifisert person sin personrelasjon")
+                logger.info("Fødselsdato funnet i identifisert person sin personrelasjon: $relasjon")
             }
-            else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
+            else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon: $relasjon")
         }
 
         return seder
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
-            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon") }
+            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon: $relasjon") }
     }
 }
 

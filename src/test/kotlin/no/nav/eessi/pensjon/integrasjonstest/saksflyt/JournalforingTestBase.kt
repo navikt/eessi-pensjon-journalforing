@@ -42,6 +42,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.oppgaverouting.logger
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -224,9 +225,18 @@ internal open class JournalforingTestBase {
         rolle: Rolle?,
         hendelseType: HendelseType = SENDT,
         fDatoFraAnnenPerson: String? = "1988-07-12",
+        pdlpersonAnnenPerson: PdlPerson? = null,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
+        val sed = SED.generateSedToClass<P8000>(
+            createSed(
+                SedType.P8000,
+                fnr,
+                createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle, pdlPerson = pdlpersonAnnenPerson),
+                sakId,
+                fdato = fDatoFraAnnenPerson
+            )
+        )
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
@@ -602,7 +612,7 @@ internal open class JournalforingTestBase {
             relasjontilavdod = relasjon?.let { RelasjonAvdodItem(it.name) },
             fornavn = "${pdlPerson?.navn?.fornavn}",
             etternavn = "${pdlPerson?.navn?.etternavn}"
-        )
+        ).also { logger.debug("createAnnenPerson: ${it.toJson()}") }
     }
 
     protected fun createSed(
@@ -615,7 +625,7 @@ internal open class JournalforingTestBase {
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
-         val pdlForsikret = if (annenPerson == null) pdlPerson else null
+        val pdlForsikret = if (annenPerson == null) pdlPerson else null
 
         val forsikretBruker = Bruker(
             person = Person(
