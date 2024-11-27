@@ -658,7 +658,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario13Utgaende {
         @Test
         fun `2 personer angitt, gyldig fnr og ugyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_OVER_62, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, FNR_OVER_62, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
 
             initCommonMocks(sed, getMockDocuments(), getDokumentfilerUtenVedlegg())
 
@@ -666,7 +666,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -699,9 +699,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val aktoerf = "${fnr}0000"
             val saknr = "13345678"
 
-            val sedP8000 = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
-            val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
-            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null))
+            val sedP8000 = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000sendt = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, fnr, createAnnenPerson(fnr = afnr, rolle = Rolle.ETTERLATTE), saknr))
+            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, null, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), null))
 
             val dokumenter = mapJsonToAny<List<ForenkletSED>>(javaClass.getResource("/fagmodul/alldocumentsids_P_BUC_05_multiP8000.json")!!.readText())
 
@@ -723,7 +723,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
             val (journalpost, _) = initJournalPostRequestSlot(true)
-            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P6000, P_BUC_05)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -747,13 +747,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Scenario 13 - 0 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
-            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.P8000, null, fdato = "1955-07-11"))
+            val sedP8000recevied = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, null, fdato = "1955-07-11"))
 
-            val sedP5000sent = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_62, gjenlevendeFnr = FNR_BARN))
+            val sedP5000sent = SED.generateSedToClass<P5000>(createSedPensjon(SedType.SEDTYPE_P5000, FNR_OVER_62, gjenlevendeFnr = FNR_BARN))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns createBrukerWith(FNR_BARN, "Lever", "Helt i live", "NOR", aktorId = AKTOER_ID)
@@ -766,7 +766,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_05)
 
             val (request, oppgaveMelding) = sendMelding(hendelse, journalpost, meldingSlot)
 
@@ -788,12 +788,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Scenario 13 - 1 Sed sendes som svar med flere personer pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSed(SedType.P5000, null, fdato = "1955-07-11")
+            val sedP8000recevied = createSed(SedType.SEDTYPE_P8000, null, fdato = "1955-07-11")
+            val sedP5000sent = createSed(SedType.SEDTYPE_P5000, null, fdato = "1955-07-11")
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -804,7 +804,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, _) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_05)
 
             val journalpostRequest = slot<OpprettJournalpostRequest>()
             justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
@@ -830,12 +830,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Scenario 13 - 2 Sed sendes som svar med fnr pa tidligere mottatt P8000, opprettes en journalføringsoppgave på tema PEN og enhet ID OG FORDELING `() {
             val fnr = "07115521999"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = createSed(SedType.P8000, null, fdato = "1955-07-11")
-            val sedP5000sent = createSed(SedType.P5000, fnr)
+            val sedP8000recevied = createSed(SedType.SEDTYPE_P8000, null, fdato = "1955-07-11")
+            val sedP5000sent = createSed(SedType.SEDTYPE_P5000, fnr)
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -847,7 +847,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, _) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_05)
             val journalpostRequest = slot<OpprettJournalpostRequest>()
             justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
@@ -874,12 +874,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN_UNDER_62
             val aktoer = "${fnr}111"
             val sakid = SAK_ID
-            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
-            val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
+            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.SEDTYPE_P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
+            val sedP9000sent = createSed(SedType.SEDTYPE_P9000, fnr, eessiSaknr = sakid)
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P9000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P9000, SedStatus.SENT)
             )
 
             val saker = listOf(
@@ -899,7 +899,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
 
-            val hendelse = createHendelseJson(SedType.P9000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P9000, P_BUC_05)
 
             val (request, oppgaveMelding) = sendMelding(hendelse, journalpost, meldingSlot)
 
@@ -925,12 +925,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN_UNDER_62
             val aktoer = "${fnr}111"
             val sakid = SAK_ID
-            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = "1955-07-11").toJson())
-            val sedP9000sent = createSed(SedType.P9000, fnr, eessiSaknr = sakid)
+            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.SEDTYPE_P8000, null, fdato = "1955-07-11").toJson())
+            val sedP9000sent = createSed(SedType.SEDTYPE_P9000, fnr, eessiSaknr = sakid)
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P9000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P9000, SedStatus.SENT)
             )
 
             val saker = listOf(
@@ -950,7 +950,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
 
-            val hendelse = createHendelseJson(SedType.P9000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P9000, P_BUC_05)
 
             val (request, oppgaveMelding) = sendMelding(hendelse, journalpost, meldingSlot)
 
@@ -977,12 +977,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_OVER_62
             val sakid = "13345678"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = "1952-03-09").toJson())
-            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
+            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.SEDTYPE_P8000, null, fdato = "1952-03-09").toJson())
+            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.SEDTYPE_P5000, fnr, eessiSaknr = sakid).toJson())
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -1001,7 +1001,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P6000, P_BUC_05)
 
             val (request, oppgaveMelding) = sendMelding(hendelse, journalpost, meldingSlot)
 
@@ -1025,12 +1025,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_OVER_62
             val sakid = "12345678"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = mapJsonToAny<P8000>((createSed(SedType.P8000, null, fdato = "1955-07-11").toJson()))
-            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
+            val sedP8000recevied = mapJsonToAny<P8000>((createSed(SedType.SEDTYPE_P8000, null, fdato = "1955-07-11").toJson()))
+            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.SEDTYPE_P5000, fnr, eessiSaknr = sakid).toJson())
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -1048,7 +1048,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P6000, P_BUC_05)
 
             val (request, oppgaveMelding) = sendMelding(hendelse, journalpost, meldingSlot)
 
@@ -1073,12 +1073,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnr = FNR_VOKSEN_UNDER_62
             val sakid = "13345678"
             val aktoer = "${fnr}111"
-            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
-            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.P5000, fnr, eessiSaknr = sakid).toJson())
+            val sedP8000recevied = mapJsonToAny<P8000>(createSed(SedType.SEDTYPE_P8000, null, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
+            val sedP5000sent = mapJsonToAny<P5000>(createSed(SedType.SEDTYPE_P5000, fnr, eessiSaknr = sakid).toJson())
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P8000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P8000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_05, alleDocumenter)
@@ -1096,7 +1096,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
             val (journalpost, _) = initJournalPostRequestSlot(true)
-            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P6000, P_BUC_05)
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -1160,14 +1160,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     inner class Scenario2Inngaende {
         @Test
         fun `Manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 03`() {
-            val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.BARN), SAK_ID)
+            val sed = createSed(SedType.SEDTYPE_P8000, null, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.BARN), SAK_ID)
             initCommonMocks(sed)
 
             val barn = createBrukerWith(FNR_BARN, "Barn", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns barn
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1198,14 +1198,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Manglende eller feil i FNR, DNR for forsikret - to personer angitt, ROLLE 02`() {
-            val sed = createSed(SedType.P8000, null, createAnnenPerson(fnr = FNR_VOKSEN_UNDER_62, rolle = Rolle.FORSORGER), SAK_ID)
+            val sed = createSed(SedType.SEDTYPE_P8000, null, createAnnenPerson(fnr = FNR_VOKSEN_UNDER_62, rolle = Rolle.FORSORGER), SAK_ID)
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(FNR_VOKSEN_UNDER_62, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns voksen
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1244,12 +1244,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val mockEttrelatte = createBrukerWith(FNR_VOKSEN_UNDER_62, "Voksen", "Etterlatte", "NOR", "1213", aktorId = "123123123123")
 
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()), SAK_ID))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE, pdlPerson = mockEttrelatte, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()), SAK_ID))
 
-            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
+            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.SEDTYPE_P8000, SedStatus.RECEIVED))
             initCommonMocks(sed, documetAction)
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN_UNDER_62, IdentGruppe.FOLKEREGISTERIDENT))
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns createBrukerWith(FNR_VOKSEN_2, "Voksen", "Avdod", "NOR", "1213")
@@ -1282,12 +1282,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `Manglende eller feil FNR-DNR på forsikret medfører bruk av sokPerson`() {
 
             val mockForsikret = createBrukerWith(FNR_VOKSEN_UNDER_62, "Voksen", "Etternavn", "NOR", "1213", aktorId = "123123123123")
-            val sed = mapJsonToAny<P8000>(createSed(SedType.P8000, null, pdlPerson = mockForsikret, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
+            val sed = mapJsonToAny<P8000>(createSed(SedType.SEDTYPE_P8000, null, pdlPerson = mockForsikret, fdato = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)?.getBirthDateAsIso()).toJson())
 
-            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P8000, SedStatus.RECEIVED))
+            val documetAction = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.SEDTYPE_P8000, SedStatus.RECEIVED))
 
             initCommonMocks(sed, documetAction)
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(FNR_VOKSEN_UNDER_62, IdentGruppe.FOLKEREGISTERIDENT))
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns mockForsikret
@@ -1317,13 +1317,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Manglende eller feil FNR-DNR - to personer angitt - etterlatte med feil FNR for annen person, eller soker`() {
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), SAK_ID))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, FNR_VOKSEN_2, createAnnenPerson(fnr = null, rolle = Rolle.ETTERLATTE), SAK_ID))
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(FNR_VOKSEN_2, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_2)) } returns voksen
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
@@ -1472,14 +1472,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `To personer angitt, gyldig fnr og ugyldig annenperson, rolle er 02, bosatt utland del 1`() {
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, FNR_OVER_62, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, FNR_OVER_62, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(FNR_OVER_62, "Voksen", "Vanlig", "SWE", "1213")
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1507,14 +1507,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt utland del 2`() {
             val valgtFNR = FNR_VOKSEN_UNDER_62
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "SWE", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1542,14 +1542,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 3`() {
             val valgtFNR = FNR_VOKSEN_UNDER_62
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1577,14 +1577,14 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 02, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_62
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.FORSORGER), null))
             initCommonMocks(sed)
 
             val voksen = createBrukerWith(valgtFNR, "Voksen", "Vanlig", "NOR", "1213")
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1612,7 +1612,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         @Test
         fun `To personer angitt, gyldig fnr og ufgyldig fnr annenperson, rolle er 01, bosatt Norge del 4`() {
             val valgtFNR = FNR_OVER_62
-            val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
+            val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, valgtFNR, createAnnenPerson(fnr = FNR_BARN, rolle = Rolle.ETTERLATTE), null))
 
             initCommonMocks(sed)
 
@@ -1620,7 +1620,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(valgtFNR)) } returns voksen
             every { personService.hentPerson(NorskIdent(FNR_BARN)) } returns null
 
-            val hendelse = createHendelseJson(SedType.P8000)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1699,9 +1699,9 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
     private fun getMockDocuments(): List<ForenkletSED> {
         return listOf(
-            ForenkletSED("44cb68f89a2f4e748934fb4722721018", SedType.P2000, SedStatus.SENT),
-            ForenkletSED("3009f65dd2ac4948944c6b7cfa4f179d", SedType.H121, null),
-            ForenkletSED("9498fc46933548518712e4a1d5133113", SedType.H070, null)
+            ForenkletSED("44cb68f89a2f4e748934fb4722721018", SedType.SEDTYPE_P2000, SedStatus.SENT),
+            ForenkletSED("3009f65dd2ac4948944c6b7cfa4f179d", SedType.SEDTYPE_H121, null),
+            ForenkletSED("9498fc46933548518712e4a1d5133113", SedType.SEDTYPE_H070, null)
         )
     }
 

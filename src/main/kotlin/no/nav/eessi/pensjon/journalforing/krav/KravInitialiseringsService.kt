@@ -20,7 +20,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
     ) {
 
         when(sedHendelse.sedType) {
-            P2000 -> {
+            SEDTYPE_P2000 -> {
                 if(sed == null){
                     logger.error("P2000 med rinaSakId: ${sedHendelse.rinaSakId} mangler SED informasjon, avslutter sending av krav")
                 }
@@ -37,7 +37,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                 }
 
             }
-            P2200 -> {
+            SEDTYPE_P2200 -> {
                 val hendelse = BehandleHendelseModel(
                     sakId = sakInformasjon?.sakId,
                     bucId = sedHendelse.rinaSakId,

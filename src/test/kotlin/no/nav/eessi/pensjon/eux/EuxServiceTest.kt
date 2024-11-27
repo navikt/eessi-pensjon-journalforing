@@ -74,7 +74,7 @@ internal class EuxServiceTest {
         val buc = mapJsonToAny<Buc>(bucJson)
 
         every { euxKlientLib.hentSedJson(eq(RINASAK_ID), any()) } returns r005json
-        every { euxKlientLib.hentSedJson(any(), any()) } returns SED(type = X008).toJson()
+        every { euxKlientLib.hentSedJson(any(), any()) } returns SED(type = SEDTYPE_X008).toJson()
 
         val alledocs = helper.hentAlleGyldigeDokumenter(buc)
         assertEquals(2, alledocs.size)
@@ -99,7 +99,7 @@ internal class EuxServiceTest {
     @Test
     fun `Finn korrekt ytelsestype for UT fra sed R005`() {
         val sedR005 = r005()
-        val sedHendelse = sedHendelse("R", sedType = P2100)
+        val sedHendelse = sedHendelse("R", sedType = SEDTYPE_P2100)
         val seds = listOf(sedR005)
 
         val actual = helper.hentSaktypeType(sedHendelse, seds)
@@ -109,7 +109,7 @@ internal class EuxServiceTest {
     @Test
     fun `Finn korrekt ytelsestype for AP fra sed P15000`() {
         val sedP15000 = mapJsonToAny<P15000>(javaClass.getResource("/buc/P15000-NAV.json")!!.readText())
-        val sedHendelse = sedHendelse("P", P_BUC_10, P15000)
+        val sedHendelse = sedHendelse("P", P_BUC_10, SEDTYPE_P15000)
         val seds: List<SED> = listOf(r005(), sedP15000)
 
         val actual = helper.hentSaktypeType(sedHendelse, seds)
@@ -153,12 +153,12 @@ internal class EuxServiceTest {
         assertEquals(1, actual.size)
 
         val actualSed = actual.first()
-        assertEquals(P2000, actualSed.second.type)
+        assertEquals(SEDTYPE_P2000, actualSed.second.type)
 
         verify(exactly = 1) { euxKlientLib.hentSedJson(any(), any()) }
     }
 
-    private fun sedHendelse(sektorkode: String, bucType: BucType? = R_BUC_02, sedType: SedType? = R005) : SedHendelse {
+    private fun sedHendelse(sektorkode: String, bucType: BucType? = R_BUC_02, sedType: SedType? = SEDTYPE_R005) : SedHendelse {
         return SedHendelse(rinaSakId = "123456", rinaDokumentId = "1234", sektorKode = sektorkode,
             bucType = bucType, rinaDokumentVersjon = "1", sedType = sedType
         )

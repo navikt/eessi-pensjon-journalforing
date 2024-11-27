@@ -131,7 +131,7 @@ internal class OppgaveRoutingServiceTest {
         sakInformasjon: SakInformasjon ?= null,
         identifisertPerson: IdentifisertPDLPerson?= mockerEnPerson("NO", DUMMY_TILKNYTNING, FORSIKRET, "Testern"),
         sakType: SakType? = ALDER,
-        sedType: SedType? = R004
+        sedType: SedType? = SEDTYPE_R004
     ): OppgaveRoutingRequest {
         return OppgaveRoutingRequest(
             aktorId = aktoerId,
@@ -161,7 +161,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 alderpensjon ytelse`() {
         assertEquals(
             PENSJON_UTLAND, routingService.hentEnhet(
-                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sedType = R005)
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sedType = SEDTYPE_R005)
             )
         )
     }
@@ -170,7 +170,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R005 på R_BUC_02 uforepensjon ytelse`() {
         assertEquals(
             UFORE_UTLAND, routingService.hentEnhet(
-                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sakType = UFOREP, sedType = R005)
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, hendelseType = MOTTATT, sakType = UFOREP, sedType = SEDTYPE_R005)
             )
         )
     }
@@ -179,7 +179,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R004 på R_BUC_02 skal gi en routing til UFORE_UTLAND`() {
         assertEquals(
             OKONOMI_PENSJON, routingService.hentEnhet(
-                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, sakType = UFOREP, hendelseType = MOTTATT, sedType = R004)
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, sakType = UFOREP, hendelseType = MOTTATT, sedType = SEDTYPE_R004)
             )
         )
     }
@@ -188,7 +188,7 @@ internal class OppgaveRoutingServiceTest {
     fun `Routing av mottatte sed R004 på R_BUC_02 ukjent ident`() {
         assertEquals(
             ID_OG_FORDELING, routingService.hentEnhet(
-                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, null, sakType = UFOREP, hendelseType = MOTTATT, sedType = R004)
+                oppgaveRoutingRequest(irrelevantDato(), R_BUC_02, UTLAND, null, sakType = UFOREP, hendelseType = MOTTATT, sedType = SEDTYPE_R004)
             )
         )
     }
@@ -200,7 +200,7 @@ internal class OppgaveRoutingServiceTest {
         forsikret.personListe = listOf(forsikret, avod)
 
         val enhetresult = routingService.hentEnhet(
-            oppgaveRoutingRequest(irrelevantDato(), R_BUC_02,null, sedType = R005, hendelseType = MOTTATT, identifisertPerson= forsikret)
+            oppgaveRoutingRequest(irrelevantDato(), R_BUC_02,null, sedType = SEDTYPE_R005, hendelseType = MOTTATT, identifisertPerson= forsikret)
         )
 
         assertEquals(ID_OG_FORDELING, enhetresult)
@@ -214,12 +214,12 @@ internal class OppgaveRoutingServiceTest {
             fun arguments(): Stream<TestArgumentsPBuc02> =
                 Arrays.stream(
                     arrayOf(
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, R004),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, R005),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, R006),
-                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, R004),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, R005),
-                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, R006),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, NORGE, SEDTYPE_R004),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SEDTYPE_R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, NORGE, SEDTYPE_R006),
+                        TestArgumentsPBuc02(OKONOMI_PENSJON, UTLAND, SEDTYPE_R004),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SEDTYPE_R005),
+                        TestArgumentsPBuc02(ID_OG_FORDELING, UTLAND, SEDTYPE_R006),
                     )
                 )
         }
@@ -392,7 +392,7 @@ internal class OppgaveRoutingServiceTest {
             identifisertPerson,
             alder60aar,
             ALDER,
-            sedHendelse(P_BUC_10, P15000),
+            sedHendelse(P_BUC_10, SEDTYPE_P15000),
             MOTTATT,
             null
         )
@@ -430,7 +430,7 @@ internal class OppgaveRoutingServiceTest {
             identifisertPerson,
             alder60aar,
             GJENLEV,
-            sedHendelse(sedType = P2100, land = "NO"),
+            sedHendelse(sedType = SEDTYPE_P2100, land = "NO"),
             MOTTATT,
             null,
         )
@@ -469,7 +469,7 @@ internal class OppgaveRoutingServiceTest {
             identifisertPerson,
             alder60aar,
             BARNEP,
-            sedHendelse(sedType = P2100, land = "NO"),
+            sedHendelse(sedType = SEDTYPE_P2100, land = "NO"),
             hendelseType = MOTTATT,
             null,
         )
@@ -490,7 +490,7 @@ internal class OppgaveRoutingServiceTest {
             identifisertPerson,
             alder60aar,
             ALDER,
-            sedHendelse(P_BUC_01, P2100),
+            sedHendelse(P_BUC_01, SEDTYPE_P2100),
             MOTTATT,
             null,
         )
@@ -529,7 +529,7 @@ internal class OppgaveRoutingServiceTest {
             identifisertPerson,
             alder60aar,
             UFOREP,
-            sedHendelse(P_BUC_03, P2200, "SE"),
+            sedHendelse(P_BUC_03, SEDTYPE_P2200, "SE"),
             SENDT,
             null,
         )
@@ -768,7 +768,7 @@ internal class OppgaveRoutingServiceTest {
         identer = null
     )
 
-    private fun sedHendelse(bucType: BucType? = P_BUC_02, sedType: SedType? = P2100, land: String ?= "NO") = SedHendelse(
+    private fun sedHendelse(bucType: BucType? = P_BUC_02, sedType: SedType? = SEDTYPE_P2100, land: String ?= "NO") = SedHendelse(
         1232312L, "2321313", "P", bucType, "32131", avsenderId = "12313123",
         "SE", "SE", "2312312", land, land, "23123123", "1",
         sedType, null

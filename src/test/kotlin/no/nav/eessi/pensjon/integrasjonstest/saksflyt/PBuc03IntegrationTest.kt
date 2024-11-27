@@ -302,7 +302,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         block: (TestResult) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P2200>(createSedPensjon(P2200, fnrVoksen, eessiSaknr = sakId, krav = krav))
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SEDTYPE_P2200, fnrVoksen, eessiSaknr = sakId, krav = krav))
 
         initCommonMocks(sed, alleDocs, documentFiler)
 
@@ -320,7 +320,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(P2200, P_BUC_03)
+        val hendelse = createHendelseJson(SEDTYPE_P2200, P_BUC_03)
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -366,7 +366,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     }
 
     private fun forenkletSED(id: String? = "10001212", sedStatus: SedStatus? = RECEIVED)
-        = listOf(ForenkletSED(id!!, P2200, sedStatus))
+        = listOf(ForenkletSED(id!!, SEDTYPE_P2200, sedStatus))
     private fun bestemSakResponse(sakStatus: SakStatus? = LOPENDE) = BestemSakResponse(null, listOf(sakInformasjon(sakStatus)))
 
     private fun sakInformasjon(sakStatus: SakStatus? = LOPENDE) = SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = sakStatus!!)

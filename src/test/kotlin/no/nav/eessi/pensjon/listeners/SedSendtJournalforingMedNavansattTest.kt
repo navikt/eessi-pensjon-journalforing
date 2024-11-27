@@ -116,7 +116,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         val buc = mapJsonToAny<Buc>(bucJson)
 
         val sedHendelse = SedHendelse(
-            sedType = SedType.M051,
+            sedType = SedType.SEDTYPE_M051,
             rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
             bucType = BucType.M_BUC_03a,
             rinaSakId = "123456789",
@@ -146,7 +146,7 @@ internal class SedSendtJournalforingMedNavansattTest {
                 fnr = Fodselsnummer.fra(JournalforingTestBase.FNR_VOKSEN_UNDER_62),
                 relasjon = Relasjon.FORSIKRET,
                 saktype = null,
-                sedType = SedType.M051,
+                sedType = SedType.SEDTYPE_M051,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "19fd5292007e4f6ab0e337e89079aaf4"
             ),
@@ -232,7 +232,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         } returns ResponseEntity.ok(responseHentEnheter)
 
         val hendelse = SedHendelse(
-            sedType = SedType.M051,
+            sedType = SedType.SEDTYPE_M051,
             rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
             bucType = BucType.M_BUC_03a,
             rinaSakId = "123456789",

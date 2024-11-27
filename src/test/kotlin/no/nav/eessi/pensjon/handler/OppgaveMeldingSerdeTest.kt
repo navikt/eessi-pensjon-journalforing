@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.handler
 
 
-import no.nav.eessi.pensjon.eux.model.SedType.P8000
+import no.nav.eessi.pensjon.eux.model.SedType.SEDTYPE_P8000
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -16,7 +16,7 @@ internal class OppgaveMeldingSerdeTest {
     @Test
     fun serde_journalforing() {
         val melding = OppgaveMelding(
-            P8000,
+            SEDTYPE_P8000,
             "12345",
             Enhet.ID_OG_FORDELING,
             "aktoerId",
@@ -43,7 +43,7 @@ internal class OppgaveMeldingSerdeTest {
     @Test
     fun serde_behandleSed() {
         val melding = OppgaveMelding(
-            P8000,
+            SEDTYPE_P8000,
             null,
             Enhet.ID_OG_FORDELING,
             "aktoerId",

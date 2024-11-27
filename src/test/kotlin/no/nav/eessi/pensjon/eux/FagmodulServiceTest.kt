@@ -66,7 +66,7 @@ internal class FagmodulServiceTest {
 
     @Test
     fun `Gitt at det finnes eessisak der land er Norge og saksnummer er på feil format så skal null returneres`() {
-        val mockAlleSedIBuc = listOf(mockSED(P2000, eessiSakId = "UGYLDIG SAK ID"))
+        val mockAlleSedIBuc = listOf(mockSED(SEDTYPE_P2000, eessiSakId = "UGYLDIG SAK ID"))
 
         val result = helper.hentPensjonSakFraPesys("123123", mockAlleSedIBuc)
         assertNull(result)
@@ -86,10 +86,10 @@ internal class FagmodulServiceTest {
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(
-                mockSED(P2000, "22874955"),
-                mockSED(P4000, "22874955"),
-                mockSED(P5000, "22874955"),
-                mockSED(P6000, "22874955")
+                mockSED(SEDTYPE_P2000, "22874955"),
+                mockSED(SEDTYPE_P4000, "22874955"),
+                mockSED(SEDTYPE_P5000, "22874955"),
+                mockSED(SEDTYPE_P6000, "22874955")
         )
 
         val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc)!!
@@ -112,7 +112,7 @@ internal class FagmodulServiceTest {
         )
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
-        val mockAllSediBuc = listOf(mockSED(P2000), mockSED(P4000), mockSED(P5000), mockSED(P6000))
+        val mockAllSediBuc = listOf(mockSED(SEDTYPE_P2000), mockSED(SEDTYPE_P4000), mockSED(SEDTYPE_P5000), mockSED(SEDTYPE_P6000))
 
         val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc)!!
         assertNotNull(result)
@@ -125,7 +125,7 @@ internal class FagmodulServiceTest {
 
     @Test
     fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {
-        val mockAllSediBuc = listOf(mockSED(P2000, "111"), mockSED(P4000, "222"), mockSED(P6000, "333"))
+        val mockAllSediBuc = listOf(mockSED(SEDTYPE_P2000, "111"), mockSED(SEDTYPE_P4000, "222"), mockSED(SEDTYPE_P6000, "333"))
 
         assertNull(
                 helper.hentPensjonSakFraPesys("111", mockAllSediBuc),

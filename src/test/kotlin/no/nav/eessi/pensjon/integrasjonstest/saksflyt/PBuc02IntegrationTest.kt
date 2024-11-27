@@ -46,7 +46,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Krav om gjenlevende`() {
             println(UUID.randomUUID().toString().toString())
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
 
             testRunnerVoksen(
@@ -67,7 +67,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon så routes oppgave til PENSJON_UTLAND`() {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -93,7 +93,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Sjekker om identifisert person er over 67 aar dersom han er det skal vi ikke håndtere det som en gjennysak og tema pensjon returneres`() {
-            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED))
             every { gcpStorageService.gjennyFinnes(any()) } returns false
 
             testRunnerVoksen(
@@ -114,7 +114,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Sjekker om identifisert person er under 67 aar dersom han er det skal vi sette det til gjennysak og tema omstilling returneres i dette tilfellet`() {
-            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED))
             every { gcpStorageService.gjennyFinnes(any()) } returns true
 
             testRunnerVoksen(
@@ -135,7 +135,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Sjekker om identifisert person er barn i en mottatt P2100 og setter den til gjennysak med tema eybarnep`() {
-            val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            val allDocuemtActions = listOf(ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED))
             every { gcpStorageService.gjennyFinnes(any()) } returns true
             every { gcpStorageService.hentFraGjenny(any()) } returns "BARNEP"
 
@@ -159,7 +159,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -187,7 +187,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLANDSTILSNITT`() {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -221,7 +221,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             saktype: SakType
         ) {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -249,7 +249,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så skal oppgaver fordeles i henhold til NORG2`( ) {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2000, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2000, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -277,7 +277,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til PENSJON med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2200, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2200, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -310,7 +310,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, og burker har gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til NFP_UTLAND_AALESUND`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -342,7 +342,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevende`() {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.SENT)
             )
 
             testRunnerVoksen(
@@ -363,7 +363,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende alderspensjon så routes oppgave til PENSJON_UTLAND`() {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.RECEIVED)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -390,7 +390,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -424,7 +424,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             saktype: SakType
         ) {
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -452,7 +452,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så journalføres automatisk`( ) {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2000, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2000, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -480,7 +480,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så skal oppgaver fordeles i henhold til NORG2`( ) {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2000, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2000, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -509,7 +509,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2200, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2200, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -527,7 +527,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT,
                 norg2enhet = null,
-                sedHendelse = createSedPensjon(P2200, FNR_VOKSEN_UNDER_62, null,  gjenlevendeFnr = FNR_VOKSEN_2, krav = KravType.UFOREP, relasjon = RelasjonTilAvdod.EKTEFELLE)
+                sedHendelse = createSedPensjon(SEDTYPE_P2200, FNR_VOKSEN_UNDER_62, null,  gjenlevendeFnr = FNR_VOKSEN_2, krav = KravType.UFOREP, relasjon = RelasjonTilAvdod.EKTEFELLE)
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
@@ -543,7 +543,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende gjenlevendeytelse eller barnepensjon, Så skal oppgaver sendes til 0001 NAV NFP_UTLAND_AALESUND`(saktype: SakType) {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2100, SedStatus.SENT)
+                ForenkletSED("10001212", SEDTYPE_P2100, SedStatus.SENT)
             )
             val bestemsak = BestemSakResponse(
                 null, listOf(
@@ -587,7 +587,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             null
         }
 
-        val sed = sedHendelse ?: createSedPensjon(P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
+        val sed = sedHendelse ?: createSedPensjon(SEDTYPE_P2100, fnrVoksen, eessisaknr,  gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod)
         initCommonMocks(sed, alleDocs)
 
         every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
@@ -615,7 +615,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         }
 
         val (journalpost, _) = initJournalPostRequestSlot()
-        val hendelse = createHendelseJson(P2100, P_BUC_02)
+        val hendelse = createHendelseJson(SEDTYPE_P2100, P_BUC_02)
         val meldingSlot = slot<String>()
 
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

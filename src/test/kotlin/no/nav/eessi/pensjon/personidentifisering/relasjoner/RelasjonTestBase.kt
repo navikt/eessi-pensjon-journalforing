@@ -35,7 +35,7 @@ open class RelasjonTestBase {
         }
 
         return R005(
-            type = SedType.R005,
+            type = SedType.SEDTYPE_R005,
             recoveryNav = RNav(brukere = listOfNotNull(
                 Brukere(
                     person = createPersonR005(forsikretFnr),

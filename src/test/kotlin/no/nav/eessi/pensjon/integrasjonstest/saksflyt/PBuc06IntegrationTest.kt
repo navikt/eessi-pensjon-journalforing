@@ -27,7 +27,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
     fun `Gitt en P6000 med enkeltkrav type ufore eller pensjon så skal tema bli deretter`(fnr: String, kravType: String, tema: String) {
 
         val sed = SED(
-            type = SedType.P6000,
+            type = SedType.SEDTYPE_P6000,
             pensjon = P6000Pensjon(
                 vedtak = listOf(VedtakItem(type = kravType))
             )
@@ -49,7 +49,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
     fun `Gitt en P5000 med enkeltkrav krav med type ufore eller pensjon så skal tema bli deretter`(fnr: String, kravType: String, tema: String) {
 
         val sed = SED(
-            type = SedType.P5000,
+            type = SedType.SEDTYPE_P5000,
             pensjon = P5000Pensjon(
                 medlemskapboarbeid = Medlemskapboarbeid(
                     enkeltkrav = KravtypeItem(krav = kravType)
@@ -73,7 +73,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
     fun `Gitt en P7000 med enkeltkrav krav med type ufore eller pensjon s å skal tema bli deretter`(fnr: String, penType: String, tema: String) {
 
         val sed = SED(
-            type = SedType.P7000,
+            type = SedType.SEDTYPE_P7000,
             pensjon = P7000Pensjon(
                 samletVedtak = SamletMeldingVedtak(
                     tildeltepensjoner = listOf(TildeltPensjonItem(pensjonType = penType))
@@ -98,7 +98,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
     fun `Gitt en P10000 med pensjonstype ufore eller pensjon så skal tema bli deretter`(fnr: String, penType: String, tema: String) {
 
         val sed = SED(
-            type = SedType.P10000,
+            type = SedType.SEDTYPE_P10000,
             pensjon = P10000Pensjon(
                 merinformasjon = MerInformasjon(
                     listOf(YtelseItem(ytelsestype = penType))
@@ -118,7 +118,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
     inner class Scenario1Utgaende {
         @Test
         fun `1 person i SED fnr finnes men ingen bestemsak men vi sjekker behandlingstema og at person er bosatt Norge som gir NFP_UTLAND_AALESUND`() {
-            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, sedType = SedType.P6000, bucType = P_BUC_06) {
+            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, sedType = SedType.SEDTYPE_P6000, bucType = P_BUC_06) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
@@ -126,49 +126,49 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak der bruker erover 62 bosatt Norge saa rutes oppgaven til 4862 NFP_UTLAND_AALESUND`() {
-            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.P6000) {
+            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.SEDTYPE_P6000) {
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak bruker er under 62 bosatt Norge og en person i sed saa rutes oppgaven til 4476 UFORE_UTLANDSTILSNITT`() {
-            testRunner(FNR_VOKSEN_UNDER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.P6000) {
+            testRunner(FNR_VOKSEN_UNDER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.SEDTYPE_P6000) {
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak bruker er under 62 bosatt Sverige og en person i sed saa rutes oppgaven til 4475 UFORE_UTLAND`() {
-            testRunner(FNR_VOKSEN_UNDER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.P6000)  {
+            testRunner(FNR_VOKSEN_UNDER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.SEDTYPE_P6000)  {
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak bruker er under 62 bosatt Sverige og en person i sed saa rutes oppgaven til 0001 PENSJON_UTLAND`() {
-            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.P6000)  {
+            testRunner(FNR_OVER_62, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.SEDTYPE_P6000)  {
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak bruker er barn bosatt Sverige og en person i sed saa rutes oppgaven til 0001 PENSJON_UTLAND`() {
-            testRunner(FNR_BARN, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.P6000) {
+            testRunner(FNR_BARN, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, land = "SE", sedType = SedType.SEDTYPE_P6000) {
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `Person i SED med gyldig fnr uten sakType fra bestemsak bruker er barn bosatt Norge og en person i sed saa rutes oppgaven til 0001 PENSJON_UTLAND`() {
-            testRunner(FNR_BARN, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.P6000) {
+            testRunner(FNR_BARN, saker = emptyList(), sakId = SAK_ID, bucType = P_BUC_06, sedType = SedType.SEDTYPE_P6000) {
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
 
         @Test
         fun `1 person i SED, men fnr er feil`() {
-            testRunner(fnr = "123456789102356878546525468432", sedType = SedType.P6000, bucType = P_BUC_06) {
+            testRunner(fnr = "123456789102356878546525468432", sedType = SedType.SEDTYPE_P6000, bucType = P_BUC_06) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }
@@ -176,7 +176,7 @@ internal class PBuc06IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `1 person i SED, men fnr mangler`() {
-            testRunner(fnr = null, sedType = SedType.P6000, bucType = P_BUC_06) {
+            testRunner(fnr = null, sedType = SedType.SEDTYPE_P6000, bucType = P_BUC_06) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(ID_OG_FORDELING, it.journalfoerendeEnhet)
             }

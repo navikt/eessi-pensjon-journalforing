@@ -7,7 +7,7 @@ import io.mockk.slot
 import no.nav.eessi.pensjon.eux.EuxCacheableKlient
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
-import no.nav.eessi.pensjon.eux.model.SedType.P8000
+import no.nav.eessi.pensjon.eux.model.SedType.SEDTYPE_P8000
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
@@ -102,7 +102,7 @@ internal class SedSendtJournalforingTest {
     )
 
     private val buc = Buc(id = PESYS_SAKID, documents = listOf(DocumentsItem(
-                type = P8000,
+                type = SEDTYPE_P8000,
                 id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1",
                 status = "sent",
                 direction = "OUT"
@@ -124,7 +124,7 @@ internal class SedSendtJournalforingTest {
 
     @Test
     fun `Ved kall til pensjonSakInformasjonSendt med saktype GJENLEV fra pensjonsinformasjon returnerer sakInformasjo saktype GJENLEV og oppretter journalpost med maskinell journalforing`() {
-        val buc = Buc(id = RINA_ID, documents = listOf(DocumentsItem(type = P8000, id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1", status = "sent", direction = "OUT")),
+        val buc = Buc(id = RINA_ID, documents = listOf(DocumentsItem(type = SEDTYPE_P8000, id = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1", status = "sent", direction = "OUT")),
             participants = listOf(Participant(role = "CaseOwner", organisation = Organisation(countryCode = "NO")))
         )
         val sedHendelse = javaClass.getResource("/eux/hendelser/P_BUC_05_P8000_02.json")!!.readText()
@@ -145,7 +145,7 @@ internal class SedSendtJournalforingTest {
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = P8000,
+                sedType = SEDTYPE_P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
@@ -208,7 +208,7 @@ internal class SedSendtJournalforingTest {
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = P8000,
+                sedType = SEDTYPE_P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "P8000_f899bf659ff04d20bc8b978b186f1ecc_1"
             ),
@@ -281,7 +281,7 @@ internal class SedSendtJournalforingTest {
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = P8000,
+                sedType = SEDTYPE_P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "165sdugh587dfkgjhbkj"
             ),
@@ -345,7 +345,7 @@ internal class SedSendtJournalforingTest {
                 fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
                 relasjon = GJENLEVENDE,
                 saktype = null,
-                sedType = P8000,
+                sedType = SEDTYPE_P8000,
                 fdato = LocalDate.of(1971, 6, 11),
                 rinaDocumentId = "165sdugh587dfkgjhbkj"
             ),

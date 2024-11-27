@@ -68,12 +68,12 @@ class EuxServiceCacheTest {
             documents = listOf(
                 DocumentsItem(
                     id = "11111",
-                    type = SedType.P6000,
+                    type = SedType.SEDTYPE_P6000,
                     status = SedStatus.SENT.name.lowercase()
                 ),
                 DocumentsItem(
                     id = "22222",
-                    type = SedType.P6000,
+                    type = SedType.SEDTYPE_P6000,
                     status = SedStatus.SENT.name.lowercase()
                 )
             )

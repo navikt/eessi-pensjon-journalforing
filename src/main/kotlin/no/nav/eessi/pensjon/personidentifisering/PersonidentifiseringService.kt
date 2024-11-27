@@ -35,7 +35,7 @@ class PersonidentifiseringService(
 ) {
     private val logger = LoggerFactory.getLogger(PersonidentifiseringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
-    private val brukForikretPersonISed = listOf(H121, H120, H070)
+    private val brukForikretPersonISed = listOf(SEDTYPE_H121, SEDTYPE_H120, SEDTYPE_H070)
 
     fun validateIdentifisertPerson(
         identifisertPerson: IdentifisertPDLPerson,

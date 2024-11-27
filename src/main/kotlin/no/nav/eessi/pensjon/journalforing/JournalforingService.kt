@@ -149,7 +149,7 @@ class JournalforingService(
 
                 // TODO: sende inn saksbehandlerInfo kun dersom det trengs til metoden under.
 
-                val arkivsaksnummer = if (sedHendelse.sedType == SedType.P2100 && hendelseType == MOTTATT) null else hentSakService.hentSak(
+                val arkivsaksnummer = if (sedHendelse.sedType == SedType.SEDTYPE_P2100 && hendelseType == MOTTATT) null else hentSakService.hentSak(
                     sedHendelse.rinaSakId,
                     saksInfoSamlet?.saksIdFraSed,
                     saksInfoSamlet?.sakInformasjon,

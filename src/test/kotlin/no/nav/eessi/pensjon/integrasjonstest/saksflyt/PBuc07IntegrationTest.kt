@@ -31,7 +31,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
     @DisplayName("Inngående")
     inner class Scenario1Inngaende {
         @ParameterizedTest
-        @EnumSource(SedType::class, names = ["P12000", "P11000"])
+        @EnumSource(SedType::class, names = ["SEDTYPE_P12000", "SEDTYPE_P11000"])
         fun `Gitt en SED med forsikret uten gjenlevende saa skal forsikret benyttes som identifisert person`(sedType: SedType) {
             val allDocuemtActions = forenkletSEDS()
 
@@ -51,7 +51,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         }
 
         @ParameterizedTest
-        @EnumSource(SedType::class, names = ["P12000", "P11000"])
+        @EnumSource(SedType::class, names = ["SEDTYPE_P12000", "SEDTYPE_P11000"])
         fun `Gitt en SED med forsikret OG gjenlevende saa skal gjenlevende benyttes som identifisert person`(sedType: SedType) {
             val allDocuemtActions = forenkletSEDS()
 
@@ -73,7 +73,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
     }
 
     private fun forenkletSEDS() = listOf(
-        ForenkletSED("10001212", SedType.P12000, SedStatus.RECEIVED)
+        ForenkletSED("10001212", SedType.SEDTYPE_P12000, SedStatus.RECEIVED)
     )
 
     private fun testRunnerVoksen(
@@ -89,7 +89,7 @@ internal class PBuc07IntegrationTest : JournalforingTestBase() {
         hendelseType: HendelseType,
         norg2enhet: Enhet? = null,
         fdatoBruker: String? = null,
-        sedType: SedType = SedType.P12000,
+        sedType: SedType = SedType.SEDTYPE_P12000,
         block: (Pair<OpprettJournalpostRequest, OppgaveMelding>) -> Unit
     ) {
         val eessisaknr = if (bestemSak?.sakInformasjonListe?.size == 1) bestemSak.sakInformasjonListe.first().sakId else null

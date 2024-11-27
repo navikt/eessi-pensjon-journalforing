@@ -26,7 +26,7 @@ internal class SedFnrSokTest {
     @Test
     fun `SED med fnr under oppholdsland og eller kompetenteuland, gjelder H020 og H021`() {
         val sed = SED(
-                type = SedType.H020,
+                type = SedType.SEDTYPE_H020,
                 nav = Nav(
                         bruker = Bruker(person = Person(
                             pinland = PinLandItem(
@@ -48,7 +48,7 @@ internal class SedFnrSokTest {
         val pin = listOf(PinItem(identifikator = "09035225916"))
 
         val sed = X005(
-                type = SedType.X005,
+                type = SedType.SEDTYPE_X005,
                 xnav = XNav(
                         sak = Navsak(Kontekst(Bruker(person = Person(pin))))
                 )

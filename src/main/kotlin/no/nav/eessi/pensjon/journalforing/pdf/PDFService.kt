@@ -60,9 +60,9 @@ class PDFService(
                 val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
                     val filtrertSupportedDokument = supportedDocuments.filterNot { it.innhold == null }
                     mapper.writeValueAsString(filtrertSupportedDokument.map {
-                        logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
+                        logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, dokumentId: $dokumentId med: sedtype: ${sedType.jsonValue} , tittel: ${it.filnavn}")
                         JournalPostDokument(
-                                brevkode = sedType.name,
+                                brevkode = sedType.jsonValue,
                                 dokumentKategori = "SED",
                                 dokumentvarianter = listOf(
                                         Dokumentvarianter(
@@ -99,7 +99,7 @@ class PDFService(
 
     private fun genererFilnavn(sedType: SedType, index: Int, vedlegg: SedVedlegg): String? {
         return if (vedlegg.mimeType != null) {
-            "${sedType.name}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.lowercase()}"
+            "${sedType.jsonValue}_vedlegg_${index+1}.${vedlegg.mimeType?.name?.lowercase()}"
         } else {
             vedlegg.filnavn
         }

@@ -39,7 +39,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
         hendelseType: HendelseType = SENDT,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<SED>(createSed(SedType.P1000, fnr))
+        val sed = SED.generateSedToClass<SED>(createSed(SedType.SEDTYPE_P1000, fnr))
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any()) } returns false
@@ -57,7 +57,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
-        val hendelse = createHendelseJson(SedType.P1000, P_BUC_04)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P1000, P_BUC_04)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

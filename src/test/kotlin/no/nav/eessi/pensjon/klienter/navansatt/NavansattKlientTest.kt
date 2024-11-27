@@ -18,7 +18,7 @@ class NavansattKlientTest {
     @Test
     fun `Sjekker at vi får ut riktig navansatt`() {
         val hendelse = SedHendelse(
-            sedType = SedType.M051,
+            sedType = SedType.SEDTYPE_M051,
             rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
             bucType = BucType.M_BUC_03a,
             rinaSakId = "123456789",

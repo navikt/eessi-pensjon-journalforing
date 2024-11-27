@@ -81,12 +81,12 @@ class EuxService(
         //hent saktype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == R_BUC_02) {
             return alleSedIBuc
-                    .firstOrNull { it.type == R005 }
+                    .firstOrNull { it.type == SEDTYPE_R005 }
                     ?.let { filterSaktypeR005(it as R005) }
 
         //hent saktype fra P15000 overgang fra papir til rina. (saktype)
         } else if (sedHendelse.bucType == P_BUC_10) {
-            val sed = alleSedIBuc.firstOrNull { it.type == P15000 }
+            val sed = alleSedIBuc.firstOrNull { it.type == SEDTYPE_P15000 }
             if (sed != null) {
                 return mapKravtypeTilSaktype(sed.nav?.krav?.type)
             }

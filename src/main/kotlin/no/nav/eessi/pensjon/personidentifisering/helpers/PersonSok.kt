@@ -43,7 +43,7 @@ class PersonSok(
 
         /** Har prioritet på fnr i journalførende sed, men åpner også opp for å bruke fnr fra andre sed i buc */
         val potensiellePersonRelasjoner = when {
-            bucType == BucType.P_BUC_02 || sedType in listOf(H070, H120, H121) -> personRelasjoner
+            bucType == BucType.P_BUC_02 || sedType in listOf(SEDTYPE_H070, SEDTYPE_H120, SEDTYPE_H121) -> personRelasjoner
             else -> personRelasjoner.filter { it.rinaDocumentId == rinaDocumentId }.ifEmpty { personRelasjoner }
         }
 

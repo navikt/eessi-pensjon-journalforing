@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.SedType.P2000
+import no.nav.eessi.pensjon.eux.model.SedType.SEDTYPE_P2000
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -29,7 +29,7 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseUtenVedlegg.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"}]", supported)
         assertEquals(0, unsupported.size)
@@ -41,10 +41,10 @@ class PDFServiceTest {
         mockkObject(ImageConverter)
         every { ImageConverter.toBase64PDF( any() ) } returns "MockPDFContent"
 
-        val fileContent = javaClass.getResource("/pdf/pdfResponseMedVedlegg.json").readText()
-        every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
+        val fileContent = mapJsonToAny<SedDokumentfiler>(javaClass.getResource("/pdf/pdfResponseMedVedlegg.json")!!.readText())
+        every { euxService.hentAlleDokumentfiler(any(), any()) } returns fileContent
 
-        val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
         assertEquals(0, unsupported.size)
@@ -61,7 +61,7 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedTomtVedlegg.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (_, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (_, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
 
         assertEquals(1, unsupported.size)
 
@@ -73,7 +73,7 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedManglendeMimeType.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (_, uSpporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (_, uSpporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
         assertEquals(1, uSpporterteVedlegg.size)
     }
 
@@ -82,7 +82,7 @@ class PDFServiceTest {
         every { euxService.hentAlleDokumentfiler(any(), any()) } throws mockk<MismatchedInputException>()
 
         assertThrows<MismatchedInputException> {
-            pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+            pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
         }
     }
 
@@ -91,7 +91,7 @@ class PDFServiceTest {
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns null
 
         assertThrows<RuntimeException> {
-            pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+            pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
         }
     }
 
@@ -100,7 +100,7 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResonseMedP2000MedVedlegg.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (supportereVedlegg, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (supportereVedlegg, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
 
         assertTrue ( supportereVedlegg.contains("P2000_vedlegg_1.pdf"))
         assertEquals(0, usupportertVedlegg.size)
@@ -115,7 +115,7 @@ class PDFServiceTest {
         )
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns fileContent
 
-        val (_, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (_, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
 
         assertEquals(1, usupportertVedlegg.size)
         assertEquals("filnavn", usupportertVedlegg[0].filnavn)
@@ -126,7 +126,7 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedUgyldigInnhold.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (_, uSupporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (_, uSupporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
         assertEquals(1, uSupporterteVedlegg.size)
         assertEquals("UgyldigInnhold.jpg", uSupporterteVedlegg[0].filnavn)
     }
@@ -137,7 +137,7 @@ class PDFServiceTest {
             javaClass.getResource("/pdf/pdfResponseMedUgyldigMimeType.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val docs = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val docs = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", SEDTYPE_P2000)
         assertNotNull(docs.second)
         assertNull(docs.second[0].mimeType)
     }

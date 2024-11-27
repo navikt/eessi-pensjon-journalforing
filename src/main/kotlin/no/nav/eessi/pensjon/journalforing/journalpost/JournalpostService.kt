@@ -172,7 +172,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        if(sedHendelse.sedType == SedType.R006 && hendelseType == SENDT){
+        if(sedHendelse.sedType == SedType.SEDTYPE_R006 && hendelseType == SENDT){
             logger.warn("HendelseType er utgående og SED er R006; setter ikke avbrutt")
             return false
 
@@ -195,14 +195,14 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         identifisertePersoner: Int,
         currentSed: SED?
     ): Behandlingstema {
-        val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
+        val noenSedInPbuc06list = listOf(SedType.SEDTYPE_P5000, SedType.SEDTYPE_P6000, SedType.SEDTYPE_P7000, SedType.SEDTYPE_P10000)
 
         if(bucType == P_BUC_01) return ALDERSPENSJON
         if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
         if(bucType == P_BUC_03) return UFOREPENSJON
 
         if (bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list) return BehandlingstemaPbuc06(currentSed)
-        if (bucType == P_BUC_10 && currentSed?.type == SedType.P15000) return behandlingstemaPbuc10(currentSed)
+        if (bucType == P_BUC_10 && currentSed?.type == SedType.SEDTYPE_P15000) return behandlingstemaPbuc10(currentSed)
 
         if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
         if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON

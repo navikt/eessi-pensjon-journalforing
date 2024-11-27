@@ -10,8 +10,8 @@ import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedHendelse
-import no.nav.eessi.pensjon.eux.model.SedType.P2000
-import no.nav.eessi.pensjon.eux.model.SedType.P2100
+import no.nav.eessi.pensjon.eux.model.SedType.SEDTYPE_P2000
+import no.nav.eessi.pensjon.eux.model.SedType.SEDTYPE_P2100
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -174,7 +174,7 @@ class JournalforingServiceMedGCPTest {
         every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
 
         val sedHendelse = SedHendelse(
-            sedType = P2100,
+            sedType = SEDTYPE_P2100,
             rinaDokumentId = "19fd5292007e4f6ab0e337e89079aaf4",
             bucType = P_BUC_01,
             rinaSakId = rinaId,
@@ -194,7 +194,7 @@ class JournalforingServiceMedGCPTest {
             SaksInfoSamlet(saktype = ALDER),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            currentSed = SED(type = P2000)
+            currentSed = SED(type = SEDTYPE_P2000)
         )
     }
 

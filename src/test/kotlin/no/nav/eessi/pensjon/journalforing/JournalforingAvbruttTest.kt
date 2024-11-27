@@ -43,7 +43,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
         journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
-        if(sedType == SedType.R006){
+        if(sedType == SedType.SEDTYPE_R006){
             verify(atLeast = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
         }
         else verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -52,7 +52,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
     @ParameterizedTest
     @EnumSource(BucType::class)
     fun `SED med ukjent fnr settes til avbrutt gitt at den ikke er i listen bucIkkeTilAvbrutt`(buc: BucType) {
-        val sedHendelse = createMockSedHendelse(SedType.P8000, buc)
+        val sedHendelse = createMockSedHendelse(SedType.SEDTYPE_P8000, buc)
 
         // buc som sendes direkte (uten lagring)
         if(buc in JournalforingService.BUC_SOM_SENDES_DIREKTE) {
@@ -89,7 +89,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
     @Test
     fun `Sendt P2000 med ukjent fnr der SED inneholder pesys sakId saa skal status settes til avbrutt`() {
-        val sedHendelse = createMockSedHendelse(SedType.P2000, BucType.P_BUC_01)
+        val sedHendelse = createMockSedHendelse(SedType.SEDTYPE_P2000, BucType.P_BUC_01)
         val oppgaveSlot = slot<OppgaveMelding>()
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -102,7 +102,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
     @Test
     fun `Sendt sed P2000 med ukjent fnr SED inneholder IKKE pesys saksId saa skal ikke status settes til avbrutt og journalpost opprettes`() {
-        val sedHendelse = createMockSedHendelse(SedType.P2000, BucType.P_BUC_01)
+        val sedHendelse = createMockSedHendelse(SedType.SEDTYPE_P2000, BucType.P_BUC_01)
 
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
@@ -211,7 +211,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             LocalDate.of(1973, 11, 22),
             identifisertePersoner = 1,
             navAnsattInfo = null,
-            currentSed = SED(type = SedType.P2200)
+            currentSed = SED(type = SedType.SEDTYPE_P2200)
         )
         journalpostService.sendJournalPost(opprettJPVurdering.captured, sedHendelse, HendelseType.SENDT, "ident")
         assertEquals(
@@ -269,7 +269,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             identifisertePersoner = 1,
             navAnsattInfo = null,
             saksInfoSamlet = saksInfoSamlet,
-            currentSed = SED(type = SedType.P2200)
+            currentSed = SED(type = SedType.SEDTYPE_P2200)
         )
     }
 

@@ -226,7 +226,7 @@ internal open class JournalforingTestBase {
         fDatoFraAnnenPerson: String? = "1988-07-12",
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P8000>(createSed(SedType.P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
+        val sed = SED.generateSedToClass<P8000>(createSed(SedType.SEDTYPE_P8000, fnr, createAnnenPerson(fnr = fnrAnnenPerson, rolle = rolle), sakId, fdato = fDatoFraAnnenPerson))
         initCommonMocks(sed)
 
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
@@ -269,7 +269,7 @@ internal open class JournalforingTestBase {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P8000)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -350,7 +350,7 @@ internal open class JournalforingTestBase {
         land: String = "NOR",
         hendelseType: HendelseType = SENDT,
         bucType: BucType = P_BUC_01,
-        sedType: SedType = SedType.P8000,
+        sedType: SedType = SedType.SEDTYPE_P8000,
         assertBlock: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = SED.generateSedToClass<P8000>(createSed(sedType = sedType, fnr = fnr, eessiSaknr = sakId))
@@ -379,7 +379,7 @@ internal open class JournalforingTestBase {
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
-        val hendelse = createHendelseJson(SedType.P8000)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P8000)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -426,7 +426,7 @@ internal open class JournalforingTestBase {
 
         val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
 
-        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedsel?.foedselsdato.toString()))
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.SEDTYPE_P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedsel?.foedselsdato.toString()))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (benyttSokPerson) {
@@ -447,7 +447,7 @@ internal open class JournalforingTestBase {
         }
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
 
-        val hendelse = createHendelseJson(SedType.P2200, P_BUC_03)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P2200, P_BUC_03)
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -676,7 +676,7 @@ internal open class JournalforingTestBase {
         val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen, fdato = fdatoAnnenPerson))
 
         val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
-            if (sedType == SedType.P12000) {
+            if (sedType == SedType.SEDTYPE_P12000) {
                 P12000Pensjon(listOf(Pensjoninfo(Betalingsdetaljer(pensjonstype = "02"))), gjenlevende = annenPerson)
             }
             Pensjon(gjenlevende = annenPerson)
@@ -706,7 +706,7 @@ internal open class JournalforingTestBase {
         return """
             {
               "id": 1869,
-              "sedId": "${sedType.name}_b12e06dda2c7474b9998c7139c841646_2",
+              "sedId": "${sedType.toJson()}_b12e06dda2c7474b9998c7139c841646_2",
               "sektorKode": "P",
               "bucType": "${bucType.name}",
               "rinaSakId": "147729",
@@ -718,7 +718,7 @@ internal open class JournalforingTestBase {
               "mottakerLand": "NO",
               "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
               "rinaDokumentVersjon": "2",
-              "sedType": "${sedType.name}",
+              "sedType": "${sedType.toJson()}",
               "navBruker": ${forsikretFnr?.let { "\"$it\"" }}
             }
         """.trimIndent()

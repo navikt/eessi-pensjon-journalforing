@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
-import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
@@ -12,7 +11,6 @@ import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.KravType.*
-import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
@@ -533,13 +531,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER skal routes til NFP_UTLAND_AALESUND 4862`() {
-            val sed15000sent = SED.generateSedToClass<P15000>( createSedPensjon(SedType.P15000, FNR_OVER_62, krav = ALDER))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.P5000, FNR_OVER_62, krav = ALDER))
+            val sed15000sent = SED.generateSedToClass<P15000>( createSedPensjon(SedType.SEDTYPE_P15000, FNR_OVER_62, krav = ALDER))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>( createSedPensjon(SedType.SEDTYPE_P5000, FNR_OVER_62, krav = ALDER))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
-                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED),
-                ForenkletSED("654654", SedType.P8000, SedStatus.EMPTY)
+                ForenkletSED("10001", SedType.SEDTYPE_P15000, SedStatus.SENT),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.RECEIVED),
+                ForenkletSED("654654", SedType.SEDTYPE_P8000, SedStatus.EMPTY)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
@@ -551,7 +549,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_10)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -575,12 +573,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav ALDER bosatt utland skal routes til PENSJON_UTLAND 0001`() {
-            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_OVER_62, krav = ALDER))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_62))
+            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, FNR_OVER_62, krav = ALDER))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.SEDTYPE_P5000, FNR_OVER_62))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
-                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED)
+                ForenkletSED("10001", SedType.SEDTYPE_P15000, SedStatus.SENT),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.RECEIVED)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
@@ -592,7 +590,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_10)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -617,12 +615,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP skal routes til UFOREP_UTLANDSTILSNITT 4476`() {
-            val sed15000sent =  SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN_UNDER_62, krav = UFOREP))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_VOKSEN_UNDER_62))
+            val sed15000sent =  SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, FNR_VOKSEN_UNDER_62, krav = UFOREP))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.SEDTYPE_P5000, FNR_VOKSEN_UNDER_62))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
-                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED)
+                ForenkletSED("10001", SedType.SEDTYPE_P15000, SedStatus.SENT),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.RECEIVED)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
@@ -634,7 +632,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_10)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -659,12 +657,12 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Flere sed i buc, mottar en P5000 tidligere mottatt P15000, krav UFOEREP bosatt utland skal routes til UFOREP_UTLAND 4475`() {
-            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN_UNDER_62, krav = UFOREP))
-            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_VOKSEN_UNDER_62))
+            val sed15000sent = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, FNR_VOKSEN_UNDER_62, krav = UFOREP))
+            val sedP5000mottatt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.SEDTYPE_P5000, FNR_VOKSEN_UNDER_62))
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P15000, SedStatus.SENT),
-                ForenkletSED("30002", SedType.P5000, SedStatus.RECEIVED)
+                ForenkletSED("10001", SedType.SEDTYPE_P15000, SedStatus.SENT),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.RECEIVED)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
@@ -676,7 +674,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_10)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -701,7 +699,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Innkommende P15000 gjenlevende mangler søker`() {
-            val sedP15000 = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, "12321", gjenlevendeFnr = null, krav = GJENLEV))
+            val sedP15000 = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, "12321", gjenlevendeFnr = null, krav = GJENLEV))
 
             val alleDocumenter = forenkletSEDs(sedStatus = SedStatus.RECEIVED)
 
@@ -713,7 +711,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P15000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10)
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -750,7 +748,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val sedP15000 = SED.generateSedToClass<P15000>(
                 createSedPensjon(
-                    SedType.P15000,
+                    SedType.SEDTYPE_P15000,
                     fnr = "12321",
                     gjenlevendeFnr = fnrSokVoken,
                     sivilstand = SivilstandItem(
@@ -764,7 +762,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 )
             )
 
-            val alleDocumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P15000, SedStatus.RECEIVED))
+            val alleDocumenter = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.SEDTYPE_P15000, SedStatus.RECEIVED))
 
             every { personService.sokPerson(any()) } returns sokPerson
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns mockGjenlevende
@@ -776,7 +774,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, journalpostResponse) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P15000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10)
 
             //kjør
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -831,8 +829,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     inner class Scenario4Inngaende {
         @Test
         fun `Flere sed i buc, mottatt en P15000 med ukjent gjenlevende relasjon, krav GJENLEV sender en P5000 med korrekt gjenlevende denne skal journalføres automatisk`() {
-            val sed15000mottatt = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, FNR_VOKSEN_2, gjenlevendeFnr = "", krav = GJENLEV, relasjon = RelasjonTilAvdod.EKTEFELLE))
-            val sedP5000sendt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.P5000, FNR_OVER_62, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_OVER_62))
+            val sed15000mottatt = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, FNR_VOKSEN_2, gjenlevendeFnr = "", krav = GJENLEV, relasjon = RelasjonTilAvdod.EKTEFELLE))
+            val sedP5000sendt = SED.generateSedToClass<P5000>(createSedPensjon(SedType.SEDTYPE_P5000, FNR_OVER_62, eessiSaknr = SAK_ID, gjenlevendeFnr = FNR_OVER_62))
 
             val saker = listOf(
                 sakInformasjon(),
@@ -840,8 +838,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             )
 
             val alleDocumenter = listOf(
-                ForenkletSED("10001", SedType.P15000, SedStatus.RECEIVED),
-                ForenkletSED("30002", SedType.P5000, SedStatus.SENT)
+                ForenkletSED("10001", SedType.SEDTYPE_P15000, SedStatus.RECEIVED),
+                ForenkletSED("30002", SedType.SEDTYPE_P5000, SedStatus.SENT)
             )
 
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
@@ -856,7 +854,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
             val (journalpost, _) = initJournalPostRequestSlot()
-            val hendelse = createHendelseJson(SedType.P5000, P_BUC_10)
+            val hendelse = createHendelseJson(SedType.SEDTYPE_P5000, P_BUC_10)
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             val request = journalpost.captured
@@ -894,7 +892,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
-                ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
+                ?: SED.generateSedToClass(createSedPensjon(SedType.SEDTYPE_P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
 
         initCommonMocks(sed, alleDocs)
         every { gcpStorageService.journalFinnes(any()) } returns false
@@ -931,7 +929,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val (journalpost, _) = initJournalPostRequestSlot()
 
         val forsikretfnr = if (krav == GJENLEV) fnrVoksen else null
-        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10, forsikretfnr)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10, forsikretfnr)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -978,7 +976,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         block: (OpprettJournalpostRequest) -> Unit
     ) {
         val sed = sedJson?.let { mapJsonToAny<P15000>(it) }
-            ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
+            ?: SED.generateSedToClass(createSedPensjon(SedType.SEDTYPE_P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
 
         initCommonMocks(sed, alleDocs)
 
@@ -1011,7 +1009,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot()
         val forsikretfnr = if (krav == GJENLEV) fnrVoksen else null
-        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10, forsikretfnr)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10, forsikretfnr)
 
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
@@ -1033,7 +1031,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
     private fun bestemSakResponse(sakType: SakType? = SakType.ALDER, sakStatus: SakStatus? = AVSLUTTET) =
         BestemSakResponse(null, listOf(SakInformasjon(sakId = SAK_ID, sakType = sakType!!, sakStatus = sakStatus!!)))
 
-    private fun forenkletSEDs(sedStatus: SedStatus? = SedStatus.SENT) = listOf(ForenkletSED("10001212", SedType.P15000, sedStatus))
+    private fun forenkletSEDs(sedStatus: SedStatus? = SedStatus.SENT) = listOf(ForenkletSED("10001212", SedType.SEDTYPE_P15000, sedStatus))
 
     private fun sakInformasjon(sakId: String? = SAK_ID, sakType: SakType? = SakType.ALDER, sakStatus: SakStatus? = TIL_BEHANDLING) =
         SakInformasjon(sakId = sakId, sakType = sakType!!, sakStatus = sakStatus!!)
@@ -1055,7 +1053,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         val sed = sedJson?.let { mapJsonToAny(it) }
             ?: createSedPensjon(
-                SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod, pdlPerson = mockBarn
+                SedType.SEDTYPE_P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, relasjon = relasjonAvod, pdlPerson = mockBarn
             )
 
         initCommonMocks(sed, alleDocs)
@@ -1078,7 +1076,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val (journalpost, _) = initJournalPostRequestSlot()
 
         val forsikretfnr = if (krav == GJENLEV) fnrVoksen else null
-        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10, forsikretfnr)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10, forsikretfnr)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1117,7 +1115,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         nor2enhet: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod))
+        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod))
         initCommonMocks(sed, alleDocs)
         every { gcpStorageService.hentFraGjenny(any()) } returns null
         every { gcpStorageService.journalFinnes(any()) } returns false
@@ -1141,7 +1139,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1180,7 +1178,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         norg2svar: Enhet? = null,
         block: (OpprettJournalpostRequest) -> Unit
     ) {
-        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnr1, eessiSaknr = sakId, krav = krav))
+        val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.SEDTYPE_P15000, fnr1, eessiSaknr = sakId, krav = krav))
         initCommonMocks(sed, alleDocs)
 
         if (fnr1 != null) {
@@ -1204,7 +1202,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
-        val hendelse = createHendelseJson(SedType.P15000, P_BUC_10)
+        val hendelse = createHendelseJson(SedType.SEDTYPE_P15000, P_BUC_10)
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

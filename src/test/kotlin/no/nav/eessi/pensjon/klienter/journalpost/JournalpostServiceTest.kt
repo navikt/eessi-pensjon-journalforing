@@ -62,7 +62,7 @@ internal class JournalpostServiceTest {
         val journalpostSlot = slot<OpprettJournalpostRequest>()
 
         val request = opprettJournalpostRequest(null, INNGAAENDE, "EY", EYBARNEP, GJENLEVENDEPENSJON)
-        val sedHendelse = sedHendelse(sedType = P2100, P_BUC_02)
+        val sedHendelse = sedHendelse(sedType = SEDTYPE_P2100, P_BUC_02)
 
         val responseBody = responsebody(false)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
@@ -107,7 +107,7 @@ internal class JournalpostServiceTest {
 
         val responseBody = responsebody(false)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(P2000, P_BUC_01, null)
+        val sedHendelse = sedHendelse(SEDTYPE_P2000, P_BUC_01, null)
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
@@ -165,9 +165,9 @@ internal class JournalpostServiceTest {
 
         val responseBody = responsebody(true)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(P15000, P_BUC_10, null)
+        val sedHendelse = sedHendelse(SEDTYPE_P15000, P_BUC_10, null)
 
-        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P15000(type = SEDTYPE_P15000, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
@@ -211,9 +211,9 @@ internal class JournalpostServiceTest {
 
         val responseBody = responsebody(true)
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-        val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
+        val sedHendelse = sedHendelse(SEDTYPE_P2100, P_BUC_02, null)
 
-        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = SEDTYPE_P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
@@ -258,7 +258,7 @@ internal class JournalpostServiceTest {
 
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
-                sedHendelse(P2000, P_BUC_01, null),
+                sedHendelse(SEDTYPE_P2000, P_BUC_01, null),
                 SLAPP_SKILPADDE,
                 MOTTATT,
                 ID_OG_FORDELING,
@@ -322,7 +322,7 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
 
-        val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
+        val sedHendelse = sedHendelse(SEDTYPE_P2100, P_BUC_02, "NAVT003")
         val actualResponse = journalpostService.opprettJournalpost(
             sedHendelse,
             LEALAUS_KAKE,
