@@ -46,12 +46,16 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
     }
 
     private fun hentGjennySak(sakIdFromSed: String?, euxCaseId: String): Sak? {
-        sakIdFromSed?.let { sakId ->
-            etterlatteService.hentGjennySak(sakId).fold(
-                onSuccess = { gjennySak -> return Sak(FAGSAK, gjennySak?.id.toString(), EY) },
-                onFailure = { logger.warn("Finner ingen gjennySak hos etterlatte for rinasakId: $euxCaseId, og sakID: $sakId") }
-            )
+        if (sakIdFromSed.isNullOrBlank()) {
+            logger.warn("sakIdFromSed er tom eller mangler for euxCaseId: $euxCaseId")
+            return null
         }
+
+        etterlatteService.hentGjennySak(sakIdFromSed).fold(
+            onSuccess = { gjennySak -> return Sak(FAGSAK, gjennySak?.id.toString(), EY) },
+            onFailure = { logger.warn("Finner ingen gjennySak hos etterlatte for rinasakId: $euxCaseId, og sakID: $sakIdFromSed") }
+        )
+
         return null
     }
 
