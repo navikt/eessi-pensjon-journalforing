@@ -43,10 +43,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
         journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
-        if(sedType == SedType.R006){
+        if (sedType in listOf(SedType.R004, SedType.R005, SedType.R006)) {
             verify(atLeast = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
-        }
-        else verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
+        } else verify(atLeast = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
     @ParameterizedTest
@@ -55,16 +54,15 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val sedHendelse = createMockSedHendelse(SedType.P8000, buc)
 
         // buc som sendes direkte (uten lagring)
-        if(buc in JournalforingService.BUC_SOM_SENDES_DIREKTE) {
-            every { journalpostKlient.opprettJournalpost(any(),  any(), any()) } returns
-                mockk<OpprettJournalPostResponse>(relaxed = true).apply {
-                    every { journalpostId } returns "12345"
-                    every { journalpostferdigstilt } returns false
-                }
+        if (buc in JournalforingService.BUC_SOM_SENDES_DIREKTE) {
+            every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns
+                    mockk<OpprettJournalPostResponse>(relaxed = true).apply {
+                        every { journalpostId } returns "12345"
+                        every { journalpostferdigstilt } returns false
+                    }
             //benytter ordinær journalforing for buc som sendes direkte
             journalfor(sedHendelse, HendelseType.SENDT)
-        }
-        else {
+        } else {
             every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
             journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
         }
@@ -160,7 +158,12 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val identifisertPerson = identifisertPDLPerson()
         justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq(sedHendelse.rinaSakId)) }
-        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT, journalPostIdMock = "112233", identer = listOf(identifisertPerson))
+        journalManueltMedAvbrutt(
+            sedHendelse,
+            HendelseType.SENDT,
+            journalPostIdMock = "112233",
+            identer = listOf(identifisertPerson)
+        )
 
         assertEquals(
             Enhet.ID_OG_FORDELING,

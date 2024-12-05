@@ -172,10 +172,9 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
-        if(sedHendelse.sedType == SedType.R006 && hendelseType == SENDT){
+        if(sedHendelse.sedType in listOf(SedType.R004, SedType.R005, SedType.R006) && hendelseType == SENDT){
             logger.warn("HendelseType er utgående og SED er R006; setter ikke avbrutt")
             return false
-
         }
 
         if (hendelseType != SENDT) {
