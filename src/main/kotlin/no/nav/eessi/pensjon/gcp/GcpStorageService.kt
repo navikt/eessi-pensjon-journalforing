@@ -190,7 +190,6 @@ class GcpStorageService(
                     """.trimMargin()
                     )
                     return blobs.values.filter {
-                        logger.info(it.name)
                         it.name.contains(rinaId)
                     }.map { it.name }.also { logger.info("Arkiverte saker: $it") }
                 }
