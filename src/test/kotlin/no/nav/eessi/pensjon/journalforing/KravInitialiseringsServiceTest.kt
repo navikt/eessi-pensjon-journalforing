@@ -2,7 +2,7 @@ package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
-import no.nav.eessi.pensjon.journalforing.krav.validerForKravinit
+import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService.Companion.validerForKravinit
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -28,7 +28,7 @@ internal class KravInitialiseringsServiceTest {
         )
         ), p2000pensjon = null)
 
-        assertEquals(true, p2000.  validerForKravinit() )
+        assertEquals(true, p2000.validerForKravinit() )
     }
 
     @Test

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
 
-    private val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
+    val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
 
     fun initKrav(
         sedHendelse: SedHendelse,
@@ -50,15 +50,18 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         }
     }
 
-    fun P2000.validerForKravinit(): Boolean {
-        return nav?.bruker?.person?.let { person ->
-            val isStatsborgerskapValid = person.statsborgerskap != null
-            val isSivilstandValid = person.sivilstand?.none { it.fradato == null } == true
+    companion object{
+        fun P2000.validerForKravinit(): Boolean {
+            val logger = LoggerFactory.getLogger(KravInitialiseringsService::class.java)
+            return nav?.bruker?.person?.let { person ->
+                val isStatsborgerskapValid = person.statsborgerskap != null
+                val isSivilstandValid = person.sivilstand?.none { it.fradato == null } == true
 
-            logger.warn("Sjekker statsborgerskap: ${person.statsborgerskap}, sivilstand: ${person.sivilstand}")
+                logger.warn("Sjekker statsborgerskap: ${person.statsborgerskap}, sivilstand: ${person.sivilstand}")
 
-            isStatsborgerskapValid && isSivilstandValid
-        } ?: false
+                isStatsborgerskapValid && isSivilstandValid
+            } ?: false
+        }
     }
 }
 
