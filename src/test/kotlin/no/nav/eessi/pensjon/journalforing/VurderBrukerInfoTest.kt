@@ -93,6 +93,7 @@ class VurderBrukerInfoTest {
         every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
             every { journalpostId } returns "1111"
             every { journalstatus } returns "UNDER_ARBEID"
+            every { journalpostferdigstilt } returns false
         }
         val bruker = createTestBruker("121280334444")
         val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
