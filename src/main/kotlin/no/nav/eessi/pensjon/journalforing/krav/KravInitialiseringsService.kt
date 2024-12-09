@@ -49,7 +49,17 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
             else ->  logger.warn("Ikke støttet sedtype for initiering av krav")
         }
     }
+
+    fun P2000.validerForKravinit(): Boolean {
+        return nav?.bruker?.person?.let { person ->
+            val isStatsborgerskapValid = person.statsborgerskap != null
+            val isSivilstandValid = person.sivilstand?.none { it.fradato == null } == true
+
+            logger.warn("Sjekker statsborgerskap: ${person.statsborgerskap}, sivilstand: ${person.sivilstand}")
+
+            isStatsborgerskapValid && isSivilstandValid
+        } ?: false
+    }
 }
-fun P2000.validerForKravinit()  = nav?.bruker?.person?.let {
-    it.statsborgerskap != null && it.sivilstand?.none { sivil -> sivil.fradato == null } == true
-} ?: false
+
+
