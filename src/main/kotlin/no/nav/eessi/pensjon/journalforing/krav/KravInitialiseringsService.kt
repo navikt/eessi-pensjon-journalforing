@@ -18,7 +18,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
         sakInformasjon: SakInformasjon?,
         sed: SED?
     ) {
-
+        logger.info("Vurderer kravinfo for ${sedHendelse.sedType} for sak: ${sakInformasjon?.sakId}, sakType: ${sakInformasjon?.sakType}")
         when(sedHendelse.sedType) {
             P2000 -> {
                 if(sed == null){
