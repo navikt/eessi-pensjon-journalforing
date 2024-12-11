@@ -23,7 +23,7 @@ spec:
         - host: prod-fss.eessipensjon.eessi-pensjon-onprem-proxy
         - host: eessi-pensjon-fagmodul.intern.nav.no
         - host: eessi-pensjon-oppgave.intern.nav.no
-        - host: eux-rina-api.prod-fss-pub.nais.io
+        - host: eux-rina-api.intern.nav.no
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
@@ -47,7 +47,7 @@ spec:
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny
     - name: EUX_RINA_API_V1_URL
-      value: https://eux-rina-api.prod-fss-pub.nais.io/cpi
+      value: https://eux-rina-api.intern.nav.no/cpi
     - name: PDL_URL
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: JOURNALPOST_V1_URL
@@ -77,7 +77,7 @@ spec:
     - name: AZURE_APP_FAGMODUL_CLIENT_ID
       value: prod-gcp.eessipensjon.eessi-pensjon-fagmodul
     - name: AZURE_APP_EUX_CLIENT_ID
-      value: prod-fss.eessibasis.eux-rina-api
+      value: prod-gcp.eessibasis.eux-rina-api
     - name: AZURE_APP_NORG2_CLIENT_ID
       value: prod-fss.org.norg2
     - name: AZURE_APP_PROXY_CLIENT_ID
