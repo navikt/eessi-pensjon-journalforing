@@ -27,18 +27,22 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
     //@Cacheable("hentNavansatt")
     fun hentAnsatt(saksbehandler: String): String? {
         val path = "/navansatt/$saksbehandler"
-        try {
-            val json = navansattRestTemplate.exchange(
-                path,
-                HttpMethod.GET,
-                null,
-                String::class.java
-            ).body.orEmpty()
-            return json
-        } catch (ex: Exception) {
-            logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex")
+        if(!saksbehandler.isNullOrBlank()) {
+            logger.info("Henter saksbehandler fra navansatt: $saksbehandler")
+            try {
+                val json = navansattRestTemplate.exchange(
+                    path,
+                    HttpMethod.GET,
+                    null,
+                    String::class.java
+                ).body.orEmpty()
+                return json
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex")
+            }
         }
         return null
+        logger.info("Saksbehandler: $saksbehandler er tom ved kall til hent Navansatt")
     }
 
     //Pair(saksbehandlerIdent, enhetsId)
