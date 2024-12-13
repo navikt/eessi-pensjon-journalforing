@@ -13,11 +13,8 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.Period
 
 @Service
 class HentTemaService(
@@ -35,13 +32,13 @@ class HentTemaService(
 
     fun hentTema(
         sedhendelse: SedHendelse?,
-        fnr: Fodselsnummer?,
+        alder: Int?,
         identifisertePersoner: Int,
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
         val ufoereSak = saksInfo?.saktype == UFOREP
-        if(fnr == null) {
+        if(alder == null) {
             if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
             return PENSJON
         }
@@ -51,7 +48,7 @@ class HentTemaService(
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
-        val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(fnr)
+        val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforAlderUnder62(alder)
         return when (sedhendelse?.bucType) {
 
             P_BUC_03 -> UFORETRYGD
@@ -60,7 +57,7 @@ class HentTemaService(
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
             P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
             P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
-            else -> if (ufoereSak && erUforAlderUnder62(fnr)) UFORETRYGD else PENSJON
+            else -> if (ufoereSak && erUforAlderUnder62(alder)) UFORETRYGD else PENSJON
         }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
     }
 
@@ -108,7 +105,8 @@ class HentTemaService(
         antallIdentifisertePersoner: Int,
         currentSed: SED?
     ): Enhet {
-        val tema = hentTema(sedHendelse, identifisertPerson.fnr, antallIdentifisertePersoner, sakinfo, currentSed)
+        val alder = identifisertPerson.personRelasjon?.fnr?.getAge()
+        val tema = hentTema(sedHendelse, alder, antallIdentifisertePersoner, sakinfo, currentSed)
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
             sakinfo?.saktype,
@@ -129,5 +127,8 @@ class HentTemaService(
             }
     }
 
-    fun erUforAlderUnder62(fnr: Fodselsnummer?) = Period.between(fnr?.getBirthDate(), LocalDate.now()).years in 18..61
+    fun erUforAlderUnder62(alder: Int?): Boolean {
+        if (alder == null) return true
+        return alder in 18..61
+    }
 }

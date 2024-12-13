@@ -117,7 +117,7 @@ class JournalforingService(
 
                 val tema = hentTemaService.hentTema(
                     sedHendelse,
-                    identifisertPerson?.personRelasjon?.fnr,
+                    identifisertPerson?.personRelasjon?.fnr?.getAge(),
                     identifisertePersoner,
                     saksInfoSamlet,
                     currentSed
