@@ -104,6 +104,19 @@ class JournalforingService(
 
                 val aktoerId = identifisertPerson?.aktoerId
 
+                //henter først tema da denne også er i bruk for tildeltJoarkEnhet
+                val alder = identifisertPerson?.personRelasjon?.fnr?.getAge() ?: identifisertPerson?.personRelasjon?.alder()
+
+                val tema = hentTemaService.hentTema(
+                    sedHendelse,
+                    alder,
+                    identifisertePersoner,
+                    saksInfoSamlet,
+                    currentSed
+                ).also {
+                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
+                }
+
                 val tildeltJoarkEnhet = journalforingsEnhet(
                     fdato,
                     identifisertPerson,
@@ -112,18 +125,9 @@ class JournalforingService(
                     saksInfoSamlet,
                     harAdressebeskyttelse,
                     identifisertePersoner,
-                    currentSed
+                    currentSed,
+                    tema
                 )
-
-                val tema = hentTemaService.hentTema(
-                    sedHendelse,
-                    identifisertPerson?.personRelasjon?.fnr,
-                    identifisertePersoner,
-                    saksInfoSamlet,
-                    currentSed
-                ).also {
-                    logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
-                }
 
                 // Henter dokumenter
                 val (documents, _) = sedHendelse.run {
@@ -347,7 +351,8 @@ class JournalforingService(
         sakInfo: SaksInfoSamlet?,
         harAdressebeskyttelse: Boolean,
         antallIdentifisertePersoner: Int,
-        currentSed: SED?
+        currentSed: SED?,
+        tema: Tema
     ): Enhet {
         val bucType = sedHendelse.bucType
         val personRelasjon = identifisertPerson?.personRelasjon
@@ -376,7 +381,8 @@ class JournalforingService(
                 sakInfo,
                 identifisertPerson,
                 antallIdentifisertePersoner,
-                currentSed
+                currentSed,
+                tema
             )
                 .also {
                     logEnhet(enhetFraRouting, it)

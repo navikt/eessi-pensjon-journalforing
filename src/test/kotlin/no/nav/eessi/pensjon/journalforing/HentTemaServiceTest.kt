@@ -10,6 +10,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
@@ -37,7 +38,14 @@ class HentTemaServiceTest {
 
         every { journalpostService.bestemBehandlingsTema(any(), any(),any(),any(), any()) } returns Behandlingstema.UFOREPENSJON
 
-        val tema = hentTemaService.enhetBasertPaaBehandlingstema(sedHendelse(), saksInfoSamlet(), identifisertPerson, 1, null)
+        val tema = hentTemaService.enhetBasertPaaBehandlingstema(
+            sedHendelse(),
+            saksInfoSamlet(),
+            identifisertPerson,
+            1,
+            null,
+            Tema.PENSJON
+        )
         assertEquals(Enhet.UFORE_UTLAND, tema)
     }
 
@@ -51,7 +59,14 @@ class HentTemaServiceTest {
 
         every { journalpostService.bestemBehandlingsTema(any(), any(),any(),any(), any()) } returns Behandlingstema.UFOREPENSJON
 
-        val tema = hentTemaService.enhetBasertPaaBehandlingstema(sedHendelse(), saksInfoSamlet(), identifisertPerson, 1, null)
+        val tema = hentTemaService.enhetBasertPaaBehandlingstema(
+            sedHendelse(),
+            saksInfoSamlet(),
+            identifisertPerson,
+            1,
+            null,
+            Tema.PENSJON
+        )
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, tema)
     }
 
