@@ -105,10 +105,10 @@ class JournalforingService(
                 val aktoerId = identifisertPerson?.aktoerId
 
                 //henter først tema da denne også er i bruk for tildeltJoarkEnhet
-                val alder = if(identifisertPerson?.fnr?.erNpid == true){
-                    identifisertPerson.personRelasjon?.alder()
+                val alder = if(identifisertPerson?.fnr?.erNpid == true || identifisertPerson?.fnr?.getBirthDate() == null) {
+                    identifisertPerson?.personRelasjon?.alder()
                 }
-                else identifisertPerson?.personRelasjon?.fnr?.getAge()
+                else identifisertPerson.personRelasjon?.fnr?.getAge()
 
                 val tema = hentTemaService.hentTema(
                     sedHendelse,
