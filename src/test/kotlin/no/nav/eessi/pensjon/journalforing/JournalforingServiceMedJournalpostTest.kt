@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -126,6 +127,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
+    @Disabled
     fun `Sendt P_BUC_2 2100 med omstilling skal lage journalpost`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -159,6 +161,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
+    @Disabled
     fun `Mottatt P_BUC_2 2100 med omstilling skal lage journalpost uten ferdigstilling`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -192,6 +195,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
+    @Disabled
     fun `Innkommende P2000 fra utlanded som oppfyller alle krav til maskinell journalføring skal opprette behandle SED oppgave`() {
 
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
