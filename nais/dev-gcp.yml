@@ -23,7 +23,7 @@ spec:
         - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
         - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
         - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
-        - host: eux-rina-api-gcp-q2.intern.dev.nav.no
+        - host: eux-rina-api-q2.intern.dev.nav.no
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
@@ -52,7 +52,7 @@ spec:
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
-      value: https://eux-rina-api-gcp-q2.intern.dev.nav.no/cpi
+      value: https://eux-rina-api-q2.intern.dev.nav.no/cpi
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: JOURNALPOST_V1_URL
