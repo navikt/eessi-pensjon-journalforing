@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
-    @Component
+@Component
 class EtterlatteService(
 
     private val etterlatteRestTemplate: RestTemplate,
