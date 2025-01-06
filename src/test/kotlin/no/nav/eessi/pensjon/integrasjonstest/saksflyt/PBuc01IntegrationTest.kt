@@ -5,8 +5,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2200
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -61,7 +60,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(
                         sakId = SAK_ID,
                         sakType = ALDER,
-                        sakStatus = OPPRETTET
+                        sakStatus = LOPENDE
                     )
                 )
             )
@@ -128,7 +127,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(
                         sakId = SAK_ID,
                         sakType = ALDER,
-                        sakStatus = OPPRETTET
+                        sakStatus = LOPENDE
                     )
                 )
             )
@@ -182,7 +181,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(
                         sakId = SAK_ID,
                         sakType = ALDER,
-                        sakStatus = OPPRETTET
+                        sakStatus = LOPENDE
                     )
                 )
             )
@@ -283,7 +282,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(
                         sakId = SAK_ID,
                         sakType = ALDER,
-                        sakStatus = OPPRETTET
+                        sakStatus = LOPENDE
                     )
                 )
             )
@@ -464,7 +463,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                     SakInformasjon(
                         sakId = SAK_ID,
                         sakType = ALDER,
-                        sakStatus = OPPRETTET
+                        sakStatus = LOPENDE
                     )
                 )
             )

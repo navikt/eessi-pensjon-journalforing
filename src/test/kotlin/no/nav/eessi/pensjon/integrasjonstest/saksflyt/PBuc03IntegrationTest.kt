@@ -5,7 +5,6 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPRETTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -225,7 +224,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Krav om uføre for Utgående P2200 journalføres automatisk med bruk av bestemsak uten forsokFerdigStilt oppretter en oppgave type JOURNALFORING`() {
-            val bestemsak = bestemSakResponse(sakStatus = OPPRETTET)
+            val bestemsak = bestemSakResponse(sakStatus = LOPENDE)
             val allDocuemtActions = forenkletSED(sedStatus = SENT)
 
             testRunnerVoksen(
