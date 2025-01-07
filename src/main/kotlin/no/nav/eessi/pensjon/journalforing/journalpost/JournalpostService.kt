@@ -178,6 +178,7 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
             return false
         }
 
+        // R-BUC skal behandles manuelt selv om vi mangler fnummer eller identifisert person
         if(sedHendelse.sedType in listOf(SedType.R004, SedType.R005, SedType.R006) && hendelseType == SENDT){
             logger.warn("HendelseType er utgående og SED er R006; setter ikke avbrutt")
             return false
