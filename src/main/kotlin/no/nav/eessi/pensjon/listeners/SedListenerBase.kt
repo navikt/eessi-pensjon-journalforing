@@ -79,8 +79,8 @@ abstract class SedListenerBase(
                 alleSedIBucList
             )
         }
-        val saktype = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
-        return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktype)
+        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
+        return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktypeFraSedEllerPesys)
     }
 
     fun skippingOffsett(offset: Long, offsetsToSkip : List<Long>): Boolean {
