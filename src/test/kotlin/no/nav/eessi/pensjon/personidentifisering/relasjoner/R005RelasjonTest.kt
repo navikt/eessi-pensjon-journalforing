@@ -27,6 +27,22 @@ internal class R005RelasjonTest : RelasjonTestBase(){
     }
 
     @Test
+    fun `Gitt personer med rolle når personrelasjoner velges så ignorer disse`() {
+        val forsikretFnr = SLAPP_SKILPADDE
+        val annenPersonFnr = KRAFTIG_VEGGPRYD
+
+        val actual = R005Relasjon(
+            createR005(
+                forsikretFnr = forsikretFnr, forsikretTilbakekreving = "debitor",
+                annenPersonFnr = annenPersonFnr, annenPersonTilbakekreving = "debitor"
+            ),
+            R_BUC_02,
+            "123123"
+        ).hentRelasjoner()
+
+        assertEquals(0, actual.size)
+    }
+    @Test
     fun `Gitt et gyldig fnr og relasjon avdod så skal det identifiseres en person`() {
         val gjenlevFnr = LEALAUS_KAKE
 
