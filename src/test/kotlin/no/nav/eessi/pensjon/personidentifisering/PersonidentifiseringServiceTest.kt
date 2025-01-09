@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDENT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -600,8 +601,45 @@ class PersonidentifiseringServiceTest {
             potensiellePerson
         )
 
-        assertEquals(avdod, result)
-        assertEquals(1, result?.personListe?.size)
+        assertEquals(gjenlevende, result)
+        assertEquals(1, result?.personListe?.size)  // AVDOD er med i personlisten
+        assertEquals(false, result?.flereEnnEnPerson())
+    }
+
+    @Test
+    fun `Gitt en R_BUC_02 med en FORSIKREET og en GJENLEVENDE saa skal GJENLEVENDE returneres`() {
+        val avdod = IdentifisertPDLPerson(
+            "123",
+            "NO",
+            "010",
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "231231"),
+            personNavn = "Testern",
+            identer = null
+        )
+
+        val gjenlevende = IdentifisertPDLPerson(
+            "123",
+            "NO",
+            "010",
+            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231"),
+            personNavn = "Testern",
+            identer = null
+        )
+
+        val alleSediBuc = emptyList<Pair<String, SED>>()
+        val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(
+            listOf(avdod, gjenlevende),
+            R_BUC_02,
+            SedType.R004,
+            potensiellePerson
+        )
+
+        println("@@@@@@@ ${result?.toJson()}")
+
+        assertEquals(gjenlevende, result)
+        assertEquals(1, result?.personListe?.size)  // AVDOD er med i personlisten
         assertEquals(false, result?.flereEnnEnPerson())
     }
 
@@ -686,11 +724,36 @@ class PersonidentifiseringServiceTest {
 
         val list = listOf(person1, person2, person3)
 
-        val result = personidentifiseringService.identifisertPersonUtvelger(list, R_BUC_02, SedType.P2100, emptyList())
+            assertThrows<FlerePersonPaaBucException> {
+                personidentifiseringService.identifisertPersonUtvelger(list, R_BUC_02, SedType.R005, emptyList())
+            }
+    }
+
+    @Test
+    fun `Gitt det kommer inn SED på R_BUC_02 med flere enn en person saa skal vi kaste FlerePersonPaaBucException`() {
+        val person1 = createIdentifisertPersonPDL(Fodselsnummer.fra("1234"), Relasjon.FORSIKRET)
+        val person3 = createIdentifisertPersonPDL(Fodselsnummer.fra("4567"), Relasjon.ANNET)
+
+        val list = listOf(person1, person3)
+
+        val relasjoner = listOf(SEDPersonRelasjon(
+            fnr = Fodselsnummer.fra("1234"),
+            relasjon = Relasjon.ANNET,
+            saktype = ALDER,
+            sedType = SedType.R005,
+            sokKriterier = null,
+            fdato = LocalDate.now(),
+            rinaDocumentId = "123123"
+        ))
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(list, R_BUC_02, SedType.R005, relasjoner)
+        val sedRelasjon = result?.personRelasjon?.relasjon.toString()
+        println("result: $result")
+        println("sedRelasjon: $sedRelasjon")
 
         assertEquals(person1, result)
-        assertEquals(2, result?.personListe?.size)
-        assertEquals(true, result?.flereEnnEnPerson())
+        assertEquals(Relasjon.FORSIKRET, result?.personRelasjon?.relasjon)
+
     }
 
     @Test
