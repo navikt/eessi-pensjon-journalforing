@@ -199,10 +199,7 @@ class PersonidentifiseringService(
         return when {
             identifisertePersoner.isEmpty() -> null
             bucType in listOf(R_BUC_02) ->  {
-                if(identifisertePersoner.size > 2) {
-                    logger.info("@@@@@: ${potensielleSEDPersonRelasjoner.toJson()}")
-                    throw FlerePersonPaaBucException()
-                }
+                if(identifisertePersoner.size > 2) throw FlerePersonPaaBucException()
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlevForRBUC(identifisertePersoner, erGjenlevendeRelasjon)
             }
@@ -213,17 +210,14 @@ class PersonidentifiseringService(
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
 
             }
-
             bucType == P_BUC_06 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon in listOf(GJENLEVENDE, ANNET, BARN, FORSORGER) }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
             }
-
             bucType == P_BUC_10 -> {
                 val erGjenlevendeYtelse = potensielleSEDPersonRelasjoner.any { it.saktype == GJENLEV }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeYtelse)
             }
-
             bucType == P_BUC_07 && (identifisertePersoner.size > 1) -> {
                 identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             }
@@ -270,7 +264,7 @@ class PersonidentifiseringService(
     ): IdentifisertPDLPerson? {
         val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
         val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
-        logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
+        logger.info("Rbuc med forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
 
         return when {
             gjenlevendePerson != null -> gjenlevendePerson.apply { personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == GJENLEVENDE } }
@@ -278,7 +272,7 @@ class PersonidentifiseringService(
             else -> {
                 forsikretPerson?.apply {
                     //TODO Fjerne personListe da den ikke er i bruk
-                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == FORSIKRET }
+                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon in listOf(FORSIKRET, ANNET) }
                 }
             }
         }
