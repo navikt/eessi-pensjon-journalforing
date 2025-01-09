@@ -198,11 +198,20 @@ class PersonidentifiseringService(
 
         return when {
             identifisertePersoner.isEmpty() -> null
-            bucType == R_BUC_02 -> identifisertePersoner.first().apply { personListe = identifisertePersoner.filterIndexed{ index, _ -> index != 0 } }
+            bucType in listOf(R_BUC_02) ->  {
+                if(identifisertePersoner.size > 2) {
+                    logger.info("@@@@@: ${potensielleSEDPersonRelasjoner.toJson()}")
+                    throw FlerePersonPaaBucException()
+                }
+                val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
+                utvelgerPersonOgGjenlevForRBUC(identifisertePersoner, erGjenlevendeRelasjon)
+            }
+
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlev(identifisertePersoner, erGjenlevendeRelasjon)
+
             }
 
             bucType == P_BUC_06 -> {
@@ -247,6 +256,28 @@ class PersonidentifiseringService(
             erGjenlevende -> null
             else -> {
                 forsikretPerson?.apply {
+                    //TODO Fjerne personListe da den ikke er i bruk
+                    personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == FORSIKRET }
+                }
+            }
+        }
+    }
+
+    //Gjelder kun for R_BUC_02
+    private fun utvelgerPersonOgGjenlevForRBUC(
+        identifisertePersoner: List<IdentifisertPDLPerson>,
+        erGjenlevende: Boolean
+    ): IdentifisertPDLPerson? {
+        val forsikretPerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == FORSIKRET }
+        val gjenlevendePerson = identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
+        logger.info("forsikretAktoerid: ${forsikretPerson?.aktoerId}, gjenlevAktoerid: ${gjenlevendePerson?.aktoerId}, harGjenlvRelasjon: $erGjenlevende")
+
+        return when {
+            gjenlevendePerson != null -> gjenlevendePerson.apply { personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == GJENLEVENDE } }
+            erGjenlevende -> null
+            else -> {
+                forsikretPerson?.apply {
+                    //TODO Fjerne personListe da den ikke er i bruk
                     personListe = identifisertePersoner.filterNot { it.personRelasjon?.relasjon == FORSIKRET }
                 }
             }

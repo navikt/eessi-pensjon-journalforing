@@ -5,6 +5,6 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 
 data class SaksInfoSamlet(
     val saksIdFraSed: String? = null,
-    val sakInformasjon: SakInformasjon? = null,
-    val saktype: SakType? = null
+    val sakInformasjon: SakInformasjon? = null, // Kommer fra Pesys
+    val saktype: SakType? = null   // Kommer fra SED
 )
