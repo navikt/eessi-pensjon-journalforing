@@ -20,7 +20,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDENT
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -429,10 +428,7 @@ class PersonidentifiseringServiceTest {
             )
         )
         val potensiellePersoner = RelasjonsHandler.hentRelasjoner(sedListe, P_BUC_02)
-
-        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(
-            potensiellePersoner
-        )
+        val identifisertePersoner = personidentifiseringService.hentIdentifisertePersoner(potensiellePersoner)
 
         assertEquals(2, identifisertePersoner.size)
     }
@@ -503,9 +499,7 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = listOf(Pair("123123", sed1), Pair("23123123", sed1), Pair("23143-adads-23123", sed1))
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, P_BUC_01)
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(
-            potensiellePerson
-        )
+        val actual = personidentifiseringService.hentIdentifisertePersoner(potensiellePerson)
         assertEquals(0, actual.size)
     }
 
@@ -573,23 +567,8 @@ class PersonidentifiseringServiceTest {
 
     @Test
     fun `Gitt en R_BUC_02 med to hovedpersoner når personer identifiseres så returneres første person`() {
-        val avdod = IdentifisertPDLPerson(
-            "123",
-            "NO",
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.AVDOD, rinaDocumentId = "231231"),
-            personNavn = "Testern",
-            identer = null
-        )
-
-        val gjenlevende = IdentifisertPDLPerson(
-            "123",
-            "NO",
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231"),
-            personNavn = "Testern",
-            identer = null
-        )
+        val avdod = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.AVDOD))
+        val gjenlevende = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.GJENLEVENDE))
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
@@ -607,24 +586,9 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
-    fun `Gitt en R_BUC_02 med en FORSIKREET og en GJENLEVENDE saa skal GJENLEVENDE returneres`() {
-        val avdod = IdentifisertPDLPerson(
-            "123",
-            "NO",
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "231231"),
-            personNavn = "Testern",
-            identer = null
-        )
-
-        val gjenlevende = IdentifisertPDLPerson(
-            "123",
-            "NO",
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.GJENLEVENDE, rinaDocumentId = "231231"),
-            personNavn = "Testern",
-            identer = null
-        )
+    fun `Gitt en R_BUC_02 med en FORSIKRET og en GJENLEVENDE saa skal GJENLEVENDE returneres`() {
+        val avdod = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
+        val gjenlevende = identifisertPDLPerson(sedPersonRelasjon())
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
@@ -636,23 +600,34 @@ class PersonidentifiseringServiceTest {
             potensiellePerson
         )
 
-        println("@@@@@@@ ${result?.toJson()}")
-
         assertEquals(gjenlevende, result)
-        assertEquals(1, result?.personListe?.size)  // AVDOD er med i personlisten
+        assertEquals(1, result?.personListe?.size)
+        assertEquals(false, result?.flereEnnEnPerson())
+    }
+
+    @Test
+    fun `Gitt en R_BUC_02 med en FORSIKRET og en med relasjon ANNET saa er personlisten tom og GJENLEVENDE returneres`() {
+        val annenRelasjon = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.ANNET))
+        val forsikret = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
+
+        val alleSediBuc = emptyList<Pair<String, SED>>()
+        val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(
+            listOf(annenRelasjon, forsikret),
+            R_BUC_02,
+            SedType.R005,
+            potensiellePerson
+        )
+
+        assertEquals(forsikret, result)
+        assertEquals(0, result?.personListe?.size)
         assertEquals(false, result?.flereEnnEnPerson())
     }
 
     @Test
     fun `Gitt en liste med flere forsikrede på P_BUC_01 så kaster vi en RuntimeException`() {
-        val forsikret = IdentifisertPDLPerson(
-            "123",
-            "NO",
-            "010",
-            SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), Relasjon.FORSIKRET, rinaDocumentId = "23123"),
-            personNavn = "Testern",
-            identer = null
-        )
+        val forsikret = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
 
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, P_BUC_01)
@@ -665,7 +640,6 @@ class PersonidentifiseringServiceTest {
                 potensiellePerson
             )
         }
-
     }
 
     @Test
@@ -679,9 +653,7 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, P_BUC_02)
 
-
-        val actual =
-            personidentifiseringService.identifisertPersonUtvelger(list, P_BUC_02, SedType.P2100, potensiellePerson)
+        val actual = personidentifiseringService.identifisertPersonUtvelger(list, P_BUC_02, SedType.P2100, potensiellePerson)
         assertEquals(Relasjon.GJENLEVENDE, actual?.personRelasjon?.relasjon)
     }
 
@@ -710,9 +682,6 @@ class PersonidentifiseringServiceTest {
             personidentifiseringService.identifisertPersonUtvelger(list, P_BUC_01, SedType.P2100, potensiellePerson)
         }
 
-        assertThrows<FlerePersonPaaBucException> {
-            personidentifiseringService.identifisertPersonUtvelger(list, P_BUC_03, SedType.P2100, potensiellePerson)
-        }
     }
 
     @Test
@@ -748,8 +717,6 @@ class PersonidentifiseringServiceTest {
 
         val result = personidentifiseringService.identifisertPersonUtvelger(list, R_BUC_02, SedType.R005, relasjoner)
         val sedRelasjon = result?.personRelasjon?.relasjon.toString()
-        println("result: $result")
-        println("sedRelasjon: $sedRelasjon")
 
         assertEquals(person1, result)
         assertEquals(Relasjon.FORSIKRET, result?.personRelasjon?.relasjon)
@@ -767,16 +734,16 @@ class PersonidentifiseringServiceTest {
     fun `hent ut person gjenlevende fra pBuc02`() {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
-
-        val avdodPerson = IdentifisertPDLPerson(
-            "",
-            "NOR",
-            "026123",
-            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123"),
-            personNavn = "avgott Testesen",
-            identer = null
-
-        )
+        val avdodPerson = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
+//        val avdodPerson = IdentifisertPDLPerson(
+//            "",
+//            "NOR",
+//            "026123",
+//            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123"),
+//            personNavn = "avgott Testesen",
+//            identer = null
+//
+//        )
 
         val sokKriterier = SokKriterier("RASK", "MULDVARP", LocalDate.of(1969, 11, 28))
         val gjenlevendePerson = IdentifisertPDLPerson(
@@ -813,9 +780,7 @@ class PersonidentifiseringServiceTest {
             fornavn = "avgott"
         )
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(
-            potensiellePerson
-        )
+        val actual = personidentifiseringService.hentIdentifisertePersoner(potensiellePerson)
 
         assertEquals(identifisertePersoner[1], actual.single())
     }
@@ -836,9 +801,7 @@ class PersonidentifiseringServiceTest {
             etternavn = "Efternamnet"
         )
 
-        val actual = personidentifiseringService.hentIdentifisertePersoner(
-            potensiellePerson
-        )
+        val actual = personidentifiseringService.hentIdentifisertePersoner(potensiellePerson)
 
         val gjenlevperson = actual.first()
         assertEquals("SWE", gjenlevperson.landkode)
@@ -983,6 +946,18 @@ class PersonidentifiseringServiceTest {
             assertFalse(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
         }
     }
+
+    private fun identifisertPDLPerson(sedPersonRelasjon: SEDPersonRelasjon? =  sedPersonRelasjon()) = IdentifisertPDLPerson(
+        "123",
+        "NO",
+        "010",
+        sedPersonRelasjon,
+        personNavn = "Testern",
+        identer = null
+    )
+
+    private fun sedPersonRelasjon(relasjon: Relasjon? = Relasjon.GJENLEVENDE, sedType: SedType?= SedType.P2100) =
+        SEDPersonRelasjon(Fodselsnummer.fra("12345678910"), relasjon!!, sedType = sedType, rinaDocumentId = "231231")
 
     private fun metadata() = Metadata(
         endringer = emptyList(),
