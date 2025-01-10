@@ -30,7 +30,7 @@ class OpprettJournalpostUkjentBruker(
 
     @Scheduled(cron = "0 0 21 * * ?")
     fun dagligSjekkForLagredeJournalposter() {
-        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(14)
+        val jp = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(7)
 
         if ((jp?.size ?: 0) > 10) {
             logger.error("${jp?.size} mangler bruker og er muligens mer enn forventet")
