@@ -78,6 +78,8 @@ class VurderBrukerInfo (
                         deleteJournalpostDetails(blob).also {
                             logger.info("Ferdig sletting av lagret journalpost: ${opprettetJournalpost.journalpostId}")
                         }
+                        countForOppdatering("Sletter fra journalpostid etter oppdatering av oppgave og journalpost")
+
                     } ?: logger.error("Kunne ikke opprette journalpost for rinaId: $rinaId")
                 } ?: logger.error("Ingen lagret request funnet for rinaId: $rinaId")
             }
@@ -115,7 +117,6 @@ class VurderBrukerInfo (
 
     private fun deleteJournalpostDetails(blobId: BlobId) {
         gcpStorageService.slettJournalpostDetaljer(blobId)
-        countForOppdatering("Sletter fra journalpostid etter oppdatering av oppgave og journalpost")
     }
 
     fun countForOppdatering(melding: String) {
