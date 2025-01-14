@@ -89,7 +89,7 @@ class PersonidentifiseringService(
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
-            logger.warn("Flere personer funnet i $bucType, returnerer null")
+            logger.error("Flere personer funnet i $bucType, returnerer null")
             return null
         }
         secureLog.info("Identifisert person: $identifisertPerson")
@@ -203,7 +203,6 @@ class PersonidentifiseringService(
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlevForRBUC(identifisertePersoner, erGjenlevendeRelasjon)
             }
-
             bucType == P_BUC_02 -> identifisertePersoner.firstOrNull { it.personRelasjon?.relasjon == GJENLEVENDE }
             bucType == P_BUC_05 -> {
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }

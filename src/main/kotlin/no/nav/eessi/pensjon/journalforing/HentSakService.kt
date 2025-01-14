@@ -93,6 +93,8 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
     }
 
     fun String?.erGyldigPesysNummer(): Boolean {
-        return this?.let { it.length == 8 && it.first() in listOf('1', '2') && it.all { char -> char.isDigit() } } ?: false
+        return this?.let { pesysSakId -> pesysSakId.length == 8 && pesysSakId.first() in listOf('1', '2') && pesysSakId.all { char -> char.isDigit() } }
+            .also { logger.info("PesysSakId er gyldig") } ?: false
+            .also { logger.info("PesysSakId er ikke gyldig ifht valideringsregler") }
     }
 }
