@@ -626,6 +626,27 @@ class PersonidentifiseringServiceTest {
     }
 
     @Test
+    fun `Gitt en R_BUC_02 med to FORSIKRET `() {
+        val forsikret1 = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
+        val forsikret2 = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
+
+        val alleSediBuc = emptyList<Pair<String, SED>>()
+        val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
+
+        val result = personidentifiseringService.identifisertPersonUtvelger(
+            listOf(forsikret1, forsikret2),
+            R_BUC_02,
+            SedType.R005,
+            potensiellePerson
+        )
+
+        println("result: $result")
+        assertEquals(forsikret1, result)
+        assertEquals(0, result?.personListe?.size)
+        assertEquals(false, result?.flereEnnEnPerson())
+    }
+
+    @Test
     fun `Gitt en liste med flere forsikrede på P_BUC_01 så kaster vi en RuntimeException`() {
         val forsikret = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
 

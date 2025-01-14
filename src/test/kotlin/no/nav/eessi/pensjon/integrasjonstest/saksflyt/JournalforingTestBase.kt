@@ -172,7 +172,7 @@ internal open class JournalforingTestBase {
 
     protected val personService: PersonService = mockk(relaxed = true)
     private val personSok = PersonSok(personService)
-    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
+    val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
 
     protected val bestemSakKlient: BestemSakKlient = mockk(relaxed = true)
