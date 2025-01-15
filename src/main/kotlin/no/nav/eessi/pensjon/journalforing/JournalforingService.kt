@@ -159,7 +159,7 @@ class JournalforingService(
                 val arkivsaksnummer = if (sedHendelse.sedType == SedType.P2100 && hendelseType == MOTTATT) null else hentSakService.hentSak(
                     sedHendelse.rinaSakId,
                     saksInfoSamlet?.saksIdFraSed,
-                    saksInfoSamlet?.sakInformasjon,
+                    saksInfoSamlet?.sakInformasjonFraPesys,
                     identifisertPerson?.personRelasjon?.fnr
                 ).also { logger.info("""SakId for rinaSak: ${sedHendelse.rinaSakId} pesysSakId: $it""".trimMargin()) }
 
@@ -172,7 +172,7 @@ class JournalforingService(
                     journalfoerendeEnhet = tildeltJoarkEnhet,
                     arkivsaksnummer = arkivsaksnummer,
                     dokumenter = documents,
-                    saktype = saksInfoSamlet?.saktype,
+                    saktype = saksInfoSamlet?.saktypeFraSed,
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
@@ -232,7 +232,7 @@ class JournalforingService(
                         )
                         kravInitialiseringsService.initKrav(
                             sedHendelse,
-                            saksInfoSamlet?.sakInformasjon,
+                            saksInfoSamlet?.sakInformasjonFraPesys,
                             currentSed
                         )
                     } else loggDersomIkkeBehSedOppgaveOpprettes(
@@ -245,7 +245,7 @@ class JournalforingService(
                     produserStatistikkmelding(
                         sedHendelse,
                         tildeltJoarkEnhet.enhetsNr,
-                        saksInfoSamlet?.saktype,
+                        saksInfoSamlet?.saktypeFraSed,
                         hendelseType
                     )
                 }
@@ -316,8 +316,8 @@ class JournalforingService(
             """**********
                         rinadokumentID: ${sedHendelse.rinaDokumentId},  rinasakID: ${sedHendelse.rinaSakId} 
                         sedType: ${sedHendelse.sedType?.name}, bucType: ${sedHendelse.bucType}, hendelseType: $hendelseType, 
-                        sakId: ${saksInfoSamlet?.sakInformasjon?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjon?.sakType?.name}  
-                        sakType: ${saksInfoSamlet?.saktype?.name}, 
+                        sakId: ${saksInfoSamlet?.sakInformasjonFraPesys?.sakId}, sakType: ${saksInfoSamlet?.sakInformasjonFraPesys?.sakType?.name}  
+                        sakType: ${saksInfoSamlet?.saktypeFraSed?.name}, 
                         identifisertPerson aktoerId: ${identifisertPerson?.aktoerId} 
                     **********""".trimIndent()
         )
@@ -367,10 +367,10 @@ class JournalforingService(
                 OppgaveRoutingRequest.fra(
                     identifisertPerson,
                     fdato,
-                    sakInfo?.saktype,
+                    sakInfo?.saktypeFraSed,
                     sedHendelse,
                     hendelseType,
-                    sakInfo?.sakInformasjon,
+                    sakInfo?.sakInformasjonFraPesys,
                     harAdressebeskyttelse
                 )
             )
