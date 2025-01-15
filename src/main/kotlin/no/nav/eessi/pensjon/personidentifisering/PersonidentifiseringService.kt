@@ -200,6 +200,8 @@ class PersonidentifiseringService(
             identifisertePersoner.isEmpty() -> null
             bucType in listOf(R_BUC_02) ->  {
                 if(identifisertePersoner.size > 2) throw FlerePersonPaaBucException()
+                if(identifisertePersoner.filter { it.personRelasjon?.relasjon == FORSIKRET }.size == 2) throw FlerePersonPaaBucException()
+                if(identifisertePersoner.filter { it.personRelasjon?.relasjon == GJENLEVENDE }.size == 2) throw FlerePersonPaaBucException()
                 val erGjenlevendeRelasjon = potensielleSEDPersonRelasjoner.any { it.relasjon == GJENLEVENDE }
                 utvelgerPersonOgGjenlevForRBUC(identifisertePersoner, erGjenlevendeRelasjon)
             }
