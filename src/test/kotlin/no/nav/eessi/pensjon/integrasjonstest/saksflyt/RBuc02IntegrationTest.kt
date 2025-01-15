@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonTestBase
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -76,7 +75,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                 fdato = LocalDate.of(1971, 6, 11),
                 saksInfoSamlet = SaksInfoSamlet(
                     saksIdFraSed = "25432122",
-                    sakInformasjon = SakInformasjon(
+                    sakInformasjonFraPesys = SakInformasjon(
                         sakId = "654321",
                         sakType = GJENLEV,
                         sakStatus = LOPENDE,
@@ -84,7 +83,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                         nyopprettet = false,
                         tilknyttedeSaker = emptyList()
                     ),
-                    saktype = GJENLEV
+                    saktypeFraSed = GJENLEV
                 ),
                 harAdressebeskyttelse = false,
                 identifisertePersoner = 2,
@@ -155,7 +154,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
             fdato = LocalDate.of(1971, 6, 11),
             saksInfoSamlet = SaksInfoSamlet(
                 saksIdFraSed = "25432122",
-                sakInformasjon = SakInformasjon(
+                sakInformasjonFraPesys = SakInformasjon(
                     sakId = "654321",
                     sakType = GJENLEV,
                     sakStatus = LOPENDE,
@@ -163,7 +162,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                     nyopprettet = false,
                     tilknyttedeSaker = emptyList()
                 ),
-                saktype = GJENLEV
+                saktypeFraSed = GJENLEV
             ),
             harAdressebeskyttelse = false,
             identifisertePersoner = 2,
@@ -199,14 +198,17 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
 
 
     }
-
     @ParameterizedTest
     @DisplayName("hentIdentfisertPerson skal returnere riktig relasjon å journalføre på for R_BUC_02")
     @CsvSource(
-        "FORSIKRET, 09035225916, GJENLEVENDE, 11067122781, 11067122781, GJENLEVENDE",
-        "FORSIKRET, 09035225916, FORSIKRET, 22117320034, 09035225916, FORSIKRET"
+        value = [
+            "FORSIKRET, 09035225916, GJENLEVENDE, 11067122781, 11067122781, GJENLEVENDE",
+            "FORSIKRET, 09035225916, FORSIKRET, 22117320034, null, null",
+            "GJENLEVENDE, 11067122781, GJENLEVENDE, 12011577847, null, null"
+            ],
+        nullValues = ["null"]
     )
-    fun `Gitt at det kommer en R004, R005 eller R006 i R_BUC_02 så skal identifisert person returnere gjenlevende`(personRelasjon: Relasjon, fnr: String, personRelasjonGjenlev: Relasjon, fnrGjenlev: String, forventetFnr: String, forventetRelasjon: String) {
+    fun `Gitt at det kommer en R004, R005 eller R006 i R_BUC_02 så skal identifisert person returnere gjenlevende`(personRelasjon: Relasjon, fnr: String, personRelasjonGjenlev: Relasjon, fnrGjenlev: String, forventetFnr: String?, forventetRelasjon: String?) {
         val identifisertePersonerISed = listOf(
             IdentifisertPDLPerson(AKTOER_ID, "NO", personRelasjon = sedPersonRelasjon(personRelasjon, fnr),fnr = Fodselsnummer.fra(fnr), geografiskTilknytning = null),
             IdentifisertPDLPerson(AKTOER_ID_2, "NO", personRelasjon = sedPersonRelasjon(personRelasjonGjenlev, fnrGjenlev), fnr = Fodselsnummer.fra(fnrGjenlev), geografiskTilknytning = null)
