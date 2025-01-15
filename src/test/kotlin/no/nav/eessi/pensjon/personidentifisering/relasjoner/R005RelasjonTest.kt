@@ -27,7 +27,7 @@ internal class R005RelasjonTest : RelasjonTestBase(){
     }
 
     @Test
-    fun `Gitt personer med rolle når personrelasjoner velges så ignorer disse`() {
+    fun `Gitt personer med annen rolle enn FORSIKRET eller GJENLEVENDE når personrelasjoner velges så ignoreres disse`() {
         val forsikretFnr = SLAPP_SKILPADDE
         val annenPersonFnr = KRAFTIG_VEGGPRYD
 
@@ -50,8 +50,8 @@ internal class R005RelasjonTest : RelasjonTestBase(){
             forsikretFnr = SLAPP_SKILPADDE, forsikretTilbakekreving = "avdød_mottaker_av_ytelser",
             annenPersonFnr = gjenlevFnr, annenPersonTilbakekreving = "enke_eller_enkemann"
         ).toJson()
-        val sed = mapJsonToAny<R005>(sedjson)
 
+        val sed = mapJsonToAny<R005>(sedjson)
         val relasjon = R005Relasjon(sed, R_BUC_02, "23123").hentRelasjoner()
 
         assertEquals(2, relasjon.size)

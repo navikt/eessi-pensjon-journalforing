@@ -633,17 +633,15 @@ class PersonidentifiseringServiceTest {
         val alleSediBuc = emptyList<Pair<String, SED>>()
         val potensiellePerson = RelasjonsHandler.hentRelasjoner(alleSediBuc, R_BUC_02)
 
-        val result = personidentifiseringService.identifisertPersonUtvelger(
-            listOf(forsikret1, forsikret2),
-            R_BUC_02,
-            SedType.R005,
-            potensiellePerson
-        )
+        assertThrows<FlerePersonPaaBucException> {
+            personidentifiseringService.identifisertPersonUtvelger(
+                listOf(forsikret1, forsikret2),
+                R_BUC_02,
+                SedType.R005,
+                potensiellePerson
+            ).also { println(" her er resultatet: $it") }
+        }
 
-        println("result: $result")
-        assertEquals(forsikret1, result)
-        assertEquals(0, result?.personListe?.size)
-        assertEquals(false, result?.flereEnnEnPerson())
     }
 
     @Test
@@ -756,15 +754,6 @@ class PersonidentifiseringServiceTest {
         val avdodBrukerFnr = Fodselsnummer.fra("02116921297")
         val gjenlevendeFnr = Fodselsnummer.fra("28116925275")
         val avdodPerson = identifisertPDLPerson(sedPersonRelasjon(relasjon = Relasjon.FORSIKRET))
-//        val avdodPerson = IdentifisertPDLPerson(
-//            "",
-//            "NOR",
-//            "026123",
-//            SEDPersonRelasjon(avdodBrukerFnr, Relasjon.FORSIKRET, sedType = SedType.P2100, rinaDocumentId = "23123"),
-//            personNavn = "avgott Testesen",
-//            identer = null
-//
-//        )
 
         val sokKriterier = SokKriterier("RASK", "MULDVARP", LocalDate.of(1969, 11, 28))
         val gjenlevendePerson = IdentifisertPDLPerson(

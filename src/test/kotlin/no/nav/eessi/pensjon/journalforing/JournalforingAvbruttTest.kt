@@ -128,7 +128,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             sedHendelse,
             HendelseType.SENDT,
             identer = listOf(identifisertPerson),
-            saksInfoSamlet = SaksInfoSamlet(sakInformasjon = sakInformasjonMock),
+            saksInfoSamlet = SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjonMock),
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }

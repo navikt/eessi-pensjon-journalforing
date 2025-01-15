@@ -59,7 +59,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
+            SaksInfoSamlet(saktypeFraSed = SakType.ALDER, sakInformasjonFraPesys = saksInformasjon),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             currentSed = SED(type = SedType.P6000)
@@ -232,7 +232,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktype = SakType.ALDER, sakInformasjon = saksInformasjon),
+            SaksInfoSamlet(saktypeFraSed = SakType.ALDER, sakInformasjonFraPesys = saksInformasjon),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             currentSed = mockk<P2000>(relaxed = true).apply {
