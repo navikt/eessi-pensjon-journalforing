@@ -13,11 +13,8 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
-import java.time.Period
 
 @Service
 class HentTemaService(
@@ -40,7 +37,7 @@ class HentTemaService(
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
-        val ufoereSak = saksInfo?.saktype == UFOREP
+        val ufoereSak = saksInfo?.saktypeFraSed == UFOREP
         if(alder == null) {
             if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
             return PENSJON
@@ -70,8 +67,8 @@ class HentTemaService(
         enPersonOgUforeAlderUnder62: Boolean,
         saksInfo: SaksInfoSamlet?
     ): Tema {
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
-        val isUforePensjon = if (currentSed is P15000 && saksInfo?.sakInformasjon?.sakStatus == SakStatus.LOPENDE) currentSed.hasUforePensjonType() else false
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktypeFraSed == UFOREP || enPersonOgUforeAlderUnder62
+        val isUforePensjon = if (currentSed is P15000 && saksInfo?.sakInformasjonFraPesys?.sakStatus == SakStatus.LOPENDE) currentSed.hasUforePensjonType() else false
         return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
@@ -81,7 +78,7 @@ class HentTemaService(
         saksInfo: SaksInfoSamlet?
     ): Tema {
         val isUforeP12000 = (currentSed as? P12000)?.hasUforePensjonType() ?: false
-        val isUforeSakType = saksInfo?.saktype == UFOREP
+        val isUforeSakType = saksInfo?.saktypeFraSed == UFOREP
 
         return if (isUforeP12000 || enPersonOgUforeAlderUnder62 || isUforeSakType) UFORETRYGD else PENSJON
     }
@@ -98,7 +95,7 @@ class HentTemaService(
             is P10000 -> currentSed.hasUforePensjonType()
             else -> false
         }
-        val uforeSakTypeEllerUforPerson = saksInfo?.saktype == UFOREP || enPersonOgUforeAlderUnder62
+        val uforeSakTypeEllerUforPerson = saksInfo?.saktypeFraSed == UFOREP || enPersonOgUforeAlderUnder62
         return if (isUforePensjon || uforeSakTypeEllerUforPerson) UFORETRYGD else PENSJON
     }
 
@@ -113,7 +110,7 @@ class HentTemaService(
 
         val behandlingstema = journalpostService.bestemBehandlingsTema(
             sedHendelse?.bucType!!,
-            sakinfo?.saktype,
+            sakinfo?.saktypeFraSed,
             tema,
             antallIdentifisertePersoner,
             currentSed
