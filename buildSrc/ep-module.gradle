@@ -24,14 +24,8 @@ apply plugin: com.adarshr.gradle.testlogger.TestLoggerPlugin
 repositories {
     mavenCentral()
 
-    String token = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
-    if (!token) throw new NullPointerException("Missing token, you have to set GITHUB_TOKEN or gpr.key, see README")
     maven {
-        url = uri("https://maven.pkg.github.com/navikt/maven-release")
-        credentials {
-            username = "token"
-            password = token
-        }
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
 }
 
