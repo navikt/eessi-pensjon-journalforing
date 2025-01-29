@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.KafkaTemplate
@@ -18,7 +19,7 @@ class OppgaveHandlerTest {
 
     private var oppgaveHandler: OppgaveHandler = mockk()
     private var etterlatteService: EtterlatteService = mockk()
-    private var oppgaveKafkaTemplate: KafkaTemplate<String, String> = mockk(relaxed = true)
+    private var oppgaveKafkaTemplate: KafkaTemplate<String, String> = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -26,7 +27,11 @@ class OppgaveHandlerTest {
         every { etterlatteService.opprettGjennyOppgave(any()) } returns Result.success("123456")
 
         val future: CompletableFuture<SendResult<String, String>> = CompletableFuture()
+        future.complete(SendResult(ProducerRecord("", ""), mockk()) )
+
         every { oppgaveKafkaTemplate.sendDefault(any(), any()) } returns future
+        every { oppgaveKafkaTemplate.defaultTopic } returns "oppgave"
+
     }
 
     @Test
