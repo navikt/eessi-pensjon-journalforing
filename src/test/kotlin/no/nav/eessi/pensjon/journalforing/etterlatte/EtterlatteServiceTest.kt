@@ -3,6 +3,15 @@ package no.nav.eessi.pensjon.journalforing.etterlatte
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveType
+import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.oppgaverouting.Enhet
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -15,11 +24,13 @@ class EtterlatteServiceTest {
 
     private lateinit var etterlatteRestTemplate: RestTemplate
     private lateinit var etterlatteService: EtterlatteService
+    private lateinit var gcpStorageService: GcpStorageService
 
     @BeforeEach
     fun setUp() {
         etterlatteRestTemplate = mockk<RestTemplate>()
-        etterlatteService = EtterlatteService(etterlatteRestTemplate) // Initialize your class with the mock
+        gcpStorageService = mockk()
+        etterlatteService = EtterlatteService(etterlatteRestTemplate, gcpStorageService) // Initialize your class with the mock
     }
 
     @Test
@@ -34,6 +45,59 @@ class EtterlatteServiceTest {
         assertTrue(result.isSuccess)
         assertNotNull(result.getOrNull())
         verifyRequestMadeOnce(sakId)
+    }
+
+    @Test
+    fun `opprettGjennyOppgave skal gi success naar den greier å opprette oppgave for gjenny med sakid`() {
+        val oppgaveMelding = OppgaveMelding(
+            rinaSakId = "12345",
+            oppgaveType = OppgaveType.JOURNALFORING,
+            journalpostId = "123456",
+            sedType = SedType.P2100,
+            tildeltEnhetsnr = Enhet.NFP_UTLAND_AALESUND,
+            aktoerId = "32165498732",
+            hendelseType = HendelseType.SENDT,
+            filnavn = "filnavn",
+            tema = Tema.EYBARNEP
+        )
+
+        val gjennySak = GjennySak("12345", "EYB")
+        val responseBody = """{"sakid": "12345"}"""
+
+        mockSuccessResponseOppgave(oppgaveMelding, responseBody)
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennySak.toJson()
+
+        val result = etterlatteService.opprettGjennyOppgave(oppgaveMelding).also { println(it) }
+
+        assertTrue(result.isSuccess)
+        assertNotNull(result.getOrNull())
+    }
+
+    @Test
+    fun `opprettGjennyOppgave skal gi success naar den finner sak`() {
+        val oppgaveMelding = OppgaveMelding(
+            rinaSakId = "12345",
+            oppgaveType = OppgaveType.JOURNALFORING,
+            journalpostId = "123456",
+            sedType = SedType.P2100,
+            tildeltEnhetsnr = Enhet.NFP_UTLAND_AALESUND,
+            aktoerId = "32165498732",
+            hendelseType = HendelseType.SENDT,
+            filnavn = "filnavn",
+            tema = Tema.EYBARNEP
+        )
+
+        val gjennySak = GjennySak("12345", "EYB")
+        val responseBody = """{"sakid": "12345"}"""
+
+        mockSuccessResponseFailedOppgave(oppgaveMelding, responseBody)
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennySak.toJson()
+
+        val result = etterlatteService.opprettGjennyOppgave(oppgaveMelding).also { println(it) }
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is HttpClientErrorException)
+
     }
 
     @Test
@@ -77,8 +141,34 @@ class EtterlatteServiceTest {
         } returns responseEntity
     }
 
+    private fun mockSuccessResponseOppgave(oppgavemelding: OppgaveMelding, responseBody: String) {
+        val responseEntity = ResponseEntity(responseBody, HttpStatus.OK)
+
+        every {
+            etterlatteRestTemplate.exchange(
+                "/api/v1/oppgave/journalfoering",
+                HttpMethod.POST,
+                any<HttpEntity<String>>(),
+                String::class.java
+            )
+        } returns responseEntity
+    }
+
+    private fun mockSuccessResponseFailedOppgave(oppgavemelding: OppgaveMelding, responseBody: String) {
+        every {
+            etterlatteRestTemplate.exchange(
+                "/api/v1/oppgave/journalfoering",
+                HttpMethod.POST,
+                any<HttpEntity<String>>(),
+                String::class.java
+            )
+        } throws HttpClientErrorException.UnprocessableEntity.create(
+            HttpStatus.UNPROCESSABLE_ENTITY, "Unprocessable Entity", HttpHeaders(), ByteArray(10), null
+        )
+    }
+
     private fun mockNotFoundError(sakId: String) {
-        val url = buildUrl(sakId)
+        val url = buildUrl( "/api/v1/oppgave/journalfoering")
         every {
             etterlatteRestTemplate.exchange(
                 url,

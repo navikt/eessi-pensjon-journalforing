@@ -157,6 +157,47 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `Ved mottatt P2100 som det skal opprettes gjennyOppgave for skal det opprettes en journalforing oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
+        val sed = mapJsonToAny<P2100>(javaClass.getResource("/sed/P2100.json")!!.readText())
+        val sedHendelse = SedHendelse.fromJson(hendelse).copy(bucType = P_BUC_02)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        every { gcpStorageService.hentFraGjenny(any()) } returns """{"sakId":"147729","sakType":"EYO"}"""
+
+        justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            SLAPP_SKILPADDE.getBirthDate(),
+            SaksInfoSamlet(saktypeFraSed = OMSORG),
+            identifisertePersoner = 1,
+            navAnsattInfo = null,
+            currentSed = sed
+        )
+
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "P2100",
+              "journalpostId" : "12345",
+              "tildeltEnhetsnr" : "0001",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "147729",
+              "hendelseType" : "MOTTATT",
+              "filnavn" : null,
+              "oppgaveType" : "JOURNALFORING",
+              "tema" : "EYO"
+              }""".trimIndent()
+        )
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+    }
+
+    @Test
     fun `Ved mottatt P2100 som kan automatisk ferdigstilles så skal det opprettes en Behandle SED oppgave`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100_SE.json")!!.readText()
         val sed = mapJsonToAny<P2100>(javaClass.getResource("/sed/P2100.json")!!.readText())
