@@ -50,7 +50,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @BeforeEach
     fun setupClass() {
-//        every { gcpStorageService.hentFraGjenny(any()) } returns null
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
 
     @Test
