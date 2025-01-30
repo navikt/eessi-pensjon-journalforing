@@ -50,7 +50,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @BeforeEach
     fun setupClass() {
-        every { gcpStorageService.hentFraGjenny(any()) } returns null
+//        every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
 
     @Test
@@ -164,10 +164,11 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            sedPersonRelasjon(SLAPP_SKILPADDE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID).copy(fdato = SLAPP_SKILPADDE.getBirthDate())
         )
+        every { gcpStorageService.gjennyFinnes(any()) } returns true
 
-        every { gcpStorageService.hentFraGjenny(any()) } returns """{"sakId":"147729","sakType":"EYO"}"""
+        every { gcpStorageService.hentFraGjenny(any()) } returns """{"sakId":"147730","sakType":"EYO"}"""
 
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
 
@@ -176,7 +177,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = OMSORG),
+            SaksInfoSamlet(sakInformasjonFraPesys = SakInformasjon(sakType = OMSORG, sakId = "147730", sakStatus = LOPENDE ), saktypeFraSed = OMSORG),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = sed
@@ -187,13 +188,14 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
               "journalpostId" : "12345",
               "tildeltEnhetsnr" : "0001",
               "aktoerId" : "12078945602",
-              "rinaSakId" : "147729",
+              "rinaSakId" : "147730",
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING",
               "tema" : "EYO"
               }""".trimIndent()
         )
+
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
     }
 
