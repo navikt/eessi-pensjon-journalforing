@@ -44,7 +44,9 @@ class HentTemaService(
         }
         if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
             val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
-            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+            val tena = if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+            logger.info("RinaSak: ${sedhendelse.rinaSakId} er en gjenny sak og gir tema: $tena")
+            return tena
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
