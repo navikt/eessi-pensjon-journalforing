@@ -168,7 +168,7 @@ class EtterlatteServiceTest {
     }
 
     private fun mockNotFoundError(sakId: String) {
-        val url = buildUrl( "/api/v1/oppgave/journalfoering")
+        val url = buildUrl( sakId)
         every {
             etterlatteRestTemplate.exchange(
                 url,

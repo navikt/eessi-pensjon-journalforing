@@ -81,7 +81,7 @@ class OppgaveHandlerTest {
         )
 
         verify(exactly = 1) { etterlatteService.opprettGjennyOppgave(any()) }
-        verify(exactly = 1) { oppgaveKafkaTemplate.sendDefault(any(), any()) }
+        verify(exactly = 0) { oppgaveKafkaTemplate.sendDefault(any(), any()) }
     }
     
 
