@@ -1,8 +1,13 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
@@ -20,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.Period
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -104,6 +111,15 @@ class SedSendtListener(
             identifisertPerson,
             alleSedIBucList.plus(kansellerteSeder)
         )
+
+        val identifisertBirthDate = identifisertPerson?.fnr?.getAge() ?: if(fdato != null) Period.between(fdato, LocalDate.now()).years else null
+        if ((identifisertBirthDate != null && identifisertBirthDate < 67)) {
+            if (bucType == P_BUC_02 && sedHendelse.sedType == SedType.P2100) {
+                logger.info("Utgående P_BUC_02 med sedType ${sedHendelse.sedType} blir behandlet som GjennySak")
+                val gjennyTema = if (Period.between(fdato, LocalDate.now()).years > 19) OMSORG else BARNEP
+                gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
+            }
+        }
 
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,

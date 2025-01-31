@@ -108,7 +108,7 @@ class JournalforingService(
                 val alder = if(identifisertPerson?.fnr?.erNpid == true || identifisertPerson?.fnr?.getBirthDate() == null) {
                     identifisertPerson?.personRelasjon?.alder()
                 }
-                else identifisertPerson.personRelasjon?.fnr?.getAge()
+                else identifisertPerson.personRelasjon?.fnr?.getAge() ?: Period.between(fdato, LocalDate.now()).years
 
                 val tema = hentTemaService.hentTema(
                     sedHendelse,
