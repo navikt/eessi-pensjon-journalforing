@@ -505,7 +505,6 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         }
 
         @Test
-        @Disabled
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
@@ -526,8 +525,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = SENDT,
-                norg2enhet = null,
-                sedHendelse = createSedPensjon(P2200, FNR_VOKSEN_UNDER_62, null,  gjenlevendeFnr = FNR_VOKSEN_2, krav = KravType.UFOREP, relasjon = RelasjonTilAvdod.EKTEFELLE)
+                norg2enhet = null
             ) {
                 Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
