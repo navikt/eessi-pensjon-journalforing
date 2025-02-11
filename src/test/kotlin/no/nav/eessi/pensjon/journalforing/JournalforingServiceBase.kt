@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
@@ -28,15 +29,18 @@ private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 abstract class JournalforingServiceBase {
 
     val journalpostKlient = mockk<JournalpostKlient>()
-    val journalpostService = JournalpostService(journalpostKlient)
     val pdfService = mockk<PDFService>()
-    val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
     val kravHandeler = mockk<KravInitialiseringsHandler>()
     val gcpStorageService = mockk<GcpStorageService>()
     val kravService = KravInitialiseringsService(kravHandeler)
     val etterlatteService = mockk<EtterlatteService>()
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
+
+    val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
+    val oppgaveService = OpprettOppgaveService(oppgaveHandler)
+    val journalpostService = JournalpostService(journalpostKlient, pdfService, oppgaveService)
     val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
+
     val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
     protected val norg2Service = mockk<Norg2Service> {
@@ -50,16 +54,15 @@ abstract class JournalforingServiceBase {
     val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     val journalforingService = JournalforingService(
-        journalpostService,
-        oppgaveRoutingService,
-        pdfService,
-        oppgaveHandler,
-        kravService,
-        statistikkPublisher,
-        vurderBrukerInfo,
-        hentSakService,
-        hentTemaService,
-        env = null
+        journalpostService = journalpostService,
+        oppgaveRoutingService = oppgaveRoutingService,
+        kravInitialiseringsService = kravService,
+        statistikkPublisher = statistikkPublisher,
+        vurderBrukerInfo = vurderBrukerInfo,
+        hentSakService = hentSakService,
+        hentTemaService = hentTemaService,
+        oppgaveService = oppgaveService,
+        env = null,
     )
 
     protected val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()

@@ -8,14 +8,18 @@ import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class OpprettJournalpostUkjentBrukerTest {
+    private lateinit var oppgaveService: OpprettOppgaveService
     private lateinit var gcpStorageService: GcpStorageService
     private lateinit var journalpostService: JournalpostService
     private lateinit var journalpostKlient: JournalpostKlient
+    private lateinit var pdfService: PDFService
     private lateinit var journalforingService: JournalforingService
     private lateinit var oppgaveHandler: OppgaveHandler
     private lateinit var opprettJournalpostUkjentBruker: OpprettJournalpostUkjentBruker
@@ -26,22 +30,23 @@ class OpprettJournalpostUkjentBrukerTest {
 
     @BeforeEach
     fun setUp() {
+        pdfService = mockk(relaxed = true)
+        oppgaveHandler = mockk(relaxed = true)
         journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
         gcpStorageService = mockk(relaxed = true)
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
         hentTemaService = HentTemaService(mockk(), gcpStorageService)
-        journalpostService = JournalpostService(journalpostKlient)
-        oppgaveHandler = mockk(relaxed = true)
+        oppgaveService = OpprettOppgaveService(oppgaveHandler)
+        journalpostService = JournalpostService(journalpostKlient, pdfService, oppgaveService)
         journalforingService = JournalforingService(
             journalpostService = journalpostService,
             oppgaveRoutingService = mockk(),
-            pdfService = mockk(),
-            oppgaveHandler = oppgaveHandler,
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk(),
             vurderBrukerInfo = mockk(),
             hentSakService = hentSakService,
             hentTemaService = hentTemaService,
+            oppgaveService,
             env = null,
         )
 

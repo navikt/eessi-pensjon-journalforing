@@ -17,6 +17,8 @@ import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.Behandlingstema.GJENLEVENDEPENSJON
@@ -25,6 +27,8 @@ import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
@@ -36,12 +40,16 @@ import org.springframework.web.client.HttpServerErrorException
 
 internal class JournalpostServiceTest {
 
+    private var pdfService: PDFService = mockk()
+    private val oppgaveService: OpprettOppgaveService = mockk(relaxed = true)
     private val mockKlient: JournalpostKlient = mockk(relaxed = true)
-    private val journalpostService = JournalpostService(mockKlient)
+    private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService)
 
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
+        private var SLAPP_SKILPADDE_IDENT = JournalforingServiceBase.identifisertPersonPDL(fnr = SLAPP_SKILPADDE, personRelasjon =  null)
+        private var LEALAUS_KAKE_IDENT = JournalforingServiceBase.identifisertPersonPDL(fnr = LEALAUS_KAKE, personRelasjon = null)
     }
 
     @Test
@@ -111,13 +119,7 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-        val actualJournalPostRequest = journalpostService.opprettJournalpost(
-            sedHendelse,
-            SLAPP_SKILPADDE,
-            MOTTATT,
-            ID_OG_FORDELING,
-            Sak("FAGSAK", "11111", "PEN"),
-            """
+        val supportedDocumentsJson = """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -130,7 +132,32 @@ internal class JournalpostServiceTest {
                         ],
                         "tittel": "Søknad om foreldrepenger ved fødsel"
                 }]
-            """.trimIndent(),
+            """.trimIndent()
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
+
+        SLAPP_SKILPADDE_IDENT.apply { personRelasjon =  SEDPersonRelasjon(SLAPP_SKILPADDE, Relasjon.GJENLEVENDE, rinaDocumentId = "429434378") }
+
+        val actualJournalPostRequest = journalpostService.opprettJournalpost(
+            sedHendelse,
+            SLAPP_SKILPADDE_IDENT,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+//            """
+//                [{
+//                    "brevkode": "NAV 14-05.09",
+//                    "dokumentKategori": "SOK",
+//                    "dokumentvarianter": [
+//                            {
+//                                "filtype": "PDF/A",
+//                                "fysiskDokument": "string",
+//                                "variantformat": "ARKIV"
+//                            }
+//                        ],
+//                        "tittel": "Søknad om foreldrepenger ved fødsel"
+//                }]
+//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, PENSJON, null
@@ -171,13 +198,7 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-        val opprettJournalpost = journalpostService.opprettJournalpost(
-            sedHendelse,
-            SLAPP_SKILPADDE,
-            MOTTATT,
-            ID_OG_FORDELING,
-            Sak("FAGSAK", "11111", "PEN"),
-            """
+        val supportedDocumentsJson = """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -190,7 +211,30 @@ internal class JournalpostServiceTest {
                         ],
                         "tittel": "Søknad om foreldrepenger ved fødsel"
                 }]
-            """.trimIndent(),
+            """.trimIndent()
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
+
+        val opprettJournalpost = journalpostService.opprettJournalpost(
+            sedHendelse,
+            SLAPP_SKILPADDE_IDENT,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+//            """
+//                [{
+//                    "brevkode": "NAV 14-05.09",
+//                    "dokumentKategori": "SOK",
+//                    "dokumentvarianter": [
+//                            {
+//                                "filtype": "PDF/A",
+//                                "fysiskDokument": "string",
+//                                "variantformat": "ARKIV"
+//                            }
+//                        ],
+//                        "tittel": "Søknad om foreldrepenger ved fødsel"
+//                }]
+//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, PENSJON, currentSed = currentSed
@@ -214,16 +258,7 @@ internal class JournalpostServiceTest {
         val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
 
         val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
-
-        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
-
-        val opprettJournalpost = journalpostService.opprettJournalpost(
-            sedHendelse,
-            SLAPP_SKILPADDE,
-            MOTTATT,
-            ID_OG_FORDELING,
-            Sak("FAGSAK", "11111", "PEN"),
-            """
+        val supportedDocumentsJson = """
                 [{
                     "brevkode": "NAV 14-05.09",
                     "dokumentKategori": "SOK",
@@ -236,7 +271,31 @@ internal class JournalpostServiceTest {
                         ],
                         "tittel": "Søknad om foreldrepenger ved fødsel"
                 }]
-            """.trimIndent(),
+            """.trimIndent()
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
+        every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
+
+        val opprettJournalpost = journalpostService.opprettJournalpost(
+            sedHendelse,
+            SLAPP_SKILPADDE_IDENT,
+            MOTTATT,
+            ID_OG_FORDELING,
+            Sak("FAGSAK", "11111", "PEN"),
+//            """
+//                [{
+//                    "brevkode": "NAV 14-05.09",
+//                    "dokumentKategori": "SOK",
+//                    "dokumentvarianter": [
+//                            {
+//                                "filtype": "PDF/A",
+//                                "fysiskDokument": "string",
+//                                "variantformat": "ARKIV"
+//                            }
+//                        ],
+//                        "tittel": "Søknad om foreldrepenger ved fødsel"
+//                }]
+//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null,
@@ -259,24 +318,24 @@ internal class JournalpostServiceTest {
         assertThrows<RuntimeException> {
             journalpostService.opprettJournalpost(
                 sedHendelse(P2000, P_BUC_01, null),
-                SLAPP_SKILPADDE,
+                SLAPP_SKILPADDE_IDENT,
                 MOTTATT,
                 ID_OG_FORDELING,
                 Sak("FAGSAK", "11111", "PEN" ),
-                """
-                [{
-                    "brevkode": "NAV 14-05.09",
-                    "dokumentKategori": "SOK",
-                    "dokumentvarianter": [
-                            {
-                                "filtype": "PDF/A",
-                                "fysiskDokument": "string",
-                                "variantformat": "ARKIV"
-                            }
-                        ],
-                        "tittel": "Søknad om foreldrepenger ved fødsel"
-                }]
-            """.trimIndent(),
+//                """
+//                [{
+//                    "brevkode": "NAV 14-05.09",
+//                    "dokumentKategori": "SOK",
+//                    "dokumentvarianter": [
+//                            {
+//                                "filtype": "PDF/A",
+//                                "fysiskDokument": "string",
+//                                "variantformat": "ARKIV"
+//                            }
+//                        ],
+//                        "tittel": "Søknad om foreldrepenger ved fødsel"
+//                }]
+//            """.trimIndent(),
                 saktype = null,
                 mockk(),
                 mockk(),
@@ -291,7 +350,7 @@ internal class JournalpostServiceTest {
         val requestSlot = slot<OpprettJournalpostRequest>()
         val responseBody = """{"journalpostId":"429434378","journalstatus":"M","melding":"null","journalpostferdigstilt":false}""".trimIndent()
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
-
+        LEALAUS_KAKE_IDENT.apply { personRelasjon =  SEDPersonRelasjon(LEALAUS_KAKE, Relasjon.GJENLEVENDE, rinaDocumentId = "429434378") }
         val requestBody = """
             {
               "avsenderMottaker" : {
@@ -321,21 +380,17 @@ internal class JournalpostServiceTest {
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
         every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("[\"P2100\"]", emptyList())
 
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
         val actualResponse = journalpostService.opprettJournalpost(
-            sedHendelse,
-            LEALAUS_KAKE,
-            SENDT,
-            ID_OG_FORDELING,
-            null,
-            "[\"P2100\"]",
-            null,
-            mockk(relaxed = true),
-            1,
-            null,
-            PENSJON,
-            null
+            sedHendelse = sedHendelse,
+            identifisertPerson = LEALAUS_KAKE_IDENT,
+            sedHendelseType = SENDT,
+            tildeltJoarkEnhet = ID_OG_FORDELING,
+            institusjon = mockk(relaxed = true),
+            identifisertePersoner = 1,
+            tema = PENSJON,
         )
         journalpostService.sendJournalPost(actualResponse, sedHendelse, SENDT, "")
 
