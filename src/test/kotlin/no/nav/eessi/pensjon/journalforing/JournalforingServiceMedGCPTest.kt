@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.journalforing.saf.SafSak
@@ -59,6 +60,8 @@ class JournalforingServiceMedGCPTest {
     lateinit var vurderBrukerInfo: VurderBrukerInfo
     lateinit var hentSakService: HentSakService
     lateinit var hentTemaService: HentTemaService
+    lateinit var opprettOppgaveService: OpprettOppgaveService
+
 
     var etterlatteService = mockk<EtterlatteService>()
 
@@ -74,20 +77,20 @@ class JournalforingServiceMedGCPTest {
         journalpostService = mockk()
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
+        opprettOppgaveService  = OpprettOppgaveService(oppgaveHandler)
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
         hentTemaService = HentTemaService(journalpostService, gcpStorageService)
         vurderBrukerInfo = VurderBrukerInfo(gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
             oppgaveroutingService,
-            pdfService,
-            oppgaveHandler,
             mockk(),
             statistikkPublisher,
             vurderBrukerInfo,
             hentSakService,
             hentTemaService,
-            env = null
+            opprettOppgaveService,
+            env = null,
         )
     }
 
@@ -129,7 +132,7 @@ class JournalforingServiceMedGCPTest {
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
         every { oppgaveroutingService.hentEnhet(any()) } returns PENSJON_UTLAND
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
-        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+        every { journalpostService.opprettJournalpost(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
                 opprettJournalpostRequest
         every { gcpStorage.get(any<BlobId>()) } returns mockk<Blob>().apply {
             every { exists() } returns true

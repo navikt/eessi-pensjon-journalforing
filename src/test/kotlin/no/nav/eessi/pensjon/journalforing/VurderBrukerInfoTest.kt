@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.journalforing.JournalforingServiceBase.Companion.ide
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.Tema
@@ -36,6 +37,7 @@ class VurderBrukerInfoTest {
     private lateinit var safClient: SafClient
     private lateinit var gcpStorageService: GcpStorageService
     private lateinit var journalpostService: JournalpostService
+    private lateinit var opprettOppgaveService: OpprettOppgaveService
     private lateinit var oppgaveHandler: OppgaveHandler
     private lateinit var vurderBrukerInfo: VurderBrukerInfo
 
@@ -56,13 +58,14 @@ class VurderBrukerInfoTest {
     @BeforeEach
     fun setUp() {
         safClient = mockk()
-        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
-        journalpostService = spyk(JournalpostService(journalpostKlient))
         oppgaveHandler = spyk(
             OppgaveHandler(
                 mockk<KafkaTemplate<String, String>>(relaxed = true).apply {
                     every { sendDefault(any(), any()).get() } returns mockk(relaxed = true) })
         )
+        opprettOppgaveService = OpprettOppgaveService(oppgaveHandler)
+        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
+        journalpostService = spyk(JournalpostService(journalpostKlient, mockk(), opprettOppgaveService))
 
         sedMedBruker = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000.json")!!.readText())
         sedUtenBruker = SedHendelse.fromJson(javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")!!.readText()).copy (

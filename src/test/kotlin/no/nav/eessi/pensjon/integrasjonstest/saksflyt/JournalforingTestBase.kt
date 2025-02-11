@@ -29,6 +29,7 @@ import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsHandler
 import no.nav.eessi.pensjon.journalforing.krav.KravInitialiseringsService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveHandler
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
@@ -122,11 +123,11 @@ internal open class JournalforingTestBase {
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
 
-    val journalpostService = spyk(JournalpostService(journalpostKlient))
-    val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
-    val etterlatteService = mockk<EtterlatteService>(relaxed = true)
-
     private val pdfService: PDFService = PDFService(euxService)
+
+    val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
+
+    val etterlatteService = mockk<EtterlatteService>(relaxed = true)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
@@ -137,6 +138,9 @@ internal open class JournalforingTestBase {
     }
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveHandlerKafka)
+    private var opprettOppgaveService: OpprettOppgaveService = OpprettOppgaveService(oppgaveHandler)
+    val journalpostService = spyk(JournalpostService(journalpostKlient, pdfService, opprettOppgaveService))
+
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
     protected val automatiseringHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
@@ -160,14 +164,13 @@ internal open class JournalforingTestBase {
     val journalforingService: JournalforingService = JournalforingService(
         journalpostService = journalpostService,
         oppgaveRoutingService = oppgaveRoutingService,
-        pdfService = pdfService,
-        oppgaveHandler = oppgaveHandler,
         kravInitialiseringsService = kravService,
         statistikkPublisher = statistikkPublisher,
         vurderBrukerInfo = vurderBrukerInfo,
         hentSakService = hentSakService,
         hentTemaService = hentTemaService,
-        env = null
+        oppgaveService = opprettOppgaveService,
+        env = null,
     )
 
     protected val personService: PersonService = mockk(relaxed = true)

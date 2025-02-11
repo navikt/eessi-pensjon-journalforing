@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -49,6 +50,8 @@ abstract class IntegrasjonsBase {
 
     @Autowired
     lateinit var mottattListener: SedMottattListener
+    @Autowired
+    lateinit var opprettOppgaveService: OpprettOppgaveService
     @Autowired
     lateinit var sendtListener: SedSendtListener
     @Autowired
