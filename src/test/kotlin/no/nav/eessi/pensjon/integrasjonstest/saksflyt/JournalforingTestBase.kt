@@ -47,6 +47,7 @@ import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Foedested
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -426,7 +427,7 @@ internal open class JournalforingTestBase {
 
         val fnrVoksensok = if (benyttSokPerson) null else fnrVoksen
 
-        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedsel?.foedselsdato.toString()))
+        val sed = SED.generateSedToClass<P2200>(createSedPensjon(SedType.P2200, fnrVoksensok, eessiSaknr = sakId, krav = krav, pdlPerson = mockBruker, fdato = mockBruker.foedselsdato?.foedselsdato.toString()))
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (benyttSokPerson) {
@@ -515,9 +516,12 @@ internal open class JournalforingTestBase {
     ): PdlPerson {
 
         val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
-            LocalDate.of(1988,7,12)
+            Foedselsdato(foedselsdato = "1988-07-12", metadata = mockk())//LocalDate.of(1988,7,12)
         else
-            fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
+            fnr?.let {
+                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate().toString(), metadata = mockk())
+                //Fodselsnummer.fra(it)?.getBirthDate()
+            }
 
         val utenlandskadresse = if (land == null || land == "NOR") null else UtenlandskAdresse(landkode = land)
 
@@ -559,7 +563,8 @@ internal open class JournalforingTestBase {
             ),
             oppholdsadresse = null,
             statsborgerskap = emptyList(),
-            foedsel = Foedsel(foedselsdato, "NOR", "OSLO", metadata = metadata),
+            foedselsdato = foedselsdato,
+            foedested = Foedested(foedeland = "NOR", foedested = "OSLO", metadata = metadata),
             geografiskTilknytning = GeografiskTilknytning(GtType.KOMMUNE, geo),
             kjoenn = Kjoenn(KjoennType.KVINNE, metadata = metadata),
             doedsfall = null,

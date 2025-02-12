@@ -131,7 +131,7 @@ class PersonidentifiseringService(
                     geografiskTilknytning = pdlPerson.geografiskTilknytning?.gtKommune ?: pdlPerson.geografiskTilknytning?.gtBydel,
                     personRelasjon = personRelasjon.copy(fnr = Fodselsnummer.fra(pdlPerson.identer.firstOrNull { it.gruppe == FOLKEREGISTERIDENT || it.gruppe == NPID }?.ident)),
                     personNavn = pdlPerson.navn?.run { "$fornavn $etternavn" },
-                    fdato = pdlPerson.foedsel?.foedselsdato,
+                    fdato = pdlPerson.foedselsdato?.foedselsdato?.let { LocalDate.parse(it) }, //TODO sjekk om dette er riktig
                     identer = pdlPerson.identer.map { it.ident},
                 )
             }.also { logger.info("Legger til identifisert person for aktorid: ${it?.aktoerId}") }
