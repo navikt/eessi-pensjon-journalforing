@@ -180,78 +180,76 @@ class JournalforingService(
         currentSed: SED?,
         saksInfoSamlet: SaksInfoSamlet?
     ) {
-        val skalSendesDirekte =
-            sedHendelse.bucType in BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
+        val skalSendesDirekte = sedHendelse.bucType in BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
         val testMiljo = env != null && env in listOf("q2", "q1")
 
         if (journalpostRequest.bruker == null && !skalSendesDirekte && !testMiljo) {
             logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent")
             vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
             return
-        } else {
-            if (journalpostRequest.bruker == null) {
-                logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
-            }
+        }
 
-            val journalPostResponse = journalpostService.sendJournalPost(
+        if (journalpostRequest.bruker == null) {
+            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
+        }
+
+        val journalPostResponse = journalpostService.sendJournalPost(
+            journalpostRequest,
+            sedHendelse,
+            hendelseType,
+            navAnsattInfo?.first
+        )
+
+        journalpostRequest.bruker?.let {
+            vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(
                 journalpostRequest,
                 sedHendelse,
-                hendelseType,
+                identifisertPerson,
+                it,
                 navAnsattInfo?.first
             )
+        }
 
-            if (journalpostRequest.bruker != null) {
-                vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(
-                    journalpostRequest,
-                    sedHendelse,
-                    identifisertPerson,
-                    journalpostRequest.bruker,
-                    navAnsattInfo?.first
-                )
-            }
+        vurderSettAvbruttOgLagOppgave(
+            identifisertPerson?.personRelasjon?.fnr,
+            hendelseType,
+            sedHendelse,
+            journalPostResponse,
+            tildeltJoarkEnhet,
+            aktoerId,
+            tema
+        )
 
-            vurderSettAvbruttOgLagOppgave(
-                identifisertPerson?.personRelasjon?.fnr,
-                hendelseType,
-                sedHendelse,
-                journalPostResponse,
+        if (hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt == true) {
+            logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
+            oppgaveService.opprettBehandleSedOppgave(
+                journalPostResponse.journalpostId,
                 tildeltJoarkEnhet,
                 aktoerId,
-                tema
-            )
-
-            if ((hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt!!)) {
-                logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
-                oppgaveService.opprettBehandleSedOppgave(
-                    journalPostResponse.journalpostId,
-                    tildeltJoarkEnhet,
-                    aktoerId,
-                    sedHendelse,
-                    tema = tema
-                )
-                kravInitialiseringsService.initKrav(
-                    sedHendelse,
-                    saksInfoSamlet?.sakInformasjonFraPesys,
-                    currentSed
-                )
-            } else {
-                loggDersomIkkeBehSedOppgaveOpprettes(
-                    sedHendelse.bucType,
-                    sedHendelse,
-                    journalPostResponse?.journalpostferdigstilt,
-                    hendelseType
-                )
-            }
-
-            produserStatistikkmelding(
                 sedHendelse,
-                tildeltJoarkEnhet.enhetsNr,
-                saksInfoSamlet?.saktypeFraSed,
+                tema = tema
+            )
+            kravInitialiseringsService.initKrav(
+                sedHendelse,
+                saksInfoSamlet?.sakInformasjonFraPesys,
+                currentSed
+            )
+        } else {
+            loggDersomIkkeBehSedOppgaveOpprettes(
+                sedHendelse.bucType,
+                sedHendelse,
+                journalPostResponse?.journalpostferdigstilt,
                 hendelseType
             )
         }
-    }
 
+        produserStatistikkmelding(
+            sedHendelse,
+            tildeltJoarkEnhet.enhetsNr,
+            saksInfoSamlet?.saktypeFraSed,
+            hendelseType
+        )
+    }
     fun vurderSettAvbruttOgLagOppgave(
         fnr: Fodselsnummer?,
         hendelseType: HendelseType,
