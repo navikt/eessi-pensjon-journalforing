@@ -52,15 +52,15 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
+import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.test.util.ReflectionTestUtils
-import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.eessi.pensjon.personoppslag.pdl.model.PdlPerson
+import java.time.format.DateTimeFormatter
 
 internal open class JournalforingTestBase {
 
@@ -516,11 +516,10 @@ internal open class JournalforingTestBase {
     ): PdlPerson {
 
         val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
-            Foedselsdato(foedselsdato = "1988-07-12", metadata = mockk())//LocalDate.of(1988,7,12)
+            Foedselsdato(foedselsdato = "1988-07-12", metadata = mockk(relaxed = true)).also { println("XXX" + it.toJsonSkipEmpty()) }
         else
             fnr?.let {
-                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate().toString(), metadata = mockk())
-                //Fodselsnummer.fra(it)?.getBirthDate()
+                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate()?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), metadata = mockk(relaxed = true)).also { println("XXX" + it.toJsonSkipEmpty()) }
             }
 
         val utenlandskadresse = if (land == null || land == "NOR") null else UtenlandskAdresse(landkode = land)

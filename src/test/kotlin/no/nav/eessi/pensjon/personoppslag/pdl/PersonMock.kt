@@ -18,11 +18,10 @@ object PersonMock {
     ): PdlPerson {
         val aarMndDag = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
-            Foedselsdato(foedselsdato = LocalDate.now().minusYears(66).format(aarMndDag), metadata = mockk())//LocalDate.of(1988,7,12)
+            Foedselsdato(foedselsdato = LocalDate.now().minusYears(66).format(aarMndDag), metadata = mockk(relaxed = true))//LocalDate.of(1988,7,12)
         else
             fnr?.let {
-                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate()?.format(aarMndDag), metadata = mockk())
-                //Fodselsnummer.fra(it)?.getBirthDate()
+                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate()?.format(aarMndDag), metadata = mockk(relaxed = true))
             }
 
         val utenlandskadresse = if (landkoder) null else UtenlandskAdresse(landkode = "SWE")
