@@ -119,20 +119,7 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-        val supportedDocumentsJson = """
-                [{
-                    "brevkode": "NAV 14-05.09",
-                    "dokumentKategori": "SOK",
-                    "dokumentvarianter": [
-                            {
-                                "filtype": "PDF/A",
-                                "fysiskDokument": "string",
-                                "variantformat": "ARKIV"
-                            }
-                        ],
-                        "tittel": "Søknad om foreldrepenger ved fødsel"
-                }]
-            """.trimIndent()
+        val supportedDocumentsJson = hentSupportedDokumenter()
 
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
 
@@ -144,20 +131,6 @@ internal class JournalpostServiceTest {
             MOTTATT,
             ID_OG_FORDELING,
             Sak("FAGSAK", "11111", "PEN"),
-//            """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, PENSJON, null
@@ -198,20 +171,7 @@ internal class JournalpostServiceTest {
 
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
 
-        val supportedDocumentsJson = """
-                [{
-                    "brevkode": "NAV 14-05.09",
-                    "dokumentKategori": "SOK",
-                    "dokumentvarianter": [
-                            {
-                                "filtype": "PDF/A",
-                                "fysiskDokument": "string",
-                                "variantformat": "ARKIV"
-                            }
-                        ],
-                        "tittel": "Søknad om foreldrepenger ved fødsel"
-                }]
-            """.trimIndent()
+        val supportedDocumentsJson = hentSupportedDokumenter()
 
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
 
@@ -221,20 +181,6 @@ internal class JournalpostServiceTest {
             MOTTATT,
             ID_OG_FORDELING,
             Sak("FAGSAK", "11111", "PEN"),
-//            """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null, PENSJON, currentSed = currentSed
@@ -258,20 +204,7 @@ internal class JournalpostServiceTest {
         val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
 
         val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
-        val supportedDocumentsJson = """
-                [{
-                    "brevkode": "NAV 14-05.09",
-                    "dokumentKategori": "SOK",
-                    "dokumentvarianter": [
-                            {
-                                "filtype": "PDF/A",
-                                "fysiskDokument": "string",
-                                "variantformat": "ARKIV"
-                            }
-                        ],
-                        "tittel": "Søknad om foreldrepenger ved fødsel"
-                }]
-            """.trimIndent()
+        val supportedDocumentsJson = hentSupportedDokumenter()
 
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
         every { mockKlient.opprettJournalpost(capture(journalpostSlot), any(), any()) } returns expectedResponse
@@ -282,20 +215,6 @@ internal class JournalpostServiceTest {
             MOTTATT,
             ID_OG_FORDELING,
             Sak("FAGSAK", "11111", "PEN"),
-//            """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
             saktype = null,
             AvsenderMottaker(null, null, null, land = "NO"),
             1, null,
@@ -307,6 +226,24 @@ internal class JournalpostServiceTest {
         val actualRequest = journalpostSlot.captured
         println("actualResponse ${opprettJournalpost.toJson()}")
         println("actualreq ${actualRequest.toJson()}")
+    }
+
+    private fun hentSupportedDokumenter(): String {
+        val supportedDocumentsJson = """
+                    [{
+                        "brevkode": "NAV 14-05.09",
+                        "dokumentKategori": "SOK",
+                        "dokumentvarianter": [
+                                {
+                                    "filtype": "PDF/A",
+                                    "fysiskDokument": "string",
+                                    "variantformat": "ARKIV"
+                                }
+                            ],
+                            "tittel": "Søknad om foreldrepenger ved fødsel"
+                    }]
+                """.trimIndent()
+        return supportedDocumentsJson
     }
 
     @Test
@@ -322,20 +259,6 @@ internal class JournalpostServiceTest {
                 MOTTATT,
                 ID_OG_FORDELING,
                 Sak("FAGSAK", "11111", "PEN" ),
-//                """
-//                [{
-//                    "brevkode": "NAV 14-05.09",
-//                    "dokumentKategori": "SOK",
-//                    "dokumentvarianter": [
-//                            {
-//                                "filtype": "PDF/A",
-//                                "fysiskDokument": "string",
-//                                "variantformat": "ARKIV"
-//                            }
-//                        ],
-//                        "tittel": "Søknad om foreldrepenger ved fødsel"
-//                }]
-//            """.trimIndent(),
                 saktype = null,
                 mockk(),
                 mockk(),
