@@ -108,7 +108,7 @@ internal open class JournalforingTestBase {
         }
     }
     protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
-        justRun { finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any(), any()) }
+        justRun { finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         justRun { lagreJournalPostUtenBruker(any(), any(), any()) }
     }
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
