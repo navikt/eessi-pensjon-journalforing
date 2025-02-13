@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -41,9 +40,11 @@ import org.springframework.web.client.RestTemplate
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
 )
 internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
-
     @MockkBean
     private lateinit var personService: PersonService
+
+    @MockkBean(relaxed = true)
+    private lateinit var gcpStorageService: GcpStorageService
 
     init {
         System.getProperty("mockServerport") ?: run {
@@ -55,16 +56,11 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     }
 
     @Autowired
-    private lateinit var gcpStorageService: GcpStorageService
-
-    @Autowired
     private lateinit var journalforebruker: VurderBrukerInfo
 
     @BeforeEach
     fun setupTest(){
-        every { gcpStorageService.gjennyFinnes(any())} returns false
-        every { gcpStorageService.journalFinnes(any())} returns false
-        justRun { journalforebruker.lagreJournalPostUtenBruker(any(), any(), any()) }
+        every { gcpStorageService.hentFraGjenny(any())} returns null
     }
 
     @TestConfiguration
