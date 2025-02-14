@@ -54,7 +54,13 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun beforeEach() {
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.journalFinnes(any()) } returns false
+        every { gcpStorageService.hentFraJournal(any()) } returns null
+        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
         every { gcpStorageService.hentFraGjenny(any()) } returns null
+        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
     }
 
     @TestConfiguration
