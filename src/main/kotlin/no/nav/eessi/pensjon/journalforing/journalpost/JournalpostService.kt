@@ -7,10 +7,13 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.Bruker
 import no.nav.eessi.pensjon.journalforing.Sak
+import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
+import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
@@ -19,12 +22,17 @@ import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class JournalpostService(private val journalpostKlient: JournalpostKlient) {
+class JournalpostService(
+    val journalpostKlient: JournalpostKlient,
+    val pdfService: PDFService,
+    val oppgaveService: OpprettOppgaveService
+) {
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
@@ -39,11 +47,10 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
      */
     fun opprettJournalpost(
         sedHendelse: SedHendelse,
-        fnr: Fodselsnummer? = null,
+        identifisertPerson: IdentifisertPerson? = null,
         sedHendelseType: HendelseType,
-        journalfoerendeEnhet: Enhet,
+        tildeltJoarkEnhet: Enhet,
         arkivsaksnummer: Sak? = null,
-        dokumenter: String,
         saktype: SakType? = null,
         institusjon: AvsenderMottaker,
         identifisertePersoner: Int,
@@ -52,19 +59,51 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
         currentSed: SED? = null
     ): OpprettJournalpostRequest {
         logger.info("Oppretter OpprettJournalpostRequest for sed: ${sedHendelse.sedType} med rinasSakId: ${sedHendelse.rinaSakId}")
-
+        val dokumenter = hentDocuments(sedHendelse, tildeltJoarkEnhet, identifisertPerson?.aktoerId, tema)
+        val fnrFraPersonrelasjon = identifisertPerson?.personRelasjon?.fnr
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
             behandlingstema = bestemBehandlingsTema(sedHendelse.bucType!!, saktype, tema, identifisertePersoner, currentSed),
-            bruker = fnr?.let { Bruker(id = it.value) },
+            bruker = fnrFraPersonrelasjon?.let { Bruker(id = it.value) },
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
             tema = tema,
             tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
             dokumenter = dokumenter,
-            journalfoerendeEnhet = saksbehandlerInfo?.second ?: journalfoerendeEnhet
+            journalfoerendeEnhet = saksbehandlerInfo?.second ?: tildeltJoarkEnhet
         )
+    }
+
+
+    private fun hentDocuments(
+        sedHendelse: SedHendelse,
+        tildeltJoarkEnhet: Enhet,
+        aktoerId: String?,
+        tema: Tema
+    ): String {
+        val (documents, _) = sedHendelse.run {
+            sedType?.let {
+                pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it).also { documentsAndAttachments ->
+                    if (documentsAndAttachments.second.isNotEmpty()) {
+                        oppgaveService.opprettBehandleSedOppgave(null, tildeltJoarkEnhet, aktoerId, sedHendelse, usupporterteFilnavn(documentsAndAttachments.second), tema)
+                    }
+                }
+            } ?: throw IllegalStateException("sedType is null")
+        }
+        logger.info("Dokument hentet, størrelse: ${dokumentStorrelse(documents)}")
+        return documents
+    }
+
+    //TODO: flyttes til PDF/DOK
+    fun dokumentStorrelse(input: String): Double {
+        val byteSize = input.length * 2
+        return byteSize / (1024.0 * 1024.0)
+    }
+
+    //TODO: flyttes til PDF/DOK
+    private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
+        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
     }
 
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
@@ -203,26 +242,21 @@ class JournalpostService(private val journalpostKlient: JournalpostKlient) {
     ): Behandlingstema {
         val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
 
-        if(bucType == P_BUC_01) return ALDERSPENSJON
-        if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
-        if(bucType == P_BUC_03) return UFOREPENSJON
-
-        if (bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list) return BehandlingstemaPbuc06(currentSed)
-        if (bucType == P_BUC_10 && currentSed?.type == SedType.P15000) return behandlingstemaPbuc10(currentSed)
-
-        if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
-        if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON
-
-        return if (bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)) {
-            return when (saktype) {
+        return when {
+            bucType == P_BUC_01 -> ALDERSPENSJON
+            bucType == P_BUC_02 -> GJENLEVENDEPENSJON
+            bucType == P_BUC_03 -> UFOREPENSJON
+            bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list -> BehandlingstemaPbuc06(currentSed)
+            bucType == P_BUC_10 && currentSed?.type == SedType.P15000 -> behandlingstemaPbuc10(currentSed)
+            tema == UFORETRYGD && identifisertePersoner <= 1 -> UFOREPENSJON
+            tema == PENSJON && identifisertePersoner >= 2 -> GJENLEVENDEPENSJON
+            bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10) -> when (saktype) {
                 GJENLEV, BARNEP -> GJENLEVENDEPENSJON
                 UFOREP -> UFOREPENSJON
-                else -> {
-                    if (bucType == R_BUC_02) TILBAKEBETALING
-                    ALDERSPENSJON
-                }
+                else -> if (bucType == R_BUC_02) TILBAKEBETALING else ALDERSPENSJON
             }
-        } else ALDERSPENSJON
+            else -> ALDERSPENSJON
+        }
     }
 
     private fun BehandlingstemaPbuc06(currentSed: SED?) : Behandlingstema {

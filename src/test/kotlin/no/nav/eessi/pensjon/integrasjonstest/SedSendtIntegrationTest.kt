@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -34,7 +35,7 @@ import org.springframework.web.client.RestTemplate
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
-    @Autowired
+    @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
 
     @Autowired

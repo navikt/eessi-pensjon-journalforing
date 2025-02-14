@@ -161,7 +161,6 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
-    @Disabled
     fun `Mottatt P_BUC_2 2100 med omstilling skal lage journalpost uten ferdigstilling`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -174,8 +173,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         every { gcpStorageService.hentFraGjenny(any()) } returns """{ "sakId" : "147730","sakType" : "EYO"}""".trimIndent()
 
         val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            aktoerId = AKTOERID,
+            fnr = LEALAUS_KAKE,
+            personRelasjon = sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
         journalforingService.journalfor(
             sedHendelse,
@@ -195,7 +195,6 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
-    @Disabled
     fun `Innkommende P2000 fra utlanded som oppfyller alle krav til maskinell journalføring skal opprette behandle SED oppgave`() {
 
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
@@ -203,7 +202,8 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         val kravtype = "01"
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            fnr = LEALAUS_KAKE,
+            personRelasjon = sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
         )
         val saksInformasjon = SakInformasjon(sakId = "22874955", sakType = SakType.ALDER, sakStatus = SakStatus.LOPENDE)
 
