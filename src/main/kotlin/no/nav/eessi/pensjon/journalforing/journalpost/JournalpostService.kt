@@ -280,7 +280,7 @@ class JournalpostService(
     private fun behandlingstemaPbuc10(currentSed: SED?) : Behandlingstema {
         return when {
             currentSed is P15000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
-            currentSed is P15000 && currentSed.hasGjenlevendePensjonType() -> GJENLEVENDEPENSJON
+            currentSed is P15000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
             else -> ALDERSPENSJON
         }
     }

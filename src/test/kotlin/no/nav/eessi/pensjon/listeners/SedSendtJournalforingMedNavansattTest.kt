@@ -116,7 +116,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         )
 
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
     }
 
     @Test

@@ -205,7 +205,6 @@ class JournalforingService(
                 journalpostRequest,
                 sedHendelse,
                 identifisertPerson,
-                it,
                 navAnsattInfo?.first
             )
         }
