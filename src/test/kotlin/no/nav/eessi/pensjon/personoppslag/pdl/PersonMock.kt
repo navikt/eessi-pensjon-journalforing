@@ -1,9 +1,11 @@
 package no.nav.eessi.pensjon.personoppslag.pdl
 
+import io.mockk.mockk
 import no.nav.eessi.pensjon.personoppslag.pdl.model.*
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object PersonMock {
     internal fun createWith(
@@ -14,10 +16,13 @@ object PersonMock {
         aktoerId: AktoerId? = null,
         geo: String? = "0301"
     ): PdlPerson {
-
+        val aarMndDag = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val foedselsdato  = if(Fodselsnummer.fra(fnr)?.erNpid == true)
-            LocalDate.now().minusYears(66)
-        else fnr?.let { Fodselsnummer.fra(it)?.getBirthDate() }
+            Foedselsdato(foedselsdato = LocalDate.now().minusYears(66).format(aarMndDag), metadata = mockk(relaxed = true))//LocalDate.of(1988,7,12)
+        else
+            fnr?.let {
+                Foedselsdato(foedselsdato = Fodselsnummer.fra(it)?.getBirthDate()?.format(aarMndDag), metadata = mockk(relaxed = true))
+            }
 
         val utenlandskadresse = if (landkoder) null else UtenlandskAdresse(landkode = "SWE")
 
@@ -58,7 +63,8 @@ object PersonMock {
             ),
             oppholdsadresse = null,
             statsborgerskap = emptyList(),
-            foedsel = Foedsel(foedselsdato, null, null, null, metadata = metadata),
+            foedselsdato = foedselsdato,
+            foedested = null,
             geografiskTilknytning = geo?.let { GeografiskTilknytning(GtType.KOMMUNE, it, null, null) },
             kjoenn = Kjoenn(KjoennType.KVINNE, null, metadata),
             doedsfall = null,

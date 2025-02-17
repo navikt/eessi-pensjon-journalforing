@@ -125,31 +125,24 @@
           }
         }
       ],
-      "foedsel": [
-        {
-          "foedselsdato": "1972-07-29",
-          "foedeland": null,
-          "foedested": null,
-          "foedselsaar": null,
-          "folkeregistermetadata": {
-            "gyldighetstidspunkt": "2021-02-16T14:53:06"
-          },
-          "metadata": {
-            "endringer": [
-              {
-                "kilde": "Dolly",
-                "registrert": "2021-02-16T14:53:06",
-                "registrertAv": "Folkeregisteret",
-                "systemkilde": "FREG",
-                "type": "OPPRETT"
-              }
-            ],
-            "master": "FREG",
-            "opplysningsId": "760afef9-21e7-46ff-bd10-b2b45eb4e8d3",
-            "historisk": false
-          }
+      "foedselsdato": [{
+        "foedselsdato" : "1971-06-11",
+        "metadata" : {
+          "historisk" : false,
+          "master" : "master",
+          "opplysningsId" : "opplysningsId",
+          "endringer": [
+            {
+              "kilde": "Dolly",
+              "registrert": "2021-02-16T14:53:06",
+              "registrertAv": "Folkeregisteret",
+              "systemkilde": "FREG",
+              "type": "OPPRETT"
+            }
+          ]
         }
-      ],
+      }],
+      "foedested": [],
       "doedsfall": [],
       "kjoenn": [
         {

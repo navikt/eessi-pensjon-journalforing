@@ -200,7 +200,7 @@ class JournalforingService(
             navAnsattInfo?.first
         )
 
-        journalpostRequest.bruker?.let { bruker ->
+        journalpostRequest.bruker?.let {
             vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(
                 journalpostRequest,
                 sedHendelse,
