@@ -125,4 +125,8 @@ class VurderBrukerInfo (
             logger.warn("Metrics feilet med melding: $melding", e)
         }
     }
+
+    fun erGjennySak(rinaSakId: String): Boolean {
+        return gcpStorageService.gjennyFinnes(rinaSakId)
+    }
 }

@@ -17,9 +17,11 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
@@ -207,6 +209,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         )
         every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns null
         every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
+        every { vurderBrukerInfo.erGjennySak(any()) } returns false
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
@@ -228,6 +231,56 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
     }
+
+    @Test
+    fun `Utgaaende sed P2100 med kjent fnr skal status ikke settes til avbrutt og vi skal opprette journalfoerings oppgave`() {
+        val fnr = FodselsnummerGenerator.generateFnrForTest(68)
+        val hendelse = """
+            {
+              "id": 1869,
+              "sedId": "P2100_b12e06dda2c7474b9998c7139c841646_2",
+              "sektorKode": "P",
+              "bucType": "P_BUC_02",
+              "rinaSakId": "147730",
+              "avsenderId": "NO:NAVT003",
+              "avsenderNavn": "NAVT003",
+              "avsenderLand": "NO",
+              "mottakerId": "NO:NAVT007",
+              "mottakerNavn": "NAV Test 07",
+              "mottakerLand": "NO",
+              "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
+              "rinaDokumentVersjon": "2",
+              "sedType": "P2100",
+              "navBruker": "$fnr"
+            }
+        """.trimIndent()
+
+        val sedHendelse = SedHendelse.fromJson(hendelse)
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            SEDPersonRelasjon(Fodselsnummer.fra(fnr), Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID, fdato = LocalDate.of(1947, 11, 22)),
+            "NOR",
+
+        )
+        every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns "EYO"
+        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
+        every { vurderBrukerInfo.erGjennySak(any()) } returns true
+
+        assertThrows<Exception> {
+            journalforingService.journalfor(
+                sedHendelse = sedHendelse,
+                hendelseType = HendelseType.SENDT,
+                identifisertPerson = identifisertPerson,
+                fdato = LocalDate.of(1947, 11, 22),
+                identifisertePersoner = 1,
+                navAnsattInfo = null,
+                currentSed = SED(type = SedType.P2200)
+            )
+        }
+
+        verify(exactly = 0) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
+    }
+
 
     private fun journalManueltMedAvbrutt(
         sedHendelse: SedHendelse,
@@ -256,6 +309,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             Tema.OMSTILLING
         )
     }
+
+
 
     private fun journalfor(
         sedHendelse: SedHendelse,

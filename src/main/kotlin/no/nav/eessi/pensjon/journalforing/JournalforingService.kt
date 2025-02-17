@@ -276,6 +276,17 @@ class JournalforingService(
         }
 
         if (journalPostResponse?.journalpostferdigstilt == false && !journalpostErAvbrutt) {
+            //Eddy vil ikke at vi skal opprette journalforingsoppgave for sendt P_BUC_02
+            if (sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT) {
+                fnr?.getAge()?.let {
+                    val erGjennySak = vurderBrukerInfo.erGjennySak(sedHendelse.rinaSakId)
+                    if(it > 67 && erGjennySak){
+                        logger.error("Utgående P_BUC_02, oppretter IKKE journalføringsoppgave")
+                        throw Exception("Utgående P_BUC_02, oppretter IKKE journalføringsoppgave, slett ${sedHendelse.rinaSakId}")
+                    }
+                }
+                logger.warn("Utgående P_BUC_02 og SENDT, er ikke gjennysak, oppretter oppgave")
+            }
             val melding = OppgaveMelding(
                 sedHendelse.sedType,
                 journalPostResponse.journalpostId,
