@@ -69,7 +69,7 @@ internal class ConfigRestTemplateTest {
     private lateinit var sedSendtListener: SedSendtListener
 
     @MockkBean
-    private lateinit var journalforingutenbruker: VurderBrukerInfo
+    private lateinit var vurderBrukerInfo: VurderBrukerInfo
 
     @MockkBean
     private lateinit var personService: PersonService
@@ -98,7 +98,9 @@ internal class ConfigRestTemplateTest {
 
     @BeforeEach
     fun setup() {
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
+        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(any(), any(), any()) }
+
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(

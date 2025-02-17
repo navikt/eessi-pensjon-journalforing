@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -34,7 +35,7 @@ import org.springframework.web.client.RestTemplate
 )
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
-    @Autowired
+    @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
 
     @Autowired
@@ -52,13 +53,14 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
     @BeforeEach
-    fun myBeforeEach() {
+    fun beforeEach() {
+        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.journalFinnes(any()) } returns false
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraJournal(any()) } returns null
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
         every { gcpStorageService.hentFraGjenny(any()) } returns null
+        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
     }
 
     @TestConfiguration

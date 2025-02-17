@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -24,12 +25,13 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.RestTemplate
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedMottattIntegrationTest.TestConfig::class])
+@SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedMottattIntegrationTest.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC])
-internal class SedMottattIntegrationTest : IntegrasjonsBase(){
+    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC]
+)
+internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
     init {
         if (System.getProperty("mockServerport") == null) {
@@ -40,19 +42,19 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
         }
     }
 
-    @Autowired
+    @MockkBean(relaxed = true)
     lateinit var gcpStorageService: GcpStorageService
 
-        var hentSakService: HentSakService = mockk()
+    private var hentSakService: HentSakService = mockk()
 
     @BeforeEach
     fun setUp() {
-        every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { gcpStorageService.journalFinnes(any()) } returns false
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
-        justRun { gcpStorageService.slettJournalpostDetaljer(any()) }
+//        every { gcpStorageService.gjennyFinnes(any()) } returns false
+//        every { gcpStorageService.journalFinnes(any()) } returns false
+//        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
+//        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
+//        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
+//        justRun { gcpStorageService.slettJournalpostDetaljer(any()) }
 
         listOf("147729", "147666", "7477291").forEach {
             every { hentSakService.hentSak(it) } returns mockk(relaxed = true)
@@ -63,10 +65,13 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
     class TestConfig {
         @Bean
         fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
+
         @Bean
         fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
+
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
+
         @Bean
         fun vurderBrukerInfo(): VurderBrukerInfo = mockk(relaxed = true)
     }
@@ -79,7 +84,11 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
             .medJournalforing(false, "429434378")
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .mockHttpRequestWithResponseFromFile("/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET,"/sed/P2000-NAV.json")
+            .mockHttpRequestWithResponseFromFile(
+                "/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018",
+                HttpMethod.GET,
+                "/sed/P2000-NAV.json"
+            )
 
         meldingForMottattListener("/eux/hendelser/FB_BUC_01_F001.json")
     }
@@ -101,8 +110,16 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .mockHttpRequestWithResponseFromFile("/buc/147729/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET,"/sed/P2000-NAV.json")
-            .mockHttpRequestWithResponseFromFile("/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer",HttpMethod.GET,"/pdf/pdfResponseMedVedlegg.json")
+            .mockHttpRequestWithResponseFromFile(
+                "/buc/147729/sed/44cb68f89a2f4e748934fb4722721018",
+                HttpMethod.GET,
+                "/sed/P2000-NAV.json"
+            )
+            .mockHttpRequestWithResponseFromFile(
+                "/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer",
+                HttpMethod.GET,
+                "/pdf/pdfResponseMedVedlegg.json"
+            )
 
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000.json")
         //verify route
@@ -122,7 +139,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
             .mockBestemSak()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/7477291",
-                HttpMethod.GET,Buc(
+                HttpMethod.GET, Buc(
                     id = "7477291",
                     participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocuments_ugyldigFNR_ids.json")
@@ -130,11 +147,11 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
             )
             .mockHttpRequestWithResponseFromFile(
                 "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx",
-                HttpMethod.GET,"/sed/P2000-ugyldigFNR-NAV.json"
+                HttpMethod.GET, "/sed/P2000-ugyldigFNR-NAV.json"
             )
             .mockHttpRequestWithResponseFromFile(
                 "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer",
-                HttpMethod.GET,"/pdf/pdfResponseUtenVedlegg.json"
+                HttpMethod.GET, "/pdf/pdfResponseUtenVedlegg.json"
             )
         //send msg
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
@@ -157,14 +174,22 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase(){
             .mockBestemSak()
             .mockHttpRequestWithResponseFromJson(
                 "/buc/147666",
-                HttpMethod.GET,Buc(
+                HttpMethod.GET, Buc(
                     id = "147666",
                     participants = emptyList(),
                     documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
                 ).toJson()
             )
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET,"/sed/P2000-NAV.json")
-            .mockHttpRequestWithResponseFromFile("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",HttpMethod.GET,"/pdf/pdfResponseMedUgyldigVedlegg.json" )
+            .mockHttpRequestWithResponseFromFile(
+                "/buc/147666/sed/44cb68f89a2f4e748934fb4722721018",
+                HttpMethod.GET,
+                "/sed/P2000-NAV.json"
+            )
+            .mockHttpRequestWithResponseFromFile(
+                "/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",
+                HttpMethod.GET,
+                "/pdf/pdfResponseMedUgyldigVedlegg.json"
+            )
 
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
 

@@ -49,7 +49,6 @@ class VurderBrukerInfo (
         jprMedBruker: OpprettJournalpostRequest,
         sedHendelse: SedHendelse,
         identifisertPerson: IdentifisertPerson?,
-        bruker: Bruker,
         saksbehandlerIdent: String?
     ) {
         try {

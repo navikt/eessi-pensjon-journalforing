@@ -30,7 +30,6 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
                 Assertions.assertEquals(Enhet.NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
-
     }
 
     private fun testRunnerP1000(

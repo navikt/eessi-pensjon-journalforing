@@ -242,26 +242,21 @@ class JournalpostService(
     ): Behandlingstema {
         val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
 
-        if(bucType == P_BUC_01) return ALDERSPENSJON
-        if(bucType == P_BUC_02) return GJENLEVENDEPENSJON
-        if(bucType == P_BUC_03) return UFOREPENSJON
-
-        if (bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list) return BehandlingstemaPbuc06(currentSed)
-        if (bucType == P_BUC_10 && currentSed?.type == SedType.P15000) return behandlingstemaPbuc10(currentSed)
-
-        if (tema == UFORETRYGD && identifisertePersoner <= 1) return UFOREPENSJON
-        if (tema == PENSJON && identifisertePersoner >= 2) return GJENLEVENDEPENSJON
-
-        return if (bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)) {
-            return when (saktype) {
+        return when {
+            bucType == P_BUC_01 -> ALDERSPENSJON
+            bucType == P_BUC_02 -> GJENLEVENDEPENSJON
+            bucType == P_BUC_03 -> UFOREPENSJON
+            bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list -> BehandlingstemaPbuc06(currentSed)
+            bucType == P_BUC_10 && currentSed?.type == SedType.P15000 -> behandlingstemaPbuc10(currentSed)
+            tema == UFORETRYGD && identifisertePersoner <= 1 -> UFOREPENSJON
+            tema == PENSJON && identifisertePersoner >= 2 -> GJENLEVENDEPENSJON
+            bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10) -> when (saktype) {
                 GJENLEV, BARNEP -> GJENLEVENDEPENSJON
                 UFOREP -> UFOREPENSJON
-                else -> {
-                    if (bucType == R_BUC_02) TILBAKEBETALING
-                    ALDERSPENSJON
-                }
+                else -> if (bucType == R_BUC_02) TILBAKEBETALING else ALDERSPENSJON
             }
-        } else ALDERSPENSJON
+            else -> ALDERSPENSJON
+        }
     }
 
     private fun BehandlingstemaPbuc06(currentSed: SED?) : Behandlingstema {
