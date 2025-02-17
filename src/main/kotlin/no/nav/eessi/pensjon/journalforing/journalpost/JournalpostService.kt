@@ -243,13 +243,14 @@ class JournalpostService(
 
         //TODO: Er dette nødvendig? allerde i varetatt i BehandlingstemaPbuc06
         val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
+        val noenSedInPbuc10list = listOf(SedType.P15000)
 
         return when {
             bucType == P_BUC_01 -> ALDERSPENSJON
             bucType == P_BUC_02 -> GJENLEVENDEPENSJON
             bucType == P_BUC_03 -> UFOREPENSJON
             bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list -> BehandlingstemaPbuc06(currentSed!!)
-            bucType == P_BUC_10 && currentSed?.type == SedType.P15000 -> behandlingstemaPbuc10(currentSed)
+            bucType == P_BUC_10 && currentSed?.type in noenSedInPbuc10list -> BehandlingstemaPbuc06(currentSed!!)
             tema == UFORETRYGD && identifisertePersoner <= 1 -> UFOREPENSJON
             tema == PENSJON && identifisertePersoner >= 2 -> GJENLEVENDEPENSJON
             bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10) -> when (saktype) {
@@ -262,20 +263,9 @@ class JournalpostService(
     }
 
     private fun BehandlingstemaPbuc06(currentSed: SED): Behandlingstema {
-        if (currentSed::class in listOf(P5000::class, P6000::class, P7000::class, P10000::class)) {
-            return when {
-                currentSed is UforePensjon && currentSed.hasUforePensjonType() -> UFOREPENSJON
-                currentSed is GjenlevPensjon && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
-                else -> ALDERSPENSJON
-            }
-        }
-        return ALDERSPENSJON
-    }
-
-    private fun behandlingstemaPbuc10(currentSed: SED?) : Behandlingstema {
         return when {
-            currentSed is P15000 && currentSed.hasUforePensjonType() -> UFOREPENSJON
-            currentSed is P15000 && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+            currentSed is UforePensjon && currentSed.hasUforePensjonType() -> UFOREPENSJON
+            currentSed is GjenlevPensjon && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
             else -> ALDERSPENSJON
         }
     }
