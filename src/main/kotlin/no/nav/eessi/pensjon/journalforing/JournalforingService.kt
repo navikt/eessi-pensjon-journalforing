@@ -103,8 +103,8 @@ class JournalforingService(
                 val alder = bestemAlder(identifisertPerson)
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
-                val institusjon = determineAvsenderMottaker(hendelseType, sedHendelse)
-                val arkivsaksnummer = fetchArkivsaksnummer(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
+                val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
+                val arkivsaksnummer = hentArkivsaksnummer(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
 
                 val journalpostRequest =journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
@@ -150,11 +150,11 @@ class JournalforingService(
         }
     }
 
-    private fun determineAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker {
+    private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker {
         return avsenderMottaker(hendelseType, sedHendelse)
     }
 
-    private fun fetchArkivsaksnummer(
+    private fun hentArkivsaksnummer(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType,
         saksInfoSamlet: SaksInfoSamlet?,
@@ -232,7 +232,7 @@ class JournalforingService(
                 sedHendelse,
                 saksInfoSamlet?.sakInformasjonFraPesys,
                 currentSed
-            )
+            ).also { logger.info("oppretter krav for ${sedHendelse.bucType} med rinanummer: ${sedHendelse.rinaSakId}") }
         } else {
             loggDersomIkkeBehSedOppgaveOpprettes(
                 sedHendelse.bucType,

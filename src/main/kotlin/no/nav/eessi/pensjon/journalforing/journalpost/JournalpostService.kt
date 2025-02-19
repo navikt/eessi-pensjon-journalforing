@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.Bruker
+import no.nav.eessi.pensjon.journalforing.JournalpostType.*
 import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
@@ -218,12 +219,13 @@ class JournalpostService(
         }
 
         // R-BUC skal behandles manuelt selv om vi mangler fnummer eller identifisert person
-        if(sedHendelse.sedType in listOf(SedType.R004, SedType.R005, SedType.R006) && hendelseType == SENDT){
-            logger.warn("HendelseType er utgående og SED er R006; setter ikke avbrutt")
+        val rSeder = listOf(SedType.R004, SedType.R005, SedType.R006)
+        if(sedHendelse.sedType in rSeder && hendelseType == SENDT){
+            logger.warn("HendelseType er utgående og SED er av typen ${sedHendelse.sedType}; settes derfor ikke til avbrutt")
             return false
         }
 
-        if (hendelseType != SENDT) {
+        if (hendelseType == MOTTATT) {
             logger.warn("HendelseType er mottatt; setter ikke avbrutt")
             return false
         }
@@ -240,20 +242,19 @@ class JournalpostService(
         identifisertePersoner: Int,
         currentSed: SED?
     ): Behandlingstema {
+        val pensjonsBucer = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
+        val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
 
         //TODO: Er dette nødvendig? allerde i varetatt i BehandlingstemaPbuc06
-        val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
-        val noenSedInPbuc10list = listOf(SedType.P15000)
-
         return when {
             bucType == P_BUC_01 -> ALDERSPENSJON
             bucType == P_BUC_02 -> GJENLEVENDEPENSJON
             bucType == P_BUC_03 -> UFOREPENSJON
             bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list -> BehandlingstemaPbuc06(currentSed!!)
-            bucType == P_BUC_10 && currentSed?.type in noenSedInPbuc10list -> BehandlingstemaPbuc06(currentSed!!)
+            bucType == P_BUC_10 && currentSed?.type == SedType.P15000 -> BehandlingstemaPbuc06(currentSed)
             tema == UFORETRYGD && identifisertePersoner <= 1 -> UFOREPENSJON
             tema == PENSJON && identifisertePersoner >= 2 -> GJENLEVENDEPENSJON
-            bucType in listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10) -> when (saktype) {
+            bucType in pensjonsBucer -> when (saktype) {
                 GJENLEV, BARNEP -> GJENLEVENDEPENSJON
                 UFOREP -> UFOREPENSJON
                 else -> if (bucType == R_BUC_02) TILBAKEBETALING else ALDERSPENSJON
@@ -271,8 +272,8 @@ class JournalpostService(
     }
 
     private fun bestemJournalpostType(sedHendelseType: HendelseType): JournalpostType =
-            if (sedHendelseType == SENDT) JournalpostType.UTGAAENDE
-            else JournalpostType.INNGAAENDE
+            if (sedHendelseType == SENDT) UTGAAENDE
+            else INNGAAENDE
 
     private fun lagTittel(journalpostType: JournalpostType,
                           sedType: SedType) = "${journalpostType.decode()} ${sedType.typeMedBeskrivelse()}"
