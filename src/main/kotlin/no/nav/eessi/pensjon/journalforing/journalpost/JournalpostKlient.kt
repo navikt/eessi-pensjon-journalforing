@@ -50,6 +50,7 @@ class JournalpostKlient(
      *
      * @param request: Request-objektet som skal sendes til joark.
      * @param forsokFerdigstill: Hvis true vil Joark forsøke å ferdigstille journalposten.
+     * Regler i Joark for å få forsoekFerdigstill=true ligger her: https://confluence.adeo.no/display/BOA/opprettJournalpost
      *
      * @return {@link OpprettJournalPostResponse}
      *         Respons fra Joark. Inneholder journalposten sin ID, status, melding, og en boolean-verdi
