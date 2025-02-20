@@ -22,7 +22,7 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
                 HttpMethod.GET,
                 null,
                 String::class.java).body
-            responsebody.orEmpty()
+            responsebody.orEmpty().also { logger.debug("Response body fra fagmodul: $it") }
         } catch(ex: Exception) {
             logger.error("En feil oppstod under henting av pensjonsakliste ex: $ex", ex)
             return emptyList()
