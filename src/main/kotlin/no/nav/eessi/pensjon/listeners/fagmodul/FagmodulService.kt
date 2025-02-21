@@ -66,10 +66,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
                 logger.error("Fant flere gyldige pesys sakId i SED: $sakerFraSed")
                 return null
             }
-            return idList.firstOrNull()
+            return idList.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
         }
 
-        return sakerFraSed.lastOrNull()
+        return sakerFraSed.firstOrNull()
     }
 
     private fun filterEESSIsak(sed: SED): String? {
