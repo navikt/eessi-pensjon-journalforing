@@ -39,9 +39,9 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             return null
         }
 
-        return hentGjennySak(sakIdFraSed, euxCaseId).also { logger.info("Hentet gjennysak for rinasakId: $euxCaseId, og sakID: $sakIdFraSed") }
-            ?: hentGjennyFraGCP(euxCaseId).also { logger.info("Henter sak fra gcp for $euxCaseId") }
-            ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId).also { logger.info("SakId fra Sed:$sakIdFraSed er en gyldig pesys sakId") }
+        return hentGjennySak(sakIdFraSed, euxCaseId).also { logger.info("hentSak: sjekker gjenny-API: rinasakId: $euxCaseId, og sakID: $sakIdFraSed") }
+            ?: hentGjennyFraGCP(euxCaseId).also { logger.info("hentSak: sjekker GCP $euxCaseId") }
+            ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
             ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
