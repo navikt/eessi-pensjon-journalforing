@@ -52,12 +52,24 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     }
 
     fun hentSakIdFraSED(sedListe: List<SED>): String? {
-        return sedListe
+        val sakerFraSed = sedListe
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }
             .distinct()
-            .singleOrNull()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
+
+        if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
+        if (sakerFraSed.size > 1) {
+            logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr", )
+            val idList = sakerFraSed.filter { sakId -> sakId.erGyldigPesysNummer() }
+            if(idList.size > 1) {
+                logger.error("Fant flere gyldige pesys sakId i SED: $sakerFraSed")
+                return null
+            }
+            return idList.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
+        }
+
+        return sakerFraSed.firstOrNull()
     }
 
     private fun filterEESSIsak(sed: SED): String? {
@@ -69,6 +81,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .lastOrNull()
     }
 
+    //TODO: replace 11 sifre med * i tilfelle det er et fnr
     private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
 
 
