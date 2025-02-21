@@ -14,7 +14,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc)?.let { sakId ->
+        return hentSakIdFraSED(alleSedIBuc, null)?.let { sakId ->
             if (sakId.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId} for aktoerid: $aktoerId")
                 return null
@@ -51,25 +51,34 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     }
 
-    fun hentSakIdFraSED(sedListe: List<SED>): String? {
+    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): String? {
         val sakerFraSed = sedListe
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }
+            .filter { it.erGyldigPesysNummer() }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
 
         if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
+
         if (sakerFraSed.size > 1) {
-            logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr", )
-            val idList = sakerFraSed.filter { sakId -> sakId.erGyldigPesysNummer() }
-            if(idList.size > 1) {
-                logger.error("Fant flere gyldige pesys sakId i SED: $sakerFraSed")
+            logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr")
+
+            //ser om vi har en treff mot SED som skal journalføres, dette vil kun gjelde utgående SED
+            val sakID = sakerFraSed.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+            if (sakID != null) {
+                logger.info("Fant pesys sakId fra SED med samme akId i EESSI: $sakID")
+                return sakID
+            }
+
+            if (sakerFraSed.size > 1) {
+                logger.error("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
                 return null
             }
-            return idList.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
+            return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
         }
 
-        return sakerFraSed.firstOrNull()
+        return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }
     }
 
     private fun filterEESSIsak(sed: SED): String? {

@@ -105,15 +105,17 @@ class SedSendtListener(
             alleSedIBucList.plus(kansellerteSeder)
         )
 
+        val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second.also { secureLog.info("Current sed fra listen med gyldige sed: ${it?.toJson()}") }
+
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
             sedHendelse,
             bucType,
             identifisertPerson,
-            SENDT
+            SENDT,
+            currentSed
         )
 
-        val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second.also { secureLog.info("Current sed fra listen med gyldige sed: ${it?.toJson()}") }
 
         journalforingService.journalfor(
             sedHendelse,
