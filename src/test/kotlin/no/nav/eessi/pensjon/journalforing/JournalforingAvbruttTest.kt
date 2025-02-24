@@ -20,6 +20,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -55,20 +56,12 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
     fun `SED med ukjent fnr settes til avbrutt gitt at den ikke er i listen bucIkkeTilAvbrutt`(buc: BucType) {
         val sedHendelse = createMockSedHendelse(SedType.P8000, buc)
 
-        // buc som sendes direkte (uten lagring)
-        if (buc in JournalforingService.BUC_SOM_SENDES_DIREKTE) {
-            every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns
-                    mockk<OpprettJournalPostResponse>(relaxed = true).apply {
-                        every { journalpostId } returns "12345"
-                        every { journalpostferdigstilt } returns false
-                    }
-            //benytter ordinær journalforing for buc som sendes direkte
-            journalfor(sedHendelse, HendelseType.SENDT)
-        } else {
-            every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk()
-            journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
-        }
-
+        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns
+                mockk<OpprettJournalPostResponse>(relaxed = true).apply {
+                    every { journalpostId } returns "12345"
+                    every { journalpostferdigstilt } returns false
+                }
+        journalfor(sedHendelse, HendelseType.SENDT)
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }
 
@@ -94,10 +87,9 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         justRun { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(capture(oppgaveSlot)) }
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
 
-        journalManueltMedAvbrutt(sedHendelse, HendelseType.SENDT)
+        journalfor(sedHendelse, HendelseType.SENDT)
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
-//        verify(exactly = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
     }
 
     @Test
@@ -126,11 +118,11 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             every { sakType } returns SakType.ALDER
         }
 
-        journalManueltMedAvbrutt(
-            sedHendelse,
-            HendelseType.SENDT,
+        journalfor(
+            sedHendelse = sedHendelse,
+            hendelseType = HendelseType.SENDT,
             identer = listOf(identifisertPerson),
-            saksInfoSamlet = SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjonMock),
+            saksInfoSamlet = SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjonMock)
         )
 
         verify(exactly = 1) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
@@ -143,11 +135,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
 
-        journalManueltMedAvbrutt(
-            sedHendelse,
-            HendelseType.MOTTATT,
-            identer = listOf(identifisertPerson)
-        )
+        journalfor(sedHendelse, HendelseType.MOTTATT, listOf(identifisertPerson))
 
         verify(exactly = 0) { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
     }

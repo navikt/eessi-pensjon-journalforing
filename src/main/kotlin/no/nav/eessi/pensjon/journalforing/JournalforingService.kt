@@ -180,18 +180,18 @@ class JournalforingService(
         currentSed: SED?,
         saksInfoSamlet: SaksInfoSamlet?
     ) {
-        val skalSendesDirekte = sedHendelse.bucType in BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
-        val testMiljo = env != null && env in listOf("q2", "q1")
+//        val skalSendesDirekte = sedHendelse.bucType in BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
+//        val testMiljo = env != null && env in listOf("q2", "q1")
 
-        if (journalpostRequest.bruker == null && !skalSendesDirekte && !testMiljo) {
-            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent")
-            vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
-            return
-        }
+//        if (journalpostRequest.bruker == null && !skalSendesDirekte && !testMiljo) {
+//            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent")
+//            vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
+//            return
+//        }
 
-        if (journalpostRequest.bruker == null) {
-            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
-        }
+//        if (journalpostRequest.bruker == null) {
+//            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
+//        }
 
         val journalPostResponse = journalpostService.sendJournalPost(
             journalpostRequest,
