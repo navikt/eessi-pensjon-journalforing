@@ -597,7 +597,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
         } ?: run {
@@ -693,7 +692,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         }
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))

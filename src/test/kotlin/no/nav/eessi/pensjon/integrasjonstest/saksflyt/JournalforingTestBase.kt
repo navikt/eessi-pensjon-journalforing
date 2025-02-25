@@ -108,10 +108,7 @@ internal open class JournalforingTestBase {
             }
         }
     }
-    protected val vurderBrukerInfo: VurderBrukerInfo = mockk(relaxed = true){
-        justRun { finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
-        justRun { lagreJournalPostUtenBruker(any(), any(), any()) }
-    }
+
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
@@ -167,7 +164,7 @@ internal open class JournalforingTestBase {
         oppgaveRoutingService = oppgaveRoutingService,
         kravInitialiseringsService = kravService,
         statistikkPublisher = statistikkPublisher,
-        vurderBrukerInfo = vurderBrukerInfo,
+        gcpStorageService = gcpStorageService,
         hentSakService = hentSakService,
         hentTemaService = hentTemaService,
         oppgaveService = opprettOppgaveService,
@@ -279,7 +276,6 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -324,7 +320,7 @@ internal open class JournalforingTestBase {
                 mapJsonToAny<SedHendelse>(hendelse),
                 hendelseType
             )
-            val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
+            val response  = journalpostService.sendJournalPost(lagretJournalpost.journalpostRequest, lagretJournalpost.sedHendelse, lagretJournalpost.sedHendelseType, null)
 
             journalforingService.vurderSettAvbruttOgLagOppgave(
                 Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),
@@ -389,7 +385,6 @@ internal open class JournalforingTestBase {
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         if (hendelseType == SENDT)
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
@@ -578,7 +573,6 @@ internal open class JournalforingTestBase {
 
     protected fun initJournalPostRequestSlot(ferdigstilt: Boolean = false): Pair<CapturingSlot<OpprettJournalpostRequest>, OpprettJournalPostResponse> {
         val request = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(request), any(), any()) }
         val journalpostResponse = OpprettJournalPostResponse("429434378", "M", null, ferdigstilt)
 
         every { journalpostKlient.opprettJournalpost(capture(request), any(), any()) } returns journalpostResponse

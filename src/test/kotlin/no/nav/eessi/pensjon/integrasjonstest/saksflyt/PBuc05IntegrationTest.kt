@@ -673,7 +673,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -807,7 +806,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
 
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -849,7 +847,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot()
             val hendelse = createHendelseJson(SedType.P5000, P_BUC_05)
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -1120,7 +1117,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     ): Pair<OpprettJournalpostRequest, OppgaveMelding> {
 
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
         createMockedJournalPostWithOppgave(journalpostRequest, hendelse, SENDT)
@@ -1175,7 +1171,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot()
 
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -1213,7 +1208,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot()
 
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -1330,7 +1324,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val (journalpost, _) = initJournalPostRequestSlot()
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 
@@ -1628,7 +1621,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val (journalpost, _) = initJournalPostRequestSlot()
 
             val journalpostRequest = slot<OpprettJournalpostRequest>()
-            justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
             mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
 

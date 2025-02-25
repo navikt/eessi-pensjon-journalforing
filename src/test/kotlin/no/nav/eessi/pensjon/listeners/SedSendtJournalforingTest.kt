@@ -68,7 +68,6 @@ internal class SedSendtJournalforingTest {
     private val gcpStorageService = mockk<GcpStorageService>()
     private val etterlatteService = mockk<EtterlatteService>()
 
-    private val journalforingutenbruker = mockk<VurderBrukerInfo>()
     private val hentSakService = HentSakService(etterlatteService, gcpStorageService)
     private lateinit var pdfService : PDFService
 
@@ -101,7 +100,7 @@ internal class SedSendtJournalforingTest {
             oppgaveRoutingService = OppgaveRoutingService(norg2Service),
             kravInitialiseringsService = mockk(),
             statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true),
-            vurderBrukerInfo = journalforingutenbruker,
+            gcpStorageService = gcpStorageService,
             hentSakService = hentSakService,
             hentTemaService = hentTemaService,
             oppgaveService = opprettOppgaveService,
@@ -121,7 +120,6 @@ internal class SedSendtJournalforingTest {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
     }
 
@@ -163,7 +161,6 @@ internal class SedSendtJournalforingTest {
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
@@ -229,7 +226,6 @@ internal class SedSendtJournalforingTest {
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "",
@@ -300,7 +296,6 @@ internal class SedSendtJournalforingTest {
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
@@ -364,7 +359,6 @@ internal class SedSendtJournalforingTest {
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-        justRun { journalforingutenbruker.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",

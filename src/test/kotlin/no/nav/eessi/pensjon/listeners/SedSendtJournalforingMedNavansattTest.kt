@@ -75,7 +75,6 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)
     private val navansattKlient = NavansattKlient(navansattRestTemplate)
     private val gcpStorageService = mockk<GcpStorageService>()
-    private val vurderBrukerInfo = mockk<VurderBrukerInfo>()
     private val etterlatteService = mockk<EtterlatteService>()
     private var hentSakService = HentSakService(etterlatteService, gcpStorageService)
 
@@ -98,9 +97,12 @@ internal class SedSendtJournalforingMedNavansattTest {
         journalforingService = JournalforingService(
             journalpostService = journalpostService,
             oppgaveRoutingService = oppgaveRoutingService,
-            mockk(), statistikkPublisher, vurderBrukerInfo = vurderBrukerInfo, hentSakService = hentSakService,
+            kravInitialiseringsService = mockk(),
+            statistikkPublisher = statistikkPublisher,
+            gcpStorageService = gcpStorageService,
+            hentSakService = hentSakService,
             hentTemaService = hentTemaService,
-            opprettOppgaveService,
+            oppgaveService = opprettOppgaveService,
             env = null,
         )
 
@@ -116,7 +118,6 @@ internal class SedSendtJournalforingMedNavansattTest {
         )
 
         every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
-        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
     }
 
     @Test

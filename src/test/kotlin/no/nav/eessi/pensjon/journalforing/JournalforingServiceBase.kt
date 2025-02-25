@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -26,9 +25,10 @@ import org.springframework.kafka.core.KafkaTemplate
 private const val AKTOERID = "12078945602"
 private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
+
 abstract class JournalforingServiceBase {
 
-    val journalpostKlient = mockk<JournalpostKlient>()
+    val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
     val pdfService = mockk<PDFService>()
     val kravHandeler = mockk<KravInitialiseringsHandler>()
     val gcpStorageService = mockk<GcpStorageService>()
@@ -40,8 +40,6 @@ abstract class JournalforingServiceBase {
     val oppgaveService = OpprettOppgaveService(oppgaveHandler)
     val journalpostService = JournalpostService(journalpostKlient, pdfService, oppgaveService)
     val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
-
-    val vurderBrukerInfo = mockk<VurderBrukerInfo>()
 
     protected val norg2Service = mockk<Norg2Service> {
         every { hentArbeidsfordelingEnhet(any()) } returns null
@@ -58,7 +56,7 @@ abstract class JournalforingServiceBase {
         oppgaveRoutingService = oppgaveRoutingService,
         kravInitialiseringsService = kravService,
         statistikkPublisher = statistikkPublisher,
-        vurderBrukerInfo = vurderBrukerInfo,
+        gcpStorageService = gcpStorageService,
         hentSakService = hentSakService,
         hentTemaService = hentTemaService,
         oppgaveService = oppgaveService,
@@ -66,25 +64,17 @@ abstract class JournalforingServiceBase {
     )
 
     protected val opprettJournalpostRequestCapturingSlot = slot<OpprettJournalpostRequest>()
-    protected val opprettJPVurdering = slot<OpprettJournalpostRequest>()
 
     @BeforeEach
     fun setup() {
         journalforingService.nameSpace = "test"
 
-        //MOCK RESPONSES
+        //mock responses
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("Supported Documents", emptyList())
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        val opprettJournalPostResponse = OpprettJournalPostResponse(
-            journalpostId = "12345",
-            journalstatus = "EKSPEDERT",
-            melding = "",
-            journalpostferdigstilt = false,
-        )
 
-        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(capture(opprettJPVurdering), any(), any(), any()) }
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(opprettJournalpostRequestCapturingSlot), any(), any()) }
-        every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), null) } returns opprettJournalPostResponse
+        val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId = "12345", journalstatus = "EKSPEDERT", melding = "", journalpostferdigstilt = false)
+        every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), any()) } returns opprettJournalPostResponse
     }
 
     companion object{

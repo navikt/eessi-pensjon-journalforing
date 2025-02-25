@@ -45,19 +45,6 @@ open class GcpStorageServiceTest {
 
     }
 
-    @Test
-    fun `skal returnere lagret journalpost`() {
-        val blobId = mockk<BlobId>(relaxed = true)
-        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, listOf(Pair(lagretJournalPost, blobId )), gcpStorage = storage)
-
-        val result = gcpStorageService.hentGamleRinaSakerMedJPDetaljer(2)
-        assertNotNull(result)
-        assertEquals(1, result!!.size)
-        assertEquals(
-            result[0].first,
-            listOf(Pair(lagretJournalPost, blobId)).toJson())
-    }
-
     companion object{
         fun opprettJournalpostRequest(bruker: Bruker?, enhet:Enhet?, tema: Tema?, behandlingstema: Behandlingstema? = Behandlingstema.ALDERSPENSJON) = OpprettJournalpostRequest(
             AvsenderMottaker(land = "GB"),

@@ -39,7 +39,6 @@ class VurderBrukerInfoTest {
     private lateinit var journalpostService: JournalpostService
     private lateinit var opprettOppgaveService: OpprettOppgaveService
     private lateinit var oppgaveHandler: OppgaveHandler
-    private lateinit var vurderBrukerInfo: VurderBrukerInfo
 
     private var journalpostKlient: JournalpostKlient = mockk()
     private val lagretJournalpostRquest = GcpStorageServiceTest.opprettJournalpostRequest(bruker = null, enhet = Enhet.ID_OG_FORDELING, tema = Tema.UFORETRYGD, )
@@ -72,14 +71,6 @@ class VurderBrukerInfoTest {
             rinaSakId = sedMedBruker.rinaSakId
         )
 
-        vurderBrukerInfo = spyk(
-            VurderBrukerInfo(
-                gcpStorageService,
-                journalpostService,
-                oppgaveHandler,
-                MetricsHelper.ForTest()
-            ))
-
         lagretJournalPost = JournalpostMedSedInfo(lagretJournalpostRquest, sedUtenBruker, HendelseType.SENDT)
 
         every { storage.get(BlobId.of("journalB", sedUtenBruker.rinaSakId)) } returns  mockk {
@@ -88,45 +79,43 @@ class VurderBrukerInfoTest {
         }
     }
 
-    @Test
-    fun `journalpost med bruker skal hente lageret jp uten bruker og opprette jp samt oppgave`() {
-        val rinaID = "147729"
-        val blobId = mockk<BlobId>(relaxed = true)
-
-        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
-            every { journalpostId } returns "1111"
-            every { journalstatus } returns "UNDER_ARBEID"
-            every { journalpostferdigstilt } returns false
-        }
-        val bruker = createTestBruker("121280334444")
-        val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
-
-        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, listOf(Pair(lagretJournalPost, blobId)), gcpStorage = storage)
-
-        vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(journalPostMedBruker, sedMedBruker, identifisertPerson,  "5555")
-
-        verify {
-            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
-            {
-              "sedType" : "P2000",
-              "journalpostId" : "1111",
-              "tildeltEnhetsnr" : "${journalPostMedBruker.journalfoerendeEnhet?.enhetsNr}",
-              "aktoerId" : "${identifisertPerson.aktoerId}",
-              "rinaSakId" : $rinaID,
-              "hendelseType" : "MOTTATT",
-              "filnavn" : null,
-              "oppgaveType" : "JOURNALFORING",
-              "tema" : "${journalPostMedBruker.tema.kode}"
-            }
-        """.trimIndent())) }
-        verify { journalpostService.sendJournalPost(eq(lagretJournalpostRquest.copy(
-            tema = journalPostMedBruker.tema,
-            journalfoerendeEnhet = journalPostMedBruker.journalfoerendeEnhet,
-            bruker = journalPostMedBruker.bruker
-        )), lagretJournalPost.sedHendelse, any(), any()) }
-        verify(exactly = 1) { gcpStorageService.slettJournalpostDetaljer(BlobId.of("journalB", sedUtenBruker.rinaSakId)) }
-    }
-
+//    @Test
+//    fun `journalpost med bruker skal hente lageret jp uten bruker og opprette jp samt oppgave`() {
+//        val rinaID = "147729"
+//        val blobId = mockk<BlobId>(relaxed = true)
+//
+//        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk<OpprettJournalPostResponse>().apply {
+//            every { journalpostId } returns "1111"
+//            every { journalstatus } returns "UNDER_ARBEID"
+//            every { journalpostferdigstilt } returns false
+//        }
+//        val bruker = createTestBruker("121280334444")
+//        val journalPostMedBruker = GcpStorageServiceTest.opprettJournalpostRequest(bruker, Enhet.UFORE_UTLAND, Tema.PENSJON)
+//
+//        GcpStorageTestHelper.simulerGcpStorage(sedUtenBruker, listOf(Pair(lagretJournalPost, blobId)), gcpStorage = storage)
+//
+//        vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(journalPostMedBruker, sedMedBruker, identifisertPerson,  "5555")
+//
+//        verify {
+//            oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(mapJsonToAny("""
+//            {
+//              "sedType" : "P2000",
+//              "journalpostId" : "1111",
+//              "tildeltEnhetsnr" : "${journalPostMedBruker.journalfoerendeEnhet?.enhetsNr}",
+//              "aktoerId" : "${identifisertPerson.aktoerId}",
+//              "rinaSakId" : $rinaID,
+//              "hendelseType" : "MOTTATT",
+//              "filnavn" : null,
+//              "oppgaveType" : "JOURNALFORING",
+//              "tema" : "${journalPostMedBruker.tema.kode}"
+//            }
+//        """.trimIndent())) }
+//        verify { journalpostService.sendJournalPost(eq(lagretJournalpostRquest.copy(
+//            tema = journalPostMedBruker.tema,
+//            journalfoerendeEnhet = journalPostMedBruker.journalfoerendeEnhet,
+//            bruker = journalPostMedBruker.bruker
+//        )), lagretJournalPost.sedHendelse, any(), any()) }
+//    }
 
     fun createTestBruker(
         id: String? = "defaultId"

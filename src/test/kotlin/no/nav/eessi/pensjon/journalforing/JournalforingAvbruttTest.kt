@@ -19,8 +19,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -32,11 +30,6 @@ private const val RINADOK_ID = "3123123"
 private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 
 internal class JournalforingAvbruttTest : JournalforingServiceBase() {
-
-    @BeforeEach
-    fun setupForTest() {
-        justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(any()) }
-    }
 
     @ParameterizedTest
     @EnumSource(SedType::class)
@@ -196,8 +189,8 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             "NOR"
         )
         every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns null
-        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+
         journalforingService.journalfor(
             sedHendelse,
             HendelseType.SENDT,
@@ -207,14 +200,14 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2200)
         )
-        journalpostService.sendJournalPost(opprettJPVurdering.captured, sedHendelse, HendelseType.SENDT, "ident")
+        //journalpostService.sendJournalPost(opprettJournalpostRequestCapturingSlot.captured, sedHendelse, HendelseType.SENDT, "ident")
         assertEquals(
             Enhet.NFP_UTLAND_AALESUND,
-            opprettJPVurdering.captured.journalfoerendeEnhet
+            opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet
         )
         assertEquals(
             Behandlingstema.GJENLEVENDEPENSJON,
-            opprettJPVurdering.captured.behandlingstema
+            opprettJournalpostRequestCapturingSlot.captured.behandlingstema
         )
 
         verify(exactly = 1) { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(any()) }
@@ -251,8 +244,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
         )
         every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns "EYO"
-        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
-        every { vurderBrukerInfo.erGjennySak(any()) } returns true
+//        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
 
         assertThrows<Exception> {
             journalforingService.journalfor(

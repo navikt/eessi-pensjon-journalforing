@@ -2,21 +2,18 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -49,13 +46,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
     @BeforeEach
     fun setUp() {
-//        every { gcpStorageService.gjennyFinnes(any()) } returns false
-//        every { gcpStorageService.journalFinnes(any()) } returns false
-//        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
-//        justRun { gcpStorageService.lagreJournalPostRequest(any(), any(), any()) }
-//        justRun { gcpStorageService.arkiverteSakerForRinaId(any(), any()) }
-//        justRun { gcpStorageService.slettJournalpostDetaljer(any()) }
-
         listOf("147729", "147666", "7477291").forEach {
             every { hentSakService.hentSak(it) } returns mockk(relaxed = true)
         }
@@ -71,9 +61,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
-
-        @Bean
-        fun vurderBrukerInfo(): VurderBrukerInfo = mockk(relaxed = true)
     }
 
     @Test

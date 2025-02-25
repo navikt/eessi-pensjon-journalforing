@@ -115,16 +115,6 @@ class GcpStorageService(
         )
     }
 
-    fun slettJournalpostDetaljer(blobId: BlobId) {
-        try {
-            logger.info("Sletter journalpostdetaljer for rinaSakId: ${blobId.name}")
-            gcpStorage.delete(blobId).also { logger.info("Slett av journalpostdetaljer utført: $it") }
-        } catch (ex: Exception) {
-            logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
-        }
-    }
-
-
     fun lagreJournalPostRequest(lagretJournalPost: String, rinaId: String?, dokId: String?) {
         try {
             if (rinaId == null || dokId == null) {
@@ -199,26 +189,6 @@ class GcpStorageService(
         }
         return null
     }
-
-    fun hentGamleRinaSakerMedJPDetaljer(dager: Long): List<Pair<String, BlobId>>? {
-        try {
-            logger.info("Henter rinasaker som er eldre enn $dager dager gamle")
-            val blobs = gcpStorage.list(journalBucket)
-
-            val jpListe = mutableListOf<Pair<String, BlobId>>()
-            for (blob in blobs.iterateAll()) {
-            val blobben = BlobId.of(journalBucket, blob.name)
-                if (blob.createTimeOffsetDateTime.isBefore(OffsetDateTime.now().minusDays(dager))) {
-                    jpListe.add(Pair(blob.getContent().decodeToString(), blobben))
-                }
-            }
-            return jpListe.also { logger.info("Det er ${jpListe.size} SED med rinaID eldre enn $dager dager") }
-        } catch (ex: Exception) {
-            logger.warn("En feil oppstod under henting av gamle rinasaker fra bucket", ex)
-        }
-        return null
-    }
-
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
