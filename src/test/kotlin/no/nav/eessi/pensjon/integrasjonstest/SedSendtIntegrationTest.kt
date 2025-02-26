@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -77,9 +76,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
 
-        @Bean
-        fun journalforingUtenBruker(): VurderBrukerInfo = VurderBrukerInfo(gcpStorageService(), mockk(), mockk())
-        //TODO: Ingen kobling mellomg journalføringservice og denne.. gå gjennom de andre mock -beans også
     }
 
     @Test

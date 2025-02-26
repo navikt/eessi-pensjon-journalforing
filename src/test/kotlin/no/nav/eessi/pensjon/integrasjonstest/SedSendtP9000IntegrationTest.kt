@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
@@ -10,7 +9,6 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -24,7 +22,6 @@ import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
 import org.slf4j.event.Level
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -55,9 +52,6 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         }
     }
 
-    @Autowired
-    private lateinit var journalforebruker: VurderBrukerInfo
-
     @BeforeEach
     fun setupTest(){
         every { gcpStorageService.hentFraGjenny(any())} returns null
@@ -73,9 +67,6 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
         @Bean
         fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
-
-        @Bean
-        fun journalforebruker(): VurderBrukerInfo = mockk(relaxed = true)
     }
 
     @Test

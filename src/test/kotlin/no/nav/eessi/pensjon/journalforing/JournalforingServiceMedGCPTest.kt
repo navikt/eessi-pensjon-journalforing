@@ -57,7 +57,6 @@ class JournalforingServiceMedGCPTest {
     lateinit var journalpostService: JournalpostService
     lateinit var oppgaveHandler: OppgaveHandler
     lateinit var statistikkPublisher: StatistikkPublisher
-    lateinit var vurderBrukerInfo: VurderBrukerInfo
     lateinit var hentSakService: HentSakService
     lateinit var hentTemaService: HentTemaService
     lateinit var opprettOppgaveService: OpprettOppgaveService
@@ -80,13 +79,12 @@ class JournalforingServiceMedGCPTest {
         opprettOppgaveService  = OpprettOppgaveService(oppgaveHandler)
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
         hentTemaService = HentTemaService(journalpostService, gcpStorageService)
-        vurderBrukerInfo = VurderBrukerInfo(gcpStorageService, journalpostService, oppgaveHandler)
         journalforingService = JournalforingService(
             journalpostService,
             oppgaveroutingService,
             mockk(),
             statistikkPublisher,
-            vurderBrukerInfo,
+            gcpStorageService,
             hentSakService,
             hentTemaService,
             opprettOppgaveService,

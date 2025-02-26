@@ -462,8 +462,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2200)
         )
-        assertEquals(UFORE_UTLAND, opprettJPVurdering.captured.journalfoerendeEnhet)
-        assertEquals(Behandlingstema.UFOREPENSJON, opprettJPVurdering.captured.behandlingstema)
+        assertEquals(UFORE_UTLAND, opprettJournalpostRequestCapturingSlot.captured.journalfoerendeEnhet)
+        assertEquals(Behandlingstema.UFOREPENSJON, opprettJournalpostRequestCapturingSlot.captured.behandlingstema)
     }
 
     @Test
@@ -501,8 +501,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedPersonRelasjon()
         )
         val sakInformasjon = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
-
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
 
         journalforingService.journalfor(
             sedHendelse,
@@ -553,8 +551,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         )
         val saksInfo = SakInformasjon("111111", GJENLEV, LOPENDE, "4303", false)
 
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
-
         journalforingService.journalfor(
             sedHendelse,
             SENDT,
@@ -581,8 +577,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedPersonRelasjon()
         )
         val sakInformasjon = SakInformasjon("111222", UFOREP, AVSLUTTET, "4303", false)
-
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
 
         journalforingService.journalfor(
             sedHendelse,
@@ -612,8 +606,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             "NO"
         )
 
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
-
         journalforingService.journalfor(
             sedHendelse,
             SENDT,
@@ -638,8 +630,6 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             sedPersonRelasjon(),
             "NO"
         )
-
-        every { vurderBrukerInfo.erGjennySak(any()) } returns false
 
         journalforingService.journalfor(
             sedHendelse,

@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.IdType.UTL_ORG
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
@@ -18,8 +19,6 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
-import no.nav.eessi.pensjon.models.Tema.EYBARNEP
-import no.nav.eessi.pensjon.models.Tema.OMSTILLING
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -45,7 +44,7 @@ class JournalforingService(
     private val oppgaveRoutingService: OppgaveRoutingService,
     private val kravInitialiseringsService: KravInitialiseringsService,
     private val statistikkPublisher: StatistikkPublisher,
-    private val vurderBrukerInfo: VurderBrukerInfo,
+    private val gcpStorageService: GcpStorageService,
     private val hentSakService: HentSakService,
     private val hentTemaService: HentTemaService,
     private val oppgaveService: OpprettOppgaveService,
@@ -61,10 +60,6 @@ class JournalforingService(
 
     @Value("\${namespace}")
     lateinit var nameSpace: String
-
-    companion object {
-        val BUC_SOM_SENDES_DIREKTE = listOf(R_BUC_02, P_BUC_06, P_BUC_09)
-    }
 
     init {
         journalforOgOpprettOppgaveForSed = metricsHelper.init("journalforOgOpprettOppgaveForSed")
@@ -180,34 +175,12 @@ class JournalforingService(
         currentSed: SED?,
         saksInfoSamlet: SaksInfoSamlet?
     ) {
-//        val skalSendesDirekte = sedHendelse.bucType in BUC_SOM_SENDES_DIREKTE || journalpostRequest.tema in listOf(OMSTILLING, EYBARNEP)
-//        val testMiljo = env != null && env in listOf("q2", "q1")
-
-//        if (journalpostRequest.bruker == null && !skalSendesDirekte && !testMiljo) {
-//            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker og settes på vent")
-//            vurderBrukerInfo.lagreJournalPostUtenBruker(journalpostRequest, sedHendelse, hendelseType)
-//            return
-//        }
-
-//        if (journalpostRequest.bruker == null) {
-//            logger.info("Journalpost for rinanr: ${sedHendelse.rinaSakId} mangler bruker, men miljøet er $env og sendes direkte")
-//        }
-
         val journalPostResponse = journalpostService.sendJournalPost(
             journalpostRequest,
             sedHendelse,
             hendelseType,
             navAnsattInfo?.first
         )
-
-        journalpostRequest.bruker?.let {
-            vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(
-                journalpostRequest,
-                sedHendelse,
-                identifisertPerson,
-                navAnsattInfo?.first
-            )
-        }
 
         vurderSettAvbruttOgLagOppgave(
             identifisertPerson?.personRelasjon?.fnr,
@@ -279,7 +252,7 @@ class JournalforingService(
             //Eddy vil ikke at vi skal opprette journalforingsoppgave for sendt P_BUC_02
             if (sedHendelse.bucType == P_BUC_02 && hendelseType == SENDT) {
                 fnr?.getAge()?.let {
-                    val erGjennySak = vurderBrukerInfo.erGjennySak(sedHendelse.rinaSakId)
+                    val erGjennySak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
                     if(it > 67 && erGjennySak){
                         logger.error("Utgående P_BUC_02, oppretter IKKE journalføringsoppgave")
                         throw Exception("Utgående P_BUC_02, oppretter IKKE journalføringsoppgave, slett ${sedHendelse.rinaSakId}")
@@ -388,10 +361,6 @@ class JournalforingService(
                     metricsCounterForEnhet(it)
                 }
         }
-    }
-
-    fun metricsOppdatering(slettetMelding: String) {
-        vurderBrukerInfo.countForOppdatering(slettetMelding)
     }
 
     fun metricsCounterForEnhet(enhet: Enhet) {

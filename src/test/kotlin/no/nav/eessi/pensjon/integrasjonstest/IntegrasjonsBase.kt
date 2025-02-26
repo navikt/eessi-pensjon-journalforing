@@ -4,14 +4,12 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.mockk.CapturingSlot
-import io.mockk.justRun
 import io.mockk.slot
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.listeners.SedMottattListener
@@ -56,8 +54,6 @@ abstract class IntegrasjonsBase {
     lateinit var sendtListener: SedSendtListener
     @Autowired
     lateinit var embeddedKafka: EmbeddedKafkaBroker
-    @Autowired
-    lateinit var vurderBrukerInfo: VurderBrukerInfo
     @Autowired
     lateinit var journalpostService: JournalpostService
     @Autowired
@@ -175,7 +171,6 @@ abstract class IntegrasjonsBase {
     fun meldingForMottattListener(messagePath: String) {
         // del 1: opprettelse av journalpost og oppgave: lagre jp-request før vurdering
         val journalpostRequest = slot<OpprettJournalpostRequest>()
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(capture(journalpostRequest), any(), any()) }
 
         val hendelse = javaClass.getResource(messagePath)!!.readText()
 
@@ -197,7 +192,7 @@ abstract class IntegrasjonsBase {
                 mapJsonToAny<SedHendelse>(hendelse),
                 hendelseType
             )
-            val response  = journalpostService.sendJournalPost(lagretJournalpost, "")
+            val response  = journalpostService.sendJournalPost(lagretJournalpost.journalpostRequest, lagretJournalpost.sedHendelse, lagretJournalpost.sedHendelseType, null)
 
             journalforingService.vurderSettAvbruttOgLagOppgave(
                 Fodselsnummer.fra(lagretJournalpost.journalpostRequest.bruker?.id),

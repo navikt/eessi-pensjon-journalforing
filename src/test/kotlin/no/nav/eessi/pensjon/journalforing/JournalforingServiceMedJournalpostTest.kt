@@ -127,7 +127,6 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
     }
 
     @Test
-    @Disabled
     fun `Sendt P_BUC_2 2100 med omstilling skal lage journalpost`() {
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_02_P2100.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
@@ -140,8 +139,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         every { gcpStorageService.hentFraGjenny(any()) } returns """{ "sakId" : "147730","sakType" : "EYO"}""".trimIndent()
 
         val identifisertPerson = identifisertPersonPDL(
-            AKTOERID,
-            sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            aktoerId = AKTOERID,
+            personRelasjon = sedPersonRelasjon(LEALAUS_KAKE, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            fnr = LEALAUS_KAKE
         )
         journalforingService.journalfor(
             sedHendelse,
@@ -155,6 +155,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
 
         // journalposten opprettes
         verify(atLeast = 1) { journalpostKlient.opprettJournalpost(any(), any(), any()) }
+
         // journalposten har tema omstilling
         assertEquals(journalpostSlot.captured.tema, Tema.OMSTILLING)
         assertEquals(true, forsoekFerdigstillSlot.captured)

@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.VurderBrukerInfo
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
@@ -69,9 +68,6 @@ internal class ConfigRestTemplateTest {
     private lateinit var sedSendtListener: SedSendtListener
 
     @MockkBean
-    private lateinit var vurderBrukerInfo: VurderBrukerInfo
-
-    @MockkBean
     private lateinit var personService: PersonService
 
     @MockkBean
@@ -98,9 +94,6 @@ internal class ConfigRestTemplateTest {
 
     @BeforeEach
     fun setup() {
-        justRun { vurderBrukerInfo.finnLagretSedUtenBrukerForRinaNr(any(), any(), any(), any()) }
-        justRun { vurderBrukerInfo.lagreJournalPostUtenBruker(any(), any(), any()) }
-
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
