@@ -31,6 +31,10 @@ spec:
         - host: saf.prod-fss-pub.nais.io
 
   webproxy: true
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journal-uten-bruker
+        uniformBucketLevelAccess: true
   kafka:
     pool: nav-prod
   env:
@@ -38,6 +42,8 @@ spec:
       value: prod
     - name: NAMESPACE
       value: p
+    - name: GCP_BUCKET_NAME_JOURNAL
+      value: eessi-pensjon-journal-uten-bruker
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny
     - name: EUX_RINA_API_V1_URL

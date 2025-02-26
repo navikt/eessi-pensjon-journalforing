@@ -29,6 +29,16 @@ spec:
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journal-uten-bruker-dev
+        lifecycleCondition:
+          age: 365
+          createdBefore: 2020-01-01
+          numNewerVersions: 2
+          withState: ANY
+        uniformBucketLevelAccess: true
+
   webproxy: true
   kafka:
     pool: nav-dev
@@ -37,6 +47,8 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
+    - name: GCP_BUCKET_NAME_JOURNAL
+      value: eessi-pensjon-journal-uten-bruker-dev
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
