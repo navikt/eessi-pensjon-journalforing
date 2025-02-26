@@ -897,7 +897,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
                 ?: SED.generateSedToClass(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrBarn, krav = krav, pdlPerson = sokPerson , relasjon = relasjonAvod))
 
         initCommonMocks(sed, alleDocs)
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
@@ -1062,7 +1061,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         if (benyttSokPerson) {
             every { personService.sokPerson(any()) } returns setOf(IdentInformasjon(fnrBarn, IdentGruppe.FOLKEREGISTERIDENT), IdentInformasjon("BLÆ", IdentGruppe.AKTORID))
         }
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
@@ -1119,7 +1117,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         val sed = SED.generateSedToClass<P15000>(createSedPensjon(SedType.P15000, fnrVoksen, eessiSaknr = sakId, gjenlevendeFnr = fnrVoksenSoker, krav = krav, relasjon = relasjonAvod))
         initCommonMocks(sed, alleDocs)
         every { gcpStorageService.hentFraGjenny(any()) } returns null
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
 
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID)
@@ -1192,7 +1189,6 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 

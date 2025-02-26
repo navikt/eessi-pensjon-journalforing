@@ -22,7 +22,6 @@ internal class SedMottattListenerTest {
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val gcpStorageService = mockk<GcpStorageService>().apply {
-        every { journalFinnes(any()) } returns false
         justRun { lagre(any(), any()) }
     }
 

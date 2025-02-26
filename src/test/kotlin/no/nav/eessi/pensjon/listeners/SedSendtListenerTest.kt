@@ -41,7 +41,6 @@ internal class SedSendtListenerTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { gcpStorageService.journalFinnes(any()) } returns false
     }
 
 

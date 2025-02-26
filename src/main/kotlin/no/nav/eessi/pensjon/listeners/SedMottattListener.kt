@@ -80,9 +80,6 @@ class SedMottattListener(
     }
 
     override fun behandleSedHendelse(sedHendelse: SedHendelse) {
-        if (gcpStorageService.journalFinnes(sedHendelse.rinaSakId)) {
-            logger.info("Innkommende ${sedHendelse.sedType} med rinaId: ${sedHendelse.rinaSakId}  finnes i GCP storage")
-        }
 
         val bucType = sedHendelse.bucType!!
         val buc = euxService.hentBuc(sedHendelse.rinaSakId)

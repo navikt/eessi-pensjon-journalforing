@@ -116,8 +116,6 @@ internal class SedSendtJournalforingMedNavansattTest {
             gcpStorageService,
             "test",
         )
-
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
     }
 
     @Test
@@ -173,9 +171,7 @@ internal class SedSendtJournalforingMedNavansattTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         every { gcpStorageService.gjennyFinnes(any())} returns false
-        every { gcpStorageService.journalFinnes(any())} returns false
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 

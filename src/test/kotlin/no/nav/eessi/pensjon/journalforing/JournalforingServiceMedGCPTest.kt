@@ -69,7 +69,7 @@ class JournalforingServiceMedGCPTest {
         gcpStorage = mockk<Storage>()
         every { gcpStorage.get(eq("bucket"), *anyVararg()) } returns mockk<Bucket>()
 
-        gcpStorageService = GcpStorageService("bucket", "bucket", gcpStorage)
+        gcpStorageService = GcpStorageService("bucket", gcpStorage)
         safClient =  mockk()
         oppgaveroutingService = mockk()
         pdfService = mockk()
