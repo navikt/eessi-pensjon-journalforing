@@ -152,7 +152,6 @@ internal open class JournalforingTestBase {
     fun setup() {
         ReflectionTestUtils.setField(kravHandler, "kravTopic", "kravTopic")
         journalforingService.nameSpace = "test"
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
@@ -232,7 +231,6 @@ internal open class JournalforingTestBase {
 
         every { personService.harAdressebeskyttelse(any()) } returns harAdressebeskyttelse
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
@@ -372,7 +370,6 @@ internal open class JournalforingTestBase {
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
         every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(sakId)
-        every { gcpStorageService.journalFinnes(any()) } returns false
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 

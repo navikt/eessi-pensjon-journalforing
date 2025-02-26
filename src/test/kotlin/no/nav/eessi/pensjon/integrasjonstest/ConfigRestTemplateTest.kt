@@ -114,8 +114,6 @@ internal class ConfigRestTemplateTest {
         every { bestemSakKlient.kallBestemSak(any()) } returns mockk(relaxed = true)
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { gcpStorageService.gjennyFinnes(any())} returns false
-        every { gcpStorageService.journalFinnes(any())} returns false
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
         every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
     }
 
@@ -129,7 +127,6 @@ internal class ConfigRestTemplateTest {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),

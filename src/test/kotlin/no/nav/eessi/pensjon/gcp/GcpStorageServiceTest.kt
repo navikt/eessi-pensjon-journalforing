@@ -11,10 +11,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.utils.toJson
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 
 open class GcpStorageServiceTest {
 
@@ -41,7 +38,7 @@ open class GcpStorageServiceTest {
             every { getContent() } returns lagretJournalPost.toJson().toByteArray()
         }
         listOf("gjennyB", "journalB").forEach { every { storage.get(it, *emptyArray<Storage.BucketGetOption>()) } returns mockk(relaxed = true)}
-        gcpStorageService = GcpStorageService("gjennyB", "journalB", storage)
+        gcpStorageService = GcpStorageService("gjennyB", storage)
 
     }
 

@@ -118,8 +118,6 @@ internal class SedSendtJournalforingTest {
             "test"
         )
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { gcpStorageService.journalFinnes(any()) } returns false
-        every { gcpStorageService.arkiverteSakerForRinaId(any(), any()) } returns emptyList()
         every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
     }
 
@@ -160,7 +158,6 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
@@ -222,10 +219,8 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { gcpStorageService.gjennyFinnes(RINA_ID) } returns false
-        every { gcpStorageService.journalFinnes(RINA_ID) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "",
@@ -295,7 +290,6 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
         val opprettJournalPostResponse = OpprettJournalPostResponse(
@@ -358,7 +352,6 @@ internal class SedSendtJournalforingTest {
         every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
-        justRun { gcpStorageService.lagreJournalpostDetaljer(any(), any(), any(), any(), any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
