@@ -5,12 +5,10 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 
 @Service
-class FagmodulService(private val fagmodulKlient: FagmodulKlient,  @Autowired private val env: Environment) {
+class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
@@ -87,9 +85,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient,  @Autowired pr
         val sak = sed.nav?.eessisak ?: return null
         logger.info("Sak fra SED: ${sak.toJson()}")
 
-        return if(env.activeProfiles[0] == "test") {
-            sak.firstNotNullOfOrNull { it.saksnummer }
-        } else sak.filter { it.land == "NO" }
+        return sak.filter { it.land == "NO" }
             .mapNotNull { it.saksnummer }
             .lastOrNull()
     }
