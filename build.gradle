@@ -84,7 +84,9 @@ dependencies {
 	implementation("no.nav.security:token-client-spring:${tokenSupportVersion}")
 	implementation("no.nav.security:token-validation-spring:${tokenSupportVersion}")
 	implementation("no.nav.security:token-validation-jaxrs:${tokenSupportVersion}")
-	implementation("no.nav.security:token-validation-test-support:2.0.5")
+
+	//nødvendig for validering av jwt og EnableJwtTokenValidationConfiguration
+	implementation("org.hibernate.validator:hibernate-validator")
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
