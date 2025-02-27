@@ -65,7 +65,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
-    private val fagmodulService = FagmodulService(fagmodulKlient)
+    private val fagmodulService = FagmodulService(fagmodulKlient, mockk())
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
 
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
