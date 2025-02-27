@@ -111,7 +111,7 @@ internal class SedSendtJournalforingTest {
             jouralforingService,
             personidentifiseringService,
             euxService,
-            FagmodulService(fagmodulKlient, mockk()),
+            FagmodulService(fagmodulKlient),
             BestemSakService(bestemSakKlient),
             NavansattKlient(mockk<RestTemplate>(relaxed = true)),
             gcpStorageService = gcpStorageService,

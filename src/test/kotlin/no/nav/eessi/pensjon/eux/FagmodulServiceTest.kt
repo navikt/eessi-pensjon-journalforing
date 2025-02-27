@@ -17,22 +17,14 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.core.env.Environment
 import java.nio.file.Files
 import java.nio.file.Paths
 
 internal class FagmodulServiceTest {
-    private val mockEnv: Environment = mockk(relaxed = true)
+
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val helper = FagmodulService(fagmodulKlient, mockEnv)
-
-    @BeforeEach
-    fun before() {
-        every { mockEnv.activeProfiles } returns arrayOf("test")
-    }
-
+    private val helper = FagmodulService(fagmodulKlient)
 
     @AfterEach
     fun after() {

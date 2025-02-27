@@ -116,7 +116,7 @@ internal open class JournalforingTestBase {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
     private val euxService = EuxService(euxKlient)
-    private val fagmodulService = FagmodulService(fagmodulKlient, mockk())
+    private val fagmodulService = FagmodulService(fagmodulKlient)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
