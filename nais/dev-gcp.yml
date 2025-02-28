@@ -20,15 +20,16 @@ spec:
           namespace: etterlatte
           cluster: dev-gcp
       external:
-        - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
-        - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
-        - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
-        - host: eux-rina-api-gcp-q2.intern.dev.nav.no
-        - host: dokarkiv-q2.dev-fss-pub.nais.io
-        - host: pdl-api.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
-        - host: navansatt.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: navansatt.dev-fss-pub.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
+        - host: pensjon-pen-q2.dev-fss-pub.nais.io
+        - host: eux-rina-api-gcp-q2.intern.dev.nav.no
+        - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
+        - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
+        - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
   webproxy: true
   kafka:
     pool: nav-dev
@@ -37,6 +38,7 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
+
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
     - name: EUX_RINA_API_V1_URL
@@ -52,11 +54,14 @@ spec:
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg
     - name: BESTEMSAK_URL
-      value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
       value: https://navansatt.dev-fss-pub.nais.io
     - name: EESSI_PEN_ONPREM_PROXY_URL
       value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
+    - name: ETTERLATTE_URL
+      value: http://etterlatte-api.etterlatte
+
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1-q2
     - name: KAFKA_SEDMOTTATT_TOPIC
@@ -67,6 +72,7 @@ spec:
       value: eessipensjon.privat-krav-initialisering-q2
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering-q2
+
     - name: AZURE_APP_FAGMODUL_CLIENT_ID
       value: dev-gcp.eessipensjon.eessi-pensjon-fagmodul-q2
     - name: AZURE_APP_EUX_CLIENT_ID
@@ -83,8 +89,8 @@ spec:
       value: dokarkiv
     - name: AZURE_APP_SAF_CLIENT_ID
       value: dev-fss.teamdokumenthandtering.saf
-    - name: ETTERLATTE_URL
-      value: http://etterlatte-api.etterlatte
+    - name: AZURE_APP_PEN_CLIENT_ID
+      value: dev-fss.pensjon-q2.pensjon-pen-q2
     - name: AZURE_APP_ETTERLATTE_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-api
 
