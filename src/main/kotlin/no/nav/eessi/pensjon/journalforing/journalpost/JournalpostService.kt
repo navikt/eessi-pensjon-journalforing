@@ -121,7 +121,7 @@ class JournalpostService(
         val forsokFerdigstill: Boolean = gjenny || kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
         val journalforingResponse  = journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
 
-        // Vi har en uvalig situasjon der vi forventer ferdigstilling, men dokarkiv klar ikke å ferdigstill
+        // Vi har en uvanlig situasjon der vi forventer ferdigstilling, men dokarkiv klarer ikke å ferdigstill
         if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false){
             logger.error("Forventet ferdigstilling feilet")
         }
