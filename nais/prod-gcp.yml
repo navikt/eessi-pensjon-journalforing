@@ -29,6 +29,8 @@ spec:
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
+        - host: pensjon-pen.prod-fss-pub.nais.io
+        - host: prod-fss.pensjondeployer.pensjon-pen
 
   webproxy: true
   kafka:
@@ -38,8 +40,10 @@ spec:
       value: prod
     - name: NAMESPACE
       value: p
+
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny
+
     - name: EUX_RINA_API_V1_URL
       value: https://eux-rina-api.intern.nav.no/cpi
     - name: PDL_URL
@@ -53,11 +57,12 @@ spec:
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2
     - name: BESTEMSAK_URL
-      value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io/pen/api/bestemsak/v1
+      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
       value: https://navansatt.prod-fss-pub.nais.io
     - name: EESSI_PEN_ONPREM_PROXY_URL
       value: https://eessi-pensjon-onprem-proxy.prod-fss-pub.nais.io
+
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1
     - name: KAFKA_SEDMOTTATT_TOPIC
@@ -68,6 +73,7 @@ spec:
       value: eessipensjon.privat-krav-initialisering
     - name: KAFKA_AUTOMATISERING_TOPIC
       value: eessipensjon.public-automatisering
+
     - name: AZURE_APP_FAGMODUL_CLIENT_ID
       value: prod-gcp.eessipensjon.eessi-pensjon-fagmodul
     - name: AZURE_APP_EUX_CLIENT_ID
@@ -89,7 +95,7 @@ spec:
     - name: AZURE_APP_ETTERLATTE_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-api
     - name: AZURE_APP_PEN_CLIENT_ID
-      value: prod-fss.pensjon.pensjon-pen
+      value: prod-fss.pensjondeployer.pensjon-pen
 
   image: {{ image }}
   ingresses:
