@@ -30,7 +30,7 @@ class RestTemplateConfig(
     private val clientConfigurationProperties: ClientConfigurationProperties,
     private val oAuth2AccessTokenService: OAuth2AccessTokenService?,
     private val meterRegistry: MeterRegistry,
-    ) {
+) {
     private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
 
     init {
@@ -81,7 +81,7 @@ class RestTemplateConfig(
     fun fagmodulOidcRestTemplate(): RestTemplate = opprettRestTemplate(fagmodulUrl, "fagmodul-credentials")
 
     @Bean
-    fun bestemSakOidcRestTemplate(): RestTemplate = opprettRestTemplate(bestemSakUrl, "proxy-credentials")
+    fun bestemSakOidcRestTemplate(): RestTemplate = opprettRestTemplate(bestemSakUrl, "pensjon-credentials")
 
     @Bean
     fun navansattRestTemplate(): RestTemplate? = opprettRestTemplate(navansattUrl, "navansatt-credentials")
@@ -114,17 +114,17 @@ class RestTemplateConfig(
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
-                .rootUri(url)
-                .errorHandler(DefaultResponseErrorHandler())
-                .additionalInterceptors(
-                        RequestIdHeaderInterceptor(),
-                        IOExceptionRetryInterceptor(),
-                        RequestCountInterceptor(meterRegistry),
-                        bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
-                )
-                .build().apply {
-                    requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
-                }
+            .rootUri(url)
+            .errorHandler(DefaultResponseErrorHandler())
+            .additionalInterceptors(
+                RequestIdHeaderInterceptor(),
+                IOExceptionRetryInterceptor(),
+                RequestCountInterceptor(meterRegistry),
+                bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
+            )
+            .build().apply {
+                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+            }
     }
 
     private fun buildRestTemplate(url: String): RestTemplate {
