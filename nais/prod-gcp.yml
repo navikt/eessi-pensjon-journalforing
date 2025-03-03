@@ -88,6 +88,8 @@ spec:
       value: http://etterlatte-api.etterlatte
     - name: AZURE_APP_ETTERLATTE_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-api
+    - name: AZURE_APP_PEN_CLIENT_ID
+      value: prod-fss.pensjon.pensjon-pen
 
   image: {{ image }}
   ingresses:
