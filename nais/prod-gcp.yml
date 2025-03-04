@@ -30,7 +30,7 @@ spec:
         - host: navansatt.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io
-        - host: prod-fss.pensjondeployer.pensjon-pen
+        - host: prod-fss.prod-fss-pub.nais.io
 
   webproxy: true
   kafka:
