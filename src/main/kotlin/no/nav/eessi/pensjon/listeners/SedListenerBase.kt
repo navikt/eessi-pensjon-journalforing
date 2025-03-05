@@ -29,12 +29,18 @@ abstract class SedListenerBase(
     private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
 
     /** Velger saktype fra enten bestemSak eller pensjonsinformasjon der det finnes */
-    private fun pensjonSakInformasjon(identifisertPerson: IdentifisertPerson?, bucType: BucType, saktypeFraSed: SakType?, alleSedIBuc: List<SED>): SakInformasjon? {
+    private fun pensjonSakInformasjon(
+        identifisertPerson: IdentifisertPerson?,
+        bucType: BucType,
+        saktypeFraSed: SakType?,
+        alleSedIBuc: List<SED>,
+        currentSed: SED?
+    ): SakInformasjon? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc).let { pensjonsinformasjon ->
+        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc, currentSed).let { pensjonsinformasjon ->
             if (pensjonsinformasjon?.sakType != null) {
                 logger.info("Velger sakType ${pensjonsinformasjon.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.sakId}")
                 return pensjonsinformasjon
@@ -77,7 +83,8 @@ abstract class SedListenerBase(
                 identifisertPerson,
                 bucType,
                 sakTypeFraSED,
-                alleSedIBucList
+                alleSedIBucList,
+                currentSed
             )
         }
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)

@@ -13,8 +13,8 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc, null)?.let { sakId ->
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): SakInformasjon? {
+        return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
             if (sakId.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId} for aktoerid: $aktoerId")
                 return null
