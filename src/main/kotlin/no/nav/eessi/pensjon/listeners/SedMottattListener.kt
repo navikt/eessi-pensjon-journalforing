@@ -117,13 +117,15 @@ class SedMottattListener(
             }
         }
 
+        val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
             sedHendelse,
             bucType,
             identifisertPerson,
             MOTTATT,
-            null // trenger ikke å sende med currentSed for MOTTATT, da det dette kommer fra utlandet
+            null,
+            // trenger ikke å sende med currentSed for MOTTATT, da det dette kommer fra utlandet
         )
 
         val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second

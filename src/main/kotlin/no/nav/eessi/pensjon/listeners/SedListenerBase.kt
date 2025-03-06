@@ -72,9 +72,10 @@ abstract class SedListenerBase(
         bucType: BucType,
         identifisertPerson: IdentifisertPDLPerson?,
         hendelseType: HendelseType,
-        currentSed: SED?
+        currentSed: SED?,
+        erGjennysak: Boolean? = false
     ): SaksInfoSamlet {
-        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed)
+        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed,)
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 

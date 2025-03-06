@@ -14,7 +14,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): SakInformasjon? {
-        return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
+        return hentSakIdFraSED(alleSedIBuc, currentSed,)?.let { sakId ->
             if (sakId.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId} for aktoerid: $aktoerId")
                 return null
@@ -51,13 +51,13 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     }
 
-    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): String? {
+    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?, erGjennysak: Boolean? = null): String? {
         val sakerFraSed = sedListe
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }
-            .filter { it.erGyldigPesysNummer() }
+            .filter { it.erGyldigPesysNummer() || erGjennysak == true }
             .distinct()
-            .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
+            .also { sakId -> logger.info("Fant sakId i SED: $sakId , sak er gjennysak: $erGjennysak") }
 
         if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
 

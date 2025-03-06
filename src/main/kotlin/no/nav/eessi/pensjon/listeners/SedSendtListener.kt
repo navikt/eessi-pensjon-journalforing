@@ -110,7 +110,7 @@ class SedSendtListener(
             bucType,
             identifisertPerson,
             SENDT,
-            currentSed
+            currentSed,
         )
 
 
