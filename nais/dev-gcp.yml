@@ -29,7 +29,6 @@ spec:
         - host: eux-rina-api-gcp-q2.intern.dev.nav.no
         - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
         - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
-        - host: eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
   webproxy: true
   kafka:
     pool: nav-dev
@@ -57,8 +56,6 @@ spec:
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
       value: https://navansatt.dev-fss-pub.nais.io
-    - name: EESSI_PEN_ONPREM_PROXY_URL
-      value: https://eessi-pensjon-onprem-proxy-q2.dev-fss-pub.nais.io
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
 
@@ -81,8 +78,6 @@ spec:
       value: dev-fss.org.norg2
     - name: AZURE_APP_NAVANSATT_CLIENT_ID
       value: dev-fss.teampensjon.navansatt
-    - name: AZURE_APP_PROXY_CLIENT_ID
-      value: dev-fss.eessipensjon.eessi-pensjon-onprem-proxy-q2
     - name: AZURE_APP_PDL_CLIENT_ID
       value: dev-fss.pdl.pdl-api
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
