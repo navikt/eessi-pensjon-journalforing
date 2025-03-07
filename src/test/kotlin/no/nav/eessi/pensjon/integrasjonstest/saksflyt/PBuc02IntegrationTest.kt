@@ -145,13 +145,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val gjennysakIBucket = """
             {
               "sakId" : "123456",
-              "sakType" : "OMSORG"
+              "sakType" : "BARNEP"
             }
         """.trimIndent()
 
-            every { gcpStorageService.hent(any(), any()) } returns gjennysakIBucket
             every { gcpStorageService.gjennyFinnes(any()) } returns true
-            every { gcpStorageService.hentFraGjenny(any()) } returns "BARNEP"
+            every { gcpStorageService.hentFraGjenny(any()) } returns gjennysakIBucket
 
             testRunnerVoksen(
                 FNR_VOKSEN_2,

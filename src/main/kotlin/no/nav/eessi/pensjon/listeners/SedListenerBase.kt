@@ -78,7 +78,7 @@ abstract class SedListenerBase(
         val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
         if(erGjennysak) {
             val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
-            oppdaterGjennySak(sedHendelse)
+            oppdaterGjennySak(sedHendelse).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             return SaksInfoSamlet(gjennySakId, null, null)
         }
         val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed)
@@ -100,8 +100,7 @@ abstract class SedListenerBase(
     }
 
     private fun oppdaterGjennySak(sedHendelse: SedHendelse) : String? {
-        val gcpGjennysak = gcpStorageService.hent(sedHendelse.rinaSakId, "eessi-pensjon-gjenny")
-            ?.let { mapJsonToAny<GjennySak>(it) }
+        val gcpGjennysak = gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId)?.let { mapJsonToAny<GjennySak>(it) }
         val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
 
         return if (gjennyFinnes && gcpGjennysak?.sakId == null && gcpGjennysak != null) {

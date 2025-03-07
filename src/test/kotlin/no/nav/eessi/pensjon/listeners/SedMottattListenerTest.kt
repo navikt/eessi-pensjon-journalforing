@@ -52,7 +52,7 @@ internal class SedMottattListenerTest {
         """.trimIndent()
         every { gcpStorageService.gjennyFinnes(any()) } returns true
         every { gcpStorageService.oppdaterGjennysak(any(), any()) } returns "123546"
-        every { gcpStorageService.hent(any(), any()) } returns gjennysakIBucket
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennysakIBucket
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { gcpStorageService.lagre(any(), any()) }
