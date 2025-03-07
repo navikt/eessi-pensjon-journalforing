@@ -44,7 +44,15 @@ internal class SedMottattListenerTest {
 
     @Test
     fun `Gitt en P_BUC_02 som er en gjenny buc saa skal den lagres i gjenny bucketen`() {
+        val gjennysakIBucket = """
+            {
+              "sakId" : "123456",
+              "sakType" : "OMSORG"
+            }
+        """.trimIndent()
         every { gcpStorageService.gjennyFinnes(any()) } returns true
+        every { gcpStorageService.oppdaterGjennysak(any(), any()) } returns "123546"
+        every { gcpStorageService.hent(any(), any()) } returns gjennysakIBucket
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { gcpStorageService.lagre(any(), any()) }
