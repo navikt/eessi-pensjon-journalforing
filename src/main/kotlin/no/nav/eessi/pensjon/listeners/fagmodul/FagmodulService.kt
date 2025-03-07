@@ -57,7 +57,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .map { id -> trimSakidString(id) }
             .filter { it.erGyldigPesysNummer() }
             .distinct()
-            .also { sakId -> logger.info("Fant sakId i SED: $sakId") }
+            .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
         if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
 
@@ -79,6 +79,16 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
 
         return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }
+    }
+
+    fun hentGjennySakIdFraSed(currentSed: SED?): String? {
+        val sakIdFraSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }
+            ?.map { id -> trimSakidString(id) }
+            ?.distinct()
+            .also { sakId -> logger.info("Fant gjenny sakId i SED: $sakId. Antall gjennysaker funnet: ${sakId?.size}") }
+
+        if (sakIdFraSed?.isEmpty() == true) logger.warn("Fant ingen gjenny sakId i SEDen")
+        return sakIdFraSed?.firstOrNull().also { logger.info("Gjenny sakId fra SED: $it") }
     }
 
     private fun filterEESSIsak(sed: SED): String? {

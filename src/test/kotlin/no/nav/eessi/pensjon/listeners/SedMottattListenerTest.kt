@@ -36,6 +36,7 @@ internal class SedMottattListenerTest {
     )
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
@@ -43,6 +44,15 @@ internal class SedMottattListenerTest {
 
     @Test
     fun `Gitt en P_BUC_02 som er en gjenny buc saa skal den lagres i gjenny bucketen`() {
+        val gjennysakIBucket = """
+            {
+              "sakId" : "123456",
+              "sakType" : "OMSORG"
+            }
+        """.trimIndent()
+        every { gcpStorageService.gjennyFinnes(any()) } returns true
+        every { gcpStorageService.oppdaterGjennysak(any(), any(), any()) } returns "123546"
+        every { gcpStorageService.hentFraGjenny(any()) } returns gjennysakIBucket
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P2100.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { gcpStorageService.lagre(any(), any()) }
@@ -51,6 +61,7 @@ internal class SedMottattListenerTest {
 
     @Test
     fun `Gitt en P_BUC_02 som ikke er P2100 saa skal den ikke lagres i gjenny bucketen`() {
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P10000.json"))), cr, acknowledgment)
 
         verify(exactly = 0) { gcpStorageService.lagre(any(), any()) }
@@ -59,6 +70,7 @@ internal class SedMottattListenerTest {
 
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedMottatt hendelse konsumeres, skal melding ackes`() {
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         sedListener.consumeSedMottatt(hendelse, cr, acknowledgment)
 

@@ -113,6 +113,14 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Sjekker om identifisert person er under 67 aar dersom han er det skal vi sette det til gjennysak og tema omstilling returneres i dette tilfellet`() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            val gjennysakIBucket = """
+            {
+              "sakId" : "123456",
+              "sakType" : "OMSORG"
+            }
+        """.trimIndent()
+
+            every { gcpStorageService.hent(any(), any()) } returns gjennysakIBucket
             every { gcpStorageService.gjennyFinnes(any()) } returns true
 
             testRunnerVoksen(
@@ -134,8 +142,15 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Sjekker om identifisert person er barn i en mottatt P2100 og setter den til gjennysak med tema eybarnep`() {
             val allDocuemtActions = listOf(ForenkletSED("10001212", P2100, SedStatus.RECEIVED))
+            val gjennysakIBucket = """
+            {
+              "sakId" : "123456",
+              "sakType" : "BARNEP"
+            }
+        """.trimIndent()
+
             every { gcpStorageService.gjennyFinnes(any()) } returns true
-            every { gcpStorageService.hentFraGjenny(any()) } returns "BARNEP"
+            every { gcpStorageService.hentFraGjenny(any()) } returns gjennysakIBucket
 
             testRunnerVoksen(
                 FNR_VOKSEN_2,
