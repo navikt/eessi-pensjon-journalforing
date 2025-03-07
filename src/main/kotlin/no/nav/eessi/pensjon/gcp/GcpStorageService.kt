@@ -82,13 +82,13 @@ class GcpStorageService(
         }
     }
 
-    fun oppdaterGjennysak(sedHendelse: SedHendelse, gcpstorageObject: GjennySak) : String {
+    fun oppdaterGjennysak(sedHendelse: SedHendelse, gcpstorageObject: GjennySak, gjennysakFraSed: String) : String {
         val blobId = hentBlobId(gjennyBucket, sedHendelse.rinaSakId)
         slettJournalpostDetaljer(blobId)
         logger.warn("Gjennysak finnes for rinaSakId: ${sedHendelse.rinaSakId}")
 
         val saksType = if (gcpstorageObject.sakType == "OMSORG") OMSORG else BARNEP
-        lagre(sedHendelse.rinaSakId, GjennySak(sedHendelse.rinaSakId, saksType.name))
+        lagre(sedHendelse.rinaSakId, GjennySak(gjennysakFraSed, saksType.name))
         return saksType.name
     }
 
