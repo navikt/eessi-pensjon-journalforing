@@ -15,7 +15,6 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
-import no.nav.eessi.pensjon.utils.mapAnyToJson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.Acknowledgment
@@ -101,12 +100,12 @@ abstract class SedListenerBase(
     }
 
     private fun oppdaterGjennySak(sedHendelse: SedHendelse) : String? {
-        val gcpstorageObject = gcpStorageService.hent(sedHendelse.rinaSakId, "eessi-pensjon-gjenny")
+        val gcpGjennysak = gcpStorageService.hent(sedHendelse.rinaSakId, "eessi-pensjon-gjenny")
             ?.let { mapJsonToAny<GjennySak>(it) }
         val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
 
-        return if (gjennyFinnes && gcpstorageObject?.sakId == null) {
-            gcpStorageService.oppdaterGjennysak(sedHendelse, gcpstorageObject!!)
+        return if (gjennyFinnes && gcpGjennysak?.sakId == null && gcpGjennysak != null) {
+            gcpStorageService.oppdaterGjennysak(sedHendelse, gcpGjennysak)
         }
         else null
 
