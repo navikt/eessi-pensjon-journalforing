@@ -3,6 +3,9 @@ package no.nav.eessi.pensjon.gcp
 import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
+import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -45,13 +48,15 @@ class GcpStorageService(
         logger.info("Melding for $storageKey finnes ikke for $bucketName")
         return false
     }
+    fun hentBlobId(bucketName: String, storageKey: String): BlobId =
+        gcpStorage.get(BlobId.of(bucketName, storageKey)).blobId
 
     fun hentFraGjenny(storageKey: String): String? {
         logger.debug("Henter gjennydetaljer for rinaSakId: $storageKey")
         return hent(storageKey, gjennyBucket)
     }
 
-    private fun hent(storageKey: String, bucketName: String): String? {
+    fun hent(storageKey: String, bucketName: String): String? {
         try {
             logger.info("storageKey: $storageKey og bucketName: $bucketName")
             val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
@@ -74,6 +79,25 @@ class GcpStorageService(
             logger.error("Feilet med å lagre dokument med id: ${blobInfo.blobId.name}", e)
         }.onSuccess {
             if (gjennysak != null) logger.info("Lagret info på S3 med rinaID: $euxCaseId for gjenny: ${gjennysak.toJson()}")
+        }
+    }
+
+    fun oppdaterGjennysak(sedHendelse: SedHendelse, gcpstorageObject: GjennySak) : String {
+        val blobId = hentBlobId(gjennyBucket, sedHendelse.rinaSakId)
+        slettJournalpostDetaljer(blobId)
+        logger.warn("Gjennysak finnes for rinaSakId: ${sedHendelse.rinaSakId}")
+
+        val saksType = if (gcpstorageObject.sakType == "OMSORG") OMSORG else BARNEP
+        lagre(sedHendelse.rinaSakId, GjennySak(sedHendelse.rinaSakId, saksType.name))
+        return saksType.name
+    }
+
+    fun slettJournalpostDetaljer(blobId: BlobId) {
+        try {
+            logger.info("Sletter journalpostdetaljer for rinaSakId: $blobId")
+            gcpStorage.delete(blobId).also { logger.info("Slett av journalpostdetaljer utført: $it") }
+        } catch (ex: Exception) {
+            logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
         }
     }
 }

@@ -4,10 +4,10 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
+import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
@@ -15,6 +15,8 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
+import no.nav.eessi.pensjon.utils.mapAnyToJson
+import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.Acknowledgment
 
@@ -72,10 +74,16 @@ abstract class SedListenerBase(
         bucType: BucType,
         identifisertPerson: IdentifisertPDLPerson?,
         hendelseType: HendelseType,
-        currentSed: SED?,
-        erGjennysak: Boolean? = false
+        currentSed: SED?
     ): SaksInfoSamlet {
-        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed,)
+        val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
+        if(erGjennysak) {
+            val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
+            oppdaterGjennySak(sedHendelse)
+            return SaksInfoSamlet(gjennySakId, null, null)
+        }
+        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed)
+
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
@@ -91,6 +99,19 @@ abstract class SedListenerBase(
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
         return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktypeFraSedEllerPesys)
     }
+
+    private fun oppdaterGjennySak(sedHendelse: SedHendelse) : String? {
+        val gcpstorageObject = gcpStorageService.hent(sedHendelse.rinaSakId, "eessi-pensjon-gjenny")
+            ?.let { mapJsonToAny<GjennySak>(it) }
+        val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
+
+        return if (gjennyFinnes && gcpstorageObject?.sakId == null) {
+            gcpStorageService.oppdaterGjennysak(sedHendelse, gcpstorageObject!!)
+        }
+        else null
+
+    }
+
 
     fun skippingOffsett(offset: Long, offsetsToSkip : List<Long>): Boolean {
         return if (offset !in offsetsToSkip) {
