@@ -129,35 +129,6 @@ class JournalpostService(
         return journalforingResponse
     }
 
-
-    fun sendJournalPost(journalpostRequest: JournalpostMedSedInfo,
-                        saksbehandlerIdent: String?): OpprettJournalPostResponse? {
-        return sendJournalPost(journalpostRequest.journalpostRequest, journalpostRequest.sedHendelse, journalpostRequest.sedHendelseType, saksbehandlerIdent)
-    }
-
-    /** Oppdatere journalpost med kall til dokarkiv:
-     *  https://dokarkiv-q2.nais.preprod.local/swagger-ui/index.html#/journalpostapi/oppdaterJournalpost
-     */
-    fun oppdaterJournalpost(
-        journalpostResponse: JournalpostResponse,
-        kjentBruker: Bruker,
-        tema: Tema,
-        enhet: Enhet,
-        behandlingsTema: Behandlingstema
-    ) {
-        journalpostKlient.oppdaterJournalpostMedBruker(
-            OppdaterJournalpost(
-                journalpostId = journalpostResponse.journalpostId!!,
-                dokumenter = journalpostResponse.dokumenter,
-                sak = journalpostResponse.sak,
-                bruker = kjentBruker,
-                tema = tema,
-                enhet = enhet,
-                behandlingsTema = behandlingsTema
-            )
-        ).also { logger.debug("Oppdatert journalpostId: ${journalpostResponse.journalpostId}") }
-    }
-
     fun kanSakFerdigstilles(request: OpprettJournalpostRequest, bucType: BucType, sedHendelseType: HendelseType): Boolean {
         val detFinnesNull = listOf(
             request.bruker,

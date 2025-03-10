@@ -105,7 +105,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
 
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(any()) }
         val sakInformasjonMock = mockk<SakInformasjon>().apply {
             every { sakId } returns null
             every { sakType } returns SakType.ALDER
@@ -135,12 +134,12 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
     @Test
     fun `Sendt sed P2200 med ukjent fnr skal sette status avbrutt og opprette behandle-sed oppgave`() {
-
         val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_03_P2200.json")!!.readText()
         val sedHendelse = SedHendelse.fromJson(hendelse)
         val identifisertPerson = identifisertPDLPerson()
-        justRun { journalpostKlient.oppdaterJournalpostfeilregistrerSakstilknytning(eq("12345")) }
+
         justRun { journalpostKlient.oppdaterJournalpostMedAvbrutt(eq(sedHendelse.rinaSakId)) }
+
         journalManueltMedAvbrutt(
             sedHendelse,
             HendelseType.SENDT,
@@ -244,7 +243,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
 
         )
         every { gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId) } returns "EYO"
-//        every { journalpostKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
 
         assertThrows<Exception> {
             journalforingService.journalfor(
@@ -290,8 +288,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
         )
     }
 
-
-
     private fun journalfor(
         sedHendelse: SedHendelse,
         hendelseType: HendelseType = HendelseType.SENDT,
@@ -310,7 +306,6 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             currentSed = SED(type = SedType.P2200)
         )
     }
-
 
     private fun identifisertPDLPerson(): IdentifisertPDLPerson {
         val identifisertPerson = identifisertPersonPDL(

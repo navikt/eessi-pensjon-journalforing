@@ -159,10 +159,7 @@ class JournalforingServiceMedGCPTest {
 
         every { gcpStorage.delete(blobId) } returns true
         every { gcpStorage.list(any<String>())} returns blobList
-
         every { safClient.hentJournalpost(any()) } returns journalpostResponse
-
-        justRun { journalpostService.oppdaterJournalpost(any(), any(), any(), any(), any()) }
         every { journalpostService.sendJournalPost(any<OpprettJournalpostRequest>(), any(), any(), any()) } returns OpprettJournalPostResponse(
             journalpostId = journalpostId,
             journalstatus = Journalstatus.MOTTATT.name,
