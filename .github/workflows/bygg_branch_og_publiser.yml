@@ -19,7 +19,7 @@ jobs:
   bygg_og_publiser:
     name: 'Bygg branch og publiser image'
     permissions:
-      contents: "read"
+      contents: "write"
       id-token: "write"
     runs-on: ubuntu-latest
     steps:
@@ -51,4 +51,4 @@ jobs:
         run: echo "IMAGE=${{ env.DOCKER_METADATA_OUTPUT_TAGS }}"
 
       - name: 'Echo Image Name'
-        run: echo "### Image Hash $(echo ${{  steps.docker-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_STEP_SUMMARY
+        run: echo "### Image Hash $(echo ${{  env.DOCKER_METADATA_OUTPUT_TAGS }} | cut -d':' -f2)" >> $GITHUB_STEP_SUMMARY
