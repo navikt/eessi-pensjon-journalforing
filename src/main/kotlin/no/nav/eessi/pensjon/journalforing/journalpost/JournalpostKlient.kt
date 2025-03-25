@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
@@ -34,11 +33,13 @@ class JournalpostKlient(
     private lateinit var opprettjournalpost: MetricsHelper.Metric
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
     private lateinit var avbruttStatusInfo: MetricsHelper.Metric
+    private lateinit var oppdatertJpMedMottaker: MetricsHelper.Metric
     private lateinit var ferdigstillJournal: MetricsHelper.Metric
 
 
     init {
         avbruttStatusInfo = metricsHelper.init("avbruttStatusInfo")
+        oppdatertJpMedMottaker = metricsHelper.init("oppdatertJpMedMottaker")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
         ferdigstillJournal = metricsHelper.init("ferdigstillJournal")
@@ -145,6 +146,29 @@ class JournalpostKlient(
 
             } catch (ex: Exception) {
                 handleException("forsøk på å sette status til avbrutt på journalpostId: $journalpostId ex: ", ex).also {
+                    throw RuntimeException(it)
+                }
+            }
+        }
+    }
+
+    fun oppdaterJournalpostMedMottaker(journalpostId: String, mottaker: String) {
+
+        return oppdatertJpMedMottaker.measure {
+            try {
+                logger.info("Forsøker å oppdatere journalpost: $journalpostId med mottaker")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    "/journalpost/$journalpostId",
+                    HttpMethod.PUT,
+                    HttpEntity(mottaker, headers),
+                    String::class.java
+                )
+
+            } catch (ex: Exception) {
+                handleException("Feiler ved forsøk på å oppdatere Journalpost: $journalpostId med mottaker ex: ", ex).also {
                     throw RuntimeException(it)
                 }
             }

@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.R_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
@@ -92,6 +93,11 @@ class EuxService(
             }
         }
         return null
+    }
+
+    fun hentDeltakereForBuc(rinanummer: String): Organisation {
+        val buc = hentBuc(rinanummer)
+        return buc.participants?.firstOrNull()?.organisation ?: throw RuntimeException("Fant ingen deltakere i BUC")
     }
 
     /**

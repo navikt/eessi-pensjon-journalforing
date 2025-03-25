@@ -20,11 +20,13 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
 
     private lateinit var HentDokumentMetadata: MetricsHelper.Metric
     private lateinit var HentDokumentInnhold: MetricsHelper.Metric
+    private lateinit var HentJournalpost: MetricsHelper.Metric
     private lateinit var HentRinaSakIderFraDokumentMetadata: MetricsHelper.Metric
 
     init {
         HentDokumentMetadata = metricsHelper.init("HentDokumentMetadata", ignoreHttpCodes = listOf(HttpStatus.FORBIDDEN))
         HentDokumentInnhold = metricsHelper.init("HentDokumentInnhold", ignoreHttpCodes = listOf(HttpStatus.FORBIDDEN, HttpStatus.UNAUTHORIZED))
+        HentJournalpost = metricsHelper.init("HentJournalpost", ignoreHttpCodes = listOf(HttpStatus.FORBIDDEN))
         HentRinaSakIderFraDokumentMetadata = metricsHelper.init("HentRinaSakIderFraDokumentMetadata", ignoreHttpCodes = listOf(HttpStatus.FORBIDDEN))
     }
 
@@ -59,11 +61,33 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
         }
     }
 
-    data class Data(
-        @JsonProperty("journalpost") val journalpost: JournalpostResponse
-    )
+    fun hentJournalpostForJp(journalpostId: String) : Journalpost? {
 
-    data class Response(
-        @JsonProperty("data") val data: Data
-    )
+        return HentJournalpost.measure {
+            try {
+                logger.info("Henter dokumentinnhold for journalpostId:$journalpostId")
+
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+                val response = safGraphQlOidcRestTemplate.exchange(
+                    "/",
+                    HttpMethod.POST,
+                    HttpEntity(SafRequest(journalpostId.toString()).toJson(), headers),
+                    String::class.java
+                )
+                val journalPostReponse = mapJsonToAny<ResponseJP>(response.body!!).takeIf { true }
+                return@measure journalPostReponse?.data?.journalpost
+
+            } catch (ex: Exception) {
+                logger.error("En feil oppstod under henting av journalpost fra SAF: $ex")
+            }
+            null
+        }
+    }
+
+    data class Data(@JsonProperty("journalpost") val journalpost: JournalpostResponse)
+    data class Response(@JsonProperty("data") val data: Data)
+
+    data class DataJP(@JsonProperty("journalpost") val journalpost: Journalpost)
+    data class ResponseJP(@JsonProperty("data") val data: DataJP)
 }
