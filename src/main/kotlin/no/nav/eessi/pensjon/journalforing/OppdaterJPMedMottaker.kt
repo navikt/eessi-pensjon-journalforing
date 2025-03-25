@@ -1,12 +1,12 @@
 package no.nav.eessi.pensjon.journalforing
 
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.File
 
@@ -25,14 +25,27 @@ class OppdaterJPMedMottaker(
      * Oppdatere JP med Mottaker ("id", "idType" : "UTL_ORG", "navn", "land" )
      */
 
-    @Scheduled(cron = "0 0 21 * * ?")
+    @PostConstruct
+    fun onStartup() {
+        OppdatereHeleSulamitten()
+    }
+
+//    @Scheduled(cron = "0 0 21 * * ?")
     fun OppdatereHeleSulamitten() {
         File("JournalpostIder").bufferedReader().useLines { lines ->
-            lines.forEach { line ->
-                val rinaIder = hentRinaIdForJournalpost(line)?.let {
-                    val mottaker  = euxService.hentDeltakereForBuc(it)
-                    journalpostKlient.oppdaterJournalpostMedMottaker(line, mottaker.toJson())
+            lines.forEach { journalpostId ->
+                if(journalpostId in File("JournalpostIderSomGikkBra").readLines()) {
+                    logger.info("Journalpost $journalpostId er allerede oppdatert")
+                    return@forEach
                 }
+
+                val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let {
+                    val mottaker  = euxService.hentDeltakereForBuc(it)
+                    journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
+                }
+
+                val file = File("JournalpostIderSomGikkBra")
+                file.appendText("$journalpostId\n")
                 logger.info("Oppdatert journalpost med mottaker: $rinaIder")
             }
         }
