@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
+import no.nav.eessi.pensjon.journalforing.OppdaterJPMedMottaker
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -39,6 +40,9 @@ import org.springframework.web.client.RestTemplate
 internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @MockkBean
     private lateinit var personService: PersonService
+
+    @MockkBean
+    private lateinit var oppdaterJPMedMottaker: OppdaterJPMedMottaker
 
     @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
