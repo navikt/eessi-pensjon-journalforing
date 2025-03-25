@@ -28,12 +28,12 @@ class CustomMockServer {
         )
     }
 
-    fun medStatusAvbrutt() = apply {
+    fun medOppdaterJpMedMottaker() = apply {
         // Mocker sett status avbrutt
         mockServer.`when`(
             HttpRequest.request()
-                .withMethod("PATCH")
-                .withPath("/journalpost/.*/settStatusAvbryt")
+                .withMethod("PUT")
+                .withPath("/journalpost")
         )
             .respond(
                 HttpResponse.response()

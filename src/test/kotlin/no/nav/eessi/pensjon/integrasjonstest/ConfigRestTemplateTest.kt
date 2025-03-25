@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkBeans
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
@@ -16,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.OppdaterJPMedMottaker
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -91,6 +91,9 @@ internal class ConfigRestTemplateTest {
     @MockkBean(relaxed = true)
     private lateinit var safClient: SafClient
 
+    @MockkBean(relaxed = true)
+    private lateinit var oppdaterJPMedMottaker: OppdaterJPMedMottaker
+
 
     @BeforeEach
     fun setup() {
@@ -126,6 +129,7 @@ internal class ConfigRestTemplateTest {
     fun `Konfigurasjon skal håndtere en pdf med dokumenter større enn 20b`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
+        every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
 
         sedSendtListener.consumeSedSendt(

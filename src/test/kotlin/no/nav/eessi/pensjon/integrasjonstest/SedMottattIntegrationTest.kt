@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.OppdaterJPMedMottaker
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -42,7 +43,11 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     @MockkBean(relaxed = true)
     lateinit var gcpStorageService: GcpStorageService
 
+    @MockkBean(relaxed = true)
+    lateinit var oppdaterJPMedMottaker: OppdaterJPMedMottaker
+
     private var hentSakService: HentSakService = mockk()
+
 
     @BeforeEach
     fun setUp() {

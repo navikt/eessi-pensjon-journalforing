@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.OppdaterJPMedMottaker
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +36,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
+
+    @MockkBean(relaxed = true)
+    private lateinit var oppdaterJPMedMottaker: OppdaterJPMedMottaker
 
     @Autowired
     private lateinit var hentSakService: HentSakService
@@ -110,6 +114,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .medGjennyResponse()
             .mockPensjonsinformasjon()
             .medOppdaterDistribusjonsinfo()
+            .medOppdaterJpMedMottaker()
 
         meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
 
