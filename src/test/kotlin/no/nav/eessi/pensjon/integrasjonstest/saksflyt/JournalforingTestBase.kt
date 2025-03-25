@@ -454,7 +454,6 @@ internal open class JournalforingTestBase {
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            else -> Assertions.fail()
         }
 
         val kravMeldingList: List<BehandleHendelseModel> = kravmeldingSlot.map {

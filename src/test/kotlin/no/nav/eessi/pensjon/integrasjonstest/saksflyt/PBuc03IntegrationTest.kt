@@ -332,7 +332,6 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            else -> fail()
         }
         var oppgaveMeldingList: List<OppgaveMelding> = meldingSlot.map {
             mapJsonToAny(it)

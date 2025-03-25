@@ -636,7 +636,6 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         when (hendelseType) {
             SENDT -> sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
             MOTTATT -> mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
-            else -> Assertions.fail()
         }
 
         val oppgaveMelding = mapJsonToAny<OppgaveMelding>(meldingSlot.captured)
