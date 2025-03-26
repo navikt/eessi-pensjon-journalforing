@@ -8,7 +8,9 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 
 @Component
 class OppdaterJPMedMottaker(
@@ -27,13 +29,15 @@ class OppdaterJPMedMottaker(
 
     @PostConstruct
     fun onStartup() {
-        OppdatereHeleSulamitten()
+        oppdatereHeleSulamitten()
     }
 
 //    @Scheduled(cron = "0 0 21 * * ?")
-    fun OppdatereHeleSulamitten() {
-    File(javaClass.classLoader.getResource("JournalpostIder")!!.file).bufferedReader().useLines { lines ->
+    fun oppdatereHeleSulamitten() {
+        val inputStream = object {}.javaClass.classLoader.getResourceAsStream("JournalpostIder") ?: throw IllegalArgumentException("File not found:JournalpostIder")
+        BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
             lines.forEach { journalpostId ->
+                println("journalpostId: $journalpostId")
                 if(journalpostId in File(javaClass.classLoader.getResource("JournalpostIderSomGikkBra")!!.file).bufferedReader().readLines()) {
                     logger.info("Journalpost $journalpostId er allerede oppdatert")
                     return@forEach
@@ -49,6 +53,12 @@ class OppdaterJPMedMottaker(
                 logger.info("Oppdatert journalpost med mottaker: $rinaIder")
             }
         }
+    }
+
+    fun readResourceFile(fileName: String): List<String> {
+        val inputStream = object {}.javaClass.classLoader.getResourceAsStream(fileName)
+            ?: throw IllegalArgumentException("File not found: $fileName")
+        return BufferedReader(InputStreamReader(inputStream)).readLines()
     }
 
     //Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
