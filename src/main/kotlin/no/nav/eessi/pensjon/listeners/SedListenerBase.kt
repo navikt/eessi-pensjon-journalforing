@@ -4,7 +4,8 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
@@ -79,7 +80,7 @@ abstract class SedListenerBase(
         if(erGjennysak) {
             val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
             if (gjennySakId != null) {
-                oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
+                oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak: ${sedHendelse.rinaSakId} oppdatert med tema: $it sakId: $gjennySakId") }
             }
             return SaksInfoSamlet(gjennySakId, null, null)
         }
@@ -106,6 +107,7 @@ abstract class SedListenerBase(
         val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
 
         return if (gjennyFinnes && gcpGjennysak?.sakId == null && gcpGjennysak != null) {
+            logger.debug("skal oppdatere gjnnysak i gcp")
             gcpStorageService.oppdaterGjennysak(sedHendelse, gcpGjennysak, gjennysakFraSed)
         }
         else null

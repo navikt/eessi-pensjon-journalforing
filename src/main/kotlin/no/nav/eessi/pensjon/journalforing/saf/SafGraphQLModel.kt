@@ -41,13 +41,13 @@ data class Journalpost(
     val tittel: String?,
     val journalposttype: String?,
     val journalstatus: String?,
-    val tema: String,
-    val behandlingstema: String,
-    val behandlingstemanavn: String,
-    val journalforendeEnhet: String,
-    val eksternReferanseId: String,
+    val tema: String?,
+    val behandlingstema: String?,
+    val behandlingstemanavn: String?,
+    val journalforendeEnhet: String?,
+    val eksternReferanseId: String?,
     val tilleggsopplysninger: List<Map<String, String>>,
-    val datoOpprettet: String,
+    val datoOpprettet: String?,
 )
 
 data class HentJournalPoster (val data: Data) {
