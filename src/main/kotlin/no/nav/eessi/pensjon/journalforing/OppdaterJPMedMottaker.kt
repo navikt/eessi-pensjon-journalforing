@@ -2,8 +2,10 @@ package no.nav.eessi.pensjon.journalforing
 
 import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.buc.Organisation
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
+import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,7 +56,15 @@ class OppdaterJPMedMottaker(
 
             val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 val mottaker = euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: ${it.toJsonSkipEmpty()}") }
-                 journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJsonSkipEmpty())
+                 journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId,
+                     """
+                          "avsenderMottaker" : {
+                                "id" : "${mottaker.id}",
+                                "idType" : "UTL_ORG",
+                                "navn" : "${mottaker.name}",
+                                "land" : "${mottaker.countryCode}"
+                             },                         
+                     """.trimIndent())
             }
 
             journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
