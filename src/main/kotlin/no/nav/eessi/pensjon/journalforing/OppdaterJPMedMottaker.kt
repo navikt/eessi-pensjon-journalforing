@@ -32,7 +32,7 @@ class OppdaterJPMedMottaker(
 
 //    @Scheduled(cron = "0 0 21 * * ?")
     fun OppdatereHeleSulamitten() {
-        File("JournalpostIder").bufferedReader().useLines { lines ->
+        File("resources/JournalpostIder").bufferedReader().useLines { lines ->
             lines.forEach { journalpostId ->
                 if(journalpostId in File("JournalpostIderSomGikkBra").readLines()) {
                     logger.info("Journalpost $journalpostId er allerede oppdatert")
@@ -41,7 +41,7 @@ class OppdaterJPMedMottaker(
 
                 val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let {
                     val mottaker  = euxService.hentDeltakereForBuc(it)
-                    journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
+//                    journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
                 }
 
                 val file = File("JournalpostIderSomGikkBra")
