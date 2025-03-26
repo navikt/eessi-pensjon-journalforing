@@ -31,39 +31,37 @@ class OppdaterJPMedMottaker(
         oppdatereHeleSulamitten()
     }
 
-//    @Scheduled(cron = "0 0 21 * * ?")
+    //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
         val tempDirectory = File(System.getProperty("java.io.tmpdir"))
 
-        val journalpostIderFile = File(tempDirectory,"JournalpostIder")
-        val journalpostIderSomGikkBraFile = File(tempDirectory,"JournalpostIderSomGikkBra")
+        val journalpostIderSomGikkBraFile = File(tempDirectory, "JournalpostIderSomGikkBra")
 
-        if (!journalpostIderFile.exists()) {
-            journalpostIderFile.createNewFile()
-        }
         if (!journalpostIderSomGikkBraFile.exists()) {
+            logger.info("JournalpostIderSomGikkBraFile eksisterer ikke, oppretter ny fil")
             journalpostIderSomGikkBraFile.createNewFile()
         }
 
-        val inputStream = journalpostIderFile.inputStream()
-        BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
-            lines.forEach { journalpostId ->
-                println("journalpostId: $journalpostId")
-                if (journalpostId in journalpostIderSomGikkBraFile.bufferedReader().readLines()) {
-                    logger.info("Journalpost $journalpostId er allerede oppdatert")
-                    return@forEach
-                }
-
-                val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
-                    euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: $it") }
-                    // journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
-                }
-
-                journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
-                logger.info("Oppdatert journalpost med mottaker: $rinaIder")
+        val journalpostIderContent = readFileUsingGetResource("/JournalpostIder")
+        val journalpostIderList = journalpostIderContent.lines()
+        journalpostIderList.forEach { journalpostId ->
+            println("journalpostId: $journalpostId")
+            if (journalpostId in journalpostIderSomGikkBraFile.bufferedReader().readLines()) {
+                logger.info("Journalpost $journalpostId er allerede oppdatert")
+                return@forEach
             }
+
+            val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
+                euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: $it") }
+                // journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
+            }
+
+            journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
+            logger.info("Oppdatert journalpost med mottaker: $rinaIder")
         }
     }
+
+    fun readFileUsingGetResource(fileName: String) = this::class.java.getResource(fileName).readText(Charsets.UTF_8)
 
     fun readResourceFile(fileName: String): List<String> {
         val inputStream = object {}.javaClass.classLoader.getResourceAsStream(fileName)

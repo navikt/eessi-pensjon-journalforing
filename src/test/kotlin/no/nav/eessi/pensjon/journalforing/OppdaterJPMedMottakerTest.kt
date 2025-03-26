@@ -8,17 +8,15 @@ import org.junit.jupiter.api.Test
 
 class OppdaterJPMedMottakerTest {
 
- val safClient: SafClient = mockk(relaxed = true)
- val euxService: EuxService = mockk()
- val journalpostKlient: JournalpostKlient = mockk()
+    val safClient: SafClient = mockk(relaxed = true)
+    val euxService: EuxService = mockk()
+    val journalpostKlient: JournalpostKlient = mockk()
 
 
-  @Test
-   fun `test oppdaterJournalpostMedMottaker`() {
-     val oppdaterJPMedMottaker = OppdaterJPMedMottaker(safClient, euxService, journalpostKlient)
-     oppdaterJPMedMottaker.oppdatereHeleSulamitten()
+    @Test
+    fun `test oppdaterJournalpostMedMottaker`() {
+        val oppdaterJPMedMottaker = OppdaterJPMedMottaker(safClient, euxService, journalpostKlient)
+        oppdaterJPMedMottaker.oppdatereHeleSulamitten()
 
-   }
-
-
+    }
 }
