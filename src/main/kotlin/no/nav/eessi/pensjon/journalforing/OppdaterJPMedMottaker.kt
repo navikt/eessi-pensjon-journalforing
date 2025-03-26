@@ -34,22 +34,32 @@ class OppdaterJPMedMottaker(
 
 //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
-        val inputStream = object {}.javaClass.classLoader.getResourceAsStream("JournalpostIder") ?: throw IllegalArgumentException("File not found:JournalpostIder")
+
+        val journalpostIderFile = File(javaClass.classLoader.getResource("JournalpostIder")!!.file)
+        val journalpostIderSomGikkBraFile = File("JournalpostIderSomGikkBra")
+
+        if (!journalpostIderFile.exists()) {
+            journalpostIderFile.createNewFile()
+        }
+        if (!journalpostIderSomGikkBraFile.exists()) {
+            journalpostIderSomGikkBraFile.createNewFile()
+        }
+
+        val inputStream = journalpostIderFile.inputStream()
         BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
             lines.forEach { journalpostId ->
                 println("journalpostId: $journalpostId")
-                if(journalpostId in File(javaClass.classLoader.getResource("JournalpostIderSomGikkBra")!!.file).bufferedReader().readLines()) {
+                if (journalpostId in journalpostIderSomGikkBraFile.bufferedReader().readLines()) {
                     logger.info("Journalpost $journalpostId er allerede oppdatert")
                     return@forEach
                 }
 
                 val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
                     euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: $it") }
-//                    journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
+                    // journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
                 }
 
-                val file = File("JournalpostIderSomGikkBra")
-                file.appendText("$journalpostId\n")
+                journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
                 logger.info("Oppdatert journalpost med mottaker: $rinaIder")
             }
         }
