@@ -74,7 +74,7 @@ class OppdaterJPMedMottaker(
     fun hentRinaIdForJournalpost(journalpostId: String): String? {
         val journalpost = safClient.hentJournalpostForJp(journalpostId)
         if (journalpost != null) {
-            return journalpost.tilleggsopplysninger.firstOrNull()?.get("eessi_pensjon_bucid")
+            return journalpost.tilleggsopplysninger.firstOrNull()?.get("verdi")
         }
         return null
     }
