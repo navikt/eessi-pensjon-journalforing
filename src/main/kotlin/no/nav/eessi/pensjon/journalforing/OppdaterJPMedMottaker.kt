@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
+import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -53,8 +53,8 @@ class OppdaterJPMedMottaker(
             }
 
             val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
-                val mottaker = euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: $it") }
-                 journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
+                val mottaker = euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: ${it.toJsonSkipEmpty()}") }
+                 journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJsonSkipEmpty())
             }
 
             journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
