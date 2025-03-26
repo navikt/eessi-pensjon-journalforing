@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -34,9 +33,10 @@ class OppdaterJPMedMottaker(
 
 //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
+        val tempDirectory = File(System.getProperty("java.io.tmpdir"))
 
-        val journalpostIderFile = File(javaClass.classLoader.getResource("JournalpostIder")!!.file)
-        val journalpostIderSomGikkBraFile = File("JournalpostIderSomGikkBra")
+        val journalpostIderFile = File(tempDirectory,"JournalpostIder")
+        val journalpostIderSomGikkBraFile = File(tempDirectory,"JournalpostIderSomGikkBra")
 
         if (!journalpostIderFile.exists()) {
             journalpostIderFile.createNewFile()
