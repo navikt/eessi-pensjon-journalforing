@@ -32,15 +32,15 @@ class OppdaterJPMedMottaker(
 
 //    @Scheduled(cron = "0 0 21 * * ?")
     fun OppdatereHeleSulamitten() {
-        File("resources/JournalpostIder").bufferedReader().useLines { lines ->
+    File(javaClass.classLoader.getResource("JournalpostIder")!!.file).bufferedReader().useLines { lines ->
             lines.forEach { journalpostId ->
-                if(journalpostId in File("JournalpostIderSomGikkBra").readLines()) {
+                if(journalpostId in File(javaClass.classLoader.getResource("JournalpostIderSomGikkBra")!!.file).bufferedReader().readLines()) {
                     logger.info("Journalpost $journalpostId er allerede oppdatert")
                     return@forEach
                 }
 
-                val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let {
-                    val mottaker  = euxService.hentDeltakereForBuc(it)
+                val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
+                    euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: $it") }
 //                    journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId, mottaker.toJson())
                 }
 
