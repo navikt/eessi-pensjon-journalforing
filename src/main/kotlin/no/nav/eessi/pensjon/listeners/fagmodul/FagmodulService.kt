@@ -72,7 +72,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             }
 
             if (sakerFraSed.size > 1) {
-                logger.error("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
+                logger.warn("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
                 return null
             }
             return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
