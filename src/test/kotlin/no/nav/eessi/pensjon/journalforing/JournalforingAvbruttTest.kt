@@ -324,4 +324,5 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             every { navBruker } returns bruker
         }
     }
+
 }
