@@ -10,10 +10,12 @@ jobs:
   deploy_topics:
     name: 'Deploy topics'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: 'Pull repo'
         uses: actions/checkout@v4
-
       - name: 'Deploy public-automatisering-q2 to eessipensjon namespace'
         uses: nais/deploy/actions/deploy@v2
         env:
