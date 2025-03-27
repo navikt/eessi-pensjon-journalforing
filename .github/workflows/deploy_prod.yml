@@ -29,7 +29,6 @@ jobs:
       - name: 'NAIS-deploy to PROD'
         uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/prod-gcp.yml
           IMAGE: ${{ github.event.client_payload.image }}
