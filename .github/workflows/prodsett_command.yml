@@ -29,7 +29,6 @@ jobs:
       - name: 'Deploy to NAIS'
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ github.event.client_payload.slash_command.arg2 }}
           RESOURCE: nais/${{ github.event.client_payload.slash_command.arg2 }}.yml
           IMAGE: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/eessipensjon/${{ github.event.repository.name }}:${{ github.event.client_payload.slash_command.arg1 }}
