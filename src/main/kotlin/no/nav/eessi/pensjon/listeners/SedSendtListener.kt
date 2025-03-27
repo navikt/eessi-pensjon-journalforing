@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
@@ -71,9 +72,8 @@ class SedSendtListener(
         }
     }
 
-    override fun behandleSedHendelse(sedHendelse: SedHendelse) {
+    override fun behandleSedHendelse(sedHendelse: SedHendelse, buc: Buc) {
         val bucType = sedHendelse.bucType!!
-        val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
         val navAnsattMedEnhet = navansattKlient.navAnsattMedEnhetsInfo(buc, sedHendelse)
 

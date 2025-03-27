@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -79,10 +80,9 @@ class SedMottattListener(
         }
     }
 
-    override fun behandleSedHendelse(sedHendelse: SedHendelse) {
+    override fun behandleSedHendelse(sedHendelse: SedHendelse, buc: Buc) {
 
         val bucType = sedHendelse.bucType!!
-        val buc = euxService.hentBuc(sedHendelse.rinaSakId)
 
         logger.info("*** Starter innkommende journalføring for SED: ${sedHendelse.sedType}, BucType: $bucType, RinaSakID: ${sedHendelse.rinaSakId}, SedID: ${sedHendelse.sedId} ***")
 
