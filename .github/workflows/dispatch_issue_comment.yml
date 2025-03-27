@@ -13,6 +13,9 @@ on:
 jobs:
   dispatcher:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Slash Command Dispatch
         uses: peter-evans/slash-command-dispatch@v1
