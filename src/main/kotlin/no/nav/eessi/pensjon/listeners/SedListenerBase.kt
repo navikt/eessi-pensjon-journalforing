@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.listeners
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
@@ -15,6 +16,7 @@ import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
@@ -133,7 +135,11 @@ abstract class SedListenerBase(
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
         } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
             logger.info("Godkjent sed: ${sedHendelse.sedId}, klar for behandling")
-            behandleSedHendelse(sedHendelse)
+
+            val buc = euxService.hentBuc(sedHendelse.rinaSakId)
+            secureLog.info("Buc: ${buc.id}, sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
+
+            behandleSedHendelse(sedHendelse, buc)
         } else {
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
         }
@@ -143,5 +149,5 @@ abstract class SedListenerBase(
 }
 
 interface journalListener {
-    fun behandleSedHendelse(sedHendelse: SedHendelse)
+    fun behandleSedHendelse(sedHendelse: SedHendelse, buc: Buc)
 }
