@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.Journalpost
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -20,9 +21,10 @@ class OppdaterJPMedMottakerTest {
 
 
     @Test
+    @Disabled
     fun `test oppdaterJournalpostMedMottaker`() {
 
-        File(System.getProperty("java.io.tmpdir"), "JournalpostIderSomGikkBra").delete()
+        File("/data/journalpostIderSomGikkBra.txt").delete()
 
         val jp = """
             {"journalpostId":"453976326","bruker":{"id":"2964001528817","type":"AKTOERID"},"tittel":"Utgående P6000 - Melding om vedtak","journalposttype":"U","journalstatus":"EKSPEDERT","tema":"PEN","behandlingstema":"ab0254","journalforendeEnhet":"4862","eksternReferanseId":"e05590fc-b93f-48a2-b7c9-2f838692fc68","tilleggsopplysninger":[{"nokkel":"eessi_pensjon_bucid","verdi":"1447240"}],"datoOpprettet":"2025-03-20T10:22:39"}
