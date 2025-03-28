@@ -54,22 +54,24 @@ class OppdaterJPMedMottaker(
                 return@forEach
             }
 
-            val rinaIder = hentRinaIdForJournalpost(journalpostId)?.let { it ->
+            hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 val mottaker = euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: ${it.toJsonSkipEmpty()}") }
-                 journalpostKlient.oppdaterJournalpostMedMottaker(journalpostId,
-                      """{
+                journalpostKlient.oppdaterJournalpostMedMottaker(
+                    journalpostId,
+                    """{
                             "avsenderMottaker" : {
                                 "id" : "${mottaker.id}",
                                 "idType" : "UTL_ORG",
                                 "navn" : "${mottaker.name}",
-                                "land" : "${mottaker.countryCode}"
+                                "land" : "SE"
                                 }
                          }
-                 """.trimIndent())
+                 """.trimIndent()
+                )
+                logger.info("Oppdatert journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
             }
 
             journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
-            logger.info("Oppdatert journalpost med mottaker: $rinaIder")
         }
     }
 
