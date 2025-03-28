@@ -48,7 +48,7 @@ class OppdaterJPMedMottaker(
         val journalpostIderContent = readFileUsingGetResource("/JournalpostIder")
         val journalpostIderList = journalpostIderContent.lines()
         journalpostIderList.forEach { journalpostId ->
-            println("journalpostId: $journalpostId")
+            logger.info("journalpostId: $journalpostId")
             if (journalpostId in journalpostIderSomGikkBraFile.bufferedReader().readLines()) {
                 logger.info("Journalpost $journalpostId er allerede oppdatert")
                 return@forEach
