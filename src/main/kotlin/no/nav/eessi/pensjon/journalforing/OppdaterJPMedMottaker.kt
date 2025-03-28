@@ -10,9 +10,7 @@ import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
+import java.io.*
 
 @Component
 class OppdaterJPMedMottaker(
@@ -36,20 +34,16 @@ class OppdaterJPMedMottaker(
 
     //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
-        val tempDirectory = File(System.getProperty("java.io.tmpdir"))
+        val journalpostIderSomGikkBraFile = JournalpostIderSomGikkBra.loadFromFile()
 
-        val journalpostIderSomGikkBraFile = File(tempDirectory, "JournalpostIderSomGikkBra")
-
-        if (!journalpostIderSomGikkBraFile.exists()) {
-            logger.info("JournalpostIderSomGikkBraFile eksisterer ikke, oppretter ny fil")
-            journalpostIderSomGikkBraFile.createNewFile()
-        }
+        logger.info("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.toJson()}")
 
         val journalpostIderContent = readFileUsingGetResource("/JournalpostIder")
         val journalpostIderList = journalpostIderContent.lines()
+
         journalpostIderList.forEach { journalpostId ->
             logger.info("journalpostId: $journalpostId")
-            if (journalpostId in journalpostIderSomGikkBraFile.bufferedReader().readLines()) {
+            if (journalpostId in journalpostIderSomGikkBraFile) {
                 logger.info("Journalpost $journalpostId er allerede oppdatert")
                 return@forEach
             }
@@ -63,15 +57,36 @@ class OppdaterJPMedMottaker(
                                 "id" : "${mottaker.id}",
                                 "idType" : "UTL_ORG",
                                 "navn" : "${mottaker.name}",
-                                "land" : "SE"
-                                }
-                         }
+                                "land" : "${mottaker.countryCode}"
+                            }
+                        }
                  """.trimIndent()
                 )
                 logger.info("Oppdatert journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
             }
+            if (!journalpostIderSomGikkBraFile.contains(journalpostId)) {
+                JournalpostIderSomGikkBra.appendToFile(journalpostId)
+            }
+        }
+    }
 
-            journalpostIderSomGikkBraFile.appendText("$journalpostId\n")
+    object JournalpostIderSomGikkBra {
+        private const val FILE_NAME = "journalpostIderSomGikkBra.txt"
+
+        fun appendToFile(newId: String) {
+            BufferedWriter(FileWriter(FILE_NAME, true)).use { writer ->
+                writer.write(newId)
+                writer.newLine()
+            }
+        }
+
+        fun loadFromFile(): List<String> {
+            val file = File(FILE_NAME)
+            return if (file.exists()) {
+                file.readLines()
+            } else {
+                emptyList()
+            }
         }
     }
 
