@@ -2,8 +2,7 @@ FROM ghcr.io/navikt/baseimages/temurin:21
 
 WORKDIR /app
 RUN mkdir -p  /app/data
-WORKDIR /app/app
-RUN chmod a+w /app/data
+RUN CHMOD a+w /app/data
 COPY init-scripts/ep-jvm-tuning.sh /init-scripts/
 VOLUME /data
 
