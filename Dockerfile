@@ -3,7 +3,7 @@ FROM ghcr.io/navikt/baseimages/temurin:21
 WORKDIR /app
 RUN mkdir -p  /app/data
 WORKDIR /app/app
-RUN chmod a+w /app/data
+RUN chmod -R 777 /app/data
 RUN touch /app/data/journalpostIderSomGikkBra.txt
 WORKDIR /app
 COPY init-scripts/ep-jvm-tuning.sh /init-scripts/
