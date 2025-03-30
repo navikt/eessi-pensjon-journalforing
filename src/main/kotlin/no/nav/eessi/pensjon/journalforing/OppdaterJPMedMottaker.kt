@@ -71,7 +71,7 @@ class OppdaterJPMedMottaker(
     }
 
     object JournalpostIderSomGikkBra {
-        private const val FILE_NAME = "/app/data/journalpostIderSomGikkBra.txt"
+        private const val FILE_NAME = "/data/journalpostIderSomGikkBra.txt"
 
         fun appendToFile(newId: String) {
             BufferedWriter(FileWriter(FILE_NAME, true)).use { writer ->
