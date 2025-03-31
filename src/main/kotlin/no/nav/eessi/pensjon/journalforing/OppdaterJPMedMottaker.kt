@@ -50,19 +50,24 @@ class OppdaterJPMedMottaker(
 
             hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 val mottaker = euxService.hentDeltakereForBuc(it).also { logger.info("deltakere på Bucen: ${it.toJsonSkipEmpty()}") }
-                journalpostKlient.oppdaterJournalpostMedMottaker(
-                    journalpostId,
-                    """{
-                            "avsenderMottaker" : {
-                                "id" : "${mottaker.id}",
-                                "idType" : "UTL_ORG",
-                                "navn" : "${mottaker.name}",
-                                "land" : "${mottaker.countryCode}"
+                try {
+                    journalpostKlient.oppdaterJournalpostMedMottaker(
+                        journalpostId,
+                        """{
+                                "avsenderMottaker" : {
+                                    "id" : "${mottaker.id}",
+                                    "idType" : "UTL_ORG",
+                                    "navn" : "${mottaker.name}",
+                                    "land" : "${mottaker.countryCode}"
+                                }
                             }
-                        }
-                 """.trimIndent()
-                )
-                logger.info("Oppdatert journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+                     """.trimIndent()
+                    )
+                    logger.info("Oppdatert journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+
+                } catch (e: Exception) {
+                    logger.error("Feil under oppdatering av mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}, feil: ${e.message}")
+                }
             }
             if (!journalpostIderSomGikkBraFile.contains(journalpostId)) {
                 JournalpostIderSomGikkBra.appendToFile(journalpostId)
