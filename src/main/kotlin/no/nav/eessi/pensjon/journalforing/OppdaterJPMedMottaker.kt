@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.*
+import java.time.LocalDateTime
 
 private const val FILE_NAME_OK = "/tmp/journalpostIderSomGikkBra.txt"
 private const val FILE_NAME_ERROR = "/tmp/journalpostIderSomFeilet.txt"
@@ -36,22 +37,24 @@ class OppdaterJPMedMottaker(
 
     //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
-        logger.info("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
+        logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
-        val journalpostIderContent = readFileUsingGetResource("/JournalpostIder")
-        val journalpostIderList = journalpostIderContent.lines()
+        val journalpostIderList = readFileUsingGetResource("/JournalpostIder")
 
+        val ferdigeJournalposter = journalpostIderSomGikkBraFile.hentAlle().toSet()
+
+        var count = 0
         journalpostIderList.forEach { journalpostId ->
-            logger.info("journalpostId: $journalpostId")
-            if (journalpostId in journalpostIderSomGikkBraFile.hentAlle()) {
-                logger.info("Journalpost $journalpostId er allerede oppdatert")
+            if (++count % 1000 == 0) logger.info("Prosessert $count journalposter")
+
+            if (journalpostId in ferdigeJournalposter) {
                 return@forEach
             }
-
             hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 runCatching {
                     val mottaker = euxService.hentDeltakereForBuc(it)
-                    logger.info("Oppdaterer journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+                    logger.debug("Oppdaterer journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+
                     journalpostKlient.oppdaterJournalpostMedMottaker(
                         journalpostId,
                         """{
@@ -59,12 +62,12 @@ class OppdaterJPMedMottaker(
                                     "id" : "${mottaker.id}",
                                     "idType" : "UTL_ORG",
                                     "navn" : "${mottaker.name}",
-                                    "land" : "SE"
+                                    "land" : "${mottaker.countryCode}"
                                 }
                             }
                      """.trimIndent()
                     )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.info("Oppdaterer journalpost $it") }
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Oppdaterer journalpost $it") }
                 }.onFailure { e ->
                     logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $it, feil: ${e.message}")
                     journalpostIderSomFeilet.leggTil(journalpostId)
@@ -76,7 +79,7 @@ class OppdaterJPMedMottaker(
     class JournalpostIdFilLager(private val fileName: String) {
         fun leggTil(newId: String) {
             BufferedWriter(FileWriter(fileName, true)).use { writer ->
-                writer.write(newId)
+                writer.write(newId+"-"+LocalDateTime.now())
                 writer.newLine()
             }
         }
@@ -87,7 +90,8 @@ class OppdaterJPMedMottaker(
         }
     }
 
-    fun readFileUsingGetResource(fileName: String) = this::class.java.getResource(fileName).readText(Charsets.UTF_8)
+    fun readFileUsingGetResource(fileName: String): Sequence<String> =
+        this::class.java.getResourceAsStream(fileName)?.bufferedReader()?.lineSequence()?: emptySequence()
 
     //Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
     fun hentRinaIdForJournalpost(journalpostId: String): String? {
