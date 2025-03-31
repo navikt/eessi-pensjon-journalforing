@@ -49,12 +49,13 @@ class OppdaterJPMedMottaker(
             if (++count % 1000 == 0) logger.info("Prosessert $count journalposter")
 
             if (journalpostId in ferdigeJournalposter) {
+                logger.debug("Journalpost $journalpostId er allerede oppdatert")
                 return@forEach
             }
             hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 runCatching {
                     val mottaker = euxService.hentDeltakereForBuc(it)
-                    logger.debug("Oppdaterer journalpost med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+                    logger.debug("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
 
                     journalpostKlient.oppdaterJournalpostMedMottaker(
                         journalpostId,
