@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.*
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private const val FILE_NAME_OK = "/tmp/journalpostIderSomGikkBra.txt"
 private const val FILE_NAME_ERROR = "/tmp/journalpostIderSomFeilet.txt"
@@ -77,9 +78,12 @@ class OppdaterJPMedMottaker(
     }
 
     class JournalpostIdFilLager(private val fileName: String) {
+        private val timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val timestamp = LocalDateTime.now().format(timeFormatter)
+
         fun leggTil(newId: String) {
             BufferedWriter(FileWriter(fileName, true)).use { writer ->
-                writer.write(newId+"-"+LocalDateTime.now())
+                writer.write("$newId -$timestamp")
                 writer.newLine()
             }
         }
