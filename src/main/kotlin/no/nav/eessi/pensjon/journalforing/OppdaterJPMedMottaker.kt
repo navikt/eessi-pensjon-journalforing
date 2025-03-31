@@ -71,12 +71,12 @@ class OppdaterJPMedMottaker(
                                     "id" : "${mottaker.id}",
                                     "idType" : "UTL_ORG",
                                     "navn" : "${mottaker.name}",
-                                    "land" : "DK"
+                                    "land" : "${mottaker.countryCode}"
                                 }
                             }
                      """.trimIndent()
                     )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Oppdaterer journalpost $it") }
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Oppdaterer journalpost") }
                 }.onFailure { e ->
                     logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $it, feil: ${e.message}")
                     journalpostIderSomFeilet.leggTil(journalpostId)
