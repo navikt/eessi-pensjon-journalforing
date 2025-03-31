@@ -42,14 +42,20 @@ class OppdaterJPMedMottaker(
 
         val journalpostIderList = readFileUsingGetResource("/JournalpostIder")
 
-        val ferdigeJournalposter = journalpostIderSomGikkBraFile.hentAlle().toSet()
+        val journalposterOK = journalpostIderSomGikkBraFile.hentAlle().toSet()
+        val journalposterError = journalpostIderSomFeilet.hentAlle().toSet()
+
 
         var count = 0
         journalpostIderList.forEach { journalpostId ->
             if (++count % 1000 == 0) logger.info("Prosessert $count journalposter")
 
-            if (journalpostId in ferdigeJournalposter) {
+            if (journalpostId in journalposterOK ) {
                 logger.debug("Journalpost $journalpostId er allerede oppdatert")
+                return@forEach
+            }
+            if (journalpostId in journalposterError ) {
+                logger.debug("Journalpost $journalpostId har tidligere feilet")
                 return@forEach
             }
             hentRinaIdForJournalpost(journalpostId)?.let { it ->
