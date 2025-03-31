@@ -62,7 +62,7 @@ class OppdaterJPMedMottaker(
             hentRinaIdForJournalpost(journalpostId)?.let { it ->
                 runCatching {
                     val mottaker = euxService.hentDeltakereForBuc(it)
-                    logger.debug("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+                    logger.info("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
 
                     journalpostKlient.oppdaterJournalpostMedMottaker(
                         journalpostId,
