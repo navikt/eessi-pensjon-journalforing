@@ -60,8 +60,8 @@ class OppdaterJPMedMottaker(
             }
             hentRinaIdForJournalpost(journalpostId)?.let { rinaId ->
                 runCatching {
-                    val mottaker = euxService.hentDeltakereForBuc(rinaId)?.filter { it.organisation?.countryCode != "NO" }
-                        ?.first()?.organisation
+                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
+                        ?.first { it.organisation?.countryCode != "NO" }?.organisation
                         ?: throw IllegalStateException("Fant ingen norske mottaker for rinaId: $rinaId")
 
                     logger.info("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
