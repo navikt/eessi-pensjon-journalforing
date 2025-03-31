@@ -63,7 +63,7 @@ class OppdaterJPMedMottaker(
                                     "id" : "${mottaker.id}",
                                     "idType" : "UTL_ORG",
                                     "navn" : "${mottaker.name}",
-                                    "land" : "${mottaker.countryCode}"
+                                    "land" : "DK"
                                 }
                             }
                      """.trimIndent()
