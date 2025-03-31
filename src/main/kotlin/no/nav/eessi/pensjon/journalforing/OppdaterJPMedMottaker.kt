@@ -46,7 +46,6 @@ class OppdaterJPMedMottaker(
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle().toSet()
         val journalposterError = journalpostIderSomFeilet.hentAlle().toSet()
 
-
         var count = 0
         journalpostIderList.forEach { journalpostId ->
             if (++count % 1000 == 0) logger.info("Prosessert $count journalposter")
@@ -59,9 +58,12 @@ class OppdaterJPMedMottaker(
                 logger.debug("Journalpost $journalpostId har tidligere feilet")
                 return@forEach
             }
-            hentRinaIdForJournalpost(journalpostId)?.let { it ->
+            hentRinaIdForJournalpost(journalpostId)?.let { rinaId ->
                 runCatching {
-                    val mottaker = euxService.hentDeltakereForBuc(it)
+                    val mottaker = euxService.hentDeltakereForBuc(rinaId)?.filter { it.organisation?.countryCode != "NO" }
+                        ?.first()?.organisation
+                        ?: throw IllegalStateException("Fant ingen norske mottaker for rinaId: $rinaId")
+
                     logger.info("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
 
                     journalpostKlient.oppdaterJournalpostMedMottaker(
@@ -78,7 +80,7 @@ class OppdaterJPMedMottaker(
                     )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Journalpost: $journalpostId ferdig oppdatert") }
                 }.onFailure { e ->
-                    logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $it, feil: ${e.message}")
+                    logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $rinaId, feil: ${e.message}")
                     journalpostIderSomFeilet.leggTil(journalpostId)
                 }
             }
