@@ -4,11 +4,8 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
-import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.*
 
@@ -19,14 +16,12 @@ private const val FILE_NAME_ERROR = "/tmp/journalpostIderSomFeilet.txt"
 class OppdaterJPMedMottaker(
     private val safClient: SafClient,
     private val euxService: EuxService,
-    private val journalpostKlient: JournalpostKlient,
-    @Value("\${journalfil.ok:/tmp/journalpostIderSomGikkBra.txt}") private val okFil: String,
-    @Value("\${journalfil.feil:/tmp/journalpostIderSomFeilet.txt}") private val feilFil: String
+    private val journalpostKlient: JournalpostKlient
 
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
-    private val okLager = JournalpostIdFilLager(okFil)
-    private val feilLager = JournalpostIdFilLager(feilFil)
+    private val journalpostIderSomGikkBraFile = JournalpostIdFilLager(FILE_NAME_OK)
+    private val journalpostIderSomFeilet = JournalpostIdFilLager(FILE_NAME_ERROR)
     /**
      * Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
      * Hente tilhørende bucId fra journalposten
@@ -41,14 +36,14 @@ class OppdaterJPMedMottaker(
 
     //    @Scheduled(cron = "0 0 21 * * ?")
     fun oppdatereHeleSulamitten() {
-        logger.info("journalpostIderSomGikkBraFile: ${okLager.hentAlle()}")
+        logger.info("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
         val journalpostIderContent = readFileUsingGetResource("/JournalpostIder")
         val journalpostIderList = journalpostIderContent.lines()
 
         journalpostIderList.forEach { journalpostId ->
             logger.info("journalpostId: $journalpostId")
-            if (journalpostId in okFil) {
+            if (journalpostId in journalpostIderSomGikkBraFile.hentAlle()) {
                 logger.info("Journalpost $journalpostId er allerede oppdatert")
                 return@forEach
             }
@@ -69,10 +64,10 @@ class OppdaterJPMedMottaker(
                             }
                      """.trimIndent()
                     )
-                    okLager.leggTil(journalpostId).also { logger.info("Oppdaterer journalpost $it") }
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.info("Oppdaterer journalpost $it") }
                 }.onFailure { e ->
                     logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $it, feil: ${e.message}")
-                    feilLager.leggTil(journalpostId)
+                    journalpostIderSomFeilet.leggTil(journalpostId)
                 }
             }
         }
