@@ -76,7 +76,7 @@ class OppdaterJPMedMottaker(
                             }
                      """.trimIndent()
                     )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Oppdaterer journalpost") }
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Journalpost: $journalpostId ferdig oppdatert") }
                 }.onFailure { e ->
                     logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $it, feil: ${e.message}")
                     journalpostIderSomFeilet.leggTil(journalpostId)
