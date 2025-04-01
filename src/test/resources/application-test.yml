@@ -11,6 +11,8 @@ KAFKA_AUTOMATISERING_TOPIC: 'eessi-pensjon-auto'
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: "dummy"
 AZURE_APP_JWK: "dummy"
 
+JOURNALPOST_ID_FILE: "JournalpostIderTest.txt"
+
 kafka:
   brokers: test
   keystore:
