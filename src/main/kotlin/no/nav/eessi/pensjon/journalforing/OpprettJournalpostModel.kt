@@ -108,18 +108,18 @@ private class JsonAsStringDeserializer : JsonDeserializer<String>() {
 }
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class JournalpostResponse(
-    val journalpostId: String?,
-    val eksternReferanseId: String?,
-    val tema: Tema?,
-    val dokumenter: List<SafDokument?>,
-    val journalstatus: Journalstatus?,
-    val journalpostferdigstilt: Boolean?,
-    val avsenderMottaker: AvsenderMottaker?,
-    val behandlingstema: Behandlingstema?,
-    val journalforendeEnhet: String?,
-    val temanavn: String?,
-    val bruker: Bruker?,
-    val sak: SafSak?,
+    val journalpostId: String? = null,
+    val eksternReferanseId: String?= null,
+    val tema: Tema?= null,
+    val dokumenter: List<SafDokument?> = emptyList(),
+    val journalstatus: Journalstatus? = null,
+    val journalpostferdigstilt: Boolean? = null,
+    val avsenderMottaker: AvsenderMottaker? = null,
+    val behandlingstema: Behandlingstema?= null,
+    val journalforendeEnhet: String?= null,
+    val temanavn: String?= null,
+    val bruker: Bruker?= null,
+    val sak: SafSak?= null,
     val datoOpprettet: LocalDateTime? = null
 )
 

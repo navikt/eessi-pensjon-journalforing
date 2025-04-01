@@ -4,8 +4,11 @@ import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
+import no.nav.eessi.pensjon.utils.toJson
+import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.*
 import java.time.LocalDateTime
@@ -19,8 +22,8 @@ private const val FILE_NAME_ERROR = "/tmp/journalpostIderSomFeilet.txt"
 class OppdaterJPMedMottaker(
     private val safClient: SafClient,
     private val euxService: EuxService,
-    private val journalpostKlient: JournalpostKlient
-
+    private val journalpostKlient: JournalpostKlient,
+    @Value("\${JOURNALPOST_ID_FILE}") private var journalpostIdFile: String
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
     private val journalpostIderSomGikkBraFile = JournalpostIdFilLager(FILE_NAME_OK)
@@ -41,71 +44,69 @@ class OppdaterJPMedMottaker(
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
-        val journalpostIderList = readFileUsingGetResource("/JournalpostIder")
+        val journalpostIderList = readFileUsingGetResource(journalpostIdFile)
 
-        val journalposterOK = journalpostIderSomGikkBraFile.hentAlle().toSet()
-        val journalposterError = journalpostIderSomFeilet.hentAlle().toSet()
+        val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
+        val journalposterError = journalpostIderSomFeilet.hentAlle()
+        val journalposterDuringRun = mutableSetOf<String>()
+        journalpostIderList
+            .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
+            .forEachIndexed { index, journalpostId ->
+                if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
-        var count = 0
-        journalpostIderList.forEach { journalpostId ->
-            if (++count % 1000 == 0) logger.info("Prosessert $count journalposter")
+                val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
 
-            if (journalpostId in journalposterOK ) {
-                logger.debug("Journalpost $journalpostId er allerede oppdatert")
-                return@forEach
-            }
-            if (journalpostId in journalposterError ) {
-                logger.debug("Journalpost $journalpostId har tidligere feilet")
-                return@forEach
-            }
-            hentRinaIdForJournalpost(journalpostId)?.let { rinaId ->
                 runCatching {
                     val mottaker = euxService.hentDeltakereForBuc(rinaId)
-                        ?.first { it.organisation?.countryCode != "NO" }?.organisation
-                        ?: throw IllegalStateException("Fant ingen norske mottaker for rinaId: $rinaId")
-
-                    logger.info("Oppdaterer journalpost: $journalpostId med mottaker: ${mottaker.id}, navn: ${mottaker.name}, land: ${mottaker.countryCode}")
+                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
+                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
 
                     journalpostKlient.oppdaterJournalpostMedMottaker(
-                        journalpostId,
-                        """{
-                                "avsenderMottaker" : {
-                                    "id" : "${mottaker.id}",
-                                    "idType" : "UTL_ORG",
-                                    "navn" : "${mottaker.name}",
-                                    "land" : "${mottaker.countryCode}"
-                                }
-                            }
-                     """.trimIndent()
+                        journalpostId, JournalpostResponse(
+                            avsenderMottaker = AvsenderMottaker(
+                                id = mottaker.id,
+                                idType = IdType.UTL_ORG,
+                                navn = mottaker.name,
+                                land = mottaker.countryCode
+                            )
+                        ).toJsonSkipEmpty()
                     )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId).also { logger.debug("Journalpost: $journalpostId ferdig oppdatert") }
-                }.onFailure { e ->
-                    logger.error("Feil under oppdatering av journalpost: ${journalpostId}, rinaid: $rinaId, feil: ${e.message}")
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId)
+                    journalposterDuringRun.add(journalpostId)
+                    logger.debug("Journalpost: $journalpostId ferdig oppdatert")
+                }.onFailure {
+                    logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
                     journalpostIderSomFeilet.leggTil(journalpostId)
+                    journalposterDuringRun.add(journalpostId)
                 }
             }
-        }
     }
 
     class JournalpostIdFilLager(private val fileName: String) {
         private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-        val timestamp = LocalTime.now().format(timeFormatter)
 
         fun leggTil(newId: String) {
+            val timestamp = LocalTime.now().format(timeFormatter)
             BufferedWriter(FileWriter(fileName, true)).use { writer ->
                 writer.write("$newId -$timestamp")
                 writer.newLine()
             }
         }
 
-        fun hentAlle(): List<String> {
+        fun hentAlle(): Set<String> {
             val file = File(fileName)
-            return if (file.exists()) file.readLines() else emptyList()
+            return if (file.exists()) file.readLines()
+                .mapNotNull { it.split(" ").firstOrNull() }
+                .toSet() else emptySet()
         }
     }
 
     fun readFileUsingGetResource(fileName: String): Sequence<String> =
-        this::class.java.getResourceAsStream(fileName)?.bufferedReader()?.lineSequence()?: emptySequence()
+        this::class.java.getResourceAsStream("/$fileName")
+            ?.bufferedReader()
+            ?.lineSequence()
+            ?.mapNotNull { it.split(" ").firstOrNull() }
+            ?: emptySequence()
 
     //Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
     fun hentRinaIdForJournalpost(journalpostId: String): String? {
@@ -115,5 +116,4 @@ class OppdaterJPMedMottaker(
         }
         return null
     }
-
 }
