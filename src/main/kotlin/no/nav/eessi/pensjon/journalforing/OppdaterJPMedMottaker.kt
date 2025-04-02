@@ -48,9 +48,8 @@ class OppdaterJPMedMottaker(
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
-        val journalposterDuringRun = mutableSetOf<String>()
         journalpostIderList
-            .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
+            .filterNot { it in journalposterOK || it in journalposterError }
             .forEachIndexed { index, journalpostId ->
                 if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
@@ -77,13 +76,12 @@ class OppdaterJPMedMottaker(
 //                            )
 //                        ).toJsonSkipEmpty()
 //                    )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId, mottaker: ${avsenderMottaker}"))
-                    journalposterDuringRun.add(journalpostId)
-                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${avsenderMottaker}")
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
+                    logger.info(avsenderMottaker.toJson())
+                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
                     journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
-                    journalposterDuringRun.add(journalpostId)
                 }
             }
     }
